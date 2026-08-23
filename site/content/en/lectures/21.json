@@ -1,0 +1,3155 @@
+{
+  "lecture": 21,
+  "slug": "21",
+  "zhTitle": "眼动积分器、参数退化与 sloppy models",
+  "enTitle": "Oculomotor Integrator, Degeneracy, and Sloppy Models",
+  "companionFile": "NEUROSCI366_Lecture21_Oculomotor_Integrator_Sloppiness_Companion.pdf",
+  "companionPages": 21,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture21_Oculomotor_Integrator_Sloppiness_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture21-OculomotorIntegrator.pdf",
+      "role": "primary",
+      "pages": 5,
+      "href": "/resources/original/Lecture21-OculomotorIntegrator.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "Explain why integrating an eye-velocity command requires a persistent neural state after a saccade, and connect bilateral excitation/inhibition to left–right position tuning.",
+    "Derive the characteristic equation, eigenvalue-one constraint, and compensating weight family for a general 2×2 recurrent matrix, while also checking transverse stability.",
+    "Use the inverse of a measured F–I curve and fixed synaptic nonlinearities to construct a design matrix, turning an apparently nonlinear circuit fit into row-wise least squares.",
+    "Use the eigendecomposition of a quadratic loss Hessian to explain stiff and sloppy directions, parameter compensation, and an ensemble of adequate models.",
+    "Distinguish low dimensionality in neural-state space, sloppiness in parameter space, measurement uncertainty, and genuine biological degeneracy."
+  ],
+  "dependencyMap": "velocity→position → bilateral integrator → dominant λ=1 → weight-family degeneracy → nonlinear synapse fit → least squares/Hessian",
+  "coreQuestion": "How does a recurrent network integrate an eye-velocity command into persistent position, why can many parameter combinations implement the same function, and how does the Hessian reveal stiff and sloppy directions?",
+  "diagnostic": [
+    "A constant eye velocity of 20 deg/s lasts 0.1 s. What position change does an ideal integrator predict?",
+    "Why is it insufficient merely to confirm that W has eigenvalue 1?",
+    "If W12=0, can we use W21=(1-W11)(1-W22)/W12?",
+    "What does a large Hessian eigenvalue mean?"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-21-source-1",
+      "order": 1,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 1,
+      "reconstruction": "Page 1: eye velocity→position integration, brainstem/cerebellar architecture, and linear position tuning.",
+      "noteMeaning": "Velocity→position and the bilateral integrator: eye velocity→position integration, brainstem/cerebellar architecture, and linear position tuning.",
+      "reasoning": "Explain why a saccade velocity command must be integrated into persistent eye position and connect it to a long-time-scale mode. Then reconstruct the bilateral excitatory/inhibitory architecture and left/right linear tuning curves.",
+      "figureReading": "First identify both axes, units, normalization, and the single parameter changed by each curve. Distinguish a schematic trend, a model prediction, and genuinely measured data points.",
+      "stopPredict": "What are the input and output of the oculomotor integrator?"
+    },
+    {
+      "id": "lecture-21-source-2",
+      "order": 2,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 2,
+      "reconstruction": "Page 2: two-neuron weight matrix, eigenvalues, perfect-integrator requirement, and family of solutions.",
+      "noteMeaning": "Dominant λ=1 and weight-family degeneracy: two-neuron weight matrix, eigenvalues, perfect-integrator requirement, and family of solutions.",
+      "reasoning": "Derive the eigenvalues of a general 2×2 weight matrix, show that a perfect integrator requires dominant eigenvalue=1, and derive the one-parameter family in the notes. Then explain the many-to-one mapping by which many synaptic-weight combinations produce the same integration dynamics, distinguishing parameter degeneracy from measurement noise.",
+      "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+      "stopPredict": "What determinant condition defines a 2×2 perfect integrator?"
+    },
+    {
+      "id": "lecture-21-source-3",
+      "order": 3,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 3,
+      "reconstruction": "Page 3: biological parameter variability, the Marder/Goldman logic, nonlinear synaptic functions, and fitting setup.",
+      "noteMeaning": "Nonlinear synapse fitting and least squares/Hessian: biological parameter variability, the Marder/Goldman logic, nonlinear synaptic functions, and fitting setup.",
+      "reasoning": "Rewrite the fitting problem using a measured inverse F–I curve and nonlinear synaptic functions, labeling every index and shape. Then explain the many-to-one mapping by which many synaptic-weight combinations produce the same integration dynamics, distinguishing parameter degeneracy from measurement noise.",
+      "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+      "stopPredict": "Why does this condition not uniquely determine 4 weights?"
+    },
+    {
+      "id": "lecture-21-source-4",
+      "order": 4,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 4,
+      "reconstruction": "Page 4: nonlinear fitting rewritten as linear regression, loss, and Hessian.",
+      "noteMeaning": "Stiff versus sloppy ensembles and velocity→position: nonlinear fitting rewritten as linear regression, loss, and Hessian.",
+      "reasoning": "Rewrite the fitting problem using a measured inverse F–I curve and nonlinear synaptic functions, labeling every index and shape. Then reconstruct the bilateral excitatory/inhibitory architecture and left/right linear tuning curves.",
+      "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+      "stopPredict": "How should the family formula be handled when W12=0?"
+    },
+    {
+      "id": "lecture-21-source-5",
+      "order": 5,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 5,
+      "reconstruction": "Page 5: Hessian eigenbasis, stiff/sloppy parameter dimensions, and ensemble interpretation.",
+      "noteMeaning": "Bilateral integrator and dominant λ=1: Hessian eigenbasis, stiff/sloppy parameter dimensions, and ensemble interpretation.",
+      "reasoning": "Work through the quadratic loss, least-squares solution, and Hessian decomposition, explaining how Hessian eigenvalues quantify parameter sensitivity. Then explain the many-to-one mapping by which many synaptic-weight combinations produce the same integration dynamics, distinguishing parameter degeneracy from measurement noise.",
+      "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+      "stopPredict": "Why does the other eigenvalue matter?"
+    }
+  ],
+  "studyGuide": {
+    "objectives": [
+      "Explain why integrating an eye-velocity command requires a persistent neural state after a saccade, and connect bilateral excitation/inhibition to left–right position tuning.",
+      "Derive the characteristic equation, eigenvalue-one constraint, and compensating weight family for a general 2×2 recurrent matrix, while also checking transverse stability.",
+      "Use the inverse of a measured F–I curve and fixed synaptic nonlinearities to construct a design matrix, turning an apparently nonlinear circuit fit into row-wise least squares.",
+      "Use the eigendecomposition of a quadratic loss Hessian to explain stiff and sloppy directions, parameter compensation, and an ensemble of adequate models.",
+      "Distinguish low dimensionality in neural-state space, sloppiness in parameter space, measurement uncertainty, and genuine biological degeneracy."
+    ],
+    "prerequisiteBridge": [
+      "Integration turns velocity into position. If velocity is approximately constant during each short interval Δt, the position change is about vΔt. Summing many small intervals and taking the continuous limit gives x(t)=x(0)+∫v(t′)dt′. After a saccade, the velocity command returns to zero but eye position must not, so a neural circuit has to retain the integrated result. When a linear recurrent mode approaches eigenvalue 1, positive feedback nearly cancels intrinsic leak and creates a long time scale.",
+      "A two-by-two matrix W has two eigenvalues. In the rate equation τ dh/dt=-h+Wh+I, a mode's effective leak is 1-λ. Perfect linear integration requires at least one task-relevant eigenvalue equal to 1. The other eigenvalue must also lie in the stable range; otherwise the network retains state along the memory direction but explodes in the transverse direction. One functional constraint generally does not determine every synaptic weight uniquely.",
+      "Least squares chooses parameters that minimize squared differences between predicted and observed targets. If predictions depend linearly on the weights, the loss surface is a quadratic bowl whose Hessian gives curvature along different parameter directions. Large curvature means a small displacement greatly increases loss and is called stiff; small curvature permits a large displacement with little loss and is called sloppy. These directions live in parameter space, not along neural activity trajectories."
+    ],
+    "diagnostic": [
+      {
+        "id": "l21-d1",
+        "prompt": "A constant eye velocity of 20 deg/s lasts 0.1 s. What position change does an ideal integrator predict?",
+        "answer": "The change is 20×0.1=2 deg.",
+        "explanation": "Velocity times time gives position. If deg/s and s do not cancel in your units, review the velocity-to-position module.",
+        "remediationModuleId": "l21-m1"
+      },
+      {
+        "id": "l21-d2",
+        "prompt": "Why is it insufficient merely to confirm that W has eigenvalue 1?",
+        "answer": "The other modes must be stable, the task input must project onto the integrating mode, the readout must access it, and the nonlinear operating range must be adequate.",
+        "explanation": "Eigenvalue one is only a local linear memory condition; it says nothing by itself about transverse stability or biological feasibility.",
+        "remediationModuleId": "l21-m2"
+      },
+      {
+        "id": "l21-d3",
+        "prompt": "If W12=0, can we use W21=(1-W11)(1-W22)/W12?",
+        "answer": "No, division by zero is invalid. The integrator condition becomes (1-W11)(1-W22)=0, so at least one of W11 and W22 must equal 1.",
+        "explanation": "The family formula assumes W12≠0. Special structures must be analyzed directly with det(I-W)=0.",
+        "remediationModuleId": "l21-m2"
+      },
+      {
+        "id": "l21-d4",
+        "prompt": "What does a large Hessian eigenvalue mean?",
+        "answer": "Loss has high curvature along the corresponding parameter combination, so a small parameter change substantially worsens the fit; that direction is stiff.",
+        "explanation": "It does not mean that one corresponding synapse is large, nor that the direction is a principal component of neural activity.",
+        "remediationModuleId": "l21-m5"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l21-m1",
+        "title": "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "sourceRefs": [
+          {
+            "file": "Lecture21-OculomotorIntegrator.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "How does a brief saccade command become an eye-position code that persists after the command disappears?",
+        "paragraphs": [
+          "Moving the eye requires phasic motor drive to generate velocity and tonic drive to oppose orbital restoring forces and hold the new position. The course abstracts the distributed brainstem and cerebellar network as a neural integrator: its input is the eye-velocity command v(t), and its output state approximates x(t)=x(0)+∫v(t′)dt′. Ideally, x retains its latest value when v returns to zero; if the network leaks, position slowly drifts back toward center.",
+          "The source diagram contains excitatory populations EL and ER and inhibitory populations IL and IR in the left and right hemispheres. Their position-tuning curves have opposite directions: at rightward positions, firing rises in one population and falls in the other. Mutual excitation can prolong the memory mode, while crossed inhibition organizes the left–right push–pull pattern into a signed coordinate. This is a functional architecture; arrows alone do not reveal the strength of each real synapse.",
+          "Linear tuning lets a weighted difference of population rates encode eye position. If a right-preferring neuron has hR≈b+kx and a left-preferring one hL≈b-kx, then hR-hL≈2kx, while the common baseline hR+hL≈2b. The integrator can store signed position in a difference-like mode while keeping the common mode stable. Real neurons have thresholds, saturation, and heterogeneity, so these linear relations hold only over an operating range.",
+          "Test the integrator by asking whether firing persists after a velocity pulse, whether the persistent level scales with the pulse integral, and how a network perturbation changes the drift time constant. Position-tuning correlations alone cannot separate sensory eye-position feedback from recurrent memory; comparisons in darkness, feedback perturbations, or circuit interventions are needed."
+        ],
+        "keyPoints": [
+          "The time integral of velocity gives position change.",
+          "Recurrent positive feedback sustains a persistent state after the command ends.",
+          "Opponent tuning in left and right populations can encode signed eye position.",
+          "Position-tuning correlations alone do not prove recurrent integration."
+        ],
+        "derivation": {
+          "title": "From velocity samples to a continuous position integral",
+          "setup": "First accumulate position changes in finite time steps, then introduce continuous notation and a leaky neural implementation.",
+          "steps": [
+            {
+              "title": "Discrete accumulation",
+              "explanation": "During interval n, position increases by v_nΔt.",
+              "latex": "x_{n+1}=x_n+v_n\\Delta t"
+            },
+            {
+              "title": "Sum all intervals",
+              "explanation": "The total change from 0 to t is the sum of the increment in each interval.",
+              "latex": "x(t)-x(0)\\approx\\sum_n v_n\\Delta t"
+            },
+            {
+              "title": "Take the continuous limit",
+              "explanation": "As Δt shrinks, the Riemann sum approaches an integral.",
+              "latex": "x(t)=x(0)+\\int_0^t v(t^\\prime)dt^\\prime"
+            },
+            {
+              "title": "Connect to a neural mode",
+              "explanation": "Implement leaky integration with τ_eff dα/dt=-α+k v; when τ_eff is long, the state is approximately retained over a delay.",
+              "latex": "\\tau_{eff}\\dot\\alpha=-\\alpha+k v(t)"
+            }
+          ],
+          "symbolNotes": [
+            "Use deg/s for v and deg for x; k maps the units of the velocity command into a neural coordinate.",
+            "α is a population-mode amplitude and need not equal mechanical position."
+          ],
+          "unitsCheck": "v×dt gives deg, so the integral has the same units as x. In a rate-coordinate neural equation, k must supply any missing units.",
+          "limitCheck": "As τ_eff→∞ with appropriately scaled input, the system approaches a perfect integrator; with finite τ_eff, α drifts exponentially under zero input."
+        },
+        "workedExample": {
+          "title": "Accumulate two saccade commands",
+          "problem": "Start at x=0 deg. Move right at 30 deg/s for 0.08 s, then left at -20 deg/s for 0.05 s. Ignoring leak, find the final position.",
+          "steps": [
+            "The first change is 30×0.08=+2.4 deg.",
+            "The second change is -20×0.05=-1.0 deg.",
+            "The final position is x=0+2.4-1.0=+1.4 deg, still rightward."
+          ],
+          "result": "After the second command ends, an ideal integrator should hold +1.4 deg rather than return to zero.",
+          "sanityCheck": "Signs of velocity must match left–right direction. The total command area 2.4-1.0=1.4 deg provides a direct check."
+        },
+        "selfCheck": {
+          "prompt": "If position returns to center after the velocity command with a time constant of 5 s, is this still an integrator?",
+          "answer": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift."
+        },
+        "pitfalls": [
+          "Conflating velocity tuning and position tuning as the same population signal.",
+          "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        ]
+      },
+      {
+        "id": "l21-m2",
+        "title": "General 2×2 weights, eigenvalue one, and a compensating family",
+        "sourceRefs": [
+          {
+            "file": "Lecture21-OculomotorIntegrator.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "Why does retaining one mode impose only one weight constraint, allowing many different circuits to implement the same integration?",
+        "paragraphs": [
+          "Let W=[[W11,W12],[W21,W22]]. Its characteristic polynomial is λ²-(W11+W22)λ+(W11W22-W12W21)=0, and the quadratic formula gives both eigenvalues. For τ dh/dt=-h+Wh, perfect integration requires an eigenvalue of W equal to 1 because that mode's coefficient -(1-λ) is exactly zero. Substituting λ=1 directly is more robust than manipulating the square root and gives det(I-W)=0.",
+          "Expanding gives det(I-W)=(1-W11)(1-W22)-W12W21=0. If W12≠0, solve W21=(1-W11)(1-W22)/W12. Once three weights are chosen, the fourth compensates; increasing a self-weight can be offset by changing cross-coupling while preserving λ=1. This is a many-to-one functional mapping: different parameter points share the same integrator eigenvalue.",
+          "Do not hide special cases with division. When W12=0, the formula is invalid and the condition becomes (1-W11)(1-W22)=0, so at least one self-weight equals 1. The other eigenvalue must also be checked. Since the sum of the eigenvalues is trace(W), if λ1=1 then λ2=W11+W22-1. Transverse stability of the continuous rate equation requires λ2<1. If λ2 is also very close to 1, the network acquires another slow mode and may fail to encode position uniquely.",
+          "Algebraic satisfaction does not guarantee biological feasibility. Excitatory and inhibitory cell types constrain weight signs, conductance and firing ranges constrain magnitudes, noise makes exact λ=1 difficult to maintain, and nonlinear saturation changes large-state dynamics. Study the region of parameter space that gives adequate integration and its robustness, rather than treating a one-parameter relation as a complete circuit solution."
+        ],
+        "keyPoints": [
+          "A perfect linear integrator satisfies det(I-W)=0.",
+          "When W12≠0, W21=(1-W11)(1-W22)/W12.",
+          "The other eigenvalue must be stable; λ2=trace(W)-1.",
+          "Parameter compensation is not measurement noise and does not guarantee biophysical feasibility."
+        ],
+        "derivation": {
+          "title": "From the characteristic polynomial to an integrator family",
+          "setup": "Keep the matrix general rather than assuming symmetry, and handle the boundary case for division separately.",
+          "steps": [
+            {
+              "title": "Write the characteristic polynomial",
+              "explanation": "The two-by-two determinant produces the trace–determinant form.",
+              "latex": "\\lambda^2-(W_{11}+W_{22})\\lambda+W_{11}W_{22}-W_{12}W_{21}=0"
+            },
+            {
+              "title": "Set the memory eigenvalue to 1",
+              "explanation": "Substitute λ=1 and rearrange.",
+              "latex": "\\det(I-W)=(1-W_{11})(1-W_{22})-W_{12}W_{21}=0"
+            },
+            {
+              "title": "Solve the compensating relation",
+              "explanation": "Isolate W21 only when W12 is nonzero.",
+              "latex": "W_{21}=\\frac{(1-W_{11})(1-W_{22})}{W_{12}}"
+            },
+            {
+              "title": "Check the transverse root",
+              "explanation": "Because the roots sum to the trace, the other root is the trace minus 1.",
+              "latex": "\\lambda_2=W_{11}+W_{22}-1"
+            }
+          ],
+          "symbolNotes": [
+            "Wij are dimensionless effective recurrent gains.",
+            "Eigenvalue 1 belongs to W; the corresponding root of the full generator is (λ-1)/τ."
+          ],
+          "unitsCheck": "det(I-W) is dimensionless. τ appears only when converting an eigenvalue gap into a time constant.",
+          "limitCheck": "As W12→0, the family formula becomes numerically unbounded, signaling that one should return to the undivided constraint rather than infer an infinite synapse."
+        },
+        "workedExample": {
+          "title": "Solve for the fourth weight and check stability",
+          "problem": "Let W11=0.8, W22=0.7, and W12=0.2. Find W21 so that one mode is a perfect integrator, then check the other mode.",
+          "steps": [
+            "W21=(0.2×0.3)/0.2=0.3.",
+            "The other eigenvalue is 0.8+0.7-1=0.5.",
+            "Its full transverse coefficient is -(1-0.5)/τ=-0.5/τ, so that mode decays stably."
+          ],
+          "result": "W=[[0.8,0.2],[0.3,0.7]] has eigenvalues 1 and 0.5, giving one memory mode and one stable transverse mode.",
+          "sanityCheck": "The trace 1.5 equals 1+0.5, and the determinant 0.5 equals 1×0.5, providing two checks."
+        },
+        "selfCheck": {
+          "prompt": "What happens if the same constraint gives λ2=1.1?",
+          "answer": "The memory mode still has λ=1, but the transverse mode's full growth rate is (1.1-1)/τ>0. Any small error grows, so the full network is not a stable, usable integrator."
+        },
+        "pitfalls": [
+          "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation.",
+          "Checking det(I-W)=0 without checking λ2, input projection, and readout."
+        ]
+      },
+      {
+        "id": "l21-m3",
+        "title": "Biological variability and reparameterizing a nonlinear circuit fit",
+        "sourceRefs": [
+          {
+            "file": "Lecture21-OculomotorIntegrator.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "Once nonlinear F–I and synaptic transfer functions are fixed, how can a model containing them become linear in its fitted weights?",
+        "paragraphs": [
+          "Following work by Goldman, Marder, and others, the source page emphasizes that different parameter settings can produce similar voltage or behavioral dynamics; variability across animals need not destroy function. Approximately linear position tuning in the oculomotor integrator lets researchers measure rates at several eye positions and ask which sets of synaptic weights reproduce those states. This variability concerns model or individual parameters, not recording noise.",
+          "For postsynaptic neuron i, measure the target rate h_i(pμ) at position pμ and use the measured inverse F–I curve to convert it into the required net current Yiμ=F_i^{-1}(h_i(pμ)). For each presynaptic neuron j, pass its rate through a fixed synaptic nonlinearity S_E or S_I to obtain feature Xjμ. Add a row of constant 1 values for bias current. The complicated biophysics is thereby precomputed into Y and X.",
+          "With the nonlinear functions fixed, the prediction is Yhat_iμ=Σ_j Wij Xjμ, linear in the unknown weights Wij and bias. Each output neuron i can fit one row of weights independently. If M sample positions are columns, X has shape D×M, Y is N×M, W is N×D, and Yhat=WX is dimensionally consistent. State this orientation explicitly, because placing samples in rows yields a transposed formula.",
+          "The boundary of this reparameterization matters. If the inverse F–I estimate is wrong, the synaptic threshold is fitted jointly, features are highly correlated, or noise is heteroscedastic, simple OLS gives unreliable uncertainty. Different nonlinear assumptions can yield different weight ensembles that fit the rates equally well. 'Linearized fitting' is a conditional computational convenience, not a claim that the native circuit lacks nonlinearities."
+        ],
+        "keyPoints": [
+          "First use F_i^{-1} to convert each target rate into required current.",
+          "Once synaptic nonlinearities are fixed, their outputs become design-matrix features.",
+          "With samples as columns, Y=N×M, X=D×M, and W=N×D.",
+          "Linear in the weights does not mean that the entire biological model is linear."
+        ],
+        "derivation": {
+          "title": "From a steady-state circuit equation to Y=WX",
+          "setup": "At every measured position, evaluate the known nonlinear terms first and leave only the weights unknown.",
+          "steps": [
+            {
+              "title": "Construct target current",
+              "explanation": "For every output i and sample μ, evaluate the inverse F–I curve.",
+              "latex": "Y_{i\\mu}=F_i^{-1}(h_i(p_\\mu))"
+            },
+            {
+              "title": "Construct the features",
+              "explanation": "Pass every presynaptic rate through its E or I synaptic function, then append a constant bias feature.",
+              "latex": "X_{j\\mu}=S_j(h_j(p_\\mu))"
+            },
+            {
+              "title": "Write the linear prediction",
+              "explanation": "The weights appear only as coefficients of the features.",
+              "latex": "\\widehat Y_{i\\mu}=\\sum_{j=1}^{D}W_{ij}X_{j\\mu}"
+            },
+            {
+              "title": "Stack into matrices",
+              "explanation": "Arrange all outputs and positions simultaneously.",
+              "latex": "\\widehat Y=WX"
+            }
+          ],
+          "symbolNotes": [
+            "M is the number of positions/samples, D is the number of features including bias, and N is the number of output neurons.",
+            "Signs for E and I can be placed in constraints on W or in feature definitions, but the convention must remain consistent."
+          ],
+          "unitsCheck": "(N×D)(D×M)=N×M, matching Y; every column corresponds to the same eye position.",
+          "limitCheck": "If F_i is not invertible or the rate lies on a saturation plateau, F_i^{-1} is not unique and target-current construction fails."
+        },
+        "workedExample": {
+          "title": "Build one design row and predict current",
+          "problem": "At two positions, an output has features x1=[1,2] and x2=[3,1], with an additional bias 1 at both. The weights are [w1,w2,b]=[0.5,-1,2]. Find both predictions.",
+          "steps": [
+            "At position 1, the feature vector is (1,2,1) and the prediction is 0.5×1-1×2+2=0.5.",
+            "At position 2, the feature vector is (3,1,1) and the prediction is 0.5×3-1×1+2=2.5.",
+            "With the two samples as columns, X=[[1,3],[2,1],[1,1]], W=[0.5,-1,2], and WX=[0.5,2.5]."
+          ],
+          "result": "The target-current predictions at the two positions are 0.5 and 2.5; matrix and term-by-term calculations agree.",
+          "sanityCheck": "W has shape 1×3 and X has shape 3×2, so the output must be 1×2. An answer of 2×1 indicates that sample orientation was reversed."
+        },
+        "selfCheck": {
+          "prompt": "Why does fitting become linear after fixing the nonlinearities even though the neuron response itself remains nonlinear?",
+          "answer": "S_j and F_i^{-1} already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+        },
+        "pitfalls": [
+          "Treating parameter variability and observation noise as the same source.",
+          "Applying YX^T(XX^T)^{-1} without stating sample orientation and obtaining incompatible shapes."
+        ]
+      },
+      {
+        "id": "l21-m4",
+        "title": "Least squares, the closed-form solution, and the Hessian",
+        "sourceRefs": [
+          {
+            "file": "Lecture21-OculomotorIntegrator.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "Why does a squared-error fit form a quadratic surface, and how does the Hessian arise from the data design?",
+        "paragraphs": [
+          "With samples as columns, write the loss L(W)=1/2||Y-WX||_F². The Frobenius norm sums squared residuals across all outputs and samples. Output rows are independent, so begin with one weight row w and target row y: L(w)=1/2(y-wX)(y-wX)^T. Expanding gives the constant yy^T, the linear term -yX^Tw^T, and the quadratic term wXX^Tw^T.",
+          "Differentiating with respect to w gives gradient (wX-y)X^T. Setting it to zero gives the normal equation wXX^T=yX^T. If XX^T is invertible, w_hat=yX^T(XX^T)^{-1}; stacking all rows gives W_hat=YX^T(XX^T)^{-1}. If features are collinear, XX^T is singular and requires a pseudoinverse, regularization, or redesigned samples.",
+          "Near the optimum, let Δw=w-w_hat. The normal equation eliminates the cross term, leaving L=Lmin+1/2 Δw H Δw^T with H=XX^T. The same feature Hessian applies row by row to the full W, or appears in blocks after vectorizing the parameters. H depends only on design features for this local curvature; changing the noise model or constraints changes the effective Hessian.",
+          "This connects fitting with experimental design. If one feature combination barely changes across positions, X contains little information along that direction and H has a small eigenvalue. Conditions that selectively activate that combination can increase curvature and tighten parameter uncertainty. Sloppiness need not be accepted passively; perturbations and improved sampling can reduce it."
+        ],
+        "keyPoints": [
+          "The OLS loss is 1/2||Y-WX||².",
+          "When the inverse exists, W_hat=YX^T(XX^T)^{-1}.",
+          "H=XX^T describes parameter curvature supported by the features.",
+          "Collinear features make H singular or nearly singular, requiring regularization or new experiments."
+        ],
+        "derivation": {
+          "title": "From quadratic loss to the OLS closed form",
+          "setup": "Derive one output row first; multiple outputs simply repeat the calculation side by side.",
+          "steps": [
+            {
+              "title": "Write the loss",
+              "explanation": "The residual row is y-wX.",
+              "latex": "L(w)=\\frac12(y-wX)(y-wX)^{\\mathsf T}"
+            },
+            {
+              "title": "Compute the gradient",
+              "explanation": "Differentiate with respect to each weight and collect the results as a row vector.",
+              "latex": "\\nabla_w L=(wX-y)X^{\\mathsf T}"
+            },
+            {
+              "title": "Solve the normal equation",
+              "explanation": "Set the gradient to zero, then right-multiply by the inverse.",
+              "latex": "\\widehat w=yX^{\\mathsf T}(XX^{\\mathsf T})^{-1}"
+            },
+            {
+              "title": "Identify the Hessian",
+              "explanation": "Differentiate the gradient once more with respect to w.",
+              "latex": "H=XX^{\\mathsf T}"
+            }
+          ],
+          "symbolNotes": [
+            "w is 1×D, X is D×M, y is 1×M, and H is D×D.",
+            "For multiple outputs, W is N×D and the formula applies to every row simultaneously."
+          ],
+          "unitsCheck": "(1×D)(D×M)=1×M, and XX^T is D×D. Every term in the loss has squared target-current units.",
+          "limitCheck": "If M<D or the features are linearly dependent, rank(XX^T)<D and the ordinary inverse does not exist. A pseudoinverse selects a minimum-norm solution but does not remove the identifiability problem."
+        },
+        "workedExample": {
+          "title": "Identifiability from a two-feature Hessian",
+          "problem": "Let X=[[1,0,1],[0,1,1]]. Compute H=XX^T and determine whether it is invertible.",
+          "steps": [
+            "H11=1²+0²+1²=2, and H22=0²+1²+1²=2.",
+            "H12=H21=1×0+0×1+1×1=1, so H=[[2,1],[1,2]].",
+            "det(H)=4-1=3>0, so H is invertible; its eigenvalues are 3 and 1."
+          ],
+          "result": "Both parameter combinations are identifiable, but curvature along the common-feature direction is 3 and exceeds the difference-direction curvature of 1.",
+          "sanityCheck": "The trace 4 must equal the eigenvalue sum 3+1, and the determinant 3 must equal the product 3×1."
+        },
+        "selfCheck": {
+          "prompt": "How does adding a ridge penalty λ||w||²/2 change the Hessian?",
+          "answer": "H becomes XX^T+λI. Every eigenvalue increases by λ, stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+        },
+        "pitfalls": [
+          "Treating existence of a closed-form inverse as proof that the biological parameters are unique.",
+          "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
+        ]
+      },
+      {
+        "id": "l21-m5",
+        "title": "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "sourceRefs": [
+          {
+            "file": "Lecture21-OculomotorIntegrator.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "Why can many individual weights vary widely while the data tightly constrain a few parameter combinations?",
+        "paragraphs": [
+          "A Hessian is symmetric positive-semidefinite, so H=VDV^T, where columns v_k are orthonormal parameter directions and D contains λ_k≥0. Let z=V^T(w-w_hat); then the quadratic loss increase is ΔL=1/2Σλ_k z_k². A large λ_k gives a large loss for the same displacement and defines a stiff direction. A small λ_k permits farther movement within the adequate-fit contour and defines a sloppy direction.",
+          "The fit shown on the source page has about 4 stiff and 46 sloppy dimensions. Those counts belong to that model, dataset, and parameterization; they are not universal constants of oculomotor circuits. In a two-direction example, the error contour is an elongated ellipse: its short axis corresponds to large λ and its long axis to small λ. Each axis is generally a mixture of many weights, so calling one parameter sloppy is often imprecise.",
+          "Sloppiness can reflect genuine functional compensation, but also failure of an experiment to excite certain modes, large measurement noise, collinear features, or poor parameter scaling. It does not make the associated biology irrelevant. A direction that is sloppy for the current eye-position dataset may matter during perturbation, development, or another behavior. New conditions are needed to distinguish biological degeneracy from insufficient data.",
+          "Reporting one best-fit W hides this structure. Instead, collect all models with loss below a prespecified adequacy threshold, compare their common predictions, and identify experiments on which they disagree most. A perturbation outcome predicted by every model is robust; divergence along a sloppy valley identifies an experiment that can narrow the ensemble. Sloppiness in parameter space is distinct from low dimensionality of neural states in Lecture19."
+        ],
+        "keyPoints": [
+          "ΔL=1/2Σλ_k z_k² decomposes curvature along parameter eigen-directions.",
+          "Large λ is stiff; small λ is sloppy.",
+          "A sloppy direction usually combines multiple parameters and does not mean that one synapse is irrelevant.",
+          "An adequate-model ensemble expresses uncertainty and robust predictions better than a single best fit."
+        ],
+        "derivation": {
+          "title": "Derive ellipse-axis lengths from curvature",
+          "setup": "In a two-dimensional Hessian eigenbasis, fix the allowable loss increase and find how far one may move along each direction.",
+          "steps": [
+            {
+              "title": "Diagonalize H",
+              "explanation": "Use z=V^TΔw to eliminate cross terms.",
+              "latex": "\\Delta L=\\frac12\\sum_k\\lambda_k z_k^2"
+            },
+            {
+              "title": "Set the adequacy threshold",
+              "explanation": "Let ΔL≤c; the boundary is Σλ_k z_k²=2c."
+            },
+            {
+              "title": "Find an axis radius",
+              "explanation": "Along axis k, set all other coordinates to 0.",
+              "latex": "|z_k|_{max}=\\sqrt{\\frac{2c}{\\lambda_k}}"
+            },
+            {
+              "title": "Compare stiff and sloppy",
+              "explanation": "Radius is proportional to 1/√λ; an eigenvalue ratio of 10000 gives an axis-length ratio of 100."
+            }
+          ],
+          "symbolNotes": [
+            "z_k uses parameter units after rotation by V; if the original parameters have different units, scale them sensibly first.",
+            "c is the permitted loss increase; its statistical interpretation depends on the noise model."
+          ],
+          "unitsCheck": "λ_k has units of loss/parameter², so taking the square root of 2c/λ_k restores parameter units.",
+          "limitCheck": "If λ_k=0, the quadratic approximation gives an infinitely flat direction, meaning that the data do not constrain that combination at all. Actual bounds or higher-order terms may truncate it."
+        },
+        "workedExample": {
+          "title": "Compare two curvature directions",
+          "problem": "The Hessian eigenvalues are 100 and 0.01, and the allowed ΔL is 0.5. Find the maximum displacement along each axis and their ratio.",
+          "steps": [
+            "2c=1. The stiff radius is √(1/100)=0.1.",
+            "The sloppy radius is √(1/0.01)=10.",
+            "The ratio is 10/0.1=100; at the same loss tolerance, the sloppy direction permits a displacement 100 times larger."
+          ],
+          "result": "The adequate-fit ellipse is extremely long along the small-eigenvalue direction, directly visualizing parameter compensation or weak constraint.",
+          "sanityCheck": "The eigenvalue ratio is 100/0.01=10000, so the axis ratio is its square root, 100, not 10000."
+        },
+        "selfCheck": {
+          "prompt": "Why can sloppy not be translated as 'this parameter is unimportant'?",
+          "answer": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it. The combination may still be crucial for an unmeasured behavior, a perturbation response, or biological viability."
+        },
+        "pitfalls": [
+          "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences.",
+          "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L21-FIG-A1",
+      "lecture": 21,
+      "moduleId": "l21-m2",
+      "title": "Three fates of an eigenvalue-one integrator",
+      "alt": "After the command ends, a mode whose eigenvalue is less than one decays, a mode equal to one persists, and a mode greater than one grows.",
+      "caption": "After input is removed, the fate of the same initial mode amplitude depends only on 1−λ: when λ<1 it leaks; when λ=1 the restoring coefficient in the derivative vanishes and memory persists; when λ>1 a small deviation grows. Thus det(I−W)=0 guarantees only an integrating mode, and the stability of all remaining modes must still be checked.",
+      "sourceRefs": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "time after command offset",
+      "yLabel": "mode amplitude α (normalized)",
+      "curves": [
+        {
+          "label": "λ < 1: leak",
+          "points": [
+            [
+              0,
+              70
+            ],
+            [
+              20,
+              50
+            ],
+            [
+              40,
+              35
+            ],
+            [
+              60,
+              24
+            ],
+            [
+              80,
+              16
+            ],
+            [
+              100,
+              10
+            ]
+          ]
+        },
+        {
+          "label": "λ = 1: hold",
+          "points": [
+            [
+              0,
+              70
+            ],
+            [
+              20,
+              70
+            ],
+            [
+              40,
+              70
+            ],
+            [
+              60,
+              70
+            ],
+            [
+              80,
+              70
+            ],
+            [
+              100,
+              70
+            ]
+          ],
+          "dashed": true
+        },
+        {
+          "label": "λ > 1: unstable",
+          "points": [
+            [
+              0,
+              70
+            ],
+            [
+              20,
+              74
+            ],
+            [
+              40,
+              80
+            ],
+            [
+              60,
+              87
+            ],
+            [
+              80,
+              95
+            ],
+            [
+              100,
+              100
+            ]
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "x": 47,
+          "y": 70,
+          "label": "λ=1: state retained"
+        }
+      ],
+      "lectureTitle": "Oculomotor Integrator, Degeneracy, and Sloppy Models"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 general 2×2 eigenvalues 与 integrator condition",
+    "【必要前置】 W=[[W11,W12],[W21,W22]] 何时有 eigenvalue 1？ p W11 + W22 ± (W11 − W22 )2 + 4W12 W21 λ± = 2 det(I − W ) = (1 − W11 )(1 − W22 ) − W12 W21 = 0 1. 由 det(W−λI)=0 得 quadratic formula。 2. perfect integrator 要求 dominant λ+=1。 3. 直接令 λ=1 代入 characteristic polynomial 得 det(I−W)=0。 4. 这是一条 scalar constraint，四个 weights 中通常仍有三维 solution family（加入结构约束后减少）。",
+    "Geometric/computational intuition. 功能约束的是某个 population mode 的 net feedback，而不是每条 synapse 的唯一值。 Biological interpretation / failure condition. 另一 eigenvalue 必须稳定，且 nonlinear operating range/robustness 也需满足。",
+    "思考题：W12=0 时 family formula 如何处理？",
+    "5.2 one-parameter relation 的教学特例",
+    "【补全推导】 给定三项如何解第四项？ (1 − W11 )(1 − W22 ) W21 = (W12 ̸= 0) W12",
+    "1. 从 det(I−W)=0 隔离 W21。 2. 若 W12=0，不能除；此时需 (1−W11)(1−W22)=0，即至少一个 self-weight 为 1。 3. 正/负 signs 还受 excitatory/inhibitory architecture 限制。 4. 同一 integration time scale 可由许多 combinations 达到。",
+    "Geometric/computational intuition. 这是 parameter compensation：一项变强可由另一项变弱抵消。 Biological interpretation / failure condition. 只满足 algebraic eigenvalue 不保证 biological conductances/units 合法。",
+    "思考题：另一 eigenvalue 为什么重要？",
+    "5.3 nonlinear circuit fit 重写为 linear regression",
+    "【跨页连接】 固定 measured F-I inverse 与 synaptic transfer functions 后估计 weights。",
+    "Yiµ = Fi−1 (hi (pµ )) X Ybiµ = Wij Xjµ j",
+    "c = Y X T (XX T )−1 W 1. 每个 eye position p_μ 提供一组 neuron rates。 2. 把 presynaptic excitatory/inhibitory nonlinearities 评估后放入 design X。 3. postsynaptic inverse F-I 给 target current Y。 4. 对每个 output neuron 独立做 least squares，weights 与 bias 是线性参数。",
+    "Geometric/computational intuition. 模型整体有 nonlinear components，但一旦这些 components 固定，剩余 weight fitting 可 linear。 Biological interpretation / failure condition. 若 nonlinear functions 也未知或 measurement noise 结构复杂，problem 不再是简单 OLS。",
+    "思考题：nonlinear circuit fit 如何变 linear？",
+    "5.4 Hessian eigenbasis 与 sloppiness",
+    "【模型边界】 哪些 parameter combinations 真正被数据约束？",
+    "1 c )T H vec(W − W c) L(W ) = Lmin + vec(W − W 2",
+    "H = V DV T 1X ∆L = λk zk2 2 k",
+    "1. H 的 eigenvector 是 parameter-space direction，不是 neural activity mode。 2. 大 λ direction 小变化即显著恶化 fit，称 stiff。 3. 小 λ direction 可大幅变化而 loss 变化小，称 sloppy。 4. 笔记实例中约 4 个 stiff、46 个 sloppy dimensions，说明 many adequate models。",
+    "Geometric/computational intuition. elongated error valley 表示参数可互相补偿。 Biological interpretation / failure condition. sloppy 不等于参数生物上不重要；可能只是当前数据/experiment 不敏感。",
+    "思考题：Hessian eigenvalue 大表示什么？"
+  ],
+  "synthesis": [
+    "The oculomotor integrator must retain eye position after a saccade, so the network needs a long-time-scale mode near λ=1. For a general 2×2 W, perfect integration imposes only det(I−W)=0, leaving a many-to-one family of weights; parameter degeneracy is still stronger in complex biological models. Once measured tuning and synaptic nonlinearities are fixed, fitting can be rewritten as linear regression. Hessian eigenvalues separate a few stiff combinations from many sloppy ones, motivating an adequate-model ensemble rather than a unique best fit."
+  ],
+  "workedExamples": [
+    "7.1 perfect-integrator family",
+    "【例题】题目：W11=0.8, W22=0.7, W12=0.2。",
+    "Worked solution. W21=(0.2×0.3)/0.2=0.3， 使 det(I−W)=0。 还需检查另一 eigenvalue W11+W22−1=0.5<1，故 transverse mode stable。 Check. integrator condition 与 secondary stability 必须同时检查。",
+    "7.2 stiff/sloppy contour",
+    "【拓展例题】题目：H eigenvalues 100 与 0.01。",
+    "Worked solution. 同样 ΔL 下 allowable displacement ∝1/√λ；sloppy direction 可移动 100 倍于 stiff direction。 Check. 比较的是 parameter combination，不一定是单个 weight。"
+  ],
+  "formulas": [
+    {
+      "id": "L21-F01",
+      "lecture": 21,
+      "name": "eye-position integration",
+      "expression": "Z t x(t) = x(0) + v(t′ )dt′ 0",
+      "latex": "x(t)=x(0)+\\int_0^t v(t')\\,dt'",
+      "conditions": "velocity command",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-F02",
+      "lecture": 21,
+      "name": "eigenvalue 1 condition",
+      "expression": "det(I − W ) = 0",
+      "latex": "\\det(I-W)=0",
+      "conditions": "perfect linear integrator",
+      "sectionId": "lecture-21-source-2",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L21-F03",
+      "lecture": 21,
+      "name": "weight-compensation family",
+      "expression": "W21 = (1 − W11 )(1 − W22 )/W12",
+      "latex": "W_{21}=\\frac{(1-W_{11})(1-W_{22})}{W_{12}}",
+      "conditions": "W12≠0",
+      "sectionId": "lecture-21-source-2",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L21-F04",
+      "lecture": 21,
+      "name": "row-wise OLS fit",
+      "expression": "Ŵ = Y X T (XX T )−1",
+      "latex": "\\widehat W=YX^{\\mathsf T}(XX^{\\mathsf T})^{-1}",
+      "conditions": "XX^T invertible",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L21-F05",
+      "lecture": 21,
+      "name": "Hessian eigendecomposition",
+      "expression": "H = V DV T",
+      "latex": "H=VDV^{\\mathsf T}",
+      "conditions": "H symmetric",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L21-F06",
+      "lecture": 21,
+      "name": "local parameter sensitivity",
+      "expression": "1X ∆L = λk zk2 2",
+      "latex": "\\Delta L=\\frac{1}{2}\\sum_k\\lambda_k z_k^2",
+      "conditions": "quadratic approximation",
+      "sectionId": "lecture-21-source-5",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L21-G01",
+      "lecture": 21,
+      "zh": "眼动积分器",
+      "en": "oculomotor integrator",
+      "definition": "A circuit that converts an eye-velocity command into a persistent eye-position signal.",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-G02",
+      "lecture": 21,
+      "zh": "线吸引子",
+      "en": "line attractor",
+      "definition": "A continuous family of nearly stable states capable of storing a graded value.",
+      "sectionId": "lecture-21-source-2",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L21-G03",
+      "lecture": 21,
+      "zh": "参数退化",
+      "en": "parameter degeneracy",
+      "definition": "The ability of different parameter combinations to produce similar output or function.",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L21-G04",
+      "lecture": 21,
+      "zh": "模型可辨识性",
+      "en": "identifiability",
+      "definition": "The extent to which data uniquely or sufficiently constrain parameters.",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-G05",
+      "lecture": 21,
+      "zh": "Hessian",
+      "en": "Hessian",
+      "definition": "The local curvature matrix of loss with respect to parameters.",
+      "sectionId": "lecture-21-source-4",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L21-G06",
+      "lecture": 21,
+      "zh": "刚性方向",
+      "en": "stiff direction",
+      "definition": "A parameter combination to whose variation the loss is highly sensitive.",
+      "sectionId": "lecture-21-source-5",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L21-G07",
+      "lecture": 21,
+      "zh": "松散方向",
+      "en": "sloppy direction",
+      "definition": "A parameter combination to whose variation the loss is insensitive.",
+      "sectionId": "lecture-21-source-5",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L21-G08",
+      "lecture": 21,
+      "zh": "模型集合",
+      "en": "model ensemble",
+      "definition": "A set of parameterizations that all explain the data adequately.",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-G09",
+      "lecture": 21,
+      "zh": "权衡补偿",
+      "en": "parameter compensation",
+      "definition": "Offsetting a change in one parameter with changes in others.",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    }
+  ],
+  "commonTraps": [
+    "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.",
+    "Requiring λ=1 but failing to check stability of the other modes.",
+    "Using the division-based family formula even when W12=0.",
+    "Treating a many-to-one parameter mapping as measurement noise.",
+    "Confusing low dimensionality in neural-state space with sloppiness in parameter space.",
+    "Interpreting a sloppy parameter as biologically irrelevant.",
+    "Reporting only best-fit weights without uncertainty or an ensemble.",
+    "Low dimensionality in neural-state space and sloppiness in parameter space must be distinguished; they are different ideas in different spaces."
+  ],
+  "errata": [
+    {
+      "id": "L21-E01",
+      "lecture": 21,
+      "lectureTitle": "Oculomotor Integrators, Parameter Degeneracy, and Sloppy Models",
+      "kind": "caution",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2,
+      "sectionId": "l21-m2",
+      "originalIssue": "The perfect-integrator condition on Page 2 constrains an eigenvalue; the algebraic family must also handle the W12=0 special case.",
+      "explanation": "When W12=0, the formula is invalid and the condition becomes (1-W11)(1-W22)=0; at least one self-weight must equal 1.",
+      "correction": null
+    },
+    {
+      "id": "L21-E02",
+      "lecture": 21,
+      "lectureTitle": "Oculomotor Integrators, Parameter Degeneracy, and Sloppy Models",
+      "kind": "caution",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 4,
+      "sectionId": "l21-m4",
+      "originalIssue": "The matrix orientation on Page 4 depends on the row/column convention for Y and X; here, examples are consistently stored in columns.",
+      "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries listed here; it is not an unconditional conclusion.",
+      "correction": null
+    },
+    {
+      "id": "L21-E03",
+      "lecture": 21,
+      "lectureTitle": "Oculomotor Integrators, Parameter Degeneracy, and Sloppy Models",
+      "kind": "caution",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5,
+      "sectionId": "l21-m5",
+      "originalIssue": "The 4 stiff and 46 sloppy dimensions on Page 5 are results of that particular fit, not constants of all integrator models.",
+      "explanation": "The fit shown on the source page has about 4 stiff and 46 sloppy dimensions.",
+      "correction": null
+    }
+  ],
+  "questions": [
+    {
+      "id": "EN-L21-Q01",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "A constant eye velocity of 20 deg/s lasts 0.1 s. What position change does an ideal integrator predict?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "The change is 20×0.1=2 deg."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Velocity times time gives position. If deg/s and s do not cancel in your units, review the velocity-to-position module. The change is 20×0.1=2 deg.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L21-Q02",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "Why is it insufficient merely to confirm that W has eigenvalue 1?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        },
+        {
+          "id": "d",
+          "text": "The other modes must be stable, the task input must project onto the integrating mode, the readout must access it, and the nonlinear operating range must be adequate."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Eigenvalue one is only a local linear memory condition; it says nothing by itself about transverse stability or biological feasibility. The other modes must be stable, the task input must project onto the integrating mode, the readout must access it, and the nonlinear operating range must be adequate.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "c": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L21-Q03",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "understand",
+      "stem": "If W12=0, can we use W21=(1-W11)(1-W22)/W12?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "No, division by zero is invalid. The integrator condition becomes (1-W11)(1-W22)=0, so at least one of W11 and W22 must equal 1."
+        },
+        {
+          "id": "b",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "c",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "The family formula assumes W12≠0. Special structures must be analyzed directly with det(I-W)=0. No, division by zero is invalid. The integrator condition becomes (1-W11)(1-W22)=0, so at least one of W11 and W22 must equal 1.",
+      "wrongChoiceExplanations": {
+        "b": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L21-Q04",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "What does a large Hessian eigenvalue mean?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "Loss has high curvature along the corresponding parameter combination, so a small parameter change substantially worsens the fit; that direction is stiff."
+        },
+        {
+          "id": "c",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "It does not mean that one corresponding synapse is large, nor that the direction is a principal component of neural activity. Loss has high curvature along the corresponding parameter combination, so a small parameter change substantially worsens the fit; that direction is stiff.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L21-Q05",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "If position returns to center after the velocity command with a time constant of 5 s, is this still an integrator?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Conflating velocity tuning and position tuning as the same population signal."
+        },
+        {
+          "id": "b",
+          "text": "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        },
+        {
+          "id": "c",
+          "text": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift. This is the distinction tested in Eye-velocity integration, persistent position, and the bilateral circuit.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q06",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "Accumulate two saccade commands"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Accumulate two saccade commands: Start at x=0 deg. Move right at 30 deg/s for 0.08 s, then left at -20 deg/s for 0.05 s. Ignoring leak, find the final position. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "b",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "c",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        },
+        {
+          "id": "d",
+          "text": "After the second command ends, an ideal integrator should hold +1.4 deg rather than return to zero."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Worked setup: Start at x=0 deg. Move right at 30 deg/s for 0.08 s, then left at -20 deg/s for 0.05 s. Ignoring leak, find the final position. The first change is 30×0.08=+2.4 deg. The second change is -20×0.05=-1.0 deg. The final position is x=0+2.4-1.0=+1.4 deg, still rightward. Signs of velocity must match left–right direction. The total command area 2.4-1.0=1.4 deg provides a direct check.",
+      "wrongChoiceExplanations": {
+        "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "c": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L21-Q07",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Eye-velocity integration, persistent position, and the bilateral circuit”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The time integral of velocity gives position change."
+        },
+        {
+          "id": "b",
+          "text": "Conflating velocity tuning and position tuning as the same population signal."
+        },
+        {
+          "id": "c",
+          "text": "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "The time integral of velocity gives position change. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q08",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Eye-velocity integration, persistent position, and the bilateral circuit”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Conflating velocity tuning and position tuning as the same population signal."
+        },
+        {
+          "id": "b",
+          "text": "Recurrent positive feedback sustains a persistent state after the command ends."
+        },
+        {
+          "id": "c",
+          "text": "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Recurrent positive feedback sustains a persistent state after the command ends. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q09",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Eye-velocity integration, persistent position, and the bilateral circuit” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Conflating velocity tuning and position tuning as the same population signal."
+        },
+        {
+          "id": "b",
+          "text": "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        },
+        {
+          "id": "c",
+          "text": "The time integral of velocity gives position change."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "The time integral of velocity gives position change. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q10",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "From velocity samples to a continuous position integral",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “From velocity samples to a continuous position integral”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Conflating velocity tuning and position tuning as the same population signal."
+        },
+        {
+          "id": "b",
+          "text": "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        },
+        {
+          "id": "c",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "d",
+          "text": "v×dt gives deg, so the integral has the same units as x. In a rate-coordinate neural equation, k must supply any missing units."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "v×dt gives deg, so the integral has the same units as x. In a rate-coordinate neural equation, k must supply any missing units. As τ_eff→∞ with appropriately scaled input, the system approaches a perfect integrator; with finite τ_eff, α drifts exponentially under zero input. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "c": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L21-Q11",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Eye-velocity integration, persistent position, and the bilateral circuit",
+        "guiding question"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "What is the best response to the guiding question: How does a brief saccade command become an eye-position code that persists after the command disappears?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The time integral of velocity gives position change."
+        },
+        {
+          "id": "b",
+          "text": "Conflating velocity tuning and position tuning as the same population signal."
+        },
+        {
+          "id": "c",
+          "text": "Treating the bilateral arrows in the schematic as the one measured connectomic implementation."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Moving the eye requires phasic motor drive to generate velocity and tonic drive to oppose orbital restoring forces and hold the new position. The course abstracts the distributed brainstem and cerebellar network as a neural integrator: its input is the eye-velocity command v(t), and its output state approximates x(t)=x(0)+∫v(t′)dt′. Ideally, x retains its latest value when v returns to zero; if the network leaks, position slowly drifts back toward center. The source diagram contains excitatory populations EL and ER and inhibitory populations IL and IR in the left and right hemispheres. Their position-tuning curves have opposite directions: at rightward positions, firing rises in one population and falls in the other. Mutual excitation can prolong the memory mode, while crossed inhibition organizes the left–right push–pull pattern into a signed coordinate. This is a functional architecture; arrows alone do not reveal the strength of each real synapse.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Eye-velocity integration, persistent position, and the bilateral circuit.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L21-Q12",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "What happens if the same constraint gives λ2=1.1?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation."
+        },
+        {
+          "id": "b",
+          "text": "The memory mode still has λ=1, but the transverse mode's full growth rate is (1.1-1)/τ>0. Any small error grows, so the full network is not a stable, usable integrator."
+        },
+        {
+          "id": "c",
+          "text": "Checking det(I-W)=0 without checking λ2, input projection, and readout."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "The memory mode still has λ=1, but the transverse mode's full growth rate is (1.1-1)/τ>0. Any small error grows, so the full network is not a stable, usable integrator. This is the distinction tested in General 2×2 weights, eigenvalue one, and a compensating family.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q13",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family",
+        "Solve for the fourth weight and check stability"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Solve for the fourth weight and check stability: Let W11=0.8, W22=0.7, and W12=0.2. Find W21 so that one mode is a perfect integrator, then check the other mode. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "b",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "c",
+          "text": "W=[[0.8,0.2],[0.3,0.7]] has eigenvalues 1 and 0.5, giving one memory mode and one stable transverse mode."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Worked setup: Let W11=0.8, W22=0.7, and W12=0.2. Find W21 so that one mode is a perfect integrator, then check the other mode. W21=(0.2×0.3)/0.2=0.3. The other eigenvalue is 0.8+0.7-1=0.5. Its full transverse coefficient is -(1-0.5)/τ=-0.5/τ, so that mode decays stably. The trace 1.5 equals 1+0.5, and the determinant 0.5 equals 1×0.5, providing two checks.",
+      "wrongChoiceExplanations": {
+        "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L21-Q14",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “General 2×2 weights, eigenvalue one, and a compensating family”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation."
+        },
+        {
+          "id": "b",
+          "text": "Checking det(I-W)=0 without checking λ2, input projection, and readout."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        },
+        {
+          "id": "d",
+          "text": "A perfect linear integrator satisfies det(I-W)=0."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "A perfect linear integrator satisfies det(I-W)=0. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q15",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “General 2×2 weights, eigenvalue one, and a compensating family”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "When W12≠0, W21=(1-W11)(1-W22)/W12."
+        },
+        {
+          "id": "b",
+          "text": "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation."
+        },
+        {
+          "id": "c",
+          "text": "Checking det(I-W)=0 without checking λ2, input projection, and readout."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "When W12≠0, W21=(1-W11)(1-W22)/W12. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q16",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “General 2×2 weights, eigenvalue one, and a compensating family” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation."
+        },
+        {
+          "id": "b",
+          "text": "When W12≠0, W21=(1-W11)(1-W22)/W12."
+        },
+        {
+          "id": "c",
+          "text": "Checking det(I-W)=0 without checking λ2, input projection, and readout."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "When W12≠0, W21=(1-W11)(1-W22)/W12. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q17",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "General 2×2 weights, eigenvalue one, and a compensating family",
+        "From the characteristic polynomial to an integrator family",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “From the characteristic polynomial to an integrator family”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation."
+        },
+        {
+          "id": "b",
+          "text": "Checking det(I-W)=0 without checking λ2, input projection, and readout."
+        },
+        {
+          "id": "c",
+          "text": "det(I-W) is dimensionless. τ appears only when converting an eigenvalue gap into a time constant."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "det(I-W) is dimensionless. τ appears only when converting an eigenvalue gap into a time constant. As W12→0, the family formula becomes numerically unbounded, signaling that one should return to the undivided constraint rather than infer an infinite synapse. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “General 2×2 weights, eigenvalue one, and a compensating family.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L21-Q18",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Biological variability and reparameterizing a nonlinear circuit fit",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Why does fitting become linear after fixing the nonlinearities even though the neuron response itself remains nonlinear?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating parameter variability and observation noise as the same source."
+        },
+        {
+          "id": "b",
+          "text": "Applying YX^T(XX^T)^{-1} without stating sample orientation and obtaining incompatible shapes."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        },
+        {
+          "id": "d",
+          "text": "S_j and F_i^{-1} already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "S_j and F_i^{-1} already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear. This is the distinction tested in Biological variability and reparameterizing a nonlinear circuit fit.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q19",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Biological variability and reparameterizing a nonlinear circuit fit",
+        "Build one design row and predict current"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Build one design row and predict current: At two positions, an output has features x1=[1,2] and x2=[3,1], with an additional bias 1 at both. The weights are [w1,w2,b]=[0.5,-1,2]. Find both predictions. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The target-current predictions at the two positions are 0.5 and 2.5; matrix and term-by-term calculations agree."
+        },
+        {
+          "id": "b",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "c",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Worked setup: At two positions, an output has features x1=[1,2] and x2=[3,1], with an additional bias 1 at both. The weights are [w1,w2,b]=[0.5,-1,2]. Find both predictions. At position 1, the feature vector is (1,2,1) and the prediction is 0.5×1-1×2+2=0.5. At position 2, the feature vector is (3,1,1) and the prediction is 0.5×3-1×1+2=2.5. With the two samples as columns, X=[[1,3],[2,1],[1,1]], W=[0.5,-1,2], and WX=[0.5,2.5]. W has shape 1×3 and X has shape 3×2, so the output must be 1×2. An answer of 2×1 indicates that sample orientation was reversed.",
+      "wrongChoiceExplanations": {
+        "b": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L21-Q20",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Biological variability and reparameterizing a nonlinear circuit fit",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Biological variability and reparameterizing a nonlinear circuit fit”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating parameter variability and observation noise as the same source."
+        },
+        {
+          "id": "b",
+          "text": "First use F_i^{-1} to convert each target rate into required current."
+        },
+        {
+          "id": "c",
+          "text": "Applying YX^T(XX^T)^{-1} without stating sample orientation and obtaining incompatible shapes."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "First use F_i^{-1} to convert each target rate into required current. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q21",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Biological variability and reparameterizing a nonlinear circuit fit",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Biological variability and reparameterizing a nonlinear circuit fit”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating parameter variability and observation noise as the same source."
+        },
+        {
+          "id": "b",
+          "text": "Applying YX^T(XX^T)^{-1} without stating sample orientation and obtaining incompatible shapes."
+        },
+        {
+          "id": "c",
+          "text": "Once synaptic nonlinearities are fixed, their outputs become design-matrix features."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Once synaptic nonlinearities are fixed, their outputs become design-matrix features. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q22",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Biological variability and reparameterizing a nonlinear circuit fit",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Biological variability and reparameterizing a nonlinear circuit fit” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating parameter variability and observation noise as the same source."
+        },
+        {
+          "id": "b",
+          "text": "Applying YX^T(XX^T)^{-1} without stating sample orientation and obtaining incompatible shapes."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        },
+        {
+          "id": "d",
+          "text": "With samples as columns, Y=N×M, X=D×M, and W=N×D."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "With samples as columns, Y=N×M, X=D×M, and W=N×D. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q23",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Biological variability and reparameterizing a nonlinear circuit fit",
+        "From a steady-state circuit equation to Y=WX",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “From a steady-state circuit equation to Y=WX”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "(N×D)(D×M)=N×M, matching Y; every column corresponds to the same eye position."
+        },
+        {
+          "id": "b",
+          "text": "Treating parameter variability and observation noise as the same source."
+        },
+        {
+          "id": "c",
+          "text": "Applying YX^T(XX^T)^{-1} without stating sample orientation and obtaining incompatible shapes."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "(N×D)(D×M)=N×M, matching Y; every column corresponds to the same eye position. If F_i is not invertible or the rate lies on a saturation plateau, F_i^{-1} is not unique and target-current construction fails. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Biological variability and reparameterizing a nonlinear circuit fit.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L21-Q24",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Least squares, the closed-form solution, and the Hessian",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "How does adding a ridge penalty λ||w||²/2 change the Hessian?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating existence of a closed-form inverse as proof that the biological parameters are unique."
+        },
+        {
+          "id": "b",
+          "text": "H becomes XX^T+λI. Every eigenvalue increases by λ, stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+        },
+        {
+          "id": "c",
+          "text": "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "H becomes XX^T+λI. Every eigenvalue increases by λ, stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data. This is the distinction tested in Least squares, the closed-form solution, and the Hessian.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q25",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Least squares, the closed-form solution, and the Hessian",
+        "Identifiability from a two-feature Hessian"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Identifiability from a two-feature Hessian: Let X=[[1,0,1],[0,1,1]]. Compute H=XX^T and determine whether it is invertible. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "b",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "c",
+          "text": "Both parameter combinations are identifiable, but curvature along the common-feature direction is 3 and exceeds the difference-direction curvature of 1."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Worked setup: Let X=[[1,0,1],[0,1,1]]. Compute H=XX^T and determine whether it is invertible. H11=1²+0²+1²=2, and H22=0²+1²+1²=2. H12=H21=1×0+0×1+1×1=1, so H=[[2,1],[1,2]]. det(H)=4-1=3>0, so H is invertible; its eigenvalues are 3 and 1. The trace 4 must equal the eigenvalue sum 3+1, and the determinant 3 must equal the product 3×1.",
+      "wrongChoiceExplanations": {
+        "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L21-Q26",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Least squares, the closed-form solution, and the Hessian",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Least squares, the closed-form solution, and the Hessian”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating existence of a closed-form inverse as proof that the biological parameters are unique."
+        },
+        {
+          "id": "b",
+          "text": "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        },
+        {
+          "id": "d",
+          "text": "The OLS loss is 1/2||Y-WX||²."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "The OLS loss is 1/2||Y-WX||². The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q27",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Least squares, the closed-form solution, and the Hessian",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Least squares, the closed-form solution, and the Hessian”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "When the inverse exists, W_hat=YX^T(XX^T)^{-1}."
+        },
+        {
+          "id": "b",
+          "text": "Treating existence of a closed-form inverse as proof that the biological parameters are unique."
+        },
+        {
+          "id": "c",
+          "text": "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "When the inverse exists, W_hat=YX^T(XX^T)^{-1}. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q28",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Least squares, the closed-form solution, and the Hessian",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Least squares, the closed-form solution, and the Hessian” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating existence of a closed-form inverse as proof that the biological parameters are unique."
+        },
+        {
+          "id": "b",
+          "text": "Collinear features make H singular or nearly singular, requiring regularization or new experiments."
+        },
+        {
+          "id": "c",
+          "text": "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Collinear features make H singular or nearly singular, requiring regularization or new experiments. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q29",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Least squares, the closed-form solution, and the Hessian",
+        "From quadratic loss to the OLS closed form",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “From quadratic loss to the OLS closed form”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating existence of a closed-form inverse as proof that the biological parameters are unique."
+        },
+        {
+          "id": "b",
+          "text": "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
+        },
+        {
+          "id": "c",
+          "text": "(1×D)(D×M)=1×M, and XX^T is D×D. Every term in the loss has squared target-current units."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "(1×D)(D×M)=1×M, and XX^T is D×D. Every term in the loss has squared target-current units. If M<D or the features are linearly dependent, rank(XX^T)<D and the ordinary inverse does not exist. A pseudoinverse selects a minimum-norm solution but does not remove the identifiability problem. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Least squares, the closed-form solution, and the Hessian.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L21-Q30",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Why can sloppy not be translated as 'this parameter is unimportant'?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences."
+        },
+        {
+          "id": "b",
+          "text": "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        },
+        {
+          "id": "d",
+          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it. The combination may still be crucial for an unmeasured behavior, a perturbation response, or biological viability. This is the distinction tested in The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q31",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "Compare two curvature directions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Compare two curvature directions: The Hessian eigenvalues are 100 and 0.01, and the allowed ΔL is 0.5. Find the maximum displacement along each axis and their ratio. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The adequate-fit ellipse is extremely long along the small-eigenvalue direction, directly visualizing parameter compensation or weak constraint."
+        },
+        {
+          "id": "b",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "c",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Worked setup: The Hessian eigenvalues are 100 and 0.01, and the allowed ΔL is 0.5. Find the maximum displacement along each axis and their ratio. 2c=1. The stiff radius is √(1/100)=0.1. The sloppy radius is √(1/0.01)=10. The ratio is 10/0.1=100; at the same loss tolerance, the sloppy direction permits a displacement 100 times larger. The eigenvalue ratio is 100/0.01=10000, so the axis ratio is its square root, 100, not 10000.",
+      "wrongChoiceExplanations": {
+        "b": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L21-Q32",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences."
+        },
+        {
+          "id": "b",
+          "text": "ΔL=1/2Σλ_k z_k² decomposes curvature along parameter eigen-directions."
+        },
+        {
+          "id": "c",
+          "text": "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "ΔL=1/2Σλ_k z_k² decomposes curvature along parameter eigen-directions. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q33",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences."
+        },
+        {
+          "id": "b",
+          "text": "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
+        },
+        {
+          "id": "c",
+          "text": "Large λ is stiff; small λ is sloppy."
+        },
+        {
+          "id": "d",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Large λ is stiff; small λ is sloppy. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q34",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences."
+        },
+        {
+          "id": "b",
+          "text": "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity."
+        },
+        {
+          "id": "d",
+          "text": "ΔL=1/2Σλ_k z_k² decomposes curvature along parameter eigen-directions."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "ΔL=1/2Σλ_k z_k² decomposes curvature along parameter eigen-directions. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L21-Q35",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "The Hessian eigenbasis, stiff/sloppy directions, and model ensembles",
+        "Derive ellipse-axis lengths from curvature",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “Derive ellipse-axis lengths from curvature”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ_k has units of loss/parameter², so taking the square root of 2c/λ_k restores parameter units."
+        },
+        {
+          "id": "b",
+          "text": "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences."
+        },
+        {
+          "id": "c",
+          "text": "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "λ_k has units of loss/parameter², so taking the square root of 2c/λ_k restores parameter units. If λ_k=0, the quadratic approximation gives an infinitely flat direction, meaning that the data do not constrain that combination at all. Actual bounds or higher-order terms may truncate it. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L21-Q36",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Three fates of an eigenvalue-one integrator",
+        "figure reading"
+      ],
+      "difficulty": 3,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "Which interpretation is supported by the schematic “Three fates of an eigenvalue-one integrator”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The schematic proves that every arrow is a direct causal biological connection and that the same relation holds without qualification across parameter regimes, so its labels, units, axes, boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "After the command ends, a mode whose eigenvalue is less than one decays, a mode equal to one persists, and a mode greater than one grows."
+        },
+        {
+          "id": "c",
+          "text": "The diagram makes all labeled variables interchangeable because spatial proximity fixes their mathematical role, allowing inputs, states, outputs, and averages to be swapped without changing the equations."
+        },
+        {
+          "id": "d",
+          "text": "The schematic guarantees identical behavior on every individual trial and in every dataset, which means noise, averaging, initial conditions, model parameters, and the distinction between observed and latent."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "After input is removed, the fate of the same initial mode amplitude depends only on 1−λ: when λ<1 it leaks; when λ=1 the restoring coefficient in the derivative vanishes and memory persists; when λ>1 a small deviation grows. Thus det(I−W)=0 guarantees only an integrating mode, and the stability of all remaining modes must still be checked. Check the labeled axes, nodes, or event order before mapping the schematic back to the model claim.",
+      "wrongChoiceExplanations": {
+        "a": "A schematic organizes variables and proposed relationships; it does not by itself prove that every arrow is causal. Its labels, axes, units, and stated regime are necessary for the supported interpretation.",
+        "c": "Spatial proximity does not make variables interchangeable. The arrow direction, labels, units, and role of each node determine how the diagram maps onto an equation or experiment.",
+        "d": "The figure summarizes a particular relationship or regime. It cannot establish trial-by-trial identity or remove the effects of noise, averaging, initial conditions, parameters, and latent-variable assumptions."
+      }
+    },
+    {
+      "id": "EN-L21-Q37",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "oculomotor integrator"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “oculomotor integrator” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "b",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        },
+        {
+          "id": "c",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "d",
+          "text": "The extent to which data uniquely or sufficiently constrain parameters."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "oculomotor integrator: A circuit that converts an eye-velocity command into a persistent eye-position signal. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “line attractor,” not “oculomotor integrator.” Keep the two lecture terms separate.",
+        "b": "This defines “parameter degeneracy,” not “oculomotor integrator.” Keep the two lecture terms separate.",
+        "d": "This defines “identifiability,” not “oculomotor integrator.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q38",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "line attractor"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “line attractor” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "b",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        },
+        {
+          "id": "c",
+          "text": "The extent to which data uniquely or sufficiently constrain parameters."
+        },
+        {
+          "id": "d",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "line attractor: A continuous family of nearly stable states capable of storing a graded value. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “oculomotor integrator,” not “line attractor.” Keep the two lecture terms separate.",
+        "b": "This defines “parameter degeneracy,” not “line attractor.” Keep the two lecture terms separate.",
+        "c": "This defines “identifiability,” not “line attractor.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q39",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "parameter degeneracy"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “parameter degeneracy” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        },
+        {
+          "id": "b",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "c",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "d",
+          "text": "The extent to which data uniquely or sufficiently constrain parameters."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "parameter degeneracy: The ability of different parameter combinations to produce similar output or function. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "b": "This defines “oculomotor integrator,” not “parameter degeneracy.” Keep the two lecture terms separate.",
+        "c": "This defines “line attractor,” not “parameter degeneracy.” Keep the two lecture terms separate.",
+        "d": "This defines “identifiability,” not “parameter degeneracy.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q40",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "identifiability"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “identifiability” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "b",
+          "text": "The extent to which data uniquely or sufficiently constrain parameters."
+        },
+        {
+          "id": "c",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "d",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "identifiability: The extent to which data uniquely or sufficiently constrain parameters. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “oculomotor integrator,” not “identifiability.” Keep the two lecture terms separate.",
+        "c": "This defines “line attractor,” not “identifiability.” Keep the two lecture terms separate.",
+        "d": "This defines “parameter degeneracy,” not “identifiability.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q41",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Hessian"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “Hessian” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "b",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "c",
+          "text": "The local curvature matrix of loss with respect to parameters."
+        },
+        {
+          "id": "d",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Hessian: The local curvature matrix of loss with respect to parameters. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “oculomotor integrator,” not “Hessian.” Keep the two lecture terms separate.",
+        "b": "This defines “line attractor,” not “Hessian.” Keep the two lecture terms separate.",
+        "d": "This defines “parameter degeneracy,” not “Hessian.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q42",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "stiff direction"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “stiff direction” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "b",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "c",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        },
+        {
+          "id": "d",
+          "text": "A parameter combination to whose variation the loss is highly sensitive."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "stiff direction: A parameter combination to whose variation the loss is highly sensitive. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “oculomotor integrator,” not “stiff direction.” Keep the two lecture terms separate.",
+        "b": "This defines “line attractor,” not “stiff direction.” Keep the two lecture terms separate.",
+        "c": "This defines “parameter degeneracy,” not “stiff direction.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q43",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "sloppy direction"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “sloppy direction” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A parameter combination to whose variation the loss is insensitive."
+        },
+        {
+          "id": "b",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "c",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "d",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "sloppy direction: A parameter combination to whose variation the loss is insensitive. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "b": "This defines “oculomotor integrator,” not “sloppy direction.” Keep the two lecture terms separate.",
+        "c": "This defines “line attractor,” not “sloppy direction.” Keep the two lecture terms separate.",
+        "d": "This defines “parameter degeneracy,” not “sloppy direction.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q44",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "model ensemble"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “model ensemble” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "b",
+          "text": "A set of parameterizations that all explain the data adequately."
+        },
+        {
+          "id": "c",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "d",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "model ensemble: A set of parameterizations that all explain the data adequately. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “oculomotor integrator,” not “model ensemble.” Keep the two lecture terms separate.",
+        "c": "This defines “line attractor,” not “model ensemble.” Keep the two lecture terms separate.",
+        "d": "This defines “parameter degeneracy,” not “model ensemble.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q45",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "parameter compensation"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “parameter compensation” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A circuit that converts an eye-velocity command into a persistent eye-position signal."
+        },
+        {
+          "id": "b",
+          "text": "A continuous family of nearly stable states capable of storing a graded value."
+        },
+        {
+          "id": "c",
+          "text": "Offsetting a change in one parameter with changes in others."
+        },
+        {
+          "id": "d",
+          "text": "The ability of different parameter combinations to produce similar output or function."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "parameter compensation: Offsetting a change in one parameter with changes in others. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “oculomotor integrator,” not “parameter compensation.” Keep the two lecture terms separate.",
+        "b": "This defines “line attractor,” not “parameter compensation.” Keep the two lecture terms separate.",
+        "d": "This defines “parameter degeneracy,” not “parameter compensation.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L21-Q46",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "eye-position integration",
+        "formula conditions"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “eye-position integration” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "c",
+          "text": "Changing the model parameters cannot change this prediction."
+        },
+        {
+          "id": "d",
+          "text": "velocity command"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "eye-position integration: Z t x(t) = x(0) + v(t′ )dt′ 0. velocity command This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "c": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L21-Q47",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "eigenvalue 1 condition",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “eigenvalue 1 condition” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "b",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "eigenvalue 1 condition: det(I − W ) = 0. perfect linear integrator This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "b": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L21-Q48",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "weight-compensation family",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “weight-compensation family” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "W12≠0"
+        },
+        {
+          "id": "c",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "weight-compensation family: W21 = (1 − W11 )(1 − W22 )/W12. W12≠0 This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L21-Q49",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "row-wise OLS fit",
+        "formula conditions"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “row-wise OLS fit” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "c",
+          "text": "XX^T invertible"
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "row-wise OLS fit: Ŵ = Y X T (XX T )−1. XX^T invertible This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L21-Q50",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Hessian eigendecomposition",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “Hessian eigendecomposition” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "c",
+          "text": "Changing the model parameters cannot change this prediction."
+        },
+        {
+          "id": "d",
+          "text": "H symmetric"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Hessian eigendecomposition: H = V DV T. H symmetric This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "c": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L21-Q51",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "local parameter sensitivity",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “local parameter sensitivity” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "quadratic approximation"
+        },
+        {
+          "id": "b",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "local parameter sensitivity: 1X ∆L = λk zk2 2. quadratic approximation This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "b": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    }
+  ]
+}

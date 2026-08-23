@@ -1,12 +1,13 @@
 # NEUROSCI 366 — Computational Neuroscience
 
-Static course website generated from the original NEUROSCI 366 notes, 27 lecture-specific source prompts, and 27 companion PDFs.
+Static Chinese/English course website generated from the original NEUROSCI 366 notes, 27 lecture-specific source prompts, and 27 companion PDFs.
 
 ## Repository layout
 
 - `site/app/` — statically generated Next.js routes.
 - `site/components/` — reading, source-view, question, search, practice, and settings interfaces.
 - `site/content/lectures/` — structured content for Lectures 1–27.
+- `site/content/en/` — generated English lectures, questions, search index, formulas, figures, glossary, and errata.
 - `site/content/coverage.json` — source-file/page → section/question coverage ledger.
 - `site/content/figures.json` — generated index for the 27 lecture figures.
 - `site/content/errata.json` — structured source cautions and corrections.
@@ -16,6 +17,7 @@ Static course website generated from the original NEUROSCI 366 notes, 27 lecture
 - `site/source/extracted/` — companion PDF text used by the ingestion pipeline.
 - `site/source/self-study/` — authored objectives, prerequisite bridges, teaching modules, derivations, examples, diagnostics, and remediation.
 - `site/source/figures/` — authored, source-aligned scientific figure specifications.
+- `site/source/locales/en/` — reviewed English teaching modules, figure labels, and lecture overlays.
 - `site/scripts/` — content generation and validation.
 - `site/tests/` — content-integrity and revisit-selection tests.
 
@@ -51,9 +53,11 @@ Source precedence used during generation:
 
 Lectures 19 and 22 keep the UPDATE files primary and preserve the previous versions as separate source records.
 
+English locale prose is translated directly from the Chinese canonical records by Codex. The locale source policy prohibits Google Translate, Bing/Microsoft Translator, web translation endpoints, and local machine-translation models; see `site/source/locales/en/README.md`.
+
 ## Question bank
 
-Questions are materialized in `site/content/questions.json` and inside each lecture JSON. Each item records its lecture, source filename/page/section, concept tags, difficulty, cognitive type, four choices, one correct choice, answer reasoning, and explanations for every distractor. Inline questions allow one retry before revealing the complete answer.
+Chinese questions are materialized in `site/content/questions.json`; English questions are materialized in `site/content/en/questions.json`. Each item records its lecture, source filename/page/section, concept tags, difficulty, cognitive type, four choices, one correct choice, answer reasoning, and explanations for every distractor. Inline questions allow one retry before revealing the complete answer.
 
 Generation produces 30–60 questions per lecture and validates source anchors, option integrity, explanation quality, balance, and coverage.
 
@@ -70,7 +74,7 @@ npm run build
 npm run validate:export
 ```
 
-`npm run validate` first regenerates the published JSON from canonical sources, then checks lecture count, per-lecture question minimum, global question IDs and stems, four-choice/correct-answer integrity, substantive answer explanations, source anchors, answer-position balance, difficulty/recall distribution, formula/glossary links, published resources, and page-level coverage. It also rejects a self-study guide when source pages are missing, explanations are too short or duplicated, derivations are not structured, examples lack intermediate steps, diagnostics lack remediation, or KaTeX is invalid. After a build, `npm run validate:export` crawls the exported routes, assets, source PDFs, and fragment links.
+`npm run validate` first regenerates both editions from canonical sources. It checks the Chinese content gates, then verifies that the English edition has all 27 lectures, at least 30 questions per lecture, fully translated display fields, valid source anchors, matching IDs/source references/LaTeX/figure geometry, and no structural drift from Chinese. After a build, `npm run validate:export` crawls both route trees, assets, source PDFs, fragment links, HTML language attributes, and exact language counterparts.
 
 ## Editing a lecture
 
@@ -87,5 +91,12 @@ Questions are regenerated from the canonical lecture sources; revise those sourc
 GitHub Actions validates, tests, builds with `PAGES_BASE_PATH=/comp_neuro`, uploads `site/out`, and deploys it through GitHub Pages. The project site is expected at:
 
 <https://kaicao2003.github.io/comp_neuro/>
+
+Chinese uses the default route tree. English uses the same path with `/en` inserted after the project base, for example:
+
+- `https://kaicao2003.github.io/comp_neuro/lectures/04/`
+- `https://kaicao2003.github.io/comp_neuro/en/lectures/04/`
+
+The site does not inspect browser language and does not redirect automatically. The language control adds or removes only `/en`, preserving the current page, query string, and fragment.
 
 For another project-site repository name, change `PAGES_BASE_PATH` in `.github/workflows/pages.yml` and rebuild.

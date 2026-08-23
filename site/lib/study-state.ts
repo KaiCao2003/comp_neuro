@@ -117,6 +117,32 @@ export function seededShuffle<T>(items: readonly T[], seed: string): T[] {
   return result;
 }
 
+export function balanceQuestionPoolByLecture(pool: readonly Question[], seed: string): Question[] {
+  if (!pool.length) return [];
+  const byLecture = new Map<number, Question[]>();
+  for (const question of pool) {
+    const lecturePool = byLecture.get(question.lecture) ?? [];
+    lecturePool.push(question);
+    byLecture.set(question.lecture, lecturePool);
+  }
+
+  const lectures = seededShuffle([...byLecture.keys()].sort((a, b) => a - b), `${seed}:lecture-order`);
+  const perLecture = Math.min(...lectures.map((lecture) => byLecture.get(lecture)!.length));
+  const shuffled = new Map(lectures.map((lecture) => [
+    lecture,
+    seededShuffle(
+      [...byLecture.get(lecture)!].sort((a, b) => a.id.localeCompare(b.id)),
+      `${seed}:lecture:${lecture}`,
+    ).slice(0, perLecture),
+  ]));
+
+  const balanced: Question[] = [];
+  for (let index = 0; index < perLecture; index += 1) {
+    for (const lecture of lectures) balanced.push(shuffled.get(lecture)![index]);
+  }
+  return balanced;
+}
+
 export function applyAttempt(state: StudyState, questionId: string, correct: boolean, at = new Date().toISOString()): StudyState {
   const previous = state.questions[questionId] ?? { seenCount: 0, correctCount: 0, incorrectCount: 0, attempts: 0 };
   const previousIncorrectAt = previous.lastIncorrectAt ? Date.parse(previous.lastIncorrectAt) : Number.NaN;

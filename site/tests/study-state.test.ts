@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { applyAttempt, applyExposure, createEmptyStudyState, isLectureSessionReusable, normalizeStudyState, seededShuffle, selectQuestionIds } from '../lib/study-state';
+import { applyAttempt, applyExposure, balanceQuestionPoolByLecture, createEmptyStudyState, isLectureSessionReusable, normalizeStudyState, seededShuffle, selectQuestionIds } from '../lib/study-state';
 import type { Question } from '../lib/types';
 
 const makeQuestion = (index: number): Question => ({
@@ -30,6 +30,24 @@ describe('seeded selection', () => {
   it('changes for a new visit seed', () => {
     const state = createEmptyStudyState('install');
     expect(selectQuestionIds(pool, state, 10, 'visit-1')).not.toEqual(selectQuestionIds(pool, state, 10, 'visit-2'));
+  });
+
+  it('builds a deterministic equal-sized candidate pool across lectures', () => {
+    const unevenPool = [
+      ...Array.from({ length: 5 }, (_, index) => ({ ...makeQuestion(index), id: `L1-Q${index}`, lecture: 1 })),
+      ...Array.from({ length: 3 }, (_, index) => ({ ...makeQuestion(index), id: `L2-Q${index}`, lecture: 2 })),
+      ...Array.from({ length: 4 }, (_, index) => ({ ...makeQuestion(index), id: `L3-Q${index}`, lecture: 3 })),
+    ];
+    const balanced = balanceQuestionPoolByLecture(unevenPool, 'cumulative-session');
+    const lectureCounts = Object.fromEntries([1, 2, 3].map((lecture) => [
+      lecture,
+      balanced.filter((question) => question.lecture === lecture).length,
+    ]));
+
+    expect(lectureCounts).toEqual({ 1: 3, 2: 3, 3: 3 });
+    expect(balanceQuestionPoolByLecture(unevenPool, 'cumulative-session')).toEqual(balanced);
+    expect(balanceQuestionPoolByLecture([...unevenPool].reverse(), 'cumulative-session')).toEqual(balanced);
+    expect(unevenPool).toHaveLength(12);
   });
 
   it('suppresses a recently seen correct question', () => {

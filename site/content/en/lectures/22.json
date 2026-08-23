@@ -1,0 +1,3352 @@
+{
+  "lecture": 22,
+  "slug": "22",
+  "zhTitle": "运动皮层潜在动力学与脑机接口",
+  "enTitle": "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
+  "companionFile": "NEUROSCI366_Lecture22_Motor_Cortex_Latent_Dynamics_BMI_Companion.pdf",
+  "companionPages": 25,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture22_Motor_Cortex_Latent_Dynamics_BMI_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture22-MotorCortex-UPDATE.pdf",
+      "role": "primary-update",
+      "pages": 5,
+      "href": "/resources/original/Lecture22-MotorCortex-UPDATE.pdf"
+    },
+    {
+      "file": "Lecture22-MotorCortex.pdf",
+      "role": "previous",
+      "pages": 4,
+      "href": "/resources/original/Lecture22-MotorCortex.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "Distinguish three levels of description—single-neuron directional tuning, low-dimensional population trajectories, and latent dynamics—and explain how all three can hold simultaneously.",
+    "Explain each component of GPFA from high-dimensional neural activity to low-dimensional factors, including the observation model, temporal covariance, matrix shapes, and non-identifiability.",
+    "Use a delayed-reach timeline to explain how preparatory states enter movement-potent and output-null subspaces without misrepresenting graphical correlations as causal conclusions.",
+    "Compute the null space and rank–nullity of a linear readout by hand, construct a simple decoder, and apply the results to closed-loop BMI and cross-day alignment.",
+    "Compare the UPDATE and earlier edition: interpret their shared pages using the UPDATE while retaining citations to the old edition, and attribute Page 5 only to the new UPDATE material."
+  ],
+  "dependencyMap": "center-out tuning → PCA low dimension → latent vs activity space → GPFA → preparatory trajectories → output-null readout",
+  "coreQuestion": "How are high-dimensional motor-cortex activities organized by a few latent trajectories, how can preparatory activity occupy output-null space, and how can these ideas support a stable closed-loop BMI?",
+  "diagnostic": [
+    "If 100 neurons are recorded and 6 latent factors are retained, what is the shape of the GPFA loading matrix C?",
+    "Does a directional tuning curve prove that the neuron directly encodes force in one muscle?",
+    "If U is 2×5 and rank(U)=2, what is the dimension of its linear output-null space?",
+    "As τ in a GP kernel increases, do neighboring latent values usually become smoother or more abrupt?",
+    "Why should a cross-day decoder not require exact correspondence of individual neuron identities every day?"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-22-source-1",
+      "order": 1,
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "page": 1,
+      "reconstruction": "UPDATE Page 1: center-out reaches, directional tuning, and low-dimensional variance/PCA.",
+      "noteMeaning": "Center-out tuning and low-dimensional PCA: center-out reaches, directional tuning, and low-dimensional variance/PCA.",
+      "reasoning": "Present the classic interpretation of center-out directional tuning and the modern dynamical view in which tuning may be epiphenomenal. Then use the PCA variance decomposition to introduce low-dimensional population activity without automatically treating low-variance dimensions as useless.",
+      "figureReading": "First identify both axes, units, normalization, and the single parameter changed by each curve. Distinguish a schematic trend, a model prediction, and genuinely measured data points.",
+      "stopPredict": "What distinguishes directional tuning from low-dimensional dynamics?"
+    },
+    {
+      "id": "lecture-22-source-2",
+      "order": 2,
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "page": 2,
+      "reconstruction": "UPDATE Page 2: dynamical-mode perspective, latent-factor space, neural-activity embedding, and the GPFA observation model.",
+      "noteMeaning": "Latent versus activity space and GPFA: dynamical-mode perspective, latent-factor space, neural-activity embedding, and the GPFA observation model.",
+      "reasoning": "Distinguish latent-factor space from observed neural-activity space and explain the high-dimensional embedding. Then explain every term of the GPFA observation model P(r_t|alpha_t)=N(C alpha_t+d,Sigma) and the temporal covariance of the latent Gaussian process.",
+      "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+      "stopPredict": "What is the shape of C in GPFA?"
+    },
+    {
+      "id": "lecture-22-source-3",
+      "order": 3,
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "page": 3,
+      "reconstruction": "UPDATE Page 3: Gaussian-process temporal covariance, parameter fitting, and delayed-reach latent trajectories.",
+      "noteMeaning": "Preparatory trajectories and the output-null readout: Gaussian-process temporal covariance, parameter fitting, and delayed-reach latent trajectories.",
+      "reasoning": "Explain every term of the GPFA observation model P(r_t|alpha_t)=N(C alpha_t+d,Sigma) and the temporal covariance of the latent Gaussian process. Then analyze a delayed-reach task: target-specific preparatory trajectories, the go cue, and movement trajectories.",
+      "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+      "stopPredict": "What does Σ represent?"
+    },
+    {
+      "id": "lecture-22-source-4",
+      "order": 4,
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "page": 4,
+      "reconstruction": "UPDATE Page 4: preparatory activity, movement modes, linear readout, and output-null space.",
+      "noteMeaning": "Closed-loop BMI/latent alignment and center-out tuning: preparatory activity, movement modes, linear readout, and output-null space.",
+      "reasoning": "Derive the linear readout, its null space, and output-null preparatory activity, making clear that Ur=0 does not imply r=0. Then distinguish latent-factor space from observed neural-activity space and explain the high-dimensional embedding.",
+      "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+      "stopPredict": "What does τ control in GP temporal covariance?"
+    },
+    {
+      "id": "lecture-22-source-5",
+      "order": 5,
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "page": 5,
+      "reconstruction": "UPDATE Page 5: neural decoding, feedforward/closed-loop BMI, and latent-aligned cross-day stability.",
+      "noteMeaning": "Low-dimensional PCA and latent versus activity space: neural decoding, feedforward/closed-loop BMI, and latent-aligned cross-day stability.",
+      "reasoning": "Explain feedforward versus closed-loop BMI, sensory feedback, latent-aligned decoders, and cross-day stability, explicitly identifying this as major new UPDATE material. Then distinguish latent-factor space from observed neural-activity space and explain the high-dimensional embedding.",
+      "figureReading": "Follow arrow directions, excitatory and inhibitory signs, state variables, and external inputs one by one. A structural diagram shows permitted dependencies; it does not by itself prove a biological implementation.",
+      "stopPredict": "Why is the scale of C and α non-identifiable?"
+    }
+  ],
+  "studyGuide": {
+    "objectives": [
+      "Distinguish three levels of description—single-neuron directional tuning, low-dimensional population trajectories, and latent dynamics—and explain how all three can hold simultaneously.",
+      "Explain each component of GPFA from high-dimensional neural activity to low-dimensional factors, including the observation model, temporal covariance, matrix shapes, and non-identifiability.",
+      "Use a delayed-reach timeline to explain how preparatory states enter movement-potent and output-null subspaces without misrepresenting graphical correlations as causal conclusions.",
+      "Compute the null space and rank–nullity of a linear readout by hand, construct a simple decoder, and apply the results to closed-loop BMI and cross-day alignment.",
+      "Compare the UPDATE and earlier edition: interpret their shared pages using the UPDATE while retaining citations to the old edition, and attribute Page 5 only to the new UPDATE material."
+    ],
+    "prerequisiteBridge": [
+      "Represent one population recording as a vector. If N neurons are recorded simultaneously, their firing rates at one moment form an N-dimensional vector r. Each plotted point is not a neuron; it is the state of the entire population at that moment. PCA or a factor model describes those points with K coordinates, where K is smaller than N. Low dimensionality does not mean that only a few neurons were recorded; it means that the variation of many neurons is constrained by a few shared variables.",
+      "Interpret the linear map Cα+d as a multidimensional shadow. α is a K-dimensional latent coordinate, each column of C specifies the activity pattern that one latent factor leaves across N neurons, and d is the mean offset. The shapes must be C: N×K, α: K×1, and output: N×1. Adding Σ acknowledges trial noise and unmodeled fluctuations even for the same latent state.",
+      "A Gaussian process does not mean that activity has a Gaussian-shaped profile. It assigns a joint distribution to a time-varying latent function at every pair of times. The kernel K(t,t′) sets how long separated points remain similar. In a squared-exponential kernel, τ is the smoothing time scale; larger τ makes the latent trajectory vary more slowly. This distinction lets us discuss smooth trajectories, preparatory states, linear readouts, and closed-loop decoders separately."
+    ],
+    "diagnostic": [
+      {
+        "id": "l22-d1",
+        "prompt": "If 100 neurons are recorded and 6 latent factors are retained, what is the shape of the GPFA loading matrix C?",
+        "answer": "C is 100×6; it maps a 6×1 latent vector to a 100×1 mean neural-activity vector.",
+        "explanation": "Check matrix multiplication from output dimension back to input dimension; do not mix trials or time bins into the neuron axis of C.",
+        "remediationModuleId": "l22-m2"
+      },
+      {
+        "id": "l22-d2",
+        "prompt": "Does a directional tuning curve prove that the neuron directly encodes force in one muscle?",
+        "answer": "No. Tuning establishes a statistical association between firing rate and reach direction; it may arise from input, shared dynamics, task covariates, or a readout.",
+        "explanation": "A causal encoding claim additionally requires control of confounders and tests of perturbations and decoder generalization.",
+        "remediationModuleId": "l22-m1"
+      },
+      {
+        "id": "l22-d3",
+        "prompt": "If U is 2×5 and rank(U)=2, what is the dimension of its linear output-null space?",
+        "answer": "By rank–nullity, the dimension is 5-2=3.",
+        "explanation": "Null-space dimension is input dimension minus rank, not output dimension minus rank.",
+        "remediationModuleId": "l22-m4"
+      },
+      {
+        "id": "l22-d4",
+        "prompt": "As τ in a GP kernel increases, do neighboring latent values usually become smoother or more abrupt?",
+        "answer": "Smoother. A fixed temporal separation becomes smaller relative to τ, making kernel covariance closer to its maximum.",
+        "explanation": "Substitute both limits into the kernel: with very large τ, the exponential approaches 1; with very small τ, covariance at a nonzero lag falls rapidly.",
+        "remediationModuleId": "l22-m3"
+      },
+      {
+        "id": "l22-d5",
+        "prompt": "Why should a cross-day decoder not require exact correspondence of individual neuron identities every day?",
+        "answer": "Electrode drift changes which units are visible. If the stable computation lies in a latent subspace, align each day's latent coordinates before decoding.",
+        "explanation": "Cross-day stability is a hypothesis about population structure. It must be tested on held-out days and cannot be confirmed by an attractive two-dimensional plot.",
+        "remediationModuleId": "l22-m5"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l22-m1",
+        "title": "Center-out tuning and low-dimensional population trajectories",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "Why can the same center-out data support directional tuning curves and also be viewed as projections of a low-dimensional dynamical system?",
+        "paragraphs": [
+          "A center-out task begins at a central location and reaches toward multiple radial targets, making direction, speed, and time from the go cue well structured. For one neuron, mean directional tuning can be described by r(θ)=b+k cos(θ-θpref), where θpref is preferred direction and k is modulation depth. This formula summarizes a condition average; it does not mean the neuron 'knows' the angle or guarantee that other movement variables have been excluded.",
+          "Stack all neuronal rates at one moment into r(t), so each reach condition traces an N-dimensional trajectory. If most variance lies on a few PCs, the trajectory is close to a low-dimensional subspace. A single-neuron curve is the shadow of the high-dimensional trajectory on one coordinate axis. Multiple phase-shifted shadows can arise from one rotating or curved population trajectory, so tuning and dynamics are compatible observations.",
+          "PCA orders dimensions by variance; it does not know which dimension drives muscles. A low-variance dimension may carry a small but behaviorally crucial output, especially if the readout has high gain along it. Conversely, a large-variance dimension may be output-null preparation. Judging usefulness requires both neural covariance and the behavioral readout, not explained variance alone.",
+          "The two-dimensional loops or clusters in teaching figures are projections. Overlap may result from truncation, while separation may be exaggerated by normalization. Record the time axis, condition colors, whether trials were averaged, and whether PCs were fitted jointly across conditions. If PCA is fitted separately per condition, the trajectories no longer share coordinates and cannot be compared for target-specific preparation."
+        ],
+        "keyPoints": [
+          "Directional tuning is a statistical condition average, not a unique neural code.",
+          "Single-cell tuning can be a coordinate projection of a low-dimensional population trajectory.",
+          "PCA variance and motor potency are different criteria."
+        ],
+        "derivation": {
+          "title": "Directional tuning as a linear projection of a two-dimensional movement vector",
+          "setup": "Write a two-dimensional reach direction as a unit vector and let the neuron respond linearly to its two coordinates.",
+          "steps": [
+            {
+              "title": "Write the direction vector",
+              "explanation": "The unit movement vector at angle θ has horizontal and vertical components.",
+              "latex": "\\mathbf u(\\theta)=\\begin{bmatrix}\\cos\\theta\\\\\\sin\\theta\\end{bmatrix}"
+            },
+            {
+              "title": "Write the sensitivity direction",
+              "explanation": "Express preferred direction as a unit vector too, with modulation gain k.",
+              "latex": "\\mathbf q=k\\begin{bmatrix}\\cos\\theta_{\\mathrm{pref}}\\\\\\sin\\theta_{\\mathrm{pref}}\\end{bmatrix}"
+            },
+            {
+              "title": "Compute the dot product",
+              "explanation": "Apply the cosine angle-difference identity to obtain the tuning curve.",
+              "latex": "r(\\theta)=b+\\mathbf q^{\\mathsf T}\\mathbf u(\\theta)=b+k\\cos(\\theta-\\theta_{\\mathrm{pref}})"
+            }
+          ],
+          "symbolNotes": [
+            "r and b are in Hz; k is a modulation amplitude in Hz.",
+            "θ and θpref must use the same angular unit and are conventionally treated as radians inside trigonometric functions."
+          ],
+          "unitsCheck": "The direction vectors in the dot product are dimensionless; multiplying by k yields Hz, which can be added to baseline b.",
+          "limitCheck": "When k=0, every direction gives b. At θ=θpref the rate is b+k, and in the opposite direction it is b-k."
+        },
+        "workedExample": {
+          "title": "Compute tuning at four directions",
+          "problem": "A neuron has b=20 Hz, k=8 Hz, and θpref=0. Find the predicted rates at θ=0, π/2, π, and 3π/2.",
+          "steps": [
+            "At θ=0, cos0=1, giving 28 Hz.",
+            "At π/2 and 3π/2, the cosine is 0, giving 20 Hz in both cases.",
+            "At π, cosπ=-1, giving 12 Hz."
+          ],
+          "result": "The four rates are 28, 20, 12, and 20 Hz, respectively.",
+          "sanityCheck": "The maximum and minimum are symmetric around the 20 Hz baseline, and their mean remains 20 Hz."
+        },
+        "selfCheck": {
+          "prompt": "Why does a PC explaining 70% of neural variance not necessarily explain 70% of behavioral variance?",
+          "answer": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+        },
+        "pitfalls": [
+          "Treating a cosine-fit preferred direction as an immutable causal label.",
+          "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        ]
+      },
+      {
+        "id": "l22-m2",
+        "title": "Latent space, activity space, and the GPFA observation model",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 2
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "How does GPFA map a few smooth latent functions into many neurons, and what does each matrix dimension represent?",
+        "paragraphs": [
+          "Let r_t be the observed vector from N neurons in time bin t and α_t contain K latent factors. Conditional on α_t, r_t follows a multivariate Gaussian with mean Cα_t+d and covariance Σ. Rows of C correspond to neurons, columns to factors, and d is each neuron's baseline. For spike counts, the Gaussian is an approximation; with very narrow bins or low rates, a Poisson observation model may be more appropriate.",
+          "A K-dimensional trajectory in latent space is embedded by C into N-dimensional activity space. The column span of C is the shared-activity subspace allowed by the model, while Σ usually absorbs neuron-specific residuals. Shared variation does not require neuron pairs to have identical waveforms: positive and negative loadings allow one factor to produce different amplitudes and directions across cells.",
+          "The conditional observation mean has a coordinate reparameterization. For any invertible K×K matrix A, define α′=Aα and C′=CA^{-1}; then C′α′=Cα. This proves only that the conditional mean is unchanged. Preserving the full GPFA marginal likelihood also requires transforming the latent prior covariance to A K A^T. Standard GPFA usually assumes independent factors that may have different temporal kernels; arbitrary rotation generally introduces between-factor covariance and leaves that model family. Sign flips, factor permutations, and paired scale changes are common ambiguities. More general rotational equivalence requires extra conditions such as identical kernels or an allowed correlated prior.",
+          "The GP prior supplies the temporal structure of α, while the observation model supplies the spatial relationship between r and α. Their roles cannot be reversed: C does not smooth time, and the kernel does not specify each neuron's loading. If Σ is diagonal, residual neurons are conditionally independent given the latent state. Strong remaining residual correlations may indicate too few factors K, a poor kernel, or an oversimplified noise model."
+        ],
+        "keyPoints": [
+          "C is N×K and links latent space with neural activity space.",
+          "Σ describes residuals conditional on the latent state; it is not the covariance of the raw data.",
+          "Conditional observation coordinates can be reparameterized; equivalence of the full GPFA also depends on the latent prior."
+        ],
+        "derivation": {
+          "title": "Shapes in the observation model and reparameterizing its conditional mean",
+          "setup": "Check every vector shape, then prove that latent reparameterization leaves the conditional mean unchanged. This alone does not prove that the full GP prior or marginal likelihood is unchanged.",
+          "steps": [
+            {
+              "title": "List the shapes",
+              "explanation": "With N neurons and K factors, the matrix product must have N outputs.",
+              "latex": "C\\in\\mathbb R^{N\\times K},\\quad\\boldsymbol\\alpha_t\\in\\mathbb R^K,\\quad\\mathbf d\\in\\mathbb R^N"
+            },
+            {
+              "title": "Write the conditional mean",
+              "explanation": "The center of the observation Gaussian lies in activity space.",
+              "latex": "\\mathbb E[\\mathbf r_t\\mid\\boldsymbol\\alpha_t]=C\\boldsymbol\\alpha_t+\\mathbf d"
+            },
+            {
+              "title": "Apply an invertible transformation",
+              "explanation": "Define the new latent coordinates as Aα and change the loading inversely.",
+              "latex": "\\boldsymbol\\alpha_t^{\\prime}=A\\boldsymbol\\alpha_t,\\qquad C^{\\prime}=CA^{-1}"
+            },
+            {
+              "title": "Verify unchanged predictions",
+              "explanation": "Multiplication cancels A^{-1}A, so both coordinate systems give the same conditional mean. The transformed prior covariance must still be checked separately for the full model.",
+              "latex": "C^{\\prime}\\boldsymbol\\alpha_t^{\\prime}=CA^{-1}A\\boldsymbol\\alpha_t=C\\boldsymbol\\alpha_t"
+            }
+          ],
+          "symbolNotes": [
+            "N is the number of neurons and K is latent dimensionality, usually with K<N.",
+            "Σ is an N×N covariance whose diagonal entries are residual variances. After transformation by A, a latent prior covariance generally no longer retains a factor-wise diagonal structure."
+          ],
+          "unitsCheck": "Cα and d must share the units of r. If α is dimensionless, entries of C have units of rate or count. Σ uses squared observation units.",
+          "limitCheck": "When K=N and C is invertible, there is no dimensionality reduction. If all latent factors share an identical kernel, an orthogonal rotation can preserve the prior form; different kernels generally preclude arbitrary rotation."
+        },
+        "workedExample": {
+          "title": "Reconstruct two neurons from one factor",
+          "problem": "Let C=(2,-1)^T Hz, d=(10,20)^T Hz, and α=3 at one moment. Find the predicted rates.",
+          "steps": [
+            "The first neuron's mean is 2×3+10=16 Hz.",
+            "The second neuron's mean is -1×3+20=17 Hz.",
+            "A negative loading means that as the latent increases, the second neuron falls below baseline; it does not imply a negative firing rate."
+          ],
+          "result": "The predicted mean is (16,17)^T Hz.",
+          "sanityCheck": "Setting α to 0 should recover the baseline (10,20)^T Hz."
+        },
+        "selfCheck": {
+          "prompt": "If one latent factor is multiplied everywhere by 2 without changing C, is it still the same GPFA model?",
+          "answer": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2."
+        },
+        "pitfalls": [
+          "Treating a latent factor as a directly measured neuron.",
+          "Concluding from diagonal Σ that real neurons are independent; independence applies only to residuals conditional on the latent state."
+        ]
+      },
+      {
+        "id": "l22-m3",
+        "title": "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "How does a squared-exponential kernel encode smoothness, and how should target preparation, go cue, and movement be separated in delayed reaches?",
+        "paragraphs": [
+          "The squared-exponential kernel K(t,t′)=σs² exp[-(t-t′)²/(2τ²)]+σn²δtt′ gives covariance between two times for one factor. σs² controls smooth signal variance, τ controls the correlation-decay time, and σn² adds independent variability only in the same time bin. The original Page 3 notes a global scale ambiguity between α and loading C and uses σn²+σs²=1 as a normalization convention. That constraint fixes scale; it is not a new biological law. Nor is this the only GP kernel: for rapid switching or oscillation, Matérn or periodic kernels may better match the hypothesis.",
+          "Fitting jointly estimates latent trajectories, loadings, baselines, noise, and kernel hyperparameters, commonly by marginal likelihood or an EM-like procedure. Increasing K always increases in-sample flexibility, so choose dimensionality with cross-validation, held-out likelihood, or reconstruction prediction. Training explained variance alone can mistake noise dimensions for meaningful factors.",
+          "Read a delayed-reach plot along its timeline. The interval after target onset but before the go cue is the preparatory epoch; movement begins only after go. Preparatory activity for different targets may approach different latent locations without producing obvious movement. After the cue, trajectories depart from those initial states along target-specific movement paths. The plot supports the idea that an initial condition influences later dynamics, but trajectories alone cannot exclude sustained common input.",
+          "Trial averaging clarifies preparatory trajectories but conceals single-trial onset jitter and variability. To claim that trajectory geometry predicts behavior, use the pre-go latent state to predict reaction time, directional error, or muscle activity on held-out trials. A post-go divergence may reflect alignment and condition averaging, so compare it with shuffled labels and alternative alignments."
+        ],
+        "keyPoints": [
+          "τ is a temporal correlation scale, not trial duration.",
+          "A kernel family is a modeling assumption that must be tested with held-out data.",
+          "Target, go, and movement events must delimit the epochs of a delayed-reach trajectory."
+        ],
+        "derivation": {
+          "title": "Two limits of the squared-exponential kernel",
+          "setup": "Fix the time difference Δt and compare covariance when τ is much larger or much smaller than that difference.",
+          "steps": [
+            {
+              "title": "Rewrite the time difference",
+              "explanation": "Let Δt=t-t′ and first consider distinct time bins, for which the Kronecker delta is zero.",
+              "latex": "K(\\Delta t)=\\sigma_s^2\\exp\\!\\left(-\\frac{\\Delta t^2}{2\\tau^2}\\right)"
+            },
+            {
+              "title": "Take the long-time-scale limit",
+              "explanation": "When τ is much larger than |Δt|, the exponent is close to zero.",
+              "latex": "\\lim_{\\tau\\to\\infty}K(\\Delta t)=\\sigma_s^2"
+            },
+            {
+              "title": "Take the short-time-scale limit",
+              "explanation": "For fixed nonzero Δt, the exponent approaches negative infinity as τ approaches zero.",
+              "latex": "\\lim_{\\tau\\to0^+}K(\\Delta t)=0\\quad(\\Delta t\\ne0)"
+            },
+            {
+              "title": "Add same-bin noise",
+              "explanation": "At t=t′, signal variance and diagonal noise variance add.",
+              "latex": "K(t,t)=\\sigma_s^2+\\sigma_n^2"
+            }
+          ],
+          "symbolNotes": [
+            "σs² and σn² have squared latent-amplitude units. The source page fixes this factor's arbitrary global scale with σn²+σs²=1.",
+            "τ and t use the same time unit; δtt′ is a discrete time-bin indicator."
+          ],
+          "unitsCheck": "The numerator and denominator of the exponent both have units of time squared, so their ratio is dimensionless; K retains units of latent variance.",
+          "limitCheck": "As τ→∞, the factor is nearly constant within a finite window. As τ→0, between-bin covariance vanishes and the smooth prior degenerates."
+        },
+        "workedExample": {
+          "title": "Compare correlation strength at two time lags",
+          "problem": "Ignore σn and set σs²=1 and τ=100 ms. Approximate the covariance for Δt=100 ms and 200 ms.",
+          "steps": [
+            "At Δt=100, the exponent is -1/2 and K=e^{-1/2}≈0.607.",
+            "At Δt=200, the exponent is -4/2=-2 and K=e^{-2}≈0.135.",
+            "The second lag is twice as long, but covariance falls by more than a factor of four because distance is squared."
+          ],
+          "result": "The two values are approximately 0.607 and 0.135.",
+          "sanityCheck": "At Δt=0 the value should be 1; the kernel decreases monotonically as |Δt| grows."
+        },
+        "selfCheck": {
+          "prompt": "Why does the smooth kernel on Page 3 of the UPDATE not prove that the true cortical trajectory is intrinsically smooth?",
+          "answer": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+        },
+        "pitfalls": [
+          "Mistaking τ for the number K of latent factors.",
+          "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
+        ]
+      },
+      {
+        "id": "l22-m4",
+        "title": "Preparatory activity, linear readouts, and output-null space",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "How can a linear readout produce zero motor output despite strong neural activity during preparation?",
+        "paragraphs": [
+          "Write a locally linear readout as m=Ur, where r is an N-dimensional neural state and m an M-dimensional motor command; U must therefore be M×N. The original Page 4 labels U as N×M, which is incompatible with m=Ur, so we correct it to M×N. Any nonzero r satisfying Ur=0 lies in the null space of U; the neurons need not be silent. Preparatory activity can move the network along null directions without changing output in this approximation. After the go cue, the state enters potent directions and the readout becomes nonzero.",
+          "Rank–nullity gives dim Null(U)=N-rank(U). This simplifies to the source page's N-M only when U has full row rank M; if rank(U)<M, the null space is larger. When recording dimension greatly exceeds motor-output dimension, a large null space is theoretically possible. But recorded r samples only some neurons, and the true downstream map may be nonlinear, state-dependent, or delayed. The null space of a fitted U is therefore relative to a model, not an anatomically absolute no-output pathway.",
+          "Use the singular value decomposition of U to write r=rpotent+rnull. Row-space directions change output, while their orthogonal complement belongs to the null space. Test whether preparatory activity is output-null by fitting U on independent trials, measuring pre-go projections, and checking EMG or kinematics. Choosing a direction and reporting zero output on the same data is circular.",
+          "Output-null does not mean computation-null. Activity along a null direction can set a recurrent initial condition, suppress an erroneous movement, or prepare multiple candidates. The same neural vector may also affect unrecorded downstream populations. The course diagram is a linear framework that separates the existence of activity from the existence of current output; it does not justify calling null activity biologically functionless."
+        ],
+        "keyPoints": [
+          "Ur=0 can hold with r≠0.",
+          "Null-space size is determined by input dimensionality and rank.",
+          "Output-null is a model statement relative to a specified readout U."
+        ],
+        "derivation": {
+          "title": "Rank–nullity and the potent/null decomposition",
+          "setup": "For an M×N readout U, use linear algebra to show how a nonzero preparatory state can produce no output.",
+          "steps": [
+            {
+              "title": "Write the readout",
+              "explanation": "The output is a linear combination of the neural state.",
+              "latex": "\\mathbf m=U\\mathbf r,\\qquad U\\in\\mathbb R^{M\\times N}"
+            },
+            {
+              "title": "Define the null space",
+              "explanation": "All input vectors mapped to zero form a linear subspace.",
+              "latex": "\\operatorname{Null}(U)=\\{\\mathbf r:U\\mathbf r=\\mathbf0\\}"
+            },
+            {
+              "title": "Compute its dimension",
+              "explanation": "Rank–nullity makes visible output directions and invisible input directions sum to N.",
+              "latex": "\\dim\\operatorname{Null}(U)=N-\\operatorname{rank}(U)"
+            },
+            {
+              "title": "Verify the decomposition",
+              "explanation": "If rnull is in the null space, it does not change the output determined by the potent component.",
+              "latex": "U(\\mathbf r_{\\mathrm{potent}}+\\mathbf r_{\\mathrm{null}})=U\\mathbf r_{\\mathrm{potent}}"
+            }
+          ],
+          "symbolNotes": [
+            "M is the number of output coordinates, and N is the number of neural coordinates.",
+            "rank(U) cannot exceed min(M,N); all vectors must use the same centering convention."
+          ],
+          "unitsCheck": "If r is in Hz and m in command units, U has units of command units/Hz; the zero vector carries the corresponding output units.",
+          "limitCheck": "If U has full column rank and N≤M, its null space contains only the zero vector. If N≫M, the null space has at least N-M dimensions."
+        },
+        "workedExample": {
+          "title": "Compute an output-null vector",
+          "problem": "Let U=[1,2] and r=(2,-1)^T. Find m and give one potent vector.",
+          "steps": [
+            "m=1×2+2×(-1)=0, so r is a nonzero null vector.",
+            "Choose rpotent=(1,0)^T, giving m=1.",
+            "Adding the two vectors gives (3,-1)^T, whose output remains 3+2×(-1)=1."
+          ],
+          "result": "The null component changes the neural state without changing the original potent output of 1.",
+          "sanityCheck": "A null vector of U has zero dot product with the row vector (1,2), so the two are geometrically orthogonal."
+        },
+        "selfCheck": {
+          "prompt": "If the downstream readout changes to U′, must the original output-null vector remain null?",
+          "answer": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+        },
+        "pitfalls": [
+          "Incorrectly inferring r=0 from Ur=0.",
+          "Defining and testing the null space on the same training trials, thereby overfitting."
+        ]
+      },
+      {
+        "id": "l22-m5",
+        "title": "Closed-loop BMI and cross-day latent alignment",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "When recorded units change from day to day, how can closed-loop feedback and latent alignment keep a decoder working?",
+        "paragraphs": [
+          "A BMI decoder maps neural features to cursor velocity, position, or a discrete action. During open-loop calibration, the participant observes prescribed movement or attempts an action while the system fits a mapping offline. In closed loop, decoder output immediately changes visual feedback, so participant and decoder coadapt. Closed-loop performance is therefore not a passive measure of a fixed encoding; the brain, decoder, and feedback form a new dynamical system.",
+          "Suppose the observation on day d is r_d=C_dα+d_d+noise. Different electrode samples change C_d while similar latent dynamics may persist. A cross-day method first estimates daily subspaces and then finds A_d to make their α coordinates comparable; it finally applies vhat=Bα in the aligned latent space. Stability here means that a transferable low-dimensional relationship exists, not that each neuron's loading is constant.",
+          "Alignment can manufacture false stability. If behavior labels from the current day rotate latent space and the decoder is then tested on that same day, the answer has leaked into the analysis. A strict evaluation uses calibration data alone to estimate A_d and B, tests on held-out blocks or future days, compares no alignment, random alignment, and a direct neuron-space decoder, and reports adaptation time and failure days.",
+          "The BMI and cross-day material newly added on Page 5 of the UPDATE has no corresponding page in the earlier edition. It connects the first four pages: PCA/GPFA supplies a shared subspace, a linear readout supplies the behavioral map, closed-loop feedback changes the data distribution, and alignment handles coordinate drift. Every step has assumptions; 'stable latent structure' must not be expanded into permanent invariance of single-neuron representations."
+        ],
+        "keyPoints": [
+          "A closed-loop BMI is a joint brain–decoder–feedback system.",
+          "Cross-day alignment aligns population coordinates rather than demanding stable unit identity.",
+          "Holding out future days prevents behavior labels from leaking into the alignment result."
+        ],
+        "derivation": {
+          "title": "Mapping chain of a cross-day latent decoder",
+          "setup": "Project each day's observation into a within-day latent space, align it to reference coordinates, and then decode.",
+          "steps": [
+            {
+              "title": "Write the daily observation",
+              "explanation": "Changes in electrode sampling appear in the daily loading and baseline.",
+              "latex": "\\mathbf r_d=C_d\\boldsymbol\\alpha_d+\\mathbf d_d+\\boldsymbol\\eta_d"
+            },
+            {
+              "title": "Align the coordinates",
+              "explanation": "Use A_d to map day d's latent coordinate into the reference latent space.",
+              "latex": "\\widetilde{\\boldsymbol\\alpha}_d=A_d\\boldsymbol\\alpha_d"
+            },
+            {
+              "title": "Apply the shared decoder",
+              "explanation": "Use the same B for behavioral prediction in aligned coordinates.",
+              "latex": "\\widehat{\\mathbf v}_d=B\\widetilde{\\boldsymbol\\alpha}_d"
+            },
+            {
+              "title": "Define held-out error",
+              "explanation": "Compare true and predicted velocity on time bins used in neither alignment nor fitting.",
+              "latex": "E_d=\\frac{1}{T_{\\mathrm{test}}}\\sum_t\\lVert\\mathbf v_{d,t}-\\widehat{\\mathbf v}_{d,t}\\rVert_2^2"
+            }
+          ],
+          "symbolNotes": [
+            "C_d is neurons×latents, A_d is latents×latents, and B is outputs×latents.",
+            "The number of neurons may vary across days, but aligned latent dimensionality must be constant."
+          ],
+          "unitsCheck": "If velocity is in cm/s and the latent is dimensionless, B is in cm/s; squared error is in cm²/s².",
+          "limitCheck": "A_d=I means that no rotation is required. If latent subspaces do not overlap at all, linear alignment should not be expected to recover an accurate decoder."
+        },
+        "workedExample": {
+          "title": "Swap the axes of a two-dimensional latent space",
+          "problem": "On day 2, latent coordinates are swapped relative to day 1: α2=(3,1)^T, whereas the reference order is (1,3)^T. Give the alignment and compute the prediction for B=[2,-1].",
+          "steps": [
+            "Use A=[[0,1],[1,0]] to swap the coordinates, giving αtilde=(1,3)^T.",
+            "Apply B: vhat=2×1-1×3=-1.",
+            "Without alignment, the result is 2×3-1×1=5, showing how a coordinate-convention change can seriously disrupt the decoder."
+          ],
+          "result": "The aligned prediction is -1; the unaligned prediction is 5.",
+          "sanityCheck": "A is a permutation matrix, so A^T A=I and latent-vector length is unchanged."
+        },
+        "selfCheck": {
+          "prompt": "Why can an improvement in closed-loop performance not be attributed entirely to more accurate decoder parameters?",
+          "answer": "The participant changes neural strategy in response to feedback, and the decoder may update online. Performance comes from joint adaptation, so one side must be frozen or otherwise controlled to separate the causes."
+        },
+        "pitfalls": [
+          "Mislabeling the newly added UPDATE page as content already present in the older edition.",
+          "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L22-FIG-A1",
+      "lecture": 22,
+      "moduleId": "l22-m5",
+      "title": "From population activity to closed-loop BMI",
+      "alt": "Population neural activity passes through GPFA latent inference, cross-day alignment, and a shared BMI decoder to produce cursor feedback, which then affects subsequent neural activity.",
+      "caption": "Observed activity is first compressed by GPFA into daily latent coordinates, then A_d aligns those coordinates to a shared space and passes them to shared decoder B. Decoder output changes cursor feedback, which in turn changes subsequent neural activity. Cross-day stability therefore means that a low-dimensional mapping is transferable; it does not require each neuron's loading to remain fixed.",
+      "sourceRefs": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2
+        },
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "activity",
+          "label": "spikes / rates\nr_d(t)",
+          "x": 8,
+          "y": 65
+        },
+        {
+          "id": "latent",
+          "label": "GPFA latent\nα_d(t)",
+          "x": 36,
+          "y": 65,
+          "tone": "accent"
+        },
+        {
+          "id": "aligned",
+          "label": "cross-day\nA_d α_d",
+          "x": 64,
+          "y": 65
+        },
+        {
+          "id": "decoder",
+          "label": "BMI decoder\nB α̃_d",
+          "x": 92,
+          "y": 65,
+          "tone": "accent"
+        },
+        {
+          "id": "feedback",
+          "label": "cursor +\nfeedback",
+          "x": 92,
+          "y": 20
+        }
+      ],
+      "edges": [
+        {
+          "from": "activity",
+          "to": "latent",
+          "label": "infer"
+        },
+        {
+          "from": "latent",
+          "to": "aligned",
+          "label": "align"
+        },
+        {
+          "from": "aligned",
+          "to": "decoder",
+          "label": "decode"
+        },
+        {
+          "from": "decoder",
+          "to": "feedback",
+          "label": "action"
+        },
+        {
+          "from": "feedback",
+          "to": "activity",
+          "label": "closed loop",
+          "dashed": true
+        }
+      ],
+      "lectureTitle": "Motor Cortex Latent Dynamics and Brain–Machine Interfaces"
+    }
+  ],
+  "specialSection": [
+    "Page-by-page visual comparison shows that Pages 1-4 of the older edition substantially repeat the core academic content of UPDATE Pages 1-4. The UPDATE adds Page 5 on neural decoding, feedforward/closed-loop BMI, and latent-aligned cross-day stability. No unique formula or argument in the older edition required separate retention."
+  ],
+  "derivations": [
+    "6.1 PCA low-dimensional variance 与限制",
+    "【必要前置】 为什么 many neurons 可由 few components 描述？",
+    "rt ≈ r̄ + VK at X X VarFrac(K) = λk / λj k≤K j",
+    "1. centered population activity 的 covariance eigenvalues 常快速衰减。 2. V_K columns 是 high-dimensional embedding axes，a_t 是 low-dimensional coordinates。 3. 低维表示可压缩 shared dynamics，但 discarded dimensions 仍可能含 output/condition information。 4. tuning curve 是单 neuron stimulus average，与 trajectory coordinates 不同。",
+    "Geometric/computational intuition. 许多 neurons 可共同参与少数 coordinated population patterns。 Biological interpretation / failure condition. PCA 不建模 temporal smoothness，也无法区分 shared dynamics 与 observation noise。",
+    "思考题：GP temporal covariance 中 τ 控制什么？",
+    "6.2 GPFA observation 与 temporal prior",
+    "【补全推导】 如何同时建模 latent factors、neuron loadings 与 smooth time course？",
+    "rt | αt ∼ N (Cαt + d, Σ)",
+    "αk (1:T ) ∼ N (0, Kk ) 2 ′ 2 2 −(t−t ) /(2τk ) 2 [Kk ]tt′ = σn,k δtt′ + σs,k e 1. r_t∈R^N，α_t∈R^K，C∈R^{N×K}，d∈R^N，Σ∈R^{N×N}。 2. observation model 把 latent state linear embed 到 neuron space。 3. Gaussian-process covariance 让 nearby time points correlated/smooth。 4. C 与 α 有 scale/rotation non-identifiability，需 convention/constraints。",
+    "Geometric/computational intuition. GPFA 把 observed spikes/rates 看作 smooth shared trajectory 加 neuron-specific noise。 Biological interpretation / failure condition. Gaussian observations、stationary kernels 与 fixed dimensionality 可能不适合 abrupt/nonlinear dynamics。",
+    "思考题：为什么 C 与 α scale 不可辨识？",
+    "6.3 output-null preparatory activity",
+    "【跨页连接】 为什么 preparation 可变化而 muscles 不动？",
+    "m = Ur",
+    "U ∈ RM ×N , M < N rnull ∈ Null(U ) ⇒ U rnull = 0 1. U 是 neural-to-muscle/output linear readout。 2. rank(U)≤M，因此 null-space dimension 至少 N−M。 3. 不同 target 可在 null directions 建立不同 preparatory states。 4. go cue 后 dynamics 转入 output-potent/movement modes。",
+    "Geometric/computational intuition. 大 population 可在不影响当前 output 的自由度中预先设置 initial condition。 Biological interpretation / failure condition. 真实 readout nonlinear/time-varying；nullspace 是 local linear approximation。",
+    "思考题：output-null 的定义？",
+    "6.4 BMI closed loop 与 latent alignment",
+    "【模型边界】 为什么同一 neuron decoder 跨日漂移，而 latent decoder 更稳定？",
+    "bt = Brt v b t = Bα αt or v",
+    "1. feedforward BMI 只把 recorded activity 映射为 command。 2. closed loop 加 device/sensory feedback，用户可在线纠错与学习。 3. individual neuron tuning/loading 可漂移，而 shared latent manifold/dynamics 可能较稳定。 4. 对齐每日 latent spaces 后再 decode，可减少 neuron-identity drift。",
+    "Geometric/computational intuition. 稳定的计算可能存在于 population geometry，而非固定单 neuron coordinates。 Biological interpretation / failure condition. latent stability 不是保证；task、electrode、learning 与 pathology 均可改变 manifold。",
+    "思考题：Ur=0 是否说明无 neural activity？"
+  ],
+  "synthesis": [
+    "Directional tuning is a classic description of motor cortex, whereas the modern population view asks whether low-dimensional trajectories generate movement dynamics. GPFA embeds smooth latent factors into noisy neural activity with a Gaussian observation model and explicitly models temporal covariance. A preparatory state can vary within the null space of muscle readout U without causing movement. BMI decodes neural or latent state into device commands and uses feedback and cross-day latent alignment to improve stability."
+  ],
+  "workedExamples": [
+    "8.1 GPFA shape check",
+    "【例题】题目：N=100 neurons, K=5 factors。",
+    "Worked solution. C 是 100×5，α_t 是 5×1，Cα_t 是 100×1，与 d 和 r_t 同 shape；Σ 是 100×100 （常简化 diagonal）。 Check. latent dimension K 小不意味着只有 5 neurons active。",
+    "8.2 null-space 数值",
+    "【拓展例题】题目：U 是 2×10 且 rank=2。",
+    "Worked solution. Null(U) dimension=10−2=8；有大量 preparatory directions 不改变 2D output。 Check. Ur=0 不推出 r=0。"
+  ],
+  "formulas": [
+    {
+      "id": "L22-F01",
+      "lecture": 22,
+      "name": "GPFA observation model",
+      "expression": "rt |αt ∼ N (Cαt + d, Σ)",
+      "latex": "\\mathbf r_t\\mid\\boldsymbol{\\alpha}_t\\sim\\mathcal N(C\\boldsymbol{\\alpha}_t+\\mathbf d,\\Sigma)",
+      "conditions": "Gaussian approximation",
+      "sectionId": "lecture-22-source-2",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L22-F02",
+      "lecture": 22,
+      "name": "GP temporal covariance",
+      "expression": "′ 2 K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′ 2",
+      "latex": "K(t,t')=\\sigma_s^2\\exp\\!\\left[-\\frac{(t-t')^2}{2\\tau^2}\\right]+\\sigma_n^2\\delta_{tt'}",
+      "conditions": "stationary smooth kernel",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-F03",
+      "lecture": 22,
+      "name": "linear motor readout",
+      "expression": "m = Ur",
+      "latex": "\\mathbf m=U\\mathbf r",
+      "conditions": "local approximation",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-F04",
+      "lecture": 22,
+      "name": "output-null space",
+      "expression": "Null(U ) = {r : U r = 0}",
+      "latex": "\\operatorname{Null}(U)=\\{\\mathbf r:U\\mathbf r=0\\}",
+      "conditions": "linear algebra",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-F05",
+      "lecture": 22,
+      "name": "rank–nullity",
+      "expression": "dim N ull(U ) = N − rank(U )",
+      "latex": "\\dim\\operatorname{Null}(U)=N-\\operatorname{rank}(U)",
+      "conditions": "U: M×N",
+      "sectionId": "lecture-22-source-5",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L22-F06",
+      "lecture": 22,
+      "name": "latent decoder",
+      "expression": "v̂ = Bα",
+      "latex": "\\widehat{\\mathbf v}=B\\boldsymbol{\\alpha}",
+      "conditions": "aligned latent coordinates",
+      "sectionId": "lecture-22-source-2",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 2
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L22-G01",
+      "lecture": 22,
+      "zh": "中心向外任务",
+      "en": "center-out reach task",
+      "definition": "A reaching paradigm from a central location to multiple radial targets.",
+      "sectionId": "lecture-22-source-1",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L22-G02",
+      "lecture": 22,
+      "zh": "方向调谐",
+      "en": "direction tuning",
+      "definition": "Variation of the mean response with reach direction.",
+      "sectionId": "lecture-22-source-1",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L22-G03",
+      "lecture": 22,
+      "zh": "潜在因子",
+      "en": "latent factor",
+      "definition": "A low-dimensional hidden variable that explains shared population variability.",
+      "sectionId": "lecture-22-source-5",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L22-G04",
+      "lecture": 22,
+      "zh": "嵌入",
+      "en": "embedding",
+      "definition": "A mapping from latent coordinates into high-dimensional activity.",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-G05",
+      "lecture": 22,
+      "zh": "高斯过程因子分析",
+      "en": "Gaussian-process factor analysis, GPFA",
+      "definition": "A latent-factor model with a temporal Gaussian-process prior.",
+      "sectionId": "lecture-22-source-2",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L22-G06",
+      "lecture": 22,
+      "zh": "准备活动",
+      "en": "preparatory activity",
+      "definition": "A target-dependent population state before movement.",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-G07",
+      "lecture": 22,
+      "zh": "输出零空间",
+      "en": "output-null space",
+      "definition": "Neural directions that do not change the current readout.",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-G08",
+      "lecture": 22,
+      "zh": "输出有效空间",
+      "en": "output-potent space",
+      "definition": "Directions that change muscle or device output.",
+      "sectionId": "lecture-22-source-2",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L22-G09",
+      "lecture": 22,
+      "zh": "脑机接口",
+      "en": "brain-machine interface, BMI",
+      "definition": "A system that controls an external device from neural activity.",
+      "sectionId": "lecture-22-source-4",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L22-G10",
+      "lecture": 22,
+      "zh": "闭环控制",
+      "en": "closed-loop control",
+      "definition": "Online control that includes sensory or device feedback.",
+      "sectionId": "lecture-22-source-5",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 5
+    }
+  ],
+  "commonTraps": [
+    "Conflating a single-neuron tuning curve with a latent trajectory.",
+    "Using PCA components, GPFA factors, dynamical modes, and decoder axes interchangeably.",
+    "Assuming that a K-dimensional model means only K neurons matter.",
+    "Ignoring non-identifiability of C–α scale and rotation.",
+    "Inferring r=0 from Ur=0.",
+    "Ignoring user feedback and learning in a feedforward BMI account.",
+    "Describing cross-day latent stability as absolute invariance.",
+    "Tuning curves, principal components, latent factors, dynamical modes, and decoder axes must be distinguished explicitly. They may be related, but they are not interchangeable."
+  ],
+  "errata": [
+    {
+      "id": "L22-E01",
+      "lecture": 22,
+      "lectureTitle": "Latent Dynamics in Motor Cortex and Brain–Machine Interfaces",
+      "kind": "version",
+      "sourceFile": "Lecture22-MotorCortex.pdf",
+      "sourcePage": 1,
+      "sectionId": "resources",
+      "originalIssue": "UPDATE Pages 1-4 match the corresponding content in the older edition; the UPDATE adds Page 5 on BMI and cross-day latent alignment.",
+      "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries listed here; it is not an unconditional conclusion.",
+      "correction": "UPDATE Pages 1-4 match the corresponding content in the older edition"
+    },
+    {
+      "id": "L22-E02",
+      "lecture": 22,
+      "lectureTitle": "Latent Dynamics in Motor Cortex and Brain–Machine Interfaces",
+      "kind": "caution",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 3,
+      "sectionId": "l22-m3",
+      "originalIssue": "The GP covariance on Page 3 is one choice of smooth kernel, not the only Gaussian-process kernel.",
+      "explanation": "This is not the only GP kernel; rapid switching or oscillation may be better represented by Matérn or periodic kernels.",
+      "correction": null
+    },
+    {
+      "id": "L22-E03",
+      "lecture": 22,
+      "lectureTitle": "Latent Dynamics in Motor Cortex and Brain–Machine Interfaces",
+      "kind": "caution",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4,
+      "sectionId": "l22-m4",
+      "originalIssue": "The output-null interpretation on Page 4 is a linear-readout framework; real motor output may be more complex.",
+      "explanation": "A locally linear readout is m=Ur, where r is an N-dimensional neural state and m is an M-dimensional motor command, so U must be M×N.",
+      "correction": null
+    }
+  ],
+  "questions": [
+    {
+      "id": "EN-L22-Q01",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "If 100 neurons are recorded and 6 latent factors are retained, what is the shape of the GPFA loading matrix C?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        },
+        {
+          "id": "d",
+          "text": "C is 100×6; it maps a 6×1 latent vector to a 100×1 mean neural-activity vector."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Check matrix multiplication from output dimension back to input dimension; do not mix trials or time bins into the neuron axis of C. C is 100×6; it maps a 6×1 latent vector to a 100×1 mean neural-activity vector.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "c": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L22-Q02",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Does a directional tuning curve prove that the neuron directly encodes force in one muscle?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "No. Tuning establishes a statistical association between firing rate and reach direction; it may arise from input, shared dynamics, task covariates, or a readout."
+        },
+        {
+          "id": "b",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "c",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A causal encoding claim additionally requires control of confounders and tests of perturbations and decoder generalization. No. Tuning establishes a statistical association between firing rate and reach direction; it may arise from input, shared dynamics, task covariates, or a readout.",
+      "wrongChoiceExplanations": {
+        "b": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L22-Q03",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "If U is 2×5 and rank(U)=2, what is the dimension of its linear output-null space?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "By rank–nullity, the dimension is 5-2=3."
+        },
+        {
+          "id": "c",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Null-space dimension is input dimension minus rank, not output dimension minus rank. By rank–nullity, the dimension is 5-2=3.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L22-Q04",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "As τ in a GP kernel increases, do neighboring latent values usually become smoother or more abrupt?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "Smoother. A fixed temporal separation becomes smaller relative to τ, making kernel covariance closer to its maximum."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Substitute both limits into the kernel: with very large τ, the exponential approaches 1; with very small τ, covariance at a nonzero lag falls rapidly. Smoother. A fixed temporal separation becomes smaller relative to τ, making kernel covariance closer to its maximum.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L22-Q05",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "Why should a cross-day decoder not require exact correspondence of individual neuron identities every day?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        },
+        {
+          "id": "d",
+          "text": "Electrode drift changes which units are visible. If the stable computation lies in a latent subspace, align each day's latent coordinates before decoding."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Cross-day stability is a hypothesis about population structure. It must be tested on held-out days and cannot be confirmed by an attractive two-dimensional plot. Electrode drift changes which units are visible. If the stable computation lies in a latent subspace, align each day's latent coordinates before decoding.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "c": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L22-Q06",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Why does a PC explaining 70% of neural variance not necessarily explain 70% of behavioral variance?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+        },
+        {
+          "id": "b",
+          "text": "Treating a cosine-fit preferred direction as an immutable causal label."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances. This is the distinction tested in Center-out tuning and low-dimensional population trajectories.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q07",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "Compute tuning at four directions"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Compute tuning at four directions: A neuron has b=20 Hz, k=8 Hz, and θpref=0. Find the predicted rates at θ=0, π/2, π, and 3π/2. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "b",
+          "text": "The four rates are 28, 20, 12, and 20 Hz, respectively."
+        },
+        {
+          "id": "c",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Worked setup: A neuron has b=20 Hz, k=8 Hz, and θpref=0. Find the predicted rates at θ=0, π/2, π, and 3π/2. At θ=0, cos0=1, giving 28 Hz. At π/2 and 3π/2, the cosine is 0, giving 20 Hz in both cases. At π, cosπ=-1, giving 12 Hz. The maximum and minimum are symmetric around the 20 Hz baseline, and their mean remains 20 Hz.",
+      "wrongChoiceExplanations": {
+        "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L22-Q08",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Center-out tuning and low-dimensional population trajectories”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a cosine-fit preferred direction as an immutable causal label."
+        },
+        {
+          "id": "b",
+          "text": "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        },
+        {
+          "id": "c",
+          "text": "Directional tuning is a statistical condition average, not a unique neural code."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Directional tuning is a statistical condition average, not a unique neural code. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q09",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Center-out tuning and low-dimensional population trajectories”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a cosine-fit preferred direction as an immutable causal label."
+        },
+        {
+          "id": "b",
+          "text": "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "Single-cell tuning can be a coordinate projection of a low-dimensional population trajectory."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Single-cell tuning can be a coordinate projection of a low-dimensional population trajectory. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q10",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Center-out tuning and low-dimensional population trajectories” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Directional tuning is a statistical condition average, not a unique neural code."
+        },
+        {
+          "id": "b",
+          "text": "Treating a cosine-fit preferred direction as an immutable causal label."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Directional tuning is a statistical condition average, not a unique neural code. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q11",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "Directional tuning as a linear projection of a two-dimensional movement vector",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “Directional tuning as a linear projection of a two-dimensional movement vector”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a cosine-fit preferred direction as an immutable causal label."
+        },
+        {
+          "id": "b",
+          "text": "The direction vectors in the dot product are dimensionless; multiplying by k yields Hz, which can be added to baseline b."
+        },
+        {
+          "id": "c",
+          "text": "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "The direction vectors in the dot product are dimensionless; multiplying by k yields Hz, which can be added to baseline b. When k=0, every direction gives b. At θ=θpref the rate is b+k, and in the opposite direction it is b-k. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L22-Q12",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out tuning and low-dimensional population trajectories",
+        "guiding question"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "What is the best response to the guiding question: Why can the same center-out data support directional tuning curves and also be viewed as projections of a low-dimensional dynamical system?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a cosine-fit preferred direction as an immutable causal label."
+        },
+        {
+          "id": "b",
+          "text": "Mistaking the smoothness of a trial-averaged projection for noise-free single trials."
+        },
+        {
+          "id": "c",
+          "text": "Directional tuning is a statistical condition average, not a unique neural code."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "A center-out task begins at a central location and reaches toward multiple radial targets, making direction, speed, and time from the go cue well structured. For one neuron, mean directional tuning can be described by r(θ)=b+k cos(θ-θpref), where θpref is preferred direction and k is modulation depth. This formula summarizes a condition average; it does not mean the neuron 'knows' the angle or guarantee that other movement variables have been excluded. Stack all neuronal rates at one moment into r(t), so each reach condition traces an N-dimensional trajectory. If most variance lies on a few PCs, the trajectory is close to a low-dimensional subspace. A single-neuron curve is the shadow of the high-dimensional trajectory on one coordinate axis. Multiple phase-shifted shadows can arise from one rotating or curved population trajectory, so tuning and dynamics are compatible observations.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Center-out tuning and low-dimensional population trajectories.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L22-Q13",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "If one latent factor is multiplied everywhere by 2 without changing C, is it still the same GPFA model?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a latent factor as a directly measured neuron."
+        },
+        {
+          "id": "b",
+          "text": "Concluding from diagonal Σ that real neurons are independent; independence applies only to residuals conditional on the latent state."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2. This is the distinction tested in Latent space, activity space, and the GPFA observation model.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q14",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model",
+        "Reconstruct two neurons from one factor"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Reconstruct two neurons from one factor: Let C=(2,-1)^T Hz, d=(10,20)^T Hz, and α=3 at one moment. Find the predicted rates. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The predicted mean is (16,17)^T Hz."
+        },
+        {
+          "id": "b",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "c",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Worked setup: Let C=(2,-1)^T Hz, d=(10,20)^T Hz, and α=3 at one moment. Find the predicted rates. The first neuron's mean is 2×3+10=16 Hz. The second neuron's mean is -1×3+20=17 Hz. A negative loading means that as the latent increases, the second neuron falls below baseline; it does not imply a negative firing rate. Setting α to 0 should recover the baseline (10,20)^T Hz.",
+      "wrongChoiceExplanations": {
+        "b": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L22-Q15",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Latent space, activity space, and the GPFA observation model”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a latent factor as a directly measured neuron."
+        },
+        {
+          "id": "b",
+          "text": "C is N×K and links latent space with neural activity space."
+        },
+        {
+          "id": "c",
+          "text": "Concluding from diagonal Σ that real neurons are independent; independence applies only to residuals conditional on the latent state."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "C is N×K and links latent space with neural activity space. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q16",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Latent space, activity space, and the GPFA observation model”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a latent factor as a directly measured neuron."
+        },
+        {
+          "id": "b",
+          "text": "Concluding from diagonal Σ that real neurons are independent; independence applies only to residuals conditional on the latent state."
+        },
+        {
+          "id": "c",
+          "text": "Σ describes residuals conditional on the latent state; it is not the covariance of the raw data."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Σ describes residuals conditional on the latent state; it is not the covariance of the raw data. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q17",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Latent space, activity space, and the GPFA observation model” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Treating a latent factor as a directly measured neuron."
+        },
+        {
+          "id": "b",
+          "text": "Concluding from diagonal Σ that real neurons are independent; independence applies only to residuals conditional on the latent state."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "Σ describes residuals conditional on the latent state; it is not the covariance of the raw data."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Σ describes residuals conditional on the latent state; it is not the covariance of the raw data. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q18",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space, activity space, and the GPFA observation model",
+        "Shapes in the observation model and reparameterizing its conditional mean",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “Shapes in the observation model and reparameterizing its conditional mean”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cα and d must share the units of r. If α is dimensionless, entries of C have units of rate or count. Σ uses squared observation units."
+        },
+        {
+          "id": "b",
+          "text": "Treating a latent factor as a directly measured neuron."
+        },
+        {
+          "id": "c",
+          "text": "Concluding from diagonal Σ that real neurons are independent; independence applies only to residuals conditional on the latent state."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Cα and d must share the units of r. If α is dimensionless, entries of C have units of rate or count. Σ uses squared observation units. When K=N and C is invertible, there is no dimensionality reduction. If all latent factors share an identical kernel, an orthogonal rotation can preserve the prior form; different kernels generally preclude arbitrary rotation. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Latent space, activity space, and the GPFA observation model.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L22-Q19",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Why does the smooth kernel on Page 3 of the UPDATE not prove that the true cortical trajectory is intrinsically smooth?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mistaking τ for the number K of latent factors."
+        },
+        {
+          "id": "b",
+          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+        },
+        {
+          "id": "c",
+          "text": "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale. This is the distinction tested in GP temporal kernels, parameter fitting, and delayed-reach trajectories.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q20",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "Compare correlation strength at two time lags"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Compare correlation strength at two time lags: Ignore σn and set σs²=1 and τ=100 ms. Approximate the covariance for Δt=100 ms and 200 ms. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The requested conclusion follows from terminology alone, so the definitions, units, equations, assumptions, and parameter regime do not need to be checked."
+        },
+        {
+          "id": "b",
+          "text": "The same answer remains valid after swapping inputs and outputs and reversing every sign, because predictions are independent of variable roles and boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "The two values are approximately 0.607 and 0.135."
+        },
+        {
+          "id": "d",
+          "text": "A single observation establishes both correlation and causal mechanism, making alternative explanations, interventions, and limiting cases irrelevant."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Worked setup: Ignore σn and set σs²=1 and τ=100 ms. Approximate the covariance for Δt=100 ms and 200 ms. At Δt=100, the exponent is -1/2 and K=e^{-1/2}≈0.607. At Δt=200, the exponent is -4/2=-2 and K=e^{-2}≈0.135. The second lag is twice as long, but covariance falls by more than a factor of four because distance is squared. At Δt=0 the value should be 1; the kernel decreases monotonically as |Δt| grows.",
+      "wrongChoiceExplanations": {
+        "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
+        "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
+        "d": "One observation can constrain a model but cannot by itself identify a causal mechanism or eliminate alternatives, interventions, and limiting-case checks."
+      }
+    },
+    {
+      "id": "EN-L22-Q21",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “GP temporal kernels, parameter fitting, and delayed-reach trajectories”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mistaking τ for the number K of latent factors."
+        },
+        {
+          "id": "b",
+          "text": "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "τ is a temporal correlation scale, not trial duration."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "τ is a temporal correlation scale, not trial duration. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q22",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “GP temporal kernels, parameter fitting, and delayed-reach trajectories”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A kernel family is a modeling assumption that must be tested with held-out data."
+        },
+        {
+          "id": "b",
+          "text": "Mistaking τ for the number K of latent factors."
+        },
+        {
+          "id": "c",
+          "text": "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "A kernel family is a modeling assumption that must be tested with held-out data. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q23",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “GP temporal kernels, parameter fitting, and delayed-reach trajectories” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mistaking τ for the number K of latent factors."
+        },
+        {
+          "id": "b",
+          "text": "Target, go, and movement events must delimit the epochs of a delayed-reach trajectory."
+        },
+        {
+          "id": "c",
+          "text": "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Target, go, and movement events must delimit the epochs of a delayed-reach trajectory. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q24",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal kernels, parameter fitting, and delayed-reach trajectories",
+        "Two limits of the squared-exponential kernel",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “Two limits of the squared-exponential kernel”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mistaking τ for the number K of latent factors."
+        },
+        {
+          "id": "b",
+          "text": "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
+        },
+        {
+          "id": "c",
+          "text": "The numerator and denominator of the exponent both have units of time squared, so their ratio is dimensionless; K retains units of latent variance."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "The numerator and denominator of the exponent both have units of time squared, so their ratio is dimensionless; K retains units of latent variance. As τ→∞, the factor is nearly constant within a finite window. As τ→0, between-bin covariance vanishes and the smooth prior degenerates. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “GP temporal kernels, parameter fitting, and delayed-reach trajectories.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L22-Q25",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "If the downstream readout changes to U′, must the original output-null vector remain null?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Incorrectly inferring r=0 from Ur=0."
+        },
+        {
+          "id": "b",
+          "text": "Defining and testing the null space on the same training trials, thereby overfitting."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable. This is the distinction tested in Preparatory activity, linear readouts, and output-null space.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q26",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space",
+        "Compute an output-null vector"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Compute an output-null vector: Let U=[1,2] and r=(2,-1)^T. Find m and give one potent vector. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The null component changes the neural state without changing the original potent output of 1."
+        },
+        {
+          "id": "b",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "c",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Worked setup: Let U=[1,2] and r=(2,-1)^T. Find m and give one potent vector. m=1×2+2×(-1)=0, so r is a nonzero null vector. Choose rpotent=(1,0)^T, giving m=1. Adding the two vectors gives (3,-1)^T, whose output remains 3+2×(-1)=1. A null vector of U has zero dot product with the row vector (1,2), so the two are geometrically orthogonal.",
+      "wrongChoiceExplanations": {
+        "b": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L22-Q27",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Preparatory activity, linear readouts, and output-null space”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Incorrectly inferring r=0 from Ur=0."
+        },
+        {
+          "id": "b",
+          "text": "Ur=0 can hold with r≠0."
+        },
+        {
+          "id": "c",
+          "text": "Defining and testing the null space on the same training trials, thereby overfitting."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Ur=0 can hold with r≠0. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q28",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Preparatory activity, linear readouts, and output-null space”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Incorrectly inferring r=0 from Ur=0."
+        },
+        {
+          "id": "b",
+          "text": "Defining and testing the null space on the same training trials, thereby overfitting."
+        },
+        {
+          "id": "c",
+          "text": "Null-space size is determined by input dimensionality and rank."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Null-space size is determined by input dimensionality and rank. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q29",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Preparatory activity, linear readouts, and output-null space” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Incorrectly inferring r=0 from Ur=0."
+        },
+        {
+          "id": "b",
+          "text": "Defining and testing the null space on the same training trials, thereby overfitting."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "Ur=0 can hold with r≠0."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Ur=0 can hold with r≠0. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q30",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        },
+        {
+          "file": "Lecture22-MotorCortex.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity, linear readouts, and output-null space",
+        "Rank–nullity and the potent/null decomposition",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “Rank–nullity and the potent/null decomposition”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "If r is in Hz and m in command units, U has units of command units/Hz; the zero vector carries the corresponding output units."
+        },
+        {
+          "id": "b",
+          "text": "Incorrectly inferring r=0 from Ur=0."
+        },
+        {
+          "id": "c",
+          "text": "Defining and testing the null space on the same training trials, thereby overfitting."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "If r is in Hz and m in command units, U has units of command units/Hz; the zero vector carries the corresponding output units. If U has full column rank and N≤M, its null space contains only the zero vector. If N≫M, the null space has at least N-M dimensions. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Preparatory activity, linear readouts, and output-null space.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L22-Q31",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment",
+        "self-check"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Why can an improvement in closed-loop performance not be attributed entirely to more accurate decoder parameters?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mislabeling the newly added UPDATE page as content already present in the older edition."
+        },
+        {
+          "id": "b",
+          "text": "The participant changes neural strategy in response to feedback, and the decoder may update online."
+        },
+        {
+          "id": "c",
+          "text": "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "The participant changes neural strategy in response to feedback, and the decoder may update online. Performance comes from joint adaptation, so one side must be frozen or otherwise controlled to separate the causes. This is the distinction tested in Closed-loop BMI and cross-day latent alignment.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q32",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment",
+        "Swap the axes of a two-dimensional latent space"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "Worked example — Swap the axes of a two-dimensional latent space: On day 2, latent coordinates are swapped relative to day 1: α2=(3,1)^T, whereas the reference order is (1,3)^T. Give the alignment and compute the prediction for B=[2,-1]. Which result or conclusion follows from these stated inputs?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The same numerical answer remains valid after reversing signs and changing units because the requested quantity is independent of the stated inputs, equations, boundary conditions, and parameter regime."
+        },
+        {
+          "id": "b",
+          "text": "A result from a different worked example can be substituted unchanged without recomputing the equation, initial condition, parameter values, units, or limiting case stated in the present problem."
+        },
+        {
+          "id": "c",
+          "text": "The aligned prediction is -1; the unaligned prediction is 5."
+        },
+        {
+          "id": "d",
+          "text": "Variable names alone determine the calculation, so numerical values, signs, dimensions, operation order, and model assumptions cannot affect the requested result."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "Worked setup: On day 2, latent coordinates are swapped relative to day 1: α2=(3,1)^T, whereas the reference order is (1,3)^T. Give the alignment and compute the prediction for B=[2,-1]. Use A=[[0,1],[1,0]] to swap the coordinates, giving αtilde=(1,3)^T. Apply B: vhat=2×1-1×3=-1. Without alignment, the result is 2×3-1×1=5, showing how a coordinate-convention change can seriously disrupt the decoder. A is a permutation matrix, so A^T A=I and latent-vector length is unchanged.",
+      "wrongChoiceExplanations": {
+        "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
+        "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
+        "d": "Variable names do not determine a calculation. Values, signs, dimensions, operation order, and model assumptions all constrain the requested result."
+      }
+    },
+    {
+      "id": "EN-L22-Q33",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment",
+        "key conclusion"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "Which statement gives the core conclusion developed in “Closed-loop BMI and cross-day latent alignment”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mislabeling the newly added UPDATE page as content already present in the older edition."
+        },
+        {
+          "id": "b",
+          "text": "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
+        },
+        {
+          "id": "c",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        },
+        {
+          "id": "d",
+          "text": "A closed-loop BMI is a joint brain–decoder–feedback system."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "A closed-loop BMI is a joint brain–decoder–feedback system. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "c": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q34",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment",
+        "key conclusion"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "Which statement gives the important constraint or comparison developed in “Closed-loop BMI and cross-day latent alignment”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cross-day alignment aligns population coordinates rather than demanding stable unit identity."
+        },
+        {
+          "id": "b",
+          "text": "Mislabeling the newly added UPDATE page as content already present in the older edition."
+        },
+        {
+          "id": "c",
+          "text": "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Cross-day alignment aligns population coordinates rather than demanding stable unit identity. The module's worked example and checks support the same conclusion.",
+      "wrongChoiceExplanations": {
+        "b": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q35",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment",
+        "transfer"
+      ],
+      "difficulty": 4,
+      "type": "transfer",
+      "cognitiveLevel": "apply",
+      "stem": "When applying “Closed-loop BMI and cross-day latent alignment” to a new experiment or dataset, which principle must still hold?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mislabeling the newly added UPDATE page as content already present in the older edition."
+        },
+        {
+          "id": "b",
+          "text": "Cross-day alignment aligns population coordinates rather than demanding stable unit identity."
+        },
+        {
+          "id": "c",
+          "text": "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
+        },
+        {
+          "id": "d",
+          "text": "Conflating a single-neuron tuning curve with a latent trajectory."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "Cross-day alignment aligns population coordinates rather than demanding stable unit identity. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "c": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "d": "The lecture presents “Conflating a single-neuron tuning curve with a latent trajectory.” as a common trap. It drops a condition or distinction needed by the argument."
+      }
+    },
+    {
+      "id": "EN-L22-Q36",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Closed-loop BMI and cross-day latent alignment",
+        "Mapping chain of a cross-day latent decoder",
+        "derivation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "Which units check correctly constrains the derivation “Mapping chain of a cross-day latent decoder”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mislabeling the newly added UPDATE page as content already present in the older edition."
+        },
+        {
+          "id": "b",
+          "text": "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
+        },
+        {
+          "id": "c",
+          "text": "If velocity is in cm/s and the latent is dimensionless, B is in cm/s; squared error is in cm²/s²."
+        },
+        {
+          "id": "d",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "If velocity is in cm/s and the latent is dimensionless, B is in cm/s; squared error is in cm²/s². A_d=I means that no rotation is required. If latent subspaces do not overlap at all, linear alignment should not be expected to recover an accurate decoder. These checks test both dimensional consistency and limiting behavior.",
+      "wrongChoiceExplanations": {
+        "a": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "b": "This is a listed pitfall for “Closed-loop BMI and cross-day latent alignment.” It describes the error the module is designed to prevent.",
+        "d": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer."
+      }
+    },
+    {
+      "id": "EN-L22-Q37",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        },
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "From population activity to closed-loop BMI",
+        "figure reading"
+      ],
+      "difficulty": 3,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "Which interpretation is supported by the schematic “From population activity to closed-loop BMI”?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The schematic proves that every arrow is a direct causal biological connection and that the same relation holds without qualification across parameter regimes, so its labels, units, axes, boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "The diagram makes all labeled variables interchangeable because spatial proximity fixes their mathematical role, allowing inputs, states, outputs, and averages to be swapped without changing the equations."
+        },
+        {
+          "id": "c",
+          "text": "The schematic guarantees identical behavior on every individual trial and in every dataset, which means noise, averaging, initial conditions, model parameters, and the distinction between observed and latent."
+        },
+        {
+          "id": "d",
+          "text": "Population neural activity passes through GPFA latent inference, cross-day alignment, and a shared BMI decoder to produce cursor feedback, which then affects subsequent neural activity."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "Observed activity is first compressed by GPFA into daily latent coordinates, then A_d aligns those coordinates to a shared space and passes them to shared decoder B. Decoder output changes cursor feedback, which in turn changes subsequent neural activity. Cross-day stability therefore means that a low-dimensional mapping is transferable; it does not require each neuron's loading to remain fixed. Check the labeled axes, nodes, or event order before mapping the schematic back to the model claim.",
+      "wrongChoiceExplanations": {
+        "a": "A schematic organizes variables and proposed relationships; it does not by itself prove that every arrow is causal. Its labels, axes, units, and stated regime are necessary for the supported interpretation.",
+        "b": "Spatial proximity does not make variables interchangeable. The arrow direction, labels, units, and role of each node determine how the diagram maps onto an equation or experiment.",
+        "c": "The figure summarizes a particular relationship or regime. It cannot establish trial-by-trial identity or remove the effects of noise, averaging, initial conditions, parameters, and latent-variable assumptions."
+      }
+    },
+    {
+      "id": "EN-L22-Q38",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "center-out reach task"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “center-out reach task” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "c",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        },
+        {
+          "id": "d",
+          "text": "A mapping from latent coordinates into high-dimensional activity."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "center-out reach task: A reaching paradigm from a central location to multiple radial targets. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "b": "This defines “direction tuning,” not “center-out reach task.” Keep the two lecture terms separate.",
+        "c": "This defines “latent factor,” not “center-out reach task.” Keep the two lecture terms separate.",
+        "d": "This defines “embedding,” not “center-out reach task.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q39",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "direction tuning"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “direction tuning” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "c",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        },
+        {
+          "id": "d",
+          "text": "A mapping from latent coordinates into high-dimensional activity."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "direction tuning: Variation of the mean response with reach direction. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “center-out reach task,” not “direction tuning.” Keep the two lecture terms separate.",
+        "c": "This defines “latent factor,” not “direction tuning.” Keep the two lecture terms separate.",
+        "d": "This defines “embedding,” not “direction tuning.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q40",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "latent factor"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “latent factor” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "c",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        },
+        {
+          "id": "d",
+          "text": "A mapping from latent coordinates into high-dimensional activity."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "latent factor: A low-dimensional hidden variable that explains shared population variability. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “center-out reach task,” not “latent factor.” Keep the two lecture terms separate.",
+        "b": "This defines “direction tuning,” not “latent factor.” Keep the two lecture terms separate.",
+        "d": "This defines “embedding,” not “latent factor.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q41",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "embedding"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “embedding” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "c",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        },
+        {
+          "id": "d",
+          "text": "A mapping from latent coordinates into high-dimensional activity."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "embedding: A mapping from latent coordinates into high-dimensional activity. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “center-out reach task,” not “embedding.” Keep the two lecture terms separate.",
+        "b": "This defines “direction tuning,” not “embedding.” Keep the two lecture terms separate.",
+        "c": "This defines “latent factor,” not “embedding.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q42",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Gaussian-process factor analysis, GPFA"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “Gaussian-process factor analysis, GPFA” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A latent-factor model with a temporal Gaussian-process prior."
+        },
+        {
+          "id": "b",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "c",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "d",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "Gaussian-process factor analysis, GPFA: A latent-factor model with a temporal Gaussian-process prior. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "b": "This defines “center-out reach task,” not “Gaussian-process factor analysis, GPFA.” Keep the two lecture terms separate.",
+        "c": "This defines “direction tuning,” not “Gaussian-process factor analysis, GPFA.” Keep the two lecture terms separate.",
+        "d": "This defines “latent factor,” not “Gaussian-process factor analysis, GPFA.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q43",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "preparatory activity"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “preparatory activity” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "A target-dependent population state before movement."
+        },
+        {
+          "id": "c",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "d",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "preparatory activity: A target-dependent population state before movement. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “center-out reach task,” not “preparatory activity.” Keep the two lecture terms separate.",
+        "c": "This defines “direction tuning,” not “preparatory activity.” Keep the two lecture terms separate.",
+        "d": "This defines “latent factor,” not “preparatory activity.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q44",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "output-null space"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “output-null space” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "c",
+          "text": "Neural directions that do not change the current readout."
+        },
+        {
+          "id": "d",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "output-null space: Neural directions that do not change the current readout. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “center-out reach task,” not “output-null space.” Keep the two lecture terms separate.",
+        "b": "This defines “direction tuning,” not “output-null space.” Keep the two lecture terms separate.",
+        "d": "This defines “latent factor,” not “output-null space.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q45",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "output-potent space"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “output-potent space” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "b",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "c",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        },
+        {
+          "id": "d",
+          "text": "Directions that change muscle or device output."
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "output-potent space: Directions that change muscle or device output. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "a": "This defines “center-out reach task,” not “output-potent space.” Keep the two lecture terms separate.",
+        "b": "This defines “direction tuning,” not “output-potent space.” Keep the two lecture terms separate.",
+        "c": "This defines “latent factor,” not “output-potent space.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q46",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "brain-machine interface, BMI"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "What does “brain-machine interface, BMI” mean in this lecture?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A system that controls an external device from neural activity."
+        },
+        {
+          "id": "b",
+          "text": "A reaching paradigm from a central location to multiple radial targets."
+        },
+        {
+          "id": "c",
+          "text": "Variation of the mean response with reach direction."
+        },
+        {
+          "id": "d",
+          "text": "A low-dimensional hidden variable that explains shared population variability."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "brain-machine interface, BMI: A system that controls an external device from neural activity. This is the meaning used in this lecture, not every possible use of the term.",
+      "wrongChoiceExplanations": {
+        "b": "This defines “center-out reach task,” not “brain-machine interface, BMI.” Keep the two lecture terms separate.",
+        "c": "This defines “direction tuning,” not “brain-machine interface, BMI.” Keep the two lecture terms separate.",
+        "d": "This defines “latent factor,” not “brain-machine interface, BMI.” Keep the two lecture terms separate."
+      }
+    },
+    {
+      "id": "EN-L22-Q47",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "GPFA observation model",
+        "formula conditions"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “GPFA observation model” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "Gaussian approximation"
+        },
+        {
+          "id": "c",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "GPFA observation model: rt |αt ∼ N (Cαt + d, Σ). Gaussian approximation This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L22-Q48",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "GP temporal covariance",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “GP temporal covariance” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "c",
+          "text": "stationary smooth kernel"
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "GP temporal covariance: ′ 2 K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′ 2. stationary smooth kernel This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L22-Q49",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "linear motor readout",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “linear motor readout” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "c",
+          "text": "Changing the model parameters cannot change this prediction."
+        },
+        {
+          "id": "d",
+          "text": "local approximation"
+        }
+      ],
+      "correctChoiceId": "d",
+      "explanation": "linear motor readout: m = Ur. local approximation This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "c": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L22-Q50",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "output-null space",
+        "formula conditions"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “output-null space” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "linear algebra"
+        },
+        {
+          "id": "b",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "c",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "a",
+      "explanation": "output-null space: Null(U ) = {r : U r = 0}. linear algebra This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "b": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L22-Q51",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "rank–nullity",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “rank–nullity” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "U: M×N"
+        },
+        {
+          "id": "c",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "b",
+      "explanation": "rank–nullity: dim N ull(U ) = N − rank(U ). U: M×N This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    },
+    {
+      "id": "EN-L22-Q52",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "latent decoder",
+        "formula conditions"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "Under which conditions should “latent decoder” be used?",
+      "choices": [
+        {
+          "id": "a",
+          "text": "The conclusion holds without checking units, assumptions, or boundary conditions."
+        },
+        {
+          "id": "b",
+          "text": "A descriptive correlation by itself establishes the proposed biological mechanism."
+        },
+        {
+          "id": "c",
+          "text": "aligned latent coordinates"
+        },
+        {
+          "id": "d",
+          "text": "Changing the model parameters cannot change this prediction."
+        }
+      ],
+      "correctChoiceId": "c",
+      "explanation": "latent decoder: v̂ = Bα. aligned latent coordinates This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "wrongChoiceExplanations": {
+        "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
+        "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
+        "d": "Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion."
+      }
+    }
+  ]
+}

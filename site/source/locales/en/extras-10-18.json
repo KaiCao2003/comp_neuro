@@ -1,0 +1,2680 @@
+[
+  {
+    "lecture": 10,
+    "coreQuestion": "How does Hebbian plasticity alter a synapse through spike timing and receptor mechanisms, and how can its firing-rate and matrix descriptions select statistical input structure without runaway weight growth?",
+    "dependencyMap": "LTP/LTD/STDP → NMDA-Ca²+ → Hebbian/covariance rule → covariance eigenmodes → positive feedback → Oja/BCM stabilization",
+    "sourceUnits": [
+      {
+        "id": "lecture-10-source-1",
+        "order": 1,
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: Hebb, LTP/LTD, STDP, and the AMPA/NMDA/Ca2+ mechanism.",
+        "noteMeaning": "LTP/LTD/STDP and NMDA-Ca²+: Hebb, LTP/LTD, STDP, and the AMPA/NMDA/Ca2+ mechanism.",
+        "reasoning": "Proceed from Hebb's postulate through LTP/LTD and STDP, linking the timing curve to AMPA insertion/removal, the NMDA Mg2+ block, and postsynaptic Ca2+. Then compare the basic Hebbian rule with three covariance-centered rules and explain why mean subtraction permits depression.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure presents a definition, derivation, model prediction, or empirical observation; a schematic has no unmarked quantitative precision.",
+        "stopPredict": "In classical STDP, what change commonly follows pre-before-post timing?"
+      },
+      {
+        "id": "lecture-10-source-2",
+        "order": 2,
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: firing-rate Hebbian rules, covariance rules, and a feedforward example.",
+        "noteMeaning": "Hebbian/covariance rules and covariance eigenmodes: firing-rate Hebbian rules, covariance rules, and a feedforward example.",
+        "reasoning": "Write the weight dynamics of a feedforward linear neuron in vector and matrix form and derive the covariance matrix from input statistics. Then compare the basic Hebbian rule with three covariance-centered rules and explain why mean subtraction permits depression.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not turn a statistical axis automatically into a causal pathway.",
+        "stopPredict": "Why can an NMDA receptor act as a coincidence detector?"
+      },
+      {
+        "id": "lecture-10-source-3",
+        "order": 3,
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: expected weight dynamics, positive feedback, and an eigenvector primer.",
+        "noteMeaning": "Positive feedback and Oja/BCM stabilization: expected weight dynamics, positive feedback, and an eigenvector primer.",
+        "reasoning": "Explain positive feedback and exponential growth in basic Hebbian dynamics and their connection to the principal eigenvector and PCA. Then write vector and matrix dynamics for a feedforward linear neuron and derive covariance from input statistics.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "Why does a basic Hebbian rule tend to make weights blow up?"
+      },
+      {
+        "id": "lecture-10-source-4",
+        "order": 4,
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: symmetric PSD covariance and Hebbian eigenmode growth.",
+        "noteMeaning": "Three-factor learning and LTP/LTD/STDP: symmetric PSD covariance and Hebbian eigenmode growth.",
+        "reasoning": "Build the required concepts of eigenvectors and eigenvalues, left and right eigenvectors, and symmetric matrices, then prove that a covariance matrix is symmetric positive semidefinite. Use these ideas to derive vector and matrix dynamics for a feedforward linear neuron from input statistics.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "Why does a centered covariance rule permit LTD?"
+      },
+      {
+        "id": "lecture-10-source-5",
+        "order": 5,
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: synaptic scaling, Oja's rule, and the BCM rule.",
+        "noteMeaning": "NMDA-Ca²+ and the Hebbian/covariance rule: synaptic scaling, Oja's rule, and the BCM rule.",
+        "reasoning": "Compare how synaptic scaling, Oja normalization, and the BCM sliding threshold stabilize learning and what each means biologically. Then contrast the basic Hebbian rule with three covariance-centered rules and explain why mean subtraction enables depression.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure presents a definition, derivation, model prediction, or empirical observation; a schematic has no unmarked quantitative precision.",
+        "stopPredict": "Write the relation between E[dw/dt] and covariance."
+      },
+      {
+        "id": "lecture-10-source-6",
+        "order": 6,
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: unsupervised, supervised, and reward learning, and three-factor rules.",
+        "noteMeaning": "Covariance eigenmodes and positive feedback: unsupervised, supervised, and reward learning, and three-factor rules.",
+        "reasoning": "Separate unsupervised, supervised, and reward-based learning clearly and explain error or reward as a third factor. Then compare the basic Hebbian rule with three covariance-centered rules and show why mean subtraction permits depression.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure presents a definition, derivation, model prediction, or empirical observation; a schematic has no unmarked quantitative precision.",
+        "stopPredict": "How can one prove that covariance eigenvalues are nonnegative?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "This lecture joins three levels of synaptic plasticity: experimental phenomena (LTP/LTD/STDP), proposed molecular mechanisms (NMDA-dependent Ca²+ signaling and AMPA trafficking), and abstract learning rules. A basic Hebbian rule amplifies high-variance eigenmodes of input covariance but also creates positive feedback and unbounded growth. Synaptic scaling, Oja's rule, and BCM stabilize the system through global normalization, local weight-dependent decay, and a dynamic threshold, respectively."
+    ],
+    "commonTraps": [
+      "Equating LTP/LTD with one NMDA/Ca²+ pathway even though mechanisms vary across synapses and contexts.",
+      "Using only coincident high activity in basic Hebbian learning and overlooking centered covariance and depression.",
+      "Treating an eigenvector as a particular neuron.",
+      "Claiming that covariance “must be positive” without writing a quadratic-form proof of PSD.",
+      "Confusing directional selection with stabilization of the norm.",
+      "Equating Hebbian learning with PCA without stating its assumptions.",
+      "Assuming dopamine is the third factor in every form of reward learning.",
+      "The Hebbian-learning/PCA relationship holds only under particular linear, statistical, and stabilizing assumptions; “Hebbian = PCA” is not a universal identity."
+    ],
+    "formulas": [
+      {
+        "id": "L10-F01",
+        "lecture": 10,
+        "name": "STDP timing rule",
+        "expression": "∆w = f (tpost − tpre )",
+        "latex": "\\Delta w=f(t_{\\mathrm{post}}-t_{\\mathrm{pre}})",
+        "conditions": "Pair-based approximation",
+        "sectionId": "lecture-10-source-1",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L10-F02",
+        "lecture": 10,
+        "name": "Basic rate Hebbian rule",
+        "expression": "τw ẇi = hxi",
+        "latex": "\\tau_w\\dot{w}_i=h x_i",
+        "conditions": "With nonnegative activity, it only potentiates",
+        "sectionId": "lecture-10-source-6",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L10-F03",
+        "lecture": 10,
+        "name": "Expected dynamics of centered Hebbian learning",
+        "expression": "τw E[ẇ] = Cw",
+        "latex": "\\tau_w\\mathbb{E}[\\dot{\\mathbf{w}}]=C\\mathbf{w}",
+        "conditions": "Linear neuron with stationary inputs",
+        "sectionId": "lecture-10-source-3",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L10-F04",
+        "lecture": 10,
+        "name": "Positive semidefiniteness of covariance",
+        "expression": "vT Cv ≥ 0",
+        "latex": "\\mathbf{v}^{\\mathsf{T}}C\\mathbf{v}\\ge 0",
+        "conditions": "Finite second moments",
+        "sectionId": "lecture-10-source-4",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L10-F05",
+        "lecture": 10,
+        "name": "Hebbian eigenmode growth",
+        "expression": "ȧk = (λk /τw )ak",
+        "latex": "\\dot{a}_k=\\frac{\\lambda_k}{\\tau_w}a_k",
+        "conditions": "Fixed C",
+        "sectionId": "lecture-10-source-4",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L10-F06",
+        "lecture": 10,
+        "name": "Oja's rule",
+        "expression": "ẇi ∝ hxi − h2 wi",
+        "latex": "\\dot{w}_i\\propto h x_i-h^2w_i",
+        "conditions": "Online approximation to PCA",
+        "sectionId": "lecture-10-source-3",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L10-F07",
+        "lecture": 10,
+        "name": "BCM sign switch",
+        "expression": "ẇi ∝ hxi (h − θ)",
+        "latex": "\\dot{w}_i\\propto h x_i(h-\\theta)",
+        "conditions": "Dynamic threshold",
+        "sectionId": "lecture-10-source-5",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L10-G01",
+        "lecture": 10,
+        "zh": "长时程增强",
+        "en": "long-term potentiation, LTP",
+        "definition": "A lasting increase in synaptic efficacy.",
+        "sectionId": "lecture-10-source-1",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L10-G02",
+        "lecture": 10,
+        "zh": "长时程抑制",
+        "en": "long-term depression, LTD",
+        "definition": "A lasting decrease in synaptic efficacy.",
+        "sectionId": "lecture-10-source-1",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L10-G03",
+        "lecture": 10,
+        "zh": "脉冲时序依赖可塑性",
+        "en": "spike-timing-dependent plasticity, STDP",
+        "definition": "An empirical rule in which weight change depends on relative pre/post spike timing.",
+        "sectionId": "lecture-10-source-1",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L10-G04",
+        "lecture": 10,
+        "zh": "Hebbian rule",
+        "en": "Hebbian learning",
+        "definition": "A class of rules in which coordinated activity drives changes in connectivity.",
+        "sectionId": "lecture-10-source-4",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L10-G05",
+        "lecture": 10,
+        "zh": "协方差规则",
+        "en": "covariance rule",
+        "definition": "A plasticity rule driven by centered pre- and postsynaptic fluctuations.",
+        "sectionId": "lecture-10-source-4",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L10-G06",
+        "lecture": 10,
+        "zh": "主特征向量",
+        "en": "principal eigenvector",
+        "definition": "The direction associated with the largest covariance eigenvalue.",
+        "sectionId": "lecture-10-source-3",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L10-G07",
+        "lecture": 10,
+        "zh": "突触缩放",
+        "en": "synaptic scaling",
+        "definition": "Global rescaling that maintains an overall activity or weight range.",
+        "sectionId": "lecture-10-source-5",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L10-G08",
+        "lecture": 10,
+        "zh": "Oja 规则",
+        "en": "Oja rule",
+        "definition": "A Hebbian PCA rule with a local normalization term.",
+        "sectionId": "lecture-10-source-3",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L10-G09",
+        "lecture": 10,
+        "zh": "BCM 规则",
+        "en": "BCM rule",
+        "definition": "A rule that uses a sliding postsynaptic threshold to control LTP and LTD.",
+        "sectionId": "lecture-10-source-1",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L10-G10",
+        "lecture": 10,
+        "zh": "三因子规则",
+        "en": "three-factor rule",
+        "definition": "An update determined jointly by presynaptic activity, postsynaptic activity, and a third modulatory or teaching signal.",
+        "sectionId": "lecture-10-source-4",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "errata": [
+      {
+        "id": "L10-E01",
+        "lecture": 10,
+        "lectureTitle": "Synaptic Plasticity",
+        "kind": "caution",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 1,
+        "sectionId": "L10-M1",
+        "originalIssue": "The AMPA/NMDA/Ca²+ sequence on page 1 is a course-level canonical mechanism, not the sole implementation at every synapse.",
+        "explanation": "A_± and τ_± depend on the protocol and are not shared constants across all brain regions.",
+        "correction": null
+      },
+      {
+        "id": "L10-E02",
+        "lecture": 10,
+        "lectureTitle": "Synaptic Plasticity",
+        "kind": "caution",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 5,
+        "sectionId": "L10-M3",
+        "originalIssue": "The Oja/BCM equations on page 5 are simplified firing-rate rules; normalization and threshold dynamics vary somewhat across sources.",
+        "explanation": "Unlike Oja's explicit weight decay, BCM produces competition and stabilization through an activity-dependent change of sign.",
+        "correction": null
+      },
+      {
+        "id": "L10-E03",
+        "lecture": 10,
+        "lectureTitle": "Synaptic Plasticity",
+        "kind": "caution",
+        "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+        "sourcePage": 6,
+        "sectionId": "L10-M3",
+        "originalIssue": "The relation on page 6 between backpropagated error and biological three-factor rules is formal only; their mechanisms cannot be identified directly.",
+        "explanation": "The third factor governs when or in which direction local eligibility is consolidated. It need not always be dopamine and is not a backpropagated gradient precisely assigned to every weight.",
+        "correction": "The relation on page 6 between backpropagated error and biological three-factor rules is formal only; their mechanisms cannot be identified directly"
+      }
+    ]
+  },
+  {
+    "lecture": 11,
+    "coreQuestion": "How do architecture, loss, and a gradient-based learning rule define supervised learning, and how does the chain rule train a multilayer network efficiently?",
+    "dependencyMap": "Dataset (x,y) → architecture → loss → gradient descent → linear regression → closed form",
+    "sourceUnits": [
+      {
+        "id": "lecture-11-source-1",
+        "order": 1,
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: supervised learning, classification and regression, architecture/loss/learning rule, and deep-network notation.",
+        "noteMeaning": "Dataset (x,y) and architecture: supervised learning, classification and regression, architecture/loss/learning rule, and deep-network notation.",
+        "reasoning": "Use digit classification and optic-flow regression to define a supervised dataset (x,y), separating architecture, loss, and optimization or learning rule. Then explain why a deep linear network has a linear overall mapping but nonlinear parameterization and learning dynamics.",
+        "figureReading": "Trace every arrow direction, excitatory or inhibitory sign, state variable, and external input. A structural diagram states permitted dependencies; it does not prove a biological implementation.",
+        "stopPredict": "What are the three design elements of a supervised algorithm?"
+      },
+      {
+        "id": "lecture-11-source-2",
+        "order": 2,
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: linear regression, squared loss, Taylor expansion, gradient descent, and the learning rule.",
+        "noteMeaning": "Loss and gradient descent: linear regression, squared loss, Taylor expansion, gradient descent, and the learning rule.",
+        "reasoning": "Derive gradient descent from squared-error loss and a first-order Taylor expansion, explaining the gradient, learning rate, and loss contours. Use digit classification and optic-flow regression to define supervised dataset (x,y) and distinguish architecture, loss, and optimization or learning rule.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Which direction does the gradient point?"
+      },
+      {
+        "id": "lecture-11-source-3",
+        "order": 3,
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: Hebbian/stabilizing decomposition and the closed-form regression solution.",
+        "noteMeaning": "Linear regression and its closed form: Hebbian/stabilizing decomposition and the closed-form regression solution.",
+        "reasoning": "Use digit classification and optic-flow regression to define supervised dataset (x,y) and distinguish architecture, loss, and optimization or learning rule. Then derive the normal-equation closed-form least-squares solution, explaining invertibility, the pseudoinverse, and regularization only as the background needed to interpret the notes.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why is the update -η∇L?"
+      },
+      {
+        "id": "lecture-11-source-4",
+        "order": 4,
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: deep linear regression and the backpropagation setup.",
+        "noteMeaning": "The backpropagation chain rule and dataset (x,y): deep linear regression and the backpropagation setup.",
+        "reasoning": "Explain why a deep linear network's total mapping remains linear although its parameterization and learning dynamics are nonlinear. Use digit classification and optic-flow regression to define supervised dataset (x,y) and distinguish architecture, loss, and optimization or learning rule.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What is the Hebbian-like term in the linear-regression gradient?"
+      },
+      {
+        "id": "lecture-11-source-5",
+        "order": 5,
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: repeated chain-rule derivation and backpropagated error.",
+        "noteMeaning": "Architecture and loss: repeated chain-rule derivation and backpropagated error.",
+        "reasoning": "Derive backpropagation by indices, stating the roles of the local derivative, transposed weight, error signal, and activation derivative. Then derive the normal-equation closed-form least-squares solution and give invertibility, pseudoinverse, and regularization as necessary context without leaving the source notes.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What should be done when XX^T is singular?"
+      },
+      {
+        "id": "lecture-11-source-6",
+        "order": 6,
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: nonlinear activation derivatives and the backpropagation summary.",
+        "noteMeaning": "Gradient descent and linear regression: nonlinear activation derivatives and the backpropagation summary.",
+        "reasoning": "Derive the backpropagation chain rule by indices, making explicit the local derivative, weight transpose, error signal, and activation derivative. Then explain why a deep linear network has a linear input-output mapping but nonlinear parameterization and learning dynamics.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why is a deep linear network's input-output map still linear?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "A machine-learning problem must specify its representation or architecture, objective or loss, and optimization or learning rule. Linear regression is the transparent example: the squared-error gradient decomposes into a data-dependent Hebbian-like term and a weight-dependent stabilizing term and admits a normal-equation closed form. In a deep network, backpropagation repeatedly applies the chain rule, carrying output error through transposed weights and local activation derivatives to each layer."
+    ],
+    "commonTraps": [
+      "Conflating architecture, loss, and optimizer.",
+      "Forgetting that the gradient points uphill and the update needs a negative sign.",
+      "Omitting matrix shapes and therefore misplacing transposes in matrix calculus.",
+      "Attempting a direct inverse for a singular design matrix.",
+      "Assuming optimization of a deep linear network is itself linear or convex.",
+      "Treating backpropagation as an established biological synaptic mechanism.",
+      "Reading an informal historical aside in a source page as a rigorous technical conclusion.",
+      "Do not describe backpropagation as a biological mechanism in which error is directly sent back to neurons. Label it as a training algorithm and distinguish its formal resemblance to three-factor plasticity from its mechanistic differences."
+    ],
+    "formulas": [
+      {
+        "id": "L11-F01",
+        "lecture": 11,
+        "name": "Gradient descent",
+        "expression": "∆w = −η∇w L",
+        "latex": "\\Delta\\mathbf{w}=-\\eta\\nabla_{\\mathbf{w}}L",
+        "conditions": "η>0 and a local step",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-F02",
+        "lecture": 11,
+        "name": "Linear-regression loss",
+        "expression": "1 L= ∥y − X T w∥2 2P",
+        "latex": "L=\\frac{1}{2P}\\lVert\\mathbf{y}-X^{\\mathsf{T}}\\mathbf{w}\\rVert_2^2",
+        "conditions": "Source orientation X:N×P",
+        "sectionId": "lecture-11-source-1",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L11-F03",
+        "lecture": 11,
+        "name": "Least-squares gradient",
+        "expression": "∇w L = −X(y − X T w)/P",
+        "latex": "\\nabla_{\\mathbf{w}}L=-\\frac{1}{P}X(\\mathbf{y}-X^{\\mathsf{T}}\\mathbf{w})",
+        "conditions": "Differentiable squared loss",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-F04",
+        "lecture": 11,
+        "name": "Closed-form solution",
+        "expression": "ŵ = (XX T )−1 Xy",
+        "latex": "\\hat{\\mathbf{w}}=(XX^{\\mathsf{T}})^{-1}X\\mathbf{y}",
+        "conditions": "Invertible XX^T",
+        "sectionId": "lecture-11-source-5",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L11-F05",
+        "lecture": 11,
+        "name": "Backpropagated-error recurrence",
+        "expression": "δ (ℓ) = (W (ℓ+1)T δ (ℓ+1) ) ⊙ ϕ′",
+        "latex": "\\delta^{(\\ell)}=\\left((W^{(\\ell+1)})^{\\mathsf{T}}\\delta^{(\\ell+1)}\\right)\\odot\\phi'",
+        "conditions": "Compatible shapes",
+        "sectionId": "lecture-11-source-5",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L11-F06",
+        "lecture": 11,
+        "name": "Layer weight gradient",
+        "expression": "∂L/∂W (ℓ) = δ (ℓ) z (ℓ−1)T",
+        "latex": "\\frac{\\partial L}{\\partial W^{(\\ell)}}=\\delta^{(\\ell)}(z^{(\\ell-1)})^{\\mathsf{T}}",
+        "conditions": "One example; average over the batch afterward",
+        "sectionId": "lecture-11-source-6",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 6
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L11-G01",
+        "lecture": 11,
+        "zh": "监督学习",
+        "en": "supervised learning",
+        "definition": "Learning a predictor from input-target pairs.",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-G02",
+        "lecture": 11,
+        "zh": "分类",
+        "en": "classification",
+        "definition": "Prediction of a discrete label.",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-G03",
+        "lecture": 11,
+        "zh": "回归",
+        "en": "regression",
+        "definition": "Prediction of a continuous target.",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-G04",
+        "lecture": 11,
+        "zh": "架构",
+        "en": "architecture",
+        "definition": "The connectivity and computations defining a model.",
+        "sectionId": "lecture-11-source-1",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L11-G05",
+        "lecture": 11,
+        "zh": "损失函数",
+        "en": "loss function",
+        "definition": "An objective quantifying disagreement between prediction and target.",
+        "sectionId": "lecture-11-source-1",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L11-G06",
+        "lecture": 11,
+        "zh": "梯度",
+        "en": "gradient",
+        "definition": "The vector of parameter derivatives pointing in the direction of fastest local increase.",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-G07",
+        "lecture": 11,
+        "zh": "学习率",
+        "en": "learning rate",
+        "definition": "The scale of each gradient step.",
+        "sectionId": "lecture-11-source-2",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L11-G08",
+        "lecture": 11,
+        "zh": "正规方程",
+        "en": "normal equation",
+        "definition": "The linear equation satisfied by a least-squares optimum.",
+        "sectionId": "lecture-11-source-3",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L11-G09",
+        "lecture": 11,
+        "zh": "反向传播",
+        "en": "backpropagation",
+        "definition": "An algorithm for efficiently computing multilayer chain-rule gradients.",
+        "sectionId": "lecture-11-source-5",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L11-G10",
+        "lecture": 11,
+        "zh": "局部导数",
+        "en": "local derivative",
+        "definition": "The derivative of one computational node's output with respect to its input.",
+        "sectionId": "lecture-11-source-5",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L11-E01",
+        "lecture": 11,
+        "lectureTitle": "Machine Learning: Regression, Gradient Descent, and Backpropagation",
+        "kind": "caution",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 3,
+        "sectionId": "L11-M2",
+        "originalIssue": "The closed form on page 3 depends on the orientation of X; here X∈R^{N×P} and y∈R^{P×1}.",
+        "explanation": "Following the source notes, each column of X∈R^{N×P} is a sample, w∈R^{N×1}, y∈R^{P×1}, and prediction=X^Tw.",
+        "correction": null
+      },
+      {
+        "id": "L11-E02",
+        "lecture": 11,
+        "lectureTitle": "Machine Learning: Regression, Gradient Descent, and Backpropagation",
+        "kind": "caution",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 6,
+        "sectionId": "lecture-11-source-6",
+        "originalIssue": "The page 6 aside connecting 2012 deep learning with the later ChatGPT is informal history and must not be read as saying that the AlexNet authors directly “invented ChatGPT.”",
+        "explanation": "This statement is valid only within the approximation, parameter, or version boundaries listed in the entry, not as an unconditional conclusion.",
+        "correction": "The page 6 aside connecting 2012 deep learning with the later ChatGPT is informal history and must not be read as saying that the AlexNet authors directly “invented ChatGPT”"
+      },
+      {
+        "id": "L11-E03",
+        "lecture": 11,
+        "lectureTitle": "Machine Learning: Regression, Gradient Descent, and Backpropagation",
+        "kind": "caution",
+        "sourceFile": "Lecture11-MachineLearning.pdf",
+        "sourcePage": 4,
+        "sectionId": "L11-M2",
+        "originalIssue": "Backpropagation and three-factor plasticity resemble each other only in outer-product or error-gating form; their biological transport and mechanisms differ.",
+        "explanation": "Its form resembles biological Hebbian learning, but target y, batch access, and signed error are not ordinary local coactivity.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 12,
+    "coreQuestion": "How does the visual system use linear filters, nonlinearities, and hierarchical feature maps to turn luminance patterns into selectivity for position, orientation, and motion?",
+    "dependencyMap": "Retina→V1→streams → contrast → LNP → DoG center-surround → rectified feature maps → Gabor orientation",
+    "sourceUnits": [
+      {
+        "id": "lecture-12-source-1",
+        "order": 1,
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: the visual hierarchy, retina→V1→dorsal/ventral streams, feature selectivity, and receptive-field size and complexity.",
+        "noteMeaning": "Retina→V1→streams and contrast: the visual hierarchy, retina→V1→dorsal/ventral streams, feature selectivity, and receptive-field size and complexity.",
+        "reasoning": "Define feature selectivity and receptive fields and explain how receptive-field size, feature complexity, history dependence, and invariance change along a hierarchy. Then build the photoreceptor/RGC/V1/MT/IT/LIP hierarchy and dorsal/ventral streams, distinguishing anatomical organization from computational abstraction.",
+        "figureReading": "Trace every arrow direction, excitatory or inhibitory sign, state variable, and external input. A structural diagram states permitted dependencies; it does not prove a biological implementation.",
+        "stopPredict": "Why is contrast divided by I0?"
+      },
+      {
+        "id": "lecture-12-source-2",
+        "order": 2,
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: the LNP model, contrast, ON/OFF RGCs, spatial convolution, and Difference of Gaussians.",
+        "noteMeaning": "LNP and DoG center-surround: the LNP model, contrast, ON/OFF RGCs, spatial convolution, and Difference of Gaussians.",
+        "reasoning": "Derive spatial-convolution notation, reconstruct an ON/OFF center-surround Difference of Gaussians, and interpret its parameters and signs. Then explain the LNP stages—linear filter, nonlinearity, and Poisson output—and define contrast rather than raw luminance.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "What are the center and surround signs of an ON-center DoG?"
+      },
+      {
+        "id": "lecture-12-source-3",
+        "order": 3,
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: threshold-linear rectification, ON/OFF feature maps, and the connection to CNNs.",
+        "noteMeaning": "Rectified feature maps and Gabor orientation: threshold-linear rectification, ON/OFF feature maps, and the connection to CNNs.",
+        "reasoning": "Explain how threshold-linear rectification produces feature maps and its formal connection to CNN convolution. Define feature selectivity and receptive fields, then describe changes in receptive-field size, feature complexity, history dependence, and invariance along the hierarchy.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What is the linear response of a zero-integral center-surround filter to a uniform field?"
+      },
+      {
+        "id": "lecture-12-source-4",
+        "order": 4,
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: the V1 simple cell, orientation tuning, the Gabor kernel, rotation, a saturating nonlinearity, and wavelets/JPEG.",
+        "noteMeaning": "Spatiotemporal motion and retina→V1→streams: the V1 simple cell, orientation tuning, the Gabor kernel, rotation, a saturating nonlinearity, and wavelets/JPEG.",
+        "reasoning": "Explain each component of the Gabor kernel, rotated coordinates, orientation and phase, rectification and saturation, and the wavelet representation. Then explain each LNP stage—linear filter, nonlinearity, and Poisson output—and distinguish contrast from raw luminance.",
+        "figureReading": "First establish the axes, units, normalization, and the single parameter changed by each curve. Separate schematic trends, model predictions, and measured observations.",
+        "stopPredict": "What does rectification do in an ON/OFF feature map?"
+      },
+      {
+        "id": "lecture-12-source-5",
+        "order": 5,
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: spatiotemporal receptive fields, separable and nonseparable temporal kernels, motion in space-time, and direction selectivity.",
+        "noteMeaning": "Contrast and LNP: spatiotemporal receptive fields, separable and nonseparable temporal kernels, motion in space-time, and direction selectivity.",
+        "reasoning": "Extend the model to spatiotemporal convolution, compare separable with nonseparable receptive fields, and interpret motion as space-time orientation. Define feature selectivity and receptive fields and explain hierarchical changes in size, complexity, history dependence, and invariance.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What does k control in a Gabor filter?"
+      },
+      {
+        "id": "lecture-12-source-6",
+        "order": 6,
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: an example of a receptive field for rightward motion.",
+        "noteMeaning": "DoG center-surround and rectified feature maps: an example of a receptive field for rightward motion.",
+        "reasoning": "Explain the Gabor kernel, rotated coordinates, orientation and phase, rectification and saturation, and wavelet representation. Then explain how threshold-linear rectification creates feature maps and how this is formally related to CNN convolution.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What does φ control in a Gabor filter?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "The visual hierarchy is not merely an anatomical list but a computational organization in which receptive-field size, feature complexity, history dependence, and invariance change by stage. LNP first projects a stimulus onto a linear receptive field, maps the drive through a nonlinearity to a rate, and uses a Poisson process to describe spikes. DoG, Gabor, and nonseparable spatiotemporal kernels summarize center-surround, orientation, and motion selectivity."
+    ],
+    "commonTraps": [
+      "Treating a receptive field only as a geometric region in visual space.",
+      "Using raw luminance and contrast interchangeably.",
+      "Leaving the sign or flip convention of a convolution kernel unstated.",
+      "Assuming a feature map is a copy of the original image rather than a map of filter responses.",
+      "Confusing Gabor orientation, phase, and spatial frequency.",
+      "Assuming a separable spatiotemporal receptive field is automatically direction-selective.",
+      "Equating an anatomical hierarchy with one purely feedforward computation.",
+      "Do not describe a receptive field only as a screen “location”; it is a stimulus-response relationship. Distinguish a linear receptive field, classical receptive field, and experimental definition. Sparse-noise receptive-field mapping provides a useful transfer example."
+    ],
+    "formulas": [
+      {
+        "id": "L12-F01",
+        "lecture": 12,
+        "name": "Visual contrast",
+        "expression": "s = (I − I0 )/I0",
+        "latex": "s=\\frac{I-I_0}{I_0}",
+        "conditions": "I0>0",
+        "sectionId": "lecture-12-source-1",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L12-F02",
+        "lecture": 12,
+        "name": "Linear receptive-field drive",
+        "expression": "L=K ∗s",
+        "latex": "L=K\\ast s",
+        "conditions": "Linear shift-invariant approximation",
+        "sectionId": "lecture-12-source-2",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L12-F03",
+        "lecture": 12,
+        "name": "Static nonlinearity",
+        "expression": "r = F(L)",
+        "latex": "r=F(L)",
+        "conditions": "A nonnegative or saturating rate, as specified",
+        "sectionId": "lecture-12-source-4",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L12-F04",
+        "lecture": 12,
+        "name": "LNP spike generation",
+        "expression": "n ∼ Poisson(rT )",
+        "latex": "n\\sim\\operatorname{Poisson}(rT)",
+        "conditions": "Conditional Poisson process",
+        "sectionId": "lecture-12-source-2",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L12-F05",
+        "lecture": 12,
+        "name": "Center-surround receptive field",
+        "expression": "KDoG = Gcenter − Gsurround",
+        "latex": "K_{\\mathrm{DoG}}=G_{\\mathrm{center}}-G_{\\mathrm{surround}}",
+        "conditions": "A wider surround",
+        "sectionId": "lecture-12-source-2",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L12-F06",
+        "lecture": 12,
+        "name": "Simple-cell orientation filter",
+        "expression": "KGabor = G(x′ , y ′ ) cos(kx′ + ϕ)",
+        "latex": "K_{\\mathrm{Gabor}}=G(x',y')\\cos(kx'+\\phi)",
+        "conditions": "Localized sinusoid",
+        "sectionId": "lecture-12-source-4",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L12-F07",
+        "lecture": 12,
+        "name": "Separable receptive field",
+        "expression": "K(x, y, t) = Ks Kt",
+        "latex": "K(x,y,t)=K_s(x,y)K_t(t)",
+        "conditions": "Rank-1 space-time structure",
+        "sectionId": "lecture-12-source-5",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L12-G01",
+        "lecture": 12,
+        "zh": "感受野",
+        "en": "receptive field",
+        "definition": "A local or functional relation between a stimulus pattern and a response, not merely a screen location.",
+        "sectionId": "lecture-12-source-3",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L12-G02",
+        "lecture": 12,
+        "zh": "特征选择性",
+        "en": "feature selectivity",
+        "definition": "A preferential response to a class of stimulus structures.",
+        "sectionId": "lecture-12-source-3",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L12-G03",
+        "lecture": 12,
+        "zh": "背侧通路",
+        "en": "dorsal stream",
+        "definition": "A broad visual pathway associated with motion- and action-related processing.",
+        "sectionId": "lecture-12-source-1",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L12-G04",
+        "lecture": 12,
+        "zh": "腹侧通路",
+        "en": "ventral stream",
+        "definition": "A broad visual pathway associated with processing related to object identity.",
+        "sectionId": "lecture-12-source-1",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L12-G05",
+        "lecture": 12,
+        "zh": "LNP 模型",
+        "en": "linear-nonlinear-Poisson model, LNP",
+        "definition": "A cascade of a linear filter, nonlinearity, and Poisson spike-count variability.",
+        "sectionId": "lecture-12-source-2",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L12-G06",
+        "lecture": 12,
+        "zh": "中心-周围",
+        "en": "center-surround",
+        "definition": "A receptive-field organization with opposite signs in the center and periphery.",
+        "sectionId": "lecture-12-source-1",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L12-G07",
+        "lecture": 12,
+        "zh": "特征图",
+        "en": "feature map",
+        "definition": "The rectified response of one filter at every location.",
+        "sectionId": "lecture-12-source-3",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L12-G08",
+        "lecture": 12,
+        "zh": "Gabor 核",
+        "en": "Gabor kernel",
+        "definition": "A Gaussian-windowed sinusoid.",
+        "sectionId": "lecture-12-source-4",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L12-G09",
+        "lecture": 12,
+        "zh": "可分离",
+        "en": "separable",
+        "definition": "Having space and time components that can be written as a product.",
+        "sectionId": "lecture-12-source-5",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L12-G10",
+        "lecture": 12,
+        "zh": "方向选择性",
+        "en": "direction selectivity",
+        "definition": "A preferential response to one direction of motion.",
+        "sectionId": "lecture-12-source-5",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L12-E01",
+        "lecture": 12,
+        "lectureTitle": "Introduction to Vision: Hierarchies, Receptive Fields, and the LNP Model",
+        "kind": "caution",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 1,
+        "sectionId": "L12-M1",
+        "originalIssue": "The region/function assignments on page 1 form a course-level hierarchy schematic, not a complete account of visual anatomy.",
+        "explanation": "The figure is a course-level computational map and does not imply that information travels only along a one-way feedforward path.",
+        "correction": null
+      },
+      {
+        "id": "L12-E02",
+        "lecture": 12,
+        "lectureTitle": "Introduction to Vision: Hierarchies, Receptive Fields, and the LNP Model",
+        "kind": "caution",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 4,
+        "sectionId": "L12-M2",
+        "originalIssue": "The wavelet/JPEG connection on page 4 is a formal analogy; biological representation is not the same as an engineering codec.",
+        "explanation": "Localized sinusoidal analysis is mathematically related to wavelets and JPEG because each represents an image with local scale-orientation components. This does not mean cortex implements the same codec.",
+        "correction": null
+      },
+      {
+        "id": "L12-E03",
+        "lecture": 12,
+        "lectureTitle": "Introduction to Vision: Hierarchies, Receptive Fields, and the LNP Model",
+        "kind": "caution",
+        "sourceFile": "Lecture12-IntroToVision.pdf",
+        "sourcePage": 5,
+        "sectionId": "L12-M3",
+        "originalIssue": "Using an ON RGC as the nonseparable example on page 5 is conceptual; actual temporal substructure depends on cell type.",
+        "explanation": "Temporal lobes of the kernel can be biphasic, canceling a sustained static-image component. If center and surround have different time courses, an RGC receptive field is generally nonseparable.",
+        "correction": "Actual temporal substructure depends on cell type"
+      }
+    ]
+  },
+  {
+    "lecture": 13,
+    "coreQuestion": "Under white-noise stimulation, why can the spike-triggered average estimate an LNP linear filter, and under which conditions can it fail fundamentally?",
+    "dependencyMap": "White-noise stimulus → spike-triggered ensemble → matrix notation → least squares/Hessian → white covariance → STA proportionality",
+    "sourceUnits": [
+      {
+        "id": "lecture-13-source-1",
+        "order": 1,
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: white-noise LNP system identification and the experimental STA procedure.",
+        "noteMeaning": "White-noise stimulus and the spike-triggered ensemble: white-noise LNP system identification and the experimental STA procedure.",
+        "reasoning": "Explain the experimental meanings of the white-noise stimulus, spike-triggered ensemble, pre-spike average, and STA step by step. Then give a complete LNP-fitting workflow and explain the conditions under which STA can fail fundamentally: multiple relevant dimensions, symmetric nonlinearities, correlated or non-Gaussian stimuli, and insufficient data.",
+        "figureReading": "Along the timeline, distinguish the stimulus or task, recording or manipulation, measured quantity, and inferred model variable. A correlation in the result does not replace a mechanistic test.",
+        "stopPredict": "What are the shapes of S, K, and L?"
+      },
+      {
+        "id": "lecture-13-source-2",
+        "order": 2,
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: continuous, pixelized, and matrix notation.",
+        "noteMeaning": "Matrix notation and least squares/Hessian: continuous, pixelized, and matrix notation.",
+        "reasoning": "Unify continuous convolution, pixel-index notation, and matrix form, stating the shapes of S, K, and h. Then explain the experimental roles of white-noise stimulation, the spike-triggered ensemble, the average preceding a spike, and the STA.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "What is the least-squares normal equation?"
+      },
+      {
+        "id": "lecture-13-source-3",
+        "order": 3,
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: a linear neuron, least-squares system identification, and loss contours/Hessian.",
+        "noteMeaning": "White covariance and STA proportionality: a linear neuron, least-squares system identification, and loss contours/Hessian.",
+        "reasoning": "Derive the normal equations and Hessian from the mean-squared loss of a linear neuron and interpret circular or elliptical loss geometry. Formulate system identification as recovering the linear filter and nonlinearity from known stimuli and spikes.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "What determines the Hessian?"
+      },
+      {
+        "id": "lecture-13-source-4",
+        "order": 4,
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: white-noise covariance and an isotropic Hessian.",
+        "noteMeaning": "Nonlinearity and failure modes with white-noise stimulation: white-noise covariance and an isotropic Hessian.",
+        "reasoning": "Derive normal equations and the Hessian from linear-neuron mean-squared loss and interpret circular or elliptical loss geometry. Then derive SS^T≈Tσ_s²I from white Gaussian stimulus covariance and obtain the proportionality between the kernel estimate and STA, retaining bin-width and spike-count scaling.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "Why does white noise make the loss contours nearly circular?"
+      },
+      {
+        "id": "lecture-13-source-5",
+        "order": 5,
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: deriving the spike-triggered average from a kernel estimator.",
+        "noteMeaning": "Spike-triggered ensemble and matrix notation: deriving the spike-triggered average from a kernel estimator.",
+        "reasoning": "Explain the experimental meanings of white-noise stimulation, the spike-triggered ensemble, the average preceding a spike, and STA. Then derive SS^T≈Tσ_s²I from white Gaussian covariance and obtain the kernel-estimate/STA proportionality with bin-width and spike-count scaling.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "In a small bin, how are h_t and k_t related?"
+      },
+      {
+        "id": "lecture-13-source-6",
+        "order": 6,
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: recovering the nonlinearity, the standard workflow, and heuristic success or failure.",
+        "noteMeaning": "Least squares/Hessian and white covariance: recovering the nonlinearity, the standard workflow, and heuristic success or failure.",
+        "reasoning": "Explain the small-Δt Poisson/Bernoulli approximation and how empirical spike probability recovers the nonlinearity. Then give the complete LNP-fitting workflow and analyze the conditions under which STA can fail fundamentally: multiple relevant dimensions, symmetric nonlinearities, correlated or non-Gaussian stimuli, and insufficient data.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why does K̂ point in the same direction as the STA?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "STA is both a descriptive average and, under a linear model, Gaussian white stimulation, and a suitable nonlinearity, a filter estimator. Matrix least squares reveals why: white stimulation makes the design covariance approximately a scalar identity, reducing the normal equation to a stimulus-response correlation. Recovering the nonlinearity yields an LNP model that can predict new stimuli, but multiple relevant dimensions, even-symmetric nonlinearities, or correlated stimulation can make the STA zero or biased."
+    ],
+    "commonTraps": [
+      "Treating the STA only as an image average without specifying time-lag alignment.",
+      "Leaving matrix orientation unstated and confusing S^TK with KS.",
+      "Omitting the large-sample and equal-variance assumptions behind white covariance.",
+      "Equating STA amplitude unconditionally with physical filter gain.",
+      "Concluding from STA=0 that a neuron has no receptive field.",
+      "Forgetting to divide by bin width when recovering F.",
+      "Evaluating a model on its training fit instead of held-out prediction.",
+      "Distinguish the STA as a descriptive average, linear-filter estimator, and LNP-model component. They are related under particular assumptions, not unconditionally equivalent."
+    ],
+    "formulas": [
+      {
+        "id": "L13-F01",
+        "lecture": 13,
+        "name": "Pixelized linear drive",
+        "expression": "L = ST K",
+        "latex": "L=S^{\\mathsf{T}}K",
+        "conditions": "S:P×T",
+        "sectionId": "lecture-13-source-2",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L13-F02",
+        "lecture": 13,
+        "name": "Least-squares filter",
+        "expression": "K̂ = (SS T )−1 Sh",
+        "latex": "\\hat{K}=(SS^{\\mathsf{T}})^{-1}Sh",
+        "conditions": "Invertible SS^T",
+        "sectionId": "lecture-13-source-3",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L13-F03",
+        "lecture": 13,
+        "name": "Loss Hessian",
+        "expression": "H = SS T /T",
+        "latex": "H=\\frac{SS^{\\mathsf{T}}}{T}",
+        "conditions": "Linear squared loss",
+        "sectionId": "lecture-13-source-4",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L13-F04",
+        "lecture": 13,
+        "name": "White-noise covariance",
+        "expression": "SS T ≈ T σs2 I",
+        "latex": "SS^{\\mathsf{T}}\\approx T\\sigma_s^2I",
+        "conditions": "Large T with independent equal-variance pixels",
+        "sectionId": "lecture-13-source-4",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L13-F05",
+        "lecture": 13,
+        "name": "Spike-triggered average",
+        "expression": "1 X ST A = st nsp t∈spikes",
+        "latex": "\\mathrm{STA}=\\frac{1}{n_{\\mathrm{sp}}}\\sum_{t\\in\\mathrm{spikes}}s_t",
+        "conditions": "Aligned stimulus histories",
+        "sectionId": "lecture-13-source-1",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L13-F06",
+        "lecture": 13,
+        "name": "STA/filter relation",
+        "expression": "K̂ ∝ ST A",
+        "latex": "\\hat{K}\\propto\\mathrm{STA}",
+        "conditions": "White Gaussian single-filter assumptions",
+        "sectionId": "lecture-13-source-3",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L13-F07",
+        "lecture": 13,
+        "name": "Small-bin nonlinearity estimate",
+        "expression": "P (spike|L) ≈ ∆tF (L)",
+        "latex": "P(\\mathrm{spike}\\mid L)\\approx\\Delta t\\,F(L)",
+        "conditions": "Δt rate≪1",
+        "sectionId": "lecture-13-source-4",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L13-G01",
+        "lecture": 13,
+        "zh": "系统辨识",
+        "en": "system identification",
+        "definition": "Inferring a system model from input-output data.",
+        "sectionId": "lecture-13-source-3",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L13-G02",
+        "lecture": 13,
+        "zh": "白噪声",
+        "en": "white noise",
+        "definition": "An ideal random stimulus with uncorrelated dimensions or time bins and uniform power.",
+        "sectionId": "lecture-13-source-4",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L13-G03",
+        "lecture": 13,
+        "zh": "脉冲触发集合",
+        "en": "spike-triggered ensemble",
+        "definition": "The collection of stimulus histories preceding all spikes.",
+        "sectionId": "lecture-13-source-1",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L13-G04",
+        "lecture": 13,
+        "zh": "脉冲触发平均",
+        "en": "spike-triggered average, STA",
+        "definition": "The mean of the spike-triggered ensemble.",
+        "sectionId": "lecture-13-source-1",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L13-G05",
+        "lecture": 13,
+        "zh": "设计矩阵",
+        "en": "design matrix",
+        "definition": "A matrix organizing stimulus vectors by examples or time bins.",
+        "sectionId": "lecture-13-source-2",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L13-G06",
+        "lecture": 13,
+        "zh": "Hessian",
+        "en": "Hessian",
+        "definition": "The matrix of second derivatives of loss with respect to parameters.",
+        "sectionId": "lecture-13-source-3",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L13-G07",
+        "lecture": 13,
+        "zh": "各向同性",
+        "en": "isotropic",
+        "definition": "Having equal curvature or variance in every direction.",
+        "sectionId": "lecture-13-source-4",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L13-G08",
+        "lecture": 13,
+        "zh": "白化",
+        "en": "whitening",
+        "definition": "Removing covariance correlations to obtain variables near unit covariance.",
+        "sectionId": "lecture-13-source-3",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L13-G09",
+        "lecture": 13,
+        "zh": "相关刺激",
+        "en": "correlated stimulus",
+        "definition": "A stimulus whose dimensions have nonzero covariance.",
+        "sectionId": "lecture-13-source-1",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L13-G10",
+        "lecture": 13,
+        "zh": "相关维度",
+        "en": "relevant dimension",
+        "definition": "A stimulus-projection direction on which the response depends.",
+        "sectionId": "lecture-13-source-1",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 1
+      }
+    ],
+    "errata": [
+      {
+        "id": "L13-E01",
+        "lecture": 13,
+        "lectureTitle": "Spike-Triggered Averaging and White-Noise System Identification",
+        "kind": "caution",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 4,
+        "sectionId": "L13-M2",
+        "originalIssue": "The isotropic Hessian on page 4 is a large-sample approximation, not an exact finite-data equality.",
+        "explanation": "If pixel variances differ, H may be diagonal without being isotropic. With colored stimulation, correlations appear in H and raw cross-correlation mixes the true filter with the stimulus spectrum.",
+        "correction": null
+      },
+      {
+        "id": "L13-E02",
+        "lecture": 13,
+        "lectureTitle": "Spike-Triggered Averaging and White-Noise System Identification",
+        "kind": "caution",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 5,
+        "sectionId": "L13-M3",
+        "originalIssue": "The proportionality constant on page 5 contains T, stimulus variance, Δt, and spike count; it cannot be omitted when comparing absolute gain.",
+        "explanation": "The STA points along K, but its absolute amplitude depends jointly on spike count, recording duration, stimulus variance, and bin width.",
+        "correction": "Do not omit these factors and then compare absolute gain"
+      },
+      {
+        "id": "L13-E03",
+        "lecture": 13,
+        "lectureTitle": "Spike-Triggered Averaging and White-Noise System Identification",
+        "kind": "caution",
+        "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "sourcePage": 6,
+        "sectionId": "L13-M3",
+        "originalIssue": "Page 6 explicitly calls the workflow heuristic; its fundamental failure conditions must also be listed.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 14,
+    "coreQuestion": "When one linear feature is insufficient, how does STC reveal a multidimensional stimulus subspace, and how do GLMs unify Gaussian, Poisson, and Bernoulli response models?",
+    "dependencyMap": "Multiple features → STC eigenspace → stimulus correction → GLM distribution → linear predictor → link",
+    "sourceUnits": [
+      {
+        "id": "lecture-14-source-1",
+        "order": 1,
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: the H1 blowfly motion example, multiple linear features, STC, and correction for stimulus correlations.",
+        "noteMeaning": "Multiple features and the STC eigenspace: the H1 blowfly motion example, multiple linear features, STC, and correction for stimulus correlations.",
+        "reasoning": "Show that a stimulus need not be a luminance image, using the H1 velocity model to introduce wide-field features and multiple relevant filters. Then present the GLM response distribution, linear predictor, and link function systematically, introducing the exponential family and canonical parameter without unnecessary burden.",
+        "figureReading": "Along the timeline, distinguish the stimulus or task, recording or manipulation, measured quantity, and inferred model variable. A correlation in the result does not replace a mechanistic test.",
+        "stopPredict": "What does STC examine beyond the STA?"
+      },
+      {
+        "id": "lecture-14-source-2",
+        "order": 2,
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: the three GLM components and the exponential-family canonical form.",
+        "noteMeaning": "Stimulus correction and the GLM distribution: the three GLM components and the exponential-family canonical form.",
+        "reasoning": "Present the GLM response distribution, linear predictor, and link function systematically and explain exponential families and canonical parameters at an accessible level. Then reconstruct each component of the Pillow retinal GLM: stimulus filters, self-history filters for refractoriness or bursting, cross-neuron coupling filters, and simultaneous fitting.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why can the STA be zero under an even energy nonlinearity?"
+      },
+      {
+        "id": "lecture-14-source-3",
+        "order": 3,
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: a unit-variance Gaussian GLM or ordinary linear regression, followed by the start of the Poisson GLM. The source mapping calls this case ‘unit-normal.’",
+        "noteMeaning": "Linear predictor and link: a unit-variance Gaussian GLM or ordinary linear regression, followed by the start of the Poisson GLM; the source mapping uses the label ‘unit-normal.’",
+        "reasoning": "Explain why maximizing Gaussian log likelihood equals minimizing MSE, how exponentiation in Poisson regression guarantees a nonnegative rate, and how the logistic sigmoid produces a probability. Then present response distributions, linear predictors, links, exponential families, and canonical parameters systematically.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "How should STC be corrected for a colored stimulus?"
+      },
+      {
+        "id": "lecture-14-source-4",
+        "order": 4,
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: the Poisson log link and log likelihood.",
+        "noteMeaning": "Population history/coupling and multiple features: the Poisson log link and log likelihood.",
+        "reasoning": "Explain the Gaussian log-likelihood/MSE equivalence, the positive rate supplied by exponentiation in Poisson regression, and the probability supplied by a logistic sigmoid. Then derive the likelihood and log likelihood for Gaussian identity-link, Poisson log-link, and Bernoulli logit-link models separately.",
+        "figureReading": "First establish the axes, units, normalization, and the single parameter changed by each curve. Separate schematic trends, model predictions, and measured observations.",
+        "stopPredict": "What are the three components of a GLM?"
+      },
+      {
+        "id": "lecture-14-source-5",
+        "order": 5,
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: the Pillow–Simoncelli retinal population GLM and its stimulus, history, and coupling filters.",
+        "noteMeaning": "STC eigenspace and stimulus correction: the Pillow–Simoncelli retinal population GLM and its stimulus, history, and coupling filters.",
+        "reasoning": "Reconstruct the Pillow retinal GLM component by component: stimulus filters, self-history filters for refractoriness or bursting, cross-neuron coupling filters, and simultaneous fitting. Then present the GLM response distribution, linear predictor, link function, exponential family, and canonical parameter systematically.",
+        "figureReading": "Along the timeline, distinguish the stimulus or task, recording or manipulation, measured quantity, and inferred model variable. A correlation in the result does not replace a mechanistic test.",
+        "stopPredict": "What does “linear” denote in a GLM?"
+      },
+      {
+        "id": "lecture-14-source-6",
+        "order": 6,
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: the Bernoulli GLM, logistic regression, log odds, and cross-entropy.",
+        "noteMeaning": "GLM distribution and linear predictor: the Bernoulli GLM, logistic regression, log odds, and cross-entropy.",
+        "reasoning": "Explain the equivalence between Gaussian likelihood and MSE, the positive rate generated by Poisson exponentiation, and the probability generated by the logistic sigmoid. Then strictly distinguish a Poisson count model, a Bernoulli small-bin model, and logistic classification.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What is maximum likelihood with a Gaussian identity link equivalent to?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "STC compares spike-triggered covariance with raw stimulus covariance to find directions in which pre-spike variance expands or contracts; colored stimulation requires whitening or correction. A GLM unifies several regressions through a response distribution, linear predictor, and link. A retinal population GLM can fit stimulus filters, self-history, and cross-neuron coupling together, but remains a statistical model: a coupling filter is not automatically a direct synapse."
+    ],
+    "commonTraps": [
+      "Concluding from STA=0 that there is no relevant feature.",
+      "Applying ordinary eigendecomposition directly to ΔC under colored stimulation.",
+      "Interpreting “linear” in GLM as requiring a linear response mean.",
+      "Using an identity link for Poisson data and thereby allowing a negative rate.",
+      "Conflating Bernoulli logistic classification with a Poisson small-count model.",
+      "Treating fitted coupling filters as direct anatomical synapses.",
+      "Ignoring history dependence and thereby biasing the apparent stimulus filter.",
+      "Do not read “linear” in GLM as a requirement that the response mean be linear. The predictor is linear; the link determines its relation to the mean."
+    ],
+    "formulas": [
+      {
+        "id": "L14-F01",
+        "lecture": 14,
+        "name": "STC covariance change",
+        "expression": "∆C = Cspike − Cstim",
+        "latex": "\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}",
+        "conditions": "Centered ensembles",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-F02",
+        "lecture": 14,
+        "name": "GLM linear predictor",
+        "expression": "η = Xβ",
+        "latex": "\\boldsymbol{\\eta}=X\\boldsymbol{\\beta}",
+        "conditions": "Shape-compatible design",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-F03",
+        "lecture": 14,
+        "name": "Link function",
+        "expression": "g(E[y|x]) = η",
+        "latex": "g(\\mathbb{E}[y\\mid x])=\\eta",
+        "conditions": "Chosen response family",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-F04",
+        "lecture": 14,
+        "name": "Inverse Poisson log link",
+        "expression": "λ = eη",
+        "latex": "\\lambda=e^{\\eta}",
+        "conditions": "Positive mean",
+        "sectionId": "lecture-14-source-4",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L14-F05",
+        "lecture": 14,
+        "name": "Inverse logistic link",
+        "expression": "q = (1 + e−η )−1",
+        "latex": "q=(1+e^{-\\eta})^{-1}",
+        "conditions": "0<q<1",
+        "sectionId": "lecture-14-source-3",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L14-F06",
+        "lecture": 14,
+        "name": "Poisson log likelihood",
+        "expression": "ℓP ois = (yη − eη − log y!)",
+        "latex": "\\ell_{\\mathrm{Pois}}=\\sum(y\\eta-e^{\\eta}-\\log(y!))",
+        "conditions": "Conditionally independent bins or counts",
+        "sectionId": "lecture-14-source-3",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L14-F07",
+        "lecture": 14,
+        "name": "Logistic loss",
+        "expression": "−ℓBern = cross-entropy",
+        "latex": "-\\ell_{\\mathrm{Bern}}=\\operatorname{cross\\text{-}entropy}",
+        "conditions": "Bernoulli outcomes",
+        "sectionId": "lecture-14-source-6",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 6
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L14-G01",
+        "lecture": 14,
+        "zh": "脉冲触发协方差",
+        "en": "spike-triggered covariance, STC",
+        "definition": "Analysis of covariance in the spike-triggered ensemble.",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-G02",
+        "lecture": 14,
+        "zh": "相关子空间",
+        "en": "relevant subspace",
+        "definition": "The response-sensitive subspace spanned by several stimulus filters.",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-G03",
+        "lecture": 14,
+        "zh": "指数族",
+        "en": "exponential family",
+        "definition": "A family of distributions expressible in a specified canonical statistic-parameter form.",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-G04",
+        "lecture": 14,
+        "zh": "线性预测子",
+        "en": "linear predictor",
+        "definition": "η=Xβ.",
+        "sectionId": "lecture-14-source-2",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L14-G05",
+        "lecture": 14,
+        "zh": "链接函数",
+        "en": "link function",
+        "definition": "The mapping between a conditional mean and η.",
+        "sectionId": "lecture-14-source-1",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L14-G06",
+        "lecture": 14,
+        "zh": "Poisson 回归",
+        "en": "Poisson regression",
+        "definition": "A log-link GLM for a count or rate.",
+        "sectionId": "lecture-14-source-4",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L14-G07",
+        "lecture": 14,
+        "zh": "逻辑回归",
+        "en": "logistic regression",
+        "definition": "A logit-link GLM for a Bernoulli outcome.",
+        "sectionId": "lecture-14-source-4",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L14-G08",
+        "lecture": 14,
+        "zh": "对数几率",
+        "en": "log odds",
+        "definition": "log[q/(1−q)].",
+        "sectionId": "lecture-14-source-6",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L14-G09",
+        "lecture": 14,
+        "zh": "历史滤波器",
+        "en": "history filter",
+        "definition": "The linear effect of past spikes on the current conditional response.",
+        "sectionId": "lecture-14-source-5",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L14-G10",
+        "lecture": 14,
+        "zh": "耦合滤波器",
+        "en": "coupling filter",
+        "definition": "A predictive filter applied to the histories of other units.",
+        "sectionId": "lecture-14-source-2",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 2
+      }
+    ],
+    "errata": [
+      {
+        "id": "L14-E01",
+        "lecture": 14,
+        "lectureTitle": "Spike-Triggered Covariance and Generalized Linear Models",
+        "kind": "caution",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 1,
+        "sectionId": "L14-M1",
+        "originalIssue": "The 4 significant temporal features of H1 on page 1 are a course example; the number of filters depends on the data and model selection.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L14-E02",
+        "lecture": 14,
+        "lectureTitle": "Spike-Triggered Covariance and Generalized Linear Models",
+        "kind": "caution",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 2,
+        "sectionId": "L14-M2",
+        "originalIssue": "The canonical exponential-family notation on page 2 is a conceptual framework; constant terms need not match every textbook convention word for word.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": "The canonical exponential-family notation on page 2 is a conceptual framework; constant terms need not match every textbook convention word for word"
+      },
+      {
+        "id": "L14-E03",
+        "lecture": 14,
+        "lectureTitle": "Spike-Triggered Covariance and Generalized Linear Models",
+        "kind": "caution",
+        "sourceFile": "Lecture14-STC-GLM.pdf",
+        "sourcePage": 5,
+        "sectionId": "L14-M3",
+        "originalIssue": "Retinal GLM coupling on page 5 denotes conditional statistical dependence and does not by itself prove a causal synaptic connection.",
+        "explanation": "Even after simultaneous fitting, unobserved neurons and global state can create residual coupling. The coefficient therefore measures predictive conditional dependence, not an anatomical-synapse label.",
+        "correction": "Retinal GLM coupling on page 5 denotes conditional statistical dependence and does not by itself prove a causal synaptic connection"
+      }
+    ]
+  },
+  {
+    "lecture": 15,
+    "coreQuestion": "How does the efficient-coding hypothesis formalize redundancy reduction with entropy, mutual information, and a noisy linear channel, and how can it predict retinal center-surround filters?",
+    "dependencyMap": "Barlow hypotheses → surprise −log p → entropy → mutual information → Gaussian channel → redundancy/capacity",
+    "sourceUnits": [
+      {
+        "id": "lecture-15-source-1",
+        "order": 1,
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: Barlow's efficient-coding hypothesis, the three hypotheses, and redundancy reduction.",
+        "noteMeaning": "Barlow's hypotheses and surprise −log p: Barlow's efficient-coding hypothesis, the three hypotheses, and redundancy reduction.",
+        "reasoning": "Present Barlow's three hypotheses accurately and identify efficient coding as a normative hypothesis rather than the unique explanation of every retinal feature. Then explain the Gaussian mutual-information determinant expression, fixed-information constraint, output-channel capacity, and redundancy objective step by step.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why do surprises from independent events add?"
+      },
+      {
+        "id": "lecture-15-source-2",
+        "order": 2,
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: surprise, logarithm properties, entropy, conditional entropy, and the motivation for mutual information.",
+        "noteMeaning": "Entropy and mutual information: surprise, logarithm properties, entropy, conditional entropy, and the motivation for mutual information.",
+        "reasoning": "Derive equivalent expressions for entropy, conditional entropy, and mutual information and prove MI=0 under independence, stating conditions for the converse. Then introduce densities and differential entropy for continuous variables, explaining why it can be negative and is not a direct copy of discrete surprise, while MI retains a stable interpretation.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What unit follows from logarithms base 2?"
+      },
+      {
+        "id": "lecture-15-source-3",
+        "order": 3,
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: mutual-information identities, independence, the continuous extension, and the differential-entropy caveat.",
+        "noteMeaning": "The Gaussian channel and redundancy/capacity: mutual-information identities, independence, the continuous extension, and the differential-entropy caveat.",
+        "reasoning": "Introduce density and differential entropy for continuous variables, making clear that it can be negative and is not simply discrete surprise. Then derive equivalent forms of entropy, conditional entropy, and mutual information, prove MI=0 under independence, and state the conditions for the converse.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What is the entropy of a fair Bernoulli variable?"
+      },
+      {
+        "id": "lecture-15-source-4",
+        "order": 4,
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: the Atick–Redlich retinal model, Gaussian signal and noise, and covariance propagation.",
+        "noteMeaning": "Decorrelation symmetry and Barlow's hypotheses: the Atick–Redlich retinal model, Gaussian signal and noise, and covariance propagation.",
+        "reasoning": "Reconstruct the noisy retina of Atick and Redlich, including signal and noise covariances, linear transform A, and output covariance. Then explain the Gaussian-MI determinant form, fixed-information constraint, output-channel capacity, and redundancy objective.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "What does I(X;Y)=0 mean?"
+      },
+      {
+        "id": "lecture-15-source-5",
+        "order": 5,
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: the Gaussian mutual-information determinant, information constraint, redundancy objective, and channel capacity.",
+        "noteMeaning": "Surprise −log p and entropy: the Gaussian mutual-information determinant, information constraint, redundancy objective, and channel capacity.",
+        "reasoning": "Explain the Gaussian-MI determinant expression, fixed-information constraint, output-channel capacity, and redundancy objective step by step. Then derive equivalent forms of entropy, conditional entropy, and mutual information, prove MI=0 under independence, and state the converse conditions.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "Why can continuous differential entropy be negative?"
+      },
+      {
+        "id": "lecture-15-source-6",
+        "order": 6,
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: decorrelation, orthogonal nonuniqueness, rotational symmetry, and a center-surround solution.",
+        "noteMeaning": "Mutual information and the Gaussian channel: decorrelation, orthogonal nonuniqueness, rotational symmetry, and a center-surround solution.",
+        "reasoning": "Explain decorrelated output, nonuniqueness under orthogonal rotation, and how rotational symmetry together with spatial constraints can select a center-surround receptive field. Then develop the Gaussian-MI determinant form, fixed-information constraint, output-channel capacity, and redundancy objective.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "How does covariance transform under a linear map?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "Barlow's efficient coding is a normative hypothesis: under resource and noise constraints, a sensory system should reduce predictable redundancy while retaining useful information. Information theory quantifies predictability and transmission through surprise, entropy, and mutual information. Atick and Redlich model the retina as a noisy linear encoder and decoder that lowers redundancy under fixed-information and output-capacity constraints. Decorrelation is nonunique; rotational symmetry together with locality and related constraints can select a center-surround form."
+    ],
+    "commonTraps": [
+      "Treating efficient coding as a uniquely established mechanism rather than a normative hypothesis.",
+      "Equating entropy unconditionally with useful information.",
+      "Calling a negative differential entropy an error.",
+      "Assuming MI=0 means only zero linear correlation; when well-defined, it means independence.",
+      "Optimizing only decorrelation while ignoring noise and output capacity.",
+      "Assuming that the whitening solution is unique.",
+      "Presenting the normative center-surround prediction as singular causal evidence.",
+      "Distinguish entropy, differential entropy, mutual information, redundancy, and channel capacity. Avoid unconditional claims such as “more entropy is better.”"
+    ],
+    "formulas": [
+      {
+        "id": "L15-F01",
+        "lecture": 15,
+        "name": "Surprise",
+        "expression": "S(x) = − log p(x)",
+        "latex": "S(x)=-\\log p(x)",
+        "conditions": "Chosen logarithm base",
+        "sectionId": "lecture-15-source-2",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L15-F02",
+        "lecture": 15,
+        "name": "Entropy",
+        "expression": "H(X) = E[− log p(X)]",
+        "latex": "H(X)=\\mathbb{E}[-\\log p(X)]",
+        "conditions": "Discrete distribution",
+        "sectionId": "lecture-15-source-2",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L15-F03",
+        "lecture": 15,
+        "name": "Mutual information",
+        "expression": "I(X; Y ) = H(X) − H(X|Y )",
+        "latex": "I(X;Y)=H(X)-H(X\\mid Y)",
+        "conditions": "Known joint distribution",
+        "sectionId": "lecture-15-source-2",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L15-F04",
+        "lecture": 15,
+        "name": "Dependence form of MI",
+        "expression": "∑ p(x, y) I= p(x, y) log p(x)p(y)",
+        "latex": "I(X;Y)=\\sum_{x,y}p(x,y)\\log\\frac{p(x,y)}{p(x)p(y)}",
+        "conditions": "Support handled correctly",
+        "sectionId": "lecture-15-source-2",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L15-F05",
+        "lecture": 15,
+        "name": "Linear Gaussian covariance propagation",
+        "expression": "Cy = ACx AT + σy2 I",
+        "latex": "C_y=AC_xA^{\\mathsf{T}}+\\sigma_y^2I",
+        "conditions": "Independent additive output noise",
+        "sectionId": "lecture-15-source-4",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L15-F06",
+        "lecture": 15,
+        "name": "Gaussian-MI determinant form",
+        "expression": "1 det Cy I(X; Y ) = log 2 det Cy|x",
+        "latex": "I(X;Y)=\\frac{1}{2}\\log\\frac{\\det C_y}{\\det C_{y\\mid x}}",
+        "conditions": "Jointly Gaussian variables",
+        "sectionId": "lecture-15-source-5",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L15-F07",
+        "lecture": 15,
+        "name": "Decorrelation objective",
+        "expression": "Cout ≈ diagonal",
+        "latex": "C_{\\mathrm{out}}\\approx\\operatorname{diag}(C_{\\mathrm{out}})",
+        "conditions": "Second-order redundancy",
+        "sectionId": "lecture-15-source-4",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L15-G01",
+        "lecture": 15,
+        "zh": "高效编码",
+        "en": "efficient coding",
+        "definition": "A normative principle for optimizing an information representation under resource and noise constraints.",
+        "sectionId": "lecture-15-source-1",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L15-G02",
+        "lecture": 15,
+        "zh": "冗余",
+        "en": "redundancy",
+        "definition": "Structure that is predictable from other components and transmitted repeatedly.",
+        "sectionId": "lecture-15-source-1",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L15-G03",
+        "lecture": 15,
+        "zh": "惊讶度",
+        "en": "surprise",
+        "definition": "The −log probability of an event.",
+        "sectionId": "lecture-15-source-1",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L15-G04",
+        "lecture": 15,
+        "zh": "熵",
+        "en": "entropy",
+        "definition": "Average surprise or uncertainty.",
+        "sectionId": "lecture-15-source-2",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L15-G05",
+        "lecture": 15,
+        "zh": "条件熵",
+        "en": "conditional entropy",
+        "definition": "Residual uncertainty after another variable is given.",
+        "sectionId": "lecture-15-source-5",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L15-G06",
+        "lecture": 15,
+        "zh": "互信息",
+        "en": "mutual information",
+        "definition": "The reduction in uncertainty about one variable supplied by another.",
+        "sectionId": "lecture-15-source-5",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L15-G07",
+        "lecture": 15,
+        "zh": "微分熵",
+        "en": "differential entropy",
+        "definition": "An entropy-like quantity for a continuous density that can be negative and depends on units.",
+        "sectionId": "lecture-15-source-2",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L15-G08",
+        "lecture": 15,
+        "zh": "信道容量",
+        "en": "channel capacity",
+        "definition": "The maximum mutual information attainable under input constraints.",
+        "sectionId": "lecture-15-source-3",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L15-G09",
+        "lecture": 15,
+        "zh": "去相关",
+        "en": "decorrelation",
+        "definition": "Making off-diagonal covariance entries approach zero.",
+        "sectionId": "lecture-15-source-4",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L15-G10",
+        "lecture": 15,
+        "zh": "规范模型",
+        "en": "normative model",
+        "definition": "A model of what a system should optimize rather than a direct specification of mechanism.",
+        "sectionId": "lecture-15-source-1",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 1
+      }
+    ],
+    "errata": [
+      {
+        "id": "L15-E01",
+        "lecture": 15,
+        "lectureTitle": "Efficient Coding and Information Theory",
+        "kind": "caution",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 1,
+        "sectionId": "L15-M1",
+        "originalIssue": "Barlow's three hypotheses on page 1 should remain distinct; only the third is the efficient-coding hypothesis emphasized here.",
+        "explanation": "The source notes preserve three Barlow ideas: detect critically meaningful “passwords,” filter signals for other nervous-system regions, and recode sensory messages to reduce redundancy.",
+        "correction": "Keep Barlow's three hypotheses on page 1 distinct"
+      },
+      {
+        "id": "L15-E02",
+        "lecture": 15,
+        "lectureTitle": "Efficient Coding and Information Theory",
+        "kind": "caution",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 3,
+        "sectionId": "L15-M1",
+        "originalIssue": "Page 3 notes the differential-entropy caveat; its dependence on coordinate units must also be retained.",
+        "explanation": "For a continuous variable, differential entropy h=-∫f logf is defined from density f(x). It can be negative and changes with measurement units.",
+        "correction": null
+      },
+      {
+        "id": "L15-E03",
+        "lecture": 15,
+        "lectureTitle": "Efficient Coding and Information Theory",
+        "kind": "caution",
+        "sourceFile": "Lecture15-EfficientCoding.pdf",
+        "sourcePage": 6,
+        "sectionId": "L15-M3",
+        "originalIssue": "Uniqueness of the center-surround solution on page 6 depends on additional constraints such as rotational symmetry, not decorrelation alone.",
+        "explanation": "Translation invariance, rotational symmetry, local wiring, or identical-channel constraints can select an isotropic center-surround filter from the equivalent family.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 16,
+    "coreQuestion": "How is the correlation structure of natural images represented in the Fourier domain, and how does SNR let an efficient retinal filter adapt between decorrelation and denoising?",
+    "dependencyMap": "SNR → center-surround adaptation → translation invariance → Fourier basis → convolution theorem → power spectrum",
+    "sourceUnits": [
+      {
+        "id": "lecture-16-source-1",
+        "order": 1,
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: SNR, center-surround filtering, and averaging at high, intermediate, and low SNR.",
+        "noteMeaning": "SNR and center-surround adaptation: SNR, center-surround filtering, and averaging at high, intermediate, and low SNR.",
+        "reasoning": "Extend the Atick–Redlich argument to show how SNR changes the optimal filter between redundancy reduction and denoising. Explain strong surrounds and decorrelation at high SNR, spatial averaging at low SNR, and continuous interpolation at intermediate SNR, with graphical predictions.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why is center-surround filtering stronger at high SNR?"
+      },
+      {
+        "id": "lecture-16-source-2",
+        "order": 2,
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: natural-scene structure, a translation-invariant correlation function, and the Fourier transform.",
+        "noteMeaning": "Translation invariance and the Fourier basis: natural-scene structure, a translation-invariant correlation function, and the Fourier transform.",
+        "reasoning": "Define translation invariance and correlation functions and explain why displacement statistics describe natural images. Then introduce complex exponentials from sine, cosine, and Euler's identity and interpret each component of the Fourier spatial-frequency vector.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Why does low SNR favor spatial averaging?"
+      },
+      {
+        "id": "lecture-16-source-3",
+        "order": 3,
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: complex exponentials, Euler's identity, the convolution theorem, and frequency-domain receptive fields.",
+        "noteMeaning": "The convolution theorem and power spectrum: complex exponentials, Euler's identity, the convolution theorem, and frequency-domain receptive fields.",
+        "reasoning": "Introduce complex exponentials from sine, cosine, and Euler's identity and interpret the Fourier spatial-frequency vector. Then derive the convolution theorem step by step and turn spatial receptive-field filtering into frequency-domain multiplication.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "How does translation invariance constrain the covariance expression?"
+      },
+      {
+        "id": "lecture-16-source-4",
+        "order": 4,
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: the power spectrum, natural-image 1/|ξ|², a perfect decorrelation filter, photoreceptor low-pass filtering, and SNR adaptation.",
+        "noteMeaning": "Whitening versus low-pass filtering and SNR: the power spectrum, natural-image 1/|ξ|², a perfect decorrelation filter, photoreceptor low-pass filtering, and SNR adaptation.",
+        "reasoning": "Explain power spectra and the approximate natural-image scaling 1/|ξ|² and derive the frequency trend of a perfect-whitening filter. Then show how photoreceptor or optical low-pass filtering and output noise change the efficient filter and connect it to light-level adaptation.",
+        "figureReading": "First establish the axes, units, normalization, and the single parameter changed by each curve. Separate schematic trends, model predictions, and measured observations.",
+        "stopPredict": "What does |ξ| represent?"
+      },
+      {
+        "id": "lecture-16-source-5",
+        "order": 5,
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: measuring adaptation in an LNP model.",
+        "noteMeaning": "Center-surround adaptation and translation invariance: measuring adaptation in an LNP model.",
+        "reasoning": "Show how photoreceptor or optical low-pass filtering and output noise alter the efficient filter and connect this with light-level adaptation. Then explain how white-noise fitting can compare LNP parameters across light levels or stimulus statistics.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "How is the direction of vector ξ related to grating orientation?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "The central prediction of Atick–Redlich theory is not one fixed filter but a filter that changes with SNR: high SNR permits strong decorrelation, while low SNR favors spatial averaging and denoising. Approximate translation invariance of natural scenes makes covariance depend only on displacement, allowing Fourier modes to diagonalize convolution and covariance. Natural-image power falls approximately with inverse squared spatial frequency. Perfect whitening would boost high frequencies, but optics, photoreceptors, and noise suppress excessive high-frequency gain."
+    ],
+    "commonTraps": [
+      "Treating the Fourier transform as a table of physically meaningless formulas.",
+      "Confusing spatial-frequency magnitude, orientation, and phase.",
+      "Assuming complex numbers introduce an additional biological variable; they are a representational tool.",
+      "Using the convolution theorem without a normalization or sign convention.",
+      "Treating 1/|ξ|² as an exact law for every image.",
+      "Letting perfect whitening amplify high frequencies without bound while ignoring optics and noise.",
+      "Comparing only firing rates in an adaptation experiment and not the filter or nonlinearity.",
+      "Do not teach the Fourier transform as a formula table. Always explain the physical meaning of spatial frequency for an image and receptive field, and state what amplitude and phase each represent."
+    ],
+    "formulas": [
+      {
+        "id": "L16-F01",
+        "lecture": 16,
+        "name": "Signal-to-noise ratio",
+        "expression": "SN R = S/N",
+        "latex": "\\mathrm{SNR}=\\frac{S}{N}",
+        "conditions": "One frequency and measurement convention",
+        "sectionId": "lecture-16-source-5",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L16-F02",
+        "lecture": 16,
+        "name": "Translation-invariant covariance",
+        "expression": "C(ρ1 , ρ2 ) = C(ρ1 − ρ2 )",
+        "latex": "C(\\boldsymbol{\\rho}_1,\\boldsymbol{\\rho}_2)=C(\\boldsymbol{\\rho}_1-\\boldsymbol{\\rho}_2)",
+        "conditions": "Stationary field",
+        "sectionId": "lecture-16-source-2",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L16-F03",
+        "lecture": 16,
+        "name": "Fourier transform",
+        "expression": "ŝ(ξ) = e−i2πξ·x s(x)dx",
+        "latex": "\\hat{s}(\\boldsymbol{\\xi})=\\int e^{-i2\\pi\\boldsymbol{\\xi}\\cdot\\mathbf{x}}s(\\mathbf{x})\\,d\\mathbf{x}",
+        "conditions": "Chosen normalization",
+        "sectionId": "lecture-16-source-2",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L16-F04",
+        "lecture": 16,
+        "name": "Euler's identity",
+        "expression": "eiθ = cos θ + i sin θ",
+        "latex": "e^{i\\theta}=\\cos\\theta+i\\sin\\theta",
+        "conditions": "Complex representation",
+        "sectionId": "lecture-16-source-2",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L16-F05",
+        "lecture": 16,
+        "name": "Convolution theorem",
+        "expression": "\\ K ∗ s = K̂ ŝ",
+        "latex": "\\widehat{K\\ast s}=\\hat{K}\\,\\hat{s}",
+        "conditions": "Linear shift-invariant filtering",
+        "sectionId": "lecture-16-source-3",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L16-F06",
+        "lecture": 16,
+        "name": "Power spectrum",
+        "expression": "P (ξ) = E[|ŝ(ξ)|2 ]",
+        "latex": "P(\\boldsymbol{\\xi})=\\mathbb{E}[|\\hat{s}(\\boldsymbol{\\xi})|^2]",
+        "conditions": "Ensemble or time average",
+        "sectionId": "lecture-16-source-3",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L16-F07",
+        "lecture": 16,
+        "name": "Perfect-whitening magnitude",
+        "expression": "−1/2 |K̂| ∝ Pin",
+        "latex": "|\\hat{K}(\\boldsymbol{\\xi})|\\propto P_{\\mathrm{in}}(\\boldsymbol{\\xi})^{-1/2}",
+        "conditions": "No additional noise or cost",
+        "sectionId": "lecture-16-source-4",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L16-G01",
+        "lecture": 16,
+        "zh": "适应",
+        "en": "adaptation",
+        "definition": "A change in response or model parameters with stimulus statistics or state.",
+        "sectionId": "lecture-16-source-5",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L16-G02",
+        "lecture": 16,
+        "zh": "信噪比",
+        "en": "signal-to-noise ratio, SNR",
+        "definition": "Signal magnitude or power relative to noise.",
+        "sectionId": "lecture-16-source-4",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L16-G03",
+        "lecture": 16,
+        "zh": "平移不变性",
+        "en": "translation invariance",
+        "definition": "Statistics or an operator that do not depend on absolute position.",
+        "sectionId": "lecture-16-source-2",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L16-G04",
+        "lecture": 16,
+        "zh": "空间频率",
+        "en": "spatial frequency",
+        "definition": "Sinusoidal cycles per unit distance; the vector also encodes direction.",
+        "sectionId": "lecture-16-source-1",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L16-G05",
+        "lecture": 16,
+        "zh": "Fourier 变换",
+        "en": "Fourier transform",
+        "definition": "A conversion between position and frequency representations.",
+        "sectionId": "lecture-16-source-2",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L16-G06",
+        "lecture": 16,
+        "zh": "复指数",
+        "en": "complex exponential",
+        "definition": "A unified representation of sine/cosine amplitude and phase.",
+        "sectionId": "lecture-16-source-2",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L16-G07",
+        "lecture": 16,
+        "zh": "功率谱",
+        "en": "power spectrum",
+        "definition": "Mean squared amplitude of each frequency component.",
+        "sectionId": "lecture-16-source-3",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L16-G08",
+        "lecture": 16,
+        "zh": "白化",
+        "en": "whitening",
+        "definition": "Making an output spectrum or covariance approximately flat or identity.",
+        "sectionId": "lecture-16-source-3",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L16-G09",
+        "lecture": 16,
+        "zh": "低通",
+        "en": "low-pass",
+        "definition": "Preserving low frequencies while suppressing high frequencies.",
+        "sectionId": "lecture-16-source-4",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L16-G10",
+        "lecture": 16,
+        "zh": "混叠",
+        "en": "aliasing",
+        "definition": "Undersampling that makes a high frequency appear as a lower one.",
+        "sectionId": "lecture-16-source-5",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L16-E01",
+        "lecture": 16,
+        "lectureTitle": "Adaptation, Natural-Scene Statistics, and Fourier Analysis",
+        "kind": "uncertainty",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 2,
+        "sectionId": "l16-m2",
+        "originalIssue": "The Fourier convention on pages 2-3 uses 2π. Other sources may place 2π in the inverse transform, so the convention must remain consistent.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": "The Fourier convention on pages 2-3 uses 2π"
+      },
+      {
+        "id": "L16-E02",
+        "lecture": 16,
+        "lectureTitle": "Adaptation, Natural-Scene Statistics, and Fourier Analysis",
+        "kind": "caution",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 4,
+        "sectionId": "lecture-16-source-4",
+        "originalIssue": "The natural-image 1/|ξ|² relation on page 4 is an approximate empirical scaling.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L16-E03",
+        "lecture": 16,
+        "lectureTitle": "Adaptation, Natural-Scene Statistics, and Fourier Analysis",
+        "kind": "caution",
+        "sourceFile": "Lecture16-Adaptation.pdf",
+        "sourcePage": 5,
+        "sectionId": "l16-m3",
+        "originalIssue": "Page 5 only sketches LNP adaptation measurement; a complete experiment requires held-out model comparison.",
+        "explanation": "Page 5 turns the prediction into an LNP measurement.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 17,
+    "coreQuestion": "How do multilayer LNP cascades and a quadratic energy model produce selectivity and invariance, and how can recurrent E/I dynamics explain surround suppression?",
+    "dependencyMap": "LNP cascade → simple-cell pooling → complex-cell STA=0 → quadrature energy → task-optimized models → E/I recurrence",
+    "sourceUnits": [
+      {
+        "id": "lecture-17-source-1",
+        "order": 1,
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: LNP cascades, the Hubel–Wiesel simple-cell construction, and a zero complex-cell STA.",
+        "noteMeaning": "LNP cascade and simple-cell pooling: LNP cascades, the Hubel–Wiesel simple-cell construction, and a zero complex-cell STA.",
+        "reasoning": "Reconstruct Hubel–Wiesel simple-cell pooling and complex-cell phase invariance and explain why a complex cell can have a zero linear STA. Then show how LNP cascades create hierarchy, selectivity, and invariance while distinguishing a descriptive cascade from a biological mechanism.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What is the central idea of the Hubel–Wiesel simple-cell construction?"
+      },
+      {
+        "id": "lecture-17-source-2",
+        "order": 2,
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: STC features, the energy model, a quadrature pair, and phase invariance.",
+        "noteMeaning": "Complex-cell STA=0 and quadrature energy: STC features, the energy model, a quadrature pair, and phase invariance.",
+        "reasoning": "Explain the energy model, quadrature filters, square-and-sum operation, and phase invariance step by step, connecting them to multiple features in STC. Then reconstruct Hubel–Wiesel simple-cell pooling and complex-cell phase invariance and explain why a complex cell can have a zero linear STA.",
+        "figureReading": "When reading the figure, first label both nullclines and axes, then determine vector-field direction, intersection stability, and the order in which trajectories cross regions. A trajectory is not itself a causal mechanism.",
+        "stopPredict": "Why can a complex cell have a zero STA?"
+      },
+      {
+        "id": "lecture-17-source-3",
+        "order": 3,
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: performance-optimized object-classification models and neural predictivity.",
+        "noteMeaning": "Task-optimized models and E/I recurrence: performance-optimized object-classification models and neural predictivity.",
+        "reasoning": "Separate the two stages of a performance-optimized deep network: optimize the task first, then fit and compare biological responses. Distinguish task accuracy from neural predictivity. Then explain the energy model, quadrature filters, square-and-sum, phase invariance, and their connection to multiple STC features.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "Which two kinds of filters does the energy model require?"
+      },
+      {
+        "id": "lecture-17-source-4",
+        "order": 4,
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: recurrence, surround suppression, and an E/I rate-network model.",
+        "noteMeaning": "Nullclines/ISN and the LNP cascade: recurrence, surround suppression, and an E/I rate-network model.",
+        "reasoning": "Analyze why surround suppression need not mean more inhibition: excitation can decrease more than inhibition. Then write the E/I rate equations, fixed-point conditions, and nullclines and explain how surround input shifts a nullcline and lowers E/I rates.",
+        "figureReading": "Trace every arrow direction, excitatory or inhibitory sign, state variable, and external input. A structural diagram states permitted dependencies; it does not prove a biological implementation.",
+        "stopPredict": "Which identity proves phase invariance?"
+      },
+      {
+        "id": "lecture-17-source-5",
+        "order": 5,
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: steady-state nullclines, surround-induced shifts, and the inhibition-stabilized network.",
+        "noteMeaning": "Simple-cell pooling and complex-cell STA=0: steady-state nullclines, surround-induced shifts, and the inhibition-stabilized network.",
+        "reasoning": "Define an inhibition-stabilized network, build the intuition, and explain why its name is easily misunderstood. Then separate the two stages of a performance-optimized deep network—task optimization followed by fitting and comparison to biological responses—and distinguish task accuracy from neural predictivity.",
+        "figureReading": "When reading the figure, first label both nullclines and axes, then determine vector-field direction, intersection stability, and the order in which trajectories cross regions. A trajectory is not itself a causal mechanism.",
+        "stopPredict": "Does high task accuracy guarantee high neural predictivity?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "Feedforward cascades can construct selectivity and invariance stage by stage, but descriptive blocks do not automatically identify biological mechanisms. Complex cells are approximately invariant to grating phase, so a single linear STA can be zero; a quadrature-pair square-and-sum energy model is a minimal explanation. Surround suppression likewise is not simply “more inhibition”: recurrent E/I dynamics can make excitation and inhibition fall together, with excitation falling more. Nullclines show the fixed-point shift, while Jacobian stability and an unstable E-only subsystem establish an inhibition-stabilized regime."
+    ],
+    "commonTraps": [
+      "Treating a descriptive LNP cascade automatically as anatomy or mechanism.",
+      "Concluding from complex-cell STA=0 that there is no stimulus selectivity.",
+      "Forgetting that squaring changes sign and phase information.",
+      "Treating task accuracy and neural predictivity as the same metric.",
+      "Equating surround suppression with a necessary increase in inhibitory firing or conductance.",
+      "Reading ISN as meaning that inhibitory rate is always higher.",
+      "Locating a fixed point without checking its stability.",
+      "State explicitly that “complex-cell STA=0” does not mean “no stimulus selectivity”; it is a central counterexample in nonlinear system identification."
+    ],
+    "formulas": [
+      {
+        "id": "L17-F01",
+        "lecture": 17,
+        "name": "Motion or orientation energy model",
+        "expression": "E = (K1 ∗ s)2 + (K2 ∗ s)2",
+        "latex": "E=(K_1\\ast s)^2+(K_2\\ast s)^2",
+        "conditions": "Quadrature filters",
+        "sectionId": "lecture-17-source-2",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L17-F02",
+        "lecture": 17,
+        "name": "Phase-invariance identity",
+        "expression": "cos2 ϕ + sin2 ϕ = 1",
+        "latex": "\\cos^2\\phi+\\sin^2\\phi=1",
+        "conditions": "Ideal pair",
+        "sectionId": "lecture-17-source-2",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L17-F03",
+        "lecture": 17,
+        "name": "Linear model-to-neuron mapping",
+        "expression": "r̂ = Bz",
+        "latex": "\\hat{\\mathbf{r}}=B\\mathbf{z}",
+        "conditions": "Fixed features z",
+        "sectionId": "lecture-17-source-2",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L17-F04",
+        "lecture": 17,
+        "name": "E/I nullclines",
+        "expression": "ṙE = 0, ṙI = 0",
+        "latex": "\\dot{r}_E=0,\\qquad\\dot{r}_I=0",
+        "conditions": "Steady state",
+        "sectionId": "lecture-17-source-4",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L17-F05",
+        "lecture": 17,
+        "name": "Rate-network fixed point",
+        "expression": "r = F (W r + I)",
+        "latex": "\\mathbf{r}=F(W\\mathbf{r}+\\mathbf{I})",
+        "conditions": "Chosen nonlinearities",
+        "sectionId": "lecture-17-source-4",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L17-F06",
+        "lecture": 17,
+        "name": "Intuitive ISN criterion",
+        "expression": "E-only unstable + feedback I stable",
+        "latex": "\\text{E-only unstable}+\\text{feedback I}\\Longrightarrow\\text{stable}",
+        "conditions": "Local effective gain matters",
+        "sectionId": "lecture-17-source-4",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L17-G01",
+        "lecture": 17,
+        "zh": "级联",
+        "en": "cascade",
+        "definition": "Several processing stages composed in sequence.",
+        "sectionId": "lecture-17-source-1",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L17-G02",
+        "lecture": 17,
+        "zh": "简单细胞",
+        "en": "simple cell",
+        "definition": "A classical V1 cell type selective for orientation and sensitive to spatial phase.",
+        "sectionId": "lecture-17-source-1",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L17-G03",
+        "lecture": 17,
+        "zh": "复杂细胞",
+        "en": "complex cell",
+        "definition": "A classical V1 cell type selective for orientation but more invariant to phase.",
+        "sectionId": "lecture-17-source-1",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L17-G04",
+        "lecture": 17,
+        "zh": "正交相位对",
+        "en": "quadrature pair",
+        "definition": "Matched filters separated by 90° of phase.",
+        "sectionId": "lecture-17-source-2",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L17-G05",
+        "lecture": 17,
+        "zh": "能量模型",
+        "en": "energy model",
+        "definition": "A nonlinear model that squares and sums quadrature-filter outputs.",
+        "sectionId": "lecture-17-source-3",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L17-G06",
+        "lecture": 17,
+        "zh": "神经预测性",
+        "en": "neural predictivity",
+        "definition": "How well model features predict neural responses.",
+        "sectionId": "lecture-17-source-3",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L17-G07",
+        "lecture": 17,
+        "zh": "周围抑制",
+        "en": "surround suppression",
+        "definition": "A reduction in center response when the receptive-field surround is stimulated.",
+        "sectionId": "lecture-17-source-4",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L17-G08",
+        "lecture": 17,
+        "zh": "零流线",
+        "en": "nullcline",
+        "definition": "A phase-plane curve on which one state derivative equals zero.",
+        "sectionId": "lecture-17-source-2",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L17-G09",
+        "lecture": 17,
+        "zh": "抑制稳定网络",
+        "en": "inhibition-stabilized network, ISN",
+        "definition": "A network whose E subnetwork is unstable alone but stabilized by feedback inhibition.",
+        "sectionId": "lecture-17-source-4",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "errata": [
+      {
+        "id": "L17-E01",
+        "lecture": 17,
+        "lectureTitle": "Visual Networks: Cascades, Complex Cells, and Recurrent Dynamics",
+        "kind": "caution",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 1,
+        "sectionId": "l17-m1",
+        "originalIssue": "The null complex-cell STA on page 1 is an important counterexample in nonlinear system identification.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L17-E02",
+        "lecture": 17,
+        "lectureTitle": "Visual Networks: Cascades, Complex Cells, and Recurrent Dynamics",
+        "kind": "caution",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 3,
+        "sectionId": "lecture-17-source-3",
+        "originalIssue": "Performance-optimized models on page 3 provide a correspondence but do not establish a biological training mechanism.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L17-E03",
+        "lecture": 17,
+        "lectureTitle": "Visual Networks: Cascades, Complex Cells, and Recurrent Dynamics",
+        "kind": "caution",
+        "sourceFile": "Lecture17-VisualNetworks.pdf",
+        "sourcePage": 5,
+        "sectionId": "l17-m3",
+        "originalIssue": "Page 5 explicitly warns that the name ISN must be interpreted carefully; retain that boundary.",
+        "explanation": "For nonlinear F, several intersections may exist, and surround can change gain rather than merely translate input. The linear example exposes causal structure, but realistic fitting must retain nonlinearities and temporal dynamics.",
+        "correction": "Retain this boundary"
+      }
+    ]
+  },
+  {
+    "lecture": 18,
+    "coreQuestion": "How can a distributed motor population be written as a linear recurrent dynamical system, and how do eigenmodes distinguish decay, long memory, perfect integration, and instability?",
+    "dependencyMap": "Brain-body-environment → feedback control → recurrent rate network → eigendecomposition → mode dynamics → effective time constant",
+    "sourceUnits": [
+      {
+        "id": "lecture-18-source-1",
+        "order": 1,
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: brain-body-environment coupling, feedforward and feedback control, motor rhythms, motor regions, and distributed activity.",
+        "noteMeaning": "Brain-body-environment and feedback control: brain-body-environment coupling, feedforward and feedback control, motor rhythms, motor regions, and distributed activity.",
+        "reasoning": "Explain the brain, body, and environment as a coupled dynamical system and compare feedforward with feedback or proprioceptive control. Then organize the course-level roles of spinal cord, brainstem, cerebellum, basal ganglia, and motor cortex without expanding them into an anatomy encyclopedia.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What direction does W_ij represent?"
+      },
+      {
+        "id": "lecture-18-source-2",
+        "order": 2,
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: linear recurrent-network equations.",
+        "noteMeaning": "The recurrent rate network and eigendecomposition: linear recurrent-network equations.",
+        "reasoning": "Generalize a familiar one-neuron linear ODE to recurrent population equation tau dh/dt=-h+Wh+I. Then derive the eigenbasis transformation, diagonalization, and decoupled mode equations from matrix form, labeling every shape.",
+        "figureReading": "Trace every arrow direction, excitatory or inhibitory sign, state variable, and external input. A structural diagram states permitted dependencies; it does not prove a biological implementation.",
+        "stopPredict": "In which spaces do h and α live?"
+      },
+      {
+        "id": "lecture-18-source-3",
+        "order": 3,
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: eigenvectors and eigenvalues, matrix diagonalization, a change of basis, and decoupled modes.",
+        "noteMeaning": "Mode dynamics and the effective time constant: eigenvectors and eigenvalues, matrix diagonalization, a change of basis, and decoupled modes.",
+        "reasoning": "Derive the eigenbasis transformation, diagonalization, and decoupled mode equations from matrix form, labeling every shape. Then generalize a familiar one-neuron linear ODE to recurrent population equation tau dh/dt=-h+Wh+I.",
+        "figureReading": "Align the drawing with matrix shapes: axes denote variables or modes, ellipse directions denote eigenvectors, and axis lengths or curvatures denote eigenvalues. Do not interpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "What assumption is required for diagonalization?"
+      },
+      {
+        "id": "lecture-18-source-4",
+        "order": 4,
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: mode solutions, effective time constants, and stable or unstable feedback.",
+        "noteMeaning": "Fixed-point stability and the brain-body-environment system: mode solutions, effective time constants, and stable or unstable feedback.",
+        "reasoning": "Derive mode-specific effective time constant tau/(1-lambda_i) and explain stability, decay, or growth for lambda<1, =1, and >1. Then derive the eigenbasis transformation, diagonalization, and decoupled mode equations from matrix form, labeling every shape.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure gives a definition, derivation, model prediction, or empirical observation; a schematic provides no unmarked quantitative precision.",
+        "stopPredict": "What is the mode equation?"
+      },
+      {
+        "id": "lecture-18-source-5",
+        "order": 5,
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: fixed points, the perfect integrator, leaky integration, and memory timescale.",
+        "noteMeaning": "Feedback control and the recurrent rate network: fixed points, the perfect integrator, leaky integration, and memory timescale.",
+        "reasoning": "Explain how lambda near 1 generates long memory and how finite error produces a leaky integrator. Then use derivative-field or fixed-point diagrams to distinguish stability from instability and separate positive feedback, perfect integration, and runaway instability.",
+        "figureReading": "When reading the figure, first label both nullclines and axes, then determine vector-field direction, intersection stability, and the order in which trajectories cross regions. A trajectory is not itself a causal mechanism.",
+        "stopPredict": "When λ=0, what is τ_eff?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "Motor control consists of closed-loop dynamics among brain, body, and environment, and neural activity is highly distributed. In a linear recurrent network, transforming individual neuronal activities into eigenmode coordinates decouples the system so each mode behaves like an independent first-order process. Eigenvalue λ sets effective time constant τ/(1−λ): λ<1 decays, λ≈1 has long memory, λ=1 is a perfect integrator, and λ>1 grows without bound."
+    ],
+    "commonTraps": [
+      "Restricting a motor signal to one region and overlooking distributed population activity.",
+      "Confusing neuronal activity coordinates with eigenmode coordinates.",
+      "Treating an eigenmode as one neuron.",
+      "Writing V^{-1}WV=D without checking the convention that columns of V are right eigenvectors.",
+      "Using τ/(1−λ) as a positive decay time when λ>1.",
+      "Assuming λ=1 is automatically robust, despite its sensitivity to perturbation.",
+      "Analyzing neural dynamics without body and environmental feedback.",
+      "Distinguish individual-neuron activity, population-mode coordinates, and behavioral state; do not turn an eigenmode into one “special neuron.”"
+    ],
+    "formulas": [
+      {
+        "id": "L18-F01",
+        "lecture": 18,
+        "name": "Linear recurrent rate network",
+        "expression": "τ ḣ = −h + W h + I",
+        "latex": "\\tau\\dot{\\mathbf{h}}=-\\mathbf{h}+W\\mathbf{h}+\\mathbf{I}",
+        "conditions": "Common τ and linearization",
+        "sectionId": "lecture-18-source-2",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L18-F02",
+        "lecture": 18,
+        "name": "Diagonalization",
+        "expression": "W = V DV −1",
+        "latex": "W=VDV^{-1}",
+        "conditions": "Diagonalizable W",
+        "sectionId": "lecture-18-source-2",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L18-F03",
+        "lecture": 18,
+        "name": "Mode coordinates",
+        "expression": "α = V −1 h",
+        "latex": "\\boldsymbol{\\alpha}=V^{-1}\\mathbf{h}",
+        "conditions": "Invertible V",
+        "sectionId": "lecture-18-source-2",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L18-F04",
+        "lecture": 18,
+        "name": "Decoupled mode",
+        "expression": "τ α̇i = −(1 − λi )αi + βi",
+        "latex": "\\tau\\dot{\\alpha}_i=-(1-\\lambda_i)\\alpha_i+\\beta_i",
+        "conditions": "Eigenbasis",
+        "sectionId": "lecture-18-source-2",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L18-F05",
+        "lecture": 18,
+        "name": "Mode time constant",
+        "expression": "τef f = τ /(1 − λ)",
+        "latex": "\\tau_{\\mathrm{eff}}=\\frac{\\tau}{1-\\lambda}",
+        "conditions": "λ<1 for stable decay",
+        "sectionId": "lecture-18-source-4",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L18-F06",
+        "lecture": 18,
+        "name": "Perfect integrator",
+        "expression": "λ = 1 ⇒ α̇ = β/τ",
+        "latex": "\\lambda=1\\Longrightarrow\\dot{\\alpha}=\\frac{\\beta}{\\tau}",
+        "conditions": "Exact cancellation of feedback and leak",
+        "sectionId": "lecture-18-source-5",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L18-G01",
+        "lecture": 18,
+        "zh": "前馈控制",
+        "en": "feedforward control",
+        "definition": "Control based mainly on a prior model or command rather than current feedback correction.",
+        "sectionId": "lecture-18-source-1",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L18-G02",
+        "lecture": 18,
+        "zh": "反馈控制",
+        "en": "feedback control",
+        "definition": "Online correction of action from sensory or state error.",
+        "sectionId": "lecture-18-source-1",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L18-G03",
+        "lecture": 18,
+        "zh": "本体感觉",
+        "en": "proprioception",
+        "definition": "Sensory feedback about body position or force.",
+        "sectionId": "lecture-18-source-1",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L18-G04",
+        "lecture": 18,
+        "zh": "循环网络",
+        "en": "recurrent network",
+        "definition": "A network with feedback loops among its units.",
+        "sectionId": "lecture-18-source-5",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L18-G05",
+        "lecture": 18,
+        "zh": "特征模态",
+        "en": "eigenmode",
+        "definition": "A population activity pattern associated with an eigenvector of W.",
+        "sectionId": "lecture-18-source-1",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L18-G06",
+        "lecture": 18,
+        "zh": "基变换",
+        "en": "change of basis",
+        "definition": "Conversion of the same state between neuronal and modal coordinates.",
+        "sectionId": "lecture-18-source-3",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L18-G07",
+        "lecture": 18,
+        "zh": "有效时间常数",
+        "en": "effective time constant",
+        "definition": "A mode's decay or integration timescale after feedback.",
+        "sectionId": "lecture-18-source-4",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L18-G08",
+        "lecture": 18,
+        "zh": "固定点",
+        "en": "fixed point",
+        "definition": "A state whose derivative is zero.",
+        "sectionId": "lecture-18-source-5",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L18-G09",
+        "lecture": 18,
+        "zh": "稳定性",
+        "en": "stability",
+        "definition": "Whether a small perturbation returns to a fixed point.",
+        "sectionId": "lecture-18-source-5",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L18-G10",
+        "lecture": 18,
+        "zh": "完美积分器",
+        "en": "perfect integrator",
+        "definition": "A mode that accumulates input without leak.",
+        "sectionId": "lecture-18-source-5",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L18-E01",
+        "lecture": 18,
+        "lectureTitle": "Motor Systems and Linear Neural Dynamics",
+        "kind": "caution",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 3,
+        "sectionId": "lecture-18-source-3",
+        "originalIssue": "The diagonalization on page 3 assumes that W is diagonalizable; the source notes make this teaching simplification.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L18-E02",
+        "lecture": 18,
+        "lectureTitle": "Motor Systems and Linear Neural Dynamics",
+        "kind": "caution",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 4,
+        "sectionId": "l18-m3",
+        "originalIssue": "On page 4, τ_eff<0 should be interpreted as exponential growth and an unstable fixed point, not a negative physical time constant.",
+        "explanation": "For real λ_i<1, α_i(t)=α_i(0)exp[-(1-λ_i)t/τ], so the effective time constant is τ_eff=τ/(1-λ_i).",
+        "correction": "On page 4, τ_eff<0 should be interpreted as exponential growth and an unstable fixed point, not a negative physical time constant"
+      },
+      {
+        "id": "L18-E03",
+        "lecture": 18,
+        "lectureTitle": "Motor Systems and Linear Neural Dynamics",
+        "kind": "caution",
+        "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "sourcePage": 1,
+        "sectionId": "l18-m1",
+        "originalIssue": "The motor-region functions on page 1 are course-level assignments, not a complete anatomical or causal decomposition.",
+        "explanation": "This statement holds only within the approximation, parameter, or version boundaries stated in the entry, not as an unconditional conclusion.",
+        "correction": null
+      }
+    ]
+  }
+]

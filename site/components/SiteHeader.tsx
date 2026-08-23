@@ -1,17 +1,23 @@
 import Link from 'next/link';
+import { localizedHref, type Locale, ui } from '@/lib/i18n';
+import { LanguageSwitch } from './LanguageControls';
 
-export function SiteHeader() {
+export function SiteHeader({ locale }: { locale: Locale }) {
+  const copy = ui[locale];
   return (
     <header className="site-header">
-      <Link className="wordmark" href="/">NEUROSCI 366</Link>
-      <nav aria-label="主要导航">
-        <Link href="/">目录</Link>
-        <Link href="/search/">搜索</Link>
-        <Link href="/practice/">练习</Link>
-        <Link href="/glossary/">术语</Link>
-        <Link href="/formulas/">公式</Link>
-        <Link href="/sources/">来源</Link>
-      </nav>
+      <Link className="wordmark" href={localizedHref(locale, '/')}>NEUROSCI 366</Link>
+      <div className="header-actions">
+        <nav aria-label={copy.primaryNavigation}>
+          <Link href={localizedHref(locale, '/')}>{copy.catalog}</Link>
+          <Link href={localizedHref(locale, '/search/')}>{copy.search}</Link>
+          <Link href={localizedHref(locale, '/practice/')}>{copy.practice}</Link>
+          <Link href={localizedHref(locale, '/glossary/')}>{copy.glossary}</Link>
+          <Link href={localizedHref(locale, '/formulas/')}>{copy.formulas}</Link>
+          <Link href={localizedHref(locale, '/sources/')}>{copy.sources}</Link>
+        </nav>
+        <LanguageSwitch className="header-language" locale={locale} />
+      </div>
     </header>
   );
 }

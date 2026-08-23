@@ -1,15 +1,27 @@
 import type { SourceRole } from './types';
+import type { Locale } from './i18n';
 
 export const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '';
 
-const sourceRoleLabels: Record<SourceRole, string> = {
-  primary: '主讲义',
-  'primary-update': '更新讲义',
-  previous: '旧版讲义',
-  exercise: '练习',
-  solution: '解答',
-  supplement: '补充材料',
-  code: '代码',
+const sourceRoleLabels: Record<Locale, Record<SourceRole, string>> = {
+  zh: {
+    primary: '主讲义',
+    'primary-update': '更新讲义',
+    previous: '旧版讲义',
+    exercise: '练习',
+    solution: '解答',
+    supplement: '补充材料',
+    code: '代码',
+  },
+  en: {
+    primary: 'Primary notes',
+    'primary-update': 'Updated notes',
+    previous: 'Previous version',
+    exercise: 'Exercises',
+    solution: 'Solutions',
+    supplement: 'Supplement',
+    code: 'Code',
+  },
 };
 
 export function assetPath(href: string) {
@@ -17,8 +29,8 @@ export function assetPath(href: string) {
   return `${basePath}${href}`;
 }
 
-export function sourceRoleLabel(role: SourceRole) {
-  return sourceRoleLabels[role];
+export function sourceRoleLabel(role: SourceRole, locale: Locale = 'zh') {
+  return sourceRoleLabels[locale][role];
 }
 
 export function absoluteSiteUrl(href = '/') {

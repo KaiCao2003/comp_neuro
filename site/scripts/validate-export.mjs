@@ -78,7 +78,48 @@ if (failures.length) {
   throw new Error(`Static export contains ${failures.length} broken internal reference(s):\n${failures.slice(0, 30).join('\n')}`);
 }
 
-const lecturePages = htmlFiles.filter((file) => /\/lectures\/\d{2}\/index\.html$/.test(file));
-if (lecturePages.length !== 27) throw new Error(`Expected 27 exported lecture pages; found ${lecturePages.length}.`);
-if (htmlFiles.length < 41) throw new Error(`Static export is unexpectedly small: ${htmlFiles.length} HTML pages.`);
+const chineseLecturePages = htmlFiles.filter((file) => /out\/lectures\/\d{2}\/index\.html$/.test(file));
+const englishLecturePages = htmlFiles.filter((file) => /out\/en\/lectures\/\d{2}\/index\.html$/.test(file));
+if (chineseLecturePages.length !== 27) throw new Error(`Expected 27 exported Chinese lecture pages; found ${chineseLecturePages.length}.`);
+if (englishLecturePages.length !== 27) throw new Error(`Expected 27 exported English lecture pages; found ${englishLecturePages.length}.`);
+
+for (const htmlFile of htmlFiles) {
+  const route = routeFor(htmlFile);
+  const html = fs.readFileSync(htmlFile, 'utf8');
+  if (route === '/_not-found/') continue;
+  if (route === '/404/' || route === '/404.html') {
+    if (!/<html[^>]*\blang="zh-CN"/.test(html)) failures.push(`${path.relative(root, htmlFile)} has no neutral bilingual language declaration.`);
+    const chineseHome = `${configuredBase}/`.replace(/\/{2,}/g, '/');
+    const englishHome = `${configuredBase}/en/`.replace(/\/{2,}/g, '/');
+    if (!html.includes(`href="${chineseHome}"`) || !html.includes(`href="${englishHome}"`)) failures.push(`${path.relative(root, htmlFile)} has no bilingual recovery links.`);
+    continue;
+  }
+  const english = route === '/en/' || route.startsWith('/en/');
+  const expectedLang = english ? 'en' : 'zh-CN';
+  if (!new RegExp(`<html[^>]*\\blang="${expectedLang}"`).test(html)) failures.push(`${path.relative(root, htmlFile)} has the wrong html lang; expected ${expectedLang}.`);
+  const counterpartRoute = english
+    ? (route === '/en/' ? '/' : route.replace(/^\/en/, ''))
+    : (route === '/' ? '/en/' : `/en${route}`);
+  const counterpart = resolveTarget(`${configuredBase}${counterpartRoute}`);
+  if (!counterpart) failures.push(`${path.relative(root, htmlFile)} has no exact language counterpart at ${counterpartRoute}.`);
+  const expectedSwitchPath = `${configuredBase}${counterpartRoute}`.replace(/\/{2,}/g, '/');
+  if (!html.includes(`href="${expectedSwitchPath}"`) && !html.includes(`href="${expectedSwitchPath.endsWith('/') ? expectedSwitchPath : `${expectedSwitchPath}/`}"`)) {
+    failures.push(`${path.relative(root, htmlFile)} has no exact language switch to ${expectedSwitchPath}.`);
+  }
+  const chineseRoute = english ? counterpartRoute : route;
+  const englishRoute = english ? route : counterpartRoute;
+  const absoluteUrl = (targetRoute) => new URL(`${configuredBase}${targetRoute}`, 'https://kaicao2003.github.io').toString();
+  const expectedAlternates = [
+    `<link rel="canonical" href="${absoluteUrl(route)}"`,
+    `<link rel="alternate" hrefLang="zh-CN" href="${absoluteUrl(chineseRoute)}"`,
+    `<link rel="alternate" hrefLang="en" href="${absoluteUrl(englishRoute)}"`,
+    `<link rel="alternate" hrefLang="x-default" href="${absoluteUrl(chineseRoute)}"`,
+  ];
+  for (const expected of expectedAlternates) if (!html.includes(expected)) failures.push(`${path.relative(root, htmlFile)} is missing metadata: ${expected}.`);
+}
+
+if (failures.length) {
+  throw new Error(`Static export language validation failed with ${failures.length} issue(s):\n${failures.slice(0, 30).join('\n')}`);
+}
+if (htmlFiles.length < 78) throw new Error(`Static export is unexpectedly small: ${htmlFiles.length} HTML pages.`);
 console.log(`Static export validated: ${htmlFiles.length} pages and ${checkedTargets.size} unique internal references.`);

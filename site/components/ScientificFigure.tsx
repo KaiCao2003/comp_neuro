@@ -1,4 +1,5 @@
 import { assetPath } from '@/lib/site';
+import type { Locale } from '@/lib/i18n';
 import type { FigureCurve, FigureIndexEntry } from '@/lib/types';
 
 const WIDTH = 760;
@@ -83,7 +84,7 @@ function PlotGraphic({ figure }: { figure: Extract<FigureIndexEntry, { kind: 'pl
   return <><Axes xLabel={figure.xLabel} yLabel={figure.yLabel} /><Curves curves={figure.curves} prefix={figure.id} />{figure.annotations?.map((item, index) => <g className="scientific-annotation" key={`${item.label}-${index}`}><circle cx={mapX(item.x)} cy={mapY(item.y)} r="3" /><SvgLabel x={mapX(item.x)} y={mapY(item.y) - 10} text={item.label} /></g>)}</>;
 }
 
-function TimelineGraphic({ figure, markerId }: { figure: Extract<FigureIndexEntry, { kind: 'timeline' }>; markerId: string }) {
+function TimelineGraphic({ figure, markerId, locale }: { figure: Extract<FigureIndexEntry, { kind: 'timeline' }>; markerId: string; locale: Locale }) {
   const laneY = (lane: number) => TOP + 60 + lane * (220 / Math.max(1, figure.lanes.length - 1));
   return (
     <>
@@ -96,7 +97,7 @@ function TimelineGraphic({ figure, markerId }: { figure: Extract<FigureIndexEntr
         return <g className="scientific-edges" key={`link-${index}`}><line x1={x1} y1={y1} x2={x2} y2={y2} markerEnd={`url(#${markerId})`} strokeDasharray={link.dashed ? '9 6' : undefined} />{link.label && <SvgLabel className="edge-label" x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 8} text={link.label} />}</g>;
       })}
       {figure.events.map((event, index) => <g className={`timeline-event ${event.tone === 'accent' ? 'event-accent' : ''}`} key={`${event.label}-${index}`}><circle cx={mapX(event.x)} cy={laneY(event.lane)} r="7" /><SvgLabel x={mapX(event.x)} y={laneY(event.lane) - 18} text={event.label} /></g>)}
-      <text className="timeline-direction" x={RIGHT} y={382} textAnchor="end">时间 / 顺序 →</text>
+      <text className="timeline-direction" x={RIGHT} y={382} textAnchor="end">{locale === 'zh' ? '时间 / 顺序' : 'Time / order'} →</text>
     </>
   );
 }
@@ -113,23 +114,23 @@ function StateSpaceGraphic({ figure }: { figure: Extract<FigureIndexEntry, { kin
   );
 }
 
-export function ScientificFigure({ figure, compact = false }: { figure: FigureIndexEntry; compact?: boolean }) {
+export function ScientificFigure({ figure, locale = 'zh', compact = false }: { figure: FigureIndexEntry; locale?: Locale; compact?: boolean }) {
   const titleId = `${figure.id}-svg-title`;
   const descriptionId = `${figure.id}-svg-description`;
   const markerId = `${figure.id.replace(/[^A-Za-z0-9_-]/g, '-')}-arrow`;
   return (
     <figure className={`scientific-figure${compact ? ' scientific-figure-compact' : ''}`} id={figure.id}>
-      <div className="scientific-canvas" role="group" aria-label={`${figure.title} 图形区域，可横向滚动`}>
+      <div className="scientific-canvas" role="group" aria-label={locale === 'zh' ? `${figure.title} 图形区域，可横向滚动` : `${figure.title} figure; scroll horizontally if needed`}>
         <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-labelledby={`${titleId} ${descriptionId}`}>
           <title id={titleId}>{figure.alt}</title>
           <desc id={descriptionId}>{figure.caption}</desc>
           {figure.kind === 'flow' && <FlowGraphic figure={figure} markerId={markerId} />}
           {figure.kind === 'plot' && <PlotGraphic figure={figure} />}
-          {figure.kind === 'timeline' && <TimelineGraphic figure={figure} markerId={markerId} />}
+          {figure.kind === 'timeline' && <TimelineGraphic figure={figure} markerId={markerId} locale={locale} />}
           {figure.kind === 'state-space' && <StateSpaceGraphic figure={figure} />}
         </svg>
       </div>
-      <figcaption><strong>{figure.title}。</strong> {figure.caption} <span className="figure-source">来源：{figure.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index ? '；' : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`}>{ref.file}，第 {ref.page} 页</a></span>)}。示意图。</span></figcaption>
+      <figcaption><strong>{figure.title}{locale === 'zh' ? '。' : '.'}</strong> {figure.caption} <span className="figure-source">{locale === 'zh' ? '来源：' : 'Sources: '}{figure.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index ? (locale === 'zh' ? '；' : '; ') : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`}>{ref.file}{locale === 'zh' ? `，第 ${ref.page} 页` : `, p. ${ref.page}`}</a></span>)}. {locale === 'zh' ? '示意图。' : 'Schematic.'}</span></figcaption>
     </figure>
   );
 }

@@ -1,0 +1,2735 @@
+[
+  {
+    "lecture": 19,
+    "coreQuestion": "How do recurrent modes in a two-neuron network produce nearly one-dimensional population trajectories, and how does PCA recover maximum-variance dimensions from activity covariance alone?",
+    "dependencyMap": "two-neuron W → common/difference modes → mode regimes → activity-space trajectory → covariance → PCA top-K",
+    "sourceUnits": [
+      {
+        "id": "lecture-19-source-1",
+        "order": 1,
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "page": 1,
+        "reconstruction": "UPDATE Page 1: symmetric two-neuron network, eigenvalues/eigenvectors, and common/difference modes.",
+        "noteMeaning": "The two-neuron weight matrix and its common and difference modes.",
+        "reasoning": "Solve the eigenvalues and eigenvectors of the two-neuron weight matrix, normalize the common and difference modes, and transform the inputs. Keep the dynamical eigenvectors of recurrent matrix W distinct from the principal components of covariance C; they are not generally identical.",
+        "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "What are the eigenvalues of W=[[0,w],[w,0]]?"
+      },
+      {
+        "id": "lecture-19-source-2",
+        "order": 2,
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "page": 2,
+        "reconstruction": "UPDATE Page 2: coupling regimes, mode time constants, and population trajectories.",
+        "noteMeaning": "Coupling regimes, mode time constants, and the trajectory in activity space.",
+        "reasoning": "Classify stable, unstable, leaky-integrator, and perfect-integrator regimes from the sign and magnitude of w0. Then connect the same trajectory in neural activity space and mode-coordinate space, showing how rapid difference-mode decay creates approximate one-dimensionality.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then decide whether the drawing expresses a definition, derivation, model prediction, or empirical observation; an unlabeled schematic supplies no quantitative precision.",
+        "stopPredict": "What is the common-mode vector?"
+      },
+      {
+        "id": "lecture-19-source-3",
+        "order": 3,
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "page": 3,
+        "reconstruction": "UPDATE Page 3: activity-space and mode-space bases, and approximately one-dimensional dynamics.",
+        "noteMeaning": "Two coordinate systems for the same trajectory and the origin of approximate one-dimensional dynamics.",
+        "reasoning": "Show that neural activity space and mode-coordinate space are reversible descriptions of the same trajectory and that fast decay of the difference mode produces approximate one-dimensionality. Relate this result to the stable, unstable, perfect-integrator, and leaky-integrator regimes set by w0.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then decide whether the drawing expresses a definition, derivation, model prediction, or empirical observation; an unlabeled schematic supplies no quantitative precision.",
+        "stopPredict": "What is the difference-mode vector?"
+      },
+      {
+        "id": "lecture-19-source-4",
+        "order": 4,
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "page": 4,
+        "reconstruction": "UPDATE Page 4: PCA motivation, projected variance, and covariance eigenvectors.",
+        "noteMeaning": "Projection variance, centered covariance, and PCA.",
+        "reasoning": "Derive PC1 as the covariance eigenvector with the largest eigenvalue by maximizing projection variance of centered activity, then extend the argument to orthogonal top-K PCs. Contrast covariance PCs with dynamical eigenvectors of recurrent W; the two are not generally the same.",
+        "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "For w=0.8, what are τ+ and τ-?"
+      },
+      {
+        "id": "lecture-19-source-5",
+        "order": 5,
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "page": 5,
+        "reconstruction": "UPDATE Page 5: top-K PCA, orthogonality, algorithm, and denoised reconstruction.",
+        "noteMeaning": "Top-K PCA, orthogonal projection, reconstruction, and information loss.",
+        "reasoning": "Track matrix shapes through projection, dimensional truncation, and reconstruction, with a small numerical example. Connect PC1 to orthogonal top-K PCs and make clear that denoising requires an extra signal-versus-noise assumption.",
+        "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "At w=1, which mode is a perfect integrator?"
+      },
+      {
+        "id": "lecture-19-source-6",
+        "order": 6,
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "page": 6,
+        "reconstruction": "UPDATE Page 6: eigenvalue cliff, cumulative variance explained, and dimensionality cutoff.",
+        "noteMeaning": "The scree-plot elbow, cumulative variance explained, and dimensionality selection.",
+        "reasoning": "Interpret the scree-plot cliff, cumulative variance explained, and the limitations of any cutoff. Relate the spectrum back to PC1 and orthogonal top-K PCs, then justify dimensionality with an explicit criterion and held-out data.",
+        "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
+        "stopPredict": "Why is the trajectory nearly one-dimensional?"
+      }
+    ],
+    "specialSection": [
+      "Page-by-page comparison shows that Pages 1-5 of the earlier version and Pages 1-5 of the UPDATE contain the same core academic material. The UPDATE adds Page 6 on the eigenvalue cliff, cumulative variance explained, and dimensionality cutoff. No unique formula or argument from the earlier version needs separate retention."
+    ],
+    "synthesis": [
+      "The common and difference eigenmodes of a symmetric two-neuron network can be calculated completely by hand: one receives feedback +w0 and the other −w0. If the difference mode decays rapidly, the neural trajectory collapses toward the common-mode line and becomes approximately one-dimensional. PCA does not require W; it finds maximum projected variance from centered activity covariance. Dynamical eigenvectors of W can relate to principal components of C, but they are not generally identical."
+    ],
+    "commonTraps": [
+      "Equating eigenvectors of W with covariance PCs without additional assumptions.",
+      "Omitting 1/√2 when normalizing the common and difference modes.",
+      "Using the wrong ± sign in the mode time constants.",
+      "Misreading a low-dimensional trajectory as activity in only a few neurons.",
+      "Applying PCA without centering the data.",
+      "Treating maximum variance as maximum causal or behavioral relevance.",
+      "Treating the eigenvalue cliff as an objectively unique dimensionality cutoff.",
+      "The UPDATE is the primary version and adds Page 6. PCA orders directions by variance; it does not automatically discover causal dynamics and can mix signal, noise, and condition structure."
+    ],
+    "formulas": [
+      {
+        "id": "L19-F01",
+        "lecture": 19,
+        "name": "common and difference modes",
+        "expression": "ξ± = (1, ±1)T / 2",
+        "latex": "\\boldsymbol{\\xi}_{\\pm}=\\frac{1}{\\sqrt{2}}(1,\\pm 1)^{\\mathsf T}",
+        "conditions": "symmetric two-neuron W",
+        "sectionId": "lecture-19-source-1",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L19-F02",
+        "lecture": 19,
+        "name": "orthonormal mode coordinates",
+        "expression": "α = V Th",
+        "latex": "\\boldsymbol{\\alpha}=V^{\\mathsf T}\\mathbf{h}",
+        "conditions": "V^TV=I",
+        "sectionId": "lecture-19-source-1",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L19-F03",
+        "lecture": 19,
+        "name": "mode time constants",
+        "expression": "τ± = τ /(1 ∓ w0 )",
+        "latex": "\\tau_{\\pm}=\\frac{\\tau}{1\\mp w_0}",
+        "conditions": "|w0|<1 for stability of both modes",
+        "sectionId": "lecture-19-source-2",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L19-F04",
+        "lecture": 19,
+        "name": "activity covariance",
+        "expression": "C = E[δhδhT ]",
+        "latex": "C=\\mathbb{E}\\!\\left[\\delta\\mathbf{h}\\,\\delta\\mathbf{h}^{\\mathsf T}\\right]",
+        "conditions": "centered data",
+        "sectionId": "lecture-19-source-4",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L19-F05",
+        "lecture": 19,
+        "name": "PC1",
+        "expression": "v1 = arg max v T Cv ∥v∥=1",
+        "latex": "\\mathbf{v}_1=\\underset{\\lVert\\mathbf{v}\\rVert=1}{\\operatorname{arg\\,max}}\\;\\mathbf{v}^{\\mathsf T}C\\mathbf{v}",
+        "conditions": "C symmetric positive semidefinite",
+        "sectionId": "lecture-19-source-1",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L19-F06",
+        "lecture": 19,
+        "name": "PC score and projection",
+        "expression": "pk = vkT (h − h̄)",
+        "latex": "p_k=\\mathbf{v}_k^{\\mathsf T}(\\mathbf{h}-\\bar{\\mathbf{h}})",
+        "conditions": "orthonormal PCs",
+        "sectionId": "lecture-19-source-4",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L19-F07",
+        "lecture": 19,
+        "name": "cumulative variance explained",
+        "expression": "∑ ∑ VarFrac(K) = λk / λj k≤K j",
+        "latex": "\\operatorname{VarFrac}(K)=\\frac{\\sum_{k=1}^{K}\\lambda_k}{\\sum_j\\lambda_j}",
+        "conditions": "sorted eigenvalues",
+        "sectionId": "lecture-19-source-6",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 6
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L19-G01",
+        "lecture": 19,
+        "zh": "共同模态",
+        "en": "common mode",
+        "definition": "An eigenmode in which both neurons change in the same direction.",
+        "sectionId": "lecture-19-source-1",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L19-G02",
+        "lecture": 19,
+        "zh": "差分模态",
+        "en": "difference mode",
+        "definition": "An eigenmode in which the two neurons change in opposite directions.",
+        "sectionId": "lecture-19-source-1",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L19-G03",
+        "lecture": 19,
+        "zh": "神经活动空间",
+        "en": "neural activity space",
+        "definition": "A state space whose coordinates are the activities of individual neurons.",
+        "sectionId": "lecture-19-source-2",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L19-G04",
+        "lecture": 19,
+        "zh": "模态空间",
+        "en": "mode space",
+        "definition": "A state space whose coordinates are dynamical eigenmode amplitudes.",
+        "sectionId": "lecture-19-source-2",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L19-G05",
+        "lecture": 19,
+        "zh": "主成分分析",
+        "en": "principal component analysis, PCA",
+        "definition": "A linear method that orders orthogonal directions by the covariance variance they capture.",
+        "sectionId": "lecture-19-source-4",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L19-G06",
+        "lecture": 19,
+        "zh": "主成分",
+        "en": "principal component",
+        "definition": "A covariance eigenvector together with the score obtained by projecting data onto it.",
+        "sectionId": "lecture-19-source-4",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L19-G07",
+        "lecture": 19,
+        "zh": "投影",
+        "en": "projection",
+        "definition": "The component of a vector along a specified basis direction.",
+        "sectionId": "lecture-19-source-3",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L19-G08",
+        "lecture": 19,
+        "zh": "重构",
+        "en": "reconstruction",
+        "definition": "An approximation of the original data formed from retained components.",
+        "sectionId": "lecture-19-source-1",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L19-G09",
+        "lecture": 19,
+        "zh": "碎石图",
+        "en": "scree plot",
+        "definition": "A plot of eigenvalue against component index.",
+        "sectionId": "lecture-19-source-4",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L19-G10",
+        "lecture": 19,
+        "zh": "方差解释率",
+        "en": "variance explained",
+        "definition": "The fraction of the total eigenvalue sum retained by selected components.",
+        "sectionId": "lecture-19-source-6",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 6
+      }
+    ],
+    "errata": [
+      {
+        "id": "L19-E01",
+        "lecture": 19,
+        "lectureTitle": "Population Activity and Principal Component Analysis",
+        "kind": "version",
+        "sourceFile": "Lecture19-PopulationActivity-PCA.pdf",
+        "sourcePage": 1,
+        "sectionId": "l19-m1",
+        "originalIssue": "Pages 1-5 of the UPDATE are substantively the same as the earlier version; UPDATE Page 6 adds the eigenvalue cliff and cumulative variance explained.",
+        "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries specified here; it is not unconditional.",
+        "correction": null
+      },
+      {
+        "id": "L19-E02",
+        "lecture": 19,
+        "lectureTitle": "Population Activity and Principal Component Analysis",
+        "kind": "caution",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 1,
+        "sectionId": "lecture-19-source-1",
+        "originalIssue": "The τ_- expression on Page 1 must follow λ_-=-w0, giving τ/(1+w0); the ± sign must be retained explicitly.",
+        "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries specified here; it is not unconditional.",
+        "correction": "On Page 1, λ_-=-w0 requires τ_-=τ/(1+w0)."
+      },
+      {
+        "id": "L19-E03",
+        "lecture": 19,
+        "lectureTitle": "Population Activity and Principal Component Analysis",
+        "kind": "caution",
+        "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
+        "sourcePage": 5,
+        "sectionId": "l19-m5",
+        "originalIssue": "Calling a PCA reconstruction 'denoised' requires the additional assumption that low-variance dimensions are mainly noise.",
+        "explanation": "A denoising interpretation requires noise to occupy primarily low-variance directions while signal occupies high-variance directions.",
+        "correction": "A 'denoised' PCA reconstruction assumes that low-variance dimensions are mainly noise."
+      }
+    ]
+  },
+  {
+    "lecture": 20,
+    "coreQuestion": "Is the rhythm cell-intrinsic or network-generated, and how do linear complex modes, Morris–Lecar fast–slow geometry, and half-center inhibition each produce oscillatory behavior?",
+    "dependencyMap": "pacemaker vs follower → half-center → complex eigenvalues → Morris–Lecar → nullclines/limit cycle → release vs escape",
+    "sourceUnits": [
+      {
+        "id": "lecture-20-source-1",
+        "order": 1,
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: intrinsic pacemaker/follower, network-generated half-center oscillator, and respiration/locomotion.",
+        "noteMeaning": "Pacemaker vs follower and half-center: intrinsic pacemaker/follower, network-generated half-center oscillator, and respiration/locomotion.",
+        "reasoning": "Analyze a mutually inhibitory half-center with a synaptic threshold, distinguishing intrinsic release from intrinsic escape step by step. Then compare cell-intrinsic pacemakers with network-generated rhythms and explain the diagnostic logic of a synaptic block.",
+        "figureReading": "Follow arrow directions, excitatory and inhibitory signs, state variables, and external inputs one by one. A structural diagram shows permitted dependencies; it does not by itself prove a biological implementation.",
+        "stopPredict": "What does persistence of rhythm after a synaptic block support?"
+      },
+      {
+        "id": "lecture-20-source-2",
+        "order": 2,
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: linear two-neuron oscillator, complex eigenvalues, Euler's formula, and damped oscillations.",
+        "noteMeaning": "Complex eigenvalues and Morris–Lecar: linear two-neuron oscillator, complex eigenvalues, Euler's formula, and damped oscillations.",
+        "reasoning": "Derive the complex eigenvalues of the full excitatory/inhibitory two-neuron weight matrix and use Euler's formula to interpret damped oscillatory components. Make explicit that complex eigenvalues in a linear system do not automatically create a sustained limit cycle; the real part determines decay or growth.",
+        "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis lengths or curvature correspond to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "What is the defining connectivity of a half-center?"
+      },
+      {
+        "id": "lecture-20-source-3",
+        "order": 3,
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: Morris–Lecar equations, V/N nullclines, and fixed points.",
+        "noteMeaning": "Nullclines/limit cycles and release vs escape: Morris–Lecar equations, V/N nullclines, and fixed points.",
+        "reasoning": "Explain every term in the Morris–Lecar voltage and recovery equations, the sigmoidal steady-state functions, and fast–slow separation. Then use nullclines and fixed-point stability to reconstruct the four-stage trajectory of a relaxation oscillation.",
+        "figureReading": "When reading the figure, first label both nullclines and the axes, then determine vector-field directions, intersection stability, and the order in which the trajectory crosses boundaries. A trajectory is not itself a causal mechanism.",
+        "stopPredict": "What does the real part of a complex eigenvalue determine?"
+      },
+      {
+        "id": "lecture-20-source-4",
+        "order": 4,
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: relaxation-oscillation cycle and an inhibitory coupled Morris–Lecar half-center.",
+        "noteMeaning": "Rate-model analogue and pacemaker vs follower: relaxation-oscillation cycle and an inhibitory coupled Morris–Lecar half-center.",
+        "reasoning": "Use nullclines and fixed-point stability to explain the four-stage trajectory of a relaxation oscillation. Then analyze a mutually inhibitory half-center with a synaptic threshold and distinguish intrinsic release from intrinsic escape step by step.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What does the imaginary part determine?"
+      },
+      {
+        "id": "lecture-20-source-5",
+        "order": 5,
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: sharp synaptic threshold, intrinsic release, and intrinsic escape.",
+        "noteMeaning": "Half-center and complex eigenvalues: sharp synaptic threshold, intrinsic release, and intrinsic escape.",
+        "reasoning": "Analyze a mutually inhibitory half-center with a synaptic threshold and distinguish intrinsic release from intrinsic escape step by step. Then use nullclines and fixed-point stability to explain the four-stage trajectory of a relaxation oscillation.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "Why does the linear network in the notes not produce a sustained rhythm?"
+      },
+      {
+        "id": "lecture-20-source-6",
+        "order": 6,
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: extension to a half-center firing-rate model.",
+        "noteMeaning": "Morris–Lecar and nullclines/limit cycles: extension to a half-center firing-rate model.",
+        "reasoning": "Show how an adaptation or recovery variable can recreate analogous geometry in a firing-rate model. Then analyze a mutually inhibitory half-center with a synaptic threshold and distinguish intrinsic release from intrinsic escape step by step.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What are the two state variables in Morris–Lecar?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "Whether rhythm persists after synaptic block can distinguish candidate intrinsic-pacemaker and network-generated mechanisms. Complex eigenvalues in a linear two-neuron system produce only damped or growing oscillatory components; a stable autonomous limit cycle requires nonlinearity. Fast voltage and slow recovery nullclines in Morris–Lecar generate a relaxation oscillation, while a mutually inhibitory half-center can alternate through intrinsic release or escape."
+    ],
+    "commonTraps": [
+      "Calling every rhythmic activity pattern a CPG.",
+      "Assuming complex eigenvalues automatically imply sustained oscillation.",
+      "Ignoring the real part of the full eigenvalue.",
+      "Treating a nullcline as a trajectory.",
+      "Assuming a fixed point is stable merely because a nullcline intersection exists.",
+      "Distinguishing release from escape by superficial firing order rather than the intrinsic transition that triggers the switch.",
+      "Excluding sensory feedback from real locomotor rhythms.",
+      "Avoid classifying all rhythmic activity as a CPG, and do not conflate a damped linear oscillation with an autonomous nonlinear oscillator."
+    ],
+    "formulas": [
+      {
+        "id": "L20-F01",
+        "lecture": 20,
+        "name": "complex mode",
+        "expression": "λ = a ± ib",
+        "latex": "\\lambda=a\\pm ib",
+        "conditions": "a controls the envelope; b controls frequency",
+        "sectionId": "lecture-20-source-2",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L20-F02",
+        "lecture": 20,
+        "name": "Euler decomposition",
+        "expression": "e(a+ib)t = eat (cos bt + i sin bt)",
+        "latex": "e^{(a+ib)t}=e^{at}\\left(\\cos(bt)+i\\sin(bt)\\right)",
+        "conditions": "complex representation",
+        "sectionId": "lecture-20-source-2",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L20-F03",
+        "lecture": 20,
+        "name": "two-dimensional conductance model",
+        "expression": "V̇ = F (V, N ), Ṅ = G(V, N )",
+        "latex": "\\dot V=F(V,N),\\qquad \\dot N=G(V,N)",
+        "conditions": "fast–slow variables",
+        "sectionId": "lecture-20-source-3",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L20-F04",
+        "lecture": 20,
+        "name": "V-nullcline",
+        "expression": "F (V, N ) = 0",
+        "latex": "F(V,N)=0",
+        "conditions": "dV/dt=0",
+        "sectionId": "lecture-20-source-4",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L20-F05",
+        "lecture": 20,
+        "name": "N-nullcline",
+        "expression": "G(V, N ) = 0",
+        "latex": "G(V,N)=0",
+        "conditions": "dN/dt=0",
+        "sectionId": "lecture-20-source-5",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L20-F06",
+        "lecture": 20,
+        "name": "sharp synaptic-threshold approximation",
+        "expression": "S∞ (V ) = H(V − VT )",
+        "latex": "S_{\\infty}(V)=H(V-V_T)",
+        "conditions": "idealized switch",
+        "sectionId": "lecture-20-source-5",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L20-G01",
+        "lecture": 20,
+        "zh": "中央模式发生器",
+        "en": "central pattern generator, CPG",
+        "definition": "A neural circuit that can generate a rhythmic motor pattern without periodic sensory drive.",
+        "sectionId": "lecture-20-source-2",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L20-G02",
+        "lecture": 20,
+        "zh": "起搏细胞",
+        "en": "pacemaker neuron",
+        "definition": "A neuron that oscillates spontaneously through intrinsic dynamics.",
+        "sectionId": "lecture-20-source-1",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L20-G03",
+        "lecture": 20,
+        "zh": "半中心振荡器",
+        "en": "half-center oscillator",
+        "definition": "A network oscillator in which two mutually inhibitory units alternate activity.",
+        "sectionId": "lecture-20-source-1",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L20-G04",
+        "lecture": 20,
+        "zh": "复特征值",
+        "en": "complex eigenvalue",
+        "definition": "An eigenvalue that encodes both an exponential envelope and oscillatory phase.",
+        "sectionId": "lecture-20-source-2",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L20-G05",
+        "lecture": 20,
+        "zh": "Morris-Lecar 模型",
+        "en": "Morris-Lecar model",
+        "definition": "A reduced, conductance-based neuron model with two variables.",
+        "sectionId": "lecture-20-source-6",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L20-G06",
+        "lecture": 20,
+        "zh": "相平面",
+        "en": "phase plane",
+        "definition": "The trajectories and nullclines in a two-dimensional state space.",
+        "sectionId": "lecture-20-source-6",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L20-G07",
+        "lecture": 20,
+        "zh": "松弛振荡",
+        "en": "relaxation oscillation",
+        "definition": "A limit cycle that alternates slow drift with fast jumps.",
+        "sectionId": "lecture-20-source-3",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L20-G08",
+        "lecture": 20,
+        "zh": "内在释放",
+        "en": "intrinsic release",
+        "definition": "Removal of inhibition when the active neuron terminates its activity.",
+        "sectionId": "lecture-20-source-1",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L20-G09",
+        "lecture": 20,
+        "zh": "内在逃逸",
+        "en": "intrinsic escape",
+        "definition": "A transition in which the inhibited neuron recovers first and escapes inhibition.",
+        "sectionId": "lecture-20-source-1",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L20-G10",
+        "lecture": 20,
+        "zh": "极限环",
+        "en": "limit cycle",
+        "definition": "A closed periodic orbit that attracts nearby trajectories.",
+        "sectionId": "lecture-20-source-2",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 2
+      }
+    ],
+    "errata": [
+      {
+        "id": "L20-E01",
+        "lecture": 20,
+        "lectureTitle": "Central Pattern Generators and Oscillations",
+        "kind": "caution",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 2,
+        "sectionId": "l20-m2",
+        "originalIssue": "The linear oscillations on Page 2 have an e^{-t/τ} envelope: they are damped components, not an autonomous sustained CPG.",
+        "explanation": "Therefore, 'having complex eigenvalues' is not equivalent to 'having a sustained CPG rhythm.'",
+        "correction": null
+      },
+      {
+        "id": "L20-E02",
+        "lecture": 20,
+        "lectureTitle": "Central Pattern Generators and Oscillations",
+        "kind": "caution",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 3,
+        "sectionId": "l20-m3",
+        "originalIssue": "The Morris–Lecar nullclines on Pages 3-4 are schematic; their exact shape and stability depend on parameters.",
+        "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries listed here; it is not an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L20-E03",
+        "lecture": 20,
+        "lectureTitle": "Central Pattern Generators and Oscillations",
+        "kind": "caution",
+        "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+        "sourcePage": 6,
+        "sectionId": "l20-m6",
+        "originalIssue": "Page 6 only notes that a firing-rate model can reproduce the same geometry; it does not specify a unique equation.",
+        "explanation": "The rate model preserves state-dependent feedback, slow recovery, and threshold geometry, not particular Ca/K currents, spike waveforms, or reversal potentials.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 21,
+    "coreQuestion": "How does a recurrent network integrate an eye-velocity command into persistent position, why can many parameter combinations implement the same function, and how does the Hessian reveal stiff and sloppy directions?",
+    "dependencyMap": "velocity→position → bilateral integrator → dominant λ=1 → weight-family degeneracy → nonlinear synapse fit → least squares/Hessian",
+    "sourceUnits": [
+      {
+        "id": "lecture-21-source-1",
+        "order": 1,
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: eye velocity→position integration, brainstem/cerebellar architecture, and linear position tuning.",
+        "noteMeaning": "Velocity→position and the bilateral integrator: eye velocity→position integration, brainstem/cerebellar architecture, and linear position tuning.",
+        "reasoning": "Explain why a saccade velocity command must be integrated into persistent eye position and connect it to a long-time-scale mode. Then reconstruct the bilateral excitatory/inhibitory architecture and left/right linear tuning curves.",
+        "figureReading": "First identify both axes, units, normalization, and the single parameter changed by each curve. Distinguish a schematic trend, a model prediction, and genuinely measured data points.",
+        "stopPredict": "What are the input and output of the oculomotor integrator?"
+      },
+      {
+        "id": "lecture-21-source-2",
+        "order": 2,
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: two-neuron weight matrix, eigenvalues, perfect-integrator requirement, and family of solutions.",
+        "noteMeaning": "Dominant λ=1 and weight-family degeneracy: two-neuron weight matrix, eigenvalues, perfect-integrator requirement, and family of solutions.",
+        "reasoning": "Derive the eigenvalues of a general 2×2 weight matrix, show that a perfect integrator requires dominant eigenvalue=1, and derive the one-parameter family in the notes. Then explain the many-to-one mapping by which many synaptic-weight combinations produce the same integration dynamics, distinguishing parameter degeneracy from measurement noise.",
+        "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "What determinant condition defines a 2×2 perfect integrator?"
+      },
+      {
+        "id": "lecture-21-source-3",
+        "order": 3,
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: biological parameter variability, the Marder/Goldman logic, nonlinear synaptic functions, and fitting setup.",
+        "noteMeaning": "Nonlinear synapse fitting and least squares/Hessian: biological parameter variability, the Marder/Goldman logic, nonlinear synaptic functions, and fitting setup.",
+        "reasoning": "Rewrite the fitting problem using a measured inverse F–I curve and nonlinear synaptic functions, labeling every index and shape. Then explain the many-to-one mapping by which many synaptic-weight combinations produce the same integration dynamics, distinguishing parameter degeneracy from measurement noise.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "Why does this condition not uniquely determine 4 weights?"
+      },
+      {
+        "id": "lecture-21-source-4",
+        "order": 4,
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: nonlinear fitting rewritten as linear regression, loss, and Hessian.",
+        "noteMeaning": "Stiff versus sloppy ensembles and velocity→position: nonlinear fitting rewritten as linear regression, loss, and Hessian.",
+        "reasoning": "Rewrite the fitting problem using a measured inverse F–I curve and nonlinear synaptic functions, labeling every index and shape. Then reconstruct the bilateral excitatory/inhibitory architecture and left/right linear tuning curves.",
+        "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "How should the family formula be handled when W12=0?"
+      },
+      {
+        "id": "lecture-21-source-5",
+        "order": 5,
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: Hessian eigenbasis, stiff/sloppy parameter dimensions, and ensemble interpretation.",
+        "noteMeaning": "Bilateral integrator and dominant λ=1: Hessian eigenbasis, stiff/sloppy parameter dimensions, and ensemble interpretation.",
+        "reasoning": "Work through the quadratic loss, least-squares solution, and Hessian decomposition, explaining how Hessian eigenvalues quantify parameter sensitivity. Then explain the many-to-one mapping by which many synaptic-weight combinations produce the same integration dynamics, distinguishing parameter degeneracy from measurement noise.",
+        "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "Why does the other eigenvalue matter?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "The oculomotor integrator must retain eye position after a saccade, so the network needs a long-time-scale mode near λ=1. For a general 2×2 W, perfect integration imposes only det(I−W)=0, leaving a many-to-one family of weights; parameter degeneracy is still stronger in complex biological models. Once measured tuning and synaptic nonlinearities are fixed, fitting can be rewritten as linear regression. Hessian eigenvalues separate a few stiff combinations from many sloppy ones, motivating an adequate-model ensemble rather than a unique best fit."
+    ],
+    "commonTraps": [
+      "Mistaking persistent eye position for a sensory afterimage rather than an integral of velocity.",
+      "Requiring λ=1 but failing to check stability of the other modes.",
+      "Using the division-based family formula even when W12=0.",
+      "Treating a many-to-one parameter mapping as measurement noise.",
+      "Confusing low dimensionality in neural-state space with sloppiness in parameter space.",
+      "Interpreting a sloppy parameter as biologically irrelevant.",
+      "Reporting only best-fit weights without uncertainty or an ensemble.",
+      "Low dimensionality in neural-state space and sloppiness in parameter space must be distinguished; they are different ideas in different spaces."
+    ],
+    "formulas": [
+      {
+        "id": "L21-F01",
+        "lecture": 21,
+        "name": "eye-position integration",
+        "expression": "Z t x(t) = x(0) + v(t′ )dt′ 0",
+        "latex": "x(t)=x(0)+\\int_0^t v(t')\\,dt'",
+        "conditions": "velocity command",
+        "sectionId": "lecture-21-source-1",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L21-F02",
+        "lecture": 21,
+        "name": "eigenvalue 1 condition",
+        "expression": "det(I − W ) = 0",
+        "latex": "\\det(I-W)=0",
+        "conditions": "perfect linear integrator",
+        "sectionId": "lecture-21-source-2",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L21-F03",
+        "lecture": 21,
+        "name": "weight-compensation family",
+        "expression": "W21 = (1 − W11 )(1 − W22 )/W12",
+        "latex": "W_{21}=\\frac{(1-W_{11})(1-W_{22})}{W_{12}}",
+        "conditions": "W12≠0",
+        "sectionId": "lecture-21-source-2",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L21-F04",
+        "lecture": 21,
+        "name": "row-wise OLS fit",
+        "expression": "Ŵ = Y X T (XX T )−1",
+        "latex": "\\widehat W=YX^{\\mathsf T}(XX^{\\mathsf T})^{-1}",
+        "conditions": "XX^T invertible",
+        "sectionId": "lecture-21-source-3",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L21-F05",
+        "lecture": 21,
+        "name": "Hessian eigendecomposition",
+        "expression": "H = V DV T",
+        "latex": "H=VDV^{\\mathsf T}",
+        "conditions": "H symmetric",
+        "sectionId": "lecture-21-source-3",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L21-F06",
+        "lecture": 21,
+        "name": "local parameter sensitivity",
+        "expression": "1X ∆L = λk zk2 2",
+        "latex": "\\Delta L=\\frac{1}{2}\\sum_k\\lambda_k z_k^2",
+        "conditions": "quadratic approximation",
+        "sectionId": "lecture-21-source-5",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L21-G01",
+        "lecture": 21,
+        "zh": "眼动积分器",
+        "en": "oculomotor integrator",
+        "definition": "A circuit that converts an eye-velocity command into a persistent eye-position signal.",
+        "sectionId": "lecture-21-source-1",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L21-G02",
+        "lecture": 21,
+        "zh": "线吸引子",
+        "en": "line attractor",
+        "definition": "A continuous family of nearly stable states capable of storing a graded value.",
+        "sectionId": "lecture-21-source-2",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L21-G03",
+        "lecture": 21,
+        "zh": "参数退化",
+        "en": "parameter degeneracy",
+        "definition": "The ability of different parameter combinations to produce similar output or function.",
+        "sectionId": "lecture-21-source-3",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L21-G04",
+        "lecture": 21,
+        "zh": "模型可辨识性",
+        "en": "identifiability",
+        "definition": "The extent to which data uniquely or sufficiently constrain parameters.",
+        "sectionId": "lecture-21-source-1",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L21-G05",
+        "lecture": 21,
+        "zh": "Hessian",
+        "en": "Hessian",
+        "definition": "The local curvature matrix of loss with respect to parameters.",
+        "sectionId": "lecture-21-source-4",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L21-G06",
+        "lecture": 21,
+        "zh": "刚性方向",
+        "en": "stiff direction",
+        "definition": "A parameter combination to whose variation the loss is highly sensitive.",
+        "sectionId": "lecture-21-source-5",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L21-G07",
+        "lecture": 21,
+        "zh": "松散方向",
+        "en": "sloppy direction",
+        "definition": "A parameter combination to whose variation the loss is insensitive.",
+        "sectionId": "lecture-21-source-5",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L21-G08",
+        "lecture": 21,
+        "zh": "模型集合",
+        "en": "model ensemble",
+        "definition": "A set of parameterizations that all explain the data adequately.",
+        "sectionId": "lecture-21-source-1",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L21-G09",
+        "lecture": 21,
+        "zh": "权衡补偿",
+        "en": "parameter compensation",
+        "definition": "Offsetting a change in one parameter with changes in others.",
+        "sectionId": "lecture-21-source-3",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 3
+      }
+    ],
+    "errata": [
+      {
+        "id": "L21-E01",
+        "lecture": 21,
+        "lectureTitle": "Oculomotor Integrators, Parameter Degeneracy, and Sloppy Models",
+        "kind": "caution",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 2,
+        "sectionId": "l21-m2",
+        "originalIssue": "The perfect-integrator condition on Page 2 constrains an eigenvalue; the algebraic family must also handle the W12=0 special case.",
+        "explanation": "When W12=0, the formula is invalid and the condition becomes (1-W11)(1-W22)=0; at least one self-weight must equal 1.",
+        "correction": null
+      },
+      {
+        "id": "L21-E02",
+        "lecture": 21,
+        "lectureTitle": "Oculomotor Integrators, Parameter Degeneracy, and Sloppy Models",
+        "kind": "caution",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 4,
+        "sectionId": "l21-m4",
+        "originalIssue": "The matrix orientation on Page 4 depends on the row/column convention for Y and X; here, examples are consistently stored in columns.",
+        "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries listed here; it is not an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L21-E03",
+        "lecture": 21,
+        "lectureTitle": "Oculomotor Integrators, Parameter Degeneracy, and Sloppy Models",
+        "kind": "caution",
+        "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+        "sourcePage": 5,
+        "sectionId": "l21-m5",
+        "originalIssue": "The 4 stiff and 46 sloppy dimensions on Page 5 are results of that particular fit, not constants of all integrator models.",
+        "explanation": "The fit shown on the source page has about 4 stiff and 46 sloppy dimensions.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 22,
+    "coreQuestion": "How are high-dimensional motor-cortex activities organized by a few latent trajectories, how can preparatory activity occupy output-null space, and how can these ideas support a stable closed-loop BMI?",
+    "dependencyMap": "center-out tuning → PCA low dimension → latent vs activity space → GPFA → preparatory trajectories → output-null readout",
+    "sourceUnits": [
+      {
+        "id": "lecture-22-source-1",
+        "order": 1,
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "page": 1,
+        "reconstruction": "UPDATE Page 1: center-out reaches, directional tuning, and low-dimensional variance/PCA.",
+        "noteMeaning": "Center-out tuning and low-dimensional PCA: center-out reaches, directional tuning, and low-dimensional variance/PCA.",
+        "reasoning": "Present the classic interpretation of center-out directional tuning and the modern dynamical view in which tuning may be epiphenomenal. Then use the PCA variance decomposition to introduce low-dimensional population activity without automatically treating low-variance dimensions as useless.",
+        "figureReading": "First identify both axes, units, normalization, and the single parameter changed by each curve. Distinguish a schematic trend, a model prediction, and genuinely measured data points.",
+        "stopPredict": "What distinguishes directional tuning from low-dimensional dynamics?"
+      },
+      {
+        "id": "lecture-22-source-2",
+        "order": 2,
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "page": 2,
+        "reconstruction": "UPDATE Page 2: dynamical-mode perspective, latent-factor space, neural-activity embedding, and the GPFA observation model.",
+        "noteMeaning": "Latent versus activity space and GPFA: dynamical-mode perspective, latent-factor space, neural-activity embedding, and the GPFA observation model.",
+        "reasoning": "Distinguish latent-factor space from observed neural-activity space and explain the high-dimensional embedding. Then explain every term of the GPFA observation model P(r_t|alpha_t)=N(C alpha_t+d,Sigma) and the temporal covariance of the latent Gaussian process.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What is the shape of C in GPFA?"
+      },
+      {
+        "id": "lecture-22-source-3",
+        "order": 3,
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "page": 3,
+        "reconstruction": "UPDATE Page 3: Gaussian-process temporal covariance, parameter fitting, and delayed-reach latent trajectories.",
+        "noteMeaning": "Preparatory trajectories and the output-null readout: Gaussian-process temporal covariance, parameter fitting, and delayed-reach latent trajectories.",
+        "reasoning": "Explain every term of the GPFA observation model P(r_t|alpha_t)=N(C alpha_t+d,Sigma) and the temporal covariance of the latent Gaussian process. Then analyze a delayed-reach task: target-specific preparatory trajectories, the go cue, and movement trajectories.",
+        "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "What does Σ represent?"
+      },
+      {
+        "id": "lecture-22-source-4",
+        "order": 4,
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "page": 4,
+        "reconstruction": "UPDATE Page 4: preparatory activity, movement modes, linear readout, and output-null space.",
+        "noteMeaning": "Closed-loop BMI/latent alignment and center-out tuning: preparatory activity, movement modes, linear readout, and output-null space.",
+        "reasoning": "Derive the linear readout, its null space, and output-null preparatory activity, making clear that Ur=0 does not imply r=0. Then distinguish latent-factor space from observed neural-activity space and explain the high-dimensional embedding.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What does τ control in GP temporal covariance?"
+      },
+      {
+        "id": "lecture-22-source-5",
+        "order": 5,
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "page": 5,
+        "reconstruction": "UPDATE Page 5: neural decoding, feedforward/closed-loop BMI, and latent-aligned cross-day stability.",
+        "noteMeaning": "Low-dimensional PCA and latent versus activity space: neural decoding, feedforward/closed-loop BMI, and latent-aligned cross-day stability.",
+        "reasoning": "Explain feedforward versus closed-loop BMI, sensory feedback, latent-aligned decoders, and cross-day stability, explicitly identifying this as major new UPDATE material. Then distinguish latent-factor space from observed neural-activity space and explain the high-dimensional embedding.",
+        "figureReading": "Follow arrow directions, excitatory and inhibitory signs, state variables, and external inputs one by one. A structural diagram shows permitted dependencies; it does not by itself prove a biological implementation.",
+        "stopPredict": "Why is the scale of C and α non-identifiable?"
+      }
+    ],
+    "specialSection": [
+      "Page-by-page visual comparison shows that Pages 1-4 of the older edition substantially repeat the core academic content of UPDATE Pages 1-4. The UPDATE adds Page 5 on neural decoding, feedforward/closed-loop BMI, and latent-aligned cross-day stability. No unique formula or argument in the older edition required separate retention."
+    ],
+    "synthesis": [
+      "Directional tuning is a classic description of motor cortex, whereas the modern population view asks whether low-dimensional trajectories generate movement dynamics. GPFA embeds smooth latent factors into noisy neural activity with a Gaussian observation model and explicitly models temporal covariance. A preparatory state can vary within the null space of muscle readout U without causing movement. BMI decodes neural or latent state into device commands and uses feedback and cross-day latent alignment to improve stability."
+    ],
+    "commonTraps": [
+      "Conflating a single-neuron tuning curve with a latent trajectory.",
+      "Using PCA components, GPFA factors, dynamical modes, and decoder axes interchangeably.",
+      "Assuming that a K-dimensional model means only K neurons matter.",
+      "Ignoring non-identifiability of C–α scale and rotation.",
+      "Inferring r=0 from Ur=0.",
+      "Ignoring user feedback and learning in a feedforward BMI account.",
+      "Describing cross-day latent stability as absolute invariance.",
+      "Tuning curves, principal components, latent factors, dynamical modes, and decoder axes must be distinguished explicitly. They may be related, but they are not interchangeable."
+    ],
+    "formulas": [
+      {
+        "id": "L22-F01",
+        "lecture": 22,
+        "name": "GPFA observation model",
+        "expression": "rt |αt ∼ N (Cαt + d, Σ)",
+        "latex": "\\mathbf r_t\\mid\\boldsymbol{\\alpha}_t\\sim\\mathcal N(C\\boldsymbol{\\alpha}_t+\\mathbf d,\\Sigma)",
+        "conditions": "Gaussian approximation",
+        "sectionId": "lecture-22-source-2",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L22-F02",
+        "lecture": 22,
+        "name": "GP temporal covariance",
+        "expression": "′ 2 K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′ 2",
+        "latex": "K(t,t')=\\sigma_s^2\\exp\\!\\left[-\\frac{(t-t')^2}{2\\tau^2}\\right]+\\sigma_n^2\\delta_{tt'}",
+        "conditions": "stationary smooth kernel",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-F03",
+        "lecture": 22,
+        "name": "linear motor readout",
+        "expression": "m = Ur",
+        "latex": "\\mathbf m=U\\mathbf r",
+        "conditions": "local approximation",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-F04",
+        "lecture": 22,
+        "name": "output-null space",
+        "expression": "Null(U ) = {r : U r = 0}",
+        "latex": "\\operatorname{Null}(U)=\\{\\mathbf r:U\\mathbf r=0\\}",
+        "conditions": "linear algebra",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-F05",
+        "lecture": 22,
+        "name": "rank–nullity",
+        "expression": "dim N ull(U ) = N − rank(U )",
+        "latex": "\\dim\\operatorname{Null}(U)=N-\\operatorname{rank}(U)",
+        "conditions": "U: M×N",
+        "sectionId": "lecture-22-source-5",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L22-F06",
+        "lecture": 22,
+        "name": "latent decoder",
+        "expression": "v̂ = Bα",
+        "latex": "\\widehat{\\mathbf v}=B\\boldsymbol{\\alpha}",
+        "conditions": "aligned latent coordinates",
+        "sectionId": "lecture-22-source-2",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 2
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L22-G01",
+        "lecture": 22,
+        "zh": "中心向外任务",
+        "en": "center-out reach task",
+        "definition": "A reaching paradigm from a central location to multiple radial targets.",
+        "sectionId": "lecture-22-source-1",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L22-G02",
+        "lecture": 22,
+        "zh": "方向调谐",
+        "en": "direction tuning",
+        "definition": "Variation of the mean response with reach direction.",
+        "sectionId": "lecture-22-source-1",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L22-G03",
+        "lecture": 22,
+        "zh": "潜在因子",
+        "en": "latent factor",
+        "definition": "A low-dimensional hidden variable that explains shared population variability.",
+        "sectionId": "lecture-22-source-5",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L22-G04",
+        "lecture": 22,
+        "zh": "嵌入",
+        "en": "embedding",
+        "definition": "A mapping from latent coordinates into high-dimensional activity.",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-G05",
+        "lecture": 22,
+        "zh": "高斯过程因子分析",
+        "en": "Gaussian-process factor analysis, GPFA",
+        "definition": "A latent-factor model with a temporal Gaussian-process prior.",
+        "sectionId": "lecture-22-source-2",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L22-G06",
+        "lecture": 22,
+        "zh": "准备活动",
+        "en": "preparatory activity",
+        "definition": "A target-dependent population state before movement.",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-G07",
+        "lecture": 22,
+        "zh": "输出零空间",
+        "en": "output-null space",
+        "definition": "Neural directions that do not change the current readout.",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-G08",
+        "lecture": 22,
+        "zh": "输出有效空间",
+        "en": "output-potent space",
+        "definition": "Directions that change muscle or device output.",
+        "sectionId": "lecture-22-source-2",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L22-G09",
+        "lecture": 22,
+        "zh": "脑机接口",
+        "en": "brain-machine interface, BMI",
+        "definition": "A system that controls an external device from neural activity.",
+        "sectionId": "lecture-22-source-4",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L22-G10",
+        "lecture": 22,
+        "zh": "闭环控制",
+        "en": "closed-loop control",
+        "definition": "Online control that includes sensory or device feedback.",
+        "sectionId": "lecture-22-source-5",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L22-E01",
+        "lecture": 22,
+        "lectureTitle": "Latent Dynamics in Motor Cortex and Brain–Machine Interfaces",
+        "kind": "version",
+        "sourceFile": "Lecture22-MotorCortex.pdf",
+        "sourcePage": 1,
+        "sectionId": "resources",
+        "originalIssue": "UPDATE Pages 1-4 match the corresponding content in the older edition; the UPDATE adds Page 5 on BMI and cross-day latent alignment.",
+        "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries listed here; it is not an unconditional conclusion.",
+        "correction": "UPDATE Pages 1-4 match the corresponding content in the older edition"
+      },
+      {
+        "id": "L22-E02",
+        "lecture": 22,
+        "lectureTitle": "Latent Dynamics in Motor Cortex and Brain–Machine Interfaces",
+        "kind": "caution",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 3,
+        "sectionId": "l22-m3",
+        "originalIssue": "The GP covariance on Page 3 is one choice of smooth kernel, not the only Gaussian-process kernel.",
+        "explanation": "This is not the only GP kernel; rapid switching or oscillation may be better represented by Matérn or periodic kernels.",
+        "correction": null
+      },
+      {
+        "id": "L22-E03",
+        "lecture": 22,
+        "lectureTitle": "Latent Dynamics in Motor Cortex and Brain–Machine Interfaces",
+        "kind": "caution",
+        "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+        "sourcePage": 4,
+        "sectionId": "l22-m4",
+        "originalIssue": "The output-null interpretation on Page 4 is a linear-readout framework; real motor output may be more complex.",
+        "explanation": "A locally linear readout is m=Ur, where r is an N-dimensional neural state and m is an M-dimensional motor command, so U must be M×N.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 23,
+    "coreQuestion": "How do long-time-scale recurrent modes, evidence accumulation, and nonlinear attractor dynamics implement short-term memory and perceptual decision-making, and how do those mechanisms relate to behavior?",
+    "dependencyMap": "cognition/decoupling → DMS/Romo → persistent activity → long recurrent mode → drift-diffusion → psychometric/chronometric/LIP",
+    "sourceUnits": [
+      {
+        "id": "lecture-23-source-1",
+        "order": 1,
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: a working definition of cognition; decision-making; STM/working memory; and learning/LTM/generalization.",
+        "noteMeaning": "Cognition/decoupling and DMS/Romo: a working definition of cognition; decision-making; STM/working memory; and learning/LTM/generalization.",
+        "reasoning": "Present the course's working definition of cognition accurately: brain state is not determined solely by present input, while recognizing the definition's limits. Then compare delayed match-to-sample with parametric working memory and explain sample, delay, comparison, and choice in the Romo task step by step.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What is this lecture's working definition of cognition?"
+      },
+      {
+        "id": "lecture-23-source-2",
+        "order": 2,
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: delayed match-to-sample, parametric working memory, and the Romo vibration task.",
+        "noteMeaning": "Persistent activity and a long recurrent mode: delayed match-to-sample, parametric working memory, and the Romo vibration task.",
+        "reasoning": "Compare delayed match-to-sample with parametric working memory and explain sample, delay, comparison, and choice in the Romo task step by step. Then present the course's working definition of cognition accurately: brain state is not determined solely by present input, while recognizing the definition's limits.",
+        "figureReading": "Along the timeline, separate the stimulus/task, recording/manipulation, measured quantity, and inferred model variable. Correlations in the result cannot replace a mechanistic test.",
+        "stopPredict": "What distinguishes DMS from parametric working memory?"
+      },
+      {
+        "id": "lecture-23-source-3",
+        "order": 3,
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: persistent PFC activity, population modes, and linear recurrent-memory dynamics.",
+        "noteMeaning": "Drift-diffusion and psychometric/chronometric/LIP results: persistent PFC activity, population modes, and linear recurrent-memory dynamics.",
+        "reasoning": "Explain persistent activity from both single-cell and population-mode views, noting that STM need not rely on immediate synaptic plasticity. Then use a recurrent eigenmode or leaky integrator to explain graded persistence and long time constants.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What must the Romo task retain during the delay?"
+      },
+      {
+        "id": "lecture-23-source-4",
+        "order": 4,
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: random-dot decisions, evidence accumulation, and the drift-diffusion model.",
+        "noteMeaning": "Wong–Wang attractors and cognition/decoupling: random-dot decisions, evidence accumulation, and the drift-diffusion model.",
+        "reasoning": "Explain the decision variable, drift/evidence, leak, bounds, bias, noise, reaction time, and variants such as collapsing or sticky bounds in a drift-diffusion equation. Then explain the reduced nonlinear recurrent Wong–Wang model, its two nullclines, stable and unstable fixed points, separatrix, weak and strong evidence, and stochastic choice.",
+        "figureReading": "Along the timeline, separate the stimulus/task, recording/manipulation, measured quantity, and inferred model variable. Correlations in the result cannot replace a mechanistic test.",
+        "stopPredict": "Does persistent activity require synaptic plasticity?"
+      },
+      {
+        "id": "lecture-23-source-5",
+        "order": 5,
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: behavioral psychometric/chronometric curves and LIP neural correlates.",
+        "noteMeaning": "DMS/Romo and persistent activity: behavioral psychometric/chronometric curves and LIP neural correlates.",
+        "reasoning": "Reconstruct psychometric and chronometric predictions and explain how LIP ramping correlates relate to behavioral and model variables without equating correlation with mechanism. Then explain the decision variable, drift/evidence, leak, bounds, bias, noise, reaction time, and variants such as collapsing or sticky bounds in a drift-diffusion equation.",
+        "figureReading": "First identify both axes, units, normalization, and the single parameter changed by each curve. Distinguish a schematic trend, a model prediction, and genuinely measured data points.",
+        "stopPredict": "What does each of drift, noise, and bound height change in a DDM?"
+      },
+      {
+        "id": "lecture-23-source-6",
+        "order": 6,
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: long integration modes, the nonlinear Wong–Wang attractor model, and phase planes.",
+        "noteMeaning": "Long recurrent modes and drift-diffusion: long integration modes, the nonlinear Wong–Wang attractor model, and phase planes.",
+        "reasoning": "Explain the reduced nonlinear recurrent Wong–Wang model, its two nullclines, stable and unstable fixed points, separatrix, weak and strong evidence, and stochastic choice. Then use a recurrent eigenmode or leaky integrator to explain graded persistent activity and long time constants.",
+        "figureReading": "When reading the figure, first label both nullclines and the axes, then determine vector-field directions, intersection stability, and the order in which trajectories cross boundaries. A trajectory is not itself a causal mechanism.",
+        "stopPredict": "How does raising coherence typically affect RT and accuracy?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "This lecture provisionally defines cognition as a brain state not determined solely by present input. Short-term memory can preserve a past sample in persistent population modes without immediately modifying synapses. Perceptual decisions can be described behaviorally by noisy evidence accumulation and bounds; LIP ramps are correlated neural variables, not automatic proof of mechanism. A reduced Wong–Wang attractor model uses two-dimensional nonlinear nullclines to connect integration, competition, and discrete choice."
+    ],
+    "commonTraps": [
+      "Treating the working definition of cognition as a complete philosophical or psychological definition.",
+      "Assuming that STM requires immediate synaptic plasticity.",
+      "Conflating persistent single-cell activity with a stable population mode.",
+      "Treating the DDM decision variable as a directly observed neuron.",
+      "Fitting only the psychometric function and not testing the chronometric function.",
+      "Equating an LIP correlation directly with a causal accumulator.",
+      "Conflating a descriptive DDM with a biophysical attractor model at the same explanatory level.",
+      "Distinguish working-memory content, neural correlates, persistent modes, and synaptic memory; also distinguish a descriptive DDM from a biophysical attractor model."
+    ],
+    "formulas": [
+      {
+        "id": "L23-F01",
+        "lecture": 23,
+        "name": "persistent memory mode",
+        "expression": "τef f = τ /(1 − λ)",
+        "latex": "\\tau_{\\mathrm{eff}}=\\frac{\\tau}{1-\\lambda}",
+        "conditions": "λ<1 but close to 1",
+        "sectionId": "lecture-23-source-2",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L23-F02",
+        "lecture": 23,
+        "name": "leaky evidence accumulator",
+        "expression": "τa ȧ = −a + e(t) + γ(t)",
+        "latex": "\\tau_a\\dot a=-a+e(t)+\\gamma(t)",
+        "conditions": "white or colored noise specified",
+        "sectionId": "lecture-23-source-4",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L23-F03",
+        "lecture": 23,
+        "name": "decision bias",
+        "expression": "a(0) = b",
+        "latex": "a(0)=b",
+        "conditions": "initial-condition interpretation",
+        "sectionId": "lecture-23-source-4",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L23-F04",
+        "lecture": 23,
+        "name": "absorbing decision bounds",
+        "expression": "a = ±B",
+        "latex": "a=\\pm B",
+        "conditions": "first-passage rule",
+        "sectionId": "lecture-23-source-4",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L23-F05",
+        "lecture": 23,
+        "name": "psychometric function",
+        "expression": "P (choice|c)",
+        "latex": "P(\\mathrm{choice}\\mid c)",
+        "conditions": "signed stimulus strength",
+        "sectionId": "lecture-23-source-2",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L23-F06",
+        "lecture": 23,
+        "name": "chronometric function",
+        "expression": "E[RT |c]",
+        "latex": "\\mathbb{E}[\\mathrm{RT}\\mid c]",
+        "conditions": "state whether nondecision time is included",
+        "sectionId": "lecture-23-source-3",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L23-F07",
+        "lecture": 23,
+        "name": "Wong–Wang nullclines",
+        "expression": "G1 = 0, G2 = 0",
+        "latex": "G_1=0,\\qquad G_2=0",
+        "conditions": "2D reduced dynamics",
+        "sectionId": "lecture-23-source-4",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L23-G01",
+        "lecture": 23,
+        "zh": "认知",
+        "en": "cognition",
+        "definition": "This lecture's working definition: a brain state partly decoupled from present input and shaped by past events or future goals.",
+        "sectionId": "lecture-23-source-1",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L23-G02",
+        "lecture": 23,
+        "zh": "短时记忆",
+        "en": "short-term memory",
+        "definition": "The ability to retain recently encountered information briefly.",
+        "sectionId": "lecture-23-source-2",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L23-G03",
+        "lecture": 23,
+        "zh": "工作记忆",
+        "en": "working memory",
+        "definition": "Information retained for use in a current computation.",
+        "sectionId": "lecture-23-source-1",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L23-G04",
+        "lecture": 23,
+        "zh": "延迟匹配样本",
+        "en": "delayed match-to-sample",
+        "definition": "A sample–delay–test memory task.",
+        "sectionId": "lecture-23-source-1",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L23-G05",
+        "lecture": 23,
+        "zh": "持续活动",
+        "en": "persistent activity",
+        "definition": "Neural activity that remains after the stimulus ends.",
+        "sectionId": "lecture-23-source-2",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L23-G06",
+        "lecture": 23,
+        "zh": "漂移扩散模型",
+        "en": "drift-diffusion model, DDM",
+        "definition": "A decision model that accumulates noisy evidence to bounds.",
+        "sectionId": "lecture-23-source-4",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L23-G07",
+        "lecture": 23,
+        "zh": "心理测量曲线",
+        "en": "psychometric curve",
+        "definition": "Choice or accuracy as a function of stimulus strength.",
+        "sectionId": "lecture-23-source-2",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L23-G08",
+        "lecture": 23,
+        "zh": "时间测量曲线",
+        "en": "chronometric curve",
+        "definition": "Reaction time as a function of stimulus strength.",
+        "sectionId": "lecture-23-source-4",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L23-G09",
+        "lecture": 23,
+        "zh": "分界线",
+        "en": "separatrix",
+        "definition": "A boundary separating different attractor basins.",
+        "sectionId": "lecture-23-source-6",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L23-G10",
+        "lecture": 23,
+        "zh": "吸引子",
+        "en": "attractor",
+        "definition": "A state or set toward which nearby states converge under the dynamics.",
+        "sectionId": "lecture-23-source-3",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 3
+      }
+    ],
+    "errata": [
+      {
+        "id": "L23-E01",
+        "lecture": 23,
+        "lectureTitle": "Short-Term Memory and Perceptual Decision-Making",
+        "kind": "caution",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 1,
+        "sectionId": "l23-m1",
+        "originalIssue": "The cognition definition on Page 1 is explicitly a working definition, not an exhaustive one.",
+        "explanation": "This lecture uses the working definition that cognition makes brain state or behavior incompletely determined by present sensory input.",
+        "correction": null
+      },
+      {
+        "id": "L23-E02",
+        "lecture": 23,
+        "lectureTitle": "Short-Term Memory and Perceptual Decision-Making",
+        "kind": "caution",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 4,
+        "sectionId": "l23-m4",
+        "originalIssue": "The equation on Page 4 contains leak. A classic perfect DDM often omits the −a term, while this lecture uses the more general leaky form.",
+        "explanation": "The -a term is leak and discounts old evidence; a classic perfect DDM often omits it, while the lecture equation is a more general leaky accumulator.",
+        "correction": null
+      },
+      {
+        "id": "L23-E03",
+        "lecture": 23,
+        "lectureTitle": "Short-Term Memory and Perceptual Decision-Making",
+        "kind": "caution",
+        "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+        "sourcePage": 5,
+        "sectionId": "l23-m5",
+        "originalIssue": "The LIP ramps on Page 5 are neural correlates; visual similarity alone cannot establish mechanism.",
+        "explanation": "During motion decisions, LIP neurons often show a choice-selective ramp and approach a similar firing level before response, consistent with accumulation to bound.",
+        "correction": "The LIP ramps on Page 5 are neural correlates; visual similarity alone cannot establish mechanism"
+      }
+    ]
+  },
+  {
+    "lecture": 24,
+    "coreQuestion": "How does reward-gated plasticity avoid unconditional weight growth and produce matching, and how do value prediction and temporal-difference error explain blocking and dopamine responses?",
+    "dependencyMap": "stimulus/action/reward → three-factor plasticity → reward baseline/covariance → matching law → Rescorla–Wagner → TD/RPE",
+    "sourceUnits": [
+      {
+        "id": "lecture-24-source-1",
+        "order": 1,
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: learned decisions, stimulus–reward associations, three-factor plasticity, and dopamine.",
+        "noteMeaning": "Stimulus/action/reward and three-factor plasticity: learned decisions, stimulus–reward associations, three-factor plasticity, and dopamine.",
+        "reasoning": "Use a foraging example to explain stimulus–action–reward associations and three-factor plasticity, making clear that dopamine is a canonical candidate third factor rather than the only mechanism of reward learning. Then redraw the three dopamine RPE patterns—early reward, cue transfer, and omitted reward—and distinguish RPE and value from a salience alternative.",
+        "figureReading": "Along the timeline, separate the stimulus/task, recording/manipulation, measured quantity, and inferred model variable. Correlations in the result cannot replace a mechanistic test.",
+        "stopPredict": "Why does naive reward-gated Hebbian learning overstrengthen?"
+      },
+      {
+        "id": "lecture-24-source-2",
+        "order": 2,
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: covariance-based reward plasticity, reward-baseline subtraction, and derivation of the matching condition.",
+        "noteMeaning": "Reward baseline/covariance and the matching law: covariance-based reward plasticity, reward-baseline subtraction, and derivation of the matching condition.",
+        "reasoning": "Derive the matching condition step by step: show how equal choice-conditioned expected rewards imply choice ratio≈reward ratio and state the assumptions. Then begin with overstrengthening under a naive reward-gated Hebbian rule and derive reward-baseline subtraction and the covariance form.",
+        "figureReading": "Match the diagram to the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis length or curvature corresponds to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "After subtracting a reward baseline, what does the expected update become?"
+      },
+      {
+        "id": "lecture-24-source-3",
+        "order": 3,
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: matching law and a neural model of fly foraging.",
+        "noteMeaning": "Rescorla–Wagner and TD/RPE: matching law and a neural model of fly foraging.",
+        "reasoning": "Reconstruct the fly mushroom-body model, stochastic choice, and baseline reward estimate, explaining behavioral and neural levels of matching. Then derive the matching condition step by step: show how equal choice-conditioned expected rewards imply choice ratio≈reward ratio and state the assumptions.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What marginal-return condition supports matching?"
+      },
+      {
+        "id": "lecture-24-source-4",
+        "order": 4,
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: value prediction, Rescorla–Wagner, blocking, temporal difference, and discounting.",
+        "noteMeaning": "Q/action selection and stimulus/action/reward: value prediction, Rescorla–Wagner, blocking, temporal difference, and discounting.",
+        "reasoning": "Derive Rescorla–Wagner from a linear value prediction and squared prediction error, then use blocking to explain zero prediction error. Next explain temporal features and state representation, Q value, and greedy action selection.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What ratio does the matching law relate?"
+      },
+      {
+        "id": "lecture-24-source-5",
+        "order": 5,
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: temporally extended features and state–action value/Q.",
+        "noteMeaning": "Three-factor plasticity and reward baseline/covariance: temporally extended features and state–action value/Q.",
+        "reasoning": "Derive Rescorla–Wagner from a linear value prediction and squared prediction error, then use blocking to explain zero prediction error. Next reconstruct the fly mushroom-body model, stochastic choice, and baseline reward estimate, explaining behavioral and neural levels of matching.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "What is the Rescorla–Wagner error?"
+      },
+      {
+        "id": "lecture-24-source-6",
+        "order": 6,
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: dopamine reward-prediction-error patterns, value/Q signals, and action selection.",
+        "noteMeaning": "Matching law and Rescorla–Wagner: dopamine reward-prediction-error patterns, value/Q signals, and action selection.",
+        "reasoning": "Explain temporal features and state representation, Q value, and greedy action selection. Then derive discounted return and the value function for delayed rewards, writing TD error as reward plus discounted next value minus current value.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "Why does blocking occur?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "Learned decisions must connect stimulus/action activity to delayed reward. A simple reward-gated Hebbian rule keeps strengthening when reward is common; subtracting the expected-reward baseline turns it into a covariance rule. Under a specified choice model and assumptions, the stationary covariance condition produces matching behavior. Rescorla–Wagner learns cue value from current reward-prediction error, while TD extends error to future value. Dopamine cue-transfer and omission patterns resemble RPE, though dopamine signals may also mix salience and movement."
+    ],
+    "commonTraps": [
+      "Failing to subtract a baseline from reward-gated Hebbian learning, so every rewarded coactivity continues to strengthen.",
+      "Treating matching as an unconditional law of rational optimality.",
+      "Explaining blocking by claiming that S2 did not coincide with reward.",
+      "Conflating RPE, value, and salience.",
+      "Omitting γ or next value from TD error.",
+      "Treating dopamine as the only third factor in all reward learning.",
+      "Prematurely treating this lecture's simplified Q concept as a complete Q-learning algorithm.",
+      "Lecture 24 is a biological and reward-learning bridge; Lecture 25 introduces MDP/RL systematically. Do not let Bellman equations or Q-learning obscure this lecture's plasticity and dopamine logic."
+    ],
+    "formulas": [
+      {
+        "id": "L24-F01",
+        "lecture": 24,
+        "name": "reward-baseline three-factor update",
+        "expression": "∆w = ηe(R − R̄)",
+        "latex": "\\Delta w=\\eta e(R-\\bar R)",
+        "conditions": "eligibility e defined",
+        "sectionId": "lecture-24-source-2",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L24-F02",
+        "lecture": 24,
+        "name": "covariance learning",
+        "expression": "E[∆w] = ηCov(e, R)",
+        "latex": "\\mathbb{E}[\\Delta w]=\\eta\\,\\operatorname{Cov}(e,R)",
+        "conditions": "stationary average",
+        "sectionId": "lecture-24-source-1",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L24-F03",
+        "lecture": 24,
+        "name": "matching law",
+        "expression": "CA /CB ≈ RA /RB",
+        "latex": "\\frac{C_A}{C_B}\\approx\\frac{R_A}{R_B}",
+        "conditions": "specific foraging assumptions",
+        "sectionId": "lecture-24-source-3",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L24-F04",
+        "lecture": 24,
+        "name": "linear value predictor",
+        "expression": "V = wT x",
+        "latex": "V=\\mathbf w^{\\mathsf T}\\mathbf x",
+        "conditions": "features x",
+        "sectionId": "lecture-24-source-4",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L24-F05",
+        "lecture": 24,
+        "name": "Rescorla–Wagner update",
+        "expression": "∆w = ηx(R − V )",
+        "latex": "\\Delta\\mathbf w=\\eta\\mathbf x(R-V)",
+        "conditions": "immediate or represented reward",
+        "sectionId": "lecture-24-source-2",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L24-F06",
+        "lecture": 24,
+        "name": "TD/RPE",
+        "expression": "δ = R + γVnext − V",
+        "latex": "\\delta=R+\\gamma V_{\\mathrm{next}}-V",
+        "conditions": "Markov or state representation implicit",
+        "sectionId": "lecture-24-source-6",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L24-F07",
+        "lecture": 24,
+        "name": "state–action value",
+        "expression": "Q(s, a) = E[G|s, a]",
+        "latex": "Q(s,a)=\\mathbb{E}[G\\mid s,a]",
+        "conditions": "policy and future behavior specified",
+        "sectionId": "lecture-24-source-5",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L24-G01",
+        "lecture": 24,
+        "zh": "奖励学习",
+        "en": "reward learning",
+        "definition": "Adjustment of stimulus–action associations by outcomes.",
+        "sectionId": "lecture-24-source-1",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L24-G02",
+        "lecture": 24,
+        "zh": "资格迹",
+        "en": "eligibility trace",
+        "definition": "A variable marking recent pre/post or action activity for modification by a later reward.",
+        "sectionId": "lecture-24-source-1",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L24-G03",
+        "lecture": 24,
+        "zh": "奖励基线",
+        "en": "reward baseline",
+        "definition": "Expected reward used to compute a signal above or below expectation.",
+        "sectionId": "lecture-24-source-2",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L24-G04",
+        "lecture": 24,
+        "zh": "匹配律",
+        "en": "matching law",
+        "definition": "Approximate matching of choice proportions to obtained-reward proportions.",
+        "sectionId": "lecture-24-source-2",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L24-G05",
+        "lecture": 24,
+        "zh": "价值",
+        "en": "value",
+        "definition": "Expected discounted future reward from the current state or cue.",
+        "sectionId": "lecture-24-source-1",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L24-G06",
+        "lecture": 24,
+        "zh": "Rescorla-Wagner 规则",
+        "en": "Rescorla-Wagner rule",
+        "definition": "A rule that updates cue value using reward-prediction error.",
+        "sectionId": "lecture-24-source-4",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L24-G07",
+        "lecture": 24,
+        "zh": "阻断",
+        "en": "blocking",
+        "definition": "Failure of a new cue to learn because an existing predictor leaves zero error.",
+        "sectionId": "lecture-24-source-4",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L24-G08",
+        "lecture": 24,
+        "zh": "时间差分误差",
+        "en": "temporal-difference error, TD error",
+        "definition": "Reward plus discounted next value minus current value.",
+        "sectionId": "lecture-24-source-6",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L24-G09",
+        "lecture": 24,
+        "zh": "奖励预测误差",
+        "en": "reward-prediction error, RPE",
+        "definition": "The difference between an actual or updated target and predicted value.",
+        "sectionId": "lecture-24-source-6",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 6
+      },
+      {
+        "id": "L24-G10",
+        "lecture": 24,
+        "zh": "Q值",
+        "en": "Q value",
+        "definition": "Expected return conditioned on a state–action pair.",
+        "sectionId": "lecture-24-source-5",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L24-E01",
+        "lecture": 24,
+        "lectureTitle": "Learning from Reward",
+        "kind": "caution",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 1,
+        "sectionId": "l24-m1",
+        "originalIssue": "Page 1 calls dopamine a canonical candidate third factor; it is not the only possible mechanism.",
+        "explanation": "Dopamine is a canonical candidate third factor because phasic responses often correspond to RPE, but different dopamine neurons, time scales, and tasks may encode components of movement, novelty, or salience.",
+        "correction": null
+      },
+      {
+        "id": "L24-E02",
+        "lecture": 24,
+        "lectureTitle": "Learning from Reward",
+        "kind": "caution",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 3,
+        "sectionId": "l24-m3",
+        "originalIssue": "The matching derivation on Page 3 depends on assumptions about choice-conditioned activity and the reward schedule.",
+        "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries listed here; it is not an unconditional conclusion.",
+        "correction": null
+      },
+      {
+        "id": "L24-E03",
+        "lecture": 24,
+        "lectureTitle": "Learning from Reward",
+        "kind": "erratum",
+        "sourceFile": "Lecture24-LearningFromRewards.pdf",
+        "sourcePage": 6,
+        "sectionId": "l24-m6",
+        "originalIssue": "The resemblance of dopamine signals to RPE on Page 6 is an influential interpretation that does not exclude mixed coding.",
+        "explanation": "This notation or implementation is inconsistent with the definitions required by the subsequent derivation; interpreting it literally gives an incorrect result.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 25,
+    "coreQuestion": "How can an MDP formalize agent–environment interaction, how does recursively decomposing discounted return yield the Bellman equation, and how do Q-learning and a generative model learn an action policy?",
+    "dependencyMap": "agent/state/action/reward → Markov property → discounted return → V/Q/policy → Bellman backup → Q-learning/exploration",
+    "sourceUnits": [
+      {
+        "id": "lecture-25-source-1",
+        "order": 1,
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: squirrel example, agent/environment/state/action/reward, Markov property, and the interaction loop.",
+        "noteMeaning": "Agent/state/action/reward and the Markov property: squirrel example, agent/environment/state/action/reward, Markov property, and the interaction loop.",
+        "reasoning": "Explain that the Markov property is a conditional-independence claim about the state representation, not a claim that the environment 'has no history.' Then use the squirrel environment to define agent, environment, state, action, reward, transition distribution, and policy precisely.",
+        "figureReading": "Follow arrow directions, excitatory and inhibitory signs, state variables, and external inputs one by one. A structural diagram shows permitted dependencies; it does not by itself prove a biological implementation.",
+        "stopPredict": "What does the Markov property describe?"
+      },
+      {
+        "id": "lecture-25-source-2",
+        "order": 2,
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: discounted return, gamma, short- versus far-sighted behavior, state value, policy, Q value, and optimal policy.",
+        "noteMeaning": "Discounted return and V/Q/policy: discounted return, gamma, short- versus far-sighted behavior, state value, policy, Q value, and optimal policy.",
+        "reasoning": "Derive discounted return term by term and explain behavior as gamma→0 and gamma→1, including the caveats for continuing and episodic tasks. Then use the squirrel environment to define agent, environment, state, action, reward, transition distribution, and policy precisely.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "How does a policy differ from a transition model?"
+      },
+      {
+        "id": "lecture-25-source-3",
+        "order": 3,
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: a step-by-step derivation of the Bellman optimality equation.",
+        "noteMeaning": "Bellman backups and Q-learning/exploration: a step-by-step derivation of the Bellman optimality equation.",
+        "reasoning": "Follow the notes to derive the Bellman optimality equation as current reward plus optimal next-state value while retaining the transition expectation. Then derive the tabular Q-learning update from Bellman error and explain learning rate, bootstrapping, the off-policy target, and the relevant convergence assumptions.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "How short-sighted does the agent become as γ→0?"
+      },
+      {
+        "id": "lecture-25-source-4",
+        "order": 4,
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: Q-learning, Bellman error, updating, exploration–exploitation, and epsilon-greedy choice.",
+        "noteMeaning": "Model-based learning/replay and agent/state/action/reward: Q-learning, Bellman error, updating, exploration–exploitation, and epsilon-greedy choice.",
+        "reasoning": "Derive the tabular Q-learning update from Bellman error and explain learning rate, bootstrapping, the off-policy target, and the relevant convergence assumptions. Then analyze the strengths and weaknesses of exploration–exploitation and epsilon-greedy choice.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "How do Vπ and Qπ differ?"
+      },
+      {
+        "id": "lecture-25-source-5",
+        "order": 5,
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: Tolman maze, generative model, hippocampal state representation, and planning.",
+        "noteMeaning": "The Markov property and discounted return: Tolman maze, generative model, hippocampal state representation, and planning.",
+        "reasoning": "Use the Tolman maze to explain generative or model-based representation, connecting hippocampal place/state coding, planning, replay, and simulated experience. Then explain that the Markov property is a conditional-independence claim about the state representation, not a claim that the environment 'has no history.'",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "How is an optimal policy obtained from Q*?"
+      },
+      {
+        "id": "lecture-25-source-6",
+        "order": 6,
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: model-based RL, simulated experience, hippocampal replay, and sample efficiency.",
+        "noteMeaning": "V/Q/policy and Bellman backups: model-based RL, simulated experience, hippocampal replay, and sample efficiency.",
+        "reasoning": "Use the Tolman maze to explain generative or model-based representation, connecting hippocampal place/state coding, planning, replay, and simulated experience. Then compare the computation, sample efficiency, flexibility, and failure modes of model-free and model-based RL.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system. Then ask whether the figure expresses a definition, derivation, model prediction, or empirical observation. A schematic supplies no unlabeled quantitative precision.",
+        "stopPredict": "Where is the maximum taken in the Bellman optimality equation?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "The central MDP claim is not that the environment has no history, but that the chosen state representation makes the future conditionally independent of earlier history given current state and action. Discounted return decomposes recursively into immediate reward plus γ times future return, yielding the Bellman optimality equation. Q-learning uses a sampled Bellman error for an off-policy bootstrap update. Model-based RL also learns a transition/reward model and can improve sample efficiency with simulated experience or replay."
+    ],
+    "commonTraps": [
+      "Equating the Markov property with an environment that has no history.",
+      "Confusing Vπ, Qπ, V*, and Q*.",
+      "Omitting the transition expectation from the Bellman equation.",
+      "Using the behavior action in a Q-learning target and inadvertently writing SARSA.",
+      "Assuming that the random branch of ε-greedy samples only nongreedy actions without stating that convention.",
+      "Equating model-free learning with an absence of internal representation.",
+      "Equating hippocampal replay directly with an exact Bellman backup.",
+      "Q-learning is not a synonym for every TD-learning method, and hippocampal replay is not directly equivalent to an exact Bellman backup; evidence and inference must be distinguished explicitly."
+    ],
+    "formulas": [
+      {
+        "id": "L25-F01",
+        "lecture": 25,
+        "name": "MDP transition/reward model",
+        "expression": "p(s′ , r|s, a)",
+        "latex": "p(s',r\\mid s,a)",
+        "conditions": "Markov state",
+        "sectionId": "lecture-25-source-1",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L25-F02",
+        "lecture": 25,
+        "name": "discounted return",
+        "expression": "Gt = γ k Rt+k+1 k≥0",
+        "latex": "G_t=\\sum_{k=0}^{\\infty}\\gamma^k R_{t+k+1}",
+        "conditions": "0≤γ<1 or a finite episode",
+        "sectionId": "lecture-25-source-2",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L25-F03",
+        "lecture": 25,
+        "name": "state value",
+        "expression": "Vπ (s) = Eπ [Gt |st = s]",
+        "latex": "V_{\\pi}(s)=\\mathbb{E}_{\\pi}[G_t\\mid s_t=s]",
+        "conditions": "policy π",
+        "sectionId": "lecture-25-source-2",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L25-F04",
+        "lecture": 25,
+        "name": "state-action value",
+        "expression": "Qπ (s, a) = Eπ [Gt |st = s, at = a]",
+        "latex": "Q_{\\pi}(s,a)=\\mathbb{E}_{\\pi}[G_t\\mid s_t=s,a_t=a]",
+        "conditions": "first action fixed",
+        "sectionId": "lecture-25-source-2",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L25-F05",
+        "lecture": 25,
+        "name": "Bellman optimality",
+        "expression": "Q∗ = E[R + γ max Q∗ ]",
+        "latex": "Q^*(s,a)=\\mathbb{E}\\!\\left[R_{t+1}+\\gamma\\max_{a'}Q^*(s_{t+1},a')\\mid s_t=s,a_t=a\\right]",
+        "conditions": "optimal continuation",
+        "sectionId": "lecture-25-source-3",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L25-F06",
+        "lecture": 25,
+        "name": "tabular Q-learning",
+        "expression": "Q ← Q + α(R + γ max Q′ − Q)",
+        "latex": "Q(s,a)\\leftarrow Q(s,a)+\\alpha\\left[R_{t+1}+\\gamma\\max_{a'}Q(s_{t+1},a')-Q(s,a)\\right]",
+        "conditions": "sampled transition",
+        "sectionId": "lecture-25-source-3",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L25-F07",
+        "lecture": 25,
+        "name": "ε-greedy exploration",
+        "expression": "πϵ = (1 − ϵ)greedy + ϵrandom",
+        "latex": "\\pi_{\\varepsilon}=(1-\\varepsilon)\\pi_{\\mathrm{greedy}}+\\varepsilon\\pi_{\\mathrm{random}}",
+        "conditions": "finite action set",
+        "sectionId": "lecture-25-source-1",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 1
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L25-G01",
+        "lecture": 25,
+        "zh": "强化学习",
+        "en": "reinforcement learning",
+        "definition": "A framework that learns a policy or value through interaction and rewards.",
+        "sectionId": "lecture-25-source-1",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L25-G02",
+        "lecture": 25,
+        "zh": "智能体",
+        "en": "agent",
+        "definition": "A learner that selects actions and updates an internal policy or model.",
+        "sectionId": "lecture-25-source-2",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L25-G03",
+        "lecture": 25,
+        "zh": "状态",
+        "en": "state",
+        "definition": "An environment representation used to predict the future and select an action.",
+        "sectionId": "lecture-25-source-1",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L25-G04",
+        "lecture": 25,
+        "zh": "马尔可夫性质",
+        "en": "Markov property",
+        "definition": "The conditional independence of the future from earlier history given the current state and action.",
+        "sectionId": "lecture-25-source-1",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L25-G05",
+        "lecture": 25,
+        "zh": "策略",
+        "en": "policy",
+        "definition": "A mapping from states to action probabilities.",
+        "sectionId": "lecture-25-source-1",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L25-G06",
+        "lecture": 25,
+        "zh": "回报",
+        "en": "return",
+        "definition": "The discounted sum of future rewards.",
+        "sectionId": "lecture-25-source-2",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L25-G07",
+        "lecture": 25,
+        "zh": "Bellman 方程",
+        "en": "Bellman equation",
+        "definition": "A recursive self-consistency relation for value.",
+        "sectionId": "lecture-25-source-3",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L25-G08",
+        "lecture": 25,
+        "zh": "Q-learning",
+        "en": "Q-learning",
+        "definition": "A model-free, off-policy TD control algorithm.",
+        "sectionId": "lecture-25-source-3",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L25-G09",
+        "lecture": 25,
+        "zh": "探索-利用",
+        "en": "exploration-exploitation",
+        "definition": "The tradeoff between gathering new information and selecting the currently best action.",
+        "sectionId": "lecture-25-source-4",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L25-G10",
+        "lecture": 25,
+        "zh": "基于模型的强化学习",
+        "en": "model-based reinforcement learning",
+        "definition": "A reinforcement-learning approach that learns or uses an environment model for planning.",
+        "sectionId": "lecture-25-source-5",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L25-G11",
+        "lecture": 25,
+        "zh": "重放",
+        "en": "replay",
+        "definition": "A neural or computational process that reinstates or simulates state sequences offline.",
+        "sectionId": "lecture-25-source-4",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 4
+      }
+    ],
+    "errata": [
+      {
+        "id": "L25-E01",
+        "lecture": 25,
+        "lectureTitle": "Reinforcement Learning: MDPs, Bellman Equations, and Q-Learning",
+        "kind": "caution",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 2,
+        "sectionId": "l25-m2",
+        "originalIssue": "For continuing tasks, γ on Page 2 is commonly less than 1; finite episodic tasks can use γ=1, and this qualification should be stated.",
+        "explanation": "A finite episode can use γ=1, whereas continuing positive reward generally requires γ<1.",
+        "correction": "Finite episodic tasks can use γ=1; this qualification should be stated explicitly."
+      },
+      {
+        "id": "L25-E02",
+        "lecture": 25,
+        "lectureTitle": "Reinforcement Learning: MDPs, Bellman Equations, and Q-Learning",
+        "kind": "caution",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 4,
+        "sectionId": "l25-m4",
+        "originalIssue": "The Q-learning rule on Page 4 is tabular; the source page does not develop issues of function approximation or convergence.",
+        "explanation": "The course equation is the basic tabular form and does not imply that function approximation is always stable.",
+        "correction": null
+      },
+      {
+        "id": "L25-E03",
+        "lecture": 25,
+        "lectureTitle": "Reinforcement Learning: MDPs, Bellman Equations, and Q-Learning",
+        "kind": "erratum",
+        "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+        "sourcePage": 5,
+        "sectionId": "l25-m5",
+        "originalIssue": "The hippocampal planning/replay connection on Pages 5-6 is a bridge from evidence to inference, not a one-to-one algorithmic mapping.",
+        "explanation": "Hippocampal place/state coding and the cognitive-map hypothesis provide a biological bridge, but place activity also depends on movement, sensory, and task variables.",
+        "correction": "The hippocampal planning/replay connection on Pages 5-6 is a bridge from evidence to inference, not a one-to-one algorithmic mapping."
+      }
+    ]
+  },
+  {
+    "lecture": 26,
+    "coreQuestion": "How do symmetric Hebbian recurrent weights turn random binary patterns into attractors, and how do energy descent, crosstalk noise, and loading α determine pattern completion and capacity?",
+    "dependencyMap": "Hebbian assembly → binary asynchronous dynamics → energy → stored attractors/basins → spurious mixtures → signal+crosstalk",
+    "sourceUnits": [
+      {
+        "id": "lecture-26-source-1",
+        "order": 1,
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "page": 1,
+        "reconstruction": "Page 1: explicit memory, Hebbian assemblies, encoding/retrieval, pattern completion, and engrams.",
+        "noteMeaning": "Hebbian assemblies and binary asynchronous dynamics: explicit memory, Hebbian assemblies, encoding/retrieval, pattern completion, and engrams.",
+        "reasoning": "Use the Hebbian cell-assembly hypothesis to explain encoding, partial cues, retrieval, pattern completion, and attractor basins; distinguish the biological hypothesis from the abstract binary model. Then derive from the Hebbian weight rule why a stored pattern is an attractor for P=1, and analyze aligned, antialigned, and spurious states.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system in the figure. Then ask whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not supply unmarked quantitative precision.",
+        "stopPredict": "What is an asynchronous update?"
+      },
+      {
+        "id": "lecture-26-source-2",
+        "order": 2,
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "page": 2,
+        "reconstruction": "Page 2: the Hopfield binary network, asynchronous updates, and stored random patterns.",
+        "noteMeaning": "Energy and stored attractors/basins: the Hopfield binary network, asynchronous updates, and stored random patterns.",
+        "reasoning": "Define binary states, random patterns, asynchronous single-neuron updating, and the convergence procedure precisely. Then use the Hebbian cell-assembly hypothesis to explain encoding, partial cues, retrieval, pattern completion, and attractor basins; distinguish the biological hypothesis from the abstract binary model.",
+        "figureReading": "Trace each arrow's direction, excitatory or inhibitory sign, state variable, and external input. A structural diagram specifies permissible dependencies; it does not by itself establish a biological implementation.",
+        "stopPredict": "What conditions on the weights are required for energy descent?"
+      },
+      {
+        "id": "lecture-26-source-3",
+        "order": 3,
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "page": 3,
+        "reconstruction": "Page 3: Ising energy, symmetric Hebbian weights, the P=1 retrieval derivation, basins, and spurious attractors.",
+        "noteMeaning": "Spurious mixtures and signal+crosstalk: Ising energy, symmetric Hebbian weights, the P=1 retrieval derivation, basins, and spurious attractors.",
+        "reasoning": "Explain Ising energy and prove that symmetric weights with asynchronous updates make energy nonincreasing; contrast this with synchronous updating. Then use the Hebbian cell-assembly hypothesis to explain encoding, partial cues, retrieval, pattern completion, and attractor basins; distinguish the biological hypothesis from the abstract binary model.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system in the figure. Then ask whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not supply unmarked quantitative precision.",
+        "stopPredict": "Why is ΔE≤0?"
+      },
+      {
+        "id": "lecture-26-source-4",
+        "order": 4,
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "page": 4,
+        "reconstruction": "Page 4: odd-mixture states, memory capacity, and the signal-plus-interference decomposition.",
+        "noteMeaning": "Capacity/spin glass and the sparse alternative: odd-mixture states, memory capacity, and the signal-plus-interference decomposition.",
+        "reasoning": "Derive from the Hebbian weight rule why a stored pattern is an attractor for P=1, and analyze aligned, antialigned, and spurious states. Then explain odd-mixture spurious attractors and their basins of attraction.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system in the figure. Then ask whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not supply unmarked quantitative precision.",
+        "stopPredict": "What does Hebbian W_ij store?"
+      },
+      {
+        "id": "lecture-26-source-5",
+        "order": 5,
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "page": 5,
+        "reconstruction": "Page 5: the Gaussian approximation, error probability, P∝N, critical alpha≈0.138, and the spin-glass transition.",
+        "noteMeaning": "Hebbian assemblies and binary asynchronous dynamics: the Gaussian approximation, error probability, P∝N, critical alpha≈0.138, and the spin-glass transition.",
+        "reasoning": "Explain capacity proportional to N, loading alpha=P/N, critical alpha_c≈0.138, and the spin-glass transition, noting that this constant depends on the assumptions of the classic model. Then, for P>1, separate signal from crosstalk, calculate the interference mean and variance step by step, and use a Gaussian approximation to estimate the tendency toward error.",
+        "figureReading": "Align the figure with the matrix shape: axes represent variables or modes, ellipse directions correspond to eigenvectors, and axis lengths or curvature correspond to eigenvalues. Do not automatically interpret a statistical axis as a causal pathway.",
+        "stopPredict": "Why is ξ a fixed point when P=1?"
+      },
+      {
+        "id": "lecture-26-source-6",
+        "order": 6,
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "page": 6,
+        "reconstruction": "Page 6: a sparse, stochastic associative-memory alternative; global inhibition; and near-optimal capacity.",
+        "noteMeaning": "Energy and stored attractors/basins: a sparse, stochastic associative-memory alternative; global inhibition; and near-optimal capacity.",
+        "reasoning": "Compare the sparse {0,1} stochastic model, global inhibition, temperature, and information capacity. Then explain capacity proportional to N, loading alpha=P/N, critical alpha_c≈0.138, and the spin-glass transition, noting that this constant depends on the assumptions of the classic model.",
+        "figureReading": "First identify the objects, arrows, parameters, and coordinate system in the figure. Then ask whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not supply unmarked quantitative precision.",
+        "stopPredict": "Why is −ξ also an attractor?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "The Hopfield model abstracts explicit memory as attractor dynamics: recurrent updates drive a partial cue toward a stored pattern. Symmetric weights and asynchronous single-neuron updates ensure that Ising energy cannot increase. For P=1, Hebbian weights make both the target and its sign-reversed pattern fixed points. For P>1, the other memories produce crosstalk noise; as loading α=P/N rises, retrieval errors increase, and stable retrieval disappears near α≈0.138 in the classic dense random model."
+    ],
+    "commonTraps": [
+      "Applying an energy proof for asynchronous dynamics to synchronous dynamics.",
+      "Forgetting that W must be symmetric and Wii=0.",
+      "Calling only ξ an attractor for P=1 while overlooking −ξ and the spurious states implied by global sign symmetry.",
+      "Conflating overlap with exact bit accuracy.",
+      "Failing to check how crosstalk variance scales with N and P.",
+      "Treating the Gaussian approximation as an exact finite-N law.",
+      "Treating 0.138N as the memory capacity of the brain.",
+      "Failing to state that a 'memory capacity of 0.138N' refers only to the stable-retrieval criterion of the classic dense random-pattern Hopfield model, not to a conclusion about biological memory capacity."
+    ],
+    "formulas": [
+      {
+        "id": "L26-F01",
+        "lecture": 26,
+        "name": "binary neuron state",
+        "expression": "Si ∈ {−1, +1}",
+        "latex": "S_i\\in\\{-1,+1\\}",
+        "conditions": "classic dense model",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-F02",
+        "lecture": 26,
+        "name": "asynchronous update",
+        "expression": "Si ← sgn(hi )",
+        "latex": "S_i(t+1)=\\operatorname{sgn}\\!\\left(\\sum_{j=1}^{N}W_{ij}S_j(t)\\right)",
+        "conditions": "one neuron at a time",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-F03",
+        "lecture": 26,
+        "name": "Hopfield energy",
+        "expression": "1∑ E=− Wij Si Sj 2 ij",
+        "latex": "E=-\\frac{1}{2}\\sum_i\\sum_{j\\ne i}W_{ij}S_iS_j",
+        "conditions": "symmetric W",
+        "sectionId": "lecture-26-source-2",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L26-F04",
+        "lecture": 26,
+        "name": "Hebbian storage rule",
+        "expression": "Wij = N −1 ξi ξj µ",
+        "latex": "W_{ij}=\\frac{1}{N}\\sum_{\\mu=1}^{P}\\xi_i^{(\\mu)}\\xi_j^{(\\mu)},\\qquad W_{ii}=0",
+        "conditions": "Wii=0",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-F05",
+        "lecture": 26,
+        "name": "pattern overlap",
+        "expression": "mµ = N −1 ξ i Si i",
+        "latex": "m^{\\mu}=\\frac{1}{N}\\sum_{i=1}^{N}\\xi_i^{(\\mu)}S_i",
+        "conditions": "±1 patterns",
+        "sectionId": "lecture-26-source-2",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L26-F06",
+        "lecture": 26,
+        "name": "retrieval field decomposition",
+        "expression": "h = signal + crosstalk",
+        "latex": "h=\\text{signal}+\\text{crosstalk}",
+        "conditions": "random-pattern analysis",
+        "sectionId": "lecture-26-source-3",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L26-F07",
+        "lecture": 26,
+        "name": "loading ratio",
+        "expression": "α = P /N",
+        "latex": "\\alpha=\\frac{P}{N}",
+        "conditions": "P memories, N neurons",
+        "sectionId": "lecture-26-source-5",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L26-F08",
+        "lecture": 26,
+        "name": "classic capacity threshold",
+        "expression": "αc ≈ 0.138",
+        "latex": "\\alpha_c\\approx 0.138",
+        "conditions": "dense unbiased random Hopfield",
+        "sectionId": "lecture-26-source-2",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 2
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L26-G01",
+        "lecture": 26,
+        "zh": "联想记忆",
+        "en": "associative memory",
+        "definition": "The recovery of a stored pattern from a partial or noisy cue.",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-G02",
+        "lecture": 26,
+        "zh": "细胞集合",
+        "en": "cell assembly",
+        "definition": "A group of neurons that are coactive and linked by Hebbian connections.",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-G03",
+        "lecture": 26,
+        "zh": "吸引子盆地",
+        "en": "basin of attraction",
+        "definition": "The set of initial states that converge to the same attractor.",
+        "sectionId": "lecture-26-source-4",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L26-G04",
+        "lecture": 26,
+        "zh": "模式补全",
+        "en": "pattern completion",
+        "definition": "The reconstruction of a complete memory from an incomplete cue.",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-G05",
+        "lecture": 26,
+        "zh": "异步更新",
+        "en": "asynchronous update",
+        "definition": "An update scheme that changes only one unit at each step.",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-G06",
+        "lecture": 26,
+        "zh": "Ising 能量",
+        "en": "Ising energy",
+        "definition": "A Lyapunov function for a symmetric binary network.",
+        "sectionId": "lecture-26-source-3",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L26-G07",
+        "lecture": 26,
+        "zh": "重叠",
+        "en": "overlap",
+        "definition": "The normalized dot product between the current state and a stored pattern.",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-G08",
+        "lecture": 26,
+        "zh": "串扰",
+        "en": "crosstalk",
+        "definition": "Interference from other stored patterns during retrieval of a target pattern.",
+        "sectionId": "lecture-26-source-2",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L26-G09",
+        "lecture": 26,
+        "zh": "伪吸引子",
+        "en": "spurious attractor",
+        "definition": "A stable state that does not correspond to any single stored pattern.",
+        "sectionId": "lecture-26-source-1",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L26-G10",
+        "lecture": 26,
+        "zh": "自旋玻璃",
+        "en": "spin glass",
+        "definition": "A regime dominated by many disordered metastable states.",
+        "sectionId": "lecture-26-source-4",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L26-G11",
+        "lecture": 26,
+        "zh": "温度",
+        "en": "temperature",
+        "definition": "A scale parameter for noise in stochastic updates.",
+        "sectionId": "lecture-26-source-6",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 6
+      }
+    ],
+    "errata": [
+      {
+        "id": "L26-E01",
+        "lecture": 26,
+        "lectureTitle": "The Hopfield associative-memory model",
+        "kind": "caution",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 2,
+        "sectionId": "lecture-26-source-2",
+        "originalIssue": "The Nobel note on Page 2 provides historical context and does not affect the model definition.",
+        "explanation": "The claim is valid only within the stated approximation, parameter range, or model variant and must not be treated as unconditional.",
+        "correction": null
+      },
+      {
+        "id": "L26-E02",
+        "lecture": 26,
+        "lectureTitle": "The Hopfield associative-memory model",
+        "kind": "caution",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 5,
+        "sectionId": "l26-m5",
+        "originalIssue": "The α_c≈0.138 value on Page 5 applies only to the retrieval criterion of the classic dense, unbiased, random-pattern Hopfield model.",
+        "explanation": "Errors by individual units feed back into their fields, so full self-consistency yields the classic dense-model retrieval threshold αc of about 0.138; the simple one-step tail does not.",
+        "correction": null
+      },
+      {
+        "id": "L26-E03",
+        "lecture": 26,
+        "lectureTitle": "The Hopfield associative-memory model",
+        "kind": "erratum",
+        "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+        "sourcePage": 6,
+        "sectionId": "l26-m6",
+        "originalIssue": "The sparse stochastic model on Page 6 is an alternative model family; its capacity comparison depends on activity sparsity and the information metric.",
+        "explanation": "The dense-model value αc=0.138 cannot be compared directly with a single sparse-model number unless activity and the evaluation metric are matched.",
+        "correction": null
+      }
+    ]
+  },
+  {
+    "lecture": 27,
+    "coreQuestion": "How does episodic memory transfer from the hippocampal one-shot notebook to the neocortical predictive student, why can standard consolidation overfit unpredictable details, and why must Go-CLS stop according to predictability?",
+    "dependencyMap": "Recent versus remote memory → hippocampal replay → Teacher–Student–Notebook → pattern separation and completion → memory error → generalization error",
+    "sourceUnits": [
+      {
+        "id": "lecture-27-source-1",
+        "order": 1,
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "page": 1,
+        "reconstruction": "Page 1 covers changes in memory locus and quality over time, patient E.P., standard systems consolidation, hippocampal replay, and episodic versus semantic memory.",
+        "noteMeaning": "This page connects recent versus remote memory with hippocampal replay by examining changes in memory locus and quality over time, patient E.P., standard systems consolidation, hippocampal replay, and episodic versus semantic memory.",
+        "reasoning": "It explains the hypothesized link among hippocampal replay, compressed trajectories, and neocortical reactivation. It therefore examines how the anatomical locus and psychological character of memories change over time while presenting evidence from patient E.P. and recent versus remote amnesia without overgeneralizing from a single case.",
+        "figureReading": "A careful reading should first identify the objects, arrows, parameters, and coordinate system in the figure, then determine whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not provide unmarked quantitative precision.",
+        "stopPredict": "Which two aspects does systems consolidation change?"
+      },
+      {
+        "id": "lecture-27-source-2",
+        "order": 2,
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "page": 2,
+        "reconstruction": "Page 2 presents the Teacher–Student–Notebook framework, including a generative Teacher, a neocortical Student, and a hippocampal one-shot Notebook.",
+        "noteMeaning": "This page connects the Teacher–Student–Notebook framework with pattern separation and completion by describing a generative Teacher, a neocortical Student, and a hippocampal one-shot Notebook.",
+        "reasoning": "This reconstruction assigns each Teacher–Student–Notebook role explicitly: the Teacher is the environment's generative model, the Student is the neocortical predictive learner, and the Notebook is the hippocampal one-shot autoassociative memory. It then explains the hypothesized link among hippocampal replay, compressed trajectories, and neocortical reactivation.",
+        "figureReading": "A careful reading should first identify the objects, arrows, parameters, and coordinate system in the figure, then determine whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not provide unmarked quantitative precision.",
+        "stopPredict": "What role does hippocampal replay play in the standard account?"
+      },
+      {
+        "id": "lecture-27-source-3",
+        "order": 3,
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "page": 3,
+        "reconstruction": "Page 3 covers the autoassociative Notebook, pattern separation and completion, and Hebbian interactions between Student and Notebook.",
+        "noteMeaning": "This page connects memory error with generalization error through the autoassociative Notebook, pattern separation and completion, and Hebbian interactions between Student and Notebook.",
+        "reasoning": "It explains the Notebook's pattern separation, pattern completion, Hebbian student↔notebook interactions, and seeding. It therefore supports a role-by-role reconstruction in which the Teacher is the environment's generative model, the Student is the neocortical predictive learner, and the Notebook is the hippocampal one-shot autoassociative memory.",
+        "figureReading": "A careful reading should first identify the objects, arrows, parameters, and coordinate system in the figure, then determine whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not provide unmarked quantitative precision.",
+        "stopPredict": "What do Teacher, Student, and Notebook represent, respectively?"
+      },
+      {
+        "id": "lecture-27-source-4",
+        "order": 4,
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "page": 4,
+        "reconstruction": "Page 4 presents the linear Teacher–Student model, memory error, generalization error, and standard complementary learning systems.",
+        "noteMeaning": "This page connects overfitting and stopping with Go-CLS lesion predictions through the linear Teacher–Student model, memory error, generalization error, and standard complementary learning systems.",
+        "reasoning": "It defines memory error and population generalization error in the linear Teacher–Student model and explains the tradeoff between fast Notebook memory and slow Student generalization. It therefore reinforces the role-by-role reconstruction in which the Teacher is the environment's generative model, the Student is the neocortical predictive learner, and the Notebook is the hippocampal one-shot autoassociative memory.",
+        "figureReading": "A careful reading should first identify the objects, arrows, parameters, and coordinate system in the figure, then determine whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not provide unmarked quantitative precision.",
+        "stopPredict": "What computational benefit does pattern separation provide?"
+      },
+      {
+        "id": "lecture-27-source-5",
+        "order": 5,
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "page": 5,
+        "reconstruction": "Page 5 covers overfitting of unpredictable components, stopping consolidation, Go-CLS, predictability/SNR, and lesion predictions.",
+        "noteMeaning": "This page connects recent versus remote memory with hippocampal replay through overfitting of unpredictable components, stopping consolidation, Go-CLS, predictability/SNR, and lesion predictions.",
+        "reasoning": "It explains generalization-optimized complementary learning systems (Go-CLS), predictability/SNR-controlled transfer, lesion predictions, and why unpredictable episodic details remain hippocampus-dependent. It therefore shows how standard CLS can overfit noise or unpredictable components and explains why consolidation must stop.",
+        "figureReading": "A careful reading should first identify the objects, arrows, parameters, and coordinate system in the figure, then determine whether it presents a definition, derivation, model prediction, or empirical observation; a schematic does not provide unmarked quantitative precision.",
+        "stopPredict": "What computational benefit does pattern completion provide?"
+      }
+    ],
+    "specialSection": [],
+    "synthesis": [
+      "Systems consolidation changes both the anatomical dependence and the psychological character of memory: recent memories tend to be more vivid and episodic, whereas remote memories tend to be more gist-like and semantic. In the Teacher–Student–Notebook framework, the environment or Teacher is a generative source, the neocortical Student slowly learns predictive structure, and the hippocampal Notebook rapidly stores and replays one-shot episodes. Continuous standard transfer can also write unpredictable noise into the Student and thereby impair generalization. Go-CLS instead controls transfer according to signal predictability/SNR and stops at the optimum, so unpredictable episodic detail remains hippocampus-dependent."
+    ],
+    "commonTraps": [
+      "A single case such as patient E.P. cannot establish every mechanism of consolidation.",
+      "Recent memory is not absolutely equivalent to hippocampal storage, nor is remote memory absolutely equivalent to neocortical storage.",
+      "A correlation with replay does not by itself demonstrate causal synaptic transfer.",
+      "Teacher, Student, and Notebook are formal roles rather than one-to-one anatomical labels.",
+      "Memory error and generalization error are distinct metrics.",
+      "Lower training error does not necessarily mean that consolidation is better.",
+      "Go-CLS predictions are not established facts.",
+      "Empirical observations, standard theory, the Teacher–Student–Notebook formal model, and Go-CLS predictions must be distinguished clearly, and model predictions must not be presented as established facts."
+    ],
+    "formulas": [
+      {
+        "id": "L27-F01",
+        "lecture": 27,
+        "name": "Linear teacher model",
+        "expression": "y = wTT x + ϵ",
+        "latex": "y=\\mathbf w_T^{\\mathsf T}\\mathbf x+\\epsilon",
+        "conditions": "The target contains signal plus unpredictable noise.",
+        "sectionId": "lecture-27-source-4",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L27-F02",
+        "lecture": 27,
+        "name": "Student predictor",
+        "expression": "ŷ = wST x",
+        "latex": "\\widehat y=\\mathbf w_S^{\\mathsf T}\\mathbf x",
+        "conditions": "The model is linear.",
+        "sectionId": "lecture-27-source-4",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L27-F03",
+        "lecture": 27,
+        "name": "Memory/training error",
+        "expression": "em = P −1 (yµ − ŷµ )2",
+        "latex": "e_m^2=\\frac{1}{P}\\sum_{\\mu=1}^{P}(y_{\\mu}-\\widehat y_{\\mu})^2",
+        "conditions": "The patterns are stored.",
+        "sectionId": "lecture-27-source-3",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L27-F04",
+        "lecture": 27,
+        "name": "Population generalization error",
+        "expression": "eg = E[(y − ŷ)2 ]",
+        "latex": "e_g^2=\\mathbb{E}[(y-\\widehat y)^2]",
+        "conditions": "The experiences are new.",
+        "sectionId": "lecture-27-source-4",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L27-F05",
+        "lecture": 27,
+        "name": "Predictability/SNR",
+        "expression": "λs = V ar(signal)/V ar(noise)",
+        "latex": "\\lambda=\\frac{\\left\\langle(\\bar{\\mathbf w}\\cdot\\mathbf x)^2\\right\\rangle}{\\left\\langle\\epsilon^2\\right\\rangle}",
+        "conditions": "The variances are finite.",
+        "sectionId": "lecture-27-source-5",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L27-F06",
+        "lecture": 27,
+        "name": "Optimal stopping",
+        "expression": "t∗ = arg min eg (t)",
+        "latex": "t^*=\\operatorname*{arg\\,min}_t e_g^2(t)",
+        "conditions": "The learning curve is measurable.",
+        "sectionId": "lecture-27-source-4",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L27-F07",
+        "lecture": 27,
+        "name": "Consolidation channel",
+        "expression": "replay → student updates",
+        "latex": "\\text{replay}\\longrightarrow\\text{student updates}",
+        "conditions": "This channel is a formal-model hypothesis.",
+        "sectionId": "lecture-27-source-2",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 2
+      }
+    ],
+    "glossary": [
+      {
+        "id": "L27-G01",
+        "lecture": 27,
+        "zh": "系统巩固",
+        "en": "systems consolidation",
+        "definition": "The time-dependent change in a memory's dependence on or representation across brain systems.",
+        "sectionId": "lecture-27-source-1",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L27-G02",
+        "lecture": 27,
+        "zh": "情景记忆",
+        "en": "episodic memory",
+        "definition": "Memory for a particular event, including its time, place, and details.",
+        "sectionId": "lecture-27-source-1",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L27-G03",
+        "lecture": 27,
+        "zh": "语义记忆",
+        "en": "semantic memory",
+        "definition": "Memory for abstract, generalized knowledge.",
+        "sectionId": "lecture-27-source-1",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L27-G04",
+        "lecture": 27,
+        "zh": "重放",
+        "en": "replay",
+        "definition": "The reactivation of experience-related neural sequences during rest or sleep.",
+        "sectionId": "lecture-27-source-1",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 1
+      },
+      {
+        "id": "L27-G05",
+        "lecture": 27,
+        "zh": "互补学习系统",
+        "en": "complementary learning systems, CLS",
+        "definition": "A framework that combines fast hippocampal learning with slow cortical learning.",
+        "sectionId": "lecture-27-source-4",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L27-G06",
+        "lecture": 27,
+        "zh": "教师-学生-笔记本",
+        "en": "Teacher-Student-Notebook",
+        "definition": "A set of formal roles comprising a generative source, a slow predictor, and a one-shot associative memory.",
+        "sectionId": "lecture-27-source-4",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 4
+      },
+      {
+        "id": "L27-G07",
+        "lecture": 27,
+        "zh": "模式分离",
+        "en": "pattern separation",
+        "definition": "A process that maps similar experiences onto more distinct memory codes.",
+        "sectionId": "lecture-27-source-2",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L27-G08",
+        "lecture": 27,
+        "zh": "模式补全",
+        "en": "pattern completion",
+        "definition": "A process that recovers a stored episode from a partial cue.",
+        "sectionId": "lecture-27-source-2",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 2
+      },
+      {
+        "id": "L27-G09",
+        "lecture": 27,
+        "zh": "记忆误差",
+        "en": "memory error",
+        "definition": "The reconstruction or prediction error measured on stored examples.",
+        "sectionId": "lecture-27-source-3",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L27-G10",
+        "lecture": 27,
+        "zh": "泛化误差",
+        "en": "generalization error",
+        "definition": "The expected prediction error on new samples.",
+        "sectionId": "lecture-27-source-3",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 3
+      },
+      {
+        "id": "L27-G11",
+        "lecture": 27,
+        "zh": "过拟合",
+        "en": "overfitting",
+        "definition": "The fitting of sample-specific noise that worsens performance on new data.",
+        "sectionId": "lecture-27-source-5",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 5
+      },
+      {
+        "id": "L27-G12",
+        "lecture": 27,
+        "zh": "Go-CLS",
+        "en": "generalization-optimized complementary learning systems, Go-CLS",
+        "definition": "A model that controls consolidation according to generalization and predictability.",
+        "sectionId": "lecture-27-source-5",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 5
+      }
+    ],
+    "errata": [
+      {
+        "id": "L27-E01",
+        "lecture": 27,
+        "lectureTitle": "Systems Consolidation and Generalization",
+        "kind": "erratum",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 1,
+        "sectionId": "l27-m1",
+        "originalIssue": "The evidence from E.P. on Page 1 should be treated as influential case evidence without overstating how broadly a single case generalizes.",
+        "explanation": "The notation or implementation is inconsistent with the definitions needed for later derivations, so using it literally would yield an incorrect result.",
+        "correction": "The evidence from E.P. on Page 1 should be treated as influential case evidence without overstating how broadly a single case generalizes."
+      },
+      {
+        "id": "L27-E02",
+        "lecture": 27,
+        "lectureTitle": "Systems Consolidation and Generalization",
+        "kind": "caution",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 2,
+        "sectionId": "l27-m2",
+        "originalIssue": "The Teacher–Student–Notebook/Go-CLS material on Pages 2-5 consists of a formal model and predictions, which must be separated from empirical observations.",
+        "explanation": "Formal models and their empirical mappings must be kept distinct.",
+        "correction": null
+      },
+      {
+        "id": "L27-E03",
+        "lecture": 27,
+        "lectureTitle": "Systems Consolidation and Generalization",
+        "kind": "caution",
+        "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+        "sourcePage": 5,
+        "sectionId": "l27-m5",
+        "originalIssue": "The predictability ratio on Page 5 is a signal-to-noise-style quantity whose precise normalization depends on the model convention.",
+        "explanation": "Page 5 defines the signal-to-noise-style quantity λ=E[(wT^T x)²]/E[ε²].",
+        "correction": null
+      }
+    ]
+  }
+]
