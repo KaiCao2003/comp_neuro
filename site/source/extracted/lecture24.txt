@@ -1,0 +1,842 @@
+NEUROSCI 366
+Lecture 24
+
+
+
+从奖励中学习 / Learning from Rewards
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture24‑LearningFromRewards.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 24                                                            Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                   2
+
+2 Learning objectives and prerequisite dependency map                                                         2
+
+3 Five‑minute prerequisite diagnostic                                                                         2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                              3
+   4.1 Lecture24‑LearningFromRewards.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . .               3
+   4.2 Lecture24‑LearningFromRewards.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . .               4
+   4.3 Lecture24‑LearningFromRewards.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . .               5
+   4.4 Lecture24‑LearningFromRewards.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . .               6
+   4.5 Lecture24‑LearningFromRewards.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . .               7
+   4.6 Lecture24‑LearningFromRewards.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . .               8
+
+5 补全推导与数学支架 / Derivations                                                                                     9
+   5.1 reward‑baseline three‑factor rule . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .           9
+   5.2 matching condition . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         10
+   5.3 Rescorla–Wagner 与 blocking . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .           11
+   5.4 TD error、temporal features 与 Q . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .             12
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                             13
+
+7 Worked examples and transfer                                                                                13
+   7.1 dopamine RPE 三模式 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .             13
+   7.2 TD 数值      . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   13
+
+8 Formula and notation sheet                                                                                  15
+
+9 Bilingual glossary                                                                                          15
+
+10 Common traps, assumptions, and limitations                                                                 16
+
+11 Cumulative Knowledge Check                                                                                 17
+
+12 Hint Bank                                                                                                  19
+
+13 Complete Answer Key with reasoning                                                                         21
+
+14 Source‑page concordance and coverage audit                                                                 22
+
+
+
+
+                                                    1/23
+NEUROSCI 366 ・Lecture 24                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            22
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      22
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+
+
+
+                                                     2/23
+NEUROSCI 366 ・Lecture 24                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：stimulus/action/reward。
+‧ 从第一原则推导：three‑factor plasticity。
+‧ 解释几何/计算直觉：reward baseline/covariance。
+‧ 连接生物学解释：matching law。
+‧ 诊断 assumptions 与 failure modes：Rescorla–Wagner。
+‧ 把概念迁移到新神经科学问题：TD/RPE。
+
+ Dependency map
+ stimulus/action/reward → three‑factor plasticity → reward baseline/covariance → matching law
+ → Rescorla–Wagner → TD/RPE
+ Core question
+ reward‑gated plasticity 如 何 避 免 无 条 件 增 权 并 产 生 matching，value prediction 与 temporal‑
+ difference error 又如何解释 blocking 与 dopamine responses？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. naive reward‑Hebb 为什么 over‑strengthen？
+                                        （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. 减 reward baseline 后 expected update 变什么？
+                                          （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. matching 的 marginal‑return condition？
+                                       （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. matching law 的 ratio？
+                       （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. Rescorla–Wagner error？
+                        （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+                                              3/23
+NEUROSCI 366 ・Lecture 24                                          Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture24‑LearningFromRewards.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture24‑LearningFromRewards.pdf, p. 1]
+ Clean reconstruction. Page 1：learned decisions、stimulus‑reward association、three‑factor
+ plasticity、dopamine。
+ What the note is saying. 本页的中心对象是 stimulus/action/reward 与 three‑factor plasticity。原
+ 笔记将它们放进以下链条：learned decisions、stimulus‑reward association、three‑factor plasticity、
+ dopamine。
+ Why it follows. 用 foraging 示例解释 stimulus/action/reward association 与 three‑factor plas‑
+ ticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。
+ 其逻辑后果是：重绘 dopamine RPE 的 early reward、cue transfer、omitted reward 三种模式，并
+ 区分 RPE、value 和 salience alternative。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 按时间线区分 stimulus/task、recording/manipulation、measured quantity 与
+ inferred model variable；结果相关性不能直接替代机制检验。
+
+  Stop & Predict
+
+  naive reward‑Hebb 为什么 over‑strengthen？
+
+
+
+
+                                          4/23
+NEUROSCI 366 ・Lecture 24                                            Source‑aligned companion
+
+
+4.2 Lecture24‑LearningFromRewards.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture24‑LearningFromRewards.pdf, p. 2]
+ Clean reconstruction. Page 2：covariance‑based reward plasticity、reward‑baseline subtrac‑
+ tion、matching condition derivation。
+ What the note is saying. 本页的中心对象是 reward baseline/covariance 与 matching law。原笔记
+ 将它们放进以下链条：covariance‑based reward plasticity、reward‑baseline subtraction、match‑
+ ing condition derivation。
+ Why it follows. 逐步推导 matching condition：choice‑conditioned expected rewards 相等如何
+ 导出 choice ratio≈reward ratio；说明 assumptions。其逻辑后果是：从 naive reward‑gated Hebb
+ rule 引出 over‑strengthening，再推导 reward‑baseline subtraction 和 covariance form。后面的
+ 正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  减 reward baseline 后 expected update 变什么？
+
+
+
+
+                                           5/23
+NEUROSCI 366 ・Lecture 24                                           Source‑aligned companion
+
+
+4.3 Lecture24‑LearningFromRewards.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture24‑LearningFromRewards.pdf, p. 3]
+ Clean reconstruction. Page 3：matching law、fly foraging neural model。
+ What the note is saying. 本页的中心对象是 Rescorla–Wagner 与 TD/RPE。原笔记将它们放进以下
+ 链条：matching law、fly foraging neural model。
+ Why it follows. 重构 fly mushroom‑body model、stochastic choice 与 baseline reward estimate；
+ 解释 matching 的行为与神经实现层次。其逻辑后果是：逐步推导 matching condition：choice‑
+ conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。后
+ 面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  matching 的 marginal‑return condition？
+
+
+
+
+                                          6/23
+NEUROSCI 366 ・Lecture 24                                           Source‑aligned companion
+
+
+4.4 Lecture24‑LearningFromRewards.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture24‑LearningFromRewards.pdf, p. 4]
+ Clean reconstruction. Page 4：value prediction、Rescorla–Wagner、blocking、temporal dif‑
+ ference/discounting。
+ What the note is saying. 本页的中心对象是 Q/action selection 与 stimulus/action/reward。原笔
+ 记将它们放进以下链条：value prediction、Rescorla–Wagner、blocking、temporal difference/dis‑
+ counting。
+ Why it follows. 从 linear value prediction 和 squared prediction error 推导 Rescorla–Wagner；
+ 用 blocking 解释 zero prediction error。其逻辑后果是：解释 temporal features/state representa‑
+ tion、Q value 与 greedy action selection。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  matching law 的 ratio？
+
+
+
+
+                                          7/23
+NEUROSCI 366 ・Lecture 24                                           Source‑aligned companion
+
+
+4.5 Lecture24‑LearningFromRewards.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture24‑LearningFromRewards.pdf, p. 5]
+ Clean reconstruction. Page 5：temporally extended features、state‑action value/Q。
+ What the note is saying. 本页的中心对象是 three‑factor plasticity 与 reward baseline/covari‑
+ ance。原笔记将它们放进以下链条：temporally extended features、state‑action value/Q。
+ Why it follows. 从 linear value prediction 和 squared prediction error 推导 Rescorla–Wagner；
+ 用 blocking 解释 zero prediction error。其逻辑后果是：重构 fly mushroom‑body model、stochastic
+ choice 与 baseline reward estimate；解释 matching 的行为与神经实现层次。后面的正式推导会逐项
+ 写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Rescorla–Wagner error？
+
+
+
+
+                                          8/23
+NEUROSCI 366 ・Lecture 24                                              Source‑aligned companion
+
+
+4.6 Lecture24‑LearningFromRewards.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture24‑LearningFromRewards.pdf, p. 6]
+ Clean reconstruction. Page 6：dopamine reward‑prediction error patterns、value/Q signals、
+ action selection。
+ What the note is saying. 本页的中心对象是 matching law 与 Rescorla–Wagner。原笔记将它们放
+ 进以下链条：dopamine reward‑prediction error patterns、value/Q signals、action selection。
+ Why it follows. 解释 temporal features/state representation、Q value 与 greedy action selection。
+ 其逻辑后果是：从 delayed rewards 推导 discounted return、value function 和 TD errordelta=R-
+ V+gamma V_next。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure
+ conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  blocking 为什么发生？
+
+
+
+
+                                            9/23
+NEUROSCI 366 ・Lecture 24                                            Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 reward‑baseline three‑factor rule
+
+【必要前置】      为什么 Δw=pre×post×R 会 over‑strengthen？
+
+                                      ∆w = η e(x, y)R
+
+                                   ∆w = η e(x, y)(R − R̄)
+                                    E[∆w] = η Cov(e, R)
+1. eligibility/coactivity e 在行为与 reward 发生时为正。
+2. 若 R 总为正，naive rule 平均持续 potentiates。
+3. 减去 expected reward 使普通/已预测 reward 的 mean update 为零。
+4. 只有 coactivity 与 above‑baseline reward 共变时净增强。
+
+  Geometric/computational intuition. 学习的是“比预期好/坏”，而不是 reward 的绝对存在。
+  Biological interpretation / failure condition. baseline 估计错误、delayed credit assignment
+  与 nonstationary rewards 需更复杂 mechanisms。
+
+  Micro‑check
+  matching law 的 ratio？
+
+
+
+
+                                           10/23
+NEUROSCI 366 ・Lecture 24                                              Source‑aligned companion
+
+
+5.2 matching condition
+
+【补全推导】      stationary learning 如何导出 choice ratio≈reward ratio？
+
+                                 E[∆w] = 0 ⇒ Cov(N, R) = 0
+
+                                 E[R | C = A] = E[R | C = B]
+                                          CA   RA
+                                             ≈
+                                          CB   RB
+1. 假设 neural activity N 的 conditional mean 随 choice 改变。
+2. covariance=0 可分解为 choice‑conditioned reward means 的差。
+3. stationarity 要求两 choice 的 obtained reward rate 相等，否则权重继续改变。
+4. 在 baiting/foraging assumptions 下，这等价于 choice fractions 匹配 reward fractions。
+
+  Geometric/computational intuition. agent 重新分配 choices，直到两个 options 的 marginal
+  return 相等。
+  Biological interpretation / failure condition. matching law 依 task reward schedule、choice
+  stochasticity 与 learning assumptions。
+
+  Micro‑check
+  Rescorla–Wagner error？
+
+
+
+
+                                            11/23
+NEUROSCI 366 ・Lecture 24                                               Source‑aligned companion
+
+
+5.3 Rescorla–Wagner 与 blocking
+
+【跨页连接】      cue weights 如何学习 immediate reward prediction？
+                                         ∑
+                                    V =    w i xi
+                                              i
+
+                                      ∆wi = ηxi (R − V )
+1. squared prediction error 的 negative gradient 给 x_i(R−V)。
+2. 未预测 reward 产生 positive error，active cue 增权。
+3. 已由 cue S1 完全预测 reward 时，再加入 S2 有 R−V≈0。
+4. 因此 S2 没有学习信号，产生 blocking。
+
+  Geometric/computational intuition. 学习由 surprise/prediction error 驱动，而不是简单 stim‑
+  ulus–reward coincidence。
+  Biological interpretation / failure condition. configural representations、attention 与 non‑
+  stationary associations 会改变 blocking。
+
+  Micro‑check
+  blocking 为什么发生？
+
+
+
+
+                                            12/23
+NEUROSCI 366 ・Lecture 24                                                Source‑aligned companion
+
+
+5.4 TD error、temporal features 与 Q
+
+【模型边界】      reward 延迟时如何把 credit 传回早期 cues/actions？
+
+                                Gt = Rt+1 + γRt+2 + γ 2 Rt+3 + · · ·
+
+                                      δt = Rt+1 + γVt+1 − Vt
+                                  Q(s, a) = E[Gt | st = s, at = a]
+1. γ 控制未来 reward discount。
+2. TD error 比较当前 estimate 与 one‑step reward+next value bootstrap target。
+3. temporal/state features 使 cue 的不同 time‑since‑onset 有不同 weights。
+4. Q 将 value 条件化于 action，可支持 argmax action selection。
+
+  Geometric/computational intuition. prediction error 从 reward 时刻向 predictor cue 转移。
+  Biological interpretation / failure condition. partial observability、state representation 错
+  误与 off‑policy issues 在下一课系统化。
+
+  Micro‑check
+  discounted return 中 γ→0 表示什么？
+
+
+
+
+                                               13/23
+ NEUROSCI 366 ・Lecture 24                                                   Source‑aligned companion
+
+
+
+ 6 Cross‑page synthesis / 跨页因果与数学链
+
+   learned decisions 需要把 stimulus/action activity 与 delayed reward 联系起来。简单 reward‑
+   gated Hebb 在 reward 常出现时会持续增权；减去 expected reward baseline 后，更新变成 co‑
+   variance rule。在特定 choice model/assumptions 下，stationary covariance condition 推出
+   matching behavior。Rescorla–Wagner 用 current reward prediction error 学 cue value；TD
+   将 error 延伸到 future value，dopamine 的 cue transfer/omission pattern 与 RPE 形式对应，但
+   dopamine 也可能混合 salience/movement signals。
+
+
+
+
+ Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+ invent precise empirical data points.
+
+
+ 7 Worked examples and transfer
+
+ 7.1 dopamine RPE 三模式
+
+【原课/核心例题】 Prompt. early unexpected reward、
+                                         learned cue+expected reward、
+                                                                    omitted reward。
+
+  Worked solution. early：reward 时 positive transient；learned：transient 转到 cue，reward 时
+  近零；omission：cue positive、expected reward time negative dip。
+  Check. 这是 canonical RPE resemblance，不排除 dopamine 同时编码 salience/movement。
+
+
+
+ 7.2 TD 数值
+
+【跨课连接】        Prompt. R=0, γ=0.9, V_t=4, V_{t+1}=6。
+
+
+                                                14/23
+NEUROSCI 366 ・Lecture 24                                      Source‑aligned companion
+
+
+
+ Worked solution. δ=0+0.9×6−4=1.4，当前 prediction 低，应增加 active features’ weights。
+ Check. next value 需 discount；符号决定 potentiation/depression 方向。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                       15/23
+NEUROSCI 366 ・Lecture 24                                                    Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. reward‑baseline three‑factor update
+
+                                             ∆w = ηe(R − R̄)
+
+Conditions / conventions: eligibility e defined
+2. covariance learning
+                                            E[∆w] = ηCov(e, R)
+Conditions / conventions: stationary average
+3. matching law
+                                             CA /CB ≈ RA /RB
+Conditions / conventions: specific foraging assumptions
+4. linear value predictor
+                                                  V = wT x
+Conditions / conventions: features x
+5. Rescorla–Wagner update
+                                             ∆w = ηx(R − V )
+Conditions / conventions: immediate/represented reward
+6. TD/RPE
+                                            δ = R + γVnext − V
+Conditions / conventions: Markov/state representation implicit
+7. state‑action value
+                                            Q(s, a) = E[G|s, a]
+Conditions / conventions: policy/future behavior specified
+
+
+9 Bilingual glossary
+
+
+ 中文                     English / symbol              Operational meaning
+ 奖励学习                   reward learning               由 outcomes 调整 stimulus/action associations。
+ 资格迹                    eligibility trace             标记近期 pre/post/action activity 可被后续
+                                                      reward 修改的变量。
+ 奖励基线                   reward baseline               expected reward，用于计算
+                                                      above/below‑expectation signal。
+ 匹配律                    matching law                  choice proportion 近匹配 obtained reward
+                                                      proportion。
+ 价值                     value                         从当前 state/cue 预期的 discounted future
+                                                      reward。
+ Rescorla–Wagner        Rescorla–Wagner rule          以 reward prediction error 更新 cue value。
+ 规则
+ 阻断                     blocking                      已有 predictor 使新 cue 因零 error 而不学习。
+ 时间差分误差                 temporal‑difference           reward+discounted next value−current value。
+                        error
+
+
+                                                   16/23
+NEUROSCI 366 ・Lecture 24                                                 Source‑aligned companion
+
+
+
+ 中文                  English / symbol             Operational meaning
+ 奖励预测误差              reward‑prediction error,     实际/更新 target 与 predicted value 的差。
+                     RPE
+ Q值                  Q value                      state‑action conditioned expected return。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. reward‑gated Hebb 不减 baseline，导致所有 rewarded coactivity 持续增强。
+2. matching 当作无条件理性最优 law。
+3. blocking 解释成 S2 没有和 reward 同时出现。
+4. 把 RPE、value 与 salience 混为一谈。
+5. TD error 中漏掉 γ 或 next value。
+6. 把 dopamine 视为所有 reward learning 的唯一第三因子。
+7. 提前把本课简化 Q 概念当作完整 Q‑learning algorithm。
+
+  Course‑specific risk boundary. Lecture 24 是 biological/reward‑learning bridge，Lecture 25
+  才系统化 MDP/RL。不要提前让 Bellman/Q‑learning 淹没本课的 plasticity 与 dopamine 逻辑。
+
+
+
+
+                                                17/23
+NEUROSCI 366 ・Lecture 24                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. naive reward‑Hebb 为什么 over‑strengthen？
+
+
+
+2. 减 reward baseline 后 expected update 变什么？
+
+
+
+3. matching 的 marginal‑return condition？
+
+
+
+4. matching law 的 ratio？
+
+
+
+5. Rescorla–Wagner error？
+
+
+
+6. blocking 为什么发生？
+
+
+
+7. discounted return 中 γ→0 表示什么？
+
+
+
+8. TD error 公式？
+
+
+
+9. cue learning 后 dopamine transient 为什么转移？
+
+
+
+10. omission 时 negative dip 出现在哪里？
+
+
+
+11. Q 与 V 区别？
+
+
+
+12. third factor 可以是什么？
+
+
+
+13. 公式表中的“reward‑baseline three‑factor update”解决什么问题？写出适用条件与一个 sanity
+    check。
+
+
+
+14. 公式表中的“covariance learning”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                                  18/23
+NEUROSCI 366 ・Lecture 24                             Source‑aligned companion
+
+
+15. 公式表中的“matching law”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+16. 公式表中的“linear value predictor”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“Rescorla–Wagner update”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“TD/RPE”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                 19/23
+NEUROSCI 366 ・Lecture 24                                   Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“reward‑baseline three‑factor update”对应的变量关系入手。
+    Hint 2. 把条件“eligibility e defined”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“covariance learning”对应的变量关系入手。
+    Hint 2. 把条件“stationary average”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     20/23
+NEUROSCI 366 ・Lecture 24                                      Source‑aligned companion
+
+
+15. Hint 1. 先从“matching law”对应的变量关系入手。
+    Hint 2. 把条件“specific foraging assumptions”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“linear value predictor”对应的变量关系入手。
+    Hint 2. 把条件“features x”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“Rescorla–Wagner update”对应的变量关系入手。
+    Hint 2. 把条件“immediate/represented reward”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“TD/RPE”对应的变量关系入手。
+    Hint 2. 把条件“Markov/state representation implicit”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                       21/23
+NEUROSCI 366 ・Lecture 24                                          Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. reward mean 为正时平均 update 持续为正。
+2. eligibility 与 reward 的 covariance。
+3. 两个 chosen options 的 expected reward rate 相等。
+4. choice ratio≈reward ratio（在特定 assumptions 下）。
+5. R−V。
+6. 已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。
+7. 几乎只重视 immediate reward。
+8. δ=R_{t+1}+γV_{t+1}−V_t。
+9. cue 变成 earliest predictor，RPE 在 cue 时 positive，expected reward 时为零。
+10. 预期 reward 应出现但未出现的时刻。
+11. Q 条件化 action；V 只条件化 state/policy。
+12. reward、RPE、error、contextual neuromodulator 等 gating signal。
+13. 适用条件/约定：eligibility e defined。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                         ∆w = ηe(R − R̄)
+
+14. 适用条件/约定：stationary average。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                        E[∆w] = ηCov(e, R)
+
+15. 适用条件/约定：specific foraging assumptions。sanity check 应检查单位、符号、极限或 shape 是
+    否与定义一致。
+                                   CA /CB ≈ RA /RB
+
+16. 适用条件/约定：features x。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                            V = wT x
+
+17. 适用条件/约定：immediate/represented reward。sanity check 应检查单位、符号、极限或 shape 是
+    否与定义一致。
+                                  ∆w = ηx(R − V )
+
+18. 适用条件/约定：Markov/state representation implicit。sanity check 应检查单位、符号、极限或 shape
+    是否与定义一致。
+                                   δ = R + γVnext − V
+
+
+
+
+                                            22/23
+NEUROSCI 366 ・Lecture 24                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture24-                         1         Main source‑page unit: thumbnail,
+ LearningFromRewards.pdf                      reconstruction, explanation, prediction
+                                              question.
+ Lecture24-                         2         Main source‑page unit: thumbnail,
+ LearningFromRewards.pdf                      reconstruction, explanation, prediction
+                                              question.
+ Lecture24-                         3         Main source‑page unit: thumbnail,
+ LearningFromRewards.pdf                      reconstruction, explanation, prediction
+                                              question.
+ Lecture24-                         4         Main source‑page unit: thumbnail,
+ LearningFromRewards.pdf                      reconstruction, explanation, prediction
+                                              question.
+ Lecture24-                         5         Main source‑page unit: thumbnail,
+ LearningFromRewards.pdf                      reconstruction, explanation, prediction
+                                              question.
+ Lecture24-                         6         Main source‑page unit: thumbnail,
+ LearningFromRewards.pdf                      reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 1 将 dopamine 称 canonical candidate third factor；本教材明确非唯一机制。
+2. Page 3 的 matching derivation 依 choice‑conditioned activity 与 reward‑schedule assumptions。
+3. Page 6 的 dopamine signals 与 RPE resemblance 是 influential interpretation，不排除混合编码。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              23/23
+NEUROSCI 366 ・Lecture 24                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/23
+

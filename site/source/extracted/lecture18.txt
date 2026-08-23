@@ -1,0 +1,761 @@
+NEUROSCI 366
+Lecture 18
+
+
+
+运动系统与线性神经动力学 / Motor Systems and
+
+Linear Neural Dynamics
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture18‑IntroToMotorSystemsAndDynamics.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 18                                                            Source‑aligned companion
+
+
+
+Contents
+
+1 How to use this companion                                                                                   2
+
+2 Learning objectives and prerequisite dependency map                                                         2
+
+3 Five‑minute prerequisite diagnostic                                                                         2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                              3
+   4.1 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ·p. 1                 . . . . . . . . . . . . . . . . .    3
+   4.2 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ·p. 2                 . . . . . . . . . . . . . . . . .    4
+   4.3 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ·p. 3                 . . . . . . . . . . . . . . . . .    5
+   4.4 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ·p. 4                 . . . . . . . . . . . . . . . . .    6
+   4.5 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ·p. 5                 . . . . . . . . . . . . . . . . .    7
+
+5 补全推导与数学支架 / Derivations                                                                                     8
+   5.1 从单 neuron 到 recurrent population . . . . . . . . . . . . . . . . . . . . . . . . . . . . .              8
+   5.2 eigenbasis transformation 与 decoupled modes . . . . . . . . . . . . . . . . . . . . . .                 9
+   5.3 effective time constant 与 solution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          9
+   5.4 perfect 与 leaky integrator . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       10
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                             11
+
+7 Worked examples and transfer                                                                                11
+   7.1 mode time scale . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        11
+   7.2 motor‑control hierarchy . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        11
+
+8 Formula and notation sheet                                                                                  13
+
+9 Bilingual glossary                                                                                          13
+
+10 Common traps, assumptions, and limitations                                                                 14
+
+11 Cumulative Knowledge Check                                                                                 15
+
+12 Hint Bank                                                                                                  17
+
+13 Complete Answer Key with reasoning                                                                         19
+
+14 Source‑page concordance and coverage audit                                                                 20
+
+15 Errata, uncertainty log, and external endnotes                                                             20
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      20
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     20
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       20
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    20
+
+                                                     1/20
+NEUROSCI 366 ・Lecture 18                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：brain–body–environment。
+‧ 从第一原则推导：feedback control。
+‧ 解释几何/计算直觉：recurrent rate network。
+‧ 连接生物学解释：eigendecomposition。
+‧ 诊断 assumptions 与 failure modes：mode dynamics。
+‧ 把概念迁移到新神经科学问题：effective time constant。
+
+ Dependency map
+ brain–body–environment → feedback control → recurrent rate network → eigendecomposition
+ → mode dynamics → effective time constant
+ Core question
+ 如何把 distributed motor population 写成 linear recurrent dynamical system，并用 eigenmodes
+ 判断 decay、long memory、perfect integration 与 instability？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. W_ij 的方向？
+           （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. h 与 α 分别在哪个空间？
+                （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. 对角化需要什么假设？
+            （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. mode equation 是什么？
+                    （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. λ=0 时 τ_eff？
+              （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+                                              2/20
+NEUROSCI 366 ・Lecture 18                                         Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture18‑IntroToMotorSystemsAndDynamics.pdf, p. 1]
+ Clean reconstruction. Page 1：brain‑body‑environment coupling、feedforward/feedback con‑
+ trol、motor rhythms、motor regions、distributed activity。
+ What the note is saying. 本页的中心对象是 brain–body–environment 与 feedback control。原笔
+ 记将它们放进以下链条：brain‑body‑environment coupling、feedforward/feedback control、motor
+ rhythms、motor regions、distributed activity。
+ Why it follows. 解释 brain、body、environment 是 coupled dynamical system；比较 feedforward
+ 与 feedback/proprioceptive control。其逻辑后果是：梳理 spinal cord、brainstem、cerebellum、
+ basal ganglia、motor cortex 的课程级功能定位，不扩写成解剖百科。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  W_ij 的方向？
+
+
+
+
+                                         3/20
+NEUROSCI 366 ・Lecture 18                                            Source‑aligned companion
+
+
+4.2 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture18‑IntroToMotorSystemsAndDynamics.pdf, p. 2]
+ Clean reconstruction. Page 2：linear recurrent network equations。
+ What the note is saying. 本页的中心对象是 recurrent rate network 与 eigendecomposition。原
+ 笔记将它们放进以下链条：linear recurrent network equations。
+ Why it follows. 从 familiar one‑neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+
+ Wh+I。 其逻辑后果是：从矩阵形式完整推导 eigenbasis transformation、            diagonalization 与 decoupled
+ mode equations；标注所有 shape。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  h 与 α 分别在哪个空间？
+
+
+
+
+                                           4/20
+NEUROSCI 366 ・Lecture 18                                           Source‑aligned companion
+
+
+4.3 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture18‑IntroToMotorSystemsAndDynamics.pdf, p. 3]
+ Clean reconstruction. Page 3：eigenvectors/eigenvalues、matrix diagonalization、change of
+ basis、decoupled modes。
+ What the note is saying. 本页的中心对象是 mode dynamics 与 effective time constant。原笔记将
+ 它们放进以下链条：eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled
+ modes。
+ Why it follows. 从矩阵形式完整推导 eigenbasis transformation、diagonalization 与 decoupled
+ mode equations；标注所有 shape。其逻辑后果是：从 familiar one‑neuron linear ODE 推广到
+ recurrent populationtau dh/dt=-h+Wh+I。   后面的正式推导会逐项写出 assumptions、          shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  对角化需要什么假设？
+
+
+
+
+                                          5/20
+NEUROSCI 366 ・Lecture 18                                            Source‑aligned companion
+
+
+4.4 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture18‑IntroToMotorSystemsAndDynamics.pdf, p. 4]
+ Clean reconstruction. Page 4：mode solution、effective time constants、stable/unstable feed‑
+ back。
+ What the note is saying. 本页的中心对象是 fixed‑point stability 与 brain–body–environment。原
+ 笔记将它们放进以下链条：mode solution、effective time constants、stable/unstable feedback。
+ Why it follows. 推导 mode‑specific effective time constanttau/(1-lambda_i)，解释 lambda<1、
+ =1、>1 的 stability/decay/growth。其逻辑后果是：从矩阵形式完整推导 eigenbasis transformation、
+ diagonalization 与 decoupled mode equations；标注所有 shape。后面的正式推导会逐项写出 as‑
+ sumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  mode equation 是什么？
+
+
+
+
+                                           6/20
+NEUROSCI 366 ・Lecture 18                                        Source‑aligned companion
+
+
+4.5 Lecture18‑IntroToMotorSystemsAndDynamics.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture18‑IntroToMotorSystemsAndDynamics.pdf, p. 5]
+ Clean reconstruction. Page 5：fixed points、perfect integrator、leaky integrator、memory
+ timescale。
+ What the note is saying. 本页的中心对象是 feedback control 与 recurrent rate network。原笔记
+ 将它们放进以下链条：fixed points、perfect integrator、leaky integrator、memory timescale。
+ Why it follows. 解释 lambda 接近 1 如何产生 long memory，     以及有限误差如何造成 leaky integrator。
+ 其逻辑后果是：用 derivative field/fixed‑point 图解释 stable vs unstable；区分 positive feedback、
+ perfect integration 和 runaway instability。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺
+ 序；轨迹本身不等于因果机制。
+
+  Stop & Predict
+
+  λ=0 时 τ_eff？
+
+
+
+
+                                        7/20
+NEUROSCI 366 ・Lecture 18                                              Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 从单 neuron 到 recurrent population
+
+【必要前置】      推广 τ dh/dt=−h+I。
+                                     τ ḣ = −h + W h + I
+                                    h ∈ RN ×1 , W ∈ RN ×N
+1. −h 是 intrinsic leak，Wh 是 recurrent feedback，I 是 external drive。
+2. W_ij 表示 neuron j 对 i 的影响。
+3. 即使每个 unit linear，network feedback 可产生多时间尺度。
+4. behavioral output 通常还需 body/readout dynamics。
+
+  Geometric/computational intuition. population state 在 N‑dimensional activity space 中移
+  动。
+  Biological interpretation / failure condition. saturation、threshold、time‑varying inputs 与
+  nonlinear body dynamics 会限制线性近似。
+
+  Micro‑check
+  mode equation 是什么？
+
+
+
+
+                                            8/20
+NEUROSCI 366 ・Lecture 18                                                     Source‑aligned companion
+
+
+5.2 eigenbasis transformation 与 decoupled modes
+
+【补全推导】      求解 coupled network。
+
+                             W = V DV −1 ,       h = V α,       β = V −1 I
+
+                                      τ α̇i = −(1 − λi )αi + βi
+1. V 的 columns 是 right eigenvectors，D=diag(λ_i)。
+2. 把 h=Vα 代入并左乘 V^{‑1}。
+3. 在 mode coordinates 中 D 不混合不同 α_i。
+4. 需假设 W diagonalizable；non‑normal/Jordan 情形更复杂。
+
+  Geometric/computational intuition. eigenmode 是整个 population 的共同 activity pattern，
+  不是单个特殊 neuron。
+  Biological interpretation / failure condition. W 不可 diagonalize 或强 non‑normal 时，eigen‑
+  values alone 不描述 transient amplification。
+
+  Micro‑check
+  λ=0 时 τ_eff？
+
+
+
+5.3 effective time constant 与 solution
+
+【跨页连接】      每个 mode 如何响应 input？
+                                                         τ
+                                           τef f,i =
+                                                       1 − λi
+
+                               αi (t) = α∗,i + [αi (0) − α∗,i ]e−t/τef f,i
+                                                         βi
+                                            α∗,i =
+                                                       1 − λi
+1. 把 mode equation 除以 1−λ_i。
+2. λ_i<1 给 positive τ_eff 和 exponential approach。
+3. λ_i→1^‑ 时 τ_eff 很长，同时 steady‑state gain 1/(1−λ_i) 很大。
+4. λ_i>1 时 exponent sign 反转，fixed point unstable。
+
+  Geometric/computational intuition. positive feedback 抵消 intrinsic leak，延长 memory；过
+  强则越过 stability boundary。
+  Biological interpretation / failure condition. λ 接近 1 时 noise、parameter drift 与 nonlinear
+  saturation 变得关键。
+
+  Micro‑check
+  λ=0.9 时 τ_eff？
+
+
+
+
+                                                  9/20
+NEUROSCI 366 ・Lecture 18                                                   Source‑aligned companion
+
+
+5.4 perfect 与 leaky integrator
+
+【模型边界】      何时 mode 累积 input 而不遗忘？
+
+                                     λi = 1 ⇒ τ α̇i = βi (t)
+                                                       ∫ t
+                                                   1
+                                 αi (t) = αi (0) +           βi (t′ )dt′
+                                                   τ    0
+
+1. λ=1 时 recurrent feedback 完全取消 −α leak。
+2. 状态等于 input 的时间积分加初值。
+3. λ 略小于 1 时是 leaky integrator，远期 input 权重指数衰减。
+4. 实际 biological integrators 需 robustness/stabilization，通常不是无限精确。
+
+  Geometric/computational intuition. memory time scale 是 feedback precision 的直接结果。
+  Biological interpretation / failure condition. λ=1 对 parameter perturbation 敏感；nonlinear
+  line attractor 可提供另一种实现。
+
+  Micro‑check
+  λ>1 时 fixed point 如何？
+
+
+
+
+                                              10/20
+NEUROSCI 366 ・Lecture 18                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  motor control 是 brain、body 与 environment 的 closed‑loop dynamics；neural activity 也高度
+  distributed。线性 recurrent network 将每个 neuron 的 activity 变换到 eigenmode coordinates
+  后解耦，每个 mode 像独立一阶系统。eigenvalue λ 决定 effective time constant τ/(1−λ)：λ<1 衰
+  减，λ≈1 长记忆，λ=1 perfect integrator，λ>1 runaway growth。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 mode time scale
+
+【原课/核心例题】         Prompt. 单元 time constant τ=20 ms，network eigenvalue λ=0.98。
+
+ Worked solution. τ_eff=20/(1−0.98)=1000 ms=1 s。recurrent feedback 把细胞尺度放大 50 倍。
+ Check. λ 是 dimensionless；τ_eff 与 τ 同单位。
+
+
+7.2 motor‑control hierarchy
+
+【跨课连接】       Prompt. 快速 perturbation correction 与预先计划 ballistic movement。
+
+ Worked solution. 前者依 feedback/proprioception 与 brain–body loop；后者可含 feedforward
+ command，但实际运动通常仍在闭环中。
+ Check. feedforward 不是“没有 sensory system”，而是在控制 law 中忽略/弱用实时反馈。
+
+
+
+                                               11/20
+NEUROSCI 366 ・Lecture 18                                     Source‑aligned companion
+
+
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      12/20
+NEUROSCI 366 ・Lecture 18                                                     Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. linear recurrent rate network
+                                             τ ḣ = −h + W h + I
+Conditions / conventions: common τ、linearization
+2. diagonalization
+                                                W = V DV −1
+Conditions / conventions: W diagonalizable
+3. mode coordinates
+                                                  α = V −1 h
+Conditions / conventions: V invertible
+4. decoupled mode
+                                           τ α̇i = −(1 − λi )αi + βi
+Conditions / conventions: eigenbasis
+5. mode time constant
+                                              τef f = τ /(1 − λ)
+Conditions / conventions: λ<1 for stable decay
+6. perfect integrator
+                                              λ = 1 ⇒ α̇ = β/τ
+Conditions / conventions: exact feedback cancellation
+
+
+9 Bilingual glossary
+
+
+ 中文                     English / symbol               Operational meaning
+ 前馈控制                   feedforward control            主要依据预先模型/command，不依当前
+                                                       feedback correction。
+ 反馈控制                   feedback control               根据 sensory/state error 在线修正 action。
+ 本体感觉                   proprioception                 关于 body position/force 的 sensory feedback。
+ 循环网络                   recurrent network              units 之间存在 feedback loops。
+ 特征模态                   eigenmode                      W eigenvector 对应的 population activity
+                                                       pattern。
+ 基变换                    change of basis                同一 state 在 neuron coordinates 与 mode
+                                                       coordinates 间转换。
+ 有效时间常数                 effective time constant        feedback 后 mode 的 decay/integration
+                                                       timescale。
+ 固定点                    fixed point                    derivative 为零的 state。
+ 稳定性                    stability                      小 perturbation 是否回到 fixed point。
+ 完美积分器                  perfect integrator             无 leak 地累积 input 的 mode。
+
+
+
+
+                                                    13/20
+NEUROSCI 366 ・Lecture 18                                          Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 motor signal 局限于单一区域，忽略 distributed population。
+2. 混淆 neuron activity coordinates 与 eigenmode coordinates。
+3. 把 eigenmode 当作一个 neuron。
+4. 写 V^{‑1}WV=D 却不检查 V columns/right eigenvectors convention。
+5. λ>1 时仍把 τ/(1−λ) 当正 decay time。
+6. 认为 λ=1 automatically robust；其实对 perturbation 敏感。
+7. 只看 neural dynamics，不考虑 body/environment feedback。
+
+  Course‑specific risk boundary. 始终区分 individual neuron activity、population mode coor‑
+  dinate 和 behavioral state；不要把 eigenmode 当成单个“特殊神经元”。
+
+
+
+
+                                         14/20
+NEUROSCI 366 ・Lecture 18                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. W_ij 的方向？
+
+
+
+2. h 与 α 分别在哪个空间？
+
+
+
+3. 对角化需要什么假设？
+
+
+
+4. mode equation 是什么？
+
+
+
+5. λ=0 时 τ_eff？
+
+
+
+6. λ=0.9 时 τ_eff？
+
+
+
+7. λ>1 时 fixed point 如何？
+
+
+
+8. λ=1 时发生什么？
+
+
+
+9. 为什么 λ≈1 产生 long memory？
+
+
+
+10. positive feedback 与 runaway 的边界？
+
+
+
+11. eigenvalues 是否足以描述所有 transient？
+
+
+
+12. feedforward 与 feedback control 的核心差异？
+
+
+
+13. 公式表中的“linear recurrent rate network”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“diagonalization”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“mode coordinates”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  15/20
+NEUROSCI 366 ・Lecture 18                          Source‑aligned companion
+
+
+
+
+16. 公式表中的“decoupled mode”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“mode time constant”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                               16/20
+NEUROSCI 366 ・Lecture 18                                   Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“linear recurrent rate network”对应的变量关系入手。
+    Hint 2. 把条件“common τ、linearization”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“diagonalization”对应的变量关系入手。
+    Hint 2. 把条件“W diagonalizable”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                    17/20
+NEUROSCI 366 ・Lecture 18                                 Source‑aligned companion
+
+
+15. Hint 1. 先从“mode coordinates”对应的变量关系入手。
+    Hint 2. 把条件“V invertible”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“decoupled mode”对应的变量关系入手。
+    Hint 2. 把条件“eigenbasis”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“mode time constant”对应的变量关系入手。
+    Hint 2. 把条件“λ<1 for stable decay”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                     18/20
+NEUROSCI 366 ・Lecture 18                                          Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. j→i。
+ 2. h 在 neuron activity space，α 在 eigenmode coordinate space。
+ 3. W 有完整线性独立 eigenvectors，即 diagonalizable。
+ 4. τ αdot_i=−(1−λ_i)α_i+β_i。
+ 5. τ。
+ 6. 10τ。
+ 7. 沿该 mode unstable，small deviations grow。
+ 8. leak 完全抵消，mode 完美积分 input。
+ 9. 1−λ 很小，decay rate 小、τ_eff 大。
+10. dominant eigenvalue crossing 1。
+11. 不总是；non‑normal matrices 可有 transient amplification。
+12. 是否根据实时 state/error feedback 修正 command。
+13. 适用条件/约定：common τ、linearization。sanity check 应检查单位、符号、极限或 shape 是否与
+    定义一致。
+                                τ ḣ = −h + W h + I
+
+14. 适用条件/约定：W diagonalizable。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                           W = V DV −1
+
+15. 适用条件/约定：V invertible。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                             α = V −1 h
+
+16. 适用条件/约定：eigenbasis。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      τ α̇i = −(1 − λi )αi + βi
+
+17. 适用条件/约定：λ<1 for stable decay。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                   τef f = τ /(1 − λ)
+
+
+
+
+                                             19/20
+NEUROSCI 366 ・Lecture 18                                                   Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                         Page       Coverage status
+ Lecture18‑IntroToMotorSystems       1          Main source‑page unit: thumbnail,
+ AndDynamics.pdf                                reconstruction, explanation, prediction
+                                                question.
+ Lecture18‑IntroToMotorSystems       2          Main source‑page unit: thumbnail,
+ AndDynamics.pdf                                reconstruction, explanation, prediction
+                                                question.
+ Lecture18‑IntroToMotorSystems       3          Main source‑page unit: thumbnail,
+ AndDynamics.pdf                                reconstruction, explanation, prediction
+                                                question.
+ Lecture18‑IntroToMotorSystems       4          Main source‑page unit: thumbnail,
+ AndDynamics.pdf                                reconstruction, explanation, prediction
+                                                question.
+ Lecture18‑IntroToMotorSystems       5          Main source‑page unit: thumbnail,
+ AndDynamics.pdf                                reconstruction, explanation, prediction
+                                                question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 3 的 diagonalization 依 W diagonalizable；笔记为教学简化。
+2. Page 4 的 τ_eff<0 应解释为 exponential growth/unstable fixed point，而非负的物理 time constant。
+3. Page 1 的 motor‑region functions 是课程级定位，不是完整 anatomy/causal decomposition。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+                                               20/20
+

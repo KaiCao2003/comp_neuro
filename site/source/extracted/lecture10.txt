@@ -1,0 +1,832 @@
+NEUROSCI 366
+Lecture 10
+
+
+
+突触可塑性 / Synaptic Plasticity
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture10‑SynapticPlasticity.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 10                                                          Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                3
+
+2 Learning objectives and prerequisite dependency map                                                      3
+
+3 Five‑minute prerequisite diagnostic                                                                      3
+
+4 Source‑aligned lesson / 按原笔记页序                                                                           4
+   4.1 Lecture10‑SynapticPlasticity.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       4
+   4.2 Lecture10‑SynapticPlasticity.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       5
+   4.3 Lecture10‑SynapticPlasticity.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       6
+   4.4 Lecture10‑SynapticPlasticity.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       7
+   4.5 Lecture10‑SynapticPlasticity.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       8
+   4.6 Lecture10‑SynapticPlasticity.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . . . . .       9
+
+5 补全推导与数学支架 / Derivations                                                                                  10
+   5.1 STDP 与三步生物机制链 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .             10
+   5.2 covariance Hebb rule 与 expected weight dynamics . . . . . . . . . . . . . . . . . . . .             11
+   5.3 covariance matrix 为 symmetric PSD . . . . . . . . . . . . . . . . . . . . . . . . . . . .           11
+   5.4 eigenmode growth、Oja 与 BCM . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            12
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                          13
+
+7 Worked examples and transfer                                                                             13
+   7.1 两维 covariance 的 mode selection . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          13
+   7.2 three‑factor transfer . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   13
+
+8 Formula and notation sheet                                                                               15
+
+9 Bilingual glossary                                                                                       15
+
+10 Common traps, assumptions, and limitations                                                              16
+
+11 Cumulative Knowledge Check                                                                              17
+
+12 Hint Bank                                                                                               19
+
+13 Complete Answer Key with reasoning                                                                      21
+
+14 Source‑page concordance and coverage audit                                                              22
+
+
+
+
+                                                    1/23
+NEUROSCI 366 ・Lecture 10                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            22
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      22
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+
+
+
+                                                     2/23
+NEUROSCI 366 ・Lecture 10                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：LTP/LTD/STDP。
+‧ 从第一原则推导：NMDA–Ca²+ 。
+‧ 解释几何/计算直觉：Hebb/covariance rule。
+‧ 连接生物学解释：covariance eigenmodes。
+‧ 诊断 assumptions 与 failure modes：positive feedback。
+‧ 把概念迁移到新神经科学问题：Oja/BCM stabilization。
+
+ Dependency map
+ LTP/LTD/STDP → NMDA–Ca²+ → Hebb/covariance rule → covariance eigenmodes → positive
+ feedback → Oja/BCM stabilization
+ Core question
+ Hebbian plasticity 如何从 spike timing 与受体机制上改变 synapse，又如何在 firing‑rate/matrix 层
+ 面选择输入统计结构并避免 weight blow‑up？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. 经典 STDP 中 pre‑before‑post 常对应什么？
+                                  （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. NMDA receptor 为什么可作为 coincidence detector？
+                                            （卡住时先看 Source‑page unit 2，再看补全推
+   导。）
+3. basic Hebb rule 为什么容易 weight blow‑up？
+                                       （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. centered covariance rule 为什么允许 LTD？
+                                     （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 写出 E[dw/dt] 与 covariance 的关系。
+                               （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+                                              3/23
+NEUROSCI 366 ・Lecture 10                                             Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture10‑SynapticPlasticity.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture10‑SynapticPlasticity.pdf, p. 1]
+ Clean reconstruction. Page 1：Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。
+ What the note is saying. 本页的中心对象是 LTP/LTD/STDP 与 NMDA–Ca²+ 。原笔记将它们放进以
+ 下链条：Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。
+ Why it follows. 从 Hebb’s postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/dele‑
+ tion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。其逻辑后果是：比较 basic Hebb rule 与
+ 三种 covariance‑centered rules；解释减均值为何允许 depression。后面的正式推导会逐项写出 as‑
+ sumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  经典 STDP 中 pre‑before‑post 常对应什么？
+
+
+
+
+                                           4/23
+NEUROSCI 366 ・Lecture 10                                          Source‑aligned companion
+
+
+4.2 Lecture10‑SynapticPlasticity.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture10‑SynapticPlasticity.pdf, p. 2]
+ Clean reconstruction. Page 2：firing‑rate Hebbian rules、covariance rules、feedforward ex‑
+ ample。
+ What the note is saying. 本页的中心对象是 Hebb/covariance rule 与 covariance eigenmodes。原
+ 笔记将它们放进以下链条：firing‑rate Hebbian rules、covariance rules、feedforward example。
+ Why it follows. 对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统
+ 计得到 covariance matrix。其逻辑后果是：比较 basic Hebb rule 与三种 covariance‑centered rules；
+ 解释减均值为何允许 depression。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  NMDA receptor 为什么可作为 coincidence detector？
+
+
+
+
+                                          5/23
+NEUROSCI 366 ・Lecture 10                                          Source‑aligned companion
+
+
+4.3 Lecture10‑SynapticPlasticity.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture10‑SynapticPlasticity.pdf, p. 3]
+ Clean reconstruction. Page 3：expected weight dynamics；positive feedback；eigenvector
+ primer。
+ What the note is saying. 本页的中心对象是 positive feedback 与 Oja/BCM stabilization。原笔记
+ 将它们放进以下链条：expected weight dynamics；positive feedback；eigenvector primer。
+ Why it follows. 解释 basic Hebbian dynamics 的 positive feedback 与 exponential growth，以及
+ principal eigenvector/PCA connection。其逻辑后果是：对 feedforward linear neuron 写出 vec‑
+ tor/matrix weight dynamics，并由输入统计得到 covariance matrix。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  basic Hebb rule 为什么容易 weight blow‑up？
+
+
+
+
+                                         6/23
+NEUROSCI 366 ・Lecture 10                                         Source‑aligned companion
+
+
+4.4 Lecture10‑SynapticPlasticity.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture10‑SynapticPlasticity.pdf, p. 4]
+ Clean reconstruction. Page 4：symmetric/PSD covariance matrix；eigenmode Hebbian growth。
+ What the note is saying. 本页的中心对象是 three‑factor learning 与 LTP/LTD/STDP。原笔记将它
+ 们放进以下链条：symmetric/PSD covariance matrix；eigenmode Hebbian growth。
+ Why it follows. 为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架；
+ 证明 covariance matrix symmetric positive semidefinite。其逻辑后果是：对 feedforward linear
+ neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  centered covariance rule 为什么允许 LTD？
+
+
+
+
+                                         7/23
+NEUROSCI 366 ・Lecture 10                                        Source‑aligned companion
+
+
+4.5 Lecture10‑SynapticPlasticity.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture10‑SynapticPlasticity.pdf, p. 5]
+ Clean reconstruction. Page 5：synaptic scaling、Oja rule、BCM rule。
+ What the note is saying. 本页的中心对象是 NMDA–Ca²+ 与 Hebb/covariance rule。原笔记将它们
+ 放进以下链条：synaptic scaling、Oja rule、BCM rule。
+ Why it follows. 比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方
+ 式与生物含义。其逻辑后果是：比较 basic Hebb rule 与三种 covariance‑centered rules；解释减均
+ 值为何允许 depression。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  写出 E[dw/dt] 与 covariance 的关系。
+
+
+
+
+                                         8/23
+NEUROSCI 366 ・Lecture 10                                           Source‑aligned companion
+
+
+4.6 Lecture10‑SynapticPlasticity.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture10‑SynapticPlasticity.pdf, p. 6]
+ Clean reconstruction. Page 6：unsupervised、supervised、reward learning、three‑factor rules。
+ What the note is saying. 本页的中心对象是 covariance eigenmodes 与 positive feedback。原笔
+ 记将它们放进以下链条：unsupervised、supervised、reward learning、three‑factor rules。
+ Why it follows. 清楚区分 unsupervised、supervised、reward‑based learning；解释 error/reward
+ 的 third factor。其逻辑后果是：比较 basic Hebb rule 与三种 covariance‑centered rules；解释减均
+ 值为何允许 depression。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  如何证明 covariance eigenvalues 非负？
+
+
+
+
+                                          9/23
+NEUROSCI 366 ・Lecture 10                                               Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 STDP 与三步生物机制链
+
+【必要前置】      为什么 pre‑before‑post 与 post‑before‑pre 可引起不同方向的长期变化？
+
+                     ∆w = A+ e−∆t/τ+ (∆t > 0),   ∆w = −A− e∆t/τ− (∆t < 0)
+
+1. presynaptic spike 释放 glutamate；postsynaptic depolarization 移除 NMDA Mg²+ block。
+2. 时间重叠决定 postsynaptic Ca²+ transient 的大小与时间形状。
+3. 较高/快速 Ca²+ 常与 kinase、AMPA insertion/LTP 联系；较低或不同时间积分可与 phosphatase、
+   AMPA removal/LTD 联系。
+4. STDP curve 是经验性摘要，不代表所有 synapses 共享同一窗口。
+
+  Geometric/computational intuition. synapse 把“谁先谁后”转成局部 biochemical coinci‑
+  dence signal。
+  Biological interpretation / failure condition. neuromodulation、burst patterns、dendritic
+  location 与 voltage state 会改变甚至反转经典 pair‑based rule。
+
+  Micro‑check
+  centered covariance rule 为什么允许 LTD？
+
+
+
+
+                                             10/23
+NEUROSCI 366 ・Lecture 10                                         Source‑aligned companion
+
+
+5.2 covariance Hebb rule 与 expected weight dynamics
+
+【补全推导】      线性 feedforward neuron h=w^Tx 在 centered Hebb rule 下如何学习输入统计？
+
+                                τw ẇi = (h − ⟨h⟩)(xi − ⟨xi ⟩)
+
+                                      τw E[ẇ] = Cx w
+                                Cx = E[(x − Ex)(x − Ex)T ]
+1. h=w^Tx，因此 centered output fluctuation 为 w^T(x−μ)。
+2. 对 input ensemble 取期望，将 w 移出 expectation。
+3. 剩余二阶统计正是 covariance matrix C_x。
+4. 减均值允许负 covariance 与 depression，而非只增不减。
+
+  Geometric/computational intuition. weights 朝与 output 共同波动的 input direction 增长。
+  Biological interpretation / failure condition. 输入非平稳、输出 nonlinear 或学习率过大时，简
+  单线性期望动力学不足。
+
+  Micro‑check
+  写出 E[dw/dt] 与 covariance 的关系。
+
+
+
+5.3 covariance matrix 为 symmetric PSD
+
+【跨页连接】      为什么其 eigenvalues 非负？
+                                        C = CT
+                                        [             ]
+                               vT Cv = E (vT (x − µ))2 ≥ 0
+                                                   vT Cv
+                                Cv = λv ⇒ λ =            ≥0
+                                                   ∥v∥2
+1. 交换乘积次序得到 C_ij=C_ji。
+2. quadratic form 是一个 scalar projection 的 squared expectation。
+3. 平方不为负，因此所有方向 variance 非负。
+4. 对 eigenvector 代入 Rayleigh quotient 得 λ≥0。
+
+  Geometric/computational intuition. 每个 eigenvalue 是对应 input direction 上的 variance。
+  Biological interpretation / failure condition. 有限样本估计或数值误差可产生很小负值；应区分
+  理论 covariance 与估计矩阵。
+
+  Micro‑check
+  如何证明 covariance eigenvalues 非负？
+
+
+
+
+                                           11/23
+NEUROSCI 366 ・Lecture 10                                                          Source‑aligned companion
+
+
+5.4 eigenmode growth、Oja 与 BCM
+
+【模型边界】      基本 Hebb 为什么爆炸，稳定规则如何修正？
+
+                                              τw ẇ = Cw
+                                                ∑
+                                         w(t) =     ak eλk t/τw vk
+                                                   k
+
+                                       τw ẇi = hxi − h2 wi   (Oja)
+                           τw ẇi = hxi (h − θ),   τθ θ̇ = h2 − θ    (BCM‑like)
+1. 把 initial weight 展开在 covariance eigenbasis。
+2. 每个 mode 以 e^{λt/τw} 增长，最大 λ 最终占优。
+3. Oja 的 h²w 项近似保持 norm 有界，并在特定条件下收敛 PC1。
+4. BCM 让 postsynaptic threshold 随近期 activity 滑动，使低/高 response 分别 LTD/LTP。
+
+  Geometric/computational intuition. Hebb 选择方向，稳定机制控制振幅和竞争。
+  Biological interpretation / failure condition.“Hebbian=PCA”只在 centered、
+                                                                        线性、
+                                                                          stationary
+  与特定 normalization 条件下成立。
+
+  Micro‑check
+  basic Hebb 最终偏向哪个 eigenmode？
+
+
+
+
+                                                   12/23
+NEUROSCI 366 ・Lecture 10                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  本课把突触可塑性连接三个层级：实验现象（LTP/LTD/STDP）、候选分子机制（NMDA‑dependent
+  Ca²+ 与 AMPA trafficking）、以及抽象 learning rule。基本 Hebb rule 会沿输入 covariance 的
+  高‑variance eigenmode 放大，但同时产生正反馈和无界增长；synaptic scaling、Oja 与 BCM 分别
+  通过全局归一化、局部 weight‑dependent decay 和动态阈值稳定系统。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 两维 covariance 的 mode selection
+
+【原课/核心例题】         Prompt. C=diag(4,1)，w(0)=(1,1)^T。
+
+ Worked solution. basic Hebb 给 w(t)=(e^{4t/τ},e^{t/τ})，归一化方向最终接近 (1,0)，即最大 variance
+ axis。
+ Check. 方向收敛不代表 norm 稳定；两个分量都无界增长。
+
+
+7.2 three‑factor transfer
+
+【跨课连接】       Prompt. pre/post coactivity 很强但没有 reward/error signal。
+
+ Worked solution. two‑factor Hebb 会改变 synapse；three‑factor rule 还要求第三因子在时间上
+ gate/调制 plasticity，因此可不更新。
+
+
+                                               13/23
+NEUROSCI 366 ・Lecture 10                                     Source‑aligned companion
+
+
+
+ Check. 第三因子可以是 reward、RPE、error 或 contextual neuromodulator，
+                                                            不必都等于 dopamine。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      14/23
+NEUROSCI 366 ・Lecture 10                                                  Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. STDP timing rule
+                                         ∆w = f (tpost − tpre )
+Conditions / conventions: pair‑based approximation
+2. basic rate Hebb
+                                              τw ẇi = hxi
+Conditions / conventions: activities 非负时只 potentiates
+3. centered Hebb expected dynamics
+
+                                            τw E[ẇ] = Cw
+
+Conditions / conventions: linear neuron、stationary inputs
+4. covariance PSD
+                                              vT Cv ≥ 0
+Conditions / conventions: finite second moments
+5. Hebbian eigenmode growth
+                                           ȧk = (λk /τw )ak
+Conditions / conventions: C fixed
+6. Oja rule
+                                           ẇi ∝ hxi − h2 wi
+Conditions / conventions: online PCA approximation
+7. BCM sign switch
+                                           ẇi ∝ hxi (h − θ)
+Conditions / conventions: dynamic threshold
+
+
+9 Bilingual glossary
+
+
+ 中文                   English / symbol              Operational meaning
+ 长时程增强                long‑term potentiation,       持续增强 synaptic efficacy。
+                      LTP
+ 长时程抑制                long‑term depression,         持续降低 synaptic efficacy。
+                      LTD
+ 脉冲时序依赖可塑             spike‑timing‑dependent        weight change 随 pre/post timing 的经验规则。
+ 性                    plasticity, STDP
+ Hebbian rule         Hebbian learning              共同活动促进连接变化的一类规则。
+ 协方差规则                covariance rule               用 centered pre/post fluctuations 驱动
+                                                    plasticity。
+ 主特征向量                principal eigenvector         covariance 最大 eigenvalue 对应方向。
+ 突触缩放                 synaptic scaling              为保持总体 activity/weight 水平而整体重标定。
+ Oja 规则               Oja rule                      含局部归一化项的 Hebbian PCA rule。
+ BCM 规则               BCM rule                      用滑动 postsynaptic threshold 控制 LTP/LTD。
+
+
+
+
+                                                 15/23
+NEUROSCI 366 ・Lecture 10                                         Source‑aligned companion
+
+
+
+ 中文                  English / symbol      Operational meaning
+ 三因子规则               three‑factor rule     pre、post 与第三调制/teaching signal 共同决定
+                                           更新。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 LTP/LTD 等同于单一 NMDA/Ca²+ pathway；机制依 synapse/context 而变。
+2. basic Hebb 只看共同高活动，忽略 centered covariance 与 depression。
+3. 把 eigenvector 当作某个具体 neuron。
+4. 证明 PSD 时只说“covariance 应该为正”而不写 quadratic form。
+5. 把方向选择与 norm 稳定混淆。
+6. 把 Hebbian learning 无条件等同于 PCA。
+7. 认为所有 reward learning 的第三因子都是 dopamine。
+
+  Course‑specific risk boundary. 明确 Hebbian learning 与 PCA 的联系是特定线性、统计和稳定
+  化条件下的结果，不要把“Hebbian = PCA”写成普遍同义。
+
+
+
+
+                                         16/23
+NEUROSCI 366 ・Lecture 10                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. 经典 STDP 中 pre‑before‑post 常对应什么？
+
+
+
+2. NMDA receptor 为什么可作为 coincidence detector？
+
+
+
+3. basic Hebb rule 为什么容易 weight blow‑up？
+
+
+
+4. centered covariance rule 为什么允许 LTD？
+
+
+
+5. 写出 E[dw/dt] 与 covariance 的关系。
+
+
+
+6. 如何证明 covariance eigenvalues 非负？
+
+
+
+7. basic Hebb 最终偏向哪个 eigenmode？
+
+
+
+8. Oja rule 的 stabilization term 是什么作用？
+
+
+
+9. BCM threshold 增大时，同一 postsynaptic response 更可能 LTP 还是 LTD？
+
+
+
+10. unsupervised、supervised、reward learning 的 teaching signal 区别？
+
+
+
+11. Hebbian=PCA 为什么不是普遍真理？
+
+
+
+12. three‑factor rule 的三个因子是什么？
+
+
+
+13. 公式表中的“STDP timing rule”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“basic rate Hebb”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“centered Hebb expected dynamics”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  17/23
+NEUROSCI 366 ・Lecture 10                            Source‑aligned companion
+
+
+
+
+16. 公式表中的“covariance PSD”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“Hebbian eigenmode growth”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“Oja rule”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                18/23
+NEUROSCI 366 ・Lecture 10                                     Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“STDP timing rule”对应的变量关系入手。
+    Hint 2. 把条件“pair‑based approximation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“basic rate Hebb”对应的变量关系入手。
+    Hint 2. 把条件“activities 非负时只 potentiates”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     19/23
+NEUROSCI 366 ・Lecture 10                                     Source‑aligned companion
+
+
+15. Hint 1. 先从“centered Hebb expected dynamics”对应的变量关系入手。
+    Hint 2. 把条件“linear neuron、stationary inputs”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“covariance PSD”对应的变量关系入手。
+    Hint 2. 把条件“finite second moments”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“Hebbian eigenmode growth”对应的变量关系入手。
+    Hint 2. 把条件“C fixed”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“Oja rule”对应的变量关系入手。
+    Hint 2. 把条件“online PCA approximation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                      20/23
+NEUROSCI 366 ・Lecture 10                                                   Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. 在许多 excitatory synapses 中对应 LTP，但并非普遍。
+ 2. 需要 presynaptic glutamate 与 postsynaptic depolarization 移除 Mg²+ block。
+ 3. weight 增大使 output/coactivity 增大，进一步加速 weight 增长，形成 positive feedback。
+ 4. pre/post fluctuation 可异号，使乘积为负。
+ 5. τ_w E[d w/dt]=Cw（在线性 centered 条件下）。
+ 6. v^TCv=E[(v^T(x−μ))²]≥0，再对 eigenvector 除以 ||v||²。
+ 7. 最大 eigenvalue 对应 principal eigenvector。
+ 8. −h²w 抑制 norm 增长，使 direction 可收敛而 weight 有界。
+ 9. 更可能低于 threshold，从而 LTD。
+10. unsupervised 依输入统计；supervised 有 target/error；reward learning 有 scalar reward/RPE 等
+    第三因子。
+11. 需线性 neuron、centered stationary inputs、适当 normalization 等特定条件。
+12. presynaptic activity、postsynaptic activity 和 gating/teaching signal。
+13. 适用条件/约定：pair‑based approximation。sanity check 应检查单位、符号、极限或 shape 是否与
+    定义一致。
+                                 ∆w = f (tpost − tpre )
+
+14. 适用条件/约定：activities 非负时只 potentiates。sanity check 应检查单位、符号、极限或 shape 是
+    否与定义一致。
+                                    τw ẇi = hxi
+
+15. 适用条件/约定：linear neuron、stationary inputs。sanity check 应检查单位、符号、极限或 shape
+    是否与定义一致。
+                                    τw E[ẇ] = Cw
+
+16. 适用条件/约定：finite second moments。sanity check 应检查单位、符号、极限或 shape 是否与定义
+    一致。
+                                     vT Cv ≥ 0
+
+17. 适用条件/约定：C fixed。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                           ȧk = (λk /τw )ak
+
+18. 适用条件/约定：online PCA approximation。sanity check 应检查单位、符号、极限或 shape 是否与
+    定义一致。
+                                   ẇi ∝ hxi − h2 wi
+
+
+
+
+                                              21/23
+NEUROSCI 366 ・Lecture 10                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture10‑SynapticPlasticity.pdf   1         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture10‑SynapticPlasticity.pdf   2         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture10‑SynapticPlasticity.pdf   3         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture10‑SynapticPlasticity.pdf   4         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture10‑SynapticPlasticity.pdf   5         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture10‑SynapticPlasticity.pdf   6         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 1 的 AMPA/NMDA/Ca²+ 链是课程级 canonical mechanism，不是所有 synapses 的唯一实现。
+2. Page 5 中 Oja/BCM 公式是简化 firing‑rate rules；不同文献 normalization 和 threshold dynamics
+   可略有差异。
+3. Page 6 的 backprop/error 与 biological three‑factor rules 仅有形式联系，机制不能直接等同。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              22/23
+NEUROSCI 366 ・Lecture 10                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               23/23
+

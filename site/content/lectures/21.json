@@ -1,0 +1,2098 @@
+{
+  "lecture": 21,
+  "slug": "21",
+  "zhTitle": "眼动积分器、参数退化与 sloppy models",
+  "enTitle": "Oculomotor Integrator, Degeneracy, and Sloppy Models",
+  "companionFile": "NEUROSCI366_Lecture21_Oculomotor_Integrator_Sloppiness_Companion.pdf",
+  "companionPages": 21,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture21_Oculomotor_Integrator_Sloppiness_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture21-OculomotorIntegrator.pdf",
+      "role": "primary",
+      "pages": 5,
+      "href": "/resources/original/Lecture21-OculomotorIntegrator.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：velocity→position。",
+    "从第一原则推导：bilateral integrator。",
+    "解释几何/计算直觉：dominant λ=1。",
+    "连接生物学解释：weight-family degeneracy。",
+    "诊断 assumptions 与 failure modes：nonlinear synapse fit。",
+    "把概念迁移到新神经科学问题：least squares/Hessian。"
+  ],
+  "dependencyMap": "velocity→position → bilateral integrator → dominant λ=1 → weight-family degeneracy → nonlinear synapse fit → least squares/Hessian",
+  "coreQuestion": "眼动 velocity command 如何通过 recurrent network 积分为 persistent position，为什么许多不同参数组合能实现同一功能，以及 Hessian 如何揭示 stiff/sloppy directions？",
+  "diagnostic": [
+    "oculomotor integrator 的输入与输出？",
+    "2×2 perfect integrator 的 determinant condition？",
+    "为什么该 condition 不唯一确定 4 个 weights？",
+    "W12=0 时 family formula 如何处理？",
+    "另一 eigenvalue 为什么重要？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-21-source-1",
+      "order": 1,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。",
+      "noteMeaning": "velocity→position 与 bilateral integrator：eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。",
+      "reasoning": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。因此，重构 bilateral excitatory/inhibitory architecture 与 left- /right linear tuning curves。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "oculomotor integrator 的输入与输出？"
+    },
+    {
+      "id": "lecture-21-source-2",
+      "order": 2,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。",
+      "noteMeaning": "dominant λ=1 与 weight-family degeneracy：two-neuron weight matrix、eigenvalues、perfect-integrator requirement、 family of solutions。",
+      "reasoning": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。因此，解释 many-to-one mapping：许多 synaptic weight combinations 可产生相同 integration dynamics；区分 parameter degeneracy 与 measurement noise。",
+      "figureReading": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。",
+      "stopPredict": "2×2 perfect integrator 的 determinant condition？"
+    },
+    {
+      "id": "lecture-21-source-3",
+      "order": 3,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。",
+      "noteMeaning": "nonlinear synapse fit 与 least squares/Hessian：biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。",
+      "reasoning": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem； 标注 all indices/shapes。因此，解释 many-to-one mapping：许多 synaptic weight combinations 可产生相同 integration dynamics；区分 parameter degeneracy 与 measurement noise。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "为什么该 condition 不唯一确定 4 个 weights？"
+    },
+    {
+      "id": "lecture-21-source-4",
+      "order": 4,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：nonlinear fitting rewritten as linear regression、loss/Hessian。",
+      "noteMeaning": "stiff vs sloppy ensemble 与 velocity→position：nonlinear fitting rewritten as linear regression、loss/Hessian。",
+      "reasoning": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。因此，重构 bilateral excitatory/inhibitory architecture 与 left/right linear tuning curves。",
+      "figureReading": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。",
+      "stopPredict": "W12=0 时 family formula 如何处理？"
+    },
+    {
+      "id": "lecture-21-source-5",
+      "order": 5,
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。",
+      "noteMeaning": "bilateral integrator 与 dominant λ=1：Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。",
+      "reasoning": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。因此，解释 many-to-one mapping：许多 synaptic weight combinations 可产生相同 integration dynamics；区分 parameter degeneracy 与 measurement noise。",
+      "figureReading": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。",
+      "stopPredict": "另一 eigenvalue 为什么重要？"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 general 2×2 eigenvalues 与 integrator condition",
+    "【必要前置】 W=[[W11,W12],[W21,W22]] 何时有 eigenvalue 1？ p W11 + W22 ± (W11 − W22 )2 + 4W12 W21 λ± = 2 det(I − W ) = (1 − W11 )(1 − W22 ) − W12 W21 = 0 1. 由 det(W−λI)=0 得 quadratic formula。 2. perfect integrator 要求 dominant λ+=1。 3. 直接令 λ=1 代入 characteristic polynomial 得 det(I−W)=0。 4. 这是一条 scalar constraint，四个 weights 中通常仍有三维 solution family（加入结构约束后减少）。",
+    "Geometric/computational intuition. 功能约束的是某个 population mode 的 net feedback，而不是每条 synapse 的唯一值。 Biological interpretation / failure condition. 另一 eigenvalue 必须稳定，且 nonlinear operating range/robustness 也需满足。",
+    "思考题：W12=0 时 family formula 如何处理？",
+    "5.2 one-parameter relation 的教学特例",
+    "【补全推导】 给定三项如何解第四项？ (1 − W11 )(1 − W22 ) W21 = (W12 ̸= 0) W12",
+    "1. 从 det(I−W)=0 隔离 W21。 2. 若 W12=0，不能除；此时需 (1−W11)(1−W22)=0，即至少一个 self-weight 为 1。 3. 正/负 signs 还受 excitatory/inhibitory architecture 限制。 4. 同一 integration time scale 可由许多 combinations 达到。",
+    "Geometric/computational intuition. 这是 parameter compensation：一项变强可由另一项变弱抵消。 Biological interpretation / failure condition. 只满足 algebraic eigenvalue 不保证 biological conductances/units 合法。",
+    "思考题：另一 eigenvalue 为什么重要？",
+    "5.3 nonlinear circuit fit 重写为 linear regression",
+    "【跨页连接】 固定 measured F-I inverse 与 synaptic transfer functions 后估计 weights。",
+    "Yiµ = Fi−1 (hi (pµ )) X Ybiµ = Wij Xjµ j",
+    "c = Y X T (XX T )−1 W 1. 每个 eye position p_μ 提供一组 neuron rates。 2. 把 presynaptic excitatory/inhibitory nonlinearities 评估后放入 design X。 3. postsynaptic inverse F-I 给 target current Y。 4. 对每个 output neuron 独立做 least squares，weights 与 bias 是线性参数。",
+    "Geometric/computational intuition. 模型整体有 nonlinear components，但一旦这些 components 固定，剩余 weight fitting 可 linear。 Biological interpretation / failure condition. 若 nonlinear functions 也未知或 measurement noise 结构复杂，problem 不再是简单 OLS。",
+    "思考题：nonlinear circuit fit 如何变 linear？",
+    "5.4 Hessian eigenbasis 与 sloppiness",
+    "【模型边界】 哪些 parameter combinations 真正被数据约束？",
+    "1 c )T H vec(W − W c) L(W ) = Lmin + vec(W − W 2",
+    "H = V DV T 1X ∆L = λk zk2 2 k",
+    "1. H 的 eigenvector 是 parameter-space direction，不是 neural activity mode。 2. 大 λ direction 小变化即显著恶化 fit，称 stiff。 3. 小 λ direction 可大幅变化而 loss 变化小，称 sloppy。 4. 笔记实例中约 4 个 stiff、46 个 sloppy dimensions，说明 many adequate models。",
+    "Geometric/computational intuition. elongated error valley 表示参数可互相补偿。 Biological interpretation / failure condition. sloppy 不等于参数生物上不重要；可能只是当前数据/experiment 不敏感。",
+    "思考题：Hessian eigenvalue 大表示什么？"
+  ],
+  "synthesis": [
+    "oculomotor integrator 需要在 saccade 后保持 eye position，因此 network 必须产生接近 λ=1 的 long-timescale mode。对 general 2×2 W，perfect integration 只约束 det(I−W)=0，留下 many-toone 的 weight family；复杂 biological models 中这种 parameter degeneracy 更强。把 measured tuning 与 synaptic nonlinearities 固定后，fitting 可重写为 linear regression；Hessian eigenvalues 区分少数 stiff combinations 与大量 sloppy combinations，支持分析 adequate-model ensemble 而非唯一 best fit。"
+  ],
+  "workedExamples": [
+    "7.1 perfect-integrator family",
+    "【例题】题目：W11=0.8, W22=0.7, W12=0.2。",
+    "Worked solution. W21=(0.2×0.3)/0.2=0.3， 使 det(I−W)=0。 还需检查另一 eigenvalue W11+W22−1=0.5<1，故 transverse mode stable。 Check. integrator condition 与 secondary stability 必须同时检查。",
+    "7.2 stiff/sloppy contour",
+    "【拓展例题】题目：H eigenvalues 100 与 0.01。",
+    "Worked solution. 同样 ΔL 下 allowable displacement ∝1/√λ；sloppy direction 可移动 100 倍于 stiff direction。 Check. 比较的是 parameter combination，不一定是单个 weight。"
+  ],
+  "formulas": [
+    {
+      "id": "L21-F01",
+      "lecture": 21,
+      "name": "eye position integration",
+      "expression": "Z t x(t) = x(0) + v(t′ )dt′ 0",
+      "latex": "x(t)=x(0)+\\int_0^t v(t')\\,dt'",
+      "conditions": "velocity command",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-F02",
+      "lecture": 21,
+      "name": "eigenvalue 1 condition",
+      "expression": "det(I − W ) = 0",
+      "latex": "\\det(I-W)=0",
+      "conditions": "perfect linear integrator",
+      "sectionId": "lecture-21-source-2",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L21-F03",
+      "lecture": 21,
+      "name": "weight compensation family",
+      "expression": "W21 = (1 − W11 )(1 − W22 )/W12",
+      "latex": "W_{21}=\\frac{(1-W_{11})(1-W_{22})}{W_{12}}",
+      "conditions": "W12≠0",
+      "sectionId": "lecture-21-source-2",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L21-F04",
+      "lecture": 21,
+      "name": "row-wise OLS fit",
+      "expression": "Ŵ = Y X T (XX T )−1",
+      "latex": "\\widehat W=YX^{\\mathsf T}(XX^{\\mathsf T})^{-1}",
+      "conditions": "XX^T invertible",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L21-F05",
+      "lecture": 21,
+      "name": "Hessian eigendecomposition",
+      "expression": "H = V DV T",
+      "latex": "H=VDV^{\\mathsf T}",
+      "conditions": "H symmetric",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L21-F06",
+      "lecture": 21,
+      "name": "local parameter sensitivity",
+      "expression": "1X ∆L = λk zk2 2",
+      "latex": "\\Delta L=\\frac{1}{2}\\sum_k\\lambda_k z_k^2",
+      "conditions": "quadratic approximation",
+      "sectionId": "lecture-21-source-5",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L21-G01",
+      "lecture": 21,
+      "zh": "眼动积分器",
+      "en": "oculomotor integrator",
+      "definition": "把 eye velocity command 转为持续 eye position signal 的 circuit。",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-G02",
+      "lecture": 21,
+      "zh": "线吸引子",
+      "en": "line attractor",
+      "definition": "一连续族近 stable states，可存储 graded value。",
+      "sectionId": "lecture-21-source-2",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L21-G03",
+      "lecture": 21,
+      "zh": "参数退化",
+      "en": "parameter degeneracy",
+      "definition": "不同 parameter combinations 产生相似 output/function。",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L21-G04",
+      "lecture": 21,
+      "zh": "模型可辨识性",
+      "en": "identifiability",
+      "definition": "数据能否唯一/充分约束 parameters。",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-G05",
+      "lecture": 21,
+      "zh": "Hessian",
+      "en": "Hessian",
+      "definition": "loss 对 parameters 的 local curvature matrix。",
+      "sectionId": "lecture-21-source-4",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L21-G06",
+      "lecture": 21,
+      "zh": "刚性方向",
+      "en": "stiff direction",
+      "definition": "loss 对其变化高度敏感的 parameter combination。",
+      "sectionId": "lecture-21-source-5",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L21-G07",
+      "lecture": 21,
+      "zh": "松散方向",
+      "en": "sloppy direction",
+      "definition": "loss 对其变化不敏感的 parameter combination。",
+      "sectionId": "lecture-21-source-5",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L21-G08",
+      "lecture": 21,
+      "zh": "模型集合",
+      "en": "model ensemble",
+      "definition": "一组都能充分解释数据的 parameterizations。",
+      "sectionId": "lecture-21-source-1",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L21-G09",
+      "lecture": 21,
+      "zh": "权衡补偿",
+      "en": "parameter compensation",
+      "definition": "一个参数变化由其他参数抵消。",
+      "sectionId": "lecture-21-source-3",
+      "sourceFile": "Lecture21-OculomotorIntegrator.pdf",
+      "sourcePage": 3
+    }
+  ],
+  "commonTraps": [
+    "把 eye position persistence 误认为 sensory afterimage，而非 velocity integration。",
+    "只要求 λ=1，不检查其他 modes stability。",
+    "W12=0 时仍使用除法 family formula。",
+    "把 many-to-one parameter mapping 当作 measurement noise。",
+    "把 neural-state low dimensionality 与 parameter-space sloppiness 混淆。",
+    "把 sloppy parameter 解释为生物学上无关。",
+    "只报告 best-fit weights，不报告 uncertainty/ensemble。",
+    "需要区分 neural-state low dimensionality 与 parameterspace sloppiness；它们是不同空间中的不同概念。"
+  ],
+  "errata": [
+    "1. Page 2 的 perfect-integrator condition 约束 eigenvalue；原式中的 algebraic family 需同时处理 W12=0 特例。 2. Page 4 的 matrix orientation 依 Y、X 的 row/column convention；这里统一采用 examples 在 columns。 3. Page 5 的 4 stiff/46 sloppy 是该具体 fit 的结果，不是所有 integrator models 的常数。"
+  ],
+  "questions": [
+    {
+      "id": "L21-Q01",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：oculomotor integrator 的输入与输出？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "b",
+          "text": "把 eye velocity command 转为持续 eye position signal 的 circuit。"
+        },
+        {
+          "id": "c",
+          "text": "eye velocity command → persistent eye position representation。"
+        },
+        {
+          "id": "d",
+          "text": "选择对该 parameter combination prediction 差异大的 perturbation/measurement。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“eigenvalue 1 condition”的适用条件。",
+        "b": "这是“眼动积分器（oculomotor integrator）”的定义。",
+        "d": "该选项回答的是“如何设计实验约束 sloppy direction？”。"
+      },
+      "explanation": "eye velocity command → persistent eye position representation。"
+    },
+    {
+      "id": "L21-Q02",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：2×2 perfect integrator 的 determinant condition？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "det(I−W)=2。"
+        },
+        {
+          "id": "b",
+          "text": "det(I−W)=1。"
+        },
+        {
+          "id": "c",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "d",
+          "text": "det(I−W)=0。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项在乘加运算中使用了错误的分量或算术结果。",
+        "b": "该选项在乘加运算中使用了错误的分量或算术结果。",
+        "c": "这是“eigenvalue 1 condition”的适用条件。"
+      },
+      "explanation": "det(I−W)=0。"
+    },
+    {
+      "id": "L21-Q03",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：为什么该 condition 不唯一确定 4 个 weights？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "只有一个 scalar constraint，留下多维 solution family。"
+        },
+        {
+          "id": "b",
+          "text": "固定 F-I inverse 与 synaptic nonlinear features 后，unknown weights 对 prediction 线性。"
+        },
+        {
+          "id": "c",
+          "text": "many parameter sets 几乎等价，单一 best fit 会夸大精确性。"
+        },
+        {
+          "id": "d",
+          "text": "退化是模型 mapping 本身 many-to-one；noise 是观测随机误差。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项回答的是“nonlinear circuit fit 如何变 linear？”。",
+        "c": "该选项回答的是“为什么分析 model ensemble？”。",
+        "d": "该选项回答的是“parameter degeneracy 与 measurement noise 区别？”。"
+      },
+      "explanation": "只有一个 scalar constraint，留下多维 solution family。"
+    },
+    {
+      "id": "L21-Q04",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 21 讲：W12=0 时 family formula 如何处理？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "W12≠0"
+        },
+        {
+          "id": "b",
+          "text": "不能除；需 W11=1 或 W22=1。"
+        },
+        {
+          "id": "c",
+          "text": "只有一个 scalar constraint，留下多维 solution family。"
+        },
+        {
+          "id": "d",
+          "text": "数据能否唯一/充分约束 parameters。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“weight compensation family”的适用条件。",
+        "c": "该选项回答的是“为什么该 condition 不唯一确定 4 个 weights？”。",
+        "d": "这是“模型可辨识性（identifiability）”的定义。"
+      },
+      "explanation": "不能除；需 W11=1 或 W22=1。"
+    },
+    {
+      "id": "L21-Q05",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 5,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：另一 eigenvalue 为什么重要？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该 parameter combination stiff，fit 对变化敏感。"
+        },
+        {
+          "id": "b",
+          "text": "退化是模型 mapping 本身 many-to-one；noise 是观测随机误差。"
+        },
+        {
+          "id": "c",
+          "text": "若 ≥1，transverse mode 不稳定，无法稳定存储 position。"
+        },
+        {
+          "id": "d",
+          "text": "loss 对 parameters 的 local curvature matrix。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“Hessian eigenvalue 大表示什么？”。",
+        "b": "该选项回答的是“parameter degeneracy 与 measurement noise 区别？”。",
+        "d": "这是“Hessian（Hessian）”的定义。"
+      },
+      "explanation": "若 ≥1，transverse mode 不稳定，无法稳定存储 position。"
+    },
+    {
+      "id": "L21-Q06",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：nonlinear circuit fit 如何变 linear？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，重构 bilateral excitatory/inhibitory architecture 与 left/right linear tuning curves。"
+        },
+        {
+          "id": "b",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。"
+        },
+        {
+          "id": "c",
+          "text": "把 eye velocity command 转为持续 eye position signal 的 circuit。"
+        },
+        {
+          "id": "d",
+          "text": "固定 F-I inverse 与 synaptic nonlinear features 后，unknown weights 对 prediction 线性。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture21-OculomotorIntegrator.pdf 第 4 页。",
+        "b": "这条推理对应 Lecture21-OculomotorIntegrator.pdf 第 4 页。",
+        "c": "这是“眼动积分器（oculomotor integrator）”的定义。"
+      },
+      "explanation": "固定 F-I inverse 与 synaptic nonlinear features 后，unknown weights 对 prediction 线性。"
+    },
+    {
+      "id": "L21-Q07",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：Hessian eigenvalue 大表示什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该 parameter combination stiff，fit 对变化敏感。"
+        },
+        {
+          "id": "b",
+          "text": "若 ≥1，transverse mode 不稳定，无法稳定存储 position。"
+        },
+        {
+          "id": "c",
+          "text": "退化是模型 mapping 本身 many-to-one；noise 是观测随机误差。"
+        },
+        {
+          "id": "d",
+          "text": "一连续族近 stable states，可存储 graded value。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项回答的是“另一 eigenvalue 为什么重要？”。",
+        "c": "该选项回答的是“parameter degeneracy 与 measurement noise 区别？”。",
+        "d": "这是“线吸引子（line attractor）”的定义。"
+      },
+      "explanation": "该 parameter combination stiff，fit 对变化敏感。"
+    },
+    {
+      "id": "L21-Q08",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：小 eigenvalue 表示什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "一组都能充分解释数据的 parameterizations。"
+        },
+        {
+          "id": "b",
+          "text": "sloppy direction，可大幅变化而 loss 小变。"
+        },
+        {
+          "id": "c",
+          "text": "loss 对其变化不敏感的 parameter combination。"
+        },
+        {
+          "id": "d",
+          "text": "一连续族近 stable states，可存储 graded value。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“模型集合（model ensemble）”的定义。",
+        "c": "这是“松散方向（sloppy direction）”的定义。",
+        "d": "这是“线吸引子（line attractor）”的定义。"
+      },
+      "explanation": "sloppy direction，可大幅变化而 loss 小变。"
+    },
+    {
+      "id": "L21-Q09",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 21 讲：sloppiness 与 PCA low dimensionality 在什么空间？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不同 parameter combinations 产生相似 output/function。"
+        },
+        {
+          "id": "b",
+          "text": "只有一个 scalar constraint，留下多维 solution family。"
+        },
+        {
+          "id": "c",
+          "text": "前者 parameter space，后者 neural activity/data space。"
+        },
+        {
+          "id": "d",
+          "text": "many parameter sets 几乎等价，单一 best fit 会夸大精确性。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“参数退化（parameter degeneracy）”的定义。",
+        "b": "该选项回答的是“为什么该 condition 不唯一确定 4 个 weights？”。",
+        "d": "该选项回答的是“为什么分析 model ensemble？”。"
+      },
+      "explanation": "前者 parameter space，后者 neural activity/data space。"
+    },
+    {
+      "id": "L21-Q10",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 5,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：为什么分析 model ensemble？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "只有一个 scalar constraint，留下多维 solution family。"
+        },
+        {
+          "id": "b",
+          "text": "退化是模型 mapping 本身 many-to-one；noise 是观测随机误差。"
+        },
+        {
+          "id": "c",
+          "text": "loss 对 parameters 的 local curvature matrix。"
+        },
+        {
+          "id": "d",
+          "text": "many parameter sets 几乎等价，单一 best fit 会夸大精确性。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“为什么该 condition 不唯一确定 4 个 weights？”。",
+        "b": "该选项回答的是“parameter degeneracy 与 measurement noise 区别？”。",
+        "c": "这是“Hessian（Hessian）”的定义。"
+      },
+      "explanation": "many parameter sets 几乎等价，单一 best fit 会夸大精确性。"
+    },
+    {
+      "id": "L21-Q11",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 1,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：parameter degeneracy 与 measurement noise 区别？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "退化是模型 mapping 本身 many-to-one；noise 是观测随机误差。"
+        },
+        {
+          "id": "b",
+          "text": "因此，解释 many-to-one mapping：许多 synaptic weight combinations 可产生相同 integration dynamics；区分 parameter degeneracy 与 measurement noise。"
+        },
+        {
+          "id": "c",
+          "text": "选择对该 parameter combination prediction 差异大的 perturbation/measurement。"
+        },
+        {
+          "id": "d",
+          "text": "many parameter sets 几乎等价，单一 best fit 会夸大精确性。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这条推理对应 Lecture21-OculomotorIntegrator.pdf 第 2 页。",
+        "c": "该选项回答的是“如何设计实验约束 sloppy direction？”。",
+        "d": "该选项回答的是“为什么分析 model ensemble？”。"
+      },
+      "explanation": "退化是模型 mapping 本身 many-to-one；noise 是观测随机误差。"
+    },
+    {
+      "id": "L21-Q12",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：如何设计实验约束 sloppy direction？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "sloppy direction，可大幅变化而 loss 小变。"
+        },
+        {
+          "id": "b",
+          "text": "选择对该 parameter combination prediction 差异大的 perturbation/measurement。"
+        },
+        {
+          "id": "c",
+          "text": "eye velocity command → persistent eye position representation。"
+        },
+        {
+          "id": "d",
+          "text": "把 eye velocity command 转为持续 eye position signal 的 circuit。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“小 eigenvalue 表示什么？”。",
+        "c": "该选项回答的是“oculomotor integrator 的输入与输出？”。",
+        "d": "这是“眼动积分器（oculomotor integrator）”的定义。"
+      },
+      "explanation": "选择对该 parameter combination prediction 差异大的 perturbation/measurement。"
+    },
+    {
+      "id": "L21-Q13",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：根据 Lecture21-OculomotorIntegrator.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。"
+        },
+        {
+          "id": "b",
+          "text": "biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。"
+        },
+        {
+          "id": "c",
+          "text": "eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。"
+        },
+        {
+          "id": "d",
+          "text": "Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation”，不是题干指定的关系。"
+      },
+      "explanation": "eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。"
+    },
+    {
+      "id": "L21-Q14",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：若要解释\"eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+        },
+        {
+          "id": "b",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem； 标注 all indices/shapes。"
+        },
+        {
+          "id": "c",
+          "text": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+        },
+        {
+          "id": "d",
+          "text": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation”，不是题干指定的关系。"
+      },
+      "explanation": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。"
+    },
+    {
+      "id": "L21-Q15",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 5,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：阅读与\"eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        },
+        {
+          "id": "c",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "d",
+          "text": "把 eye velocity command 转为持续 eye position signal 的 circuit。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "d": "这是“眼动积分器（oculomotor integrator）”的定义。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L21-Q16",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：根据 Lecture21-OculomotorIntegrator.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。"
+        },
+        {
+          "id": "b",
+          "text": "two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。"
+        },
+        {
+          "id": "c",
+          "text": "biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。"
+        },
+        {
+          "id": "d",
+          "text": "nonlinear fitting rewritten as linear regression、loss/Hessian。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "d": "该陈述解释的是“nonlinear fitting rewritten as linear regression、loss/Hessian”，不是题干指定的关系。"
+      },
+      "explanation": "two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。"
+    },
+    {
+      "id": "L21-Q17",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：若要解释\"two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。"
+        },
+        {
+          "id": "b",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。"
+        },
+        {
+          "id": "c",
+          "text": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+        },
+        {
+          "id": "d",
+          "text": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "b": "该陈述解释的是“nonlinear fitting rewritten as linear regression、loss/Hessian”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation”，不是题干指定的关系。"
+      },
+      "explanation": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+    },
+    {
+      "id": "L21-Q18",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 3,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：阅读与\"two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "c",
+          "text": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+        },
+        {
+          "id": "d",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "b": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "c": "这条推理对应 Lecture21-OculomotorIntegrator.pdf 第 2 页。"
+      },
+      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+    },
+    {
+      "id": "L21-Q19",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：根据 Lecture21-OculomotorIntegrator.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。"
+        },
+        {
+          "id": "b",
+          "text": "eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。"
+        },
+        {
+          "id": "c",
+          "text": "two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。"
+        },
+        {
+          "id": "d",
+          "text": "nonlinear fitting rewritten as linear regression、loss/Hessian。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "d": "该陈述解释的是“nonlinear fitting rewritten as linear regression、loss/Hessian”，不是题干指定的关系。"
+      },
+      "explanation": "biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。"
+    },
+    {
+      "id": "L21-Q20",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：若要解释\"biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。"
+        },
+        {
+          "id": "b",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem； 标注 all indices/shapes。"
+        },
+        {
+          "id": "c",
+          "text": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+        },
+        {
+          "id": "d",
+          "text": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation”，不是题干指定的关系。"
+      },
+      "explanation": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem； 标注 all indices/shapes。"
+    },
+    {
+      "id": "L21-Q21",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：根据 Lecture21-OculomotorIntegrator.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。"
+        },
+        {
+          "id": "b",
+          "text": "eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。"
+        },
+        {
+          "id": "c",
+          "text": "nonlinear fitting rewritten as linear regression、loss/Hessian。"
+        },
+        {
+          "id": "d",
+          "text": "Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation”，不是题干指定的关系。"
+      },
+      "explanation": "nonlinear fitting rewritten as linear regression、loss/Hessian。"
+    },
+    {
+      "id": "L21-Q22",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：若要解释\"nonlinear fitting rewritten as linear regression、loss/Hessian\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+        },
+        {
+          "id": "b",
+          "text": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。"
+        },
+        {
+          "id": "c",
+          "text": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+        },
+        {
+          "id": "d",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation”，不是题干指定的关系。"
+      },
+      "explanation": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。"
+    },
+    {
+      "id": "L21-Q23",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 3,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：阅读与\"nonlinear fitting rewritten as linear regression、loss/Hessian\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        },
+        {
+          "id": "b",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "c",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "d",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture21-OculomotorIntegrator.pdf 第 4 页。"
+      },
+      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+    },
+    {
+      "id": "L21-Q24",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 21 讲：根据 Lecture21-OculomotorIntegrator.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning。"
+        },
+        {
+          "id": "b",
+          "text": "Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。"
+        },
+        {
+          "id": "c",
+          "text": "two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions。"
+        },
+        {
+          "id": "d",
+          "text": "biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions、fitting setup。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。",
+        "d": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。"
+      },
+      "explanation": "Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。"
+    },
+    {
+      "id": "L21-Q25",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：若要解释\"Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释为何 saccade velocity command 必须被积分为 persistent eye position；连接 long-timescale mode。"
+        },
+        {
+          "id": "b",
+          "text": "从 measured F-I inverse 与 nonlinear synaptic functions 重写 fitting problem；标注 all indices/shapes。"
+        },
+        {
+          "id": "c",
+          "text": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+        },
+        {
+          "id": "d",
+          "text": "推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需要 dominant eigenvalue=1；推导 notes 中的 one-parameter family relation。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "b": "该陈述解释的是“nonlinear fitting rewritten as linear regression、loss/Hessian”，不是题干指定的关系。",
+        "d": "该陈述解释的是“two-neuron weight matrix、eigenvalues、perfect-integrator requirement、family of solutions”，不是题干指定的关系。"
+      },
+      "explanation": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+    },
+    {
+      "id": "L21-Q26",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Oculomotor Integrator",
+        "Lecture21-OculomotorIntegrator.pdf"
+      ],
+      "difficulty": 1,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 21 讲：阅读与\"Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "c",
+          "text": "逐步完成 quadratic loss、least-squares solution、Hessian decomposition；解释 Hessian eigenvalues 代表 parameter sensitivity。"
+        },
+        {
+          "id": "d",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“eye velocity→position integration、brainstem/cerebellar architecture、linear position tuning”，不是题干指定的关系。",
+        "b": "该陈述解释的是“biological parameter variability、Marder/Goldman logic、nonlinear synaptic functions”，不是题干指定的关系。",
+        "c": "这条推理对应 Lecture21-OculomotorIntegrator.pdf 第 5 页。"
+      },
+      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+    },
+    {
+      "id": "L21-Q27",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "眼动积分器",
+        "oculomotor integrator"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"把 eye velocity command 转为持续 eye position signal 的 circuit。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "眼动积分器（oculomotor integrator）"
+        },
+        {
+          "id": "b",
+          "text": "线吸引子（line attractor）"
+        },
+        {
+          "id": "c",
+          "text": "参数退化（parameter degeneracy）"
+        },
+        {
+          "id": "d",
+          "text": "模型可辨识性（identifiability）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“线吸引子（line attractor）”指：一连续族近 stable states，可存储 graded value。",
+        "c": "“参数退化（parameter degeneracy）”指：不同 parameter combinations 产生相似 output/function。",
+        "d": "“模型可辨识性（identifiability）”指：数据能否唯一/充分约束 parameters。"
+      },
+      "explanation": "眼动积分器（oculomotor integrator）：把 eye velocity command 转为持续 eye position signal 的 circuit。"
+    },
+    {
+      "id": "L21-Q28",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "线吸引子",
+        "line attractor"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"一连续族近 stable states，可存储 graded value。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "参数退化（parameter degeneracy）"
+        },
+        {
+          "id": "b",
+          "text": "线吸引子（line attractor）"
+        },
+        {
+          "id": "c",
+          "text": "模型可辨识性（identifiability）"
+        },
+        {
+          "id": "d",
+          "text": "Hessian（Hessian）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“参数退化（parameter degeneracy）”指：不同 parameter combinations 产生相似 output/function。",
+        "c": "“模型可辨识性（identifiability）”指：数据能否唯一/充分约束 parameters。",
+        "d": "“Hessian（Hessian）”指：loss 对 parameters 的 local curvature matrix。"
+      },
+      "explanation": "线吸引子（line attractor）：一连续族近 stable states，可存储 graded value。"
+    },
+    {
+      "id": "L21-Q29",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "参数退化",
+        "parameter degeneracy"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"不同 parameter combinations 产生相似 output/function。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "模型可辨识性（identifiability）"
+        },
+        {
+          "id": "b",
+          "text": "Hessian（Hessian）"
+        },
+        {
+          "id": "c",
+          "text": "参数退化（parameter degeneracy）"
+        },
+        {
+          "id": "d",
+          "text": "刚性方向（stiff direction）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“模型可辨识性（identifiability）”指：数据能否唯一/充分约束 parameters。",
+        "b": "“Hessian（Hessian）”指：loss 对 parameters 的 local curvature matrix。",
+        "d": "“刚性方向（stiff direction）”指：loss 对其变化高度敏感的 parameter combination。"
+      },
+      "explanation": "参数退化（parameter degeneracy）：不同 parameter combinations 产生相似 output/function。"
+    },
+    {
+      "id": "L21-Q30",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "模型可辨识性",
+        "identifiability"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"数据能否唯一/充分约束 parameters。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Hessian（Hessian）"
+        },
+        {
+          "id": "b",
+          "text": "刚性方向（stiff direction）"
+        },
+        {
+          "id": "c",
+          "text": "松散方向（sloppy direction）"
+        },
+        {
+          "id": "d",
+          "text": "模型可辨识性（identifiability）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“Hessian（Hessian）”指：loss 对 parameters 的 local curvature matrix。",
+        "b": "“刚性方向（stiff direction）”指：loss 对其变化高度敏感的 parameter combination。",
+        "c": "“松散方向（sloppy direction）”指：loss 对其变化不敏感的 parameter combination。"
+      },
+      "explanation": "模型可辨识性（identifiability）：数据能否唯一/充分约束 parameters。"
+    },
+    {
+      "id": "L21-Q31",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 4,
+          "section": "lecture-21-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Hessian",
+        "Hessian"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"loss 对 parameters 的 local curvature matrix。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Hessian（Hessian）"
+        },
+        {
+          "id": "b",
+          "text": "刚性方向（stiff direction）"
+        },
+        {
+          "id": "c",
+          "text": "松散方向（sloppy direction）"
+        },
+        {
+          "id": "d",
+          "text": "模型集合（model ensemble）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“刚性方向（stiff direction）”指：loss 对其变化高度敏感的 parameter combination。",
+        "c": "“松散方向（sloppy direction）”指：loss 对其变化不敏感的 parameter combination。",
+        "d": "“模型集合（model ensemble）”指：一组都能充分解释数据的 parameterizations。"
+      },
+      "explanation": "Hessian（Hessian）：loss 对 parameters 的 local curvature matrix。"
+    },
+    {
+      "id": "L21-Q32",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "刚性方向",
+        "stiff direction"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"loss 对其变化高度敏感的 parameter combination。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "松散方向（sloppy direction）"
+        },
+        {
+          "id": "b",
+          "text": "刚性方向（stiff direction）"
+        },
+        {
+          "id": "c",
+          "text": "模型集合（model ensemble）"
+        },
+        {
+          "id": "d",
+          "text": "权衡补偿（parameter compensation）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“松散方向（sloppy direction）”指：loss 对其变化不敏感的 parameter combination。",
+        "c": "“模型集合（model ensemble）”指：一组都能充分解释数据的 parameterizations。",
+        "d": "“权衡补偿（parameter compensation）”指：一个参数变化由其他参数抵消。"
+      },
+      "explanation": "刚性方向（stiff direction）：loss 对其变化高度敏感的 parameter combination。"
+    },
+    {
+      "id": "L21-Q33",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 5,
+          "section": "lecture-21-source-5"
+        }
+      ],
+      "conceptTags": [
+        "松散方向",
+        "sloppy direction"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"loss 对其变化不敏感的 parameter combination。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "模型集合（model ensemble）"
+        },
+        {
+          "id": "b",
+          "text": "权衡补偿（parameter compensation）"
+        },
+        {
+          "id": "c",
+          "text": "松散方向（sloppy direction）"
+        },
+        {
+          "id": "d",
+          "text": "眼动积分器（oculomotor integrator）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“模型集合（model ensemble）”指：一组都能充分解释数据的 parameterizations。",
+        "b": "“权衡补偿（parameter compensation）”指：一个参数变化由其他参数抵消。",
+        "d": "“眼动积分器（oculomotor integrator）”指：把 eye velocity command 转为持续 eye position signal 的 circuit。"
+      },
+      "explanation": "松散方向（sloppy direction）：loss 对其变化不敏感的 parameter combination。"
+    },
+    {
+      "id": "L21-Q34",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "模型集合",
+        "model ensemble"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"一组都能充分解释数据的 parameterizations。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "权衡补偿（parameter compensation）"
+        },
+        {
+          "id": "b",
+          "text": "眼动积分器（oculomotor integrator）"
+        },
+        {
+          "id": "c",
+          "text": "线吸引子（line attractor）"
+        },
+        {
+          "id": "d",
+          "text": "模型集合（model ensemble）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“权衡补偿（parameter compensation）”指：一个参数变化由其他参数抵消。",
+        "b": "“眼动积分器（oculomotor integrator）”指：把 eye velocity command 转为持续 eye position signal 的 circuit。",
+        "c": "“线吸引子（line attractor）”指：一连续族近 stable states，可存储 graded value。"
+      },
+      "explanation": "模型集合（model ensemble）：一组都能充分解释数据的 parameterizations。"
+    },
+    {
+      "id": "L21-Q35",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "权衡补偿",
+        "parameter compensation"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 21 讲：本讲把\"一个参数变化由其他参数抵消。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "权衡补偿（parameter compensation）"
+        },
+        {
+          "id": "b",
+          "text": "眼动积分器（oculomotor integrator）"
+        },
+        {
+          "id": "c",
+          "text": "线吸引子（line attractor）"
+        },
+        {
+          "id": "d",
+          "text": "参数退化（parameter degeneracy）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“眼动积分器（oculomotor integrator）”指：把 eye velocity command 转为持续 eye position signal 的 circuit。",
+        "c": "“线吸引子（line attractor）”指：一连续族近 stable states，可存储 graded value。",
+        "d": "“参数退化（parameter degeneracy）”指：不同 parameter combinations 产生相似 output/function。"
+      },
+      "explanation": "权衡补偿（parameter compensation）：一个参数变化由其他参数抵消。"
+    },
+    {
+      "id": "L21-Q36",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 1,
+          "section": "lecture-21-source-1"
+        }
+      ],
+      "conceptTags": [
+        "eye position integration"
+      ],
+      "difficulty": 1,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：使用\"eye position integration\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "b",
+          "text": "velocity command"
+        },
+        {
+          "id": "c",
+          "text": "W12≠0"
+        },
+        {
+          "id": "d",
+          "text": "XX^T invertible"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“eigenvalue 1 condition”的条件，不是题干公式的条件。",
+        "c": "这是“weight compensation family”的条件，不是题干公式的条件。",
+        "d": "这是“row-wise OLS fit”的条件，不是题干公式的条件。"
+      },
+      "explanation": "eye position integration 的适用条件：velocity command"
+    },
+    {
+      "id": "L21-Q37",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "eigenvalue 1 condition"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：使用\"eigenvalue 1 condition\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "velocity command"
+        },
+        {
+          "id": "b",
+          "text": "W12≠0"
+        },
+        {
+          "id": "c",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "d",
+          "text": "XX^T invertible"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“eye position integration”的条件，不是题干公式的条件。",
+        "b": "这是“weight compensation family”的条件，不是题干公式的条件。",
+        "d": "这是“row-wise OLS fit”的条件，不是题干公式的条件。"
+      },
+      "explanation": "eigenvalue 1 condition 的适用条件：perfect linear integrator"
+    },
+    {
+      "id": "L21-Q38",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 2,
+          "section": "lecture-21-source-2"
+        }
+      ],
+      "conceptTags": [
+        "weight compensation family"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：使用\"weight compensation family\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "velocity command"
+        },
+        {
+          "id": "b",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "c",
+          "text": "XX^T invertible"
+        },
+        {
+          "id": "d",
+          "text": "W12≠0"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“eye position integration”的条件，不是题干公式的条件。",
+        "b": "这是“eigenvalue 1 condition”的条件，不是题干公式的条件。",
+        "c": "这是“row-wise OLS fit”的条件，不是题干公式的条件。"
+      },
+      "explanation": "weight compensation family 的适用条件：W12≠0"
+    },
+    {
+      "id": "L21-Q39",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "row-wise OLS fit"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：使用\"row-wise OLS fit\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "XX^T invertible"
+        },
+        {
+          "id": "b",
+          "text": "velocity command"
+        },
+        {
+          "id": "c",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "d",
+          "text": "W12≠0"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“eye position integration”的条件，不是题干公式的条件。",
+        "c": "这是“eigenvalue 1 condition”的条件，不是题干公式的条件。",
+        "d": "这是“weight compensation family”的条件，不是题干公式的条件。"
+      },
+      "explanation": "row-wise OLS fit 的适用条件：XX^T invertible"
+    },
+    {
+      "id": "L21-Q40",
+      "lecture": 21,
+      "sectionId": "lecture-21-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture21-OculomotorIntegrator.pdf",
+          "page": 3,
+          "section": "lecture-21-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Hessian eigendecomposition"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 21 讲：使用\"Hessian eigendecomposition\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "velocity command"
+        },
+        {
+          "id": "b",
+          "text": "H symmetric"
+        },
+        {
+          "id": "c",
+          "text": "perfect linear integrator"
+        },
+        {
+          "id": "d",
+          "text": "W12≠0"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“eye position integration”的条件，不是题干公式的条件。",
+        "c": "这是“eigenvalue 1 condition”的条件，不是题干公式的条件。",
+        "d": "这是“weight compensation family”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Hessian eigendecomposition 的适用条件：H symmetric"
+    }
+  ]
+}

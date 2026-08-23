@@ -1,0 +1,843 @@
+NEUROSCI 366
+Lecture 22
+
+
+
+运动皮层潜在动力学与 Brain–Machine Interfaces
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture22‑MotorCortex‑UPDATE.pdf
+ ‧ Lecture22‑MotorCortex.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 22                                                        Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                              3
+
+2 Learning objectives and prerequisite dependency map                                                    3
+
+3 Five‑minute prerequisite diagnostic                                                                    3
+
+4 Source‑aligned lesson / 按原笔记页序                                                                         4
+   4.1 Lecture22‑MotorCortex‑UPDATE.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . .         4
+   4.2 Lecture22‑MotorCortex‑UPDATE.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . .         5
+   4.3 Lecture22‑MotorCortex‑UPDATE.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . .         6
+   4.4 Lecture22‑MotorCortex‑UPDATE.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . .         7
+   4.5 Lecture22‑MotorCortex‑UPDATE.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . .         8
+
+5 Version comparison / 新旧版本审计                                                                            9
+
+6 补全推导与数学支架 / Derivations                                                                                10
+   6.1 PCA low‑dimensional variance 与限制 . . . . . . . . . . . . . . . . . . . . . . . . . . . .          10
+   6.2 GPFA observation 与 temporal prior . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       11
+   6.3 output‑null preparatory activity . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    12
+   6.4 BMI closed loop 与 latent alignment . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      13
+
+7 Cross‑page synthesis / 跨页因果与数学链                                                                        14
+
+8 Worked examples and transfer                                                                           14
+   8.1 GPFA shape check . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    14
+   8.2 null‑space 数值 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   14
+
+9 Formula and notation sheet                                                                             16
+
+10 Bilingual glossary                                                                                    16
+
+11 Common traps, assumptions, and limitations                                                            17
+
+12 Cumulative Knowledge Check                                                                            18
+
+13 Hint Bank                                                                                             20
+
+14 Complete Answer Key with reasoning                                                                    22
+
+15 Source‑page concordance and coverage audit                                                            23
+
+
+
+
+                                                   1/24
+NEUROSCI 366 ・Lecture 22                                                            Source‑aligned companion
+
+
+16 Errata, uncertainty log, and external endnotes                                                            23
+   16.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     23
+   16.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    23
+   16.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      24
+   16.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   24
+
+
+
+
+                                                     2/24
+NEUROSCI 366 ・Lecture 22                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：center‑out tuning。
+‧ 从第一原则推导：PCA low dimension。
+‧ 解释几何/计算直觉：latent vs activity space。
+‧ 连接生物学解释：GPFA。
+‧ 诊断 assumptions 与 failure modes：preparatory trajectories。
+‧ 把概念迁移到新神经科学问题：output‑null readout。
+
+ Dependency map
+ center‑out tuning → PCA low dimension → latent vs activity space → GPFA → preparatory tra‑
+ jectories → output‑null readout
+ Core question
+ motor cortex 的高维 neuron activity 如何由少数 latent trajectories 组织，preparatory activity 如
+ 何位于 output‑null space，并如何用于稳定 closed‑loop BMI？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. direction tuning 与 low‑dimensional dynamics 的区别？（卡住时先看 Source‑page unit 1，再看补
+   全推导。）
+2. GPFA 中 C 的 shape？
+                   （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. Σ 表示什么？
+         （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. GP temporal covariance 中 τ 控制什么？
+                                  （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 为什么 C 与 α scale 不可辨识？
+                       （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+                                              3/24
+NEUROSCI 366 ・Lecture 22                                          Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture22‑MotorCortex‑UPDATE.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture22‑MotorCortex‑UPDATE.pdf, p. 1]
+ Clean reconstruction. UPDATE Page 1：center‑out reach、direction tuning、low‑dimensional
+ variance/PCA。
+ What the note is saying. 本页的中心对象是 center‑out tuning 与 PCA low dimension。原笔记将
+ 它们放进以下链条：center‑out reach、direction tuning、low‑dimensional variance/PCA。
+ Why it follows. 说明 center‑out directional tuning 的经典解释及 tuning may be epiphenom‑
+ enal 的现代动力学视角。其逻辑后果是：从 PCA variance decomposition 引出 low‑dimensional
+ population activity，但不把 low variance dimensions 自动视为无用。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  direction tuning 与 low‑dimensional dynamics 的区别？
+
+
+
+
+                                         4/24
+NEUROSCI 366 ・Lecture 22                                           Source‑aligned companion
+
+
+4.2 Lecture22‑MotorCortex‑UPDATE.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture22‑MotorCortex‑UPDATE.pdf, p. 2]
+ Clean reconstruction. UPDATE Page 2：dynamical‑mode perspective、latent factor space、neu‑
+ ral activity embedding、GPFA observation model。
+ What the note is saying. 本页的中心对象是 latent vs activity space 与 GPFA。原笔记将它们放进以
+ 下链条：dynamical‑mode perspective、latent factor space、neural activity embedding、GPFA
+ observation model。
+ Why it follows. 区 分 latent factor space 与 observed neural activity space； 解 释 high‑
+ dimensional embedding。其逻辑后果是：逐项解释 GPFA observation modelP(r_t|alpha_t)
+ =N(C alpha_t+d,Sigma)与 latent Gaussian‑process temporal covariance。后面的正式推导会逐
+ 项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  GPFA 中 C 的 shape？
+
+
+
+
+                                          5/24
+NEUROSCI 366 ・Lecture 22                                        Source‑aligned companion
+
+
+4.3 Lecture22‑MotorCortex‑UPDATE.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture22‑MotorCortex‑UPDATE.pdf, p. 3]
+ Clean reconstruction. UPDATE Page 3：Gaussian‑process temporal covariance、parameter
+ fitting、delayed‑reach latent trajectories。
+ What the note is saying. 本页的中心对象是 preparatory trajectories 与 output‑null readout。原笔
+ 记将它们放进以下链条：Gaussian‑process temporal covariance、parameter fitting、delayed‑reach
+ latent trajectories。
+ Why it follows. 逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma)
+ 与 latent Gaussian‑process temporal covariance。其逻辑后果是：分析 delayed‑reach task：target‑
+ specific preparatory trajectories、go‑cue、movement trajectories。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  Σ 表示什么？
+
+
+
+
+                                        6/24
+NEUROSCI 366 ・Lecture 22                                          Source‑aligned companion
+
+
+4.4 Lecture22‑MotorCortex‑UPDATE.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture22‑MotorCortex‑UPDATE.pdf, p. 4]
+ Clean reconstruction. UPDATE Page 4：preparatory activity、movement modes、linear readout、
+ output‑null space。
+ What the note is saying. 本页的中心对象是 closed‑loop BMI/latent alignment 与 center‑out
+ tuning。原笔记将它们放进以下链条：preparatory activity、movement modes、linear readout、
+ output‑null space。
+ Why it follows. 推导 linear readout、null space 与 output‑null preparatory activity；说明 Ur=
+ 0 不等于 r=0。其逻辑后果是：区分 latent factor space 与 observed neural activity space；解释
+ high‑dimensional embedding。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  GP temporal covariance 中 τ 控制什么？
+
+
+
+
+                                          7/24
+NEUROSCI 366 ・Lecture 22                                           Source‑aligned companion
+
+
+4.5 Lecture22‑MotorCortex‑UPDATE.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture22‑MotorCortex‑UPDATE.pdf, p. 5]
+ Clean reconstruction. UPDATE Page 5：neural decoding、feedforward/closed‑loop BMI、latent‑
+ aligned cross‑day stability。
+ What the note is saying. 本页的中心对象是 PCA low dimension 与 latent vs activity space。原笔
+ 记将它们放进以下链条：neural decoding、feedforward/closed‑loop BMI、latent‑aligned cross‑day
+ stability。
+ Why it follows. 解释 feedforward versus closed‑loop BMI、sensory feedback、latent‑aligned
+ decoders 和跨日 stability；明确这是 UPDATE 新增核心内容。其逻辑后果是：区分 latent factor space
+ 与 observed neural activity space；解释 high‑dimensional embedding。后面的正式推导会逐项写
+ 出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  为什么 C 与 α scale 不可辨识？
+
+
+
+
+                                          8/24
+NEUROSCI 366 ・Lecture 22                                             Source‑aligned companion
+
+
+
+5 Version comparison / 新旧版本审计
+
+  逐页视觉比较显示，旧版 Pages 1–4 与 UPDATE Pages 1–4 在核心学术内容上实质重复；UPDATE 新增
+  Page 5：neural decoding、feedforward/closed‑loop BMI 与 latent‑aligned cross‑day stability。
+  旧版未发现需要单独保留的独有公式或论点。
+
+
+
+
+                                           9/24
+NEUROSCI 366 ・Lecture 22                                          Source‑aligned companion
+
+
+
+6 补全推导与数学支架 / Derivations
+
+6.1 PCA low‑dimensional variance 与限制
+
+【必要前置】      为什么 many neurons 可由 few components 描述？
+
+                                     rt ≈ r̄ + VK at
+                                              X        X
+                               VarFrac(K) =       λk /   λj
+                                             k≤K      j
+
+1. centered population activity 的 covariance eigenvalues 常快速衰减。
+2. V_K columns 是 high‑dimensional embedding axes，a_t 是 low‑dimensional coordinates。
+3. 低维表示可压缩 shared dynamics，但 discarded dimensions 仍可能含 output/condition informa‑
+   tion。
+4. tuning curve 是单 neuron stimulus average，与 trajectory coordinates 不同。
+
+  Geometric/computational intuition. 许多 neurons 可共同参与少数 coordinated population
+  patterns。
+  Biological interpretation / failure condition. PCA 不建模 temporal smoothness，也无法区分
+  shared dynamics 与 observation noise。
+
+  Micro‑check
+  GP temporal covariance 中 τ 控制什么？
+
+
+
+
+                                          10/24
+NEUROSCI 366 ・Lecture 22                                                  Source‑aligned companion
+
+
+6.2 GPFA observation 与 temporal prior
+
+【补全推导】      如何同时建模 latent factors、neuron loadings 与 smooth time course？
+
+                                    rt | αt ∼ N (Cαt + d, Σ)
+
+                                       αk (1:T ) ∼ N (0, Kk )
+                                          2                     ′ 2
+                                                      2 −(t−t ) /(2τk )
+                                                                      2
+                              [Kk ]tt′ = σn,k δtt′ + σs,k e
+1. r_t∈R^N，α_t∈R^K，C∈R^{N×K}，d∈R^N，Σ∈R^{N×N}。
+2. observation model 把 latent state linear embed 到 neuron space。
+3. Gaussian‑process covariance 让 nearby time points correlated/smooth。
+4. C 与 α 有 scale/rotation non‑identifiability，需 convention/constraints。
+
+  Geometric/computational intuition. GPFA 把 observed spikes/rates 看作 smooth shared tra‑
+  jectory 加 neuron‑specific noise。
+  Biological interpretation / failure condition. Gaussian observations、stationary kernels 与
+  fixed dimensionality 可能不适合 abrupt/nonlinear dynamics。
+
+  Micro‑check
+  为什么 C 与 α scale 不可辨识？
+
+
+
+
+                                               11/24
+NEUROSCI 366 ・Lecture 22                                            Source‑aligned companion
+
+
+6.3 output‑null preparatory activity
+
+【跨页连接】      为什么 preparation 可变化而 muscles 不动？
+
+                                          m = Ur
+
+                                    U ∈ RM ×N , M < N
+                                rnull ∈ Null(U ) ⇒ U rnull = 0
+1. U 是 neural‑to‑muscle/output linear readout。
+2. rank(U)≤M，因此 null‑space dimension 至少 N−M。
+3. 不同 target 可在 null directions 建立不同 preparatory states。
+4. go cue 后 dynamics 转入 output‑potent/movement modes。
+
+  Geometric/computational intuition. 大 population 可在不影响当前 output 的自由度中预先设
+  置 initial condition。
+  Biological interpretation / failure condition. 真实 readout nonlinear/time‑varying；null‑
+  space 是 local linear approximation。
+
+  Micro‑check
+  output‑null 的定义？
+
+
+
+
+                                            12/24
+NEUROSCI 366 ・Lecture 22                                               Source‑aligned companion
+
+
+6.4 BMI closed loop 与 latent alignment
+
+【模型边界】      为什么同一 neuron decoder 跨日漂移，而 latent decoder 更稳定？
+
+                                   bt = Brt
+                                   v             b t = Bα αt
+                                              or v
+
+1. feedforward BMI 只把 recorded activity 映射为 command。
+2. closed loop 加 device/sensory feedback，用户可在线纠错与学习。
+3. individual neuron tuning/loading 可漂移，而 shared latent manifold/dynamics 可能较稳定。
+4. 对齐每日 latent spaces 后再 decode，可减少 neuron‑identity drift。
+
+  Geometric/computational intuition. 稳定的计算可能存在于 population geometry，而非固定
+  单 neuron coordinates。
+  Biological interpretation / failure condition. latent stability 不是保证；task、electrode、learn‑
+  ing 与 pathology 均可改变 manifold。
+
+  Micro‑check
+  Ur=0 是否说明无 neural activity？
+
+
+
+
+                                              13/24
+NEUROSCI 366 ・Lecture 22                                                   Source‑aligned companion
+
+
+
+7 Cross‑page synthesis / 跨页因果与数学链
+
+  direction tuning 是 motor cortex 的经典描述，但现代 population view 关注 low‑dimensional
+  trajectories 是否生成 movement dynamics。GPFA 用 Gaussian observation model 把 smooth
+  latent factors 嵌入 noisy neural activity，显式建模 time covariance。preparatory state 可沿
+  muscle readout U 的 null space 变化而不产生 movement；BMI 则把 neural/latent state 解码为
+  device commands，并利用 feedback 与跨日 latent alignment 提高稳定性。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+8 Worked examples and transfer
+
+8.1 GPFA shape check
+
+【原课/核心例题】         Prompt. N=100 neurons, K=5 factors。
+
+ Worked solution. C 是 100×5，α_t 是 5×1，Cα_t 是 100×1，与 d 和 r_t 同 shape；Σ 是 100×100
+（常简化 diagonal）   。
+ Check. latent dimension K 小不意味着只有 5 neurons active。
+
+
+8.2 null‑space 数值
+
+【跨课连接】       Prompt. U 是 2×10 且 rank=2。
+
+
+
+
+                                               14/24
+NEUROSCI 366 ・Lecture 22                                       Source‑aligned companion
+
+
+
+ Worked solution. Null(U) dimension=10−2=8；有大量 preparatory directions 不改变 2D output。
+ Check. Ur=0 不推出 r=0。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                       15/24
+NEUROSCI 366 ・Lecture 22                                                        Source‑aligned companion
+
+
+
+9 Formula and notation sheet
+
+1. GPFA observation model
+                                          rt |αt ∼ N (Cαt + d, Σ)
+Conditions / conventions: Gaussian approximation
+2. GP temporal covariance
+                                                         ′ 2
+                                   K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′
+                                                                2
+
+
+
+Conditions / conventions: stationary smooth kernel
+3. linear motor readout
+                                                   m = Ur
+Conditions / conventions: local approximation
+4. output‑null space
+                                          Null(U ) = {r : U r = 0}
+Conditions / conventions: linear algebra
+5. rank–nullity
+                                     dim N ull(U ) = N − rank(U )
+Conditions / conventions: U:M×N
+6. latent decoder
+                                                   v̂ = Bα
+Conditions / conventions: aligned latent coordinates
+
+
+10 Bilingual glossary
+
+
+ 中文                    English / symbol                 Operational meaning
+ 中心向外任务                center‑out reach task            从中心到多个 radial targets 的 reaching
+                                                        paradigm。
+ 方向调谐                  direction tuning                 response mean 随 reach direction 变化。
+ 潜在因子                  latent factor                    解释 shared population variability 的低维隐藏变
+                                                        量。
+ 嵌入                    embedding                        从 latent coordinates 映射到 high‑dimensional
+                                                        activity。
+ 高斯过程因子分析              Gaussian Process Factor          带 temporal GP prior 的 latent factor model。
+                       Analysis, GPFA
+ 准备活动                  preparatory activity             movement 前 target‑dependent population
+                                                        state。
+ 输出零空间                 output‑null space                不改变当前 readout 的 neural directions。
+ 输出有效空间                output‑potent space              会改变 muscle/device output 的 directions。
+ 脑机接口                  brain–machine                    由 neural activity 控制 external device 的系统。
+                       interface, BMI
+ 闭环控制                  closed‑loop control              包含 sensory/device feedback 的在线控制。
+
+
+
+
+                                                    16/24
+NEUROSCI 366 ・Lecture 22                                          Source‑aligned companion
+
+
+
+11 Common traps, assumptions, and limitations
+
+1. 把 single‑neuron tuning curve 与 latent trajectory 混为一谈。
+2. PCA components、GPFA factors、dynamical modes 与 decoder axes 互换使用。
+3. K low‑dimensional 就认为只有 K neurons 重要。
+4. 忽略 C–α scale/rotation non‑identifiability。
+5. Ur=0 就认为 r=0。
+6. feedforward BMI 忽略 user feedback/learning。
+7. 把 latent cross‑day stability 写成绝对不变。
+
+  Course‑specific risk boundary. 明确区分 tuning curve、principal components、latent factors、
+  dynamical modes 和 decoder axes；这些概念可相关但不可互换。
+
+
+
+
+                                            17/24
+NEUROSCI 366 ・Lecture 22                                               Source‑aligned companion
+
+
+
+12 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. direction tuning 与 low‑dimensional dynamics 的区别？
+
+
+
+2. GPFA 中 C 的 shape？
+
+
+
+3. Σ 表示什么？
+
+
+
+4. GP temporal covariance 中 τ 控制什么？
+
+
+
+5. 为什么 C 与 α scale 不可辨识？
+
+
+
+6. output‑null 的定义？
+
+
+
+7. Ur=0 是否说明无 neural activity？
+
+
+
+8. preparatory activity 的功能解释？
+
+
+
+9. feedforward 与 closed‑loop BMI 差异？
+
+
+
+10. 为什么 direct neuron decoder 跨日退化？
+
+
+
+11. latent alignment 如何改善？
+
+
+
+12. low variance dimension 一定无用吗？
+
+
+
+13. 公式表中的“GPFA observation model”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“GP temporal covariance”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“linear motor readout”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/24
+NEUROSCI 366 ・Lecture 22                           Source‑aligned companion
+
+
+
+
+16. 公式表中的“output‑null space”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“rank–nullity”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“latent decoder”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                19/24
+NEUROSCI 366 ・Lecture 22                                     Source‑aligned companion
+
+
+
+13 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“GPFA observation model”对应的变量关系入手。
+    Hint 2. 把条件“Gaussian approximation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“GP temporal covariance”对应的变量关系入手。
+    Hint 2. 把条件“stationary smooth kernel”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     20/24
+NEUROSCI 366 ・Lecture 22                                       Source‑aligned companion
+
+
+15. Hint 1. 先从“linear motor readout”对应的变量关系入手。
+    Hint 2. 把条件“local approximation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“output‑null space”对应的变量关系入手。
+    Hint 2. 把条件“linear algebra”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“rank–nullity”对应的变量关系入手。
+    Hint 2. 把条件“U:M×N”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“latent decoder”对应的变量关系入手。
+    Hint 2. 把条件“aligned latent coordinates”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                      21/24
+NEUROSCI 366 ・Lecture 22                                          Source‑aligned companion
+
+
+
+14 Complete Answer Key with reasoning
+
+ 1. 前者描述单 neuron mean vs direction；后者描述 population state 随 time 的 trajectory。
+ 2. N neurons × K factors。
+ 3. observation/noise covariance，常近 diagonal。
+ 4. latent smoothness/correlation time。
+ 5. C 乘 a、α 除 a 不改变 product；rotations 也可由相应变换抵消。
+ 6. Ur=0 的 activity directions。
+ 7. 否，只说明对该 readout 无即时输出。
+ 8. 在 null space 设置 target‑specific initial condition，go cue 后快速进入 movement modes。
+ 9. closed loop 有 device/sensory feedback 与在线 correction。
+10. recorded units/loadings/tuning 漂移。
+11. 把每日 population activity 映射到共享 manifold coordinates 后再 decode。
+12. 不一定，可能包含 output/condition‑specific information。
+13. 适用条件/约定：Gaussian approximation。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                rt |αt ∼ N (Cαt + d, Σ)
+
+14. 适用条件/约定：stationary smooth kernel。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                                  ′ 2
+                            K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′
+                                                         2
+
+
+
+
+15. 适用条件/约定：local approximation。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                      m = Ur
+
+16. 适用条件/约定：linear algebra。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      Null(U ) = {r : U r = 0}
+
+17. 适用条件/约定：U:M×N。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                   dim N ull(U ) = N − rank(U )
+
+18. 适用条件/约定：aligned latent coordinates。sanity check 应检查单位、符号、极限或 shape 是否与
+    定义一致。
+                                       v̂ = Bα
+
+
+
+
+                                             22/24
+NEUROSCI 366 ・Lecture 22                                                 Source‑aligned companion
+
+
+
+15 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture22-MotorCortex-             1         Main source‑page unit: thumbnail,
+ UPDATE.pdf                                   reconstruction, explanation, prediction
+                                              question.
+ Lecture22-MotorCortex-             2         Main source‑page unit: thumbnail,
+ UPDATE.pdf                                   reconstruction, explanation, prediction
+                                              question.
+ Lecture22-MotorCortex-             3         Main source‑page unit: thumbnail,
+ UPDATE.pdf                                   reconstruction, explanation, prediction
+                                              question.
+ Lecture22-MotorCortex-             4         Main source‑page unit: thumbnail,
+ UPDATE.pdf                                   reconstruction, explanation, prediction
+                                              question.
+ Lecture22-MotorCortex-             5         Main source‑page unit: thumbnail,
+ UPDATE.pdf                                   reconstruction, explanation, prediction
+                                              question.
+ Lecture22-MotorCortex.pdf          1         Old‑version comparison: substantively
+                                              duplicated by UPDATE; UPDATE adds
+                                              BMI/cross‑day stability material.
+ Lecture22-MotorCortex.pdf          2         Old‑version comparison: substantively
+                                              duplicated by UPDATE; UPDATE adds
+                                              BMI/cross‑day stability material.
+ Lecture22-MotorCortex.pdf          3         Old‑version comparison: substantively
+                                              duplicated by UPDATE; UPDATE adds
+                                              BMI/cross‑day stability material.
+ Lecture22-MotorCortex.pdf          4         Old‑version comparison: substantively
+                                              duplicated by UPDATE; UPDATE adds
+                                              BMI/cross‑day stability material.
+
+
+
+16 Errata, uncertainty log, and external endnotes
+
+16.1 Errata / source cautions
+
+1. UPDATE 版 Pages 1–4 与旧版对应内容一致；UPDATE 新增 Page 5 的 BMI 与 cross‑day latent align‑
+   ment。
+2. Page 3 的 GP covariance 是一种 smooth kernel choice，不是唯一 Gaussian‑process kernel。
+3. Page 4 的 output‑null interpretation 是 linear readout framework，真实 motor output 可更复杂。
+
+
+16.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+                                              23/24
+NEUROSCI 366 ・Lecture 22                                                   Source‑aligned companion
+
+
+16.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+16.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/24
+

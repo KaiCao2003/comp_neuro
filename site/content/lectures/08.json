@@ -1,0 +1,2107 @@
+{
+  "lecture": 8,
+  "slug": "08",
+  "zhTitle": "神经网络 I：脉冲表示、卷积与 E/I 平衡",
+  "enTitle": "Neural Networks I: Spikes, Convolution, and E/I Balance",
+  "companionFile": "NEUROSCI366_Lecture08_Neural_Networks1_Spikes_Balance_Companion.pdf",
+  "companionPages": 24,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture08_Neural_Networks1_Spikes_Balance_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture8-NeuralNetworks1.pdf",
+      "role": "primary",
+      "pages": 6,
+      "href": "/resources/original/Lecture8-NeuralNetworks1.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：spike train δ-sum。",
+    "从第一原则推导：kernel/convolution。",
+    "解释几何/计算直觉：coupled network。",
+    "连接生物学解释：Poisson E/I input。",
+    "诊断 assumptions 与 failure modes：mean vs variance。",
+    "把概念迁移到新神经科学问题：1/N failure。"
+  ],
+  "dependencyMap": "spike train δ-sum → kernel/convolution → coupled network → Poisson E/I input → mean vs variance → 1/N failure",
+  "coreQuestion": "如何把离散 spike times 变成 synaptic currents，并理解大规模网络中 mean、variance 与 E/I balance 的不同 scaling？",
+  "diagnostic": [
+    "δ 的核心积分性质是什么？",
+    "为什么 K*Δ 等于每个 spike-triggered kernel 的和？",
+    "W_ij 的方向 convention 是什么？",
+    "独立 Poisson inputs 的 variance 为什么相加？",
+    "抑制项为什么对 variance 为正？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-08-source-1",
+      "order": 1,
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：recurrent/input weights、population architecture、coupled spiking-network equations。",
+      "noteMeaning": "spike train δ-sum 与 kernel/convolution：recurrent/input weights、population architecture、coupled spiking-network equations。",
+      "reasoning": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。",
+      "figureReading": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。",
+      "stopPredict": "δ 的核心积分性质是什么？"
+    },
+    {
+      "id": "lecture-08-source-2",
+      "order": 2,
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：spike-train delta representation、Dirac delta、kernel sum、convolution。",
+      "noteMeaning": "coupled network 与 Poisson E/I input：spike-train delta representation、Dirac delta、kernel sum、convolution。",
+      "reasoning": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。因此，将原始 spike-time sum 改写为 compact network equations， 并解释每一项如何从 presynaptic spikes 产生 current。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "为什么 K*Δ 等于每个 spike-triggered kernel 的和？"
+    },
+    {
+      "id": "lecture-08-source-3",
+      "order": 3,
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：compact convolution form 的 coupled equations。",
+      "noteMeaning": "mean vs variance 与 1/N failure：compact convolution form 的 coupled equations。",
+      "reasoning": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。因此，解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "W_ij 的方向 convention 是什么？"
+    },
+    {
+      "id": "lecture-08-source-4",
+      "order": 4,
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：stochastic E/I Poisson inputs；total charge/current mean。",
+      "noteMeaning": "1/√N balance 与 spike train δ-sum：stochastic E/I Poisson inputs；total charge/current mean。",
+      "reasoning": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。因此，严格推导 W∝1/N 时 mean finite 但 variance→0，为何网络趋于规则/静默而失去 Poissonlike fluctuations。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "独立 Poisson inputs 的 variance 为什么相加？"
+    },
+    {
+      "id": "lecture-08-source-5",
+      "order": 5,
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。",
+      "noteMeaning": "kernel/convolution 与 coupled network：variance of independent inputs；large-N1/Nscaling 的 failure；E/I balance。",
+      "reasoning": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。因此，推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "抑制项为什么对 variance 为正？"
+    },
+    {
+      "id": "lecture-08-source-6",
+      "order": 6,
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "page": 6,
+      "reconstruction": "Page 6：1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。",
+      "noteMeaning": "Poisson E/I input 与 mean vs variance：1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。",
+      "reasoning": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。",
+      "figureReading": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。",
+      "stopPredict": "W∼1/N 时 mean 和 variance 如何缩放？"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 spike-time sum 等于 convolution",
+    "【必要前置】 证明一串 kernel responses 可写成 K*Δ。 ∑ (k) ∆j (t) = δ(t − tj ) k ∫ ∑ dt′ K(t − t′ )∆j (t′ ) = (k) (K ∗ ∆j )(t) = K(t − tj ) k",
+    "1. Dirac delta 不是普通有限高度函数，而由积分取样性质定义。 2. 把 delta sum 代入 convolution integral。 3. 交换有限/可收敛求和与积分。 4. 每个 delta 把 integrand 取样在 t'=t_j^(k)。",
+    "Geometric/computational intuition. 每个 spike 在其时间点\"触发\"一份相同 kernel，convolution 只是把所有触发响应相加。 Biological interpretation / failure condition. δ(0) 本身不是可作为普通数计算的有限值；离散代码需用 bin/impulse normalization。",
+    "思考题：独立 Poisson inputs 的 variance 为什么相加？",
+    "5.2 independent Poisson inputs 的 mean 与 variance",
+    "【补全推导】 长度 Δt 内总 synaptic charge 如何缩放？",
+    "∑ NE ∑ NI Q= W E Kj − W I Kj j=1 j=1",
+    "E[Q] = (NE WE rE − NI WI rI )∆t Var(Q) = (NE WE2 rE + NI WI2 rI )∆t 1. 每个 K_j 是 Poisson count，mean=variance=rΔt。 2. 期望线性相加；independent variables 的 variances 相加。 3. inhibitory sign 在 mean 中为负，但平方后对 variance 为正。 4. 共享输入/相关 spikes 会额外产生 covariance terms。",
+    "Geometric/computational intuition. mean 关心带符号总和，variance 关心随机振幅平方。 Biological interpretation / failure condition. 忽略 independent assumption 会低估 network fluctuations。",
+    "思考题：抑制项为什么对 variance 为正？",
+    "5.3 为什么 1/N scaling 消灭 fluctuations",
+    "【跨页连接】 令每个 weight 为 W_bar/N。",
+    "1 E[Q] ∼ N = O(1) N 1 Var(Q) ∼ N = O(1/N ) → 0 N2 1. N 个输入各贡献 O(1/N)，mean 是 N 项之和。 2. variance 使用 weight squared，所以每项 O(1/N²)。 3. standard deviation O(1/√N) 消失。 4. 网络变得近 deterministic，难以产生 Poisson-like irregularity。",
+    "Geometric/computational intuition. 平均很多极小、独立输入会洗掉随机波动。 Biological interpretation / failure condition. 若输入强相关，variance 不一定按 1/N 消失。",
+    "思考题：W∼1/N 时 mean 和 variance 如何缩放？",
+    "5.4 balanced 1/√N scaling",
+    "【模型边界】 如何同时保留 finite mean 与 finite variance？ √ √ WE = W̄E / NE , WI = W̄I / NI",
+    "Var(Q) = W̄E2 rE ∆t + W̄I2 rI ∆t = O(1) √ √ E[Q] = O( N ) − O( N ) = O(1) after balance 1. 1/√N 使 variance 的 N×W² 项保持 O(1)。 2. 单独的 excitatory/inhibitory mean 各为 O(√N)。 3. 网络必须动态调节 rates/feedback，使两大 mean 相消到 O(1)。 4. balance 指统计/动态抵消，不是每时刻 E=I。",
+    "Geometric/computational intuition. 巨大的 E 和 I 背景彼此抵消，留下小 mean 但可观 fluctuations。 Biological interpretation / failure condition. 连接结构、delays、nonlinearities 或 strong correlations 可能改变 scaling。",
+    "思考题：W∼1/√N 时 variance 如何缩放？"
+  ],
+  "synthesis": [
+    "Dirac delta 让每个 spike time 成为可积分的事件，synaptic kernel 与 spike train 的 convolution 产生连续 current。在大 N limit 中，权重 scaling 必须同时检查 mean 与 variance：1/N 保持 mean 有限却把 fluctuations 压到零；balanced 1/√N 让大的 excitation 与 inhibition 在 mean 上相消， 同时保留 O(1) fluctuations。"
+  ],
+  "workedExamples": [
+    "7.1 finite-bin scaling 数值",
+    "【例题】题目：N=10,000，独立输入；比较 W=1/N 与 W=1/√N。",
+    "Worked solution. 1/N 时 mean∼1、variance∼10^{-4}；1/√N 时未经 balance 的 mean∼100、variance∼1。若 E/I mean 相消，净 mean 可回到 O(1)。 Check. 必须分别写 mean、variance；只说\"总输入有限\"会遗漏 fluctuation。",
+    "7.2 kernel sum",
+    "【拓展例题】题目：spikes 在 1、3 ms，K(t)=e^{-t/τ}H(t)。",
+    "Worked solution. current ∝e^{-(t-1)/τ}H(t-1)+e^{-(t-3)/τ}H(t-3)。 Check. 第二个 spike 在 t<3 ms 不应贡献。"
+  ],
+  "formulas": [
+    {
+      "id": "L08-F01",
+      "lecture": 8,
+      "name": "spike train 的 distribution 表示",
+      "expression": "∆(t) = δ(t − tk ) k",
+      "latex": "\\Delta(t)=\\sum_k\\delta(t-t_k)",
+      "conditions": "通过积分定义",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-F02",
+      "lecture": 8,
+      "name": "synaptic filtering",
+      "expression": "(K ∗ ∆)(t) = K(t − t′ )∆(t′ )dt′",
+      "latex": "(K\\ast\\Delta)(t)=\\int_{-\\infty}^{\\infty}K(t-t')\\Delta(t')\\,dt'",
+      "conditions": "causal K 时只依赖过去",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-F03",
+      "lecture": 8,
+      "name": "independent sum variance",
+      "expression": "∑ ∑ Var( a i Xi ) = a2i Var(Xi )",
+      "latex": "\\operatorname{Var}\\!\\left(\\sum_i a_iX_i\\right)=\\sum_i a_i^2\\operatorname{Var}(X_i)",
+      "conditions": "X_i independent",
+      "sectionId": "lecture-08-source-3",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L08-F04",
+      "lecture": 8,
+      "name": "mean-field weak weights",
+      "expression": "W ∼ 1/N",
+      "latex": "W\\sim\\frac{1}{N}",
+      "conditions": "variance→0 under independence",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-F05",
+      "lecture": 8,
+      "name": "balanced-network scaling",
+      "expression": "W ∼ 1/ N",
+      "latex": "W\\sim\\frac{1}{\\sqrt{N}}",
+      "conditions": "E/I cancellation required",
+      "sectionId": "lecture-08-source-5",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L08-F06",
+      "lecture": 8,
+      "name": "balanced net mean",
+      "expression": "E[QE + QI ] = O(1)",
+      "latex": "\\mathbb{E}[Q_E+Q_I]=O(1)",
+      "conditions": "large signed currents cancel",
+      "sectionId": "lecture-08-source-6",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L08-G01",
+      "lecture": 8,
+      "zh": "Dirac delta",
+      "en": "Dirac delta",
+      "definition": "在积分中取样的 generalized function/distribution。",
+      "sectionId": "lecture-08-source-2",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L08-G02",
+      "lecture": 8,
+      "zh": "卷积",
+      "en": "convolution",
+      "definition": "把输入历史按 kernel 平移加权的运算。",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-G03",
+      "lecture": 8,
+      "zh": "突触核",
+      "en": "synaptic kernel",
+      "definition": "单个 presynaptic spike 引起的时间响应。",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-G04",
+      "lecture": 8,
+      "zh": "循环权重",
+      "en": "recurrent weight",
+      "definition": "网络内部 neuron j→i 的连接强度。",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-G05",
+      "lecture": 8,
+      "zh": "输入权重",
+      "en": "input weight",
+      "definition": "外部输入 neuron→recurrent neuron 的连接。",
+      "sectionId": "lecture-08-source-1",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L08-G06",
+      "lecture": 8,
+      "zh": "激发-抑制平衡",
+      "en": "excitation-inhibition balance",
+      "definition": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。",
+      "sectionId": "lecture-08-source-5",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L08-G07",
+      "lecture": 8,
+      "zh": "动态平衡",
+      "en": "dynamic balance",
+      "definition": "balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
+      "sectionId": "lecture-08-source-6",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 6
+    },
+    {
+      "id": "L08-G08",
+      "lecture": 8,
+      "zh": "数量级",
+      "en": "order of magnitude",
+      "definition": "随 N 增长的主导 scaling，如 O(1)、O(√N)。",
+      "sectionId": "lecture-08-source-5",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L08-G09",
+      "lecture": 8,
+      "zh": "不规则放电",
+      "en": "irregular spiking",
+      "definition": "ISI 高变异、近 Poisson-like 的 spike timing。",
+      "sectionId": "lecture-08-source-6",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "commonTraps": [
+    "把 δ(t) 当作 t=0 时的普通无限数。",
+    "convolution 中把 K(t−t') 与 K(t') 的时间方向写反。",
+    "variance 计算忘记 weight 要平方。",
+    "inhibition 对 mean 为负，但对 variance 的贡献仍为正。",
+    "只检查 mean scaling，不检查 variance。",
+    "把 E/I balance 误写成每个瞬间 excitation 与 inhibition 完全相等。",
+    "本讲的 scaling 推导容易因跳步失真。不能只报结论； 需要把 mean 与 variance 分别计算，并明确独立性假设。"
+  ],
+  "errata": [
+    "1. Page 2 的 crossed-out 手写不影响 delta/convolution 核心推导。 2. Page 5 的 1/N conclusion 依赖独立 Poisson inputs；相关输入需加入 covariance terms。 3. Page 6 的 balanced state 是候选机制，不应写成所有 cortical irregularity 的唯一来源。"
+  ],
+  "questions": [
+    {
+      "id": "L08-Q01",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：δ 的核心积分性质是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "b",
+          "text": "∫f(t)δ(t−t0)dt=f(t0)。"
+        },
+        {
+          "id": "c",
+          "text": "covariance terms 为零。"
+        },
+        {
+          "id": "d",
+          "text": "在积分中取样的 generalized function/distribution。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“spike train 的 distribution 表示”的适用条件。",
+        "c": "该选项回答的是“独立 Poisson inputs 的 variance 为什么相加？”。",
+        "d": "这是“Dirac delta（Dirac delta）”的定义。"
+      },
+      "explanation": "∫f(t)δ(t−t0)dt=f(t0)。"
+    },
+    {
+      "id": "L08-Q02",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 2,
+          "section": "lecture-08-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：为什么 K*Δ 等于每个 spike-triggered kernel 的和？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "把输入历史按 kernel 平移加权的运算。"
+        },
+        {
+          "id": "b",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "c",
+          "text": "delta 在每个 spike time 对 K(t−t') 取样。"
+        },
+        {
+          "id": "d",
+          "text": "引入正 covariance terms，波动可能不随 N 平均掉。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“卷积（convolution）”的定义。",
+        "b": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 2 页。",
+        "d": "该选项回答的是“shared input 会如何改变 variance scaling？”。"
+      },
+      "explanation": "delta 在每个 spike time 对 K(t−t') 取样。"
+    },
+    {
+      "id": "L08-Q03",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：W_ij 的方向 convention 是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+        },
+        {
+          "id": "b",
+          "text": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        },
+        {
+          "id": "c",
+          "text": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+        },
+        {
+          "id": "d",
+          "text": "j 是 presynaptic/source，i 是 postsynaptic/target。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 1 页。",
+        "b": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。",
+        "c": "该选项回答的是“dynamic balance 与静态设置 E=I 的区别？”。"
+      },
+      "explanation": "j 是 presynaptic/source，i 是 postsynaptic/target。"
+    },
+    {
+      "id": "L08-Q04",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "calculation",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 8 讲：独立 Poisson inputs 的 variance 为什么相加？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "covariance terms 为零。"
+        },
+        {
+          "id": "b",
+          "text": "variance 中 coefficient 被平方。"
+        },
+        {
+          "id": "c",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        },
+        {
+          "id": "d",
+          "text": "mean O(1)，variance O(1/N)→0。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项回答的是“抑制项为什么对 variance 为正？”。",
+        "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。",
+        "d": "该选项回答的是“W∼1/N 时 mean 和 variance 如何缩放？”。"
+      },
+      "explanation": "covariance terms 为零。"
+    },
+    {
+      "id": "L08-Q05",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 5,
+          "section": "lecture-08-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：抑制项为什么对 variance 为正？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "mean O(1)，variance O(1/N)→0。"
+        },
+        {
+          "id": "b",
+          "text": "variance 中 coefficient 被平方。"
+        },
+        {
+          "id": "c",
+          "text": "variance→0 under independence"
+        },
+        {
+          "id": "d",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“W∼1/N 时 mean 和 variance 如何缩放？”。",
+        "c": "这是“mean-field weak weights”的适用条件。",
+        "d": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。"
+      },
+      "explanation": "variance 中 coefficient 被平方。"
+    },
+    {
+      "id": "L08-Q06",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "calculation",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：W∼1/N 时 mean 和 variance 如何缩放？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        },
+        {
+          "id": "b",
+          "text": "variance 中 coefficient 被平方。"
+        },
+        {
+          "id": "c",
+          "text": "mean O(1)，variance O(1/N)→0。"
+        },
+        {
+          "id": "d",
+          "text": "E/I mean 各自 O(√N)，不相消会使净输入发散。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。",
+        "b": "该选项回答的是“抑制项为什么对 variance 为正？”。",
+        "d": "该选项回答的是“1/√N 时为什么还需要 balance？”。"
+      },
+      "explanation": "mean O(1)，variance O(1/N)→0。"
+    },
+    {
+      "id": "L08-Q07",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：W∼1/√N 时 variance 如何缩放？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "variance 中 coefficient 被平方。"
+        },
+        {
+          "id": "b",
+          "text": "mean O(1)，variance O(1/N)→0。"
+        },
+        {
+          "id": "c",
+          "text": "variance→0 under independence"
+        },
+        {
+          "id": "d",
+          "text": "O(1)。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“抑制项为什么对 variance 为正？”。",
+        "b": "该选项回答的是“W∼1/N 时 mean 和 variance 如何缩放？”。",
+        "c": "这是“mean-field weak weights”的适用条件。"
+      },
+      "explanation": "O(1)。"
+    },
+    {
+      "id": "L08-Q08",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：1/√N 时为什么还需要 balance？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "E/I mean 各自 O(√N)，不相消会使净输入发散。"
+        },
+        {
+          "id": "b",
+          "text": "balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+        },
+        {
+          "id": "c",
+          "text": "单个 presynaptic spike 引起的时间响应。"
+        },
+        {
+          "id": "d",
+          "text": "variance→0 under independence"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“动态平衡（dynamic balance）”的定义。",
+        "c": "这是“突触核（synaptic kernel）”的定义。",
+        "d": "这是“mean-field weak weights”的适用条件。"
+      },
+      "explanation": "E/I mean 各自 O(√N)，不相消会使净输入发散。"
+    },
+    {
+      "id": "L08-Q09",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "comparison",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 8 讲：dynamic balance 与静态设置 E=I 的区别？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+        },
+        {
+          "id": "b",
+          "text": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+        },
+        {
+          "id": "c",
+          "text": "因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。"
+        },
+        {
+          "id": "d",
+          "text": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“动态平衡（dynamic balance）”的定义。",
+        "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。",
+        "d": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。"
+      },
+      "explanation": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+    },
+    {
+      "id": "L08-Q10",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：shared input 会如何改变 variance scaling？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        },
+        {
+          "id": "b",
+          "text": "随 N 增长的主导 scaling，如 O(1)、O(√N)。"
+        },
+        {
+          "id": "c",
+          "text": "引入正 covariance terms，波动可能不随 N 平均掉。"
+        },
+        {
+          "id": "d",
+          "text": "variance→0 under independence"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。",
+        "b": "这是“数量级（order of magnitude）”的定义。",
+        "d": "这是“mean-field weak weights”的适用条件。"
+      },
+      "explanation": "引入正 covariance terms，波动可能不随 N 平均掉。"
+    },
+    {
+      "id": "L08-Q11",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：causal kernel 的含义？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "把输入历史按 kernel 平移加权的运算。"
+        },
+        {
+          "id": "b",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "delta 在每个 spike time 对 K(t−t') 取样。"
+        },
+        {
+          "id": "d",
+          "text": "K(t<0)=0，当前 response 只由过去 spikes 决定。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“卷积（convolution）”的定义。",
+        "b": "这是“synaptic filtering”的适用条件。",
+        "c": "该选项回答的是“为什么 K*Δ 等于每个 spike-triggered kernel 的和？”。"
+      },
+      "explanation": "K(t<0)=0，当前 response 只由过去 spikes 决定。"
+    },
+    {
+      "id": "L08-Q12",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：为何 balanced network 可产生 irregular spiking？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "有限 O(1) fluctuations 持续推动膜电位随机接近 threshold。"
+        },
+        {
+          "id": "b",
+          "text": "balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+        },
+        {
+          "id": "c",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        },
+        {
+          "id": "d",
+          "text": "因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“动态平衡（dynamic balance）”的定义。",
+        "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 1 页。",
+        "d": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。"
+      },
+      "explanation": "有限 O(1) fluctuations 持续推动膜电位随机接近 threshold。"
+    },
+    {
+      "id": "L08-Q13",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+        },
+        {
+          "id": "b",
+          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
+        },
+        {
+          "id": "c",
+          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+        },
+        {
+          "id": "d",
+          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "c": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
+        "d": "该陈述解释的是“variance of independent inputs”，不是题干指定的关系。"
+      },
+      "explanation": "recurrent/input weights、population architecture、coupled spiking-network equations。"
+    },
+    {
+      "id": "L08-Q14",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"recurrent/input weights、population architecture、coupled spiking-network equations\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+        },
+        {
+          "id": "b",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "c",
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+        },
+        {
+          "id": "d",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
+        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
+      },
+      "explanation": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+    },
+    {
+      "id": "L08-Q15",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：阅读与\"recurrent/input weights、population architecture、coupled spiking-network equations\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+        },
+        {
+          "id": "c",
+          "text": "balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+        },
+        {
+          "id": "d",
+          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "b": "该选项回答的是“dynamic balance 与静态设置 E=I 的区别？”。",
+        "c": "这是“动态平衡（dynamic balance）”的定义。"
+      },
+      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+    },
+    {
+      "id": "L08-Q16",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 2,
+          "section": "lecture-08-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+        },
+        {
+          "id": "b",
+          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
+        },
+        {
+          "id": "c",
+          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+        },
+        {
+          "id": "d",
+          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
+        "d": "该陈述解释的是“variance of independent inputs”，不是题干指定的关系。"
+      },
+      "explanation": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+    },
+    {
+      "id": "L08-Q17",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 2,
+          "section": "lecture-08-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"spike-train delta representation、Dirac delta、kernel sum、convolution\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        },
+        {
+          "id": "b",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "c",
+          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+        },
+        {
+          "id": "d",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
+        "c": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
+        "d": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。"
+      },
+      "explanation": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+    },
+    {
+      "id": "L08-Q18",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 3,
+          "section": "lecture-08-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+        },
+        {
+          "id": "b",
+          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
+        },
+        {
+          "id": "c",
+          "text": "compact convolution form 的 coupled equations。"
+        },
+        {
+          "id": "d",
+          "text": "1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
+        "b": "该陈述解释的是“variance of independent inputs”，不是题干指定的关系。",
+        "d": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。"
+      },
+      "explanation": "compact convolution form 的 coupled equations。"
+    },
+    {
+      "id": "L08-Q19",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 3,
+          "section": "lecture-08-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"compact convolution form 的 coupled equations\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        },
+        {
+          "id": "b",
+          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+        },
+        {
+          "id": "c",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "d",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
+        "b": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
+        "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。"
+      },
+      "explanation": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+    },
+    {
+      "id": "L08-Q20",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+        },
+        {
+          "id": "b",
+          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
+        },
+        {
+          "id": "c",
+          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+        },
+        {
+          "id": "d",
+          "text": "compact convolution form 的 coupled equations。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
+      },
+      "explanation": "stochastic E/I Poisson inputs；total charge/current mean。"
+    },
+    {
+      "id": "L08-Q21",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"stochastic E/I Poisson inputs\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+        },
+        {
+          "id": "b",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        },
+        {
+          "id": "c",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "d",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
+      },
+      "explanation": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+    },
+    {
+      "id": "L08-Q22",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 5,
+          "section": "lecture-08-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
+        },
+        {
+          "id": "b",
+          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+        },
+        {
+          "id": "c",
+          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
+        },
+        {
+          "id": "d",
+          "text": "compact convolution form 的 coupled equations。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
+        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
+      },
+      "explanation": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
+    },
+    {
+      "id": "L08-Q23",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 5,
+          "section": "lecture-08-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"variance of independent inputs\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+        },
+        {
+          "id": "b",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "c",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        },
+        {
+          "id": "d",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
+        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "c": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
+      },
+      "explanation": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+    },
+    {
+      "id": "L08-Q24",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 6 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。"
+        },
+        {
+          "id": "b",
+          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+        },
+        {
+          "id": "c",
+          "text": "compact convolution form 的 coupled equations。"
+        },
+        {
+          "id": "d",
+          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "c": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。",
+        "d": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。"
+      },
+      "explanation": "1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。"
+    },
+    {
+      "id": "L08-Q25",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+        },
+        {
+          "id": "b",
+          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+        },
+        {
+          "id": "c",
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+        },
+        {
+          "id": "d",
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "c": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。",
+        "d": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。"
+      },
+      "explanation": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+    },
+    {
+      "id": "L08-Q26",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks I",
+        "Lecture8-NeuralNetworks1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：阅读与\"1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。"
+        },
+        {
+          "id": "c",
+          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+        },
+        {
+          "id": "d",
+          "text": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "b": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。",
+        "d": "该选项回答的是“dynamic balance 与静态设置 E=I 的区别？”。"
+      },
+      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+    },
+    {
+      "id": "L08-Q27",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 2,
+          "section": "lecture-08-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Dirac delta",
+        "Dirac delta"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"在积分中取样的 generalized function/distribution。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "卷积（convolution）"
+        },
+        {
+          "id": "b",
+          "text": "突触核（synaptic kernel）"
+        },
+        {
+          "id": "c",
+          "text": "循环权重（recurrent weight）"
+        },
+        {
+          "id": "d",
+          "text": "Dirac delta（Dirac delta）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。",
+        "b": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。",
+        "c": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。"
+      },
+      "explanation": "Dirac delta（Dirac delta）：在积分中取样的 generalized function/distribution。"
+    },
+    {
+      "id": "L08-Q28",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "卷积",
+        "convolution"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"把输入历史按 kernel 平移加权的运算。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "卷积（convolution）"
+        },
+        {
+          "id": "b",
+          "text": "突触核（synaptic kernel）"
+        },
+        {
+          "id": "c",
+          "text": "循环权重（recurrent weight）"
+        },
+        {
+          "id": "d",
+          "text": "输入权重（input weight）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。",
+        "c": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。",
+        "d": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。"
+      },
+      "explanation": "卷积（convolution）：把输入历史按 kernel 平移加权的运算。"
+    },
+    {
+      "id": "L08-Q29",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "突触核",
+        "synaptic kernel"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"单个 presynaptic spike 引起的时间响应。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "循环权重（recurrent weight）"
+        },
+        {
+          "id": "b",
+          "text": "突触核（synaptic kernel）"
+        },
+        {
+          "id": "c",
+          "text": "输入权重（input weight）"
+        },
+        {
+          "id": "d",
+          "text": "激发-抑制平衡（excitation-inhibition balance）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。",
+        "c": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。",
+        "d": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+      },
+      "explanation": "突触核（synaptic kernel）：单个 presynaptic spike 引起的时间响应。"
+    },
+    {
+      "id": "L08-Q30",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "循环权重",
+        "recurrent weight"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"网络内部 neuron j→i 的连接强度。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "输入权重（input weight）"
+        },
+        {
+          "id": "b",
+          "text": "激发-抑制平衡（excitation-inhibition balance）"
+        },
+        {
+          "id": "c",
+          "text": "循环权重（recurrent weight）"
+        },
+        {
+          "id": "d",
+          "text": "动态平衡（dynamic balance）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。",
+        "b": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。",
+        "d": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+      },
+      "explanation": "循环权重（recurrent weight）：网络内部 neuron j→i 的连接强度。"
+    },
+    {
+      "id": "L08-Q31",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "输入权重",
+        "input weight"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"外部输入 neuron→recurrent neuron 的连接。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "激发-抑制平衡（excitation-inhibition balance）"
+        },
+        {
+          "id": "b",
+          "text": "动态平衡（dynamic balance）"
+        },
+        {
+          "id": "c",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "d",
+          "text": "输入权重（input weight）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。",
+        "b": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
+        "c": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。"
+      },
+      "explanation": "输入权重（input weight）：外部输入 neuron→recurrent neuron 的连接。"
+    },
+    {
+      "id": "L08-Q32",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "激发-抑制平衡",
+        "excitation-inhibition balance"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "激发-抑制平衡（excitation-inhibition balance）"
+        },
+        {
+          "id": "b",
+          "text": "动态平衡（dynamic balance）"
+        },
+        {
+          "id": "c",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "d",
+          "text": "不规则放电（irregular spiking）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
+        "c": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。",
+        "d": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。"
+      },
+      "explanation": "激发-抑制平衡（excitation-inhibition balance）：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+    },
+    {
+      "id": "L08-Q33",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "动态平衡",
+        "dynamic balance"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "b",
+          "text": "动态平衡（dynamic balance）"
+        },
+        {
+          "id": "c",
+          "text": "不规则放电（irregular spiking）"
+        },
+        {
+          "id": "d",
+          "text": "Dirac delta（Dirac delta）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。",
+        "c": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。",
+        "d": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。"
+      },
+      "explanation": "动态平衡（dynamic balance）：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+    },
+    {
+      "id": "L08-Q34",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 5,
+          "section": "lecture-08-source-5"
+        }
+      ],
+      "conceptTags": [
+        "数量级",
+        "order of magnitude"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"随 N 增长的主导 scaling，如 O(1)、O(√N)。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不规则放电（irregular spiking）"
+        },
+        {
+          "id": "b",
+          "text": "Dirac delta（Dirac delta）"
+        },
+        {
+          "id": "c",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "d",
+          "text": "卷积（convolution）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。",
+        "b": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。",
+        "d": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。"
+      },
+      "explanation": "数量级（order of magnitude）：随 N 增长的主导 scaling，如 O(1)、O(√N)。"
+    },
+    {
+      "id": "L08-Q35",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "不规则放电",
+        "irregular spiking"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"ISI 高变异、近 Poisson-like 的 spike timing。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Dirac delta（Dirac delta）"
+        },
+        {
+          "id": "b",
+          "text": "卷积（convolution）"
+        },
+        {
+          "id": "c",
+          "text": "突触核（synaptic kernel）"
+        },
+        {
+          "id": "d",
+          "text": "不规则放电（irregular spiking）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。",
+        "b": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。",
+        "c": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。"
+      },
+      "explanation": "不规则放电（irregular spiking）：ISI 高变异、近 Poisson-like 的 spike timing。"
+    },
+    {
+      "id": "L08-Q36",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "spike train 的 distribution 表示"
+      ],
+      "difficulty": 1,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：使用\"spike train 的 distribution 表示\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "b",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "X_i independent"
+        },
+        {
+          "id": "d",
+          "text": "variance→0 under independence"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "c": "这是“independent sum variance”的条件，不是题干公式的条件。",
+        "d": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
+      },
+      "explanation": "spike train 的 distribution 表示的适用条件：通过积分定义"
+    },
+    {
+      "id": "L08-Q37",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "synaptic filtering"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：使用\"synaptic filtering\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "b",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "X_i independent"
+        },
+        {
+          "id": "d",
+          "text": "variance→0 under independence"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "c": "这是“independent sum variance”的条件，不是题干公式的条件。",
+        "d": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
+      },
+      "explanation": "synaptic filtering 的适用条件：causal K 时只依赖过去"
+    },
+    {
+      "id": "L08-Q38",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 3,
+          "section": "lecture-08-source-3"
+        }
+      ],
+      "conceptTags": [
+        "independent sum variance"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：使用\"independent sum variance\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "b",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "X_i independent"
+        },
+        {
+          "id": "d",
+          "text": "variance→0 under independence"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "d": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
+      },
+      "explanation": "independent sum variance 的适用条件：X_i independent"
+    },
+    {
+      "id": "L08-Q39",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "mean-field weak weights"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：使用\"mean-field weak weights\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "b",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "X_i independent"
+        },
+        {
+          "id": "d",
+          "text": "variance→0 under independence"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "c": "这是“independent sum variance”的条件，不是题干公式的条件。"
+      },
+      "explanation": "mean-field weak weights 的适用条件：variance→0 under independence"
+    },
+    {
+      "id": "L08-Q40",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 5,
+          "section": "lecture-08-source-5"
+        }
+      ],
+      "conceptTags": [
+        "balanced-network scaling"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：使用\"balanced-network scaling\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "E/I cancellation required"
+        },
+        {
+          "id": "b",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "c",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "d",
+          "text": "X_i independent"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "c": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "d": "这是“independent sum variance”的条件，不是题干公式的条件。"
+      },
+      "explanation": "balanced-network scaling 的适用条件：E/I cancellation required"
+    }
+  ]
+}

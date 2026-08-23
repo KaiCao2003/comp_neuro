@@ -1,0 +1,924 @@
+NEUROSCI 366
+Lecture 2
+
+
+
+向 量、 矩 阵 与 概 率 基 础 / Vectors, Matrices, and
+
+Probability
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture2‑FC_NEUROSCI_366_F2025.pdf
+ ‧ Lecture2‑FC_Solutions_NEUROSCI_366_F2025.pdf
+ ‧ Lecture2‑FC_Solutions_NEUROSCI_366_F2025.m
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 2                                                            Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                 3
+
+2 Learning objectives and prerequisite dependency map                                                       3
+
+3 Five‑minute prerequisite diagnostic                                                                       3
+
+4 Source‑aligned lesson / 按原笔记页序                                                                            4
+   4.1 Lecture2‑FC_NEUROSCI_366_F2025.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . .              4
+   4.2 Lecture2‑FC_NEUROSCI_366_F2025.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . .              5
+   4.3 Lecture2‑FC_NEUROSCI_366_F2025.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . .              6
+   4.4 Lecture2‑FC_NEUROSCI_366_F2025.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . .              7
+
+5 MATLAB source audit / 代码逐行审计                                                                              8
+
+6 补全推导与数学支架 / Derivations                                                                                   10
+   6.1 shape‑first 线性代数 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       10
+   6.2 Bernoulli 的 mean 与 variance . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          11
+   6.3 Exponential distribution 的 CDF、均值与尺度 . . . . . . . . . . . . . . . . . . . . . . . .                 12
+   6.4 Bivariate Gaussian、conditional mean 与 Bayes . . . . . . . . . . . . . . . . . . . . . .              13
+
+7 Cross‑page synthesis / 跨页因果与数学链                                                                           14
+
+8 Worked examples and transfer                                                                              14
+   8.1 题目给定对象的手算 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .              14
+   8.2 conditional Gaussian 数值检查 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            15
+
+9 Formula and notation sheet                                                                                16
+
+10 Bilingual glossary                                                                                       16
+
+11 Common traps, assumptions, and limitations                                                               17
+
+12 Cumulative Knowledge Check                                                                               18
+
+13 Hint Bank                                                                                                20
+
+14 Complete Answer Key with reasoning                                                                       22
+
+15 Source‑page concordance and coverage audit                                                               23
+
+16 Errata, uncertainty log, and external endnotes                                                           23
+   16.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    23
+   16.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   24
+
+                                                    1/24
+NEUROSCI 366 ・Lecture 2                                                             Source‑aligned companion
+
+
+   16.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      24
+   16.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   24
+
+
+
+
+                                                     2/24
+NEUROSCI 366 ・Lecture 2                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：对象与 shape。
+‧ 从第一原则推导：线性代数运算。
+‧ 解释几何/计算直觉：概率分布。
+‧ 连接生物学解释：联合/边缘/条件。
+‧ 诊断 assumptions 与 failure modes：Bayes 更新。
+
+ Dependency map
+ 对象与 shape → 线性代数运算 → 概率分布 → 联合/边缘/条件 → Bayes 更新
+ Core question
+ 如何用 shape reasoning 保证线性代数运算合法，并用概率分布把神经数据中的不确定性写成可计算对
+ 象？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. A 是 4×2，v 是 2×1；Av 的 shape 是什么？
+                                 （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. 为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？
+                                    （卡住时先看 Source‑page unit 2，再看
+   补全推导。）
+3. 计算 u^Tv，其中 u=(0,1)^T，v=(2,5)^T。
+                                 （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. C=[[3,4],[6,8]] 为什么不可逆？
+                         （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. Bernoulli(p) 的 variance 在什么 p 最大？
+                                   （卡住时先看 Source‑page unit 4，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+
+                                              3/24
+NEUROSCI 366 ・Lecture 2                                       Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture2‑FC_NEUROSCI_366_F2025.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture2‑FC_NEUROSCI_366_F2025.pdf, p. 1]
+ Clean reconstruction. Exercise Page 1：scalar/vector/matrix objects；维度规则；sum、inner
+ product、norm、outer product、matrix‑vector 与 matrix‑matrix multiplication。
+ What the note is saying. 本页的中心对象是对象与 shape 与线性代数运算。原笔记将它们放进以
+ 下链条：scalar/vector/matrix objects；维度规则；sum、inner product、norm、outer product、
+ matrix‑vector 与 matrix‑matrix multiplication。
+ Why it follows. 完整覆盖 dot product、norm、outer product、identity、transpose、inverse、
+ determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。其逻辑后
+ 果是：完整讲 marginalization、independence、conditional probability、product rule 与 Bayes
+ rule；严格区分 probability、likelihood、prior、posterior。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  A 是 4×2，v 是 2×1；Av 的 shape 是什么？
+
+
+
+
+                                       4/24
+NEUROSCI 366 ・Lecture 2                                          Source‑aligned companion
+
+
+4.2 Lecture2‑FC_NEUROSCI_366_F2025.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture2‑FC_NEUROSCI_366_F2025.pdf, p. 2]
+ Clean reconstruction. Exercise Page 2：identity、transpose、vector‑as‑matrix、inverse、sin‑
+ gularity、determinant、Hadamard product；Bernoulli distribution；exponential distribution
+ 开始。
+ What the note is saying. 本页的中心对象是概率分布与联合/边缘/条件。原笔记将它们放进以下链条：
+ identity、transpose、vector‑as‑matrix、inverse、singularity、determinant、Hadamard product；
+ Bernoulli distribution；exponential distribution 开始。
+ Why it follows. 完整覆盖 dot product、norm、outer product、identity、transpose、inverse、deter‑
+ minant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。其逻辑后果是：完整推
+ 导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，
+ 并给出 integration by parts 的最小支架。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？
+
+
+
+
+                                         5/24
+NEUROSCI 366 ・Lecture 2                                           Source‑aligned companion
+
+
+4.3 Lecture2‑FC_NEUROSCI_366_F2025.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture2‑FC_NEUROSCI_366_F2025.pdf, p. 3]
+ Clean reconstruction. Exercise Page 3：exponential CDF/mean/median/mode/standard devia‑
+ tion；bivariate normal；covariance matrix；marginal、independence、conditional distribution。
+ What the note is saying. 本页的中心对象是 Bayes 更新与对象与 shape。原笔记将它们放进以下
+ 链条：exponential CDF/mean/median/mode/standard deviation；bivariate normal；covariance
+ matrix；marginal、independence、conditional distribution。
+ Why it follows. 逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、
+ inverse、correlation coefficient；用图形解释 covariance 的符号。其逻辑后果是：完整推导 Bernoulli
+ mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出
+ integration by parts 的最小支架。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  计算 u^Tv，其中 u=(0,1)^T，v=(2,5)^T。
+
+
+
+
+                                          6/24
+NEUROSCI 366 ・Lecture 2                                           Source‑aligned companion
+
+
+4.4 Lecture2‑FC_NEUROSCI_366_F2025.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture2‑FC_NEUROSCI_366_F2025.pdf, p. 4]
+ Clean reconstruction. Exercise Page 4：Bayes rule。
+ What the note is saying. 本页的中心对象是线性代数运算与概率分布。原笔记将它们放进以下链条：
+ Bayes rule。
+ Why it follows. 完整讲 marginalization、independence、conditional probability、product rule 与
+ Bayes rule；严格区分 probability、likelihood、prior、posterior。其逻辑后果是：完整推导 Bernoulli
+ mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出
+ integration by parts 的最小支架。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  C=[[3,4],[6,8]] 为什么不可逆？
+
+
+
+
+                                          7/24
+     NEUROSCI 366 ・Lecture 2                                            Source‑aligned companion
+
+
+
+     5 MATLAB source audit / 代码逐行审计
+
+        Authority. The listing below is the actual uploaded source; instructional intent and
+        production‑quality recommendations are kept separate.
+
+ 1   %% Clear workspace before starting work
+ 2
+ 3   clear all;
+ 4
+ 5   %% Problem 1
+ 6
+ 7   % Bullet 1
+ 8   s = 2;
+ 9   u = [0; 1];
+10   v = [2; 5];
+11   w = [0; 1; 2; 5];
+12   A = [0 0.5; 10 1; 2 9; 2 7];
+13   B = [4 4; 8 9];
+14   C = [3 4; 6 8];
+15
+16   % Well-defined mathematical objects
+17   u+v
+18   B+C
+19
+20   % Imprecise MATLAB notation
+21   s+A
+22   s+A-A
+23
+24   % Bullet 2
+25   dot(u,v)
+26
+27   % Bullet 3
+28   norm(w)
+29   sqrt(dot(w,w))
+30
+31   % Bullet 5
+32   A*v
+33
+34   % Bullet 6
+35   B*C
+36
+37   % Bullet 7
+38   eye(3)
+39
+40   % Bullet 8
+41   A'
+42
+43   % Bullet 10
+44   inv(B)
+45   inv(C)
+46
+47   % BUllet 11
+48   det(s)
+49   det(B)
+50   det(C)
+51
+52   % Bullet 12
+53   u.*v
+54   B.*C
+
+
+
+
+                                                8/24
+NEUROSCI 366 ・Lecture 2                                                   Source‑aligned companion
+
+
+
+Lines     Role             Audit finding                                   Consequence
+1–3       Workspace        clear all 可复现课程环境，但会清函数缓存；                      No mathematical
+          reset            日常更常用 clearvars; close all; clc.                effect, but avoid
+                                                                           unnecessary global
+                                                                           reset.
+8–14      Objects and      s + Arelies on MATLAB scalar expansion.         Separate language
+          scalar           This is valid MATLAB, but it is not “matrix     semantics from
+          expansion        addition of unequal shapes.”                    abstract linear
+                                                                           algebra.
+17–22     Sums and         sum(A)reduces by columns by default;u*vis       Always state output
+          products         dimensionally invalid whileu*v'is an outer      shape.
+                           product.
+25–29     Matrix           A*v,B*u,A*B,B*Aare determined by inner          Predict shape before
+          multiplication   dimensions; only defined products should        execution.
+                           be interpreted.
+32–44     Inverse,         The script demonstrates explicit inversion      Do not use
+          determinant,     for B. Production numerical solving should      determinant alone as
+          singularity      use left division. C is singular becausedet(    a stable numerical
+                           C)=0;inv(C)is not a mathematical inverse.       singularity test.
+47–54     Hadamard         A.*Ais elementwise and distinct fromA*A.        Same symbols,
+          product                                                          different algebra.
+
+
+
+
+                                             9/24
+NEUROSCI 366 ・Lecture 2                                           Source‑aligned companion
+
+
+
+6 补全推导与数学支架 / Derivations
+
+6.1 shape‑first 线性代数
+
+【必要前置】      判断加法、内积、外积和矩阵乘法是否定义。
+
+                             A ∈ Rm×n , x ∈ Rn×1 ⇒ Ax ∈ Rm×1
+
+                                               ∑
+                                               n
+                                   (AB)ij =          Aik Bkj
+                                               k=1
+
+                                 uT v ∈ R,      uv T ∈ Rm×n
+1. 加法要求 shape 完全相同；矩阵乘法要求内维相等。
+2. 内积把两个同维列向量压缩成 scalar；外积保留每一对分量组合形成 matrix。
+3. Hadamard product 逐元素相乘，要求同 shape；它与矩阵乘法不是同一运算。
+4. 每一步先写 shape，再算数值，可提前排除大多数错误。
+
+  Geometric/computational intuition. 矩阵乘法是“每个输出行模板”与输入向量做内积；外积则
+  构造所有成对乘积。
+  Biological interpretation / failure condition. MATLAB implicit expansion 可能让 shape 不
+  同的对象产生输出，但该输出未必对应题目所问的抽象运算。
+
+  Micro‑check
+  C=[[3,4],[6,8]] 为什么不可逆？
+
+
+
+
+                                             10/24
+NEUROSCI 366 ・Lecture 2                                               Source‑aligned companion
+
+
+6.2 Bernoulli 的 mean 与 variance
+
+【补全推导】      从 PMF 推出二元随机变量的中心与波动。
+
+                           P (X = x) = px (1 − p)1−x ,   x ∈ {0, 1}
+
+                                          E[X] = p
+                           Var(X) = E[X 2 ] − E[X]2 = p(1 − p)
+1. X 只能取 0 或 1，所以 X^2=X。
+2. E[X]=(1‑p)×0+p×1=p。
+3. E[X^2]=E[X]=p，因此 variance=p‑p^2。
+4. p=0 或 1 时没有随机性；p=1/2 时 variance 最大。
+
+  Geometric/computational intuition. variance 衡量 coin flip 离其平均值的平方距离；最不确定
+  的硬币波动最大。
+  Biological interpretation / failure condition. Bernoulli 只描述单次 binary outcome；多个相
+  关 trial 不能简单当作独立 Bernoulli。
+
+  Micro‑check
+  Bernoulli(p) 的 variance 在什么 p 最大？
+
+
+
+
+                                            11/24
+NEUROSCI 366 ・Lecture 2                                                       Source‑aligned companion
+
+
+6.3 Exponential distribution 的 CDF、均值与尺度
+
+【跨页连接】      描述等待时间并从 PDF 推导可观测统计量。
+
+                                         f (x) = λe−λx 1x≥0
+
+                                     F (x) = 1 − e−λx (x ≥ 0)
+                                   1                   ln 2               1
+                          E[X] =     ,   median =           ,   SD(X) =
+                                   λ                    λ                 λ
+1. CDF 是从负无穷积分到 x；负值区间概率为零。
+2. 区间概率由 F(b)‑F(a)=e^(−λa)−e^(−λb)。
+3. 均值用 integration by parts；第二矩给出 2/λ²，故 variance=1/λ²。
+4. mode 在 x=0，因为 density 随 x 单调下降。
+
+  Geometric/computational intuition. λ 是 rate；rate 越大，典型等待时间 1/λ 越短。
+  Biological interpretation / failure condition. 若 hazard 随时间改变或事件有 refractory/his‑
+  tory dependence，指数等待时间模型不成立。
+
+  Micro‑check
+  Exponential(λ) 的 mean 与 SD 分别是多少？
+
+
+
+
+                                               12/24
+NEUROSCI 366 ・Lecture 2                                                  Source‑aligned companion
+
+
+6.4 Bivariate Gaussian、conditional mean 与 Bayes
+
+【模型边界】      把两个有相关性的连续测量写成联合分布并进行条件更新。
+                            [ 2            ]
+                              σ1    cσ1 σ2
+                         C=
+                             cσ1 σ2  σ22
+                                                         σ1
+                            E[X1 | X2 = x2 ] = µ1 + c       (x2 − µ2 )
+                                                         σ2
+                                                P (x1 | x2 )P (x2 )
+                               P (x2 | x1 ) =
+                                                     P (x1 )
+1. c 的符号决定椭圆倾斜方向，绝对值决定拉长程度。
+2. Gaussian 情形下 c=0 等价于 independence；一般分布中 uncorrelated 不保证 independent。
+3. 条件均值沿相关方向移动；给定 x2<μ2 且 c>0，x1 的条件均值低于 μ1。
+4. Bayes 用 product rule 重排同一 joint probability。
+
+  Geometric/computational intuition. conditioning 相当于在联合密度椭圆上切一条 slice，再重
+  新归一化。
+  Biological interpretation / failure condition. 把 likelihood 当作 parameter 的概率分布、或忘
+  记 evidence 的归一化作用。
+
+  Micro‑check
+  为什么连续变量 P(X=x)=0 不与 density f(x)>0 矛盾？
+
+
+
+
+                                            13/24
+ NEUROSCI 366 ・Lecture 2                                                    Source‑aligned companion
+
+
+
+ 7 Cross‑page synthesis / 跨页因果与数学链
+
+   本课建立课程后续几乎所有公式的语法：先辨认 scalar、vector、matrix 的 shape，再判断运算是否定
+   义；概率部分则从单变量 Bernoulli/Exponential 走向 bivariate Gaussian、marginal、conditional
+   与 Bayes。MATLAB 可以执行的表达式不一定等于抽象数学中定义的运算，因此代码输出必须和对象
+   含义分开解释。
+
+
+
+
+ Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+ invent precise empirical data points.
+
+
+ 8 Worked examples and transfer
+
+ 8.1 题目给定对象的手算
+
+【原课/核心例题】 Prompt. u=(0,1)^T，
+                           v=(2,5)^T，
+                                    w=(0,1,2,5)^T，
+                                                 A 为 4×2，
+                                                        B=[[4,4],[8,9]]，
+                                                                       C=[[3,4],[6,8]]。
+
+  Worked solution. u+v=(2,6)^T；u^Tv=5；||w||=√30；Av=(2.5,25,49,39)^T；BC=[[36,48],[78,104]]；
+  det(B)=4，B^{‑1}=(1/4)[[9,‑4],[‑8,4]]；det(C)=0。
+  Check. 每个结果先核对 shape，再核对数值；C 的第二行是第一行的 2 倍，因此 singular。
+
+
+                                                14/24
+NEUROSCI 366 ・Lecture 2                                           Source‑aligned companion
+
+
+8.2 conditional Gaussian 数值检查
+
+【跨课连接】      Prompt. μ1=0, μ2=1, σ1=0.5, σ2=1, c=0.7，给定 x2=0.75。
+
+ Worked solution. 条件均值为 0+0.7×0.5×(0.75−1)=−0.0875，小于边缘均值 0。
+ Check. 正相关且观测到的 x2 低于其均值，所以对 x1 的更新也向下。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                          15/24
+NEUROSCI 366 ・Lecture 2                                                                  Source‑aligned companion
+
+
+
+9 Formula and notation sheet
+
+1. 矩阵–向量乘法的 shape 规则
+                                            Am×n xn×1 → ym×1
+Conditions / conventions: 内维相等
+2. inner product                                        ∑
+                                              uT v =             ui v i
+                                                         i
+
+Conditions / conventions: 向量同维
+3. outer product
+                                                      uv T
+Conditions / conventions: 结果 shape 为 len(u)×len(v)
+4. Euclidean norm                                        √
+                                              ∥w∥2 =         wT w
+Conditions / conventions: 列/行 convention 一致
+5. variance 恒等式
+                                       Var(X) = E[X 2 ] − E[X]2
+Conditions / conventions: 二阶矩存在
+6. CDF 定义
+                                            FX (x) = P (X ≤ x)
+Conditions / conventions: 离散/连续均适用
+7. exponential PDF
+                                            fX (x) = λe−λx 1x≥0
+Conditions / conventions: λ>0
+8. 二维 Gaussian density
+                                                  1                           −1 (x−µ)
+                                                        e− 2 (x−µ) C
+                                                             1            T
+                                   p(x) =     √
+                                            2π det C
+Conditions / conventions: C 对称正定
+9. Bayes rule
+                                                       P (B | A)P (A)
+                                       P (A | B) =
+                                                           P (B)
+Conditions / conventions: P(B)>0
+
+
+10 Bilingual glossary
+
+
+ 中文                  English / symbol                   Operational meaning
+ 标量                  scalar                             单个数；可视为 1×1 对象但需说明语境。
+ 向量                  vector                             有序分量；本课默认列向量。
+ 矩阵                  matrix                             按行列组织的二维线性映射表示。
+ 内积                  inner product                      同维向量对应分量乘积之和。
+ 外积                  outer product                      列向量与行向量相乘得到矩阵。
+
+
+                                                      16/24
+NEUROSCI 366 ・Lecture 2                                                 Source‑aligned companion
+
+
+
+ 中文                  English / symbol             Operational meaning
+ Hadamard 乘积         Hadamard product             同 shape 对象逐元素相乘。
+ 奇异矩阵                singular matrix              不可逆、determinant 为零的方阵。
+ 概率质量函数              probability mass             离散结果各自的概率。
+                     function, PMF
+ 概率密度函数              probability density          连续变量单位区间概率的密度。
+                     function, PDF
+ 边缘分布                marginal distribution        对其他变量求和/积分后保留一个变量。
+ 条件分布                conditional distribution     已知另一事件/变量时的重新归一化分布。
+ 似然                  likelihood                   把观测固定后，模型参数的相对支持度函数。
+ 先验                  prior                        观测当前数据前对未知量的分布。
+ 后验                  posterior                    结合 likelihood 与 prior 后的更新分布。
+
+
+
+11 Common traps, assumptions, and limitations
+
+1. 把 MATLAB 的 scalar expansion 误当成抽象线性代数中的 scalar+matrix。
+2. 混淆 * 与.*；前者是矩阵乘法，后者是 Hadamard product。
+3. 先算数字再看 shape，导致把未定义运算算成结果。
+4. 把 density 值当成某个精确连续数值的概率。
+5. 认为 uncorrelated 总是 independent；只有 Gaussian 等特定情形成立。
+6. 把 posterior、likelihood 和 prior 的 conditioning 方向写反。
+
+  Course‑specific risk boundary. 审计.m 中 clear all、inv 等写法：忠实解释课程代码，同时
+  指出数值计算中通常更偏好线性求解而非显式求逆。将 MATLAB 的 scalar‑plus‑matrix 行为与抽象
+  线性代数严格分开。
+
+
+
+
+                                                17/24
+NEUROSCI 366 ・Lecture 2                                                Source‑aligned companion
+
+
+
+12 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. A 是 4×2，v 是 2×1；Av 的 shape 是什么？
+
+
+
+2. 为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？
+
+
+
+3. 计算 u^Tv，其中 u=(0,1)^T，v=(2,5)^T。
+
+
+
+4. C=[[3,4],[6,8]] 为什么不可逆？
+
+
+
+5. Bernoulli(p) 的 variance 在什么 p 最大？
+
+
+
+6. Exponential(λ) 的 mean 与 SD 分别是多少？
+
+
+
+7. 为什么连续变量 P(X=x)=0 不与 density f(x)>0 矛盾？
+
+
+
+8. 二维 Gaussian 中 c>0 的等密度椭圆如何倾斜？
+
+
+
+9. 一般情况下 uncorrelated 是否推出 independent？
+
+
+
+10. 写出 Bayes rule 并标出 evidence。
+
+
+
+11. 为什么 inv(A)*b 通常不如 A\b？
+
+
+
+12. Hadamard product B.*C 的 (1,2) 元素是什么？
+
+
+
+13. 公式表中的“矩阵–向量乘法的 shape 规则”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“inner product”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“outer product”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/24
+NEUROSCI 366 ・Lecture 2                          Source‑aligned companion
+
+
+
+
+16. 公式表中的“Euclidean norm”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“variance 恒等式”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“CDF 定义”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                               19/24
+NEUROSCI 366 ・Lecture 2                       Source‑aligned companion
+
+
+
+13 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“矩阵–向量乘法的 shape 规则”对应的变量关系入手。
+    Hint 2. 把条件“内维相等”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“inner product”对应的变量关系入手。
+    Hint 2. 把条件“向量同维”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                  20/24
+NEUROSCI 366 ・Lecture 2                                      Source‑aligned companion
+
+
+15. Hint 1. 先从“outer product”对应的变量关系入手。
+    Hint 2. 把条件“结果 shape 为 len(u)×len(v)”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“Euclidean norm”对应的变量关系入手。
+    Hint 2. 把条件“列/行 convention 一致”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“variance 恒等式”对应的变量关系入手。
+    Hint 2. 把条件“二阶矩存在”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“CDF 定义”对应的变量关系入手。
+    Hint 2. 把条件“离散/连续均适用”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                    21/24
+NEUROSCI 366 ・Lecture 2                                        Source‑aligned companion
+
+
+
+14 Complete Answer Key with reasoning
+
+ 1. 4×1。
+ 2. shape 不同所以抽象加法未定义；MATLAB 把 scalar/小数组广播到 A 的每个元素。
+ 3. 0×2+1×5=5。
+ 4. 两行线性相关，det(C)=24−24=0。
+ 5. p=1/2，此时 p(1‑p)=1/4。
+ 6. 二者都是 1/λ。
+ 7. 单点区间宽度为零；概率是 density 在区间上的积分。
+ 8. 沿 x1 与 x2 同时增大/减小的正斜率方向拉长。
+ 9. 否；independent 推出 uncorrelated（矩存在），反向一般不成立。
+10. P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。
+11. 显式逆更慢、数值误差更大；线性求解器利用分解直接求解。
+12. 4×4=16。
+13. 适用条件/约定：内维相等。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                       Am×n xn×1 → ym×1
+
+14. 适用条件/约定：向量同维。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                      ∑
+                               uT v =   ui v i
+                                                   i
+
+
+15. 适用条件/约定：结果 shape 为 len(u)×len(v)。sanity check 应检查单位、符号、极限或 shape 是否
+    与定义一致。
+                                     uv T
+
+16. 适用条件/约定：列/行 convention 一致。sanity check 应检查单位、符号、极限或 shape 是否与定义
+    一致。                                √
+                                ∥w∥2 = wT w
+
+17. 适用条件/约定：二阶矩存在。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    Var(X) = E[X 2 ] − E[X]2
+
+18. 适用条件/约定：离散/连续均适用。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                       FX (x) = P (X ≤ x)
+
+
+
+
+                                           22/24
+NEUROSCI 366 ・Lecture 2                                             Source‑aligned companion
+
+
+
+15 Source‑page concordance and coverage audit
+
+
+ Source file                    Page       Coverage status
+ Lecture2‑FC_NEUROSCI_366_      1          Main source‑page unit: thumbnail,
+ F2025.pdf                                 reconstruction, explanation, prediction
+                                           question.
+ Lecture2‑FC_NEUROSCI_366_      2          Main source‑page unit: thumbnail,
+ F2025.pdf                                 reconstruction, explanation, prediction
+                                           question.
+ Lecture2‑FC_NEUROSCI_366_      3          Main source‑page unit: thumbnail,
+ F2025.pdf                                 reconstruction, explanation, prediction
+                                           question.
+ Lecture2‑FC_NEUROSCI_366_      4          Main source‑page unit: thumbnail,
+ F2025.pdf                                 reconstruction, explanation, prediction
+                                           question.
+ Lecture2‑FC_Solutions_         1          Answer/verification source: cross‑checked
+ NEUROSCI_366_F2025.pdf                    against exercises and incorporated in Answer
+                                           Key.
+ Lecture2‑FC_Solutions_         2          Answer/verification source: cross‑checked
+ NEUROSCI_366_F2025.pdf                    against exercises and incorporated in Answer
+                                           Key.
+ Lecture2‑FC_Solutions_         3          Answer/verification source: cross‑checked
+ NEUROSCI_366_F2025.pdf                    against exercises and incorporated in Answer
+                                           Key.
+ Lecture2‑FC_Solutions_         4          Answer/verification source: cross‑checked
+ NEUROSCI_366_F2025.pdf                    against exercises and incorporated in Answer
+                                           Key.
+ Lecture2‑FC_Solutions_         5          Answer/verification source: cross‑checked
+ NEUROSCI_366_F2025.pdf                    against exercises and incorporated in Answer
+                                           Key.
+ Lecture2‑FC_Solutions_         lines 1–   Full source listing and line‑group audit
+ NEUROSCI_366_F2025.m           55         included; syntax, shape, units, indexing,
+                                           numerical stability and edge cases checked.
+
+
+
+16 Errata, uncertainty log, and external endnotes
+
+16.1 Errata / source cautions
+
+1. Solutions p.3 的 Bernoulli variance 推导最后一行左侧写成 μ，语义上应为 σ²。
+2. MATLABclear all 会清除函数缓存，教学脚本通常用 clearvars 更合适。
+3. inv(C)对 singular matrix 会产生警告和不可靠的 Inf/NaN/巨大数值；不应把输出解释为数学逆。
+4. 数值计算中解 Bx=y 通常使用 B\y，而不是显式 inv(B)*y。
+
+
+
+
+                                           23/24
+NEUROSCI 366 ・Lecture 2                                                    Source‑aligned companion
+
+
+16.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+16.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+16.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/24
+

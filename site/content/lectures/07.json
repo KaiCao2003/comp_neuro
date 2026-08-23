@@ -1,0 +1,2132 @@
+{
+  "lecture": 7,
+  "slug": "07",
+  "zhTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+  "enTitle": "Neural Coding II: Population Decoding, Fisher Information, and Bayes",
+  "companionFile": "NEUROSCI366_Lecture07_Neural_Coding2_Population_Fisher_Bayes_Companion.pdf",
+  "companionPages": 24,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture07_Neural_Coding2_Population_Fisher_Bayes_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture7-NeuralCoding2.pdf",
+      "role": "primary",
+      "pages": 6,
+      "href": "/resources/original/Lecture7-NeuralCoding2.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：population likelihood。",
+    "从第一原则推导：Fisher information。",
+    "解释几何/计算直觉：CRLB。",
+    "连接生物学解释：noise covariance。",
+    "诊断 assumptions 与 failure modes：information limiting。",
+    "把概念迁移到新神经科学问题：bias-variance。"
+  ],
+  "dependencyMap": "population likelihood → Fisher information → CRLB → noise covariance → information limiting → bias-variance",
+  "coreQuestion": "population code 的 Fisher information 如何随 neuron 数和观察时间增长，相关噪声、bias 与 prior 又如何改变可解码精度？",
+  "diagnostic": [
+    "ideal independent code 中 J 如何随 N、T 变化？",
+    "若 J 加倍，SD lower bound 如何变？",
+    "CRLB 对何种 estimator 的基本形式最直接？",
+    "noise correlation 与 signal correlation 区别？",
+    "为什么 C^{-1} 出现在 Gaussian decoder？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-07-source-1",
+      "order": 1,
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。",
+      "noteMeaning": "population likelihood 与 Fisher information：single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。",
+      "reasoning": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。随后推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "ideal independent code 中 J 如何随 N、T 变化？"
+    },
+    {
+      "id": "lecture-07-source-2",
+      "order": 2,
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：Fisher information 的 population derivation、sum-to-integral、 N/T scaling。",
+      "noteMeaning": "CRLB 与 noise covariance：Fisher information 的 population derivation、sum-to-integral、N/T scaling。",
+      "reasoning": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。因此，解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "若 J 加倍，SD lower bound 如何变？"
+    },
+    {
+      "id": "lecture-07-source-3",
+      "order": 3,
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：Cramér-Rao bound、perceptual error、noise correlations。",
+      "noteMeaning": "information limiting 与 bias-variance：Cramér-Rao bound、perceptual error、noise correlations。",
+      "reasoning": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。因此，解释 Pearson noise correlation、 positive/negative/zero correlation 和 shared variability；区分 signal correlation。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "CRLB 对何种 estimator 的基本形式最直接？"
+    },
+    {
+      "id": "lecture-07-source-4",
+      "order": 4,
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。",
+      "noteMeaning": "Bayes prior 与 population likelihood：left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。",
+      "reasoning": "逐步推导 left/right pooled-count mean/variance，并引入 multivariate Gaussian、 covariance inverse 与 Mahalanobis geometry。因此，准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。",
+      "figureReading": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。",
+      "stopPredict": "noise correlation 与 signal correlation 区别？"
+    },
+    {
+      "id": "lecture-07-source-5",
+      "order": 5,
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：information-limiting correlations、biological saturation、suboptimal decoder。",
+      "noteMeaning": "Fisher information 与 CRLB：information-limiting correlations、biological saturation、suboptimal decoder。",
+      "reasoning": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。因此，准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "为什么 C^{-1} 出现在 Gaussian decoder？"
+    },
+    {
+      "id": "lecture-07-source-6",
+      "order": 6,
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "page": 6,
+      "reconstruction": "Page 6：biased decoding、bias-variance decomposition、modified CRLB、 Bayesian decoder。",
+      "noteMeaning": "noise covariance 与 information limiting：biased decoding、bias-variance decomposition、modified CRLB、Bayesian decoder。",
+      "reasoning": "推导 bias-variance decomposition，解释 modified CRLB；将 Bayesian prior 视为 regularization，并区分 likelihood 与 posterior。因此，解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "positive correlation 是否必然降低 information？"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 independent Poisson population 的 Fisher information",
+    "【必要前置】 从 log-likelihood 二阶导数得到 J(θ)。 X ℓ(θ) = [ki log(fi T ) − fi T − log ki !] i",
+    "X [f ′ (θ)]2 i J(θ) = T fi (θ) i Z dϕ [f ′ (ϕ)]2 J(θ) ≈ N T 2π f (ϕ) 1. 一阶导数含 f_i'(k_i/f_i−T)。 2. 二阶导数取 true stimulus 下期望，使用 E[k_i]=f_iT。 3. 均匀 preferred directions 使离散 sum 在大 N 时近似 circular integral。 4. 若 tuning shape 固定，则 J∝NT。",
+    "Geometric/computational intuition. 更多 independent neurons 或更长观察时间相当于累积更多局部 evidence。 Biological interpretation / failure condition. 非独立 noise、heterogeneous tuning、有限 N 或 information-limiting covariance 可破坏 scaling。",
+    "思考题：noise correlation 与 signal correlation 区别？",
+    "5.2 Cramér-Rao bound 的条件",
+    "【补全推导】 Fisher information 如何限制 unbiased decoder？",
+    "b ≥ 1 Var(θ) J(θ)",
+    "1. 估计量需在局部 unbiased，并满足可交换微分与积分等 regularity。 2. bound 是下界，不保证任意 decoder 达到。 3. MLE 常在大样本接近 bound，但有限样本、多峰/边界问题可偏离。 4. behavioral error 还包含 downstream computation、motor noise 与 lapse。",
+    "Geometric/computational intuition. encoding distribution 本身设定了任何 unbiased readout 都无法跨越的局部精度极限。 Biological interpretation / failure condition. 对 biased estimator 直接使用 1/J 会得到错误结论。",
+    "思考题：为什么 C^{-1} 出现在 Gaussian decoder？",
+    "5.3 correlated Gaussian code 与 Mahalanobis geometry",
+    "【跨页连接】 noise covariance 如何改变 stimulus discrimination？",
+    "r | θ ∼ N (µ(θ), C(θ))",
+    "−2ℓ = (r − µ)T C −1 (r − µ) + log det C + const J ≈ µ′ (θ)T C −1 µ′ (θ) (C independent of θ) 1. C 的 off-diagonal 元素表示 shared trial-to-trial variability。 2. C^{-1} 对高噪声方向降低权重、低噪声方向提高权重。 3. 若 noise 沿 signal derivative 方向增长，会严重限制 information。 4. decoder 若忽略 C，即使 code 含信息也可能表现 suboptimal。",
+    "Geometric/computational intuition. 可分辨性由 mean shift 相对 noise ellipse 的方向决定，而不只由单 neuron variance。 Biological interpretation / failure condition. 把 signal correlation（tuning 相似）与 noise correlation（同 trial residual 共变）混淆。",
+    "思考题：positive correlation 是否必然降低 information？",
+    "5.4 bias-variance 与 Bayesian regularization",
+    "【模型边界】 biased decoder 为什么可能有更低 MSE？",
+    "s − s)2 ] = Var(b E[(b s) + b(s)2",
+    "[1 + b′ (s)]2 s) ≥ Var(b J(s) P (s | n) ∝ P (n | s)P (s) 1. MSE 分解为 variance 与 squared bias。 2. prior 拉估计向常见 stimulus，增加 bias 但可降低 variance。 3. modified CRLB 显式包含 bias derivative。 4. MAP decoder 最大化 log-likelihood+log-prior。",
+    "Geometric/computational intuition. regularization 用一些系统性偏移换取对噪声不敏感。 Biological interpretation / failure condition. prior 与环境不匹配时 bias 会恶化性能。",
+    "思考题：information-limiting correlation 的核心特征是什么？"
+  ],
+  "synthesis": [
+    "单个 tuning curve 常对多个 stimulus 给出相似 rate，population pattern 可打破 ambiguity。在 independent Poisson 与均匀 preferred direction 的理想条件下，Fisher information 对 N 和 T 线性增长。真实群体的 noise correlations、decoder mismatch 与 behavioral constraints 使性能可能饱和；Bayesian prior 以可控 bias 换取 variance reduction。"
+  ],
+  "workedExamples": [
+    "7.1 N/T scaling",
+    "【例题】题目：若每个 neuron/秒贡献同样 Fisher information j0，N=100, T=0.5 s。",
+    "Worked solution. J=NTj0=50j0；理想 SD 下界为 1/√J。把 N 或 T 加倍只把 SD 降低 √2 倍。 Check. variance ∝1/(NT)，standard deviation ∝1/√(NT)。",
+    "7.2 相关方向反例",
+    "【拓展例题】题目：两维 mean 随 stimulus 沿 (1,1) 变化。",
+    "Worked solution. 若 noise ellipse 也沿 (1,1) 极度拉长， positive correlation 会损害 discrimination； 若 noise 沿 (1,−1)，可能影响较小。 Check. 相关系数的正负本身不足以判断 information；必须比较 covariance eigenvectors 与 signal",
+    "direction。"
+  ],
+  "formulas": [
+    {
+      "id": "L07-F01",
+      "lecture": 7,
+      "name": "independent Poisson population Fisher",
+      "expression": "X J =T (fi′ )2 /fi i",
+      "latex": "J(s)=T\\sum_i\\frac{[f_i'(s)]^2}{f_i(s)}",
+      "conditions": "counts independent",
+      "sectionId": "lecture-07-source-1",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L07-F02",
+      "lecture": 7,
+      "name": "unbiased CRLB",
+      "expression": "Var(θ̂) ≥ 1/J",
+      "latex": "\\operatorname{Var}(\\hat{\\theta})\\ge\\frac{1}{J(\\theta)}",
+      "conditions": "regularity/unbiased",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-F03",
+      "lecture": 7,
+      "name": "noise covariance",
+      "expression": "Cij = Cov(ri , rj )",
+      "latex": "C_{ij}=\\operatorname{Cov}(r_i,r_j)",
+      "conditions": "同 stimulus、跨 trial residual",
+      "sectionId": "lecture-07-source-2",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L07-F04",
+      "lecture": 7,
+      "name": "Pearson noise correlation",
+      "expression": "ρij = Cij /(σi σj )",
+      "latex": "\\rho_{ij}=\\frac{C_{ij}}{\\sigma_i\\sigma_j}",
+      "conditions": "非零 variances",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-F05",
+      "lecture": 7,
+      "name": "Mahalanobis separation",
+      "expression": "d2M = ∆µT C −1 ∆µ",
+      "latex": "d_M^2=\\Delta\\mu^\\top C^{-1}\\Delta\\mu",
+      "conditions": "C 正定",
+      "sectionId": "lecture-07-source-4",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L07-F06",
+      "lecture": 7,
+      "name": "bias-variance decomposition",
+      "expression": "M SE = Var +b2",
+      "latex": "\\mathbb{E}[(\\hat{s}-s)^2]=\\operatorname{Var}(\\hat{s})+b(s)^2",
+      "conditions": "标量 estimator",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-F07",
+      "lecture": 7,
+      "name": "Bayesian decoding",
+      "expression": "P (s|n) ∝ P (n|s)P (s)",
+      "latex": "P(s\\mid\\mathbf{n})\\propto P(\\mathbf{n}\\mid s)P(s)",
+      "conditions": "posterior properly normalized",
+      "sectionId": "lecture-07-source-6",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L07-G01",
+      "lecture": 7,
+      "zh": "群体编码",
+      "en": "population code",
+      "definition": "多个 neurons 的联合 response pattern。",
+      "sectionId": "lecture-07-source-1",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L07-G02",
+      "lecture": 7,
+      "zh": "Cramér-Rao 下界",
+      "en": "Cramér-Rao lower bound",
+      "definition": "无偏估计量方差在正则条件下的信息论下界。",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-G03",
+      "lecture": 7,
+      "zh": "噪声相关",
+      "en": "noise correlation",
+      "definition": "固定 stimulus 时 trial residual 的相关性。",
+      "sectionId": "lecture-07-source-2",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L07-G04",
+      "lecture": 7,
+      "zh": "信号相关",
+      "en": "signal correlation",
+      "definition": "tuning curves across stimuli 的相似性。",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-G05",
+      "lecture": 7,
+      "zh": "协方差矩阵",
+      "en": "covariance matrix",
+      "definition": "各维 variance 与 pairwise covariance 的矩阵。",
+      "sectionId": "lecture-07-source-4",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L07-G06",
+      "lecture": 7,
+      "zh": "Mahalanobis 距离",
+      "en": "Mahalanobis distance",
+      "definition": "按 noise covariance 归一化的距离。",
+      "sectionId": "lecture-07-source-4",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L07-G07",
+      "lecture": 7,
+      "zh": "信息限制相关",
+      "en": "information-limiting correlation",
+      "definition": "沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-G08",
+      "lecture": 7,
+      "zh": "次优解码器",
+      "en": "suboptimal decoder",
+      "definition": "未充分利用 encoding information 的 readout。",
+      "sectionId": "lecture-07-source-5",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L07-G09",
+      "lecture": 7,
+      "zh": "偏差",
+      "en": "bias",
+      "definition": "估计均值与真值之差。",
+      "sectionId": "lecture-07-source-3",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L07-G10",
+      "lecture": 7,
+      "zh": "正则化",
+      "en": "regularization",
+      "definition": "通过约束或 prior 降低 variance/复杂度。",
+      "sectionId": "lecture-07-source-6",
+      "sourceFile": "Lecture7-NeuralCoding2.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "commonTraps": [
+    "把 CRLB 当作所有 decoder 的实际误差，而非有条件的下界。",
+    "认为正相关总是有害、负相关总是有利。",
+    "混淆 encoding distribution、decoder algorithm 与 behavior 三个层级。",
+    "把 Fisher information saturation 自动归因于唯一生物机制。",
+    "忽略 biased decoder 的 modified bound。",
+    "把 prior 当作额外数据而非对 stimulus frequency/structure 的假设。",
+    "需要明确区分 three levels：neural encoding distribution、decoder algorithm、behavioral performance；相关性存在不等于某个 decoder 一定使用或不使用它。"
+  ],
+  "errata": [
+    "1. Page 2 的 sum-to-integral 需要大 N、均匀 preferred directions 与共同 tuning shape。 2. Page 3 的 CRLB 必须附 unbiased/regularity 条件。 3. Page 5 的 performance saturation 有多种可能来源；笔记明确不应只归因于 correlations。"
+  ],
+  "questions": [
+    {
+      "id": "L07-Q01",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：ideal independent code 中 J 如何随 N、T 变化？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "J∝NT。"
+        },
+        {
+          "id": "b",
+          "text": "counts independent"
+        },
+        {
+          "id": "c",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "C 正定"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“independent Poisson population Fisher”的适用条件。",
+        "c": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 1 页。",
+        "d": "这是“Mahalanobis separation”的适用条件。"
+      },
+      "explanation": "J∝NT。"
+    },
+    {
+      "id": "L07-Q02",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 2,
+          "section": "lecture-07-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：若 J 加倍，SD lower bound 如何变？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "J∝NT。"
+        },
+        {
+          "id": "b",
+          "text": "乘 1/√2。"
+        },
+        {
+          "id": "c",
+          "text": "估计均值与真值之差。"
+        },
+        {
+          "id": "d",
+          "text": "C 正定"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“ideal independent code 中 J 如何随 N、T 变化？”。",
+        "c": "这是“偏差（bias）”的定义。",
+        "d": "这是“Mahalanobis separation”的适用条件。"
+      },
+      "explanation": "乘 1/√2。"
+    },
+    {
+      "id": "L07-Q03",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：CRLB 对何种 estimator 的基本形式最直接？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "bias 随 stimulus 的局部变化会改变 estimator 对参数变化的响应。"
+        },
+        {
+          "id": "b",
+          "text": "标量 estimator"
+        },
+        {
+          "id": "c",
+          "text": "unbiased、满足 regularity 的 estimator。"
+        },
+        {
+          "id": "d",
+          "text": "它按各 noise direction 的可靠性加权 residual。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“modified CRLB 为什么含 b'(s)？”。",
+        "b": "这是“bias-variance decomposition”的适用条件。",
+        "d": "该选项回答的是“为什么 C^{-1} 出现在 Gaussian decoder？”。"
+      },
+      "explanation": "unbiased、满足 regularity 的 estimator。"
+    },
+    {
+      "id": "L07-Q04",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "comparison",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 7 讲：noise correlation 与 signal correlation 区别？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。"
+        },
+        {
+          "id": "b",
+          "text": "shared noise 沿 stimulus signal direction，不能靠增加相似 neurons 平均掉。"
+        },
+        {
+          "id": "c",
+          "text": "因此，解释 Pearson noise correlation、 positive/negative/zero correlation 和 shared variability；区分 signal correlation。"
+        },
+        {
+          "id": "d",
+          "text": "前者是固定 stimulus 的 trial residual 共变；后者是 tuning means 的相似。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“信息限制相关（information-limiting correlation）”的定义。",
+        "b": "该选项回答的是“information-limiting correlation 的核心特征是什么？”。",
+        "c": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 3 页。"
+      },
+      "explanation": "前者是固定 stimulus 的 trial residual 共变；后者是 tuning means 的相似。"
+    },
+    {
+      "id": "L07-Q05",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 5,
+          "section": "lecture-07-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 5,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：为什么 C^{-1} 出现在 Gaussian decoder？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "它按各 noise direction 的可靠性加权 residual。"
+        },
+        {
+          "id": "b",
+          "text": "unbiased、满足 regularity 的 estimator。"
+        },
+        {
+          "id": "c",
+          "text": "未充分利用 encoding information 的 readout。"
+        },
+        {
+          "id": "d",
+          "text": "固定 stimulus 时 trial residual 的相关性。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项回答的是“CRLB 对何种 estimator 的基本形式最直接？”。",
+        "c": "这是“次优解码器（suboptimal decoder）”的定义。",
+        "d": "这是“噪声相关（noise correlation）”的定义。"
+      },
+      "explanation": "它按各 noise direction 的可靠性加权 residual。"
+    },
+    {
+      "id": "L07-Q06",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 6,
+          "section": "lecture-07-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 1,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：positive correlation 是否必然降低 information？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，解释 Pearson noise correlation、 positive/negative/zero correlation 和 shared variability；区分 signal correlation。"
+        },
+        {
+          "id": "b",
+          "text": "否，取决于 correlation eigenmode 与 stimulus-induced mean shift 的相对方向。"
+        },
+        {
+          "id": "c",
+          "text": "未充分利用 encoding information 的 readout。"
+        },
+        {
+          "id": "d",
+          "text": "把 posterior/MAP 拉向先验常见值，通常降低 variance 但引入 bias。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 3 页。",
+        "c": "这是“次优解码器（suboptimal decoder）”的定义。",
+        "d": "该选项回答的是“Bayesian prior 如何 regularize？”。"
+      },
+      "explanation": "否，取决于 correlation eigenmode 与 stimulus-induced mean shift 的相对方向。"
+    },
+    {
+      "id": "L07-Q07",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：information-limiting correlation 的核心特征是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "否，取决于 correlation eigenmode 与 stimulus-induced mean shift 的相对方向。"
+        },
+        {
+          "id": "b",
+          "text": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。"
+        },
+        {
+          "id": "c",
+          "text": "shared noise 沿 stimulus signal direction，不能靠增加相似 neurons 平均掉。"
+        },
+        {
+          "id": "d",
+          "text": "当 preferred angles 密集均匀时，Riemann sum 收敛到 circular integral。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“positive correlation 是否必然降低 information？”。",
+        "b": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 5 页。",
+        "d": "该选项回答的是“uniform preferred direction sum 为什么能近似积分？”。"
+      },
+      "explanation": "shared noise 沿 stimulus signal direction，不能靠增加相似 neurons 平均掉。"
+    },
+    {
+      "id": "L07-Q08",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 5,
+          "section": "lecture-07-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：behavior 比 CRLB 差能证明 brain decoder suboptimal 吗？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        },
+        {
+          "id": "b",
+          "text": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。"
+        },
+        {
+          "id": "c",
+          "text": "前者是固定 stimulus 的 trial residual 共变；后者是 tuning means 的相似。"
+        },
+        {
+          "id": "d",
+          "text": "不能单独证明；还可能有 model mismatch、downstream/motor noise、lapses。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 3 页。",
+        "b": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 5 页。",
+        "c": "该选项回答的是“noise correlation 与 signal correlation 区别？”。"
+      },
+      "explanation": "不能单独证明；还可能有 model mismatch、downstream/motor noise、lapses。"
+    },
+    {
+      "id": "L07-Q09",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 7 讲：MSE 的两项是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "variance+bias²。"
+        },
+        {
+          "id": "b",
+          "text": "counts independent"
+        },
+        {
+          "id": "c",
+          "text": "非零 variances"
+        },
+        {
+          "id": "d",
+          "text": "标量 estimator"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“independent Poisson population Fisher”的适用条件。",
+        "c": "这是“Pearson noise correlation”的适用条件。",
+        "d": "这是“bias-variance decomposition”的适用条件。"
+      },
+      "explanation": "variance+bias²。"
+    },
+    {
+      "id": "L07-Q10",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 6,
+          "section": "lecture-07-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：Bayesian prior 如何 regularize？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过约束或 prior 降低 variance/复杂度。"
+        },
+        {
+          "id": "b",
+          "text": "把 posterior/MAP 拉向先验常见值，通常降低 variance 但引入 bias。"
+        },
+        {
+          "id": "c",
+          "text": "推导 bias-variance decomposition，解释 modified CRLB；将 Bayesian prior 视为 regularization，并区分 likelihood 与 posterior。"
+        },
+        {
+          "id": "d",
+          "text": "bias 随 stimulus 的局部变化会改变 estimator 对参数变化的响应。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“正则化（regularization）”的定义。",
+        "c": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 6 页。",
+        "d": "该选项回答的是“modified CRLB 为什么含 b'(s)？”。"
+      },
+      "explanation": "把 posterior/MAP 拉向先验常见值，通常降低 variance 但引入 bias。"
+    },
+    {
+      "id": "L07-Q11",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 1,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：modified CRLB 为什么含 b'(s)？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 bias-variance decomposition，解释 modified CRLB；将 Bayesian prior 视为 regularization，并区分 likelihood 与 posterior。"
+        },
+        {
+          "id": "b",
+          "text": "把 posterior/MAP 拉向先验常见值，通常降低 variance 但引入 bias。"
+        },
+        {
+          "id": "c",
+          "text": "bias 随 stimulus 的局部变化会改变 estimator 对参数变化的响应。"
+        },
+        {
+          "id": "d",
+          "text": "各维 variance 与 pairwise covariance 的矩阵。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 6 页。",
+        "b": "该选项回答的是“Bayesian prior 如何 regularize？”。",
+        "d": "这是“协方差矩阵（covariance matrix）”的定义。"
+      },
+      "explanation": "bias 随 stimulus 的局部变化会改变 estimator 对参数变化的响应。"
+    },
+    {
+      "id": "L07-Q12",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：uniform preferred direction sum 为什么能近似积分？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+        },
+        {
+          "id": "b",
+          "text": "shared noise 沿 stimulus signal direction，不能靠增加相似 neurons 平均掉。"
+        },
+        {
+          "id": "c",
+          "text": "沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。"
+        },
+        {
+          "id": "d",
+          "text": "当 preferred angles 密集均匀时，Riemann sum 收敛到 circular integral。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 2 页。",
+        "b": "该选项回答的是“information-limiting correlation 的核心特征是什么？”。",
+        "c": "这是“信息限制相关（information-limiting correlation）”的定义。"
+      },
+      "explanation": "当 preferred angles 密集均匀时，Riemann sum 收敛到 circular integral。"
+    },
+    {
+      "id": "L07-Q13",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：根据 Lecture7-NeuralCoding2.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。"
+        },
+        {
+          "id": "b",
+          "text": "Cramér-Rao bound、perceptual error、noise correlations。"
+        },
+        {
+          "id": "c",
+          "text": "left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。"
+        },
+        {
+          "id": "d",
+          "text": "information-limiting correlations、biological saturation、suboptimal decoder。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。",
+        "d": "该陈述解释的是“information-limiting correlations、biological saturation、suboptimal decoder”，不是题干指定的关系。"
+      },
+      "explanation": "single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。"
+    },
+    {
+      "id": "L07-Q14",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：若要解释\"single-neuron ambiguity、population likelihood、uniform preferred directions\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        },
+        {
+          "id": "b",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        },
+        {
+          "id": "c",
+          "text": "逐步推导 left/right pooled-count mean/variance，并引入 multivariate Gaussian、 covariance inverse 与 Mahalanobis geometry。"
+        },
+        {
+          "id": "d",
+          "text": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。",
+        "d": "该陈述解释的是“information-limiting correlations、biological saturation、suboptimal decoder”，不是题干指定的关系。"
+      },
+      "explanation": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+    },
+    {
+      "id": "L07-Q15",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 5,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：阅读与\"single-neuron ambiguity、population likelihood、uniform preferred directions\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        },
+        {
+          "id": "c",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "d",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "b": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 1 页。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L07-Q16",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 2,
+          "section": "lecture-07-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：根据 Lecture7-NeuralCoding2.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cramér-Rao bound、perceptual error、noise correlations。"
+        },
+        {
+          "id": "b",
+          "text": "left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。"
+        },
+        {
+          "id": "c",
+          "text": "information-limiting correlations、biological saturation、suboptimal decoder。"
+        },
+        {
+          "id": "d",
+          "text": "Fisher information 的 population derivation、sum-to-integral、 N/T scaling。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。",
+        "b": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。",
+        "c": "该陈述解释的是“information-limiting correlations、biological saturation、suboptimal decoder”，不是题干指定的关系。"
+      },
+      "explanation": "Fisher information 的 population derivation、sum-to-integral、 N/T scaling。"
+    },
+    {
+      "id": "L07-Q17",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 2,
+          "section": "lecture-07-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：若要解释\"Fisher information 的 population derivation、sum-to-integral、 N/T scaling\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+        },
+        {
+          "id": "b",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        },
+        {
+          "id": "c",
+          "text": "逐步推导 left/right pooled-count mean/variance，并引入 multivariate Gaussian、 covariance inverse 与 Mahalanobis geometry。"
+        },
+        {
+          "id": "d",
+          "text": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。",
+        "d": "该陈述解释的是“information-limiting correlations、biological saturation、suboptimal decoder”，不是题干指定的关系。"
+      },
+      "explanation": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+    },
+    {
+      "id": "L07-Q18",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：根据 Lecture7-NeuralCoding2.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。"
+        },
+        {
+          "id": "b",
+          "text": "Cramér-Rao bound、perceptual error、noise correlations。"
+        },
+        {
+          "id": "c",
+          "text": "Fisher information 的 population derivation、sum-to-integral、 N/T scaling。"
+        },
+        {
+          "id": "d",
+          "text": "left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。"
+      },
+      "explanation": "Cramér-Rao bound、perceptual error、noise correlations。"
+    },
+    {
+      "id": "L07-Q19",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：若要解释\"Cramér-Rao bound、perceptual error、noise correlations\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        },
+        {
+          "id": "b",
+          "text": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+        },
+        {
+          "id": "c",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        },
+        {
+          "id": "d",
+          "text": "推导 bias-variance decomposition，解释 modified CRLB；将 Bayesian prior 视为 regularization，并区分 likelihood 与 posterior。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "该陈述解释的是“biased decoding、bias-variance decomposition、modified CRLB、 Bayesian decoder”，不是题干指定的关系。"
+      },
+      "explanation": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+    },
+    {
+      "id": "L07-Q20",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：根据 Lecture7-NeuralCoding2.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。"
+        },
+        {
+          "id": "b",
+          "text": "Fisher information 的 population derivation、sum-to-integral、 N/T scaling。"
+        },
+        {
+          "id": "c",
+          "text": "Cramér-Rao bound、perceptual error、noise correlations。"
+        },
+        {
+          "id": "d",
+          "text": "left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。"
+      },
+      "explanation": "left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。"
+    },
+    {
+      "id": "L07-Q21",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：若要解释\"left/right pooling statistics\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐步推导 left/right pooled-count mean/variance，并引入 multivariate Gaussian、 covariance inverse 与 Mahalanobis geometry。"
+        },
+        {
+          "id": "b",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        },
+        {
+          "id": "c",
+          "text": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+        },
+        {
+          "id": "d",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。"
+      },
+      "explanation": "逐步推导 left/right pooled-count mean/variance，并引入 multivariate Gaussian、 covariance inverse 与 Mahalanobis geometry。"
+    },
+    {
+      "id": "L07-Q22",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 2,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：阅读与\"left/right pooling statistics\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        },
+        {
+          "id": "c",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "d",
+          "text": "逐步推导 left/right pooled-count mean/variance，并引入 multivariate Gaussian、 covariance inverse 与 Mahalanobis geometry。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture7-NeuralCoding2.pdf 第 4 页。"
+      },
+      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+    },
+    {
+      "id": "L07-Q23",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 5,
+          "section": "lecture-07-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：根据 Lecture7-NeuralCoding2.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。"
+        },
+        {
+          "id": "b",
+          "text": "Fisher information 的 population derivation、sum-to-integral、 N/T scaling。"
+        },
+        {
+          "id": "c",
+          "text": "information-limiting correlations、biological saturation、suboptimal decoder。"
+        },
+        {
+          "id": "d",
+          "text": "left/right pooling statistics；correlated Gaussian encoding model、covariance matrix/inverse。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "该陈述解释的是“left/right pooling statistics”，不是题干指定的关系。"
+      },
+      "explanation": "information-limiting correlations、biological saturation、suboptimal decoder。"
+    },
+    {
+      "id": "L07-Q24",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 5,
+          "section": "lecture-07-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：若要解释\"information-limiting correlations、biological saturation、suboptimal decoder\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        },
+        {
+          "id": "b",
+          "text": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+        },
+        {
+          "id": "c",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        },
+        {
+          "id": "d",
+          "text": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。"
+      },
+      "explanation": "解释 information-limiting correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。"
+    },
+    {
+      "id": "L07-Q25",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 6,
+          "section": "lecture-07-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 7 讲：根据 Lecture7-NeuralCoding2.pdf 第 6 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "biased decoding、bias-variance decomposition、modified CRLB、 Bayesian decoder。"
+        },
+        {
+          "id": "b",
+          "text": "single-neuron ambiguity、population likelihood、uniform preferred directions、log-likelihood derivatives。"
+        },
+        {
+          "id": "c",
+          "text": "Fisher information 的 population derivation、sum-to-integral、 N/T scaling。"
+        },
+        {
+          "id": "d",
+          "text": "Cramér-Rao bound、perceptual error、noise correlations。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。"
+      },
+      "explanation": "biased decoding、bias-variance decomposition、modified CRLB、 Bayesian decoder。"
+    },
+    {
+      "id": "L07-Q26",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 6,
+          "section": "lecture-07-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding II",
+        "Lecture7-NeuralCoding2.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 7 讲：若要解释\"biased decoding、bias-variance decomposition、modified CRLB、 Bayesian decoder\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。"
+        },
+        {
+          "id": "b",
+          "text": "推导 bias-variance decomposition，解释 modified CRLB；将 Bayesian prior 视为 regularization，并区分 likelihood 与 posterior。"
+        },
+        {
+          "id": "c",
+          "text": "推导 first/second derivative、在 true stimulus 处取 expectation、Fisher information，并说明 uniform preferred-direction sum 如何近似积分。"
+        },
+        {
+          "id": "d",
+          "text": "准确陈述 Cramér-Rao lower bound 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“single-neuron ambiguity、population likelihood、uniform preferred directions”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Fisher information 的 population derivation、sum-to-integral、 N/T scaling”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Cramér-Rao bound、perceptual error、noise correlations”，不是题干指定的关系。"
+      },
+      "explanation": "推导 bias-variance decomposition，解释 modified CRLB；将 Bayesian prior 视为 regularization，并区分 likelihood 与 posterior。"
+    },
+    {
+      "id": "L07-Q27",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "群体编码",
+        "population code"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"多个 neurons 的联合 response pattern。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Cramér-Rao 下界（Cramér-Rao lower bound）"
+        },
+        {
+          "id": "b",
+          "text": "噪声相关（noise correlation）"
+        },
+        {
+          "id": "c",
+          "text": "群体编码（population code）"
+        },
+        {
+          "id": "d",
+          "text": "信号相关（signal correlation）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“Cramér-Rao 下界（Cramér-Rao lower bound）”指：无偏估计量方差在正则条件下的信息论下界。",
+        "b": "“噪声相关（noise correlation）”指：固定 stimulus 时 trial residual 的相关性。",
+        "d": "“信号相关（signal correlation）”指：tuning curves across stimuli 的相似性。"
+      },
+      "explanation": "群体编码（population code）：多个 neurons 的联合 response pattern。"
+    },
+    {
+      "id": "L07-Q28",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Cramér-Rao 下界",
+        "Cramér-Rao lower bound"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"无偏估计量方差在正则条件下的信息论下界。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "噪声相关（noise correlation）"
+        },
+        {
+          "id": "b",
+          "text": "信号相关（signal correlation）"
+        },
+        {
+          "id": "c",
+          "text": "协方差矩阵（covariance matrix）"
+        },
+        {
+          "id": "d",
+          "text": "Cramér-Rao 下界（Cramér-Rao lower bound）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“噪声相关（noise correlation）”指：固定 stimulus 时 trial residual 的相关性。",
+        "b": "“信号相关（signal correlation）”指：tuning curves across stimuli 的相似性。",
+        "c": "“协方差矩阵（covariance matrix）”指：各维 variance 与 pairwise covariance 的矩阵。"
+      },
+      "explanation": "Cramér-Rao 下界（Cramér-Rao lower bound）：无偏估计量方差在正则条件下的信息论下界。"
+    },
+    {
+      "id": "L07-Q29",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 2,
+          "section": "lecture-07-source-2"
+        }
+      ],
+      "conceptTags": [
+        "噪声相关",
+        "noise correlation"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"固定 stimulus 时 trial residual 的相关性。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "噪声相关（noise correlation）"
+        },
+        {
+          "id": "b",
+          "text": "信号相关（signal correlation）"
+        },
+        {
+          "id": "c",
+          "text": "协方差矩阵（covariance matrix）"
+        },
+        {
+          "id": "d",
+          "text": "Mahalanobis 距离（Mahalanobis distance）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“信号相关（signal correlation）”指：tuning curves across stimuli 的相似性。",
+        "c": "“协方差矩阵（covariance matrix）”指：各维 variance 与 pairwise covariance 的矩阵。",
+        "d": "“Mahalanobis 距离（Mahalanobis distance）”指：按 noise covariance 归一化的距离。"
+      },
+      "explanation": "噪声相关（noise correlation）：固定 stimulus 时 trial residual 的相关性。"
+    },
+    {
+      "id": "L07-Q30",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "信号相关",
+        "signal correlation"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"tuning curves across stimuli 的相似性。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "协方差矩阵（covariance matrix）"
+        },
+        {
+          "id": "b",
+          "text": "信号相关（signal correlation）"
+        },
+        {
+          "id": "c",
+          "text": "Mahalanobis 距离（Mahalanobis distance）"
+        },
+        {
+          "id": "d",
+          "text": "信息限制相关（information-limiting correlation）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“协方差矩阵（covariance matrix）”指：各维 variance 与 pairwise covariance 的矩阵。",
+        "c": "“Mahalanobis 距离（Mahalanobis distance）”指：按 noise covariance 归一化的距离。",
+        "d": "“信息限制相关（information-limiting correlation）”指：沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。"
+      },
+      "explanation": "信号相关（signal correlation）：tuning curves across stimuli 的相似性。"
+    },
+    {
+      "id": "L07-Q31",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "协方差矩阵",
+        "covariance matrix"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"各维 variance 与 pairwise covariance 的矩阵。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Mahalanobis 距离（Mahalanobis distance）"
+        },
+        {
+          "id": "b",
+          "text": "信息限制相关（information-limiting correlation）"
+        },
+        {
+          "id": "c",
+          "text": "协方差矩阵（covariance matrix）"
+        },
+        {
+          "id": "d",
+          "text": "次优解码器（suboptimal decoder）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“Mahalanobis 距离（Mahalanobis distance）”指：按 noise covariance 归一化的距离。",
+        "b": "“信息限制相关（information-limiting correlation）”指：沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。",
+        "d": "“次优解码器（suboptimal decoder）”指：未充分利用 encoding information 的 readout。"
+      },
+      "explanation": "协方差矩阵（covariance matrix）：各维 variance 与 pairwise covariance 的矩阵。"
+    },
+    {
+      "id": "L07-Q32",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 4,
+          "section": "lecture-07-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Mahalanobis 距离",
+        "Mahalanobis distance"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"按 noise covariance 归一化的距离。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "信息限制相关（information-limiting correlation）"
+        },
+        {
+          "id": "b",
+          "text": "次优解码器（suboptimal decoder）"
+        },
+        {
+          "id": "c",
+          "text": "偏差（bias）"
+        },
+        {
+          "id": "d",
+          "text": "Mahalanobis 距离（Mahalanobis distance）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“信息限制相关（information-limiting correlation）”指：沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。",
+        "b": "“次优解码器（suboptimal decoder）”指：未充分利用 encoding information 的 readout。",
+        "c": "“偏差（bias）”指：估计均值与真值之差。"
+      },
+      "explanation": "Mahalanobis 距离（Mahalanobis distance）：按 noise covariance 归一化的距离。"
+    },
+    {
+      "id": "L07-Q33",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "信息限制相关",
+        "information-limiting correlation"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "信息限制相关（information-limiting correlation）"
+        },
+        {
+          "id": "b",
+          "text": "次优解码器（suboptimal decoder）"
+        },
+        {
+          "id": "c",
+          "text": "偏差（bias）"
+        },
+        {
+          "id": "d",
+          "text": "正则化（regularization）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“次优解码器（suboptimal decoder）”指：未充分利用 encoding information 的 readout。",
+        "c": "“偏差（bias）”指：估计均值与真值之差。",
+        "d": "“正则化（regularization）”指：通过约束或 prior 降低 variance/复杂度。"
+      },
+      "explanation": "信息限制相关（information-limiting correlation）：沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。"
+    },
+    {
+      "id": "L07-Q34",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 5,
+          "section": "lecture-07-source-5"
+        }
+      ],
+      "conceptTags": [
+        "次优解码器",
+        "suboptimal decoder"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"未充分利用 encoding information 的 readout。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "偏差（bias）"
+        },
+        {
+          "id": "b",
+          "text": "次优解码器（suboptimal decoder）"
+        },
+        {
+          "id": "c",
+          "text": "正则化（regularization）"
+        },
+        {
+          "id": "d",
+          "text": "群体编码（population code）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“偏差（bias）”指：估计均值与真值之差。",
+        "c": "“正则化（regularization）”指：通过约束或 prior 降低 variance/复杂度。",
+        "d": "“群体编码（population code）”指：多个 neurons 的联合 response pattern。"
+      },
+      "explanation": "次优解码器（suboptimal decoder）：未充分利用 encoding information 的 readout。"
+    },
+    {
+      "id": "L07-Q35",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "偏差",
+        "bias"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"估计均值与真值之差。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "正则化（regularization）"
+        },
+        {
+          "id": "b",
+          "text": "群体编码（population code）"
+        },
+        {
+          "id": "c",
+          "text": "偏差（bias）"
+        },
+        {
+          "id": "d",
+          "text": "Cramér-Rao 下界（Cramér-Rao lower bound）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“正则化（regularization）”指：通过约束或 prior 降低 variance/复杂度。",
+        "b": "“群体编码（population code）”指：多个 neurons 的联合 response pattern。",
+        "d": "“Cramér-Rao 下界（Cramér-Rao lower bound）”指：无偏估计量方差在正则条件下的信息论下界。"
+      },
+      "explanation": "偏差（bias）：估计均值与真值之差。"
+    },
+    {
+      "id": "L07-Q36",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 6,
+          "section": "lecture-07-source-6"
+        }
+      ],
+      "conceptTags": [
+        "正则化",
+        "regularization"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 7 讲：本讲把\"通过约束或 prior 降低 variance/复杂度。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "群体编码（population code）"
+        },
+        {
+          "id": "b",
+          "text": "Cramér-Rao 下界（Cramér-Rao lower bound）"
+        },
+        {
+          "id": "c",
+          "text": "噪声相关（noise correlation）"
+        },
+        {
+          "id": "d",
+          "text": "正则化（regularization）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“群体编码（population code）”指：多个 neurons 的联合 response pattern。",
+        "b": "“Cramér-Rao 下界（Cramér-Rao lower bound）”指：无偏估计量方差在正则条件下的信息论下界。",
+        "c": "“噪声相关（noise correlation）”指：固定 stimulus 时 trial residual 的相关性。"
+      },
+      "explanation": "正则化（regularization）：通过约束或 prior 降低 variance/复杂度。"
+    },
+    {
+      "id": "L07-Q37",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 1,
+          "section": "lecture-07-source-1"
+        }
+      ],
+      "conceptTags": [
+        "independent Poisson population Fisher"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：使用\"independent Poisson population Fisher\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "counts independent"
+        },
+        {
+          "id": "b",
+          "text": "regularity/unbiased"
+        },
+        {
+          "id": "c",
+          "text": "同 stimulus、跨 trial residual"
+        },
+        {
+          "id": "d",
+          "text": "非零 variances"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“unbiased CRLB”的条件，不是题干公式的条件。",
+        "c": "这是“noise covariance”的条件，不是题干公式的条件。",
+        "d": "这是“Pearson noise correlation”的条件，不是题干公式的条件。"
+      },
+      "explanation": "independent Poisson population Fisher 的适用条件：counts independent"
+    },
+    {
+      "id": "L07-Q38",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "unbiased CRLB"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：使用\"unbiased CRLB\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "counts independent"
+        },
+        {
+          "id": "b",
+          "text": "regularity/unbiased"
+        },
+        {
+          "id": "c",
+          "text": "同 stimulus、跨 trial residual"
+        },
+        {
+          "id": "d",
+          "text": "非零 variances"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“independent Poisson population Fisher”的条件，不是题干公式的条件。",
+        "c": "这是“noise covariance”的条件，不是题干公式的条件。",
+        "d": "这是“Pearson noise correlation”的条件，不是题干公式的条件。"
+      },
+      "explanation": "unbiased CRLB 的适用条件：regularity/unbiased"
+    },
+    {
+      "id": "L07-Q39",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 2,
+          "section": "lecture-07-source-2"
+        }
+      ],
+      "conceptTags": [
+        "noise covariance"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：使用\"noise covariance\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "counts independent"
+        },
+        {
+          "id": "b",
+          "text": "regularity/unbiased"
+        },
+        {
+          "id": "c",
+          "text": "同 stimulus、跨 trial residual"
+        },
+        {
+          "id": "d",
+          "text": "非零 variances"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“independent Poisson population Fisher”的条件，不是题干公式的条件。",
+        "b": "这是“unbiased CRLB”的条件，不是题干公式的条件。",
+        "d": "这是“Pearson noise correlation”的条件，不是题干公式的条件。"
+      },
+      "explanation": "noise covariance 的适用条件：同 stimulus、跨 trial residual"
+    },
+    {
+      "id": "L07-Q40",
+      "lecture": 7,
+      "sectionId": "lecture-07-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture7-NeuralCoding2.pdf",
+          "page": 3,
+          "section": "lecture-07-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Pearson noise correlation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 7 讲：使用\"Pearson noise correlation\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "counts independent"
+        },
+        {
+          "id": "b",
+          "text": "regularity/unbiased"
+        },
+        {
+          "id": "c",
+          "text": "同 stimulus、跨 trial residual"
+        },
+        {
+          "id": "d",
+          "text": "非零 variances"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“independent Poisson population Fisher”的条件，不是题干公式的条件。",
+        "b": "这是“unbiased CRLB”的条件，不是题干公式的条件。",
+        "c": "这是“noise covariance”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Pearson noise correlation 的适用条件：非零 variances"
+    }
+  ]
+}

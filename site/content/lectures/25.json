@@ -1,0 +1,2149 @@
+{
+  "lecture": 25,
+  "slug": "25",
+  "zhTitle": "强化学习：MDP、Bellman 方程与 Q-learning",
+  "enTitle": "Reinforcement Learning: MDPs, Bellman Equations, and Q-Learning",
+  "companionFile": "NEUROSCI366_Lecture25_Reinforcement_Learning_MDP_Q_Learning_Companion.pdf",
+  "companionPages": 25,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture25_Reinforcement_Learning_MDP_Q_Learning_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture25-ReinforcementLearning.pdf",
+      "role": "primary",
+      "pages": 6,
+      "href": "/resources/original/Lecture25-ReinforcementLearning.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：agent/state/action/reward。",
+    "从第一原则推导：Markov property。",
+    "解释几何/计算直觉：discounted return。",
+    "连接生物学解释：V/Q/policy。",
+    "诊断 assumptions 与 failure modes：Bellman backup。",
+    "把概念迁移到新神经科学问题：Q-learning/exploration。"
+  ],
+  "dependencyMap": "agent/state/action/reward → Markov property → discounted return → V/Q/policy → Bellman backup → Q-learning/exploration",
+  "coreQuestion": "如何用 MDP formalize agent-environment interaction，递归分解 discounted return 得到 Bellman equation，并用 Q-learning 与 generative model 学习行动策略？",
+  "diagnostic": [
+    "Markov property 是关于什么？",
+    "policy 与 transition model 区别？",
+    "γ→0 的 agent？",
+    "Vπ 与 Qπ 区别？",
+    "optimal policy 如何由 Q* 得到？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-25-source-1",
+      "order": 1,
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。",
+      "noteMeaning": "agent/state/action/reward 与 Markov property：squirrel example、agent/environment/state/action/reward、Markov property、interaction loop。",
+      "reasoning": "解释 Markov property 是关于 state representation 的条件独立性，不等于环境\"没有历史\"。因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。",
+      "figureReading": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。",
+      "stopPredict": "Markov property 是关于什么？"
+    },
+    {
+      "id": "lecture-25-source-2",
+      "order": 2,
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy。",
+      "noteMeaning": "discounted return 与 V/Q/policy：discounted return、gamma、myopic/far-sighted、state value、policy、Q value、optimal policy。",
+      "reasoning": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。因此，从 squirrel environment 精确定义 agent、environment、 state、action、reward、transition distribution 和 policy。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "policy 与 transition model 区别？"
+    },
+    {
+      "id": "lecture-25-source-3",
+      "order": 3,
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：Bellman optimality equation 的逐步推导。",
+      "noteMeaning": "Bellman backup 与 Q-learning/exploration：Bellman optimality equation 的逐步推导。",
+      "reasoning": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。因此，从 Bellman error 推导 tabular Qlearning update；解释 learning rate、bootstrap、off-policy target 和 convergence assumptions 的适当背景。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "γ→0 的 agent？"
+    },
+    {
+      "id": "lecture-25-source-4",
+      "order": 4,
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy。",
+      "noteMeaning": "model-based/replay 与 agent/state/action/reward：Q-learning、Bellman error、update、exploration-exploitation、epsilongreedy。",
+      "reasoning": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。因此，分析 exploration-exploitation 与 epsilon-greedy 的优缺点。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "Vπ 与 Qπ 区别？"
+    },
+    {
+      "id": "lecture-25-source-5",
+      "order": 5,
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：Tolman maze、generative model、hippocampal state representation、planning。",
+      "noteMeaning": "Markov property 与 discounted return：Tolman maze、generative model、hippocampal state representation、planning。",
+      "reasoning": "用 Tolman maze 解释 generative/model-based representation；连接 hippocampal place/state coding、planning、replay 与 simulated experience。因此，解释 Markov property 是关于 state representation 的条件独立性，不等于环境\"没有历史\"。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "optimal policy 如何由 Q* 得到？"
+    },
+    {
+      "id": "lecture-25-source-6",
+      "order": 6,
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "page": 6,
+      "reconstruction": "Page 6：model-based RL、simulated experience、hippocampal replay、 sample efficiency。",
+      "noteMeaning": "V/Q/policy 与 Bellman backup：model-based RL、simulated experience、hippocampal replay、sample efficiency。",
+      "reasoning": "用 Tolman maze 解释 generative/model-based representation； 连接 hippocampal place/state coding、planning、replay 与 simulated experience。因此，比较 model-free vs model-based RL 的 computation、sample efficiency、flexibility 和 failure modes。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "Bellman optimality equation 的 max 在哪里？"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 MDP 与 Markov property",
+    "【必要前置】 定义 squirrel foraging 的 formal components。",
+    "P (st+1 , Rt+1 | s0:t , a0:t ) = P (st+1 , Rt+1 | st , at )",
+    "at ∼ π(a | st ) 1. agent 选择 action，environment 根据 transition distribution 产生 next state/reward。 2. state 必须包含预测 future 所需信息，如位置、可见威胁、资源状态等。 3. 若 state 缺记忆变量，observations 可能非-Markov。 4. policy 是 state 到 action distribution，不等于 transition model。",
+    "Geometric/computational intuition. Markov 性是 representation 的充分性条件，而非世界真的无历史。 Biological interpretation / failure condition. partial observability 时需 belief state/recurrent memory。",
+    "思考题：Vπ 与 Qπ 区别？",
+    "5.2 return、V 与 Q",
+    "【补全推导】 量化 long-term reward。",
+    "Gt = Rt+1 + γRt+2 + γ 2 Rt+3 + · · ·",
+    "Vπ (s) = Eπ [Gt | st = s] Qπ (s, a) = Eπ [Gt | st = s, at = a] 1. 0≤γ<1 使远期 reward 权重几何衰减并帮助 continuing tasks 收敛。 2. V 在 policy π 下从 state 出发平均；Q 额外固定第一 action。 3. V_π(s)=E_{a∼π}Q_π(s,a)。 4. optimal policy 选择最大 Q* 的 action（ties 可多解）。",
+    "Geometric/computational intuition. Q 把\"现在做什么\"与未来 consequences 连接。 Biological interpretation / failure condition. episodic finite horizon 可允许 γ=1；reward scaling 与 termination 需明确。",
+    "思考题：optimal policy 如何由 Q* 得到？",
+    "5.3 Bellman optimality equation",
+    "【跨页连接】 递归表示 Q*。",
+    "Q∗ (s, a) = E[Rt+1 + γ max ′ Q∗ (st+1 , a′ ) | st = s, at = a] a X = p(s′ , r | s, a)[r + γ max ′ Q∗ (s′ , a′ )] a s′ ,r",
+    "1. 将 G_t 拆成 R_{t+1}+γG_{t+1}。 2. 第一步 action a 固定；下一 state 后采用 optimal future action。 3. 对 environment stochastic transition/reward 取 expectation。 4. equation 是 self-consistency relation；已知 model 时可用 dynamic programming 求解。",
+    "Geometric/computational intuition. 一个 state-action 的价值等于一步 reward 加最优 future 的折扣价值。 Biological interpretation / failure condition. 把 max 放到 expectation 外/内位置写错会改变 stochastic problem。",
+    "思考题：Bellman optimality equation 的 max 在哪里？",
+    "5.4 Q-learning 与 exploration",
+    "【模型边界】 未知 transition model 时如何从 experience 学 Q*？",
+    "δt = Rt+1 + γ max ′ Q(st+1 , a′ ) − Q(st , at ) a",
+    "Q(st , at ) ← Q(st , at ) + αδt 1. sample transition 给 Bellman target 的 noisy sample。 2. update 只改 visited state-action entry。 3. target 使用 greedy max，而 behavior 可以 ε-greedy，因此 off-policy。 4. tabular convergence 需充分 exploration、适当 decaying learning rates 与 stationary finite MDP 等条件。",
+    "Geometric/computational intuition. 把当前 Q 向 one-step bootstrap target 移动。 Biological interpretation / failure condition. function approximation、off-policy 与 bootstrap 可共同引发 instability；state coverage 不足也失败。",
+    "思考题：Q-learning TD error？",
+    "5.5 model-based RL、planning 与 replay",
+    "【必要前置】 generative model 如何提高 sample efficiency？",
+    "pb(s′ , r | s, a)",
+    "real or simulated (s, a, r, s′ ) → planning/update 1. agent 学 transition/reward model。 2. 可在不实际行动时模拟 trajectories、评估 detours/changed reward。 3. hippocampal state/place representations 与 replay 提供候选 biological substrate。 4. replay 与 exact Bellman backup 是层级推断，不能直接等同。",
+    "Geometric/computational intuition. world model 把过去 experience 重组为未实际经历的 counterfactual updates。 Biological interpretation / failure condition. model bias 会在 planning 中累积；computational cost 也更高。",
+    "思考题：为什么 Q-learning off-policy？"
+  ],
+  "synthesis": [
+    "MDP 的核心不是\"环境没有历史\"，而是 chosen state representation 使 future 在给定 current state/action 后与更早历史条件独立。discounted return 可递归拆成 immediate reward + γ future return，导出 Bellman optimality equation。Q-learning 用 sampled Bellman error 做 off-policy bootstrap update；model-based RL 另学习 transition/reward model，并可通过 simulated experience/replay 提高 sample efficiency。"
+  ],
+  "workedExamples": [
+    "7.1 两状态 Bellman backup",
+    "【例题】题目：s,a 立即 reward=1，确定转到 terminal-like s'，max Q(s',·)=4，γ=0.9。",
+    "Worked solution. target=1+0.9×4=4.6。若当前 Q=3, α=0.2，则新 Q=3+0.2(1.6)=3.32。 Check. update 不是直接设为 4.6，除非 α=1。",
+    "7.2 Markov diagnosis",
+    "【拓展例题】题目：maze observation 只有当前位置，但门是否已打开取决于之前踩过开关。",
+    "Worked solution. 当前位置 alone 非-Markov；state 应加入 switch/door status 或 belief/memory。 Check. 历史效应可通过扩充 state 恢复 Markov property。"
+  ],
+  "formulas": [
+    {
+      "id": "L25-F01",
+      "lecture": 25,
+      "name": "MDP transition/reward model",
+      "expression": "p(s′ , r|s, a)",
+      "latex": "p(s',r\\mid s,a)",
+      "conditions": "Markov state",
+      "sectionId": "lecture-25-source-1",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L25-F02",
+      "lecture": 25,
+      "name": "discounted return",
+      "expression": "Gt = γ k Rt+k+1 k≥0",
+      "latex": "G_t=\\sum_{k=0}^{\\infty}\\gamma^k R_{t+k+1}",
+      "conditions": "0≤γ<1 or finite episode",
+      "sectionId": "lecture-25-source-2",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L25-F03",
+      "lecture": 25,
+      "name": "state value",
+      "expression": "Vπ (s) = Eπ [Gt |st = s]",
+      "latex": "V_{\\pi}(s)=\\mathbb{E}_{\\pi}[G_t\\mid s_t=s]",
+      "conditions": "policy π",
+      "sectionId": "lecture-25-source-2",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L25-F04",
+      "lecture": 25,
+      "name": "state-action value",
+      "expression": "Qπ (s, a) = Eπ [Gt |st = s, at = a]",
+      "latex": "Q_{\\pi}(s,a)=\\mathbb{E}_{\\pi}[G_t\\mid s_t=s,a_t=a]",
+      "conditions": "first action fixed",
+      "sectionId": "lecture-25-source-2",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L25-F05",
+      "lecture": 25,
+      "name": "Bellman optimality",
+      "expression": "Q∗ = E[R + γ max Q∗ ]",
+      "latex": "Q^*(s,a)=\\mathbb{E}\\!\\left[R_{t+1}+\\gamma\\max_{a'}Q^*(s_{t+1},a')\\mid s_t=s,a_t=a\\right]",
+      "conditions": "optimal continuation",
+      "sectionId": "lecture-25-source-3",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L25-F06",
+      "lecture": 25,
+      "name": "tabular Q-learning",
+      "expression": "Q ← Q + α(R + γ max Q′ − Q)",
+      "latex": "Q(s,a)\\leftarrow Q(s,a)+\\alpha\\left[R_{t+1}+\\gamma\\max_{a'}Q(s_{t+1},a')-Q(s,a)\\right]",
+      "conditions": "sampled transition",
+      "sectionId": "lecture-25-source-3",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L25-F07",
+      "lecture": 25,
+      "name": "ε-greedy exploration",
+      "expression": "πϵ = (1 − ϵ)greedy + ϵrandom",
+      "latex": "\\pi_{\\varepsilon}=(1-\\varepsilon)\\pi_{\\mathrm{greedy}}+\\varepsilon\\pi_{\\mathrm{random}}",
+      "conditions": "finite action set",
+      "sectionId": "lecture-25-source-1",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 1
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L25-G01",
+      "lecture": 25,
+      "zh": "强化学习",
+      "en": "reinforcement learning",
+      "definition": "通过 interaction 与 rewards 学 policy/value。",
+      "sectionId": "lecture-25-source-1",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L25-G02",
+      "lecture": 25,
+      "zh": "智能体",
+      "en": "agent",
+      "definition": "选择 actions、更新内部 policy/model 的 learner。",
+      "sectionId": "lecture-25-source-2",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L25-G03",
+      "lecture": 25,
+      "zh": "状态",
+      "en": "state",
+      "definition": "用于预测 future 与选择 action 的 environment representation。",
+      "sectionId": "lecture-25-source-1",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L25-G04",
+      "lecture": 25,
+      "zh": "马尔可夫性质",
+      "en": "Markov property",
+      "definition": "given current state/action 后 future 与更早 history 条件独立。",
+      "sectionId": "lecture-25-source-1",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L25-G05",
+      "lecture": 25,
+      "zh": "策略",
+      "en": "policy",
+      "definition": "state 到 action probability 的映射。",
+      "sectionId": "lecture-25-source-1",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L25-G06",
+      "lecture": 25,
+      "zh": "回报",
+      "en": "return",
+      "definition": "未来 rewards 的 discounted sum。",
+      "sectionId": "lecture-25-source-2",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L25-G07",
+      "lecture": 25,
+      "zh": "Bellman 方程",
+      "en": "Bellman equation",
+      "definition": "value 的 recursive self-consistency relation。",
+      "sectionId": "lecture-25-source-3",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L25-G08",
+      "lecture": 25,
+      "zh": "Q-learning",
+      "en": "Q-learning",
+      "definition": "model-free off-policy TD control algorithm。",
+      "sectionId": "lecture-25-source-3",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L25-G09",
+      "lecture": 25,
+      "zh": "探索-利用",
+      "en": "exploration-exploitation",
+      "definition": "收集新信息与选择当前最佳 action 的权衡。",
+      "sectionId": "lecture-25-source-4",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L25-G10",
+      "lecture": 25,
+      "zh": "基于模型的强化学习",
+      "en": "model-based reinforcement learning",
+      "definition": "学习或使用 environment model 进行 planning。",
+      "sectionId": "lecture-25-source-5",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L25-G11",
+      "lecture": 25,
+      "zh": "重放",
+      "en": "replay",
+      "definition": "离线重现/模拟 state sequences 的 neural/computational process。",
+      "sectionId": "lecture-25-source-4",
+      "sourceFile": "Lecture25-ReinforcementLearning.pdf",
+      "sourcePage": 4
+    }
+  ],
+  "commonTraps": [
+    "Markov property 等于环境没有历史。",
+    "混淆 Vπ、Qπ、V*、Q*。",
+    "Bellman equation 忘记 transition expectation。",
+    "Q-learning target 使用 behavior action 而误写成 SARSA。",
+    "ε-greedy 的 random branch 只在非 greedy actions 中选而不说明 convention。",
+    "把 model-free 等同于无 internal representation。",
+    "把 hippocampal replay 直接等同于精确 Bellman backup。",
+    "需避免把 Q-learning 与所有 TD learning 同义化；需避免把 hippocampal replay 直接等同于精确 Bellman backup，需要标明 evidence 与 inference 的层级。"
+  ],
+  "errata": [
+    "1. Page 2 的 γ 范围在 continuing tasks 常取 <1；episodic finite tasks 可使用 γ=1，需说明。 2. Page 4 的 Q-learning 是 tabular form；function approximation/convergence issues 未在源页展开。 3. Pages 5-6 的 hippocampal planning/replay connection 是 evidence+inference bridge，不是算法级一一对应。"
+  ],
+  "questions": [
+    {
+      "id": "L25-Q01",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：Markov property 是关于什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 Markov property 是关于 state representation 的条件独立性，不等于环境\"没有历史\"。"
+        },
+        {
+          "id": "b",
+          "text": "Markov state"
+        },
+        {
+          "id": "c",
+          "text": "state representation 的 conditional sufficiency。"
+        },
+        {
+          "id": "d",
+          "text": "target 使用 greedy max，而 behavior 可 exploratory。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 1 页。",
+        "b": "这是“MDP transition/reward model”的适用条件。",
+        "d": "该选项回答的是“为什么 Q-learning off-policy？”。"
+      },
+      "explanation": "state representation 的 conditional sufficiency。"
+    },
+    {
+      "id": "L25-Q02",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：policy 与 transition model 区别？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "b",
+          "text": "选择 actions、更新内部 policy/model 的 learner。"
+        },
+        {
+          "id": "c",
+          "text": "next state 的 future actions 上，位于 transition expectation 内部的 bracket 中。"
+        },
+        {
+          "id": "d",
+          "text": "policy 由 agent 选 action；transition model 由 environment 给 next state/reward。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 1 页。",
+        "b": "这是“智能体（agent）”的定义。",
+        "c": "该选项回答的是“Bellman optimality equation 的 max 在哪里？”。"
+      },
+      "explanation": "policy 由 agent 选 action；transition model 由 environment 给 next state/reward。"
+    },
+    {
+      "id": "L25-Q03",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：γ→0 的 agent？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "myopic，主要重视 immediate reward。"
+        },
+        {
+          "id": "b",
+          "text": "未来 rewards 的 discounted sum。"
+        },
+        {
+          "id": "c",
+          "text": "R+γmax_{a'}Q(s',a')−Q(s,a)。"
+        },
+        {
+          "id": "d",
+          "text": "state 到 action probability 的映射。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“回报（return）”的定义。",
+        "c": "该选项回答的是“Q-learning TD error？”。",
+        "d": "这是“策略（policy）”的定义。"
+      },
+      "explanation": "myopic，主要重视 immediate reward。"
+    },
+    {
+      "id": "L25-Q04",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 4,
+      "type": "comparison",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 25 讲：Vπ 与 Qπ 区别？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "model-free off-policy TD control algorithm。"
+        },
+        {
+          "id": "b",
+          "text": "Q additionally conditions on first action。"
+        },
+        {
+          "id": "c",
+          "text": "通过 interaction 与 rewards 学 policy/value。"
+        },
+        {
+          "id": "d",
+          "text": "value 的 recursive self-consistency relation。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“Q-learning（Q-learning）”的定义。",
+        "c": "这是“强化学习（reinforcement learning）”的定义。",
+        "d": "这是“Bellman 方程（Bellman equation）”的定义。"
+      },
+      "explanation": "Q additionally conditions on first action。"
+    },
+    {
+      "id": "L25-Q05",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：optimal policy 如何由 Q* 得到？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "选择 argmin_a Q*(s,a)。"
+        },
+        {
+          "id": "b",
+          "text": "optimal continuation"
+        },
+        {
+          "id": "c",
+          "text": "选择 argmax_a Q*(s,a)。"
+        },
+        {
+          "id": "d",
+          "text": "policy π"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项把最大化与最小化方向颠倒了。",
+        "b": "这是“Bellman optimality”的适用条件。",
+        "d": "这是“state value”的适用条件。"
+      },
+      "explanation": "选择 argmax_a Q*(s,a)。"
+    },
+    {
+      "id": "L25-Q06",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 6,
+          "section": "lecture-25-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 1,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：Bellman optimality equation 的 max 在哪里？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。"
+        },
+        {
+          "id": "b",
+          "text": "target 使用 greedy max，而 behavior 可 exploratory。"
+        },
+        {
+          "id": "c",
+          "text": "控制新 Bellman target 对现有 estimate 的更新幅度。"
+        },
+        {
+          "id": "d",
+          "text": "next state 的 future actions 上，位于 transition expectation 内部的 bracket 中。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 3 页。",
+        "b": "该选项回答的是“为什么 Q-learning off-policy？”。",
+        "c": "该选项回答的是“α 的作用？”。"
+      },
+      "explanation": "next state 的 future actions 上，位于 transition expectation 内部的 bracket 中。"
+    },
+    {
+      "id": "L25-Q07",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：Q-learning TD error？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "R+γmax_{a'}Q(s',a')−Q(s,a)。"
+        },
+        {
+          "id": "b",
+          "text": "R+γmin_{a'}Q(s',a')−Q(s,a)。"
+        },
+        {
+          "id": "c",
+          "text": "未来 rewards 的 discounted sum。"
+        },
+        {
+          "id": "d",
+          "text": "myopic，主要重视 immediate reward。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项把最大化与最小化方向颠倒了。",
+        "c": "这是“回报（return）”的定义。",
+        "d": "该选项回答的是“γ→0 的 agent？”。"
+      },
+      "explanation": "R+γmax_{a'}Q(s',a')−Q(s,a)。"
+    },
+    {
+      "id": "L25-Q08",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：为什么 Q-learning off-policy？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "target 使用 random max，而 behavior 可 exploratory。"
+        },
+        {
+          "id": "b",
+          "text": "target 使用 greedy max，而 behavior 可 exploratory。"
+        },
+        {
+          "id": "c",
+          "text": "model-free off-policy TD control algorithm。"
+        },
+        {
+          "id": "d",
+          "text": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项混淆了 greedy target 与 exploratory behavior。",
+        "c": "这是“Q-learning（Q-learning）”的定义。",
+        "d": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 4 页。"
+      },
+      "explanation": "target 使用 greedy max，而 behavior 可 exploratory。"
+    },
+    {
+      "id": "L25-Q09",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 25 讲：α 的作用？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "选择 actions、更新内部 policy/model 的 learner。"
+        },
+        {
+          "id": "b",
+          "text": "通过 interaction 与 rewards 学 policy/value。"
+        },
+        {
+          "id": "c",
+          "text": "控制新 Bellman target 对现有 estimate 的更新幅度。"
+        },
+        {
+          "id": "d",
+          "text": "学习或使用 environment model 进行 planning。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“智能体（agent）”的定义。",
+        "b": "这是“强化学习（reinforcement learning）”的定义。",
+        "d": "这是“基于模型的强化学习（model-based reinforcement learning）”的定义。"
+      },
+      "explanation": "控制新 Bellman target 对现有 estimate 的更新幅度。"
+    },
+    {
+      "id": "L25-Q10",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：ε-greedy 的代价？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "target 使用 greedy max，而 behavior 可 exploratory。"
+        },
+        {
+          "id": "b",
+          "text": "animals 可能学习 generative/cognitive map，而非只缓存固定 action values。"
+        },
+        {
+          "id": "c",
+          "text": "离线重现/模拟 state sequences 的 neural/computational process。"
+        },
+        {
+          "id": "d",
+          "text": "持续随机 actions 降低 immediate reward，且 uniform exploration 低效。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“为什么 Q-learning off-policy？”。",
+        "b": "该选项回答的是“Tolman detour 支持什么？”。",
+        "c": "这是“重放（replay）”的定义。"
+      },
+      "explanation": "持续随机 actions 降低 immediate reward，且 uniform exploration 低效。"
+    },
+    {
+      "id": "L25-Q11",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：model-based 的优势与风险？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "更 sample-efficient/flexible planning；model bias 与 computation cost。"
+        },
+        {
+          "id": "b",
+          "text": "因此，比较 model-free vs model-based RL 的 computation、sample efficiency、flexibility 和 failure modes。"
+        },
+        {
+          "id": "c",
+          "text": "因此，分析 exploration-exploitation 与 epsilon-greedy 的优缺点。"
+        },
+        {
+          "id": "d",
+          "text": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 6 页。",
+        "c": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 4 页。",
+        "d": "该选项回答的是“诊断并修正下面的说法：Markov property 等于环境没有历史。”。"
+      },
+      "explanation": "更 sample-efficient/flexible planning；model bias 与 computation cost。"
+    },
+    {
+      "id": "L25-Q12",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：Tolman detour 支持什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "持续随机 actions 降低 immediate reward，且 uniform exploration 低效。"
+        },
+        {
+          "id": "b",
+          "text": "animals 可能学习 generative/cognitive map，而非只缓存固定 action values。"
+        },
+        {
+          "id": "c",
+          "text": "解释 Markov property 是关于 state representation 的条件独立性，不等于环境\"没有历史\"。"
+        },
+        {
+          "id": "d",
+          "text": "离线重现/模拟 state sequences 的 neural/computational process。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“ε-greedy 的代价？”。",
+        "c": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 1 页。",
+        "d": "这是“重放（replay）”的定义。"
+      },
+      "explanation": "animals 可能学习 generative/cognitive map，而非只缓存固定 action values。"
+    },
+    {
+      "id": "L25-Q13",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：诊断并修正下面的说法：Markov property 等于环境没有历史。",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，解释 Markov property 是关于 state representation 的条件独立性，不等于环境\"没有历史\"。"
+        },
+        {
+          "id": "b",
+          "text": "更 sample-efficient/flexible planning；model bias 与 computation cost。"
+        },
+        {
+          "id": "c",
+          "text": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。"
+        },
+        {
+          "id": "d",
+          "text": "next state 的 future actions 上，位于 transition expectation 内部的 bracket 中。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 5 页。",
+        "b": "该选项回答的是“model-based 的优势与风险？”。",
+        "d": "该选项回答的是“Bellman optimality equation 的 max 在哪里？”。"
+      },
+      "explanation": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。"
+    },
+    {
+      "id": "L25-Q14",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：根据 Lecture25-ReinforcementLearning.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bellman optimality equation 的逐步推导。"
+        },
+        {
+          "id": "b",
+          "text": "Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy。"
+        },
+        {
+          "id": "c",
+          "text": "model-based RL、simulated experience、hippocampal replay、 sample efficiency。"
+        },
+        {
+          "id": "d",
+          "text": "squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy”，不是题干指定的关系。",
+        "c": "该陈述解释的是“model-based RL、simulated experience、hippocampal replay、 sample efficiency”，不是题干指定的关系。"
+      },
+      "explanation": "squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。"
+    },
+    {
+      "id": "L25-Q15",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：若要解释\"squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "b",
+          "text": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。"
+        },
+        {
+          "id": "c",
+          "text": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。"
+        },
+        {
+          "id": "d",
+          "text": "用 Tolman maze 解释 generative/model-based representation； 连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。",
+        "d": "该陈述解释的是“model-based RL、simulated experience、hippocampal replay、 sample efficiency”，不是题干指定的关系。"
+      },
+      "explanation": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+    },
+    {
+      "id": "L25-Q16",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 1,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：阅读与\"squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+        },
+        {
+          "id": "c",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "d",
+          "text": "policy 由 agent 选 action；transition model 由 environment 给 next state/reward。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。",
+        "c": "这条推理对应 Lecture25-ReinforcementLearning.pdf 第 1 页。",
+        "d": "该选项回答的是“policy 与 transition model 区别？”。"
+      },
+      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+    },
+    {
+      "id": "L25-Q17",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：根据 Lecture25-ReinforcementLearning.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bellman optimality equation 的逐步推导。"
+        },
+        {
+          "id": "b",
+          "text": "Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy。"
+        },
+        {
+          "id": "c",
+          "text": "discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy。"
+        },
+        {
+          "id": "d",
+          "text": "model-based RL、simulated experience、hippocampal replay、 sample efficiency。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy”，不是题干指定的关系。",
+        "d": "该陈述解释的是“model-based RL、simulated experience、hippocampal replay、 sample efficiency”，不是题干指定的关系。"
+      },
+      "explanation": "discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy。"
+    },
+    {
+      "id": "L25-Q18",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：若要解释\"discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。"
+        },
+        {
+          "id": "b",
+          "text": "用 Tolman maze 解释 generative/model-based representation；连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+        },
+        {
+          "id": "c",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "d",
+          "text": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Tolman maze、generative model、hippocampal state representation、planning”，不是题干指定的关系。",
+        "c": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。"
+      },
+      "explanation": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。"
+    },
+    {
+      "id": "L25-Q19",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：根据 Lecture25-ReinforcementLearning.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bellman optimality equation 的逐步推导。"
+        },
+        {
+          "id": "b",
+          "text": "squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。"
+        },
+        {
+          "id": "c",
+          "text": "discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy。"
+        },
+        {
+          "id": "d",
+          "text": "Tolman maze、generative model、hippocampal state representation、planning。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。",
+        "c": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Tolman maze、generative model、hippocampal state representation、planning”，不是题干指定的关系。"
+      },
+      "explanation": "Bellman optimality equation 的逐步推导。"
+    },
+    {
+      "id": "L25-Q20",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：若要解释\"Bellman optimality equation 的逐步推导\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "b",
+          "text": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。"
+        },
+        {
+          "id": "c",
+          "text": "用 Tolman maze 解释 generative/model-based representation；连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+        },
+        {
+          "id": "d",
+          "text": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Tolman maze、generative model、hippocampal state representation、planning”，不是题干指定的关系。",
+        "d": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。"
+      },
+      "explanation": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。"
+    },
+    {
+      "id": "L25-Q21",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 4,
+          "section": "lecture-25-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：根据 Lecture25-ReinforcementLearning.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。"
+        },
+        {
+          "id": "b",
+          "text": "discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy。"
+        },
+        {
+          "id": "c",
+          "text": "Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy。"
+        },
+        {
+          "id": "d",
+          "text": "Tolman maze、generative model、hippocampal state representation、planning。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。",
+        "b": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Tolman maze、generative model、hippocampal state representation、planning”，不是题干指定的关系。"
+      },
+      "explanation": "Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy。"
+    },
+    {
+      "id": "L25-Q22",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 4,
+          "section": "lecture-25-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：若要解释\"Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "b",
+          "text": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。"
+        },
+        {
+          "id": "c",
+          "text": "用 Tolman maze 解释 generative/model-based representation；连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+        },
+        {
+          "id": "d",
+          "text": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。",
+        "b": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Tolman maze、generative model、hippocampal state representation、planning”，不是题干指定的关系。"
+      },
+      "explanation": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。"
+    },
+    {
+      "id": "L25-Q23",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：根据 Lecture25-ReinforcementLearning.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Tolman maze、generative model、hippocampal state representation、planning。"
+        },
+        {
+          "id": "b",
+          "text": "Bellman optimality equation 的逐步推导。"
+        },
+        {
+          "id": "c",
+          "text": "Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy。"
+        },
+        {
+          "id": "d",
+          "text": "squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy”，不是题干指定的关系。",
+        "d": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。"
+      },
+      "explanation": "Tolman maze、generative model、hippocampal state representation、planning。"
+    },
+    {
+      "id": "L25-Q24",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：若要解释\"Tolman maze、generative model、hippocampal state representation、planning\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。"
+        },
+        {
+          "id": "b",
+          "text": "用 Tolman maze 解释 generative/model-based representation；连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+        },
+        {
+          "id": "c",
+          "text": "从 Bellman error 推导 tabular Q-learning update；解释 learning rate、bootstrap、 off-policy target 和 convergence assumptions 的适当背景。"
+        },
+        {
+          "id": "d",
+          "text": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Q-learning、Bellman error、update、exploration-exploitation、 epsilon-greedy”，不是题干指定的关系。",
+        "d": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。"
+      },
+      "explanation": "用 Tolman maze 解释 generative/model-based representation；连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+    },
+    {
+      "id": "L25-Q25",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 6,
+          "section": "lecture-25-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 25 讲：根据 Lecture25-ReinforcementLearning.pdf 第 6 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop。"
+        },
+        {
+          "id": "b",
+          "text": "discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy。"
+        },
+        {
+          "id": "c",
+          "text": "model-based RL、simulated experience、hippocampal replay、 sample efficiency。"
+        },
+        {
+          "id": "d",
+          "text": "Bellman optimality equation 的逐步推导。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。",
+        "b": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。"
+      },
+      "explanation": "model-based RL、simulated experience、hippocampal replay、 sample efficiency。"
+    },
+    {
+      "id": "L25-Q26",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 6,
+          "section": "lecture-25-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Reinforcement Learning",
+        "Lecture25-ReinforcementLearning.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 25 讲：若要解释\"model-based RL、simulated experience、hippocampal replay、 sample efficiency\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从 squirrel environment 精确定义 agent、environment、state、action、 reward、transition distribution 和 policy。"
+        },
+        {
+          "id": "b",
+          "text": "逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 continuing/episodic caveats。"
+        },
+        {
+          "id": "c",
+          "text": "按笔记步骤推导 Bellman optimality equation：当前 reward + next-state optimal value；保留 transition expectation。"
+        },
+        {
+          "id": "d",
+          "text": "用 Tolman maze 解释 generative/model-based representation； 连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“squirrel example、agent/environment/state/action/reward、 Markov property、interaction loop”，不是题干指定的关系。",
+        "b": "该陈述解释的是“discounted return、gamma、myopic/far-sighted、state value、 policy、Q value、optimal policy”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Bellman optimality equation 的逐步推导”，不是题干指定的关系。"
+      },
+      "explanation": "用 Tolman maze 解释 generative/model-based representation； 连接 hippocampal place/state coding、planning、replay 与 simulated experience。"
+    },
+    {
+      "id": "L25-Q27",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "强化学习",
+        "reinforcement learning"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"通过 interaction 与 rewards 学 policy/value。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "强化学习（reinforcement learning）"
+        },
+        {
+          "id": "b",
+          "text": "智能体（agent）"
+        },
+        {
+          "id": "c",
+          "text": "状态（state）"
+        },
+        {
+          "id": "d",
+          "text": "马尔可夫性质（Markov property）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“智能体（agent）”指：选择 actions、更新内部 policy/model 的 learner。",
+        "c": "“状态（state）”指：用于预测 future 与选择 action 的 environment representation。",
+        "d": "“马尔可夫性质（Markov property）”指：given current state/action 后 future 与更早 history 条件独立。"
+      },
+      "explanation": "强化学习（reinforcement learning）：通过 interaction 与 rewards 学 policy/value。"
+    },
+    {
+      "id": "L25-Q28",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "智能体",
+        "agent"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"选择 actions、更新内部 policy/model 的 learner。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "状态（state）"
+        },
+        {
+          "id": "b",
+          "text": "智能体（agent）"
+        },
+        {
+          "id": "c",
+          "text": "马尔可夫性质（Markov property）"
+        },
+        {
+          "id": "d",
+          "text": "策略（policy）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“状态（state）”指：用于预测 future 与选择 action 的 environment representation。",
+        "c": "“马尔可夫性质（Markov property）”指：given current state/action 后 future 与更早 history 条件独立。",
+        "d": "“策略（policy）”指：state 到 action probability 的映射。"
+      },
+      "explanation": "智能体（agent）：选择 actions、更新内部 policy/model 的 learner。"
+    },
+    {
+      "id": "L25-Q29",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "状态",
+        "state"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"用于预测 future 与选择 action 的 environment representation。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "马尔可夫性质（Markov property）"
+        },
+        {
+          "id": "b",
+          "text": "策略（policy）"
+        },
+        {
+          "id": "c",
+          "text": "状态（state）"
+        },
+        {
+          "id": "d",
+          "text": "回报（return）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“马尔可夫性质（Markov property）”指：given current state/action 后 future 与更早 history 条件独立。",
+        "b": "“策略（policy）”指：state 到 action probability 的映射。",
+        "d": "“回报（return）”指：未来 rewards 的 discounted sum。"
+      },
+      "explanation": "状态（state）：用于预测 future 与选择 action 的 environment representation。"
+    },
+    {
+      "id": "L25-Q30",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "马尔可夫性质",
+        "Markov property"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"given current state/action 后 future 与更早 history 条件独立。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "策略（policy）"
+        },
+        {
+          "id": "b",
+          "text": "回报（return）"
+        },
+        {
+          "id": "c",
+          "text": "Bellman 方程（Bellman equation）"
+        },
+        {
+          "id": "d",
+          "text": "马尔可夫性质（Markov property）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“策略（policy）”指：state 到 action probability 的映射。",
+        "b": "“回报（return）”指：未来 rewards 的 discounted sum。",
+        "c": "“Bellman 方程（Bellman equation）”指：value 的 recursive self-consistency relation。"
+      },
+      "explanation": "马尔可夫性质（Markov property）：given current state/action 后 future 与更早 history 条件独立。"
+    },
+    {
+      "id": "L25-Q31",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "策略",
+        "policy"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"state 到 action probability 的映射。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "策略（policy）"
+        },
+        {
+          "id": "b",
+          "text": "回报（return）"
+        },
+        {
+          "id": "c",
+          "text": "Bellman 方程（Bellman equation）"
+        },
+        {
+          "id": "d",
+          "text": "Q-learning（Q-learning）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“回报（return）”指：未来 rewards 的 discounted sum。",
+        "c": "“Bellman 方程（Bellman equation）”指：value 的 recursive self-consistency relation。",
+        "d": "“Q-learning（Q-learning）”指：model-free off-policy TD control algorithm。"
+      },
+      "explanation": "策略（policy）：state 到 action probability 的映射。"
+    },
+    {
+      "id": "L25-Q32",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "回报",
+        "return"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"未来 rewards 的 discounted sum。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bellman 方程（Bellman equation）"
+        },
+        {
+          "id": "b",
+          "text": "回报（return）"
+        },
+        {
+          "id": "c",
+          "text": "Q-learning（Q-learning）"
+        },
+        {
+          "id": "d",
+          "text": "探索-利用（exploration-exploitation）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“Bellman 方程（Bellman equation）”指：value 的 recursive self-consistency relation。",
+        "c": "“Q-learning（Q-learning）”指：model-free off-policy TD control algorithm。",
+        "d": "“探索-利用（exploration-exploitation）”指：收集新信息与选择当前最佳 action 的权衡。"
+      },
+      "explanation": "回报（return）：未来 rewards 的 discounted sum。"
+    },
+    {
+      "id": "L25-Q33",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Bellman 方程",
+        "Bellman equation"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"value 的 recursive self-consistency relation。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Q-learning（Q-learning）"
+        },
+        {
+          "id": "b",
+          "text": "探索-利用（exploration-exploitation）"
+        },
+        {
+          "id": "c",
+          "text": "Bellman 方程（Bellman equation）"
+        },
+        {
+          "id": "d",
+          "text": "基于模型的强化学习（model-based reinforcement learning）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“Q-learning（Q-learning）”指：model-free off-policy TD control algorithm。",
+        "b": "“探索-利用（exploration-exploitation）”指：收集新信息与选择当前最佳 action 的权衡。",
+        "d": "“基于模型的强化学习（model-based reinforcement learning）”指：学习或使用 environment model 进行 planning。"
+      },
+      "explanation": "Bellman 方程（Bellman equation）：value 的 recursive self-consistency relation。"
+    },
+    {
+      "id": "L25-Q34",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 3,
+          "section": "lecture-25-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Q-learning",
+        "Q-learning"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"model-free off-policy TD control algorithm。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "探索-利用（exploration-exploitation）"
+        },
+        {
+          "id": "b",
+          "text": "基于模型的强化学习（model-based reinforcement learning）"
+        },
+        {
+          "id": "c",
+          "text": "重放（replay）"
+        },
+        {
+          "id": "d",
+          "text": "Q-learning（Q-learning）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“探索-利用（exploration-exploitation）”指：收集新信息与选择当前最佳 action 的权衡。",
+        "b": "“基于模型的强化学习（model-based reinforcement learning）”指：学习或使用 environment model 进行 planning。",
+        "c": "“重放（replay）”指：离线重现/模拟 state sequences 的 neural/computational process。"
+      },
+      "explanation": "Q-learning（Q-learning）：model-free off-policy TD control algorithm。"
+    },
+    {
+      "id": "L25-Q35",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 4,
+          "section": "lecture-25-source-4"
+        }
+      ],
+      "conceptTags": [
+        "探索-利用",
+        "exploration-exploitation"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"收集新信息与选择当前最佳 action 的权衡。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "探索-利用（exploration-exploitation）"
+        },
+        {
+          "id": "b",
+          "text": "基于模型的强化学习（model-based reinforcement learning）"
+        },
+        {
+          "id": "c",
+          "text": "重放（replay）"
+        },
+        {
+          "id": "d",
+          "text": "强化学习（reinforcement learning）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“基于模型的强化学习（model-based reinforcement learning）”指：学习或使用 environment model 进行 planning。",
+        "c": "“重放（replay）”指：离线重现/模拟 state sequences 的 neural/computational process。",
+        "d": "“强化学习（reinforcement learning）”指：通过 interaction 与 rewards 学 policy/value。"
+      },
+      "explanation": "探索-利用（exploration-exploitation）：收集新信息与选择当前最佳 action 的权衡。"
+    },
+    {
+      "id": "L25-Q36",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 5,
+          "section": "lecture-25-source-5"
+        }
+      ],
+      "conceptTags": [
+        "基于模型的强化学习",
+        "model-based reinforcement learning"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 25 讲：本讲把\"学习或使用 environment model 进行 planning。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "重放（replay）"
+        },
+        {
+          "id": "b",
+          "text": "基于模型的强化学习（model-based reinforcement learning）"
+        },
+        {
+          "id": "c",
+          "text": "强化学习（reinforcement learning）"
+        },
+        {
+          "id": "d",
+          "text": "智能体（agent）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“重放（replay）”指：离线重现/模拟 state sequences 的 neural/computational process。",
+        "c": "“强化学习（reinforcement learning）”指：通过 interaction 与 rewards 学 policy/value。",
+        "d": "“智能体（agent）”指：选择 actions、更新内部 policy/model 的 learner。"
+      },
+      "explanation": "基于模型的强化学习（model-based reinforcement learning）：学习或使用 environment model 进行 planning。"
+    },
+    {
+      "id": "L25-Q37",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 1,
+          "section": "lecture-25-source-1"
+        }
+      ],
+      "conceptTags": [
+        "MDP transition/reward model"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：使用\"MDP transition/reward model\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "0≤γ<1 or finite episode"
+        },
+        {
+          "id": "b",
+          "text": "policy π"
+        },
+        {
+          "id": "c",
+          "text": "Markov state"
+        },
+        {
+          "id": "d",
+          "text": "first action fixed"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“discounted return”的条件，不是题干公式的条件。",
+        "b": "这是“state value”的条件，不是题干公式的条件。",
+        "d": "这是“state-action value”的条件，不是题干公式的条件。"
+      },
+      "explanation": "MDP transition/reward model 的适用条件：Markov state"
+    },
+    {
+      "id": "L25-Q38",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "discounted return"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：使用\"discounted return\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Markov state"
+        },
+        {
+          "id": "b",
+          "text": "policy π"
+        },
+        {
+          "id": "c",
+          "text": "first action fixed"
+        },
+        {
+          "id": "d",
+          "text": "0≤γ<1 or finite episode"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“MDP transition/reward model”的条件，不是题干公式的条件。",
+        "b": "这是“state value”的条件，不是题干公式的条件。",
+        "c": "这是“state-action value”的条件，不是题干公式的条件。"
+      },
+      "explanation": "discounted return 的适用条件：0≤γ<1 or finite episode"
+    },
+    {
+      "id": "L25-Q39",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "state value"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：使用\"state value\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "policy π"
+        },
+        {
+          "id": "b",
+          "text": "Markov state"
+        },
+        {
+          "id": "c",
+          "text": "0≤γ<1 or finite episode"
+        },
+        {
+          "id": "d",
+          "text": "first action fixed"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“MDP transition/reward model”的条件，不是题干公式的条件。",
+        "c": "这是“discounted return”的条件，不是题干公式的条件。",
+        "d": "这是“state-action value”的条件，不是题干公式的条件。"
+      },
+      "explanation": "state value 的适用条件：policy π"
+    },
+    {
+      "id": "L25-Q40",
+      "lecture": 25,
+      "sectionId": "lecture-25-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture25-ReinforcementLearning.pdf",
+          "page": 2,
+          "section": "lecture-25-source-2"
+        }
+      ],
+      "conceptTags": [
+        "state-action value"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 25 讲：使用\"state-action value\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Markov state"
+        },
+        {
+          "id": "b",
+          "text": "first action fixed"
+        },
+        {
+          "id": "c",
+          "text": "0≤γ<1 or finite episode"
+        },
+        {
+          "id": "d",
+          "text": "policy π"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“MDP transition/reward model”的条件，不是题干公式的条件。",
+        "c": "这是“discounted return”的条件，不是题干公式的条件。",
+        "d": "这是“state value”的条件，不是题干公式的条件。"
+      },
+      "explanation": "state-action value 的适用条件：first action fixed"
+    }
+  ]
+}

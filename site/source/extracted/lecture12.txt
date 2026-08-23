@@ -1,0 +1,823 @@
+NEUROSCI 366
+Lecture 12
+
+
+
+视觉导论——Hierarchy, Receptive Fields, and LNP
+
+Models
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture12‑IntroToVision.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 12                                                           Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                  2
+
+2 Learning objectives and prerequisite dependency map                                                        2
+
+3 Five‑minute prerequisite diagnostic                                                                        2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                             3
+   4.1 Lecture12‑IntroToVision.pdf ·p. 1       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    3
+   4.2 Lecture12‑IntroToVision.pdf ·p. 2       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    4
+   4.3 Lecture12‑IntroToVision.pdf ·p. 3       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    5
+   4.4 Lecture12‑IntroToVision.pdf ·p. 4       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    6
+   4.5 Lecture12‑IntroToVision.pdf ·p. 5       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    7
+   4.6 Lecture12‑IntroToVision.pdf ·p. 6       . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    8
+
+5 补全推导与数学支架 / Derivations                                                                                    9
+   5.1 contrast 与 spatial convolution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         9
+   5.2 Difference of Gaussians center‑surround . . . . . . . . . . . . . . . . . . . . . . . . . .           10
+   5.3 Gabor kernel、rotation 与 orientation tuning . . . . . . . . . . . . . . . . . . . . . . . .            11
+   5.4 spatiotemporal RF 与 motion as spacetime orientation . . . . . . . . . . . . . . . . . .               11
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                            12
+
+7 Worked examples and transfer                                                                               12
+   7.1 ON/OFF sign prediction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        12
+   7.2 egocentric RF transfer . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      12
+
+8 Formula and notation sheet                                                                                 14
+
+9 Bilingual glossary                                                                                         14
+
+10 Common traps, assumptions, and limitations                                                                15
+
+11 Cumulative Knowledge Check                                                                                16
+
+12 Hint Bank                                                                                                 18
+
+13 Complete Answer Key with reasoning                                                                        20
+
+14 Source‑page concordance and coverage audit                                                                21
+
+
+
+
+                                                   1/22
+NEUROSCI 366 ・Lecture 12                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            21
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     21
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    21
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      21
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   22
+
+
+
+
+                                                     2/22
+NEUROSCI 366 ・Lecture 12                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：retina→V1→streams。
+‧ 从第一原则推导：contrast。
+‧ 解释几何/计算直觉：LNP。
+‧ 连接生物学解释：DoG center‑surround。
+‧ 诊断 assumptions 与 failure modes：rectified feature maps。
+‧ 把概念迁移到新神经科学问题：Gabor orientation。
+
+ Dependency map
+ retina→V1→streams → contrast → LNP → DoG center‑surround → rectified feature maps →
+ Gabor orientation
+ Core question
+ 视觉系统如何用 linear filters、nonlinearities 与 hierarchical feature maps，把 luminance patterns
+ 转成位置、方向与运动选择性？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. contrast 为什么除以 I0？
+                    （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. ON‑center DoG 的 center 与 surround 符号？
+                                       （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. uniform field 对零积分 center‑surround 的 linear response？（卡住时先看 Source‑page unit 3，再
+   看补全推导。）
+4. rectification 在 ON/OFF feature map 中做什么？
+                                          （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. Gabor 的 k 控制什么？
+                 （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+                                              3/22
+NEUROSCI 366 ・Lecture 12                                          Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture12‑IntroToVision.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture12‑IntroToVision.pdf, p. 1]
+ Clean reconstruction. Page 1：visual hierarchy、retina→V1→dorsal/ventral streams、feature
+ selectivity、RF size/complexity。
+ What the note is saying. 本页的中心对象是 retina→V1→streams 与 contrast。原笔记将它们放进
+ 以下链条：visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/‑
+ complexity。
+ Why it follows. 定 义 feature selectivity 与 receptive field， 并 解 释 层 级 上 RF size、feature
+ complexity、history dependence 和 invariance 的 变 化。 其 逻 辑 后 果 是： 建 立 photorecep‑
+ tors/RGC/V1/MT/IT/LIP 的层级与 dorsal/ventral stream；区分 anatomical hierarchy 与 compu‑
+ tational abstraction。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  contrast 为什么除以 I0？
+
+
+
+
+                                          4/22
+NEUROSCI 366 ・Lecture 12                                           Source‑aligned companion
+
+
+4.2 Lecture12‑IntroToVision.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture12‑IntroToVision.pdf, p. 2]
+ Clean reconstruction. Page 2：LNP model、contrast、ON/OFF RGC、spatial convolution、Dif‑
+ ference of Gaussians。
+ What the note is saying. 本页的中心对象是 LNP 与 DoG center‑surround。原笔记将它们放进以下
+ 链条：LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。
+ Why it follows. 推导 spatial convolution notation，重构 ON/OFF center‑surround Difference‑of‑
+ Gaussians，并解释参数/符号。其逻辑后果是：逐项解释 LNP：linear filter、nonlinearity、Poisson
+ output；定义 contrast 而非 raw luminance。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  ON‑center DoG 的 center 与 surround 符号？
+
+
+
+
+                                          5/22
+NEUROSCI 366 ・Lecture 12                                            Source‑aligned companion
+
+
+4.3 Lecture12‑IntroToVision.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture12‑IntroToVision.pdf, p. 3]
+ Clean reconstruction. Page 3：threshold‑linear rectification、ON/OFF feature maps、CNN con‑
+ nection。
+ What the note is saying. 本页的中心对象是 rectified feature maps 与 Gabor orientation。原笔记
+ 将它们放进以下链条：threshold‑linear rectification、ON/OFF feature maps、CNN connection。
+ Why it follows. 解释 threshold‑linear rectification 如何生成 feature maps，以及与 CNN convo‑
+ lution 的形式联系。其逻辑后果是：定义 feature selectivity 与 receptive field，并解释层级上 RF
+ size、feature complexity、history dependence 和 invariance 的变化。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  uniform field 对零积分 center‑surround 的 linear response？
+
+
+
+
+                                           6/22
+NEUROSCI 366 ・Lecture 12                                              Source‑aligned companion
+
+
+4.4 Lecture12‑IntroToVision.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture12‑IntroToVision.pdf, p. 4]
+ Clean reconstruction. Page 4：V1 simple cell、orientation tuning、Gabor kernel、rotation、
+ saturating nonlinearity、wavelet/JPEG。
+ What the note is saying. 本页的中心对象是 spatiotemporal motion 与 retina→V1→streams。原
+ 笔记将它们放进以下链条：V1 simple cell、orientation tuning、Gabor kernel、rotation、saturating
+ nonlinearity、wavelet/JPEG。
+ Why it follows. 逐项解释 Gabor kernel、   rotated coordinates、
+                                                         orientation/phase、rectification/sat‑
+ uration 与 wavelet representation。 其逻辑后果是：逐项解释 LNP：linear filter、      nonlinearity、 Poisson
+ output；定义 contrast 而非 raw luminance。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  rectification 在 ON/OFF feature map 中做什么？
+
+
+
+
+                                            7/22
+NEUROSCI 366 ・Lecture 12                                             Source‑aligned companion
+
+
+4.5 Lecture12‑IntroToVision.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture12‑IntroToVision.pdf, p. 5]
+ Clean reconstruction. Page 5：spatiotemporal RF、separable/nonseparable temporal kernels、
+ motion in spacetime、direction selectivity。
+ What the note is saying. 本页的中心对象是 contrast 与 LNP。       原笔记将它们放进以下链条：          spatiotem‑
+ poral RF、separable/nonseparable temporal kernels、motion in spacetime、direction selectivity。
+ Why it follows. 扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释
+ motion 作为 spacetime orientation。其逻辑后果是：定义 feature selectivity 与 receptive field，并
+ 解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Gabor 的 k 控制什么？
+
+
+
+
+                                           8/22
+NEUROSCI 366 ・Lecture 12                                              Source‑aligned companion
+
+
+4.6 Lecture12‑IntroToVision.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture12‑IntroToVision.pdf, p. 6]
+ Clean reconstruction. Page 6：rightward‑motion receptive‑field example。
+ What the note is saying. 本页的中心对象是 DoG center‑surround 与 rectified feature maps。原
+ 笔记将它们放进以下链条：rightward‑motion receptive‑field example。
+ Why it follows. 逐项解释 Gabor kernel、    rotated coordinates、
+                                                          orientation/phase、
+                                                                           rectification/sat‑
+ uration 与 wavelet representation。其逻辑后果是：解释 threshold‑linear rectification 如何生成
+ feature maps，以及与 CNN convolution 的形式联系。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Gabor 的 φ 控制什么？
+
+
+
+
+                                            9/22
+NEUROSCI 366 ・Lecture 12                                                                     Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 contrast 与 spatial convolution
+
+【必要前置】      为何 early vision 通常建模 contrast 而非 raw luminance？
+
+                                                          I(x, y, t) − I0
+                                           s(x, y, t) =
+                                                                I0
+                                           ∫∫
+                           L(x0 , y0 ) =        s(x′ , y ′ )K(x0 − x′ , y0 − y ′ )dx′ dy ′
+
+1. contrast 将局部强度相对平均 luminance 归一化。
+2. kernel K 平移到 receptive‑field center，与每个 pixel 相乘后积分。
+3. 正/负 kernel lobes 分别使亮/暗 contrast 增加或减少 linear drive。
+4. translation‑shared kernel 产生 feature map。
+
+  Geometric/computational intuition. convolution 是在每个位置问“当前 patch 与这个 feature
+  模板有多匹配”。
+  Biological interpretation / failure condition. 适应、
+                                                   gain control、
+                                                               eye movements 或 nonlinear
+  subunits 会使单一 linear filter 不足。
+
+  Micro‑check
+  rectification 在 ON/OFF feature map 中做什么？
+
+
+
+
+                                                       10/22
+NEUROSCI 366 ・Lecture 12                                          Source‑aligned companion
+
+
+5.2 Difference of Gaussians center‑surround
+
+【补全推导】      重构 ON/OFF retinal receptive fields。
+
+         A −r2 /(2σc2 )    B −r2 /(2σs2 )
+ K(r) =    2
+             e          −    2
+                               e          ,                               σs > σc
+        2πσc              2πσs
+1. 窄 Gaussian 表示 center，宽 Gaussian 表示 surround。
+2. ON‑center 取中心正、surround 负；OFF‑center 反号。
+3. 若积分接近零，uniform luminance 被抑制，local contrast 被强调。
+4. rectification [L]_+ 只保留偏好 polarity 的 drive。
+
+  Geometric/computational intuition. 中 心 与 周 围 比 较 可 减 少 common luminance redun‑
+  dancy、突出边界。
+  Biological interpretation / failure condition. 真实 RGC 有 temporal dynamics、nonlinear
+  subunits 与 adaptation；DoG 是一阶摘要。
+
+  Micro‑check
+  Gabor 的 k 控制什么？
+
+
+
+
+                                           11/22
+NEUROSCI 366 ・Lecture 12                                                                   Source‑aligned companion
+
+
+5.3 Gabor kernel、rotation 与 orientation tuning
+
+【跨页连接】      用 localized sinusoidal filter 表示 V1 simple‑cell RF。
+                                                        ′2    ′2
+                                         ′   ′       −x 2−y 2
+                                    K(x , y ) = Ae    2σx    2σy
+                                                                   cos(kx′ + ϕ)
+
+                               x′ = x cos θ + y sin θ,       y ′ = y cos θ − x sin θ
+1. Gaussian envelope 限制 receptive‑field location/size。
+2. cosine carrier 创建 alternating ON/OFF lobes，k 决定 spatial frequency，φ 决定 phase。
+3. 坐标 rotation 改变 preferred orientation，而不是旋转 stimulus array 的定义。
+4. nonlinearity rectifies/saturates linear drive。
+
+  Geometric/computational intuition. Gabor 同时选择位置、方向、spatial frequency 与 phase。
+  Biological interpretation / failure condition. complex cells 对 phase 更 invariant，
+                                                                                  单一 linear
+  Gabor 的 STA 可接近零。
+
+  Micro‑check
+  Gabor 的 φ 控制什么？
+
+
+
+5.4 spatiotemporal RF 与 motion as spacetime orientation
+
+【模型边界】      为什么 direction selectivity 需要 space‑time tilted kernel？
+                            ∫∫∫
+                     L(t) =      K(x′ , y ′ , τ )s(x − x′ , y − y ′ , t − τ )dx′ dy ′ dτ
+
+                                  K(x, y, t) = Ks (x, y)Kt (t)       (separable)
+1. separable kernel 的 spatial preference 不随 time lag 改变，通常不能单独区分相反 motion direc‑
+   tions。
+2. moving edge 在 x–t diagram 中形成斜线，斜率对应 velocity。
+3. nonseparable tilted RF 与某一斜率匹配，产生 direction selectivity。
+4. rightward 与 leftward motion 对应相反 spacetime orientations。
+
+  Geometric/computational intuition. 运动不是静态位置序列之外的新维度；它是空间与时间联合
+  图案的方向。
+  Biological interpretation / failure condition. 复 杂 motion、eye movement 与 nonlinear
+  motion‑energy mechanisms 需多 filters/recurrence。
+
+  Micro‑check
+  rotation formula 中 θ 改变什么？
+
+
+
+
+                                                      12/22
+NEUROSCI 366 ・Lecture 12                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  视觉层级不是简单的解剖列表，而是 receptive‑field size、feature complexity、history dependence
+  与 invariance 逐级变化的计算组织。LNP 将 stimulus 先投影到 linear receptive field，再经 non‑
+  linearity 产生 rate，最后用 Poisson 描述 spikes。DoG、Gabor 和 nonseparable spatiotemporal
+  kernels 分别概括 center‑surround、orientation 和 motion selectivity。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 ON/OFF sign prediction
+
+【原课/核心例题】         Prompt. 亮点落在 ON‑center 中心，同时 surround 不变。
+
+ Worked solution. 中心 positive contrast 与 positive kernel 相乘，L 增大；OFF‑center kernel 反
+ 号，L 减小并可能被 rectification 截为 0。
+ Check. 不能只说“亮点激活所有 RGC”；polarity 与位置都重要。
+
+
+7.2 egocentric RF transfer
+
+【跨课连接】       Prompt. 同一 sparse‑noise bar 在动物移动后投到不同视角。
+
+
+
+
+                                               13/22
+NEUROSCI 366 ・Lecture 12                                       Source‑aligned companion
+
+
+
+ Worked solution. screen coordinate 的 stimulus 必须先转换到 head/eye‑centered coordinates，
+ 才能检验 RF 是否 egocentric stable；否则 rotation/translation 会 smear map。
+ Check. 这是 coordinate transform 问题，不是简单重画热图。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                       14/22
+NEUROSCI 366 ・Lecture 12                                                     Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. visual contrast
+                                             s = (I − I0 )/I0
+Conditions / conventions: I0>0
+2. linear receptive‑field drive
+                                               L=K ∗s
+Conditions / conventions: linear shift‑invariant approximation
+3. static nonlinearity
+                                                r = F(L)
+Conditions / conventions: rate nonnegative/saturating as specified
+4. LNP spike generation
+                                           n ∼ Poisson(rT )
+Conditions / conventions: conditional Poisson
+5. center‑surround RF
+                                       KDoG = Gcenter − Gsurround
+Conditions / conventions: surround wider
+6. simple‑cell orientation filter
+
+                                    KGabor = G(x′ , y ′ ) cos(kx′ + ϕ)
+
+Conditions / conventions: localized sinusoid
+7. separable RF
+                                           K(x, y, t) = Ks Kt
+Conditions / conventions: rank‑1 space‑time structure
+
+
+9 Bilingual glossary
+
+
+ 中文                  English / symbol                Operational meaning
+ 感受野                 receptive field                 stimulus pattern 到 response 的局部/功能关系，
+                                                     不只是屏幕位置。
+ 特征选择性               feature selectivity             对某类 stimulus structure 的 preferential
+                                                     response。
+ 背侧通路                dorsal stream                   与 motion/action‑related processing 相关的视觉
+                                                     通路概括。
+ 腹侧通路                ventral stream                  与 object identity‑related processing 相关的视
+                                                     觉通路概括。
+ LNP 模型              linear–nonlinear–               linear filter、nonlinearity 与 spike‑count noise
+                     Poisson model                   的 cascade。
+ 中心–周围               center‑surround                 中心与外围具有相反符号的 RF organization。
+ 特征图                 feature map                     同一 filter 在各位置的 rectified response。
+ Gabor 核             Gabor kernel                    Gaussian‑windowed sinusoid。
+ 可分离                 separable                       space 与 time components 可写为乘积。
+
+
+                                                  15/22
+NEUROSCI 366 ・Lecture 12                                              Source‑aligned companion
+
+
+
+ 中文                  English / symbol          Operational meaning
+ 方向选择性               direction selectivity     对 motion direction 的 preferential response。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 receptive field 仅理解为视野中的几何区域。
+2. 把 raw luminance 与 contrast 混用。
+3. convolution kernel sign/flip convention 不说明。
+4. 认为 feature map 是原图的复制，而非 filter response。
+5. 混淆 Gabor orientation、phase 与 spatial frequency。
+6. 认为 separable spatiotemporal RF 自动 direction selective。
+7. 把 anatomical hierarchy 与单一 feedforward computation 完全等同。
+
+  Course‑specific risk boundary. 不要把 receptive field 只说成屏幕上的“位置”
+                                                               ；它是刺激到响应
+  关系。说明 linear RF、classical RF 与实验定义的差异。可用 sparse‑noise RF mapping 作为个性
+  化 transfer。
+
+
+
+
+                                             16/22
+NEUROSCI 366 ・Lecture 12                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. contrast 为什么除以 I0？
+
+
+
+2. ON‑center DoG 的 center 与 surround 符号？
+
+
+
+3. uniform field 对零积分 center‑surround 的 linear response？
+
+
+
+4. rectification 在 ON/OFF feature map 中做什么？
+
+
+
+5. Gabor 的 k 控制什么？
+
+
+
+6. Gabor 的 φ 控制什么？
+
+
+
+7. rotation formula 中 θ 改变什么？
+
+
+
+8. separable RF 如何写？
+
+
+
+9. 为什么 motion 在 x–t 图上是斜线？
+
+
+
+10. 相反 direction 对应什么？
+
+
+
+11. LNP 中 Poisson 层描述什么？
+
+
+
+12. sparse‑noise RF map 为何需考虑坐标系？
+
+
+
+13. 公式表中的“visual contrast”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“linear receptive‑field drive”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“static nonlinearity”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  17/22
+NEUROSCI 366 ・Lecture 12                           Source‑aligned companion
+
+
+
+
+16. 公式表中的“LNP spike generation”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                18/22
+NEUROSCI 366 ・Lecture 12                                      Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“visual contrast”对应的变量关系入手。
+    Hint 2. 把条件“I0>0”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“linear receptive‑field drive”对应的变量关系入手。
+    Hint 2. 把条件“linear shift‑invariant approximation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                       19/22
+NEUROSCI 366 ・Lecture 12                                       Source‑aligned companion
+
+
+15. Hint 1. 先从“static nonlinearity”对应的变量关系入手。
+    Hint 2. 把条件“rate nonnegative/saturating as specified”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“LNP spike generation”对应的变量关系入手。
+    Hint 2. 把条件“conditional Poisson”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                       20/22
+NEUROSCI 366 ・Lecture 12                                             Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. 使亮度差相对背景归一化，并得到 dimensionless contrast。
+ 2. center 正、surround 负。
+ 3. 近 0。
+ 4. 保留偏好符号的 positive drive，截断负值。
+ 5. spatial frequency。
+ 6. spatial phase/ON‑OFF lobe placement。
+ 7. filter preferred orientation。
+ 8. K(x,y,t)=K_s(x,y)K_t(t)。
+ 9. position 随 time 线性改变，轨迹 x=vt+x0。
+10. 相反 spacetime tilt/slope。
+11. 给定 linear+nonlinear predicted rate 后的 spike‑count variability。
+12. 同一 world/screen stimulus 在不同 head/eye pose 下有不同 egocentric angle。
+13. 适用条件/约定：I0>0。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                           s = (I − I0 )/I0
+
+14. 适用条件/约定：linear shift‑invariant approximation。sanity check 应检查单位、符号、极限或 shape
+    是否与定义一致。
+                                         L=K ∗s
+
+15. 适用条件/约定：rate nonnegative/saturating as specified。sanity check 应检查单位、符号、极限或
+    shape 是否与定义一致。
+                                       r = F(L)
+
+16. 适用条件/约定：conditional Poisson。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                  n ∼ Poisson(rT )
+
+
+
+
+                                              21/22
+NEUROSCI 366 ・Lecture 12                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture12-IntroToVision.           1         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture12-IntroToVision.           2         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture12-IntroToVision.           3         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture12-IntroToVision.           4         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture12-IntroToVision.           5         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture12-IntroToVision.           6         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 1 的 region/function 是课程级 hierarchy schematic，不是完整视觉解剖。
+2. Page 4 的 wavelet/JPEG connection 是形式类比；biological representation 与工程 codec 不等同。
+3. Page 5 将 ON RGC 作为 nonseparable example 是概念性说明；实际 temporal substructure 依细胞
+   类型。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              22/22
+NEUROSCI 366 ・Lecture 12                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               23/22
+

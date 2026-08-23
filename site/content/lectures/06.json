@@ -1,0 +1,2166 @@
+{
+  "lecture": 6,
+  "slug": "06",
+  "zhTitle": "神经编码 I：Poisson 脉冲与最大似然",
+  "enTitle": "Neural Coding I: Poisson Spikes and Maximum Likelihood",
+  "companionFile": "NEUROSCI366_Lecture06_Neural_Coding1_Poisson_ML_Companion.pdf",
+  "companionPages": 26,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture06_Neural_Coding1_Poisson_ML_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "role": "primary",
+      "pages": 7,
+      "href": "/resources/original/Lecture6-Neurons3-NeuralCoding1.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：stimulus/task。",
+    "从第一原则推导：voltage→spikes。",
+    "解释几何/计算直觉：raster/PSTH。",
+    "连接生物学解释：Poisson variability。",
+    "诊断 assumptions 与 failure modes：encoding P(n|s)。",
+    "把概念迁移到新神经科学问题：MLE/Fisher。"
+  ],
+  "dependencyMap": "stimulus/task → voltage→spikes → raster/PSTH → Poisson variability → encoding P(n|s) → MLE/Fisher",
+  "coreQuestion": "如何把 trial-to-trial spike variability 写成 Poisson encoding model，并由 population likelihood 解码刺激？",
+  "diagnostic": [
+    "r=20 Hz, T=0.1 s 时 λ 是多少？",
+    "Poisson count 的 Fano factor 是多少？",
+    "Poisson ISI 的 CV 是多少？",
+    "refractory period 通常让短 ISI 和 CV 如何变化？",
+    "raster 与 PSTH 的区别是什么？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-06-source-1",
+      "order": 1,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：activation/inactivation 与 refractory/F-I 回顾。",
+      "noteMeaning": "stimulus/task 与 voltage→spikes：activation/inactivation 与 refractory/F-I 回顾。",
+      "reasoning": "Pages 1-2 复习上一讲的内容，随后转入 neural coding problem。因此，按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "r=20 Hz, T=0.1 s 时 λ 是多少？"
+    },
+    {
+      "id": "lecture-06-source-2",
+      "order": 2,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：area normalization、cable、cell diversity 回顾。",
+      "noteMeaning": "raster/PSTH 与 Poisson variability：area normalization、cable、cell diversity 回顾。",
+      "reasoning": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。因此，Pages 1-2 复习上一讲的内容，随后转入 neural coding problem。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "Poisson count 的 Fano factor 是多少？"
+    },
+    {
+      "id": "lecture-06-source-3",
+      "order": 3,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。",
+      "noteMeaning": "encoding P(n|s) 与 MLE/Fisher：neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。",
+      "reasoning": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。因此，Pages 1-2 复习上一讲的内容，随后转入 neural coding problem。",
+      "figureReading": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。",
+      "stopPredict": "Poisson ISI 的 CV 是多少？"
+    },
+    {
+      "id": "lecture-06-source-4",
+      "order": 4,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、CV。",
+      "noteMeaning": "stimulus/task 与 voltage→spikes：trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、 CV。",
+      "reasoning": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。因此，解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 small-bin approximation。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "refractory period 通常让短 ISI 和 CV 如何变化？"
+    },
+    {
+      "id": "lecture-06-source-5",
+      "order": 5,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：Poisson point process。",
+      "noteMeaning": "raster/PSTH 与 Poisson variability：Poisson point process。",
+      "reasoning": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。因此，推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1；解释这些是模型预测而非所有神经元的普遍事实。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "raster 与 PSTH 的区别是什么？"
+    },
+    {
+      "id": "lecture-06-source-6",
+      "order": 6,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 6,
+      "reconstruction": "Page 6：encoding model、tuning curve、P(n|s)、independent population likelihood。",
+      "noteMeaning": "encoding P(n|s) 与 MLE/Fisher：encoding model、tuning curve、P(n|s)、independent population likelihood。",
+      "reasoning": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。因此，逐步从 likelihood 到 log-likelihood、MLE、second derivative 和 Fisher information；解释 curvature 与 estimator variance 的关系。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？"
+    },
+    {
+      "id": "lecture-06-source-7",
+      "order": 7,
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "page": 7,
+      "reconstruction": "Page 7：maximum-likelihood decoding、log likelihood、curvature、 asymptotic normality、Fisher information。",
+      "noteMeaning": "stimulus/task 与 voltage→spikes：maximum-likelihood decoding、log likelihood、curvature、asymptotic normality、 Fisher information。",
+      "reasoning": "逐步从 likelihood 到 log-likelihood、MLE、second derivative 和 Fisher information；解释 curvature 与 estimator variance 的关系。因此，建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "population likelihood 何时能写成乘积？"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 Poisson count 的 mean、variance 与 Fano factor",
+    "【必要前置】 给定 rate r、窗口 T，spike count k 如何波动？",
+    "λk e−λ P (K = k) = , λ = rT k! E[K] = λ, Var(K) = λ Var(K) F = =1 E[K] 1. λ 是期望 count，不是 instantaneous voltage。 2. 利用概率生成函数或标准求和可得 first/second moments。 3. variance=mean 导致 Fano factor 1。 4. 实验中的 F≈1 只支持 Poisson-like count variability，不证明所有 point-process assumptions。",
+    "Geometric/computational intuition. Poisson 中每个小 bin 都提供独立、稀少的 spike opportunity，波动随平均数一起增大。 Biological interpretation / failure condition. refractory、bursting、rate drift、trial correlations 会使 Fano/CV 偏离 1。",
+    "思考题：refractory period 通常让短 ISI 和 CV 如何变化？",
+    "5.2 ISI distribution 与 homogeneous point process",
+    "【补全推导】 若 rate 恒定且 independent increments，等待下一 spike 多久？",
+    "P (TISI > t) = P (N (t) = 0) = e−rt",
+    "fISI (t) = re−rt E[TISI ] = SD(TISI ) = 1/r 1. 等待时间大于 t 等价于长度 t 的窗口内没有 spike。 2. Poisson zero-count probability 是 e^{-rt}。 3. 对 survival function 求负导数得到 exponential density。 4. CV=SD/mean=1。",
+    "Geometric/computational intuition. exponential 的 memoryless property 表示已经等多久不改变下一瞬间 hazard。 Biological interpretation / failure condition. absolute refractory 使短 ISI 缺失，regular spiking 使 CV<1，bursting 可使 CV>1。",
+    "思考题：raster 与 PSTH 的区别是什么？",
+    "5.3 population Poisson likelihood 与 MLE",
+    "【跨页连接】 由 N 个 neuron 的 counts k_i 估计 motion direction θ。",
+    "Y N [fi (θ)T ]ki e−fi (θ)T P (k | θ) = ki ! i=1 X ℓ(θ) = {ki log[fi (θ)T ] − fi (θ)T − log ki !} i",
+    "θb = arg max ℓ(θ) θ",
+    "1. 每个 tuning curve f_i(θ) 给出该刺激下的 expected rate。 2. 独立性假设允许 joint probability 分解成乘积。 3. 取 log 将乘法转为求和，并保持 argmax 不变。 4. MLE 选择使实际 count pattern 最可能的 θ。",
+    "Geometric/computational intuition. 每个 neuron 对 θ 投一票，但票的权重由其 tuning、observed count 与 noise model 决定。 Biological interpretation / failure condition. noise correlations、错误 tuning curve 或非- Poisson variability 会使 decoder mismatch。",
+    "思考题：为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？",
+    "5.4 likelihood curvature 与 Fisher information",
+    "【模型边界】 为什么尖锐 likelihood 意味着估计更精确？ 2 ∂ ℓ J(θ) = −E θ ∂θ2",
+    "b 1 θ ≈ N θ0 , J(θ0 ) 1. 在最大值附近用二阶 Taylor expansion 把 log-likelihood 近似为倒抛物线。 2. 负二阶导数越大，曲线越窄。 3. 大样本与正则条件下 MLE 近似正态，variance≈1/J。 4. 这是 asymptotic result，不保证小样本完全达到。",
+    "Geometric/computational intuition. J 衡量 response distribution 对刺激微小变化的可区分性。 Biological interpretation / failure condition. 边界参数、多峰 likelihood、少量 spikes 或 model misspecification 会破坏近似。",
+    "思考题：population likelihood 何时能写成乘积？"
+  ],
+  "synthesis": [
+    "神经编码不是只画 tuning curve，而是指定 stimulus 条件下完整 response distribution。Poisson model 同时预测 count variance≈mean、exponential ISI 与 independent increments；这些是可检验假设而非普遍事实。population likelihood 把各 neurons 的 evidence 相乘，log-likelihood 将乘积化为求和；curvature 则连接解码精度与 Fisher information。"
+  ],
+  "workedExamples": [
+    "7.1 count、rate、PSTH 的层级",
+    "【例题】题目：10 个重复 trial、每 trial 200 ms，某 bin 共观察到 8 spikes。",
+    "Worked solution. 每 trial 该 bin 的平均 count=0.8；若 bin=20 ms， PSTH rate estimate=0.8/0.02=40 spikes/s。原始观测仍是 8 个离散 spike events。 Check. 不能把 40 Hz 当作每个 trial 都连续输出 40。",
+    "7.2 Poisson hand calculation",
+    "【拓展例题】题目：r=10 Hz, T=0.2 s。",
+    "Worked solution. λ=2；P(K=0)=e^{-2}≈0.135；mean=variance=2；expected ISI=0.1 s。 Check. count 的单位是 spikes（无量纲计数），rate 单位 1/s。"
+  ],
+  "formulas": [
+    {
+      "id": "L06-F01",
+      "lecture": 6,
+      "name": "观察窗内 expected count",
+      "expression": "λ = rT",
+      "latex": "\\lambda=rT",
+      "conditions": "homogeneous rate",
+      "sectionId": "lecture-06-source-2",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L06-F02",
+      "lecture": 6,
+      "name": "Poisson PMF",
+      "expression": "P (K = k) = λk e−λ /k!",
+      "latex": "P(K=k)=\\frac{\\lambda^k e^{-\\lambda}}{k!}",
+      "conditions": "independent increments",
+      "sectionId": "lecture-06-source-4",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L06-F03",
+      "lecture": 6,
+      "name": "Fano factor",
+      "expression": "F = Var(K)/E[K]",
+      "latex": "F=\\frac{\\operatorname{Var}(K)}{\\mathbb{E}[K]}",
+      "conditions": "跨 trial 同条件 counts",
+      "sectionId": "lecture-06-source-4",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L06-F04",
+      "lecture": 6,
+      "name": "Poisson ISI density",
+      "expression": "fISI (t) = re−rt",
+      "latex": "f_{\\mathrm{ISI}}(t)=re^{-rt}",
+      "conditions": "constant rate",
+      "sectionId": "lecture-06-source-3",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L06-F05",
+      "lecture": 6,
+      "name": "ISI irregularity",
+      "expression": "CV = SD(ISI)/E[ISI]",
+      "latex": "\\mathrm{CV}=\\frac{\\operatorname{SD}(\\mathrm{ISI})}{\\mathbb{E}[\\mathrm{ISI}]}",
+      "conditions": "mean>0",
+      "sectionId": "lecture-06-source-4",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L06-F06",
+      "lecture": 6,
+      "name": "independent population likelihood",
+      "expression": "Y P (k | θ) = P (ki | θ) i",
+      "latex": "P(\\mathbf{k}\\mid\\theta)=\\prod_i P(k_i\\mid\\theta)",
+      "conditions": "conditional independence",
+      "sectionId": "lecture-06-source-6",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 6
+    },
+    {
+      "id": "L06-F07",
+      "lecture": 6,
+      "name": "maximum-likelihood decoder",
+      "expression": "θb = arg max ℓ(θ)",
+      "latex": "\\hat{\\theta}=\\operatorname*{arg\\,max}_{\\theta}\\ell(\\theta)",
+      "conditions": "specified encoding model",
+      "sectionId": "lecture-06-source-7",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 7
+    },
+    {
+      "id": "L06-F08",
+      "lecture": 6,
+      "name": "Fisher information",
+      "expression": "J = −E[ℓ′′ (θ)]",
+      "latex": "J(\\theta)=-\\mathbb{E}[\\ell''(\\theta)]",
+      "conditions": "regular differentiable model",
+      "sectionId": "lecture-06-source-6",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L06-G01",
+      "lecture": 6,
+      "zh": "神经编码",
+      "en": "neural encoding",
+      "definition": "刺激/状态到 response distribution 的映射。",
+      "sectionId": "lecture-06-source-3",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L06-G02",
+      "lecture": 6,
+      "zh": "脉冲序列",
+      "en": "spike train",
+      "definition": "一组离散 spike times。",
+      "sectionId": "lecture-06-source-3",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L06-G03",
+      "lecture": 6,
+      "zh": "栅格图",
+      "en": "raster plot",
+      "definition": "按 trial 排列 spike times 的可视化。",
+      "sectionId": "lecture-06-source-1",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L06-G04",
+      "lecture": 6,
+      "zh": "刺激后时间直方图",
+      "en": "peri-stimulus time histogram, PSTH",
+      "definition": "跨 trial 分 bin 得到的平均 spike-rate estimate。",
+      "sectionId": "lecture-06-source-5",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L06-G05",
+      "lecture": 6,
+      "zh": "Fano 因子",
+      "en": "Fano factor",
+      "definition": "count variance/mean。",
+      "sectionId": "lecture-06-source-4",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L06-G06",
+      "lecture": 6,
+      "zh": "点过程",
+      "en": "point process",
+      "definition": "随机事件时间的概率模型。",
+      "sectionId": "lecture-06-source-4",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L06-G07",
+      "lecture": 6,
+      "zh": "独立增量",
+      "en": "independent increments",
+      "definition": "不重叠时间段内事件数独立。",
+      "sectionId": "lecture-06-source-4",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L06-G08",
+      "lecture": 6,
+      "zh": "调谐曲线",
+      "en": "tuning curve",
+      "definition": "expected response 随 stimulus parameter 的函数。",
+      "sectionId": "lecture-06-source-6",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 6
+    },
+    {
+      "id": "L06-G09",
+      "lecture": 6,
+      "zh": "似然",
+      "en": "likelihood",
+      "definition": "给定观测 response 后，stimulus/parameter 的支持度。",
+      "sectionId": "lecture-06-source-6",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 6
+    },
+    {
+      "id": "L06-G10",
+      "lecture": 6,
+      "zh": "最大似然估计",
+      "en": "maximum-likelihood estimate, MLE",
+      "definition": "使 likelihood 最大的参数或刺激估计。",
+      "sectionId": "lecture-06-source-7",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 7
+    },
+    {
+      "id": "L06-G11",
+      "lecture": 6,
+      "zh": "Fisher 信息",
+      "en": "Fisher information",
+      "definition": "分布对参数微小变化的局部敏感度。",
+      "sectionId": "lecture-06-source-6",
+      "sourceFile": "Lecture6-Neurons3-NeuralCoding1.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "commonTraps": [
+    "把 firing rate 当作电极直接测得的连续信号。",
+    "把 raster、count、PSTH 和 rate 混为同一对象。",
+    "Fano≈1 就断言 spike train 完全 Poisson。",
+    "忽略观察窗 T，使 rate 与 count 的单位混乱。",
+    "把 P(n|s) 与 P(s|n) 写反。",
+    "在 population likelihood 中默认 independence 而不说明。",
+    "不能把 firing rate 当作直接观察到的连续信号；强调它通常是统计模型或估计量。Neuropixels/HD-cell 数据可作为迁移例，MT 保留为原例。"
+  ],
+  "errata": [
+    "1. Pages 1-2 复习 Lecture 5 的内容。 2. Page 7 的 asymptotic normality 是大样本近似，不能无条件用于低 spike-count 情形。 3. 笔记中的 Poisson 结论是模型预测，不是所有 neurons 的普遍事实。"
+  ],
+  "questions": [
+    {
+      "id": "L06-Q01",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 1,
+          "section": "lecture-06-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "calculation",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：r=20 Hz, T=0.1 s 时 λ 是多少？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "0 spikes"
+        },
+        {
+          "id": "b",
+          "text": "4 spikes"
+        },
+        {
+          "id": "c",
+          "text": "3 spikes"
+        },
+        {
+          "id": "d",
+          "text": "2 spikes。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项代入了错误的数值或漏掉了题干给出的系数。",
+        "b": "该选项代入了错误的数值或漏掉了题干给出的系数。",
+        "c": "该选项代入了错误的数值或漏掉了题干给出的系数。"
+      },
+      "explanation": "2 spikes。"
+    },
+    {
+      "id": "L06-Q02",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 2,
+          "section": "lecture-06-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 6 讲：Poisson count 的 Fano factor 是多少？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "1。"
+        },
+        {
+          "id": "b",
+          "text": "0"
+        },
+        {
+          "id": "c",
+          "text": "2"
+        },
+        {
+          "id": "d",
+          "text": "0.5"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项代入了错误的数值或漏掉了题干给出的系数。",
+        "c": "该选项代入了错误的数值或漏掉了题干给出的系数。",
+        "d": "该选项代入了错误的数值或漏掉了题干给出的系数。"
+      },
+      "explanation": "1。"
+    },
+    {
+      "id": "L06-Q03",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 3,
+          "section": "lecture-06-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：Poisson ISI 的 CV 是多少？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "0"
+        },
+        {
+          "id": "b",
+          "text": "1。"
+        },
+        {
+          "id": "c",
+          "text": "2"
+        },
+        {
+          "id": "d",
+          "text": "0.5"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项代入了错误的数值或漏掉了题干给出的系数。",
+        "c": "该选项代入了错误的数值或漏掉了题干给出的系数。",
+        "d": "该选项代入了错误的数值或漏掉了题干给出的系数。"
+      },
+      "explanation": "1。"
+    },
+    {
+      "id": "L06-Q04",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 4,
+          "section": "lecture-06-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 6 讲：refractory period 通常让短 ISI 和 CV 如何变化？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "分布对参数微小变化的局部敏感度。"
+        },
+        {
+          "id": "b",
+          "text": "它未乘 prior，也未对 stimulus 归一化。"
+        },
+        {
+          "id": "c",
+          "text": "短 ISI 被抑制，规则性增加，CV 往往低于 1。"
+        },
+        {
+          "id": "d",
+          "text": "按 trial 排列 spike times 的可视化。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“Fisher 信息（Fisher information）”的定义。",
+        "b": "该选项回答的是“为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？”。",
+        "d": "这是“栅格图（raster plot）”的定义。"
+      },
+      "explanation": "短 ISI 被抑制，规则性增加，CV 往往低于 1。"
+    },
+    {
+      "id": "L06-Q05",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 5,
+          "section": "lecture-06-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 6 讲：raster 与 PSTH 的区别是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "局部 curvature/Fisher information 更大，估计 variance 更小。"
+        },
+        {
+          "id": "c",
+          "text": "否，只给 expected response；还需 P(n|θ) noise model。"
+        },
+        {
+          "id": "d",
+          "text": "raster 保留每 trial 的 spike times；PSTH 跨 trial/bin 平均。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture6-Neurons3-NeuralCoding1.pdf 第 1 页。",
+        "b": "该选项回答的是“likelihood 更尖意味着什么？”。",
+        "c": "该选项回答的是“MT tuning curve 本身是否描述 trial variability？”。"
+      },
+      "explanation": "raster 保留每 trial 的 spike times；PSTH 跨 trial/bin 平均。"
+    },
+    {
+      "id": "L06-Q06",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "它未乘 prior，也未对 stimulus 归一化。"
+        },
+        {
+          "id": "b",
+          "text": "expected response 随 stimulus parameter 的函数。"
+        },
+        {
+          "id": "c",
+          "text": "使 likelihood 最大的参数或刺激估计。"
+        },
+        {
+          "id": "d",
+          "text": "给定 stimulus 后 neuron responses 条件独立。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“调谐曲线（tuning curve）”的定义。",
+        "c": "这是“最大似然估计（maximum-likelihood estimate, MLE）”的定义。",
+        "d": "该选项回答的是“population likelihood 何时能写成乘积？”。"
+      },
+      "explanation": "它未乘 prior，也未对 stimulus 归一化。"
+    },
+    {
+      "id": "L06-Q07",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-7",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 7,
+          "section": "lecture-06-source-7"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 6 讲：population likelihood 何时能写成乘积？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "使 likelihood 最大的参数或刺激估计。"
+        },
+        {
+          "id": "b",
+          "text": "给定 stimulus 后 neuron responses 条件独立。"
+        },
+        {
+          "id": "c",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "刺激/状态到 response distribution 的映射。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“最大似然估计（maximum-likelihood estimate, MLE）”的定义。",
+        "c": "这条推理对应 Lecture6-Neurons3-NeuralCoding1.pdf 第 6 页。",
+        "d": "这是“神经编码（neural encoding）”的定义。"
+      },
+      "explanation": "给定 stimulus 后 neuron responses 条件独立。"
+    },
+    {
+      "id": "L06-Q08",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：取 log 为什么不改变 MLE？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "2 spikes。"
+        },
+        {
+          "id": "b",
+          "text": "随机事件时间的概率模型。"
+        },
+        {
+          "id": "c",
+          "text": "log 单调递增。"
+        },
+        {
+          "id": "d",
+          "text": "mean>0"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“r=20 Hz, T=0.1 s 时 λ 是多少？”。",
+        "b": "这是“点过程（point process）”的定义。",
+        "d": "这是“ISI irregularity”的适用条件。"
+      },
+      "explanation": "log 单调递增。"
+    },
+    {
+      "id": "L06-Q09",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 6 讲：likelihood 更尖意味着什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        },
+        {
+          "id": "b",
+          "text": "使 likelihood 最大的参数或刺激估计。"
+        },
+        {
+          "id": "c",
+          "text": "raster 保留每 trial 的 spike times；PSTH 跨 trial/bin 平均。"
+        },
+        {
+          "id": "d",
+          "text": "局部 curvature/Fisher information 更大，估计 variance 更小。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture6-Neurons3-NeuralCoding1.pdf 第 6 页。",
+        "b": "这是“最大似然估计（maximum-likelihood estimate, MLE）”的定义。",
+        "c": "该选项回答的是“raster 与 PSTH 的区别是什么？”。"
+      },
+      "explanation": "局部 curvature/Fisher information 更大，估计 variance 更小。"
+    },
+    {
+      "id": "L06-Q10",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 6 讲：Fisher information 与 decoder variance 的近似关系？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "高效大样本估计下 Var≈1/J。"
+        },
+        {
+          "id": "b",
+          "text": "局部 curvature/Fisher information 更大，估计 variance 更小。"
+        },
+        {
+          "id": "c",
+          "text": "逐步从 likelihood 到 log-likelihood、MLE、second derivative 和 Fisher information；解释 curvature 与 estimator variance 的关系。"
+        },
+        {
+          "id": "d",
+          "text": "count variance/mean。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项回答的是“likelihood 更尖意味着什么？”。",
+        "c": "这条推理对应 Lecture6-Neurons3-NeuralCoding1.pdf 第 7 页。",
+        "d": "这是“Fano 因子（Fano factor）”的定义。"
+      },
+      "explanation": "高效大样本估计下 Var≈1/J。"
+    },
+    {
+      "id": "L06-Q11",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：MT tuning curve 本身是否描述 trial variability？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "跨 trial 分 bin 得到的平均 spike-rate estimate。"
+        },
+        {
+          "id": "b",
+          "text": "否，只给 expected response；还需 P(n|θ) noise model。"
+        },
+        {
+          "id": "c",
+          "text": "raster 保留每 trial 的 spike times；PSTH 跨 trial/bin 平均。"
+        },
+        {
+          "id": "d",
+          "text": "按 trial 排列 spike times 的可视化。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“刺激后时间直方图（peri-stimulus time histogram, PSTH）”的定义。",
+        "c": "该选项回答的是“raster 与 PSTH 的区别是什么？”。",
+        "d": "这是“栅格图（raster plot）”的定义。"
+      },
+      "explanation": "否，只给 expected response；还需 P(n|θ) noise model。"
+    },
+    {
+      "id": "L06-Q12",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 1,
+          "section": "lecture-06-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、CV。"
+        },
+        {
+          "id": "c",
+          "text": "activation/inactivation 与 refractory/F-I 回顾。"
+        },
+        {
+          "id": "d",
+          "text": "Poisson point process。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。",
+        "b": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Poisson point process”，不是题干指定的关系。"
+      },
+      "explanation": "activation/inactivation 与 refractory/F-I 回顾。"
+    },
+    {
+      "id": "L06-Q13",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 1,
+          "section": "lecture-06-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"activation/inactivation 与 refractory/F-I 回顾\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+        },
+        {
+          "id": "b",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        },
+        {
+          "id": "c",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Poisson point process”，不是题干指定的关系。",
+        "c": "该陈述解释的是“encoding model、tuning curve、P(n|s)、independent population likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+    },
+    {
+      "id": "L06-Q14",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 1,
+          "section": "lecture-06-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：阅读与\"activation/inactivation 与 refractory/F-I 回顾\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "c",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "d",
+          "text": "否，只给 expected response；还需 P(n|θ) noise model。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。",
+        "d": "该选项回答的是“MT tuning curve 本身是否描述 trial variability？”。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L06-Q15",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 2,
+          "section": "lecture-06-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "area normalization、cable、cell diversity 回顾。"
+        },
+        {
+          "id": "c",
+          "text": "trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、CV。"
+        },
+        {
+          "id": "d",
+          "text": "Poisson point process。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。",
+        "c": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Poisson point process”，不是题干指定的关系。"
+      },
+      "explanation": "area normalization、cable、cell diversity 回顾。"
+    },
+    {
+      "id": "L06-Q16",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 2,
+          "section": "lecture-06-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"area normalization、cable、cell diversity 回顾\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+        },
+        {
+          "id": "b",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        },
+        {
+          "id": "c",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "d",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Poisson point process”，不是题干指定的关系。",
+        "d": "该陈述解释的是“encoding model、tuning curve、P(n|s)、independent population likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+    },
+    {
+      "id": "L06-Q17",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 3,
+          "section": "lecture-06-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "activation/inactivation 与 refractory/F-I 回顾。"
+        },
+        {
+          "id": "b",
+          "text": "area normalization、cable、cell diversity 回顾。"
+        },
+        {
+          "id": "c",
+          "text": "trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、CV。"
+        },
+        {
+          "id": "d",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。"
+      },
+      "explanation": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+    },
+    {
+      "id": "L06-Q18",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 3,
+          "section": "lecture-06-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"neural coding 问题\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+        },
+        {
+          "id": "c",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        },
+        {
+          "id": "d",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Poisson point process”，不是题干指定的关系。",
+        "d": "该陈述解释的是“encoding model、tuning curve、P(n|s)、independent population likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+    },
+    {
+      "id": "L06-Q19",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 3,
+          "section": "lecture-06-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：阅读与\"neural coding 问题\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "c",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "d",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture6-Neurons3-NeuralCoding1.pdf 第 1 页。"
+      },
+      "explanation": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+    },
+    {
+      "id": "L06-Q20",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 4,
+          "section": "lecture-06-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "activation/inactivation 与 refractory/F-I 回顾。"
+        },
+        {
+          "id": "b",
+          "text": "area normalization、cable、cell diversity 回顾。"
+        },
+        {
+          "id": "c",
+          "text": "trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、CV。"
+        },
+        {
+          "id": "d",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "d": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。"
+      },
+      "explanation": "trial-to-trial variability；Fano factor；Poisson counts；ISI、exponential distribution、CV。"
+    },
+    {
+      "id": "L06-Q21",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 4,
+          "section": "lecture-06-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"trial-to-trial variability\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        },
+        {
+          "id": "c",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Poisson point process”，不是题干指定的关系。",
+        "c": "该陈述解释的是“encoding model、tuning curve、P(n|s)、independent population likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+    },
+    {
+      "id": "L06-Q22",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 5,
+          "section": "lecture-06-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Poisson point process。"
+        },
+        {
+          "id": "b",
+          "text": "activation/inactivation 与 refractory/F-I 回顾。"
+        },
+        {
+          "id": "c",
+          "text": "area normalization、cable、cell diversity 回顾。"
+        },
+        {
+          "id": "d",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "d": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。"
+      },
+      "explanation": "Poisson point process。"
+    },
+    {
+      "id": "L06-Q23",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 5,
+          "section": "lecture-06-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"Poisson point process\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        },
+        {
+          "id": "c",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "逐步从 likelihood 到 log-likelihood、MLE、second derivative 和 Fisher information；解释 curvature 与 estimator variance 的关系。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“encoding model、tuning curve、P(n|s)、independent population likelihood”，不是题干指定的关系。",
+        "d": "该陈述解释的是“maximum-likelihood decoding、log likelihood、curvature”，不是题干指定的关系。"
+      },
+      "explanation": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+    },
+    {
+      "id": "L06-Q24",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 6 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "activation/inactivation 与 refractory/F-I 回顾。"
+        },
+        {
+          "id": "b",
+          "text": "area normalization、cable、cell diversity 回顾。"
+        },
+        {
+          "id": "c",
+          "text": "encoding model、tuning curve、P(n|s)、independent population likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "d": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。"
+      },
+      "explanation": "encoding model、tuning curve、P(n|s)、independent population likelihood。"
+    },
+    {
+      "id": "L06-Q25",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"encoding model、tuning curve、P(n|s)、independent population likelihood\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+        },
+        {
+          "id": "c",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        },
+        {
+          "id": "d",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Poisson point process”，不是题干指定的关系。"
+      },
+      "explanation": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+    },
+    {
+      "id": "L06-Q26",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：阅读与\"encoding model、tuning curve、P(n|s)、independent population likelihood\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "b",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "c",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "d",
+          "text": "建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint likelihood。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture6-Neurons3-NeuralCoding1.pdf 第 6 页。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L06-Q27",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-7",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 7,
+          "section": "lecture-06-source-7"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 6 讲：根据 Lecture6-Neurons3-NeuralCoding1.pdf 第 7 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "activation/inactivation 与 refractory/F-I 回顾。"
+        },
+        {
+          "id": "b",
+          "text": "maximum-likelihood decoding、log likelihood、curvature、 asymptotic normality、Fisher information。"
+        },
+        {
+          "id": "c",
+          "text": "area normalization、cable、cell diversity 回顾。"
+        },
+        {
+          "id": "d",
+          "text": "neural coding 问题；random-dot kinematogram；in-vivo electrophysiology；voltage/spike train/raster/PSTH。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "c": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "d": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。"
+      },
+      "explanation": "maximum-likelihood decoding、log likelihood、curvature、 asymptotic normality、Fisher information。"
+    },
+    {
+      "id": "L06-Q28",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-7",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 7,
+          "section": "lecture-06-source-7"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：若要解释\"maximum-likelihood decoding、log likelihood、curvature\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按实验流程解释 random-dot stimulus、motion coherence、recording、spike detection、repeated trials、raster 与 PSTH。"
+        },
+        {
+          "id": "b",
+          "text": "推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1； 解释这些是模型预测而非所有神经元的普遍事实。"
+        },
+        {
+          "id": "c",
+          "text": "逐步从 likelihood 到 log-likelihood、MLE、second derivative 和 Fisher information；解释 curvature 与 estimator variance 的关系。"
+        },
+        {
+          "id": "d",
+          "text": "解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 smallbin approximation。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“activation/inactivation 与 refractory/F-I 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“trial-to-trial variability”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Poisson point process”，不是题干指定的关系。"
+      },
+      "explanation": "逐步从 likelihood 到 log-likelihood、MLE、second derivative 和 Fisher information；解释 curvature 与 estimator variance 的关系。"
+    },
+    {
+      "id": "L06-Q29",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-7",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 7,
+          "section": "lecture-06-source-7"
+        }
+      ],
+      "conceptTags": [
+        "Neural Coding I",
+        "Lecture6-Neurons3-NeuralCoding1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 6 讲：阅读与\"maximum-likelihood decoding、log likelihood、curvature\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "c",
+          "text": "局部 curvature/Fisher information 更大，估计 variance 更小。"
+        },
+        {
+          "id": "d",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“area normalization、cable、cell diversity 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“neural coding 问题”，不是题干指定的关系。",
+        "c": "该选项回答的是“likelihood 更尖意味着什么？”。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L06-Q30",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 3,
+          "section": "lecture-06-source-3"
+        }
+      ],
+      "conceptTags": [
+        "神经编码",
+        "neural encoding"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"刺激/状态到 response distribution 的映射。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "神经编码（neural encoding）"
+        },
+        {
+          "id": "b",
+          "text": "脉冲序列（spike train）"
+        },
+        {
+          "id": "c",
+          "text": "栅格图（raster plot）"
+        },
+        {
+          "id": "d",
+          "text": "刺激后时间直方图（peri-stimulus time histogram, PSTH）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“脉冲序列（spike train）”指：一组离散 spike times。",
+        "c": "“栅格图（raster plot）”指：按 trial 排列 spike times 的可视化。",
+        "d": "“刺激后时间直方图（peri-stimulus time histogram, PSTH）”指：跨 trial 分 bin 得到的平均 spike-rate estimate。"
+      },
+      "explanation": "神经编码（neural encoding）：刺激/状态到 response distribution 的映射。"
+    },
+    {
+      "id": "L06-Q31",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 3,
+          "section": "lecture-06-source-3"
+        }
+      ],
+      "conceptTags": [
+        "脉冲序列",
+        "spike train"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"一组离散 spike times。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "栅格图（raster plot）"
+        },
+        {
+          "id": "b",
+          "text": "脉冲序列（spike train）"
+        },
+        {
+          "id": "c",
+          "text": "刺激后时间直方图（peri-stimulus time histogram, PSTH）"
+        },
+        {
+          "id": "d",
+          "text": "Fano 因子（Fano factor）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“栅格图（raster plot）”指：按 trial 排列 spike times 的可视化。",
+        "c": "“刺激后时间直方图（peri-stimulus time histogram, PSTH）”指：跨 trial 分 bin 得到的平均 spike-rate estimate。",
+        "d": "“Fano 因子（Fano factor）”指：count variance/mean。"
+      },
+      "explanation": "脉冲序列（spike train）：一组离散 spike times。"
+    },
+    {
+      "id": "L06-Q32",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 1,
+          "section": "lecture-06-source-1"
+        }
+      ],
+      "conceptTags": [
+        "栅格图",
+        "raster plot"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"按 trial 排列 spike times 的可视化。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "刺激后时间直方图（peri-stimulus time histogram, PSTH）"
+        },
+        {
+          "id": "b",
+          "text": "Fano 因子（Fano factor）"
+        },
+        {
+          "id": "c",
+          "text": "栅格图（raster plot）"
+        },
+        {
+          "id": "d",
+          "text": "点过程（point process）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“刺激后时间直方图（peri-stimulus time histogram, PSTH）”指：跨 trial 分 bin 得到的平均 spike-rate estimate。",
+        "b": "“Fano 因子（Fano factor）”指：count variance/mean。",
+        "d": "“点过程（point process）”指：随机事件时间的概率模型。"
+      },
+      "explanation": "栅格图（raster plot）：按 trial 排列 spike times 的可视化。"
+    },
+    {
+      "id": "L06-Q33",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 5,
+          "section": "lecture-06-source-5"
+        }
+      ],
+      "conceptTags": [
+        "刺激后时间直方图",
+        "peri-stimulus time histogram, PSTH"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"跨 trial 分 bin 得到的平均 spike-rate estimate。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Fano 因子（Fano factor）"
+        },
+        {
+          "id": "b",
+          "text": "点过程（point process）"
+        },
+        {
+          "id": "c",
+          "text": "独立增量（independent increments）"
+        },
+        {
+          "id": "d",
+          "text": "刺激后时间直方图（peri-stimulus time histogram, PSTH）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“Fano 因子（Fano factor）”指：count variance/mean。",
+        "b": "“点过程（point process）”指：随机事件时间的概率模型。",
+        "c": "“独立增量（independent increments）”指：不重叠时间段内事件数独立。"
+      },
+      "explanation": "刺激后时间直方图（peri-stimulus time histogram, PSTH）：跨 trial 分 bin 得到的平均 spike-rate estimate。"
+    },
+    {
+      "id": "L06-Q34",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 4,
+          "section": "lecture-06-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Fano 因子",
+        "Fano factor"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"count variance/mean。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Fano 因子（Fano factor）"
+        },
+        {
+          "id": "b",
+          "text": "点过程（point process）"
+        },
+        {
+          "id": "c",
+          "text": "独立增量（independent increments）"
+        },
+        {
+          "id": "d",
+          "text": "调谐曲线（tuning curve）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“点过程（point process）”指：随机事件时间的概率模型。",
+        "c": "“独立增量（independent increments）”指：不重叠时间段内事件数独立。",
+        "d": "“调谐曲线（tuning curve）”指：expected response 随 stimulus parameter 的函数。"
+      },
+      "explanation": "Fano 因子（Fano factor）：count variance/mean。"
+    },
+    {
+      "id": "L06-Q35",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 4,
+          "section": "lecture-06-source-4"
+        }
+      ],
+      "conceptTags": [
+        "点过程",
+        "point process"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"随机事件时间的概率模型。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "独立增量（independent increments）"
+        },
+        {
+          "id": "b",
+          "text": "点过程（point process）"
+        },
+        {
+          "id": "c",
+          "text": "调谐曲线（tuning curve）"
+        },
+        {
+          "id": "d",
+          "text": "似然（likelihood）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“独立增量（independent increments）”指：不重叠时间段内事件数独立。",
+        "c": "“调谐曲线（tuning curve）”指：expected response 随 stimulus parameter 的函数。",
+        "d": "“似然（likelihood）”指：给定观测 response 后，stimulus/parameter 的支持度。"
+      },
+      "explanation": "点过程（point process）：随机事件时间的概率模型。"
+    },
+    {
+      "id": "L06-Q36",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 4,
+          "section": "lecture-06-source-4"
+        }
+      ],
+      "conceptTags": [
+        "独立增量",
+        "independent increments"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"不重叠时间段内事件数独立。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "调谐曲线（tuning curve）"
+        },
+        {
+          "id": "b",
+          "text": "似然（likelihood）"
+        },
+        {
+          "id": "c",
+          "text": "独立增量（independent increments）"
+        },
+        {
+          "id": "d",
+          "text": "最大似然估计（maximum-likelihood estimate, MLE）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“调谐曲线（tuning curve）”指：expected response 随 stimulus parameter 的函数。",
+        "b": "“似然（likelihood）”指：给定观测 response 后，stimulus/parameter 的支持度。",
+        "d": "“最大似然估计（maximum-likelihood estimate, MLE）”指：使 likelihood 最大的参数或刺激估计。"
+      },
+      "explanation": "独立增量（independent increments）：不重叠时间段内事件数独立。"
+    },
+    {
+      "id": "L06-Q37",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "调谐曲线",
+        "tuning curve"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"expected response 随 stimulus parameter 的函数。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "似然（likelihood）"
+        },
+        {
+          "id": "b",
+          "text": "最大似然估计（maximum-likelihood estimate, MLE）"
+        },
+        {
+          "id": "c",
+          "text": "Fisher 信息（Fisher information）"
+        },
+        {
+          "id": "d",
+          "text": "调谐曲线（tuning curve）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“似然（likelihood）”指：给定观测 response 后，stimulus/parameter 的支持度。",
+        "b": "“最大似然估计（maximum-likelihood estimate, MLE）”指：使 likelihood 最大的参数或刺激估计。",
+        "c": "“Fisher 信息（Fisher information）”指：分布对参数微小变化的局部敏感度。"
+      },
+      "explanation": "调谐曲线（tuning curve）：expected response 随 stimulus parameter 的函数。"
+    },
+    {
+      "id": "L06-Q38",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 6,
+          "section": "lecture-06-source-6"
+        }
+      ],
+      "conceptTags": [
+        "似然",
+        "likelihood"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"给定观测 response 后，stimulus/parameter 的支持度。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "似然（likelihood）"
+        },
+        {
+          "id": "b",
+          "text": "最大似然估计（maximum-likelihood estimate, MLE）"
+        },
+        {
+          "id": "c",
+          "text": "Fisher 信息（Fisher information）"
+        },
+        {
+          "id": "d",
+          "text": "神经编码（neural encoding）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“最大似然估计（maximum-likelihood estimate, MLE）”指：使 likelihood 最大的参数或刺激估计。",
+        "c": "“Fisher 信息（Fisher information）”指：分布对参数微小变化的局部敏感度。",
+        "d": "“神经编码（neural encoding）”指：刺激/状态到 response distribution 的映射。"
+      },
+      "explanation": "似然（likelihood）：给定观测 response 后，stimulus/parameter 的支持度。"
+    },
+    {
+      "id": "L06-Q39",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-7",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 7,
+          "section": "lecture-06-source-7"
+        }
+      ],
+      "conceptTags": [
+        "最大似然估计",
+        "maximum-likelihood estimate, MLE"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 6 讲：本讲把\"使 likelihood 最大的参数或刺激估计。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Fisher 信息（Fisher information）"
+        },
+        {
+          "id": "b",
+          "text": "最大似然估计（maximum-likelihood estimate, MLE）"
+        },
+        {
+          "id": "c",
+          "text": "神经编码（neural encoding）"
+        },
+        {
+          "id": "d",
+          "text": "脉冲序列（spike train）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“Fisher 信息（Fisher information）”指：分布对参数微小变化的局部敏感度。",
+        "c": "“神经编码（neural encoding）”指：刺激/状态到 response distribution 的映射。",
+        "d": "“脉冲序列（spike train）”指：一组离散 spike times。"
+      },
+      "explanation": "最大似然估计（maximum-likelihood estimate, MLE）：使 likelihood 最大的参数或刺激估计。"
+    },
+    {
+      "id": "L06-Q40",
+      "lecture": 6,
+      "sectionId": "lecture-06-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
+          "page": 2,
+          "section": "lecture-06-source-2"
+        }
+      ],
+      "conceptTags": [
+        "观察窗内 expected count"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 6 讲：使用\"观察窗内 expected count\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "independent increments"
+        },
+        {
+          "id": "b",
+          "text": "跨 trial 同条件 counts"
+        },
+        {
+          "id": "c",
+          "text": "homogeneous rate"
+        },
+        {
+          "id": "d",
+          "text": "constant rate"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“Poisson PMF”的条件，不是题干公式的条件。",
+        "b": "这是“Fano factor”的条件，不是题干公式的条件。",
+        "d": "这是“Poisson ISI density”的条件，不是题干公式的条件。"
+      },
+      "explanation": "观察窗内 expected count 的适用条件：homogeneous rate"
+    }
+  ]
+}

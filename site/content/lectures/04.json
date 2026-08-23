@@ -1,0 +1,2121 @@
+{
+  "lecture": 4,
+  "slug": "04",
+  "zhTitle": "神经元 I：膜电位、电路与 Integrate-and-Fire",
+  "enTitle": "Neurons I: Membrane Voltage, Circuits, and Integrate-and-Fire",
+  "companionFile": "NEUROSCI366_Lecture04_Neurons1_Membrane_Circuit_IF_Companion.pdf",
+  "companionPages": 21,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture04_Neurons1_Membrane_Circuit_IF_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture4-Neurons1.pdf",
+      "role": "primary",
+      "pages": 6,
+      "href": "/resources/original/Lecture4-Neurons1.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：浓度梯度。",
+    "从第一原则推导：电化学平衡。",
+    "解释几何/计算直觉：Nernst potential。",
+    "连接生物学解释：膜电容/通道。",
+    "诊断 assumptions 与 failure modes：Kirchhoff law。",
+    "把概念迁移到新神经科学问题：IF/LIF。"
+  ],
+  "dependencyMap": "浓度梯度 → 电化学平衡 → Nernst potential → 膜电容/通道 → Kirchhoff law → IF/LIF",
+  "coreQuestion": "如何把离子扩散、电场与膜结构映射为电路，并从电荷守恒得到 integrate-and-fire 动力学？",
+  "diagnostic": [
+    "本课 V_m 的符号定义是什么？",
+    "K+ 内高外低时 E_K 为什么通常为负？",
+    "E_Na≈+55 mV 表示什么？",
+    "Q=CV 中 C 增大如何影响同一电流下 dV/dt？",
+    "恒流 pure capacitor 的 V(t) 形状是什么？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-04-source-1",
+      "order": 1,
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。",
+      "noteMeaning": "浓度梯度与电化学平衡：cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。",
+      "reasoning": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。因此，解释 diffusion 与 electric force 如何共同决定 equilibrium potential； 逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "本课 V_m 的符号定义是什么？"
+    },
+    {
+      "id": "lecture-04-source-2",
+      "order": 2,
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。",
+      "noteMeaning": "Nernst potential 与膜电容/通道：ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。",
+      "reasoning": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。因此，从 charge、 force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "K+ 内高外低时 E_K 为什么通常为负？"
+    },
+    {
+      "id": "lecture-04-source-3",
+      "order": 3,
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：Hodgkin-Huxley equivalent circuit 与各支路含义。",
+      "noteMeaning": "Kirchhoff law 与 IF/LIF：Hodgkin-Huxley equivalent circuit 与各支路含义。",
+      "reasoning": "把 membrane、channels、concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。因此，说明 Na+, K+, Ca2+, Cl− reversal potential 的符号和 action-potential trajectory，但不要把 equilibrium potential 误写成实际瞬时膜电位。",
+      "figureReading": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。",
+      "stopPredict": "E_Na≈+55 mV 表示什么？"
+    },
+    {
+      "id": "lecture-04-source-4",
+      "order": 4,
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：Kirchhoff current law、 charge conservation、 capacitor、 capacitive current。",
+      "noteMeaning": "浓度梯度与电化学平衡：Kirchhoff current law、charge conservation、capacitor、capacitive current。",
+      "reasoning": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。因此，把 membrane、channels、 concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "Q=CV 中 C 增大如何影响同一电流下 dV/dt？"
+    },
+    {
+      "id": "lecture-04-source-5",
+      "order": 5,
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：pure-capacitor current integration、current step、integrate-andfire、threshold/reset、F-I curve。",
+      "noteMeaning": "Nernst potential 与膜电容/通道：pure-capacitor current integration、current step、integrate-and-fire、threshold/reset、 F-I curve。",
+      "reasoning": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。因此，从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "恒流 pure capacitor 的 V(t) 形状是什么？"
+    },
+    {
+      "id": "lecture-04-source-6",
+      "order": 6,
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "page": 6,
+      "reconstruction": "Page 6：leak resistance、battery/reversal potential、Ohm's law、leakyintegrator equation。",
+      "noteMeaning": "Kirchhoff law 与 IF/LIF：leak resistance、battery/reversal potential、Ohm's law、leaky-integrator equation。",
+      "reasoning": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。因此，解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "写出 leak current 并解释 V=E_L 时的结果。"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 从 Boltzmann ratio 到 Nernst equation",
+    "【必要前置】 求单一离子跨膜达到净通量为零时的电位差。 Pin = e−(Uin −Uout )/(kB T ) Pout U = qϕ, Vm = ϕin − ϕout kB T [c]out Ec = ln qc [c]in 1. 平衡时占据概率比同时反映浓度比与电势能差。 2. 把 U=qφ 代入，并采用 V_m=φ_in−φ_out 的符号 convention。 3. 取自然对数并解出 V_m。 4. 离子 valence 进入 q_c=z e，因此 Ca²+ 的电压尺度有 1/2 因子。",
+    "Geometric/computational intuition. E_c 是电场恰好抵消扩散驱动力的电压，不等于膜在任意时刻的实际 V_m。 Biological interpretation / failure condition. 多离子同时通透、浓度随时间改变或主动泵显著时， 单离子 Nernst equation 不足。",
+    "思考题：Q=CV 中 C 增大如何影响同一电流下 dV/dt？",
+    "5.2 电容与电流积分",
+    "【补全推导】 只有 capacitor 时，外加电流如何改变 V_m？",
+    "Q = CVm dQ dVm IC = =C dt dt ∫ t 1 Vm (t) = Vm (0) + Ie (t′ )dt′ C 0 1. 膜两侧导电溶液被 lipid insulator 分开，能储存相反电荷。 2. 电流是电荷变化率；若 C 固定，I=C dV/dt。 3. 恒定电流产生 linear voltage ramp，斜率 I/C。 4. 加入 threshold 与 reset 即得到 pure integrate-and-fire。",
+    "Geometric/computational intuition. 更大的 C 需要更多电荷才能改变同样电压，所以电位变化更慢。 Biological interpretation / failure condition. 真实膜有 leak 和 voltage-gated currents，不能长期线性积累。",
+    "思考题：恒流 pure capacitor 的 V(t) 形状是什么？",
+    "5.3 leak current 与 LIF 方程",
+    "【跨页连接】 加入被动通道和 reversal battery 后如何写 current balance？",
+    "IL = GL (Vm − EL )",
+    "dVm C = Ie − GL (Vm − EL ) dt C τm = GL 1. resistor 支路的电压降是 V_m−E_L；Ohm's law 给出 outward leak current。 2. Kirchhoff current law：进入 capacitor 的净电流等于 external current 减去 leak。 3. 无外加电流时 V_m 被拉回 E_L。 4. threshold/reset 是对 subthreshold differential equation 的额外事件规则。",
+    "Geometric/computational intuition. leak 让模型从无限记忆的 integrator 变成指数遗忘的 leaky integrator。 Biological interpretation / failure condition. G_L 若依赖电压或存在多个动态 conductances， 需要 HH 类模型。",
+    "思考题：写出 leak current 并解释 V=E_L 时的结果。"
+  ],
+  "synthesis": [
+    "神经膜同时是电荷分离的 capacitor 和离子选择性通道的 conductance network。扩散推动离子沿浓度梯度移动，电场推动带电粒子沿电势能下降方向移动；二者平衡定义每种离子的 reversal potential。 电路等效并非比喻装饰，而是把 charge conservation、Ohm's law 与 channel selectivity 组合成可求解的膜电位方程。"
+  ],
+  "workedExamples": [
+    "7.1 Nernst sign check",
+    "【例题】题目：K+ 通常细胞内浓度高于外部。",
+    "Worked solution. [K]out/[K]in<1，log ratio 为负；q_K>0，所以 E_K<0，符合约 −75 mV。Cl− 的 q<0，会反转符号。 Check. 只看浓度比而不看 ion charge 会把阴离子符号算错。",
+    "7.2 pure IF firing rate",
+    "【拓展例题】题目：恒定 I_e 从 reset V_R 充到 threshold V_T。",
+    "Worked solution. ΔV=V_T−V_R，充电时间 Δt=CΔV/I_e，因此 rate r=1/Δt=I_e/[C(V_T−V_R)]。 Check. 单位 A/[F·V]=1/s；若 I_e≤0 不会向上越阈值。"
+  ],
+  "formulas": [
+    {
+      "id": "L04-F01",
+      "lecture": 4,
+      "name": "膜电位符号 convention",
+      "expression": "Vm = ϕin − ϕout",
+      "latex": "V_m=\\phi_{\\mathrm{in}}-\\phi_{\\mathrm{out}}",
+      "conditions": "inside minus outside",
+      "sectionId": "lecture-04-source-2",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L04-F02",
+      "lecture": 4,
+      "name": "Nernst equilibrium potential",
+      "expression": "kB T [c]out Ec = ln qc [c]in",
+      "latex": "E_c=\\frac{k_B T}{q_c}\\ln\\!\\left(\\frac{[c]_{\\mathrm{out}}}{[c]_{\\mathrm{in}}}\\right)",
+      "conditions": "单离子平衡、温度固定",
+      "sectionId": "lecture-04-source-1",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L04-F03",
+      "lecture": 4,
+      "name": "电容定义",
+      "expression": "Q = CV",
+      "latex": "Q=CV",
+      "conditions": "C 近似常数",
+      "sectionId": "lecture-04-source-2",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L04-F04",
+      "lecture": 4,
+      "name": "capacitive current",
+      "expression": "I = C V̇",
+      "latex": "I=C\\dot{V}",
+      "conditions": "Q=CV",
+      "sectionId": "lecture-04-source-4",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L04-F05",
+      "lecture": 4,
+      "name": "leak current",
+      "expression": "IL = GL (V − EL )",
+      "latex": "I_L=G_L(V-E_L)",
+      "conditions": "线性被动 conductance",
+      "sectionId": "lecture-04-source-4",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L04-F06",
+      "lecture": 4,
+      "name": "LIF subthreshold equation",
+      "expression": "C V̇ = Ie − GL (V − EL )",
+      "latex": "C\\dot{V}=I_e-G_L(V-E_L)",
+      "conditions": "threshold/reset 另行指定",
+      "sectionId": "lecture-04-source-5",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L04-F07",
+      "lecture": 4,
+      "name": "pure IF 的 F-I slope",
+      "expression": "Ie r= C(VT − VR )",
+      "latex": "r=\\frac{I_e}{C(V_T-V_R)}",
+      "conditions": "恒流、无 refractory、无 leak",
+      "sectionId": "lecture-04-source-5",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 5
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L04-G01",
+      "lecture": 4,
+      "zh": "膜电位",
+      "en": "membrane voltage",
+      "definition": "细胞内电势减去细胞外电势。",
+      "sectionId": "lecture-04-source-1",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L04-G02",
+      "lecture": 4,
+      "zh": "扩散",
+      "en": "diffusion",
+      "definition": "由浓度梯度驱动的随机净迁移。",
+      "sectionId": "lecture-04-source-1",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L04-G03",
+      "lecture": 4,
+      "zh": "电势能",
+      "en": "electric potential energy",
+      "definition": "带电粒子在电势中的能量 qφ。",
+      "sectionId": "lecture-04-source-1",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L04-G04",
+      "lecture": 4,
+      "zh": "平衡电位",
+      "en": "equilibrium potential",
+      "definition": "单离子净通量为零的电压。",
+      "sectionId": "lecture-04-source-1",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L04-G05",
+      "lecture": 4,
+      "zh": "反转电位",
+      "en": "reversal potential",
+      "definition": "该通道电流改变方向的电压；简单情形等于 equilibrium potential。",
+      "sectionId": "lecture-04-source-3",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L04-G06",
+      "lecture": 4,
+      "zh": "电导",
+      "en": "conductance",
+      "definition": "电阻的倒数，G=1/R。",
+      "sectionId": "lecture-04-source-3",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L04-G07",
+      "lecture": 4,
+      "zh": "电容",
+      "en": "capacitance",
+      "definition": "单位电压可储存的电荷 Q/V。",
+      "sectionId": "lecture-04-source-5",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L04-G08",
+      "lecture": 4,
+      "zh": "Kirchhoff 电流定律",
+      "en": "Kirchhoff current law",
+      "definition": "节点流入与流出电流的代数和为零。",
+      "sectionId": "lecture-04-source-4",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L04-G09",
+      "lecture": 4,
+      "zh": "积分放电模型",
+      "en": "integrate-and-fire model",
+      "definition": "积累输入，越阈值产生 spike 并 reset 的抽象模型。",
+      "sectionId": "lecture-04-source-4",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L04-G10",
+      "lecture": 4,
+      "zh": "漏积分器",
+      "en": "leaky integrator",
+      "definition": "状态被输入驱动同时向基线指数回归。",
+      "sectionId": "lecture-04-source-3",
+      "sourceFile": "Lecture4-Neurons1.pdf",
+      "sourcePage": 3
+    }
+  ],
+  "commonTraps": [
+    "把 equilibrium potential 当作细胞实际瞬时膜电位。",
+    "忘记 V_m=inside−outside 的符号 convention。",
+    "对 Cl− 使用阳离子符号直觉。",
+    "把 current direction、positive charge movement 和 voltage change 混为一谈。",
+    "认为 capacitor 支路有离子跨膜；理想 capacitor 表示膜两侧电荷重新分布。",
+    "把 threshold/reset 当作 LIF differential equation 自然产生的 action potential。",
+    "本讲止于 LIF equation；不要提前吞并 Lecture 5 的完整 LIF closed-form solution 与 HH gating dynamics，但可在结尾给出明确预告。"
+  ],
+  "errata": [
+    "1. Page 2 的典型 reversal potentials 是课程级近似，具体数值依赖温度和浓度。 2. Page 3 将 HH equivalent circuit 用于概念映射；完整 voltage-gated conductance dynamics 在 Lecture 5 展开。 3. 未发现影响核心推导的不可辨认手写。"
+  ],
+  "questions": [
+    {
+      "id": "L04-Q01",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：本课 V_m 的符号定义是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "带电粒子在电势中的能量 qφ。"
+        },
+        {
+          "id": "b",
+          "text": "V_m=φ_in−φ_out。"
+        },
+        {
+          "id": "c",
+          "text": "单位电压可储存的电荷 Q/V。"
+        },
+        {
+          "id": "d",
+          "text": "由浓度梯度驱动的随机净迁移。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“电势能（electric potential energy）”的定义。",
+        "c": "这是“电容（capacitance）”的定义。",
+        "d": "这是“扩散（diffusion）”的定义。"
+      },
+      "explanation": "V_m=φ_in−φ_out。"
+    },
+    {
+      "id": "L04-Q02",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 2,
+          "section": "lecture-04-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：K+ 内高外低时 E_K 为什么通常为负？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "充电斜率 I/C，跨越固定 ΔV 的时间与 1/I 成正比。"
+        },
+        {
+          "id": "b",
+          "text": "恒流、无 refractory、无 leak"
+        },
+        {
+          "id": "c",
+          "text": "log([K]out/[K]in)<0 且 q>0。"
+        },
+        {
+          "id": "d",
+          "text": "积累输入，越阈值产生 spike 并 reset 的抽象模型。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“pure IF 的 rate 对 I 的关系为什么是直线？”。",
+        "b": "这是“pure IF 的 F-I slope”的适用条件。",
+        "d": "这是“积分放电模型（integrate-and-fire model）”的定义。"
+      },
+      "explanation": "log([K]out/[K]in)<0 且 q>0。"
+    },
+    {
+      "id": "L04-Q03",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：E_Na≈+55 mV 表示什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该通道电流改变方向的电压；简单情形等于 equilibrium potential。"
+        },
+        {
+          "id": "b",
+          "text": "I_L=G_L(V−E_L)；V=E_L 时 leak current 为零。"
+        },
+        {
+          "id": "c",
+          "text": "多离子通透、非平衡浓度变化、主动 transport 或其他电化学效应显著时。"
+        },
+        {
+          "id": "d",
+          "text": "若只有 Na+ 通透，约在 +55 mV 时扩散和电力平衡、Na current 反转。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“反转电位（reversal potential）”的定义。",
+        "b": "该选项回答的是“写出 leak current 并解释 V=E_L 时的结果。”。",
+        "c": "该选项回答的是“Nernst equation 在什么条件下会失败？”。"
+      },
+      "explanation": "若只有 Na+ 通透，约在 +55 mV 时扩散和电力平衡、Na current 反转。"
+    },
+    {
+      "id": "L04-Q04",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 4 讲：Q=CV 中 C 增大如何影响同一电流下 dV/dt？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "dV/dt=I/C，C 越大变化越慢。"
+        },
+        {
+          "id": "b",
+          "text": "节点流入与流出电流的代数和为零。"
+        },
+        {
+          "id": "c",
+          "text": "电荷守恒：各支路电流与 capacitive current 平衡。"
+        },
+        {
+          "id": "d",
+          "text": "inside minus outside"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“Kirchhoff 电流定律（Kirchhoff current law）”的定义。",
+        "c": "该选项回答的是“Kirchhoff law 在膜模型中表达什么守恒？”。",
+        "d": "这是“膜电位符号 convention”的适用条件。"
+      },
+      "explanation": "dV/dt=I/C，C 越大变化越慢。"
+    },
+    {
+      "id": "L04-Q05",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：恒流 pure capacitor 的 V(t) 形状是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "恒流、无 refractory、无 leak"
+        },
+        {
+          "id": "b",
+          "text": "线性 ramp。"
+        },
+        {
+          "id": "c",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "d",
+          "text": "C 近似常数"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“pure IF 的 F-I slope”的适用条件。",
+        "c": "这是“Nernst equilibrium potential”的适用条件。",
+        "d": "这是“电容定义”的适用条件。"
+      },
+      "explanation": "线性 ramp。"
+    },
+    {
+      "id": "L04-Q06",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 6,
+          "section": "lecture-04-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：写出 leak current 并解释 V=E_L 时的结果。",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若只有 Na+ 通透，约在 +55 mV 时扩散和电力平衡、Na current 反转。"
+        },
+        {
+          "id": "b",
+          "text": "电荷守恒：各支路电流与 capacitive current 平衡。"
+        },
+        {
+          "id": "c",
+          "text": "I_L=G_L(V−E_L)；V=E_L 时 leak current 为零。"
+        },
+        {
+          "id": "d",
+          "text": "恒流、无 refractory、无 leak"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“E_Na≈+55 mV 表示什么？”。",
+        "b": "该选项回答的是“Kirchhoff law 在膜模型中表达什么守恒？”。",
+        "d": "这是“pure IF 的 F-I slope”的适用条件。"
+      },
+      "explanation": "I_L=G_L(V−E_L)；V=E_L 时 leak current 为零。"
+    },
+    {
+      "id": "L04-Q07",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：为什么 LIF 是 leaky？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。"
+        },
+        {
+          "id": "b",
+          "text": "I_L=G_L(V−E_L)；V=E_L 时 leak current 为零。"
+        },
+        {
+          "id": "c",
+          "text": "多离子通透、非平衡浓度变化、主动 transport 或其他电化学效应显著时。"
+        },
+        {
+          "id": "d",
+          "text": "被动 conductance 持续把 V 拉向 E_L，使过去输入指数衰减。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture4-Neurons1.pdf 第 6 页。",
+        "b": "该选项回答的是“写出 leak current 并解释 V=E_L 时的结果。”。",
+        "c": "该选项回答的是“Nernst equation 在什么条件下会失败？”。"
+      },
+      "explanation": "被动 conductance 持续把 V 拉向 E_L，使过去输入指数衰减。"
+    },
+    {
+      "id": "L04-Q08",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：pure IF 的 rate 对 I 的关系为什么是直线？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "充电斜率 I/C，跨越固定 ΔV 的时间与 1/I 成正比。"
+        },
+        {
+          "id": "b",
+          "text": "积累输入，越阈值产生 spike 并 reset 的抽象模型。"
+        },
+        {
+          "id": "c",
+          "text": "log([K]out/[K]in)<0 且 q>0。"
+        },
+        {
+          "id": "d",
+          "text": "电荷守恒：各支路电流与 capacitive current 平衡。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“积分放电模型（integrate-and-fire model）”的定义。",
+        "c": "该选项回答的是“K+ 内高外低时 E_K 为什么通常为负？”。",
+        "d": "该选项回答的是“Kirchhoff law 在膜模型中表达什么守恒？”。"
+      },
+      "explanation": "充电斜率 I/C，跨越固定 ΔV 的时间与 1/I 成正比。"
+    },
+    {
+      "id": "L04-Q09",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 4 讲：Kirchhoff law 在膜模型中表达什么守恒？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "积累输入，越阈值产生 spike 并 reset 的抽象模型。"
+        },
+        {
+          "id": "b",
+          "text": "电荷守恒：各支路电流与 capacitive current 平衡。"
+        },
+        {
+          "id": "c",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        },
+        {
+          "id": "d",
+          "text": "被动 conductance 持续把 V 拉向 E_L，使过去输入指数衰减。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“积分放电模型（integrate-and-fire model）”的定义。",
+        "c": "这条推理对应 Lecture4-Neurons1.pdf 第 4 页。",
+        "d": "该选项回答的是“为什么 LIF 是 leaky？”。"
+      },
+      "explanation": "电荷守恒：各支路电流与 capacitive current 平衡。"
+    },
+    {
+      "id": "L04-Q10",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：Nernst equation 在什么条件下会失败？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。"
+        },
+        {
+          "id": "b",
+          "text": "I_L=G_L(V−E_L)；V=E_L 时 leak current 为零。"
+        },
+        {
+          "id": "c",
+          "text": "多离子通透、非平衡浓度变化、主动 transport 或其他电化学效应显著时。"
+        },
+        {
+          "id": "d",
+          "text": "被动 conductance 持续把 V 拉向 E_L，使过去输入指数衰减。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture4-Neurons1.pdf 第 6 页。",
+        "b": "该选项回答的是“写出 leak current 并解释 V=E_L 时的结果。”。",
+        "d": "该选项回答的是“为什么 LIF 是 leaky？”。"
+      },
+      "explanation": "多离子通透、非平衡浓度变化、主动 transport 或其他电化学效应显著时。"
+    },
+    {
+      "id": "L04-Q11",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：根据 Lecture4-Neurons1.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。"
+        },
+        {
+          "id": "b",
+          "text": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+        },
+        {
+          "id": "c",
+          "text": "pure-capacitor current integration、current step、integrate-andfire、threshold/reset、F-I curve。"
+        },
+        {
+          "id": "d",
+          "text": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。",
+        "c": "该陈述解释的是“pure-capacitor current integration、current step、integrate-andfire”，不是题干指定的关系。"
+      },
+      "explanation": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+    },
+    {
+      "id": "L04-Q12",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：若要解释\"cell membrane、ions、charge separation\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。"
+        },
+        {
+          "id": "b",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        },
+        {
+          "id": "c",
+          "text": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。"
+        },
+        {
+          "id": "d",
+          "text": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“pure-capacitor current integration、current step、integrate-andfire”，不是题干指定的关系。",
+        "c": "该陈述解释的是“leak resistance、battery/reversal potential、Ohm's law、leakyintegrator equation”，不是题干指定的关系。",
+        "d": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。"
+      },
+      "explanation": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。"
+    },
+    {
+      "id": "L04-Q13",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 2,
+          "section": "lecture-04-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：根据 Lecture4-Neurons1.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+        },
+        {
+          "id": "b",
+          "text": "ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。"
+        },
+        {
+          "id": "c",
+          "text": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+        },
+        {
+          "id": "d",
+          "text": "Kirchhoff current law、 charge conservation、 capacitor、 capacitive current。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Kirchhoff current law、 charge conservation、 capacitor、 capacitive current”，不是题干指定的关系。"
+      },
+      "explanation": "ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。"
+    },
+    {
+      "id": "L04-Q14",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 2,
+          "section": "lecture-04-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：若要解释\"ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        },
+        {
+          "id": "b",
+          "text": "把 membrane、channels、concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。"
+        },
+        {
+          "id": "c",
+          "text": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+        },
+        {
+          "id": "d",
+          "text": "因此，说明 Na+, K+, Ca2+, Cl− reversal potential 的符号和 action-potential trajectory，但不要把 equilibrium potential 误写成实际瞬时膜电位。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“pure-capacitor current integration、current step、integrate-andfire”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture4-Neurons1.pdf 第 3 页。"
+      },
+      "explanation": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+    },
+    {
+      "id": "L04-Q15",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：根据 Lecture4-Neurons1.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+        },
+        {
+          "id": "b",
+          "text": "ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。"
+        },
+        {
+          "id": "c",
+          "text": "Kirchhoff current law、 charge conservation、 capacitor、 capacitive current。"
+        },
+        {
+          "id": "d",
+          "text": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "b": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Kirchhoff current law、 charge conservation、 capacitor、 capacitive current”，不是题干指定的关系。"
+      },
+      "explanation": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+    },
+    {
+      "id": "L04-Q16",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：若要解释\"Hodgkin-Huxley equivalent circuit 与各支路含义\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "把 membrane、channels、concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。"
+        },
+        {
+          "id": "b",
+          "text": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。"
+        },
+        {
+          "id": "c",
+          "text": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+        },
+        {
+          "id": "d",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "d": "该陈述解释的是“pure-capacitor current integration、current step、integrate-andfire”，不是题干指定的关系。"
+      },
+      "explanation": "把 membrane、channels、concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。"
+    },
+    {
+      "id": "L04-Q17",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：阅读与\"Hodgkin-Huxley equivalent circuit 与各支路含义\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+        },
+        {
+          "id": "c",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "d",
+          "text": "电荷守恒：各支路电流与 capacitive current 平衡。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“pure-capacitor current integration、current step、integrate-andfire”，不是题干指定的关系。",
+        "d": "该选项回答的是“Kirchhoff law 在膜模型中表达什么守恒？”。"
+      },
+      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+    },
+    {
+      "id": "L04-Q18",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：根据 Lecture4-Neurons1.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。"
+        },
+        {
+          "id": "b",
+          "text": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+        },
+        {
+          "id": "c",
+          "text": "Kirchhoff current law、 charge conservation、 capacitor、 capacitive current。"
+        },
+        {
+          "id": "d",
+          "text": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。",
+        "d": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。"
+      },
+      "explanation": "Kirchhoff current law、 charge conservation、 capacitor、 capacitive current。"
+    },
+    {
+      "id": "L04-Q19",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：若要解释\"Kirchhoff current law、 charge conservation、 capacitor、 capacitive current\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。"
+        },
+        {
+          "id": "b",
+          "text": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。"
+        },
+        {
+          "id": "c",
+          "text": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+        },
+        {
+          "id": "d",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“leak resistance、battery/reversal potential、Ohm's law、leakyintegrator equation”，不是题干指定的关系。",
+        "b": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。"
+      },
+      "explanation": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+    },
+    {
+      "id": "L04-Q20",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：根据 Lecture4-Neurons1.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "pure-capacitor current integration、current step、integrate-andfire、threshold/reset、F-I curve。"
+        },
+        {
+          "id": "b",
+          "text": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+        },
+        {
+          "id": "c",
+          "text": "ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action potential。"
+        },
+        {
+          "id": "d",
+          "text": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。"
+      },
+      "explanation": "pure-capacitor current integration、current step、integrate-andfire、threshold/reset、F-I curve。"
+    },
+    {
+      "id": "L04-Q21",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：若要解释\"pure-capacitor current integration、current step、integrate-andfire\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。"
+        },
+        {
+          "id": "b",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        },
+        {
+          "id": "c",
+          "text": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+        },
+        {
+          "id": "d",
+          "text": "把 membrane、channels、concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。"
+      },
+      "explanation": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+    },
+    {
+      "id": "L04-Q22",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 2,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：阅读与\"pure-capacitor current integration、current step、integrate-andfire\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+        },
+        {
+          "id": "c",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "d",
+          "text": "若只有 Na+ 通透，约在 +55 mV 时扩散和电力平衡、Na current 反转。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。",
+        "d": "该选项回答的是“E_Na≈+55 mV 表示什么？”。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L04-Q23",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 6,
+          "section": "lecture-04-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 4 讲：根据 Lecture4-Neurons1.pdf 第 6 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Hodgkin-Huxley equivalent circuit 与各支路含义。"
+        },
+        {
+          "id": "b",
+          "text": "pure-capacitor current integration、current step、integrate-andfire、threshold/reset、F-I curve。"
+        },
+        {
+          "id": "c",
+          "text": "cell membrane、ions、charge separation、electric force/potential energy/potential、membrane voltage、diffusion。"
+        },
+        {
+          "id": "d",
+          "text": "leak resistance、battery/reversal potential、Ohm's law、leakyintegrator equation。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Hodgkin-Huxley equivalent circuit 与各支路含义”，不是题干指定的关系。",
+        "b": "该陈述解释的是“pure-capacitor current integration、current step、integrate-andfire”，不是题干指定的关系。",
+        "c": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。"
+      },
+      "explanation": "leak resistance、battery/reversal potential、Ohm's law、leakyintegrator equation。"
+    },
+    {
+      "id": "L04-Q24",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 6,
+          "section": "lecture-04-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Neurons I",
+        "Lecture4-Neurons1.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 4 讲：若要解释\"leak resistance、battery/reversal potential、Ohm's law、leakyintegrator equation\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。"
+        },
+        {
+          "id": "b",
+          "text": "从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。"
+        },
+        {
+          "id": "c",
+          "text": "解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。"
+        },
+        {
+          "id": "d",
+          "text": "从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate-and-fire 的 ramp、threshold crossing、reset 和 F-I relation。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“cell membrane、ions、charge separation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“ion-selective channels、Boltzmann distribution、Nernst/equilibrium potentials”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Kirchhoff current law、 charge conservation、 capacitor、 capacitive current”，不是题干指定的关系。"
+      },
+      "explanation": "从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。"
+    },
+    {
+      "id": "L04-Q25",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "膜电位",
+        "membrane voltage"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"细胞内电势减去细胞外电势。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "扩散（diffusion）"
+        },
+        {
+          "id": "b",
+          "text": "膜电位（membrane voltage）"
+        },
+        {
+          "id": "c",
+          "text": "电势能（electric potential energy）"
+        },
+        {
+          "id": "d",
+          "text": "平衡电位（equilibrium potential）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“扩散（diffusion）”指：由浓度梯度驱动的随机净迁移。",
+        "c": "“电势能（electric potential energy）”指：带电粒子在电势中的能量 qφ。",
+        "d": "“平衡电位（equilibrium potential）”指：单离子净通量为零的电压。"
+      },
+      "explanation": "膜电位（membrane voltage）：细胞内电势减去细胞外电势。"
+    },
+    {
+      "id": "L04-Q26",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "扩散",
+        "diffusion"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"由浓度梯度驱动的随机净迁移。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "电势能（electric potential energy）"
+        },
+        {
+          "id": "b",
+          "text": "平衡电位（equilibrium potential）"
+        },
+        {
+          "id": "c",
+          "text": "扩散（diffusion）"
+        },
+        {
+          "id": "d",
+          "text": "反转电位（reversal potential）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“电势能（electric potential energy）”指：带电粒子在电势中的能量 qφ。",
+        "b": "“平衡电位（equilibrium potential）”指：单离子净通量为零的电压。",
+        "d": "“反转电位（reversal potential）”指：该通道电流改变方向的电压；简单情形等于 equilibrium potential。"
+      },
+      "explanation": "扩散（diffusion）：由浓度梯度驱动的随机净迁移。"
+    },
+    {
+      "id": "L04-Q27",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "电势能",
+        "electric potential energy"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"带电粒子在电势中的能量 qφ。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "平衡电位（equilibrium potential）"
+        },
+        {
+          "id": "b",
+          "text": "反转电位（reversal potential）"
+        },
+        {
+          "id": "c",
+          "text": "电导（conductance）"
+        },
+        {
+          "id": "d",
+          "text": "电势能（electric potential energy）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“平衡电位（equilibrium potential）”指：单离子净通量为零的电压。",
+        "b": "“反转电位（reversal potential）”指：该通道电流改变方向的电压；简单情形等于 equilibrium potential。",
+        "c": "“电导（conductance）”指：电阻的倒数，G=1/R。"
+      },
+      "explanation": "电势能（electric potential energy）：带电粒子在电势中的能量 qφ。"
+    },
+    {
+      "id": "L04-Q28",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "平衡电位",
+        "equilibrium potential"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"单离子净通量为零的电压。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "平衡电位（equilibrium potential）"
+        },
+        {
+          "id": "b",
+          "text": "反转电位（reversal potential）"
+        },
+        {
+          "id": "c",
+          "text": "电导（conductance）"
+        },
+        {
+          "id": "d",
+          "text": "电容（capacitance）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“反转电位（reversal potential）”指：该通道电流改变方向的电压；简单情形等于 equilibrium potential。",
+        "c": "“电导（conductance）”指：电阻的倒数，G=1/R。",
+        "d": "“电容（capacitance）”指：单位电压可储存的电荷 Q/V。"
+      },
+      "explanation": "平衡电位（equilibrium potential）：单离子净通量为零的电压。"
+    },
+    {
+      "id": "L04-Q29",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "反转电位",
+        "reversal potential"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"该通道电流改变方向的电压；简单情形等于 equilibrium potential。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "电导（conductance）"
+        },
+        {
+          "id": "b",
+          "text": "反转电位（reversal potential）"
+        },
+        {
+          "id": "c",
+          "text": "电容（capacitance）"
+        },
+        {
+          "id": "d",
+          "text": "Kirchhoff 电流定律（Kirchhoff current law）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“电导（conductance）”指：电阻的倒数，G=1/R。",
+        "c": "“电容（capacitance）”指：单位电压可储存的电荷 Q/V。",
+        "d": "“Kirchhoff 电流定律（Kirchhoff current law）”指：节点流入与流出电流的代数和为零。"
+      },
+      "explanation": "反转电位（reversal potential）：该通道电流改变方向的电压；简单情形等于 equilibrium potential。"
+    },
+    {
+      "id": "L04-Q30",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "电导",
+        "conductance"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"电阻的倒数，G=1/R。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "电容（capacitance）"
+        },
+        {
+          "id": "b",
+          "text": "Kirchhoff 电流定律（Kirchhoff current law）"
+        },
+        {
+          "id": "c",
+          "text": "电导（conductance）"
+        },
+        {
+          "id": "d",
+          "text": "积分放电模型（integrate-and-fire model）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“电容（capacitance）”指：单位电压可储存的电荷 Q/V。",
+        "b": "“Kirchhoff 电流定律（Kirchhoff current law）”指：节点流入与流出电流的代数和为零。",
+        "d": "“积分放电模型（integrate-and-fire model）”指：积累输入，越阈值产生 spike 并 reset 的抽象模型。"
+      },
+      "explanation": "电导（conductance）：电阻的倒数，G=1/R。"
+    },
+    {
+      "id": "L04-Q31",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "电容",
+        "capacitance"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"单位电压可储存的电荷 Q/V。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Kirchhoff 电流定律（Kirchhoff current law）"
+        },
+        {
+          "id": "b",
+          "text": "积分放电模型（integrate-and-fire model）"
+        },
+        {
+          "id": "c",
+          "text": "漏积分器（leaky integrator）"
+        },
+        {
+          "id": "d",
+          "text": "电容（capacitance）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“Kirchhoff 电流定律（Kirchhoff current law）”指：节点流入与流出电流的代数和为零。",
+        "b": "“积分放电模型（integrate-and-fire model）”指：积累输入，越阈值产生 spike 并 reset 的抽象模型。",
+        "c": "“漏积分器（leaky integrator）”指：状态被输入驱动同时向基线指数回归。"
+      },
+      "explanation": "电容（capacitance）：单位电压可储存的电荷 Q/V。"
+    },
+    {
+      "id": "L04-Q32",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Kirchhoff 电流定律",
+        "Kirchhoff current law"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"节点流入与流出电流的代数和为零。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Kirchhoff 电流定律（Kirchhoff current law）"
+        },
+        {
+          "id": "b",
+          "text": "积分放电模型（integrate-and-fire model）"
+        },
+        {
+          "id": "c",
+          "text": "漏积分器（leaky integrator）"
+        },
+        {
+          "id": "d",
+          "text": "膜电位（membrane voltage）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“积分放电模型（integrate-and-fire model）”指：积累输入，越阈值产生 spike 并 reset 的抽象模型。",
+        "c": "“漏积分器（leaky integrator）”指：状态被输入驱动同时向基线指数回归。",
+        "d": "“膜电位（membrane voltage）”指：细胞内电势减去细胞外电势。"
+      },
+      "explanation": "Kirchhoff 电流定律（Kirchhoff current law）：节点流入与流出电流的代数和为零。"
+    },
+    {
+      "id": "L04-Q33",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "积分放电模型",
+        "integrate-and-fire model"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"积累输入，越阈值产生 spike 并 reset 的抽象模型。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "漏积分器（leaky integrator）"
+        },
+        {
+          "id": "b",
+          "text": "积分放电模型（integrate-and-fire model）"
+        },
+        {
+          "id": "c",
+          "text": "膜电位（membrane voltage）"
+        },
+        {
+          "id": "d",
+          "text": "扩散（diffusion）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“漏积分器（leaky integrator）”指：状态被输入驱动同时向基线指数回归。",
+        "c": "“膜电位（membrane voltage）”指：细胞内电势减去细胞外电势。",
+        "d": "“扩散（diffusion）”指：由浓度梯度驱动的随机净迁移。"
+      },
+      "explanation": "积分放电模型（integrate-and-fire model）：积累输入，越阈值产生 spike 并 reset 的抽象模型。"
+    },
+    {
+      "id": "L04-Q34",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 3,
+          "section": "lecture-04-source-3"
+        }
+      ],
+      "conceptTags": [
+        "漏积分器",
+        "leaky integrator"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 4 讲：本讲把\"状态被输入驱动同时向基线指数回归。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "膜电位（membrane voltage）"
+        },
+        {
+          "id": "b",
+          "text": "扩散（diffusion）"
+        },
+        {
+          "id": "c",
+          "text": "漏积分器（leaky integrator）"
+        },
+        {
+          "id": "d",
+          "text": "电势能（electric potential energy）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“膜电位（membrane voltage）”指：细胞内电势减去细胞外电势。",
+        "b": "“扩散（diffusion）”指：由浓度梯度驱动的随机净迁移。",
+        "d": "“电势能（electric potential energy）”指：带电粒子在电势中的能量 qφ。"
+      },
+      "explanation": "漏积分器（leaky integrator）：状态被输入驱动同时向基线指数回归。"
+    },
+    {
+      "id": "L04-Q35",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 2,
+          "section": "lecture-04-source-2"
+        }
+      ],
+      "conceptTags": [
+        "膜电位符号 convention"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：使用\"膜电位符号 convention\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "b",
+          "text": "C 近似常数"
+        },
+        {
+          "id": "c",
+          "text": "Q=CV"
+        },
+        {
+          "id": "d",
+          "text": "inside minus outside"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“Nernst equilibrium potential”的条件，不是题干公式的条件。",
+        "b": "这是“电容定义”的条件，不是题干公式的条件。",
+        "c": "这是“capacitive current”的条件，不是题干公式的条件。"
+      },
+      "explanation": "膜电位符号 convention 的适用条件：inside minus outside"
+    },
+    {
+      "id": "L04-Q36",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 1,
+          "section": "lecture-04-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Nernst equilibrium potential"
+      ],
+      "difficulty": 1,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：使用\"Nernst equilibrium potential\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "b",
+          "text": "inside minus outside"
+        },
+        {
+          "id": "c",
+          "text": "C 近似常数"
+        },
+        {
+          "id": "d",
+          "text": "Q=CV"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“膜电位符号 convention”的条件，不是题干公式的条件。",
+        "c": "这是“电容定义”的条件，不是题干公式的条件。",
+        "d": "这是“capacitive current”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Nernst equilibrium potential 的适用条件：单离子平衡、温度固定"
+    },
+    {
+      "id": "L04-Q37",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 2,
+          "section": "lecture-04-source-2"
+        }
+      ],
+      "conceptTags": [
+        "电容定义"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：使用\"电容定义\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "inside minus outside"
+        },
+        {
+          "id": "b",
+          "text": "C 近似常数"
+        },
+        {
+          "id": "c",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "d",
+          "text": "Q=CV"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“膜电位符号 convention”的条件，不是题干公式的条件。",
+        "c": "这是“Nernst equilibrium potential”的条件，不是题干公式的条件。",
+        "d": "这是“capacitive current”的条件，不是题干公式的条件。"
+      },
+      "explanation": "电容定义的适用条件：C 近似常数"
+    },
+    {
+      "id": "L04-Q38",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "capacitive current"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：使用\"capacitive current\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "inside minus outside"
+        },
+        {
+          "id": "b",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "c",
+          "text": "Q=CV"
+        },
+        {
+          "id": "d",
+          "text": "C 近似常数"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“膜电位符号 convention”的条件，不是题干公式的条件。",
+        "b": "这是“Nernst equilibrium potential”的条件，不是题干公式的条件。",
+        "d": "这是“电容定义”的条件，不是题干公式的条件。"
+      },
+      "explanation": "capacitive current 的适用条件：Q=CV"
+    },
+    {
+      "id": "L04-Q39",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 4,
+          "section": "lecture-04-source-4"
+        }
+      ],
+      "conceptTags": [
+        "leak current"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：使用\"leak current\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "inside minus outside"
+        },
+        {
+          "id": "b",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "c",
+          "text": "C 近似常数"
+        },
+        {
+          "id": "d",
+          "text": "线性被动 conductance"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“膜电位符号 convention”的条件，不是题干公式的条件。",
+        "b": "这是“Nernst equilibrium potential”的条件，不是题干公式的条件。",
+        "c": "这是“电容定义”的条件，不是题干公式的条件。"
+      },
+      "explanation": "leak current 的适用条件：线性被动 conductance"
+    },
+    {
+      "id": "L04-Q40",
+      "lecture": 4,
+      "sectionId": "lecture-04-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture4-Neurons1.pdf",
+          "page": 5,
+          "section": "lecture-04-source-5"
+        }
+      ],
+      "conceptTags": [
+        "LIF subthreshold equation"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 4 讲：使用\"LIF subthreshold equation\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "threshold/reset 另行指定"
+        },
+        {
+          "id": "b",
+          "text": "inside minus outside"
+        },
+        {
+          "id": "c",
+          "text": "单离子平衡、温度固定"
+        },
+        {
+          "id": "d",
+          "text": "C 近似常数"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“膜电位符号 convention”的条件，不是题干公式的条件。",
+        "c": "这是“Nernst equilibrium potential”的条件，不是题干公式的条件。",
+        "d": "这是“电容定义”的条件，不是题干公式的条件。"
+      },
+      "explanation": "LIF subthreshold equation 的适用条件：threshold/reset 另行指定"
+    }
+  ]
+}

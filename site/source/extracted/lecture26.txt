@@ -1,0 +1,899 @@
+NEUROSCI 366
+Lecture 26
+
+
+
+Hopfield 联 想 记 忆 模 型 / Hopfield Associative
+
+Memory
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture26‑Memory‑HopfieldModel.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 26                                                          Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                3
+
+2 Learning objectives and prerequisite dependency map                                                      3
+
+3 Five‑minute prerequisite diagnostic                                                                      3
+
+4 Source‑aligned lesson / 按原笔记页序                                                                           4
+   4.1 Lecture26‑Memory‑HopfieldModel.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . .             4
+   4.2 Lecture26‑Memory‑HopfieldModel.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . .             5
+   4.3 Lecture26‑Memory‑HopfieldModel.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . .             6
+   4.4 Lecture26‑Memory‑HopfieldModel.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . .             7
+   4.5 Lecture26‑Memory‑HopfieldModel.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . .             8
+   4.6 Lecture26‑Memory‑HopfieldModel.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . .             9
+
+5 补全推导与数学支架 / Derivations                                                                                  10
+   5.1 binary asynchronous update 与 energy descent . . . . . . . . . . . . . . . . . . . . . .             10
+   5.2 Hebbian weights 与 P=1 retrieval . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       11
+   5.3 P>1 的 signal–crosstalk decomposition . . . . . . . . . . . . . . . . . . . . . . . . . . .          12
+   5.4 capacity、spurious mixtures 与 sparse alternative . . . . . . . . . . . . . . . . . . . . .           13
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                          14
+
+7 Worked examples and transfer                                                                             14
+   7.1 小 N pattern completion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      14
+   7.2 loading scale . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   14
+
+8 Formula and notation sheet                                                                               16
+
+9 Bilingual glossary                                                                                       16
+
+10 Common traps, assumptions, and limitations                                                              17
+
+11 Cumulative Knowledge Check                                                                              18
+
+12 Hint Bank                                                                                               20
+
+13 Complete Answer Key with reasoning                                                                      22
+
+14 Source‑page concordance and coverage audit                                                              23
+
+
+
+
+                                                    1/24
+NEUROSCI 366 ・Lecture 26                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            23
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     23
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    23
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      23
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   24
+
+
+
+
+                                                     2/24
+NEUROSCI 366 ・Lecture 26                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：Hebbian assembly。
+‧ 从第一原则推导：binary asynchronous dynamics。
+‧ 解释几何/计算直觉：energy。
+‧ 连接生物学解释：stored attractors/basins。
+‧ 诊断 assumptions 与 failure modes：spurious mixtures。
+‧ 把概念迁移到新神经科学问题：signal+crosstalk。
+
+ Dependency map
+ Hebbian assembly → binary asynchronous dynamics → energy → stored attractors/basins →
+ spurious mixtures → signal+crosstalk
+ Core question
+ symmetric Hebbian recurrent weights 如何把 random binary patterns 变成 attractors，energy
+ descent、crosstalk noise 与 loading α 又如何决定 pattern completion 和 capacity？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. asynchronous update 是什么？
+                          （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. energy descent 需要哪些 weight 条件？
+                                （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. 为什么 ΔE≤0？
+           （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. Hebbian W_ij 存了什么？
+                    （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. P=1 时 ξ 为什么 fixed point？
+                          （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+                                              3/24
+NEUROSCI 366 ・Lecture 26                                          Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture26‑Memory‑HopfieldModel.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture26‑Memory‑HopfieldModel.pdf, p. 1]
+ Clean reconstruction. Page 1：explicit memory、Hebbian assemblies、encoding/retrieval、pat‑
+ tern completion、engram。
+ What the note is saying. 本页的中心对象是 Hebbian assembly 与 binary asynchronous dynam‑
+ ics。原笔记将它们放进以下链条：explicit memory、Hebbian assemblies、encoding/retrieval、
+ pattern completion、engram。
+ Why it follows. 从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern com‑
+ pletion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。其逻辑后果
+ 是：从 Hebbian weight rule 完整推导 P=1 时 stored pattern 为 attractor，并分析 aligned/anti‑
+ aligned/spurious states。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  asynchronous update 是什么？
+
+
+
+
+                                          4/24
+NEUROSCI 366 ・Lecture 26                                            Source‑aligned companion
+
+
+4.2 Lecture26‑Memory‑HopfieldModel.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture26‑Memory‑HopfieldModel.pdf, p. 2]
+ Clean reconstruction. Page 2：Hopfield binary network、asynchronous update、stored random
+ patterns。
+ What the note is saying. 本页的中心对象是 energy 与 stored attractors/basins。原笔记将它们放
+ 进以下链条：Hopfield binary network、asynchronous update、stored random patterns。
+ Why it follows. 精确定义 binary states、random patterns、asynchronous single‑neuron update
+ 和 convergence procedure。其逻辑后果是：从 Hebbian cell assembly 解释 encoding、partial cue、
+ retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary
+ model。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  energy descent 需要哪些 weight 条件？
+
+
+
+
+                                           5/24
+NEUROSCI 366 ・Lecture 26                                             Source‑aligned companion
+
+
+4.3 Lecture26‑Memory‑HopfieldModel.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture26‑Memory‑HopfieldModel.pdf, p. 3]
+ Clean reconstruction. Page 3：Ising energy、symmetric Hebbian weights、P=1 retrieval deriva‑
+ tion、basins/spurious attractors。
+ What the note is saying. 本页的中心对象是 spurious mixtures 与 signal+crosstalk。原笔记将它们
+ 放进以下链条：Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spu‑
+ rious attractors。
+ Why it follows. 解释 Ising energy，证明 symmetric weights/asynchronous updates 使 energy
+ non‑increasing；说明 synchronous update 的差异。其逻辑后果是：从 Hebbian cell assembly 解释
+ encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypoth‑
+ esis 与 abstract binary model。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么 ΔE≤0？
+
+
+
+
+                                           6/24
+NEUROSCI 366 ・Lecture 26                                           Source‑aligned companion
+
+
+4.4 Lecture26‑Memory‑HopfieldModel.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture26‑Memory‑HopfieldModel.pdf, p. 4]
+ Clean reconstruction. Page 4：odd‑mixture states、memory capacity、signal‑plus‑interference
+ decomposition。
+ What the note is saying. 本页的中心对象是 capacity/spin glass 与 sparse alternative。 原笔记将它们
+ 放进以下链条：odd‑mixture states、memory capacity、signal‑plus‑interference decomposition。
+ Why it follows. 从 Hebbian weight rule 完整推导 P=1 时 stored pattern 为 attractor，并分析
+ aligned/anti‑aligned/spurious states。其逻辑后果是：解释 odd‑mixture spurious attractors 及
+ basin of attraction。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Hebbian W_ij 存了什么？
+
+
+
+
+                                          7/24
+NEUROSCI 366 ・Lecture 26                                           Source‑aligned companion
+
+
+4.5 Lecture26‑Memory‑HopfieldModel.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture26‑Memory‑HopfieldModel.pdf, p. 5]
+ Clean reconstruction. Page 5：Gaussian approximation、error probability、P∝N、critical al‑
+ pha≈0.138、spin‑glass transition。
+ What the note is saying. 本页的中心对象是 Hebbian assembly 与 binary asynchronous dynam‑
+ ics。原笔记将它们放进以下链条：Gaussian approximation、error probability、P∝N、critical
+ alpha≈0.138、spin‑glass transition。
+ Why it follows. 解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和
+ spin‑glass transition；说明该常数依赖经典模型假设。其逻辑后果是：对 P>1 做 signal‑plus‑crosstalk
+ decomposition；逐步计算 interference mean/variance，并用 Gaussian approximation 得到 error
+ tendency。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure con‑
+ ditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  P=1 时 ξ 为什么 fixed point？
+
+
+
+
+                                          8/24
+NEUROSCI 366 ・Lecture 26                                              Source‑aligned companion
+
+
+4.6 Lecture26‑Memory‑HopfieldModel.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture26‑Memory‑HopfieldModel.pdf, p. 6]
+ Clean reconstruction. Page 6：sparse/stochastic associative‑memory alternative、global inhi‑
+ bition、near‑optimal capacity。
+ What the note is saying. 本页的中心对象是 energy 与 stored attractors/basins。原笔记将它们放
+ 进以下链条：sparse/stochastic associative‑memory alternative、global inhibition、near‑optimal
+ capacity。
+ Why it follows. 比较 sparse{0,1}stochastic model、global inhibition、temperature 与 informa‑
+ tion capacity。其逻辑后果是：解释 capacity proportional to N、loading alpha=P/N、criticalalpha_
+ c≈0.138 和 spin‑glass transition；说明该常数依赖经典模型假设。后面的正式推导会逐项写出 as‑
+ sumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  −ξ 为什么也 attractor？
+
+
+
+
+                                            9/24
+NEUROSCI 366 ・Lecture 26                                          Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 binary asynchronous update 与 energy descent
+
+【必要前置】      为什么 dynamics 收敛而不是任意循环？
+                                               
+                                       ∑
+                             Si ← sgn   Wij Sj 
+                                                  j
+
+                                          1∑
+                                   E=−       Wij Si Sj
+                                          2
+                                             ij
+
+                                ∆E = −(Sinew − Siold )hi ≤ 0
+1. 每步只随机选择一个 neuron 更新。
+2. symmetric W_ij=W_ji、W_ii=0 让涉及 i 的 energy change 合并成 −ΔS_i h_i。
+3. update 选择与 local field h_i 同号的新 state，因此 product 非负、ΔE≤0。
+4. 有限 state space 下 eventually 到 fixed point（或平能 plateau）。
+
+  Geometric/computational intuition. 每个 bit 局部对齐于 neighbors，同时整个 network 沿
+  energy landscape 下坡。
+  Biological interpretation / failure condition. synchronous update 可出现 2‑cycles；asym‑
+  metric weights 不保证该 energy。
+
+  Micro‑check
+  Hebbian W_ij 存了什么？
+
+
+
+
+                                           10/24
+NEUROSCI 366 ・Lecture 26                                                  Source‑aligned companion
+
+
+5.2 Hebbian weights 与 P=1 retrieval
+
+【补全推导】      证明单一 pattern ξ 是 attractor。
+
+                                                   1
+                                       Wij =         ξi ξj (i ̸= j)
+                                                   N
+                                          ∑                 ξi ∑
+                                   hi =          Wij Sj =        ξ j Sj
+                                                            N
+                                          j̸=i                 j̸=i
+
+                                    Sinew = ξi sgn(ξ · S − ξi Si )
+1. 若 S=ξ，local field=(N−1)ξ_i/N，update 保持 ξ_i。
+2. 若 cue 与 ξ overlap 为正且 errors 不多，sum 仍与 ξ_i 同号，errors 被纠正。
+3. −ξ 也成为 attractor，因为 weights 对 global sign invariant。
+4. basin size 由 initial overlap 与 finite‑size effects 决定。
+
+  Geometric/computational intuition. 每条 weight 存储两个 bits 是否同号，local field 投票恢复
+  一致 pattern。
+  Biological interpretation / failure condition. patterns correlated 或 biased activity 会改变
+  weights 与 basins。
+
+  Micro‑check
+  P=1 时 ξ 为什么 fixed point？
+
+
+
+
+                                                   11/24
+NEUROSCI 366 ・Lecture 26                                             Source‑aligned companion
+
+
+5.3 P>1 的 signal–crosstalk decomposition
+
+【跨页连接】      在目标 memory μ 上计算 local field。
+
+                                                1 ∑ ν ν
+                                                    P
+                                        Wij =      ξi ξj
+                                                N
+                                                   ν=1
+
+                                            N −1 µ
+                                        hµi =     ξi + ηiµ
+                                              N
+                                                 (N − 1)(P − 1)
+                            E[η] = 0,   Var(η) ≈                ≈α
+                                                      N2
+1. ν=μ 项给 aligned signal。
+2. ν≠μ memories 的随机 products 相加成 interference。
+3. 独立 random ±1 patterns 下 mean 0，variance 是项数/N²。
+4. large N 可用 Gaussian approximation 估 error P(h_i ξ_i^μ<0)。
+
+  Geometric/computational intuition. 每个 memory 都贡献一个 weak vote，目标 signal O(1)，
+  其他 memories 汇成 noise O(√α)。
+  Biological interpretation / failure condition. independence/Gaussian approximation 在
+  correlated/sparse patterns 下改变。
+
+  Micro‑check
+  −ξ 为什么也 attractor？
+
+
+
+
+                                                12/24
+NEUROSCI 366 ・Lecture 26                                                  Source‑aligned companion
+
+
+5.4 capacity、spurious mixtures 与 sparse alternative
+
+【模型边界】      为什么 capacity ∝N 且经典常数约 0.138？
+
+                                              α = P /N
+
+                           αc ≈ 0.138   (classic dense random Hopfield)
+                                   S mix = sgn(±ξ µ1 ± ξ µ2 ± ξ µ3 )
+1. 保持 finite error 需 P 与 N 同阶，因此 capacity linear in N。
+2. self‑consistent statistical‑mechanics analysis 给稳定 retrieval 临界 α_c≈0.138。
+3. odd mixtures 可形成 spurious attractors，不对应任何单一 memory。
+4. sparse {0,1} stochastic models 加 global inhibition/temperature，可提高 information efficiency
+   并改变 capacity。
+
+  Geometric/computational intuition. 更多 memories 让 landscape 出现错误 valleys，最终
+  retrieval states 被 spin‑glass‑like states 取代。
+  Biological interpretation / failure condition. 0.138N 不是 brain memory capacity，也不适用
+  于 modern/sparse/structured associative memories。
+
+  Micro‑check
+  overlap m=1、0、−1 分别表示？
+
+
+
+
+                                                13/24
+NEUROSCI 366 ・Lecture 26                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  Hopfield model 把 explicit memory 抽象为 attractor dynamics：partial cue 经 recurrent up‑
+  dates 收敛到 stored pattern。symmetric weights 与 asynchronous single‑neuron updates 保
+  证 Ising energy 不增加。P=1 时 Hebbian weights 使目标及其反号成为 fixed points；P>1 时其他
+  memories 产生 crosstalk noise，loading α=P/N 增大后 retrieval errors 上升，并在经典 dense
+  random model 的 α≈0.138 附近失去稳定 retrieval。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 小 N pattern completion
+
+【原课/核心例题】         Prompt. ξ=(1,1,−1,−1)，P=1；cue S=(1,−1,−1,−1)。
+
+ Worked solution. overlap ξ·S=2>0；对第二 bit，多数 other aligned products 推 local field 为正，
+ 更新可纠正到 +1，随后收敛 ξ。
+ Check. 需逐 neuron asynchronous 更新；order 可影响 transient，但 energy 不增。
+
+
+7.2 loading scale
+
+【跨课连接】       Prompt. N=1000, P=100。
+
+
+
+
+                                               14/24
+NEUROSCI 366 ・Lecture 26                                     Source‑aligned companion
+
+
+
+ Worked solution. α=0.1，低于经典 0.138 threshold，理论上 random patterns 可较稳定 retrieval；
+ 这不是保证每个 finite pattern 零错误。
+ Check. critical value 是 large‑N 经典模型结果。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      15/24
+NEUROSCI 366 ・Lecture 26                                                 Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. binary neuron state
+                                            Si ∈ {−1, +1}
+Conditions / conventions: classic dense model
+2. asynchronous update
+                                            Si ← sgn(hi )
+Conditions / conventions: one neuron at a time
+3. Hopfield energy
+                                                1∑
+                                         E=−       Wij Si Sj
+                                                2
+                                                  ij
+
+Conditions / conventions: symmetric W
+4. Hebbian storage rule                                ∑ µ µ
+                                         Wij = N −1     ξi ξj
+                                                         µ
+
+Conditions / conventions: Wii=0
+5. pattern overlap                                     ∑ µ
+                                         mµ = N −1      ξ i Si
+                                                         i
+
+Conditions / conventions: ±1 patterns
+6. retrieval field decomposition
+                                        h = signal + crosstalk
+Conditions / conventions: random‑pattern analysis
+7. loading ratio
+                                              α = P /N
+Conditions / conventions: P memories, N neurons
+8. classic capacity threshold
+                                             αc ≈ 0.138
+Conditions / conventions: dense unbiased random Hopfield
+
+
+9 Bilingual glossary
+
+
+ 中文                  English / symbol              Operational meaning
+ 联想记忆                associative memory            由 partial/noisy cue 恢复 stored pattern。
+ 细胞集合                cell assembly                 共同活动并因 Hebbian connections 形成的
+                                                   neuron group。
+ 吸引子盆地               basin of attraction           收敛到同一 attractor 的 initial states 集合。
+ 模式补全                pattern completion            由 incomplete cue 重建完整 memory。
+ 异步更新                asynchronous update           每步只更新一个 unit。
+ Ising 能量            Ising energy                  symmetric binary network 的 Lyapunov
+                                                   function。
+
+
+
+                                                 16/24
+NEUROSCI 366 ・Lecture 26                                           Source‑aligned companion
+
+
+
+ 中文                  English / symbol       Operational meaning
+ 重叠                  overlap                current state 与 stored pattern 的 normalized
+                                            dot product。
+ 串扰                  crosstalk              其他 stored patterns 对目标 retrieval 的
+                                            interference。
+ 伪吸引子                spurious attractor     不对应单一 stored pattern 的 stable state。
+ 自旋玻璃                spin glass             大量无序 metastable states 主导的 regime。
+ 温度                  temperature            stochastic update noise 的 scale parameter。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. synchronous 与 asynchronous dynamics 混用 energy proof。
+2. 忘记 W 必须 symmetric 且 Wii=0。
+3. P=1 时只说 ξ attractor，忽略 −ξ 与 spurious/global symmetry。
+4. 把 overlap 与 exact bit accuracy 混为一谈。
+5. crosstalk variance 不检查 N、P scaling。
+6. 把 Gaussian approximation 当精确 finite‑N law。
+7. 把 0.138N 当作大脑 memory capacity。
+
+  Course‑specific risk boundary. 明确“memory capacity 0.138N”只属于经典 dense random‑
+  pattern Hopfield model 的稳定‑retrieval criterion，不是大脑记忆容量结论。
+
+
+
+
+                                          17/24
+NEUROSCI 366 ・Lecture 26                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. asynchronous update 是什么？
+
+
+
+2. energy descent 需要哪些 weight 条件？
+
+
+
+3. 为什么 ΔE≤0？
+
+
+
+4. Hebbian W_ij 存了什么？
+
+
+
+5. P=1 时 ξ 为什么 fixed point？
+
+
+
+6. −ξ 为什么也 attractor？
+
+
+
+7. overlap m=1、0、−1 分别表示？
+
+
+
+8. crosstalk mean/variance 近似？
+
+
+
+9. capacity 为什么 ∝N？
+
+
+
+10. odd mixture state 是什么？
+
+
+
+11. α_c≈0.138 的适用范围？
+
+
+
+12. sparse model 为什么可能更高效？
+
+
+
+13. 公式表中的“binary neuron state”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“asynchronous update”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“Hopfield energy”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/24
+NEUROSCI 366 ・Lecture 26                              Source‑aligned companion
+
+
+
+
+16. 公式表中的“Hebbian storage rule”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“pattern overlap”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“retrieval field decomposition”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+19. 公式表中的“loading ratio”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+20. 公式表中的“classic capacity threshold”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                  19/24
+NEUROSCI 366 ・Lecture 26                                 Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“binary neuron state”对应的变量关系入手。
+    Hint 2. 把条件“classic dense model”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“asynchronous update”对应的变量关系入手。
+    Hint 2. 把条件“one neuron at a time”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     20/24
+NEUROSCI 366 ・Lecture 26                                    Source‑aligned companion
+
+
+15. Hint 1. 先从“Hopfield energy”对应的变量关系入手。
+    Hint 2. 把条件“symmetric W”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“Hebbian storage rule”对应的变量关系入手。
+    Hint 2. 把条件“Wii=0”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“pattern overlap”对应的变量关系入手。
+    Hint 2. 把条件“±1 patterns”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“retrieval field decomposition”对应的变量关系入手。
+    Hint 2. 把条件“random‑pattern analysis”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+19. Hint 1. 先从“loading ratio”对应的变量关系入手。
+    Hint 2. 把条件“P memories, N neurons”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+20. Hint 1. 先从“classic capacity threshold”对应的变量关系入手。
+    Hint 2. 把条件“dense unbiased random Hopfield”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                     21/24
+NEUROSCI 366 ・Lecture 26                                            Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. 随机/依序选择一个 neuron，用 local field 更新，再继续。
+ 2. W symmetric，通常 Wii=0。
+ 3. new state 与 local field 对齐，使 −ΔS_i h_i≤0。
+ 4. 所有 patterns 中 bits i、j 同号/异号的 summed correlation。
+ 5. local field=(N−1)ξ_i/N，与 ξ_i 同号。
+ 6. global sign flip 不改变 pair products/energy。
+ 7. 完全同 pattern、平均无关、完全反号。
+ 8. mean 0，variance≈P/N=α。
+ 9. signal O(1)，crosstalk variance P/N；保持 finite 需 P=O(N)。
+10. 若干 memories 带符号求和后取 sign 的 spurious attractor。
+11. 经典 dense random unbiased asynchronous Hopfield large‑N model。
+12. 低 activity 与 global inhibition 减少 interference，并按 information per synapse 优化。
+13. 适用条件/约定：classic dense model。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                   Si ∈ {−1, +1}
+
+14. 适用条件/约定：one neuron at a time。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                    Si ← sgn(hi )
+
+15. 适用条件/约定：symmetric W。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                     1∑
+                                E=−     Wij Si Sj
+                                     2
+                                                 ij
+
+16. 适用条件/约定：Wii=0。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                           ∑ µ µ
+                                Wij = N −1  ξi ξj
+                                                      µ
+
+17. 适用条件/约定：±1 patterns。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                           ∑ µ
+                                 mµ = N −1  ξ i Si
+                                                      i
+
+18. 适用条件/约定：random‑pattern analysis。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                h = signal + crosstalk
+
+19. 适用条件/约定：P memories, N neurons。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                    α = P /N
+
+20. 适用条件/约定：dense unbiased random Hopfield。sanity check 应检查单位、符号、极限或 shape
+    是否与定义一致。
+                                    αc ≈ 0.138
+
+
+                                           22/24
+NEUROSCI 366 ・Lecture 26                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture26-Memory-                  1         Main source‑page unit: thumbnail,
+ HopfieldModel.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture26-Memory-                  2         Main source‑page unit: thumbnail,
+ HopfieldModel.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture26-Memory-                  3         Main source‑page unit: thumbnail,
+ HopfieldModel.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture26-Memory-                  4         Main source‑page unit: thumbnail,
+ HopfieldModel.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture26-Memory-                  5         Main source‑page unit: thumbnail,
+ HopfieldModel.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture26-Memory-                  6         Main source‑page unit: thumbnail,
+ HopfieldModel.pdf                            reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的 Nobel 旁注是历史背景，不影响模型定义。
+2. Page 5 的 α_c≈0.138 仅属于 classic dense unbiased random‑pattern Hopfield retrieval criterion。
+3. Page 6 的 sparse stochastic model 是 alternative family，capacity comparison 依 activity sparsity
+   与 information metric。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              23/24
+NEUROSCI 366 ・Lecture 26                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/24
+

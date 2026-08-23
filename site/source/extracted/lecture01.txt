@@ -1,0 +1,582 @@
+NEUROSCI 366
+Lecture 1
+
+
+
+计算神经科学导论 / Course Introduction
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture1‑Course‑Introduction.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 1                                                             Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                  2
+
+2 Learning objectives and prerequisite dependency map                                                        2
+
+3 Five‑minute prerequisite diagnostic                                                                        2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                             3
+   4.1 Lecture1‑Course‑Introduction.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . .           3
+   4.2 Lecture1‑Course‑Introduction.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . .           4
+   4.3 Lecture1‑Course‑Introduction.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . .           5
+   4.4 Lecture1‑Course‑Introduction.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . .           6
+
+5 补全推导与数学支架 / Derivations                                                                                    7
+   5.1 最小神经元输入–输出模型：从语言到方程 . . . . . . . . . . . . . . . . . . . . . . . . . . . .                            7
+   5.2 model–data–inference 三角 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            8
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                            9
+
+7 Worked examples and transfer                                                                               9
+   7.1 receptive‑field mapping 的计算化 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .             9
+   7.2 head‑direction coding 的可检验预测 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                 9
+
+8 Formula and notation sheet                                                                                 11
+
+9 Bilingual glossary                                                                                         11
+
+10 Common traps, assumptions, and limitations                                                                11
+
+11 Cumulative Knowledge Check                                                                                13
+
+12 Hint Bank                                                                                                 14
+
+13 Complete Answer Key with reasoning                                                                        15
+
+14 Source‑page concordance and coverage audit                                                                16
+
+15 Errata, uncertainty log, and external endnotes                                                            16
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     16
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    16
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      16
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   16
+
+
+
+
+                                                     1/16
+NEUROSCI 366 ・Lecture 1                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：脑与行为问题。
+‧ 从第一原则推导：变量与假设。
+‧ 解释几何/计算直觉：数学模型。
+‧ 连接生物学解释：simulation / analysis。
+‧ 诊断 assumptions 与 failure modes：数据与估计。
+‧ 把概念迁移到新神经科学问题：检验与修正。
+
+ Dependency map
+ 脑与行为问题 → 变量与假设 → 数学模型 → simulation / analysis → 数据与估计 → 检验与修正
+ Core question
+ 如何把一个关于脑的自然语言问题，转写为变量、模型、可计算预测和可检验数据之间的闭环？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. 为什么“使用 MATLAB 分析 spikes”不自动等于 computational neuroscience？
+                                                           （卡住时先看 Source‑
+   page unit 1，再看补全推导。）
+2. data analysis、simulation 与 inference 的箭头方向分别是什么？
+                                                  （卡住时先看 Source‑page unit 2，再
+   看补全推导。）
+3. 在 r(s)=[ws+b]+ 中，b 增大通常如何影响阈值？
+                                （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. 为什么模型必须报告 assumptions？
+                        （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 举例说明 machine learning 与 nervous‑system modeling 的交集但非同义。
+                                                          （卡住时先看 Source‑page
+   unit 4，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+                                              2/16
+NEUROSCI 366 ・Lecture 1                                          Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture1‑Course‑Introduction.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture1‑Course‑Introduction.pdf, p. 1]
+ Clean reconstruction. Page 1：课堂与教师介绍；课程的跨学科定位。
+ What the note is saying. 本页的中心对象是脑与行为问题与变量与假设。原笔记将它们放进以下链条：
+ 课堂与教师介绍；课程的跨学科定位。
+ Why it follows. 严格区分 computational neuroscience、data science、machine learning、neural‑
+ network engineering 与 nervous‑system modeling；解释它们的交集和非同义关系。其逻辑后果是：
+ 围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。后面的正
+ 式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么“使用 MATLAB 分析 spikes”不自动等于 computational neuroscience？
+
+
+
+
+                                         3/16
+NEUROSCI 366 ・Lecture 1                                          Source‑aligned companion
+
+
+4.2 Lecture1‑Course‑Introduction.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture1‑Course‑Introduction.pdf, p. 2]
+ Clean reconstruction. Page 2：什么是 computational neuroscience；computers、data analysis、
+ machine learning、modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。
+ What the note is saying. 本页的中心对象是数学模型与 simulation / analysis。原笔记将它们放进
+ 以下链条：什么是 computational neuroscience；computers、data analysis、machine learning、
+ modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。
+ Why it follows. 严格区分 computational neuroscience、data science、machine learning、neural‑
+ network engineering 与 nervous‑system modeling；解释它们的交集和非同义关系。其逻辑后果是：
+ 解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation
+ 与 data analysis。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure
+ conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  data analysis、simulation 与 inference 的箭头方向分别是什么？
+
+
+
+
+                                         4/16
+NEUROSCI 366 ・Lecture 1                                    Source‑aligned companion
+
+
+4.3 Lecture1‑Course‑Introduction.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture1‑Course‑Introduction.pdf, p. 3]
+ Clean reconstruction. Page 3：syllabus / course logistics。把它作为 2025 课程档案简洁记录，不
+ 要把行政事项扩写成学术内容。
+ What the note is saying. 本页的中心对象是数据与估计与检验与修正。原笔记将它们放进以下链条：
+ syllabus / course logistics。把它作为 2025 课程档案简洁记录，不要把行政事项扩写成学术内容。
+ Why it follows. 解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming
+ 用于 simulation 与 data analysis。其逻辑后果是：围绕四个课程级问题建立全课路线图：感觉信息提
+ 取、身体控制、记忆存取、智能系统的形成。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  在 r(s)=[ws+b]+ 中，b 增大通常如何影响阈值？
+
+
+
+
+                                        5/16
+NEUROSCI 366 ・Lecture 1                                     Source‑aligned companion
+
+
+4.4 Lecture1‑Course‑Introduction.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture1‑Course‑Introduction.pdf, p. 4]
+ Clean reconstruction. Page 4：mathematics、programming、MATLAB/Python 的作用；flipped‑
+ classroom logic 与学习方法。
+ What the note is saying. 本页的中心对象是脑与行为问题与变量与假设。原笔记将它们放进以下链条：
+ mathematics、programming、MATLAB/Python 的作用；flipped‑classroom logic 与学习方法。
+ Why it follows. 解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming
+ 用于 simulation 与 data analysis。其逻辑后果是：以神经电生理、receptive‑field mapping、head‑
+ direction coding 等为补充例子，但不要替代原笔记的定义。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么模型必须报告 assumptions？
+
+
+
+
+                                        6/16
+NEUROSCI 366 ・Lecture 1                                        Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 最小神经元输入–输出模型：从语言到方程
+
+【必要前置】      把“刺激越强，神经元通常放电越多，但低于阈值时不响应”转写为可检验模型。
+
+                           r(s) = [ws + b]+ ≡ max(0, ws + b)
+
+                                n | s ∼ Poisson(T r(s))
+                                b
+1. 令 s 表示刺激强度，r 表示预测 firing rate，w 表示敏感度，b 表示基线/阈值偏置。
+2. 线性部分 ws+b 给出刺激投影；rectification 保证预测 rate 不为负。
+3. 给定观察窗 T，Poisson 层把连续 rate 转成可与 spike count 比较的概率预测。
+4. 改变 w、b 或非线性形式会产生不同、可由数据区分的预测。
+
+  Geometric/computational intuition. 模型不是“真实神经元本身”，而是把一句模糊陈述压缩为
+  可计算的输入–输出规则。
+  Biological interpretation / failure condition. 若神经元有 history dependence、适应、多个刺
+  激维度或相关噪声，这个一维静态模型会失败。
+
+  Micro‑check
+  为什么模型必须报告 assumptions？
+
+
+
+
+                                         7/16
+NEUROSCI 366 ・Lecture 1                                                            Source‑aligned companion
+
+
+5.2 model–data–inference 三角
+
+【补全推导】      区分模拟、数据分析和推断各自在做什么。
+
+                          model: P (y | x, θ),    fit: θb = arg max P (y | x, θ)
+                                                                    θ
+
+                                                               b
+                                        prediction: yb = f (x; θ)
+1. simulation 从假设和参数出发生成可能数据；analysis 从已观测数据计算统计量；inference 用数据约
+   束未知参数或模型。
+2. 同一段代码可能同时包含三者，因此必须用问题方向而不是软件名称来分类。
+3. 可证伪性来自模型对未用于拟合的数据作出具体预测。
+
+  Geometric/computational intuition. 箭头方向不同：model→data 是生成；data→parameter
+  是推断；parameter+new input→prediction 是泛化。
+  Biological interpretation / failure condition. 只在训练数据上重现现象而没有 held‑out predic‑
+  tion，不能充分区分解释与记忆。
+
+  Micro‑check
+  举例说明 machine learning 与 nervous‑system modeling 的交集但非同义。
+
+
+
+
+                                                  8/16
+NEUROSCI 366 ・Lecture 1                                                    Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  本课把 computational neuroscience 定位为一种研究策略，而不是某一种软件、算法或职业标签。
+  它既可以从数据出发估计神经表征，也可以从机制假设出发建立模型并模拟；关键标准是：变量定义
+  明确、预测可计算、假设可证伪、结果能回到神经科学问题。课程后续会依次把这套语言用于单神经
+  元、群体编码、视觉、运动、决策、强化学习和记忆。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 receptive‑field mapping 的计算化
+
+【原课/核心例题】         Prompt. 自然语言问题：某神经元在视野哪里最敏感？
+
+ Worked solution. 定义 stimulus pixel/位置 x、时间窗 T、spike count n；建立 P(n|x) 或 rate map
+ r(x)，用重复试验估计并用新试验验证。必须同时记录空间坐标系、曝光时间、baseline 和不确定度。
+ Check. 改变坐标系（screen‑centered vs head‑centered）会改变问题本身，而不仅是画图方式。
+
+
+7.2 head‑direction coding 的可检验预测
+
+【跨课连接】       Prompt. 假设神经元只编码 allocentric head direction。
+
+ Worked solution. 预测 firing rate 应主要由世界坐标中的角度 θ 决定；在改变视觉背景但保持 θ 时
+ tuning 应较稳定。若响应随 egocentric visual angle 改变，则需扩展模型。
+
+
+                                                9/16
+NEUROSCI 366 ・Lecture 1                                      Source‑aligned companion
+
+
+
+ Check. 相关性不能单独证明 causal computation；需要控制行为、速度、视觉输入与采样不均。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      10/16
+NEUROSCI 366 ・Lecture 1                                                      Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. 最小 threshold‑linear 输入–输出模型
+                                           r(s) = [ws + b]+
+Conditions / conventions: 静态、一维刺激；rate 非负
+2. 生成模型：给定输入和参数时数据的分布
+                                               P (y | x, θ)
+Conditions / conventions: conditioning 与随机变量定义明确
+3. maximum‑likelihood 参数估计
+                                        θb = arg max P (y | x, θ)
+                                                   θ
+Conditions / conventions: 模型类与数据独立性假设成立
+4. 已拟合模型对新输入的预测
+                                                         b
+                                              yb = f (x; θ)
+Conditions / conventions: 新输入与训练分布关系需说明
+5. 观测与预测的残差
+                                             error = y − yb
+Conditions / conventions: 单位必须与 y 相同
+
+
+9 Bilingual glossary
+
+ 中文                  English / symbol                  Operational meaning
+ 计算神经科学              computational                     用定量模型、算法与数据分析研究
+                     neuroscience                      nervous‑system computation。
+ 模型                  model                             对变量、关系和假设的明确简化表示。
+ 模拟                  simulation                        按照模型规则生成状态轨迹或合成数据。
+ 推断                  inference                         由数据约束未知状态、参数或模型。
+ 预测                  prediction                        在给定条件下模型对尚未使用数据的定量输出。
+ 可证伪性                falsifiability                    存在观测结果能够与模型预测冲突。
+ 机器学习                machine learning                  从数据优化预测函数的一组方法；与
+                                                       computational neuroscience 有交集但不等同。
+ 数据科学                data science                      数据整理、统计、计算与解释的广义实践。
+ 机制模型                mechanistic model                 变量及相互作用被解释为候选生物过程的模型。
+ 参数                  parameter                         在一次模型运行中固定、但可由数据估计的量。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 computational neuroscience 等同于“用电脑”或“训练神经网络”。
+2. 把拟合得好误认为机制一定正确；多个模型可给出相似预测。
+3. 先选工具再定义问题，导致变量、单位和可证伪预测缺失。
+4. 把 firing rate 当作直接连续测量值，而忽略它通常是统计估计。
+5. 将课程行政信息当作永久学术内容；Page 3 应作为 2025 课程档案。
+
+
+                                                 11/16
+NEUROSCI 366 ・Lecture 1                            Source‑aligned companion
+
+
+
+  Course‑specific risk boundary. 这是一份导论 PDF，不要写成 40 页的泛化计算神经科学百科；重
+  点是忠实、清晰地建立后续 26 课的依赖地图。
+
+
+
+
+                                12/16
+NEUROSCI 366 ・Lecture 1                                                Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. 为什么“使用 MATLAB 分析 spikes”不自动等于 computational neuroscience？
+
+
+
+2. data analysis、simulation 与 inference 的箭头方向分别是什么？
+
+
+
+3. 在 r(s)=[ws+b]+ 中，b 增大通常如何影响阈值？
+
+
+
+4. 为什么模型必须报告 assumptions？
+
+
+
+5. 举例说明 machine learning 与 nervous‑system modeling 的交集但非同义。
+
+
+
+6. 把“记忆”改写成一个可计算问题，至少给出输入、状态、输出。
+
+
+
+7. 为什么 held‑out prediction 比训练集拟合更能检验模型？
+
+
+
+8. Page 4 的 flipped‑classroom logic 如何嵌入静态教材？
+
+
+
+
+                                                  13/16
+NEUROSCI 366 ・Lecture 1                  Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+
+
+
+
+                                 14/16
+NEUROSCI 366 ・Lecture 1                                  Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. 因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。
+2. analysis 对已观测数据求统计量；simulation 从模型生成数据；inference 从数据估计未知参数/状态。
+3. 使 ws+b 更容易为正，等效降低输入阈值；具体阈值为 ‑b/w（w>0）。
+4. 同一公式只在假设成立时具有相应解释；假设决定可推广范围和失败方式。
+5. 可用神经网络预测 spikes，这是 ML；若权重/单元被解释为生物机制并检验，则也是 modeling。许多
+   ML 模型只追求预测，不主张生物机制。
+6. 例如输入为 sample stimulus，隐藏状态 m(t) 在 delay 中演化，输出为 comparison choice；检验 m(t)
+   是否保留 sample 信息。
+7. 它测试模型是否捕捉可泛化结构，而不是只记住观测噪声。
+8. 先阅读与预测，再做 micro‑check，必要时查 Hint Bank，最后独立核对 Answer Key 并反思错误类型。
+
+
+
+
+                                   15/16
+NEUROSCI 366 ・Lecture 1                                                    Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                         Page       Coverage status
+ Lecture1-Course-                    1          Main source‑page unit: thumbnail,
+ Introduction.pdf                               reconstruction, explanation, prediction
+                                                question.
+ Lecture1-Course-                    2          Main source‑page unit: thumbnail,
+ Introduction.pdf                               reconstruction, explanation, prediction
+                                                question.
+ Lecture1-Course-                    3          Main source‑page unit: thumbnail,
+ Introduction.pdf                               reconstruction, explanation, prediction
+                                                question.
+ Lecture1-Course-                    4          Main source‑page unit: thumbnail,
+ Introduction.pdf                               reconstruction, explanation, prediction
+                                                question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 3 的日期、office hour、working‑group 等属于 2025 年课程行政档案，不应被解释为永久课程要
+   求。
+2. 未发现影响核心学术内容的不可辨认手写。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               16/16
+

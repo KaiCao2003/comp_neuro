@@ -1,0 +1,757 @@
+NEUROSCI 366
+Lecture 4
+
+
+
+神经元 I——膜电位、电路与 Integrate‑and‑Fire
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture4‑Neurons1.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 4                                                              Source‑aligned companion
+
+
+
+Contents
+
+1 How to use this companion                                                                                    2
+
+2 Learning objectives and prerequisite dependency map                                                          2
+
+3 Five‑minute prerequisite diagnostic                                                                          2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                               3
+   4.1 Lecture4‑Neurons1.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            3
+   4.2 Lecture4‑Neurons1.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            4
+   4.3 Lecture4‑Neurons1.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            5
+   4.4 Lecture4‑Neurons1.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            6
+   4.5 Lecture4‑Neurons1.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            7
+   4.6 Lecture4‑Neurons1.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            8
+
+5 补全推导与数学支架 / Derivations                                                                                      9
+   5.1 从 Boltzmann ratio 到 Nernst equation . . . . . . . . . . . . . . . . . . . . . . . . . . . .              9
+   5.2 电容与电流积分             . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   10
+   5.3 leak current 与 LIF 方程 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .           11
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                              12
+
+7 Worked examples and transfer                                                                                 12
+   7.1 Nernst sign check . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         12
+   7.2 pure IF firing rate . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       12
+
+8 Formula and notation sheet                                                                                   14
+
+9 Bilingual glossary                                                                                           14
+
+10 Common traps, assumptions, and limitations                                                                  15
+
+11 Cumulative Knowledge Check                                                                                  16
+
+12 Hint Bank                                                                                                   17
+
+13 Complete Answer Key with reasoning                                                                          18
+
+14 Source‑page concordance and coverage audit                                                                  19
+
+15 Errata, uncertainty log, and external endnotes                                                              19
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       19
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      19
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        19
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     20
+
+                                                     1/20
+NEUROSCI 366 ・Lecture 4                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：浓度梯度。
+‧ 从第一原则推导：电化学平衡。
+‧ 解释几何/计算直觉：Nernst potential。
+‧ 连接生物学解释：膜电容/通道。
+‧ 诊断 assumptions 与 failure modes：Kirchhoff law。
+‧ 把概念迁移到新神经科学问题：IF/LIF。
+
+ Dependency map
+ 浓度梯度 → 电化学平衡 → Nernst potential → 膜电容/通道 → Kirchhoff law → IF/LIF
+ Core question
+ 如何把离子扩散、电场与膜结构映射为电路，并从电荷守恒得到 integrate‑and‑fire 动力学？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. 本课 V_m 的符号定义是什么？
+                  （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. K+ 内高外低时 E_K 为什么通常为负？
+                       （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. E_Na≈+55 mV 表示什么？
+                   （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. Q=CV 中 C 增大如何影响同一电流下 dV/dt？
+                             （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 恒流 pure capacitor 的 V(t) 形状是什么？
+                                 （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+
+                                              2/20
+NEUROSCI 366 ・Lecture 4                                              Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture4‑Neurons1.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture4‑Neurons1.pdf, p. 1]
+ Clean reconstruction. Page 1：cell membrane、ions、charge separation、electric force/potential
+ energy/potential、membrane voltage、diffusion。
+ What the note is saying. 本页的中心对象是浓度梯度与电化学平衡。原笔记将它们放进以下链条：
+ cell membrane、ions、charge separation、electric force/potential energy/potential、membrane
+ voltage、diffusion。
+ Why it follows. 从 charge、force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位
+ 差的符号约定。其逻辑后果是：解释 diffusion 与 electric force 如何共同决定 equilibrium potential；
+ 逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  本课 V_m 的符号定义是什么？
+
+
+
+
+                                           3/20
+NEUROSCI 366 ・Lecture 4                                           Source‑aligned companion
+
+
+4.2 Lecture4‑Neurons1.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture4‑Neurons1.pdf, p. 2]
+ Clean reconstruction. Page 2：ion‑selective channels、Boltzmann distribution、Nernst/equi‑
+ librium potentials、action potential。
+ What the note is saying. 本页的中心对象是 Nernst potential 与膜电容/通道。原笔记将它们放进以
+ 下链条：ion‑selective channels、Boltzmann distribution、Nernst/equilibrium potentials、action
+ potential。
+ Why it follows. 解释 diffusion 与 electric force 如何共同决定 equilibrium potential；逐步推导
+ Nernst equation，并解释 ion valence、concentration ratio、temperature。其逻辑后果是：从 charge、
+ force、potential energy 到 voltage 建立清晰链条，并说明膜内外电位差的符号约定。后面的正式推导
+ 会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  K+ 内高外低时 E_K 为什么通常为负？
+
+
+
+
+                                          4/20
+NEUROSCI 366 ・Lecture 4                                       Source‑aligned companion
+
+
+4.3 Lecture4‑Neurons1.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture4‑Neurons1.pdf, p. 3]
+ Clean reconstruction. Page 3：Hodgkin–Huxley equivalent circuit 与各支路含义。
+ What the note is saying. 本页的中心对象是 Kirchhoff law 与 IF/LIF。原笔记将它们放进以下链条：
+ Hodgkin–Huxley equivalent circuit 与各支路含义。
+ Why it follows. 把 membrane、channels、concentration gradients 映射到 capacitor、conduc‑
+ tance、battery；逐支路解释 HH circuit。其逻辑后果是：说明 Na+, K+, Ca2+, Cl− reversal potential
+ 的符号和 action‑potential trajectory，但不要把 equilibrium potential 误写成实际瞬时膜电位。后面
+ 的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  E_Na≈+55 mV 表示什么？
+
+
+
+
+                                       5/20
+NEUROSCI 366 ・Lecture 4                                            Source‑aligned companion
+
+
+4.4 Lecture4‑Neurons1.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture4‑Neurons1.pdf, p. 4]
+ Clean reconstruction. Page 4：Kirchhoff current law、
+                                                   charge conservation、
+                                                                      capacitor、
+                                                                               capacitive
+ current。
+ What the note is saying. 本页的中心对象是浓度梯度与电化学平衡。原笔记将它们放进以下链条：
+ Kirchhoff current law、charge conservation、capacitor、capacitive current。
+ Why it follows. 从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate‑and‑fire
+ 的 ramp、threshold crossing、reset 和 F–I relation。其逻辑后果是：把 membrane、channels、
+ concentration gradients 映射到 capacitor、conductance、battery；逐支路解释 HH circuit。后面
+ 的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Q=CV 中 C 增大如何影响同一电流下 dV/dt？
+
+
+
+
+                                          6/20
+NEUROSCI 366 ・Lecture 4                                              Source‑aligned companion
+
+
+4.5 Lecture4‑Neurons1.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture4‑Neurons1.pdf, p. 5]
+ Clean reconstruction. Page 5：pure‑capacitor current integration、current step、integrate‑and‑
+ fire、threshold/reset、F–I curve。
+ What the note is saying. 本页的中心对象是 Nernst potential 与膜电容/通道。原笔记将它们放进以
+ 下链条：pure‑capacitor current integration、current step、integrate‑and‑fire、threshold/reset、
+ F–I curve。
+ Why it follows. 从 Kirchhoff current law 推到 C dV/dt = I_e，再推到 pure integrate‑and‑fire
+ 的 ramp、threshold crossing、reset 和 F–I relation。其逻辑后果是：从 resistor+battery 推导 leak
+ currentI_L=G_L(V_m-E_L)与 LIF equation；解释每一项的方向和单位。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  恒流 pure capacitor 的 V(t) 形状是什么？
+
+
+
+
+                                           7/20
+NEUROSCI 366 ・Lecture 4                                            Source‑aligned companion
+
+
+4.6 Lecture4‑Neurons1.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture4‑Neurons1.pdf, p. 6]
+ Clean reconstruction. Page 6：leak resistance、battery/reversal potential、Ohm’s law、leaky‑
+ integrator equation。
+ What the note is saying. 本页的中心对象是 Kirchhoff law 与 IF/LIF。原笔记将它们放进以下链条：
+ leak resistance、battery/reversal potential、Ohm’s law、leaky‑integrator equation。
+ Why it follows. 从 resistor+battery 推导 leak currentI_L=G_L(V_m-E_L)与 LIF equation；解释
+ 每一项的方向和单位。其逻辑后果是：解释 diffusion 与 electric force 如何共同决定 equilibrium
+ potential；逐步推导 Nernst equation，并解释 ion valence、concentration ratio、temperature。后
+ 面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  写出 leak current 并解释 V=E_L 时的结果。
+
+
+
+
+                                          8/20
+NEUROSCI 366 ・Lecture 4                                        Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 从 Boltzmann ratio 到 Nernst equation
+
+【必要前置】      求单一离子跨膜达到净通量为零时的电位差。
+                               Pin
+                                    = e−(Uin −Uout )/(kB T )
+                               Pout
+                              U = qϕ,     Vm = ϕin − ϕout
+                                         kB T    [c]out
+                                  Ec =        ln
+                                          qc      [c]in
+1. 平衡时占据概率比同时反映浓度比与电势能差。
+2. 把 U=qφ 代入，并采用 V_m=φ_in−φ_out 的符号 convention。
+3. 取自然对数并解出 V_m。
+4. 离子 valence 进入 q_c=z e，因此 Ca²+ 的电压尺度有 1/2 因子。
+
+  Geometric/computational intuition. E_c 是电场恰好抵消扩散驱动力的电压，不等于膜在任意时
+  刻的实际 V_m。
+  Biological interpretation / failure condition. 多离子同时通透、浓度随时间改变或主动泵显著时，
+  单离子 Nernst equation 不足。
+
+  Micro‑check
+  Q=CV 中 C 增大如何影响同一电流下 dV/dt？
+
+
+
+
+                                          9/20
+NEUROSCI 366 ・Lecture 4                                              Source‑aligned companion
+
+
+5.2 电容与电流积分
+
+【补全推导】      只有 capacitor 时，外加电流如何改变 V_m？
+
+                                           Q = CVm
+                                           dQ      dVm
+                                      IC =      =C
+                                            dt      dt
+                                                   ∫ t
+                                                 1
+                               Vm (t) = Vm (0) +       Ie (t′ )dt′
+                                                 C 0
+1. 膜两侧导电溶液被 lipid insulator 分开，能储存相反电荷。
+2. 电流是电荷变化率；若 C 固定，I=C dV/dt。
+3. 恒定电流产生 linear voltage ramp，斜率 I/C。
+4. 加入 threshold 与 reset 即得到 pure integrate‑and‑fire。
+
+  Geometric/computational intuition. 更大的 C 需要更多电荷才能改变同样电压，所以电位变化更
+  慢。
+  Biological interpretation / failure condition. 真实膜有 leak 和 voltage‑gated currents，不能
+  长期线性积累。
+
+  Micro‑check
+  恒流 pure capacitor 的 V(t) 形状是什么？
+
+
+
+
+                                             10/20
+NEUROSCI 366 ・Lecture 4                                         Source‑aligned companion
+
+
+5.3 leak current 与 LIF 方程
+
+【跨页连接】      加入被动通道和 reversal battery 后如何写 current balance？
+
+                                     IL = GL (Vm − EL )
+
+                                   dVm
+                               C       = Ie − GL (Vm − EL )
+                                    dt
+                                               C
+                                         τm =
+                                               GL
+1. resistor 支路的电压降是 V_m−E_L；Ohm’s law 给出 outward leak current。
+2. Kirchhoff current law：进入 capacitor 的净电流等于 external current 减去 leak。
+3. 无外加电流时 V_m 被拉回 E_L。
+4. threshold/reset 是对 subthreshold differential equation 的额外事件规则。
+
+  Geometric/computational intuition. leak 让 模 型 从 无 限 记 忆 的 integrator 变 成 指 数 遗 忘 的
+  leaky integrator。
+  Biological interpretation / failure condition. G_L 若依赖电压或存在多个动态 conductances，
+  需要 HH 类模型。
+
+  Micro‑check
+  写出 leak current 并解释 V=E_L 时的结果。
+
+
+
+
+                                           11/20
+NEUROSCI 366 ・Lecture 4                                                    Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  神经膜同时是电荷分离的 capacitor 和离子选择性通道的 conductance network。扩散推动离子沿浓
+  度梯度移动，电场推动带电粒子沿电势能下降方向移动；二者平衡定义每种离子的 reversal potential。
+  电路等效并非比喻装饰，而是把 charge conservation、Ohm’s law 与 channel selectivity 组合成
+  可求解的膜电位方程。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 Nernst sign check
+
+【原课/核心例题】         Prompt. K+ 通常细胞内浓度高于外部。
+
+ Worked solution. [K]out/[K]in<1，log ratio 为负；q_K>0，所以 E_K<0，符合约 −75 mV。Cl− 的
+ q<0，会反转符号。
+ Check. 只看浓度比而不看 ion charge 会把阴离子符号算错。
+
+
+7.2 pure IF firing rate
+
+【跨课连接】       Prompt. 恒定 I_e 从 reset V_R 充到 threshold V_T。
+
+ Worked solution. ΔV=V_T−V_R，充电时间 Δt=CΔV/I_e，因此 rate r=1/Δt=I_e/[C(V_T−V_R)]。
+ Check. 单位 A/[F·V]=1/s；若 I_e≤0 不会向上越阈值。
+
+
+
+                                               12/20
+NEUROSCI 366 ・Lecture 4                                      Source‑aligned companion
+
+
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      13/20
+NEUROSCI 366 ・Lecture 4                                                  Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. 膜电位符号 convention
+                                         Vm = ϕin − ϕout
+Conditions / conventions: inside minus outside
+2. Nernst equilibrium potential
+                                               kB T    [c]out
+                                        Ec =        ln
+                                                qc      [c]in
+Conditions / conventions: 单离子平衡、温度固定
+3. 电容定义
+                                               Q = CV
+Conditions / conventions: C 近似常数
+4. capacitive current
+                                               I = C V̇
+Conditions / conventions: Q=CV
+5. leak current
+                                        IL = GL (V − EL )
+Conditions / conventions: 线性被动 conductance
+6. LIF subthreshold equation
+                                     C V̇ = Ie − GL (V − EL )
+Conditions / conventions: threshold/reset 另行指定
+7. pure IF 的 F–I slope
+                                                   Ie
+                                         r=
+                                               C(VT − VR )
+Conditions / conventions: 恒流、无 refractory、无 leak
+
+
+9 Bilingual glossary
+
+
+ 中文                  English / symbol              Operational meaning
+ 膜电位                 membrane voltage              细胞内电势减去细胞外电势。
+ 扩散                  diffusion                     由浓度梯度驱动的随机净迁移。
+ 电势能                 electric potential energy     带电粒子在电势中的能量 qφ。
+ 平衡电位                equilibrium potential         单离子净通量为零的电压。
+ 反转电位                reversal potential            该通道电流改变方向的电压；简单情形等于
+                                                   equilibrium potential。
+ 电导                  conductance                   电阻的倒数，G=1/R。
+ 电容                  capacitance                   单位电压可储存的电荷 Q/V。
+ Kirchhoff 电流定       Kirchhoff current law         节点流入与流出电流之和为零。
+ 律
+ 积分放电模型              integrate‑and‑fire model      积累输入，越阈值产生 spike 并 reset 的抽象模型。
+ 漏积分器                leaky integrator              状态被输入驱动同时向基线指数回归。
+
+
+
+
+                                                 14/20
+NEUROSCI 366 ・Lecture 4                                            Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 equilibrium potential 当作细胞实际瞬时膜电位。
+2. 忘记 V_m=inside−outside 的符号 convention。
+3. 对 Cl− 使用阳离子符号直觉。
+4. 把 current direction、positive charge movement 和 voltage change 混为一谈。
+5. 认为 capacitor 支路有离子跨膜；理想 capacitor 表示膜两侧电荷重新分布。
+6. 把 threshold/reset 当作 LIF differential equation 自然产生的 action potential。
+
+  Course‑specific risk boundary. 本课只铺到 LIF equation；不要提前吞并 Lecture 5 的完整 LIF
+  closed‑form solution 与 HH gating dynamics，但可在结尾给出明确预告。
+
+
+
+
+                                         15/20
+NEUROSCI 366 ・Lecture 4                                                Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. 本课 V_m 的符号定义是什么？
+
+
+
+2. K+ 内高外低时 E_K 为什么通常为负？
+
+
+
+3. E_Na≈+55 mV 表示什么？
+
+
+
+4. Q=CV 中 C 增大如何影响同一电流下 dV/dt？
+
+
+
+5. 恒流 pure capacitor 的 V(t) 形状是什么？
+
+
+
+6. 写出 leak current 并解释 V=E_L 时的结果。
+
+
+
+7. 为什么 LIF 是 leaky？
+
+
+
+8. pure IF 的 rate 对 I 的关系为什么是直线？
+
+
+
+9. Kirchhoff law 在膜模型中表达什么守恒？
+
+
+
+10. Nernst equation 在什么条件下会失败？
+
+
+
+11. 公式表中的“膜电位符号 convention”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+12. 公式表中的“Nernst equilibrium potential”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+13. 公式表中的“电容定义”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“capacitive current”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                                  16/20
+NEUROSCI 366 ・Lecture 4                                  Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先从“膜电位符号 convention”对应的变量关系入手。
+    Hint 2. 把条件“inside minus outside”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+12. Hint 1. 先从“Nernst equilibrium potential”对应的变量关系入手。
+    Hint 2. 把条件“单离子平衡、温度固定”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+13. Hint 1. 先从“电容定义”对应的变量关系入手。
+    Hint 2. 把条件“C 近似常数”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“capacitive current”对应的变量关系入手。
+    Hint 2. 把条件“Q=CV”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+                                     17/20
+NEUROSCI 366 ・Lecture 4                              Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. V_m=φ_in−φ_out。
+2. log([K]out/[K]in)<0 且 q>0。
+3. 若只有 Na+ 通透，约在 +55 mV 时扩散和电力平衡、Na current 反转。
+4. dV/dt=I/C，C 越大变化越慢。
+5. 线性 ramp。
+6. I_L=G_L(V−E_L)；V=E_L 时 leak current 为零。
+7. 被动 conductance 持续把 V 拉向 E_L，使过去输入指数衰减。
+8. 充电斜率 I/C，跨越固定 ΔV 的时间与 1/I 成正比。
+9. 电荷守恒：各支路电流与 capacitive current 平衡。
+10. 多离子通透、非平衡浓度变化、主动 transport 或其他电化学效应显著时。
+11. 适用条件/约定：inside minus outside。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                   Vm = ϕin − ϕout
+
+12. 适用条件/约定：单离子平衡、温度固定。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                              kB T    [c]out
+                        Ec =       ln
+                               qc      [c]in
+
+13. 适用条件/约定：C 近似常数。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      Q = CV
+
+14. 适用条件/约定：Q=CV。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                       I = C V̇
+
+
+
+
+                                      18/20
+NEUROSCI 366 ・Lecture 4                                                  Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture4‑Neurons1.pdf              1         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture4‑Neurons1.pdf              2         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture4‑Neurons1.pdf              3         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture4‑Neurons1.pdf              4         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture4‑Neurons1.pdf              5         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture4‑Neurons1.pdf              6         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的典型 reversal potentials 是课程级近似，具体数值依赖温度和浓度。
+2. Page 3 将 HH equivalent circuit 用于概念映射；完整 voltage‑gated conductance dynamics 在
+   Lecture 5 展开。
+3. 未发现影响核心推导的不可辨认手写。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              19/20
+NEUROSCI 366 ・Lecture 4                                                    Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               20/20
+

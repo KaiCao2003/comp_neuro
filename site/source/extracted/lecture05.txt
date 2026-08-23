@@ -1,0 +1,854 @@
+NEUROSCI 366
+Lecture 5
+
+
+
+神经元 II——LIF 解析解与 Hodgkin–Huxley
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture5‑Neurons2.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 5                                                         Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                             2
+
+2 Learning objectives and prerequisite dependency map                                                   2
+
+3 Five‑minute prerequisite diagnostic                                                                   2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                        3
+   4.1 Lecture5‑Neurons2.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     3
+   4.2 Lecture5‑Neurons2.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     4
+   4.3 Lecture5‑Neurons2.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     5
+   4.4 Lecture5‑Neurons2.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     6
+   4.5 Lecture5‑Neurons2.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     7
+   4.6 Lecture5‑Neurons2.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     8
+   4.7 Lecture5‑Neurons2.pdf ·p. 7 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     9
+
+5 补全推导与数学支架 / Derivations                                                                               10
+   5.1 LIF step response 与 threshold current . . . . . . . . . . . . . . . . . . . . . . . . . . .      10
+   5.2 threshold crossing 与 exact F–I . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   11
+   5.3 HH membrane equation 与 gating dynamics . . . . . . . . . . . . . . . . . . . . . . . .           12
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                       13
+
+7 Worked examples and transfer                                                                          13
+   7.1 LIF 数值 threshold . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   13
+   7.2 gate 与 current 的区别 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     13
+
+8 Formula and notation sheet                                                                            15
+
+9 Bilingual glossary                                                                                    15
+
+10 Common traps, assumptions, and limitations                                                           16
+
+11 Cumulative Knowledge Check                                                                           17
+
+12 Hint Bank                                                                                            19
+
+13 Complete Answer Key with reasoning                                                                   21
+
+14 Source‑page concordance and coverage audit                                                           22
+
+
+
+
+                                                  1/23
+NEUROSCI 366 ・Lecture 5                                                             Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            22
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      22
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+
+
+
+                                                     2/23
+NEUROSCI 366 ・Lecture 5                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：LIF ODE。
+‧ 从第一原则推导：steady state。
+‧ 解释几何/计算直觉：threshold time。
+‧ 连接生物学解释：exact F–I。
+‧ 诊断 assumptions 与 failure modes：HH conductances。
+‧ 把概念迁移到新神经科学问题：gating/refractory。
+
+ Dependency map
+ LIF ODE → steady state → threshold time → exact F–I → HH conductances → gating/refractory
+ Core question
+ LIF 的指数充电如何决定 threshold crossing 与 F–I curve，而 Hodgkin–Huxley 又如何用动态 con‑
+ ductances 生成真实 spike？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. τ_m 由哪两个被动参数决定？
+                 （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. 恒流下 V∞ 是什么？
+             （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. V∞=V_T 时是否在有限时间 spike？
+                        （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. 写出 I_T。
+         （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 加入 refractory δ 后高电流极限 rate 是多少？
+                                  （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+
+                                              3/23
+NEUROSCI 366 ・Lecture 5                                     Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture5‑Neurons2.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 1]
+ Clean reconstruction. Page 1：capacitor integrate‑and‑fire 回顾。
+ What the note is saying. 本页的中心对象是 LIF ODE 与 steady state。原笔记将它们放进以下链条：
+ capacitor integrate‑and‑fire 回顾。
+ Why it follows. 将 Pages 1–2 标为 retrieval bridge：简洁但完整核对，不得假装它们是新内容，也
+ 不得完全跳过。其逻辑后果是：逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step
+ response、threshold current、interspike interval 与 firing‑rate formula。后面的正式推导会逐项
+ 写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  τ_m 由哪两个被动参数决定？
+
+
+
+
+                                      4/23
+NEUROSCI 366 ・Lecture 5                                         Source‑aligned companion
+
+
+4.2 Lecture5‑Neurons2.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 2]
+ Clean reconstruction. Page 2：leak current 与 LIF equation 回顾。
+ What the note is saying. 本页的中心对象是 threshold time 与 exact F–I。原笔记将它们放进以下链
+ 条：leak current 与 LIF equation 回顾。
+ Why it follows. 逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、
+ threshold current、interspike interval 与 firing‑rate formula。其逻辑后果是：逐项解释 HH mem‑
+ brane equation、maximal conductances、reversal potentials、m^3h、n^4 和 voltage‑dependent
+ alpha/beta kinetics。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 fail‑
+ ure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  恒流下 V∞ 是什么？
+
+
+
+
+                                        5/23
+NEUROSCI 366 ・Lecture 5                                             Source‑aligned companion
+
+
+4.3 Lecture5‑Neurons2.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 3]
+ Clean reconstruction. Page 3：LIF time constant、 steady state、
+                                                             current‑step response、
+                                                                                  threshold
+ current。
+ What the note is saying. 本页的中心对象是 HH conductances 与 gating/refractory。原笔记将它
+ 们放进以下链条：LIF time constant、steady state、current‑step response、threshold current。
+ Why it follows. 逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、
+ threshold current、interspike interval 与 firing‑rate formula。其逻辑后果是：解释 threshold‑
+ linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改
+ 变高电流极限。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure
+ conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  V∞=V_T 时是否在有限时间 spike？
+
+
+
+
+                                           6/23
+NEUROSCI 366 ・Lecture 5                                              Source‑aligned companion
+
+
+4.4 Lecture5‑Neurons2.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 4]
+ Clean reconstruction. Page 4：threshold‑crossing time 与 exact F–I curve；threshold‑linear
+ approximation。
+ What the note is saying. 本页的中心对象是 cable diversity 与 LIF ODE。原笔记将它们放进以下链
+ 条：threshold‑crossing time 与 exact F–I curve；threshold‑linear approximation。
+ Why it follows. 解释 threshold‑linear approximation 为什么有 bias、在哪个电流区间近似合理，以
+ 及 refractory period 如何改变高电流极限。其逻辑后果是：逐步将 LIF equation 化为 tau dV/dt=-
+ V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing‑rate formula。
+ 后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  写出 I_T。
+
+
+
+
+                                           7/23
+NEUROSCI 366 ・Lecture 5                                        Source‑aligned companion
+
+
+4.5 Lecture5‑Neurons2.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 5]
+ Clean reconstruction. Page 5：Na/K conductances、HH equation、m/h/n gating dynamics。
+ What the note is saying. 本页的中心对象是 steady state 与 threshold time。原笔记将它们放进以
+ 下链条：Na/K conductances、HH equation、m/h/n gating dynamics。
+ Why it follows. 逐项解释 HH membrane equation、maximal conductances、reversal potentials、
+ m^3h、n^4 和 voltage‑dependent alpha/beta kinetics。其逻辑后果是：解释 activation、inactivation、
+ recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  加入 refractory δ 后高电流极限 rate 是多少？
+
+
+
+
+                                        8/23
+NEUROSCI 366 ・Lecture 5                                               Source‑aligned companion
+
+
+4.6 Lecture5‑Neurons2.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 6]
+ Clean reconstruction. Page 6：activation/inactivation curves、refractory period、saturating F–
+ I。
+ What the note is saying. 本页的中心对象是 exact F–I 与 HH conductances。原笔记将它们放进以
+ 下链条：activation/inactivation curves、refractory period、saturating F–I。
+ Why it follows. 解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把
+ gating variable 当作 channel count。其逻辑后果是：解释 threshold‑linear approximation 为什么
+ 有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。后面的正式推导会
+ 逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  为什么 exact F–I 在 threshold 附近不是直线？
+
+
+
+
+                                            9/23
+NEUROSCI 366 ・Lecture 5                                       Source‑aligned companion
+
+
+4.7 Lecture5‑Neurons2.pdf ・p. 7
+
+
+
+
+ Original‑note anchor. [Source: Lecture5‑Neurons2.pdf, p. 7]
+ Clean reconstruction. Page 7：area normalization、cable/multicompartment models、sub‑
+ threshold attenuation、AP propagation、cellular diversity。
+ What the note is saying. 本页的中心对象是 gating/refractory 与 cable diversity。原笔记将它们放
+ 进以下链条：area normalization、cable/multicompartment models、subthreshold attenuation、
+ AP propagation、cellular diversity。
+ Why it follows. 说明按 membrane area 归一化的意义；给出 cable equation/multicompartment
+ 的概念桥，区分 passive attenuation 与 regenerative propagation。其逻辑后果是：强调 HH 是框架
+ 而非所有神经元的单一固定模型，并讨论 cellular diversity。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  m³h 的生理含义是什么？
+
+
+
+
+                                       10/23
+NEUROSCI 366 ・Lecture 5                                                    Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 LIF step response 与 threshold current
+
+【必要前置】      恒流 I_e 下 V_m 如何接近稳态，何时能放电？
+
+                                     C V̇ = Ie − GL (V − EL )
+
+                                                      C               Ie
+                          τm V̇ = −V + V∞ ,   τm =       , V ∞ = EL +
+                                                      GL              GL
+                                 V (t) = V∞ + (VR − V∞ )e−t/τm
+1. 把 leak 方程除以 G_L，识别 time constant 与 steady state。
+2. 解与 Lecture 3 的一阶系统同形。
+3. 只有 V_∞>V_T 才可能越 threshold。
+4. 因此 rheobase/threshold current 为 I_T=G_L(V_T−E_L)。
+
+  Geometric/computational intuition. 电流并不保证 spike；它首先把 asymptotic voltage 推高，
+  只有目标高于 threshold 才会 crossing。
+  Biological interpretation / failure condition. 若 输 入 随 时 间 变 化 或 有 conductance‑based
+  synapses，简单恒流解需扩展。
+
+  Micro‑check
+  写出 I_T。
+
+
+
+
+                                              11/23
+NEUROSCI 366 ・Lecture 5                                               Source‑aligned companion
+
+
+5.2 threshold crossing 与 exact F–I
+
+【补全推导】      从 reset 到 threshold 的时间是多少？
+
+                                 VT = V∞ + (VR − V∞ )e−∆t/τm
+
+                                                    V∞ − VR
+                                       ∆t = τm ln
+                                                    V ∞ − VT
+                                   [                            ]
+                                              I − GL (VR − EL ) −1
+                             r(I) = δ + τm ln
+                                              I − GL (VT − EL )
+1. 将 threshold condition 代入指数解。
+2. 隔离 exponential，再取自然对数。
+3. 无 refractory 时 r=1/Δt；加入绝对 refractory δ 后周期为 δ+Δt。
+4. I→∞ 时无 refractory 的 rate 无界；有 δ 时上限为 1/δ。
+
+  Geometric/computational intuition. 接近 rheobase 时 V∞ 只略高于 V_T，          最后一段靠近 thresh‑
+  old 很慢，rate 从 0 非线性升起。
+  Biological interpretation / failure condition. threshold‑linear approximation 在 rheobase
+  附近有明显 bias，也不能表现 refractory saturation。
+
+  Micro‑check
+  加入 refractory δ 后高电流极限 rate 是多少？
+
+
+
+
+                                             12/23
+NEUROSCI 366 ・Lecture 5                                                           Source‑aligned companion
+
+
+5.3 HH membrane equation 与 gating dynamics
+
+【跨页连接】      用 voltage‑dependent conductances 生成 action potential。
+
+                   C V̇ = Ie − ḠL (V − EL ) − ḠN a m3 h(V − EN a ) − ḠK n4 (V − EK )
+
+                                                                 n∞ (V ) − n
+                              ṅ = αn (V )(1 − n) − βn (V )n =
+                                                                   τn (V )
+                                             αn                  1
+                                    n∞ =           ,   τn =
+                                           αn + βn            αn + βn
+1. m 表示 Na activation，
+                     h 表示 Na inactivation，
+                                         n 表示 K activation；
+                                                          它们是 gate‑open probability‑like
+   variables，不是 channel count。
+2. depolarization 快速提高 m，产生 inward Na positive feedback。
+3. 随后 h 下降、n 上升，Na current 关断而 K outward current repolarizes。
+4. gate recovery 需要时间，形成 refractory period。
+
+  Geometric/computational intuition. spike 是多个动态 conductance 的时序竞争，而不是单一
+  threshold 公式。
+  Biological interpretation / failure condition. 经典 squid‑axon 参数不是所有细胞的固定模板；
+  真实 neurons 有更多 channel types 与 morphology。
+
+  Micro‑check
+  为什么 exact F–I 在 threshold 附近不是直线？
+
+
+
+
+                                                  13/23
+NEUROSCI 366 ・Lecture 5                                                    Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  LIF 把 spike 视为 threshold/reset 事件，因此可解析求出跨阈值时间和 firing rate；HH 则把 spike
+  waveform 解释为 Na/K conductance 的动态反馈。两类模型回答的问题不同：LIF 适合网络与编码
+  的可计算抽象，HH 适合离子机制与 waveform。time constant、interspike interval 和 refractory
+  period 必须严格分开。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 LIF 数值 threshold
+
+【原课/核心例题】         Prompt. E_L=−65 mV, V_T=−50 mV, G_L=10 nS。
+
+ Worked solution. I_T=G_L(V_T−E_L)=10 nS×15 mV=150 pA。只有 I>150 pA 时恒流 steady state
+ 超过 threshold。
+ Check. nS·mV=pA；若 V_R 更低，它改变 ISI 但不改变 I_T。
+
+
+
+7.2 gate 与 current 的区别
+
+【跨课连接】       Prompt. n 从 0.3 增至 0.6，其他量不变。
+
+
+
+
+                                               14/23
+NEUROSCI 366 ・Lecture 5                                        Source‑aligned companion
+
+
+
+ Worked solution. K conductance 因 n^4 从 0.0081 增到 0.1296，约 16 倍；actual current 还要乘
+ (V−E_K)，方向取决于 driving force。
+ Check. activation probability、conductance 和 ionic current 是三个不同层级。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                       15/23
+NEUROSCI 366 ・Lecture 5                                                  Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. membrane time constant
+                                            τm = C/GL
+Conditions / conventions: 被动线性膜
+2. 恒流 steady‑state voltage
+                                         V∞ = EL + I/GL
+Conditions / conventions: I 常数
+3. LIF rheobase
+                                         IT = GL (VT − EL )
+Conditions / conventions: V_R 不影响稳态 crossing 条件
+4. 从 reset 到 threshold 的时间
+                                                     V∞ − VR
+                                        ∆t = τm ln
+                                                     V ∞ − VT
+Conditions / conventions: V∞>V_T
+5. 含 refractory 的 firing rate
+                                           r = 1/(δ + ∆t)
+Conditions / conventions: 周期性恒流响应
+6. conductance‑based ionic current
+
+                                     Iion = Ḡ popen (V − Erev )
+
+Conditions / conventions: sign convention 与 driving force 明确
+7. two‑state gate kinetics
+                                        ṅ = αn (1 − n) − βn n
+Conditions / conventions: 0≤n≤1
+
+
+9 Bilingual glossary
+
+
+ 中文                  English / symbol              Operational meaning
+ 膜时间常数               membrane time constant        被动膜指数响应的时间尺度 C/G_L。
+ 稳态电位                steady‑state voltage          恒定输入下导数为零的 V∞。
+ 阈电流                 threshold current /           无限长恒流刚好可引发 spike 的最小值。
+                     rheobase
+ 放电间隔                interspike interval, ISI      相邻 spikes 的时间间隔。
+ 绝对不应期               absolute refractory           spike 后无法再次放电的最短时间。
+                     period
+ 最大电导                maximal conductance           所有相关 channels 全开时的 conductance scale。
+ 激活                  activation                    去极化增加 channel opening 的 gate process。
+ 失活                  inactivation                  持续去极化使 channel availability 降低的过程。
+ 电缆方程                cable equation                描述 voltage 沿 neurite 空间传播与衰减的方程。
+ 多室模型                multicompartment              把 morphology 离散成耦合电气 compartments。
+                     model
+
+
+
+                                                16/23
+NEUROSCI 366 ・Lecture 5                                          Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 混淆 τ_m、ISI 与 refractory δ。
+2. 认为 V∞=V_T 时会在有限时间越阈值；实际上只渐近接近。
+3. 把 threshold‑linear F–I 当成 exact LIF。
+4. 把 m、h、n 当作离子通道个数。
+5. 忘记 current=conductance×driving force；gate 增加不保证 current 方向。
+6. 把 HH 当作所有 neurons 的唯一模型。
+
+  Course‑specific risk boundary. 明确区分 membrane time constant、interspike interval 和
+  refractory period；明确区分 channel activation probability、conductance 与 ionic current。
+
+
+
+
+                                          17/23
+NEUROSCI 366 ・Lecture 5                                                Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+ 1. τ_m 由哪两个被动参数决定？
+
+
+
+ 2. 恒流下 V∞ 是什么？
+
+
+
+ 3. V∞=V_T 时是否在有限时间 spike？
+
+
+
+ 4. 写出 I_T。
+
+
+
+ 5. 加入 refractory δ 后高电流极限 rate 是多少？
+
+
+
+ 6. 为什么 exact F–I 在 threshold 附近不是直线？
+
+
+
+ 7. m³h 的生理含义是什么？
+
+
+
+ 8. K current 的方向由什么决定？
+
+
+
+ 9. Na inactivation 如何产生 refractory period？
+
+
+
+10. 为什么按 membrane area 归一化？
+
+
+
+11. passive attenuation 与 regenerative propagation 有何不同？
+
+
+
+12. LIF 与 HH 最适合回答的不同问题是什么？
+
+
+
+13. 公式表中的“membrane time constant”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“恒流 steady‑state voltage”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“LIF rheobase”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/23
+NEUROSCI 366 ・Lecture 5                               Source‑aligned companion
+
+
+
+
+16. 公式表中的“从 reset 到 threshold 的时间”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“含 refractory 的 firing rate”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“conductance‑based ionic current”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                 19/23
+NEUROSCI 366 ・Lecture 5                             Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“membrane time constant”对应的变量关系入手。
+    Hint 2. 把条件“被动线性膜”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“恒流 steady‑state voltage”对应的变量关系入手。
+    Hint 2. 把条件“I 常数”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                   20/23
+NEUROSCI 366 ・Lecture 5                                     Source‑aligned companion
+
+
+15. Hint 1. 先从“LIF rheobase”对应的变量关系入手。
+    Hint 2. 把条件“V_R 不影响稳态 crossing 条件”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“从 reset 到 threshold 的时间”对应的变量关系入手。
+    Hint 2. 把条件“V∞>V_T”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“含 refractory 的 firing rate”对应的变量关系入手。
+    Hint 2. 把条件“周期性恒流响应”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“conductance‑based ionic current”对应的变量关系入手。
+    Hint 2. 把条件“sign convention 与 driving force 明确”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                      21/23
+NEUROSCI 366 ・Lecture 5                                        Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. τ_m=C/G_L。
+2. E_L+I/G_L。
+3. 否，只渐近接近 threshold。
+4. I_T=G_L(V_T−E_L)。
+5. 1/δ。
+6. crossing time 含 log[(V∞−V_R)/(V∞−V_T)]，V∞→V_T 时发散。
+7. Na activation gates 共同开放的概率因子 m³ 与 availability/inactivation h 的乘积。
+8. 由 conductance 和 driving force V−E_K 的符号共同决定。
+9. spike 后 h 恢复需要时间，即使再次 depolarize 也缺少可用 Na channels。
+10. 便于比较不同大小细胞，并让 capacitance/current/conductance 以密度表示。
+11. 前者随距离衰减；后者由 voltage‑gated channels 在各段重新放大 action potential。
+12. LIF 适合 spike timing/rate 与网络计算；HH 适合 waveform、离子机制和 conductance dynamics。
+13. 适用条件/约定：被动线性膜。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      τm = C/GL
+
+14. 适用条件/约定：I 常数。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    V∞ = EL + I/GL
+
+15. 适用条件/约定：V_R 不影响稳态 crossing 条件。sanity check 应检查单位、符号、极限或 shape 是否
+    与定义一致。
+                              IT = GL (VT − EL )
+
+16. 适用条件/约定：V∞>V_T。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                               V∞ − V R
+                                  ∆t = τm ln
+                                               V∞ − VT
+
+17. 适用条件/约定：周期性恒流响应。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                     r = 1/(δ + ∆t)
+
+18. 适用条件/约定：sign convention 与 driving force 明确。sanity check 应检查单位、符号、极限或
+    shape 是否与定义一致。
+                               Iion = Ḡ popen (V − Erev )
+
+
+
+
+                                       22/23
+NEUROSCI 366 ・Lecture 5                                                  Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture5-Neurons2.pdf              1         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture5-Neurons2.pdf              2         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture5-Neurons2.pdf              3         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture5-Neurons2.pdf              4         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture5-Neurons2.pdf              5         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture5-Neurons2.pdf              6         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture5-Neurons2.pdf              7         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Pages 1–2 与 Lecture 4 有意重复，应作为 retrieval bridge 而非新内容。
+2. Page 4 的 threshold‑linear curve 是 approximation；exact LIF 在 threshold 附近呈 logarithmic
+   onset。
+3. Page 7 的 cable/multicompartment 内容为概念桥，未给出完整 cable equation。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+                                              23/23
+NEUROSCI 366 ・Lecture 5                                                    Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/23
+

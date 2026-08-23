@@ -1,0 +1,2132 @@
+{
+  "lecture": 14,
+  "slug": "14",
+  "zhTitle": "Spike-Triggered Covariance 与广义线性模型",
+  "enTitle": "Spike-Triggered Covariance and Generalized Linear Models",
+  "companionFile": "NEUROSCI366_Lecture14_STC_and_GLM_Companion.pdf",
+  "companionPages": 25,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture14_STC_and_GLM_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture14-STC-GLM.pdf",
+      "role": "primary",
+      "pages": 6,
+      "href": "/resources/original/Lecture14-STC-GLM.pdf"
+    }
+  ],
+  "codeSources": [],
+  "objectives": [
+    "定义并区分：multiple features。",
+    "从第一原则推导：STC eigenspace。",
+    "解释几何/计算直觉：stimulus correction。",
+    "连接生物学解释：GLM distribution。",
+    "诊断 assumptions 与 failure modes：linear predictor。",
+    "把概念迁移到新神经科学问题：link。"
+  ],
+  "dependencyMap": "multiple features → STC eigenspace → stimulus correction → GLM distribution → linear predictor → link",
+  "coreQuestion": "当单一 linear feature 不够时，STC 如何发现多维 stimulus subspace；GLM 又如何统一 Gaussian、 Poisson 与 Bernoulli response models？",
+  "diagnostic": [
+    "STC 比 STA 多检查什么？",
+    "even energy nonlinearity 下 STA 为什么可为零？",
+    "colored stimulus 下 STC 应如何修正？",
+    "GLM 的三个元素？",
+    "GLM 中 linear 指什么？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-14-source-1",
+      "order": 1,
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "page": 1,
+      "reconstruction": "Page 1：H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。",
+      "noteMeaning": "multiple features 与 STC eigenspace：H1 blowfly motion example、multiple linear features、STC、stimulus-correlation correction。",
+      "reasoning": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。因此，系统讲 GLM 的 response distribution、linear predictor、 link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。",
+      "figureReading": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。",
+      "stopPredict": "STC 比 STA 多检查什么？"
+    },
+    {
+      "id": "lecture-14-source-2",
+      "order": 2,
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "page": 2,
+      "reconstruction": "Page 2：GLM 三要素与 exponential-family canonical form。",
+      "noteMeaning": "stimulus correction 与 GLM distribution：GLM 三要素与 exponential-family canonical form。",
+      "reasoning": "系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。因此，逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters， 以及 simultaneous fitting。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "even energy nonlinearity 下 STA 为什么可为零？"
+    },
+    {
+      "id": "lecture-14-source-3",
+      "order": 3,
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "page": 3,
+      "reconstruction": "Page 3：unit-normal Gaussian GLM / ordinary linear regression；Poisson GLM 开始。",
+      "noteMeaning": "linear predictor 与 link：unit-normal Gaussian GLM / ordinary linear regression；Poisson GLM 开始。",
+      "reasoning": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。因此，系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。",
+      "figureReading": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。",
+      "stopPredict": "colored stimulus 下 STC 应如何修正？"
+    },
+    {
+      "id": "lecture-14-source-4",
+      "order": 4,
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "page": 4,
+      "reconstruction": "Page 4：Poisson log link 与 log likelihood。",
+      "noteMeaning": "population history/coupling 与 multiple features：Poisson log link 与 log likelihood。",
+      "reasoning": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "GLM 的三个元素？"
+    },
+    {
+      "id": "lecture-14-source-5",
+      "order": 5,
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "page": 5,
+      "reconstruction": "Page 5：Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters。",
+      "noteMeaning": "STC eigenspace 与 stimulus correction：Pillow-Simoncelli retinal population GLM、stimulus/history/coupling filters。",
+      "reasoning": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。因此，系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。",
+      "figureReading": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。",
+      "stopPredict": "GLM 中 linear 指什么？"
+    },
+    {
+      "id": "lecture-14-source-6",
+      "order": 6,
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "page": 6,
+      "reconstruction": "Page 6：Bernoulli GLM、logistic regression、log odds、cross-entropy。",
+      "noteMeaning": "GLM distribution 与 linear predictor：Bernoulli GLM、logistic regression、log odds、cross-entropy。",
+      "reasoning": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。因此，严格区分 Poisson count model、Bernoulli small-bin model 和 logistic classification。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "Gaussian identity-link MLE 与什么等价？"
+    }
+  ],
+  "specialSection": [],
+  "derivations": [
+    "5.1 STC 与 multiple relevant dimensions",
+    "【必要前置】 STA 为零或 neuron 依赖多个 projections 时如何找 features？",
+    "Csp = E[(s − µsp )(s − µsp )T | spike]",
+    "∆C = Csp − Cs ∆Cvk = λk vk 1. STA 检查 conditional mean shift；STC 检查 conditional covariance shift。 2. large positive/negative eigenvalues 表示 spike-triggered variance 相对 baseline 增/减的 directions。 3. energy model 的 ±feature stimuli 平均为零但 covariance 沿 feature direction 增大。 4. 若 C_s≠I，应先 whiten 或解 generalized eigenproblem。",
+    "Geometric/computational intuition. STC 找的是\"spike 前 stimulus cloud 形状改变\"的轴。 Biological interpretation / failure condition. 高维 covariance 需要大量 spikes；有限样本 eigenvectors 易过拟合。",
+    "思考题：GLM 的三个元素？",
+    "5.2 GLM 三要素与 canonical form",
+    "【补全推导】 如何把不同 response types 放进统一建模语言？ ∑ ηµ = β 0 + βn xnµ n",
+    "g(mµ ) = ηµ P (yµ | ηµ ) = exp{yµ ηµ − H(yµ ) − D(ηµ )} 1. 选择 response distribution 决定 noise/variance structure。 2. linear predictor η 是 features 的 weighted sum。 3. link g 把 conditional mean m 映射到 η。 4. maximum likelihood 估计 β，而不是统一最小化 MSE。",
+    "Geometric/computational intuition. GLM 的\"linear\"指 predictor，对 mean 的关系可通过 nonlinear link。 Biological interpretation / failure condition. distribution/link 选择错误会导致 negative rates、probability 越界或 variance mismatch。",
+    "思考题：GLM 中 linear 指什么？",
+    "5.3 Gaussian、Poisson、Bernoulli 三种 likelihood",
+    "【跨页连接】 推导常用 GLMs。 1∑ Gaussian: m = η, ℓ = − (y − m)2 + const 2 ∑ Poisson: λ = eη , ℓ = [yη − eη − log(y!)] eη ∑ Bernoulli: q = η , ℓ= [y log q + (1 − y) log(1 − q)] 1+e 1. unit-variance Gaussian + identity link 使 MLE 等价于 least squares。 2. Poisson canonical log link 保证 λ>0。 3. Bernoulli logit link 令 η=log(q/(1−q))，inverse 是 sigmoid。 4. negative Bernoulli log-likelihood 即 binary cross-entropy。",
+    "Geometric/computational intuition. link 把 unrestricted linear score 转成 response mean 的合法范围。 Biological interpretation / failure condition. Poisson overdispersion、zero inflation 或 temporal dependence 需扩展。",
+    "思考题：Gaussian identity-link MLE 与什么等价？",
+    "5.4 retinal population GLM 的 filters",
+    "【模型边界】 如何同时建模 stimulus、refractory/history 与 neuron interactions？ ∑ λi (t) = exp{ki ∗ s + hi ∗ yi + cij ∗ yj + bi } j̸=i",
+    "1. stimulus filter k_i 提取外界 drive。 2. self-history h_i 可表示 refractory suppression 或 bursting facilitation。 3. coupling filters c_ij 捕捉其他 neurons' past spikes 对 conditional rate 的预测。 4. 全部 filters 可在 joint likelihood 中同时优化，减少逐步拟合造成的 confounding。",
+    "Geometric/computational intuition. GLM 把多种历史变量都放进同一个 linear predictor，再用 exp 生成 positive rate。 Biological interpretation / failure condition. coupling coefficient 可能反映 shared input 或 unobserved neurons，不自动证明 direct synapse。",
+    "思考题：Poisson 为什么常用 log link？"
+  ],
+  "synthesis": [
+    "STC 比较 spike-triggered 与 raw stimulus covariance，寻找 spikes 前 variance 被放大或压缩的 directions；colored stimuli 需 whitening/correction。GLM 则用 response distribution、linear predictor 与 link function 统一多种 regression。retinal population GLM 可同时拟合 stimulus filters、self-history 与 cross-neuron couplings，但它仍是统计模型，coupling filter 不自动等于直接 synapse。"
+  ],
+  "workedExamples": [
+    "7.1 distribution/link matching",
+    "【例题】题目：200 ms 窗口 spike count、单 bin spike/no-spike、连续 eye velocity。",
+    "Worked solution. count 可用 Poisson/log； small-bin binary 可用 Bernoulli/logit； 连续近 Gaussian residual 可用 Gaussian/identity。 Check. response support 必须匹配：count≥0，probability∈[0,1]，continuous 可正可负。",
+    "7.2 history filter prediction",
+    "【拓展例题】题目：self-history filter 在 spike 后 5 ms 强负、20-50 ms 正。",
+    "Worked solution. 模型预测立即 refractory suppression， 随后短暂 increased conditional rate/burst tendency。 Check. 这是 conditional statistical effect，不一定对应单一 ion channel。"
+  ],
+  "formulas": [
+    {
+      "id": "L14-F01",
+      "lecture": 14,
+      "name": "STC covariance change",
+      "expression": "∆C = Cspike − Cstim",
+      "latex": "\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}",
+      "conditions": "centered ensembles",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-F02",
+      "lecture": 14,
+      "name": "GLM linear predictor",
+      "expression": "η = Xβ",
+      "latex": "\\boldsymbol{\\eta}=X\\boldsymbol{\\beta}",
+      "conditions": "shape-compatible design",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-F03",
+      "lecture": 14,
+      "name": "link function",
+      "expression": "g(E[y|x]) = η",
+      "latex": "g(\\mathbb{E}[y\\mid x])=\\eta",
+      "conditions": "chosen response family",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-F04",
+      "lecture": 14,
+      "name": "Poisson log-link inverse",
+      "expression": "λ = eη",
+      "latex": "\\lambda=e^{\\eta}",
+      "conditions": "positive mean",
+      "sectionId": "lecture-14-source-4",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L14-F05",
+      "lecture": 14,
+      "name": "logistic inverse link",
+      "expression": "q = (1 + e−η )−1",
+      "latex": "q=(1+e^{-\\eta})^{-1}",
+      "conditions": "0<q<1",
+      "sectionId": "lecture-14-source-3",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L14-F06",
+      "lecture": 14,
+      "name": "Poisson log-likelihood",
+      "expression": "ℓP ois = (yη − eη − log y!)",
+      "latex": "\\ell_{\\mathrm{Pois}}=\\sum(y\\eta-e^{\\eta}-\\log(y!))",
+      "conditions": "conditionally independent bins/counts",
+      "sectionId": "lecture-14-source-3",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L14-F07",
+      "lecture": 14,
+      "name": "logistic loss",
+      "expression": "−ℓBern = cross-entropy",
+      "latex": "-\\ell_{\\mathrm{Bern}}=\\operatorname{cross\\text{-}entropy}",
+      "conditions": "Bernoulli outcomes",
+      "sectionId": "lecture-14-source-6",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 6
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L14-G01",
+      "lecture": 14,
+      "zh": "脉冲触发协方差",
+      "en": "spike-triggered covariance, STC",
+      "definition": "对 spike-triggered ensemble covariance 的分析。",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-G02",
+      "lecture": 14,
+      "zh": "相关子空间",
+      "en": "relevant subspace",
+      "definition": "多个 stimulus filters 张成的 response-sensitive subspace。",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-G03",
+      "lecture": 14,
+      "zh": "指数族",
+      "en": "exponential family",
+      "definition": "可写成特定 canonical statistic/parameter 形式的分布族。",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-G04",
+      "lecture": 14,
+      "zh": "线性预测子",
+      "en": "linear predictor",
+      "definition": "η=Xβ。",
+      "sectionId": "lecture-14-source-2",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L14-G05",
+      "lecture": 14,
+      "zh": "链接函数",
+      "en": "link function",
+      "definition": "conditional mean 与 η 之间的映射。",
+      "sectionId": "lecture-14-source-1",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L14-G06",
+      "lecture": 14,
+      "zh": "Poisson 回归",
+      "en": "Poisson regression",
+      "definition": "count/rate 的 log-link GLM。",
+      "sectionId": "lecture-14-source-4",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L14-G07",
+      "lecture": 14,
+      "zh": "逻辑回归",
+      "en": "logistic regression",
+      "definition": "Bernoulli outcome 的 logit-link GLM。",
+      "sectionId": "lecture-14-source-4",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L14-G08",
+      "lecture": 14,
+      "zh": "对数几率",
+      "en": "log odds",
+      "definition": "log[q/(1−q)]。",
+      "sectionId": "lecture-14-source-6",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 6
+    },
+    {
+      "id": "L14-G09",
+      "lecture": 14,
+      "zh": "历史滤波器",
+      "en": "history filter",
+      "definition": "过去 spikes 对当前 conditional response 的线性影响。",
+      "sectionId": "lecture-14-source-5",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 5
+    },
+    {
+      "id": "L14-G10",
+      "lecture": 14,
+      "zh": "耦合滤波器",
+      "en": "coupling filter",
+      "definition": "其他 units' histories 的 predictive filter。",
+      "sectionId": "lecture-14-source-2",
+      "sourceFile": "Lecture14-STC-GLM.pdf",
+      "sourcePage": 2
+    }
+  ],
+  "commonTraps": [
+    "STA=0 就认为没有 relevant feature。",
+    "colored stimulus 下直接对 ΔC 做普通 eigendecomposition。",
+    "把 GLM 的 linear 理解为 response mean 必须线性。",
+    "Poisson link 使用 identity 导致 negative rate。",
+    "把 Bernoulli logistic classification 与 Poisson small-count model 混同。",
+    "把 fitted coupling filters 当作直接 anatomical synapses。",
+    "忽略 history dependence 导致 apparent stimulus filter 偏差。",
+    "需避免把 GLM 的\"linear\"理解成 response mean 需要线性；linear 指 predictor，对 mean 的关系由 link 决定。"
+  ],
+  "errata": [
+    "1. Page 1 中 H1 的 4 significant temporal features 是课程实例；具体 filter 数量依数据与模型选择。 2. Page 2 的 canonical exponential-family notation 为概念框架，不要求所有常数项逐字对应同一教材 convention。 3. Page 5 的 retinal GLM coupling 应解释为 conditional statistical dependence，不自动证明 causal synaptic connection。"
+  ],
+  "questions": [
+    {
+      "id": "L14-Q01",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：STC 比 STA 多检查什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "response distribution、linear predictor、link function。"
+        },
+        {
+          "id": "b",
+          "text": "whiten stimulus 或使用 generalized eigen/covariance correction。"
+        },
+        {
+          "id": "c",
+          "text": "inverse exp 保证 rate/count mean 非负，并是 canonical link。"
+        },
+        {
+          "id": "d",
+          "text": "spike-triggered covariance/variance structure，而不只是 mean。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“GLM 的三个元素？”。",
+        "b": "该选项回答的是“colored stimulus 下 STC 应如何修正？”。",
+        "c": "该选项回答的是“Poisson 为什么常用 log link？”。"
+      },
+      "explanation": "spike-triggered covariance/variance structure，而不只是 mean。"
+    },
+    {
+      "id": "L14-Q02",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 2,
+          "section": "lecture-14-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 14 讲：even energy nonlinearity 下 STA 为什么可为零？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "+feature 与 −feature 都触发，mean 相消。"
+        },
+        {
+          "id": "b",
+          "text": "不能，可能来自 shared/unobserved input。"
+        },
+        {
+          "id": "c",
+          "text": "Bernoulli negative log-likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "Bernoulli outcome 的 logit-link GLM。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该选项回答的是“coupling filter 非零能证明 direct synapse 吗？”。",
+        "c": "该选项回答的是“cross-entropy 从哪里来？”。",
+        "d": "这是“逻辑回归（logistic regression）”的定义。"
+      },
+      "explanation": "+feature 与 −feature 都触发，mean 相消。"
+    },
+    {
+      "id": "L14-Q03",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 3,
+          "section": "lecture-14-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：colored stimulus 下 STC 应如何修正？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "多个 stimulus filters 张成的 response-sensitive subspace。"
+        },
+        {
+          "id": "b",
+          "text": "whiten stimulus 或使用 generalized eigen/covariance correction。"
+        },
+        {
+          "id": "c",
+          "text": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。"
+        },
+        {
+          "id": "d",
+          "text": "spike-triggered covariance/variance structure，而不只是 mean。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“相关子空间（relevant subspace）”的定义。",
+        "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。",
+        "d": "该选项回答的是“STC 比 STA 多检查什么？”。"
+      },
+      "explanation": "whiten stimulus 或使用 generalized eigen/covariance correction。"
+    },
+    {
+      "id": "L14-Q04",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 14 讲：GLM 的三个元素？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bernoulli outcome 的 logit-link GLM。"
+        },
+        {
+          "id": "b",
+          "text": "count/rate 的 log-link GLM。"
+        },
+        {
+          "id": "c",
+          "text": "response distribution、linear predictor、link function。"
+        },
+        {
+          "id": "d",
+          "text": "inverse exp 保证 rate/count mean 非负，并是 canonical link。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“逻辑回归（logistic regression）”的定义。",
+        "b": "这是“Poisson 回归（Poisson regression）”的定义。",
+        "d": "该选项回答的是“Poisson 为什么常用 log link？”。"
+      },
+      "explanation": "response distribution、linear predictor、link function。"
+    },
+    {
+      "id": "L14-Q05",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 5,
+          "section": "lecture-14-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 14 讲：GLM 中 linear 指什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "count/rate 的 log-link GLM。"
+        },
+        {
+          "id": "b",
+          "text": "Bernoulli outcome 的 logit-link GLM。"
+        },
+        {
+          "id": "c",
+          "text": "response distribution、linear predictor、link function。"
+        },
+        {
+          "id": "d",
+          "text": "η 对 predictors linear。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“Poisson 回归（Poisson regression）”的定义。",
+        "b": "这是“逻辑回归（logistic regression）”的定义。",
+        "c": "该选项回答的是“GLM 的三个元素？”。"
+      },
+      "explanation": "η 对 predictors linear。"
+    },
+    {
+      "id": "L14-Q06",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：Gaussian identity-link MLE 与什么等价？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "minimize mean squared error。"
+        },
+        {
+          "id": "b",
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
+        },
+        {
+          "id": "c",
+          "text": "conditional mean 与 η 之间的映射。"
+        },
+        {
+          "id": "d",
+          "text": "count/rate 的 log-link GLM。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。",
+        "c": "这是“链接函数（link function）”的定义。",
+        "d": "这是“Poisson 回归（Poisson regression）”的定义。"
+      },
+      "explanation": "minimize mean squared error。"
+    },
+    {
+      "id": "L14-Q07",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 3,
+          "section": "lecture-14-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 14 讲：Poisson 为什么常用 log link？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "response distribution、linear predictor、link function。"
+        },
+        {
+          "id": "b",
+          "text": "inverse exp 保证 rate/count mean 非负，并是 canonical link。"
+        },
+        {
+          "id": "c",
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "因此，严格区分 Poisson count model、Bernoulli small-bin model 和 logistic classification。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“GLM 的三个元素？”。",
+        "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 6 页。"
+      },
+      "explanation": "inverse exp 保证 rate/count mean 非负，并是 canonical link。"
+    },
+    {
+      "id": "L14-Q08",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：logit 的 inverse 是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "inverse exp 保证 rate/count mean 非负，并是 canonical link。"
+        },
+        {
+          "id": "b",
+          "text": "shape-compatible design"
+        },
+        {
+          "id": "c",
+          "text": "sigmoid q=1/(1+e^{-η})。"
+        },
+        {
+          "id": "d",
+          "text": "η 对 predictors linear。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“Poisson 为什么常用 log link？”。",
+        "b": "这是“GLM linear predictor”的适用条件。",
+        "d": "该选项回答的是“GLM 中 linear 指什么？”。"
+      },
+      "explanation": "sigmoid q=1/(1+e^{-η})。"
+    },
+    {
+      "id": "L14-Q09",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 14 讲：cross-entropy 从哪里来？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Bernoulli outcome 的 logit-link GLM。"
+        },
+        {
+          "id": "b",
+          "text": "+feature 与 −feature 都触发，mean 相消。"
+        },
+        {
+          "id": "c",
+          "text": "不能，可能来自 shared/unobserved input。"
+        },
+        {
+          "id": "d",
+          "text": "Bernoulli negative log-likelihood。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“逻辑回归（logistic regression）”的定义。",
+        "b": "该选项回答的是“even energy nonlinearity 下 STA 为什么可为零？”。",
+        "c": "该选项回答的是“coupling filter 非零能证明 direct synapse 吗？”。"
+      },
+      "explanation": "Bernoulli negative log-likelihood。"
+    },
+    {
+      "id": "L14-Q10",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 2,
+          "section": "lecture-14-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 14 讲：self-history 负 lobe 可代表什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "refractory effect。"
+        },
+        {
+          "id": "b",
+          "text": "centered ensembles"
+        },
+        {
+          "id": "c",
+          "text": "Bernoulli outcomes"
+        },
+        {
+          "id": "d",
+          "text": "η 对 predictors linear。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“STC covariance change”的适用条件。",
+        "c": "这是“logistic loss”的适用条件。",
+        "d": "该选项回答的是“GLM 中 linear 指什么？”。"
+      },
+      "explanation": "refractory effect。"
+    },
+    {
+      "id": "L14-Q11",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 5,
+          "section": "lecture-14-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：coupling filter 非零能证明 direct synapse 吗？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "其他 units' histories 的 predictive filter。"
+        },
+        {
+          "id": "b",
+          "text": "不能，可能来自 shared/unobserved input。"
+        },
+        {
+          "id": "c",
+          "text": "+feature 与 −feature 都触发，mean 相消。"
+        },
+        {
+          "id": "d",
+          "text": "Bernoulli negative log-likelihood。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“耦合滤波器（coupling filter）”的定义。",
+        "c": "该选项回答的是“even energy nonlinearity 下 STA 为什么可为零？”。",
+        "d": "该选项回答的是“cross-entropy 从哪里来？”。"
+      },
+      "explanation": "不能，可能来自 shared/unobserved input。"
+    },
+    {
+      "id": "L14-Q12",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 14 讲：Poisson count 与 Bernoulli small-bin 的选择差异？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，严格区分 Poisson count model、Bernoulli small-bin model 和 logistic classification。"
+        },
+        {
+          "id": "b",
+          "text": "inverse exp 保证 rate/count mean 非负，并是 canonical link。"
+        },
+        {
+          "id": "c",
+          "text": "前者允许 0,1,2⋯counts；后者每 bin 只允许 spike/no-spike。"
+        },
+        {
+          "id": "d",
+          "text": "Bernoulli outcome 的 logit-link GLM。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture14-STC-GLM.pdf 第 6 页。",
+        "b": "该选项回答的是“Poisson 为什么常用 log link？”。",
+        "d": "这是“逻辑回归（logistic regression）”的定义。"
+      },
+      "explanation": "前者允许 0,1,2⋯counts；后者每 bin 只允许 spike/no-spike。"
+    },
+    {
+      "id": "L14-Q13",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：诊断并修正下面的说法：STA=0 就认为没有 relevant feature。",
+      "choices": [
+        {
+          "id": "a",
+          "text": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。"
+        },
+        {
+          "id": "b",
+          "text": "+feature 与 −feature 都触发，mean 相消。"
+        },
+        {
+          "id": "c",
+          "text": "whiten stimulus 或使用 generalized eigen/covariance correction。"
+        },
+        {
+          "id": "d",
+          "text": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。",
+        "b": "该选项回答的是“even energy nonlinearity 下 STA 为什么可为零？”。",
+        "c": "该选项回答的是“colored stimulus 下 STC 应如何修正？”。"
+      },
+      "explanation": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。"
+    },
+    {
+      "id": "L14-Q14",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：根据 Lecture14-STC-GLM.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+        },
+        {
+          "id": "b",
+          "text": "GLM 三要素与 exponential-family canonical form。"
+        },
+        {
+          "id": "c",
+          "text": "Poisson log link 与 log likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。"
+      },
+      "explanation": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+    },
+    {
+      "id": "L14-Q15",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：若要解释\"H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+        },
+        {
+          "id": "b",
+          "text": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。"
+        },
+        {
+          "id": "c",
+          "text": "系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+        },
+        {
+          "id": "d",
+          "text": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "c": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。"
+      },
+      "explanation": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。"
+    },
+    {
+      "id": "L14-Q16",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 1,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：阅读与\"H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        },
+        {
+          "id": "c",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "d",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "b": "该陈述解释的是“unit-normal Gaussian GLM / ordinary linear regression”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+    },
+    {
+      "id": "L14-Q17",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 2,
+          "section": "lecture-14-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：根据 Lecture14-STC-GLM.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+        },
+        {
+          "id": "b",
+          "text": "Poisson log link 与 log likelihood。"
+        },
+        {
+          "id": "c",
+          "text": "unit-normal Gaussian GLM / ordinary linear regression；Poisson GLM 开始。"
+        },
+        {
+          "id": "d",
+          "text": "GLM 三要素与 exponential-family canonical form。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "c": "该陈述解释的是“unit-normal Gaussian GLM / ordinary linear regression”，不是题干指定的关系。"
+      },
+      "explanation": "GLM 三要素与 exponential-family canonical form。"
+    },
+    {
+      "id": "L14-Q18",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 2,
+          "section": "lecture-14-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：若要解释\"GLM 三要素与 exponential-family canonical form\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+        },
+        {
+          "id": "b",
+          "text": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+        },
+        {
+          "id": "c",
+          "text": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+        },
+        {
+          "id": "d",
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
+      },
+      "explanation": "系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+    },
+    {
+      "id": "L14-Q19",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 3,
+          "section": "lecture-14-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：根据 Lecture14-STC-GLM.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Poisson log link 与 log likelihood。"
+        },
+        {
+          "id": "b",
+          "text": "unit-normal Gaussian GLM / ordinary linear regression；Poisson GLM 开始。"
+        },
+        {
+          "id": "c",
+          "text": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+        },
+        {
+          "id": "d",
+          "text": "GLM 三要素与 exponential-family canonical form。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "c": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "d": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。"
+      },
+      "explanation": "unit-normal Gaussian GLM / ordinary linear regression；Poisson GLM 开始。"
+    },
+    {
+      "id": "L14-Q20",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 3,
+          "section": "lecture-14-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：若要解释\"unit-normal Gaussian GLM / ordinary linear regression\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，系统讲 GLM 的 response distribution、linear predictor、 link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+        },
+        {
+          "id": "b",
+          "text": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+        },
+        {
+          "id": "c",
+          "text": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+        },
+        {
+          "id": "d",
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
+      },
+      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+    },
+    {
+      "id": "L14-Q21",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 3,
+          "section": "lecture-14-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 1,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：阅读与\"unit-normal Gaussian GLM / ordinary linear regression\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "b",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "c",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "d",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+    },
+    {
+      "id": "L14-Q22",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 4,
+          "section": "lecture-14-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：根据 Lecture14-STC-GLM.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Poisson log link 与 log likelihood。"
+        },
+        {
+          "id": "b",
+          "text": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+        },
+        {
+          "id": "c",
+          "text": "GLM 三要素与 exponential-family canonical form。"
+        },
+        {
+          "id": "d",
+          "text": "Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "c": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。"
+      },
+      "explanation": "Poisson log link 与 log likelihood。"
+    },
+    {
+      "id": "L14-Q23",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 4,
+          "section": "lecture-14-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：若要解释\"Poisson log link 与 log likelihood\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，系统讲 GLM 的 response distribution、linear predictor、 link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+        },
+        {
+          "id": "b",
+          "text": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+        },
+        {
+          "id": "c",
+          "text": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+        },
+        {
+          "id": "d",
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
+      },
+      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+    },
+    {
+      "id": "L14-Q24",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 4,
+          "section": "lecture-14-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：阅读与\"Poisson log link 与 log likelihood\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "b",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "c",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "d",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "d": "该陈述解释的是“unit-normal Gaussian GLM / ordinary linear regression”，不是题干指定的关系。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L14-Q25",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 5,
+          "section": "lecture-14-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：根据 Lecture14-STC-GLM.pdf 第 5 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+        },
+        {
+          "id": "b",
+          "text": "Poisson log link 与 log likelihood。"
+        },
+        {
+          "id": "c",
+          "text": "GLM 三要素与 exponential-family canonical form。"
+        },
+        {
+          "id": "d",
+          "text": "Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "c": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。"
+      },
+      "explanation": "Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters。"
+    },
+    {
+      "id": "L14-Q26",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 5,
+          "section": "lecture-14-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：若要解释\"Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+        },
+        {
+          "id": "b",
+          "text": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+        },
+        {
+          "id": "c",
+          "text": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。"
+        },
+        {
+          "id": "d",
+          "text": "因此，系统讲 GLM 的 response distribution、linear predictor、 link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。",
+        "c": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。"
+      },
+      "explanation": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+    },
+    {
+      "id": "L14-Q27",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 5,
+          "section": "lecture-14-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 2,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：阅读与\"Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+        },
+        {
+          "id": "c",
+          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+        },
+        {
+          "id": "d",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "c": "该陈述解释的是“unit-normal Gaussian GLM / ordinary linear regression”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+    },
+    {
+      "id": "L14-Q28",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 14 讲：根据 Lecture14-STC-GLM.pdf 第 6 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction。"
+        },
+        {
+          "id": "b",
+          "text": "GLM 三要素与 exponential-family canonical form。"
+        },
+        {
+          "id": "c",
+          "text": "Bernoulli GLM、logistic regression、log odds、cross-entropy。"
+        },
+        {
+          "id": "d",
+          "text": "Poisson log link 与 log likelihood。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Poisson log link 与 log likelihood”，不是题干指定的关系。"
+      },
+      "explanation": "Bernoulli GLM、logistic regression、log odds、cross-entropy。"
+    },
+    {
+      "id": "L14-Q29",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Spike-Triggered Covariance and Generalized Linear Models",
+        "Lecture14-STC-GLM.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 14 讲：若要解释\"Bernoulli GLM、logistic regression、log odds、cross-entropy\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，系统讲 GLM 的 response distribution、linear predictor、 link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。"
+        },
+        {
+          "id": "b",
+          "text": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。"
+        },
+        {
+          "id": "c",
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
+        },
+        {
+          "id": "d",
+          "text": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
+        "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
+      },
+      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。"
+    },
+    {
+      "id": "L14-Q30",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "脉冲触发协方差",
+        "spike-triggered covariance, STC"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"对 spike-triggered ensemble covariance 的分析。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "脉冲触发协方差（spike-triggered covariance, STC）"
+        },
+        {
+          "id": "b",
+          "text": "相关子空间（relevant subspace）"
+        },
+        {
+          "id": "c",
+          "text": "指数族（exponential family）"
+        },
+        {
+          "id": "d",
+          "text": "线性预测子（linear predictor）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“相关子空间（relevant subspace）”指：多个 stimulus filters 张成的 response-sensitive subspace。",
+        "c": "“指数族（exponential family）”指：可写成特定 canonical statistic/parameter 形式的分布族。",
+        "d": "“线性预测子（linear predictor）”指：η=Xβ。"
+      },
+      "explanation": "脉冲触发协方差（spike-triggered covariance, STC）：对 spike-triggered ensemble covariance 的分析。"
+    },
+    {
+      "id": "L14-Q31",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "相关子空间",
+        "relevant subspace"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"多个 stimulus filters 张成的 response-sensitive subspace。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "指数族（exponential family）"
+        },
+        {
+          "id": "b",
+          "text": "相关子空间（relevant subspace）"
+        },
+        {
+          "id": "c",
+          "text": "线性预测子（linear predictor）"
+        },
+        {
+          "id": "d",
+          "text": "链接函数（link function）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“指数族（exponential family）”指：可写成特定 canonical statistic/parameter 形式的分布族。",
+        "c": "“线性预测子（linear predictor）”指：η=Xβ。",
+        "d": "“链接函数（link function）”指：conditional mean 与 η 之间的映射。"
+      },
+      "explanation": "相关子空间（relevant subspace）：多个 stimulus filters 张成的 response-sensitive subspace。"
+    },
+    {
+      "id": "L14-Q32",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "指数族",
+        "exponential family"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"可写成特定 canonical statistic/parameter 形式的分布族。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "线性预测子（linear predictor）"
+        },
+        {
+          "id": "b",
+          "text": "链接函数（link function）"
+        },
+        {
+          "id": "c",
+          "text": "指数族（exponential family）"
+        },
+        {
+          "id": "d",
+          "text": "Poisson 回归（Poisson regression）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“线性预测子（linear predictor）”指：η=Xβ。",
+        "b": "“链接函数（link function）”指：conditional mean 与 η 之间的映射。",
+        "d": "“Poisson 回归（Poisson regression）”指：count/rate 的 log-link GLM。"
+      },
+      "explanation": "指数族（exponential family）：可写成特定 canonical statistic/parameter 形式的分布族。"
+    },
+    {
+      "id": "L14-Q33",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 2,
+          "section": "lecture-14-source-2"
+        }
+      ],
+      "conceptTags": [
+        "线性预测子",
+        "linear predictor"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"η=Xβ。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "链接函数（link function）"
+        },
+        {
+          "id": "b",
+          "text": "Poisson 回归（Poisson regression）"
+        },
+        {
+          "id": "c",
+          "text": "逻辑回归（logistic regression）"
+        },
+        {
+          "id": "d",
+          "text": "线性预测子（linear predictor）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“链接函数（link function）”指：conditional mean 与 η 之间的映射。",
+        "b": "“Poisson 回归（Poisson regression）”指：count/rate 的 log-link GLM。",
+        "c": "“逻辑回归（logistic regression）”指：Bernoulli outcome 的 logit-link GLM。"
+      },
+      "explanation": "线性预测子（linear predictor）：η=Xβ。"
+    },
+    {
+      "id": "L14-Q34",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "链接函数",
+        "link function"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"conditional mean 与 η 之间的映射。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "链接函数（link function）"
+        },
+        {
+          "id": "b",
+          "text": "Poisson 回归（Poisson regression）"
+        },
+        {
+          "id": "c",
+          "text": "逻辑回归（logistic regression）"
+        },
+        {
+          "id": "d",
+          "text": "对数几率（log odds）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“Poisson 回归（Poisson regression）”指：count/rate 的 log-link GLM。",
+        "c": "“逻辑回归（logistic regression）”指：Bernoulli outcome 的 logit-link GLM。",
+        "d": "“对数几率（log odds）”指：log[q/(1−q)]。"
+      },
+      "explanation": "链接函数（link function）：conditional mean 与 η 之间的映射。"
+    },
+    {
+      "id": "L14-Q35",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 4,
+          "section": "lecture-14-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Poisson 回归",
+        "Poisson regression"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"count/rate 的 log-link GLM。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逻辑回归（logistic regression）"
+        },
+        {
+          "id": "b",
+          "text": "Poisson 回归（Poisson regression）"
+        },
+        {
+          "id": "c",
+          "text": "对数几率（log odds）"
+        },
+        {
+          "id": "d",
+          "text": "历史滤波器（history filter）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“逻辑回归（logistic regression）”指：Bernoulli outcome 的 logit-link GLM。",
+        "c": "“对数几率（log odds）”指：log[q/(1−q)]。",
+        "d": "“历史滤波器（history filter）”指：过去 spikes 对当前 conditional response 的线性影响。"
+      },
+      "explanation": "Poisson 回归（Poisson regression）：count/rate 的 log-link GLM。"
+    },
+    {
+      "id": "L14-Q36",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 4,
+          "section": "lecture-14-source-4"
+        }
+      ],
+      "conceptTags": [
+        "逻辑回归",
+        "logistic regression"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"Bernoulli outcome 的 logit-link GLM。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "对数几率（log odds）"
+        },
+        {
+          "id": "b",
+          "text": "历史滤波器（history filter）"
+        },
+        {
+          "id": "c",
+          "text": "逻辑回归（logistic regression）"
+        },
+        {
+          "id": "d",
+          "text": "耦合滤波器（coupling filter）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“对数几率（log odds）”指：log[q/(1−q)]。",
+        "b": "“历史滤波器（history filter）”指：过去 spikes 对当前 conditional response 的线性影响。",
+        "d": "“耦合滤波器（coupling filter）”指：其他 units' histories 的 predictive filter。"
+      },
+      "explanation": "逻辑回归（logistic regression）：Bernoulli outcome 的 logit-link GLM。"
+    },
+    {
+      "id": "L14-Q37",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 6,
+          "section": "lecture-14-source-6"
+        }
+      ],
+      "conceptTags": [
+        "对数几率",
+        "log odds"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"log[q/(1−q)]。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "历史滤波器（history filter）"
+        },
+        {
+          "id": "b",
+          "text": "耦合滤波器（coupling filter）"
+        },
+        {
+          "id": "c",
+          "text": "脉冲触发协方差（spike-triggered covariance, STC）"
+        },
+        {
+          "id": "d",
+          "text": "对数几率（log odds）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“历史滤波器（history filter）”指：过去 spikes 对当前 conditional response 的线性影响。",
+        "b": "“耦合滤波器（coupling filter）”指：其他 units' histories 的 predictive filter。",
+        "c": "“脉冲触发协方差（spike-triggered covariance, STC）”指：对 spike-triggered ensemble covariance 的分析。"
+      },
+      "explanation": "对数几率（log odds）：log[q/(1−q)]。"
+    },
+    {
+      "id": "L14-Q38",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 5,
+          "section": "lecture-14-source-5"
+        }
+      ],
+      "conceptTags": [
+        "历史滤波器",
+        "history filter"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"过去 spikes 对当前 conditional response 的线性影响。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "历史滤波器（history filter）"
+        },
+        {
+          "id": "b",
+          "text": "耦合滤波器（coupling filter）"
+        },
+        {
+          "id": "c",
+          "text": "脉冲触发协方差（spike-triggered covariance, STC）"
+        },
+        {
+          "id": "d",
+          "text": "相关子空间（relevant subspace）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“耦合滤波器（coupling filter）”指：其他 units' histories 的 predictive filter。",
+        "c": "“脉冲触发协方差（spike-triggered covariance, STC）”指：对 spike-triggered ensemble covariance 的分析。",
+        "d": "“相关子空间（relevant subspace）”指：多个 stimulus filters 张成的 response-sensitive subspace。"
+      },
+      "explanation": "历史滤波器（history filter）：过去 spikes 对当前 conditional response 的线性影响。"
+    },
+    {
+      "id": "L14-Q39",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 2,
+          "section": "lecture-14-source-2"
+        }
+      ],
+      "conceptTags": [
+        "耦合滤波器",
+        "coupling filter"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 14 讲：本讲把\"其他 units' histories 的 predictive filter。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "脉冲触发协方差（spike-triggered covariance, STC）"
+        },
+        {
+          "id": "b",
+          "text": "耦合滤波器（coupling filter）"
+        },
+        {
+          "id": "c",
+          "text": "相关子空间（relevant subspace）"
+        },
+        {
+          "id": "d",
+          "text": "指数族（exponential family）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“脉冲触发协方差（spike-triggered covariance, STC）”指：对 spike-triggered ensemble covariance 的分析。",
+        "c": "“相关子空间（relevant subspace）”指：多个 stimulus filters 张成的 response-sensitive subspace。",
+        "d": "“指数族（exponential family）”指：可写成特定 canonical statistic/parameter 形式的分布族。"
+      },
+      "explanation": "耦合滤波器（coupling filter）：其他 units' histories 的 predictive filter。"
+    },
+    {
+      "id": "L14-Q40",
+      "lecture": 14,
+      "sectionId": "lecture-14-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture14-STC-GLM.pdf",
+          "page": 1,
+          "section": "lecture-14-source-1"
+        }
+      ],
+      "conceptTags": [
+        "STC covariance change"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 14 讲：使用\"STC covariance change\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "shape-compatible design"
+        },
+        {
+          "id": "b",
+          "text": "chosen response family"
+        },
+        {
+          "id": "c",
+          "text": "centered ensembles"
+        },
+        {
+          "id": "d",
+          "text": "positive mean"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“GLM linear predictor”的条件，不是题干公式的条件。",
+        "b": "这是“link function”的条件，不是题干公式的条件。",
+        "d": "这是“Poisson log-link inverse”的条件，不是题干公式的条件。"
+      },
+      "explanation": "STC covariance change 的适用条件：centered ensembles"
+    }
+  ]
+}

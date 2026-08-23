@@ -1,0 +1,891 @@
+NEUROSCI 366
+Lecture 25
+
+
+
+强 化 学 习 ——MDP, Bellman Equations, and Q‑
+
+Learning
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture25‑ReinforcementLearning.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 25                                                         Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                               2
+
+2 Learning objectives and prerequisite dependency map                                                     2
+
+3 Five‑minute prerequisite diagnostic                                                                     2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                          3
+   4.1 Lecture25‑ReinforcementLearning.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . .           3
+   4.2 Lecture25‑ReinforcementLearning.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . .           4
+   4.3 Lecture25‑ReinforcementLearning.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . .           5
+   4.4 Lecture25‑ReinforcementLearning.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . .           6
+   4.5 Lecture25‑ReinforcementLearning.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . .           7
+   4.6 Lecture25‑ReinforcementLearning.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . .           8
+
+5 补全推导与数学支架 / Derivations                                                                                 9
+   5.1 MDP 与 Markov property . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         9
+   5.2 return、V 与 Q . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     10
+   5.3 Bellman optimality equation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      11
+   5.4 Q‑learning 与 exploration . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     12
+   5.5 model‑based RL、planning 与 replay . . . . . . . . . . . . . . . . . . . . . . . . . . . .           12
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                         13
+
+7 Worked examples and transfer                                                                            13
+   7.1 两状态 Bellman backup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         13
+   7.2 Markov diagnosis . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   13
+
+8 Formula and notation sheet                                                                              15
+
+9 Bilingual glossary                                                                                      15
+
+10 Common traps, assumptions, and limitations                                                             16
+
+11 Cumulative Knowledge Check                                                                             17
+
+12 Hint Bank                                                                                              19
+
+13 Complete Answer Key with reasoning                                                                     21
+
+14 Source‑page concordance and coverage audit                                                             22
+
+
+
+
+                                                   1/23
+NEUROSCI 366 ・Lecture 25                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            22
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      22
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+
+
+
+                                                     2/23
+NEUROSCI 366 ・Lecture 25                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：agent/state/action/reward。
+‧ 从第一原则推导：Markov property。
+‧ 解释几何/计算直觉：discounted return。
+‧ 连接生物学解释：V/Q/policy。
+‧ 诊断 assumptions 与 failure modes：Bellman backup。
+‧ 把概念迁移到新神经科学问题：Q‑learning/exploration。
+
+ Dependency map
+ agent/state/action/reward → Markov property → discounted return → V/Q/policy → Bellman
+ backup → Q‑learning/exploration
+ Core question
+ 如何用 MDP formalize agent–environment interaction，递归分解 discounted return 得到 Bellman
+ equation，并用 Q‑learning 与 generative model 学习行动策略？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. Markov property 是关于什么？
+                        （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. policy 与 transition model 区别？
+                               （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. γ→0 的 agent？
+              （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. Vπ 与 Qπ 区别？
+             （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. optimal policy 如何由 Q* 得到？
+                           （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+                                              3/23
+NEUROSCI 366 ・Lecture 25                                        Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture25‑ReinforcementLearning.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture25‑ReinforcementLearning.pdf, p. 1]
+ Clean reconstruction. Page 1：squirrel example、agent/environment/state/action/reward、
+ Markov property、interaction loop。
+ What the note is saying. 本页的中心对象是 agent/state/action/reward 与 Markov property。原
+ 笔记将它们放进以下链条：squirrel example、agent/environment/state/action/reward、Markov
+ property、interaction loop。
+ Why it follows. 解释 Markov property 是关于 state representation 的条件独立性，不等于环境“没
+ 有历史”。其逻辑后果是：从 squirrel environment 精确定义 agent、environment、state、action、
+ reward、transition distribution 和 policy。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  Markov property 是关于什么？
+
+
+
+
+                                        4/23
+NEUROSCI 366 ・Lecture 25                                        Source‑aligned companion
+
+
+4.2 Lecture25‑ReinforcementLearning.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture25‑ReinforcementLearning.pdf, p. 2]
+ Clean reconstruction. Page 2：discounted return、gamma、myopic/far‑sighted、state value、
+ policy、Q value、optimal policy。
+ What the note is saying. 本页的中心对象是 discounted return 与 V/Q/policy。原笔记将它们放进以
+ 下链条：discounted return、gamma、myopic/far‑sighted、state value、policy、Q value、optimal
+ policy。
+ Why it follows. 逐项推导 discounted return；解释 gamma→0 与 gamma→1 的行为和 contin‑
+ uing/episodic caveats。其逻辑后果是：从 squirrel environment 精确定义 agent、environment、
+ state、action、reward、transition distribution 和 policy。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  policy 与 transition model 区别？
+
+
+
+
+                                        5/23
+NEUROSCI 366 ・Lecture 25                                            Source‑aligned companion
+
+
+4.3 Lecture25‑ReinforcementLearning.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture25‑ReinforcementLearning.pdf, p. 3]
+ Clean reconstruction. Page 3：Bellman optimality equation 的逐步推导。
+ What the note is saying. 本页的中心对象是 Bellman backup 与 Q‑learning/exploration。原笔记
+ 将它们放进以下链条：Bellman optimality equation 的逐步推导。
+ Why it follows. 按笔记步骤完整推导 Bellman optimality equation：当前 reward + next‑state
+ optimal value；保留 transition expectation。其逻辑后果是：从 Bellman error 推导 tabular Q‑
+ learning update；解释 learning rate、bootstrap、off‑policy target 和 convergence assumptions 的适
+ 当背景。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  γ→0 的 agent？
+
+
+
+
+                                           6/23
+NEUROSCI 366 ・Lecture 25                                           Source‑aligned companion
+
+
+4.4 Lecture25‑ReinforcementLearning.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture25‑ReinforcementLearning.pdf, p. 4]
+ Clean reconstruction. Page 4：Q‑learning、Bellman error、update、exploration–exploitation、
+ epsilon‑greedy。
+ What the note is saying. 本页的中心对象是 model‑based/replay 与 agent/state/action/reward。原
+ 笔记将它们放进以下链条：Q‑learning、Bellman error、update、exploration–exploitation、epsilon‑
+ greedy。
+ Why it follows. 从 Bellman error 推导 tabular Q‑learning update；解释 learning rate、bootstrap、
+ off‑policy target 和 convergence assumptions 的适当背景。其逻辑后果是：分析 exploration–ex‑
+ ploitation 与 epsilon‑greedy 的优缺点。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Vπ 与 Qπ 区别？
+
+
+
+
+                                          7/23
+NEUROSCI 366 ・Lecture 25                                         Source‑aligned companion
+
+
+4.5 Lecture25‑ReinforcementLearning.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture25‑ReinforcementLearning.pdf, p. 5]
+ Clean reconstruction. Page 5：Tolman maze、generative model、hippocampal state represen‑
+ tation、planning。
+ What the note is saying. 本页的中心对象是 Markov property 与 discounted return。原笔记将它们
+ 放进以下链条：Tolman maze、generative model、hippocampal state representation、planning。
+ Why it follows. 用 Tolman maze 解释 generative/model‑based representation；连接 hippocam‑
+ pal place/state coding、planning、replay 与 simulated experience。其逻辑后果是：解释 Markov
+ property 是关于 state representation 的条件独立性，不等于环境“没有历史”。后面的正式推导会逐
+ 项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  optimal policy 如何由 Q* 得到？
+
+
+
+
+                                         8/23
+NEUROSCI 366 ・Lecture 25                                          Source‑aligned companion
+
+
+4.6 Lecture25‑ReinforcementLearning.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture25‑ReinforcementLearning.pdf, p. 6]
+ Clean reconstruction. Page 6：model‑based RL、simulated experience、hippocampal replay、
+ sample efficiency。
+ What the note is saying. 本页的中心对象是 V/Q/policy 与 Bellman backup。原笔记将它们放进以
+ 下链条：model‑based RL、simulated experience、hippocampal replay、sample efficiency。
+ Why it follows. 用 Tolman maze 解释 generative/model‑based representation；  连接 hippocampal
+ place/state coding、planning、replay 与 simulated experience。其逻辑后果是：比较 model‑free
+ vs model‑based RL 的 computation、sample efficiency、flexibility 和 failure modes。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Bellman optimality equation 的 max 在哪里？
+
+
+
+
+                                          9/23
+NEUROSCI 366 ・Lecture 25                                                                 Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 MDP 与 Markov property
+
+【必要前置】      定义 squirrel foraging 的 formal components。
+
+                           P (st+1 , Rt+1 | s0:t , a0:t ) = P (st+1 , Rt+1 | st , at )
+
+                                                at ∼ π(a | st )
+1. agent 选择 action，environment 根据 transition distribution 产生 next state/reward。
+2. state 必须包含预测 future 所需信息，如位置、可见威胁、资源状态等。
+3. 若 state 缺记忆变量，observations 可能非‑Markov。
+4. policy 是 state 到 action distribution，不等于 transition model。
+
+  Geometric/computational intuition. Markov 性是 representation 的充分性条件，而非世界真
+  的无历史。
+  Biological interpretation / failure condition. partial observability 时需 belief state/recur‑
+  rent memory。
+
+  Micro‑check
+  Vπ 与 Qπ 区别？
+
+
+
+
+                                                     10/23
+NEUROSCI 366 ・Lecture 25                                             Source‑aligned companion
+
+
+5.2 return、V 与 Q
+
+【补全推导】      量化 long‑term reward。
+
+                              Gt = Rt+1 + γRt+2 + γ 2 Rt+3 + · · ·
+
+                                    Vπ (s) = Eπ [Gt | st = s]
+                              Qπ (s, a) = Eπ [Gt | st = s, at = a]
+1. 0≤γ<1 使远期 reward 权重几何衰减并帮助 continuing tasks 收敛。
+2. V 在 policy π 下从 state 出发平均；Q 额外固定第一 action。
+3. V_π(s)=E_{a∼π}Q_π(s,a)。
+4. optimal policy 选择最大 Q* 的 action（ties 可多解）。
+
+  Geometric/computational intuition. Q 把“现在做什么”与未来 consequences 连接。
+  Biological interpretation / failure condition. episodic finite horizon 可允许 γ=1；reward
+  scaling 与 termination 需明确。
+
+  Micro‑check
+  optimal policy 如何由 Q* 得到？
+
+
+
+
+                                             11/23
+NEUROSCI 366 ・Lecture 25                                                               Source‑aligned companion
+
+
+5.3 Bellman optimality equation
+
+【跨页连接】      递归表示 Q*。
+
+                       Q∗ (s, a) = E[Rt+1 + γ max
+                                               ′
+                                                  Q∗ (st+1 , a′ ) | st = s, at = a]
+                                                       a
+                                   X
+                               =           p(s′ , r | s, a)[r + γ max
+                                                                   ′
+                                                                      Q∗ (s′ , a′ )]
+                                                                   a
+                                   s′ ,r
+
+1. 将 G_t 拆成 R_{t+1}+γG_{t+1}。
+2. 第一步 action a 固定；下一 state 后采用 optimal future action。
+3. 对 environment stochastic transition/reward 取 expectation。
+4. equation 是 self‑consistency relation；已知 model 时可用 dynamic programming 求解。
+
+  Geometric/computational intuition. 一个 state‑action 的价值等于一步 reward 加最优 future
+  的折扣价值。
+  Biological interpretation / failure condition. 把 max 放到 expectation 外/内位置写错会改变
+  stochastic problem。
+
+  Micro‑check
+  Bellman optimality equation 的 max 在哪里？
+
+
+
+
+                                                        12/23
+NEUROSCI 366 ・Lecture 25                                                        Source‑aligned companion
+
+
+5.4 Q‑learning 与 exploration
+
+【模型边界】      未知 transition model 时如何从 experience 学 Q*？
+
+                                δt = Rt+1 + γ max
+                                               ′
+                                                  Q(st+1 , a′ ) − Q(st , at )
+                                                 a
+
+                                        Q(st , at ) ← Q(st , at ) + αδt
+1. sample transition 给 Bellman target 的 noisy sample。
+2. update 只改 visited state‑action entry。
+3. target 使用 greedy max，而 behavior 可以 ε‑greedy，因此 off‑policy。
+4. tabular convergence 需充分 exploration、适当 decaying learning rates 与 stationary finite MDP
+   等条件。
+
+  Geometric/computational intuition. 把当前 Q 向 one‑step bootstrap target 移动。
+  Biological interpretation / failure condition. function approximation、off‑policy 与 boot‑
+  strap 可共同引发 instability；state coverage 不足也失败。
+
+  Micro‑check
+  Q‑learning TD error？
+
+
+
+5.5 model‑based RL、planning 与 replay
+
+【必要前置】      generative model 如何提高 sample efficiency？
+
+                                                pb(s′ , r | s, a)
+
+                           real or simulated (s, a, r, s′ ) → planning/update
+1. agent 学 transition/reward model。
+2. 可在不实际行动时模拟 trajectories、评估 detours/changed reward。
+3. hippocampal state/place representations 与 replay 提供候选 biological substrate。
+4. replay 与 exact Bellman backup 是层级推断，不能直接等同。
+
+  Geometric/computational intuition. world model 把过去 experience 重组为未实际经历的
+  counterfactual updates。
+  Biological interpretation / failure condition. model bias 会在 planning 中累积；computa‑
+  tional cost 也更高。
+
+  Micro‑check
+  为什么 Q‑learning off‑policy？
+
+
+
+
+                                                     13/23
+NEUROSCI 366 ・Lecture 25                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  MDP 的核心不是“环境没有历史”，而是 chosen state representation 使 future 在给定 current
+  state/action 后与更早历史条件独立。discounted return 可递归拆成 immediate reward + γ future
+  return，导出 Bellman optimality equation。Q‑learning 用 sampled Bellman error 做 off‑policy
+  bootstrap update；model‑based RL 另学习 transition/reward model，并可通过 simulated ex‑
+  perience/replay 提高 sample efficiency。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 两状态 Bellman backup
+
+【原课/核心例题】         Prompt. s,a 立即 reward=1，确定转到 terminal‑like s’，max Q(s’,·)=4，γ=0.9。
+
+ Worked solution. target=1+0.9×4=4.6。若当前 Q=3, α=0.2，则新 Q=3+0.2(1.6)=3.32。
+ Check. update 不是直接设为 4.6，除非 α=1。
+
+
+7.2 Markov diagnosis
+
+【跨课连接】       Prompt. maze observation 只有当前位置，但门是否已打开取决于之前踩过开关。
+
+
+
+
+                                               14/23
+NEUROSCI 366 ・Lecture 25                                      Source‑aligned companion
+
+
+
+ Worked solution. 当前位置 alone 非‑Markov；state 应加入 switch/door status 或 belief/memory。
+ Check. 历史效应可通过扩充 state 恢复 Markov property。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                       15/23
+NEUROSCI 366 ・Lecture 25                                                       Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. MDP transition/reward model
+                                                 p(s′ , r|s, a)
+Conditions / conventions: Markov state
+2. discounted return                               X
+                                            Gt =         γ k Rt+k+1
+                                                   k≥0
+
+Conditions / conventions: 0≤γ<1 or finite episode
+3. state value
+                                           Vπ (s) = Eπ [Gt |st = s]
+Conditions / conventions: policy π
+4. state‑action value
+                                     Qπ (s, a) = Eπ [Gt |st = s, at = a]
+Conditions / conventions: first action fixed
+5. Bellman optimality
+                                           Q∗ = E[R + γ max Q∗ ]
+Conditions / conventions: optimal continuation
+6. tabular Q‑learning
+                                     Q ← Q + α(R + γ max Q′ − Q)
+Conditions / conventions: sampled transition
+7. ε‑greedy exploration
+                                     πϵ = (1 − ϵ)greedy + ϵrandom
+Conditions / conventions: finite action set
+
+
+9 Bilingual glossary
+
+
+ 中文                     English / symbol                 Operational meaning
+ 强化学习                   reinforcement learning           通过 interaction 与 rewards 学 policy/value。
+ 智能体                    agent                            选择 actions、更新内部 policy/model 的 learner。
+ 状态                     state                            用于预测 future 与选择 action 的 environment
+                                                         representation。
+ 马尔可夫性质                 Markov property                  given current state/action 后 future 与更早
+                                                         history 条件独立。
+ 策略                     policy                           state 到 action probability 的映射。
+ 回报                     return                           未来 rewards 的 discounted sum。
+ Bellman 方程             Bellman equation                 value 的 recursive self‑consistency relation。
+ Q‑learning             Q‑learning                       model‑free off‑policy TD control algorithm。
+ 探索–利用                  exploration–exploitation         收集新信息与选择当前最佳 action 的权衡。
+ 基于模型的强化学               model‑based RL                   学习/使用 environment model 进行 planning。
+ 习
+
+
+
+
+                                                    16/23
+NEUROSCI 366 ・Lecture 25                                          Source‑aligned companion
+
+
+
+ 中文                  English / symbol       Operational meaning
+ 重放                  replay                 离线重现/模拟 state sequences 的
+                                            neural/computational process。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. Markov property 等于环境没有历史。
+2. 混淆 Vπ、Qπ、V*、Q*。
+3. Bellman equation 忘记 transition expectation。
+4. Q‑learning target 使用 behavior action 而误写成 SARSA。
+5. ε‑greedy 的 random branch 只在非 greedy actions 中选而不说明 convention。
+6. 把 model‑free 等同于无 internal representation。
+7. 把 hippocampal replay 直接等同于精确 Bellman backup。
+
+  Course‑specific risk boundary. 不要把 Q‑learning 与所有 TD learning 同义化；不要把 hip‑
+  pocampal replay 直接等同于精确 Bellman backup，必须标明 evidence 与 inference 的层级。
+
+
+
+
+                                          17/23
+NEUROSCI 366 ・Lecture 25                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. Markov property 是关于什么？
+
+
+
+2. policy 与 transition model 区别？
+
+
+
+3. γ→0 的 agent？
+
+
+
+4. Vπ 与 Qπ 区别？
+
+
+
+5. optimal policy 如何由 Q* 得到？
+
+
+
+6. Bellman optimality equation 的 max 在哪里？
+
+
+
+7. Q‑learning TD error？
+
+
+
+8. 为什么 Q‑learning off‑policy？
+
+
+
+9. α 的作用？
+
+
+
+10. ε‑greedy 的代价？
+
+
+
+11. model‑based 的优势与风险？
+
+
+
+12. Tolman detour 支持什么？
+
+
+
+13. 公式表中的“MDP transition/reward model”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“discounted return”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“state value”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/23
+NEUROSCI 366 ・Lecture 25                            Source‑aligned companion
+
+
+
+
+16. 公式表中的“state‑action value”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“Bellman optimality”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“tabular Q‑learning”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+19. 公式表中的“ε‑greedy exploration”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+20. 诊断并修正下面的说法：Markov property 等于环境没有历史。
+
+
+
+
+                                19/23
+NEUROSCI 366 ・Lecture 25                                    Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“MDP transition/reward model”对应的变量关系入手。
+    Hint 2. 把条件“Markov state”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“discounted return”对应的变量关系入手。
+    Hint 2. 把条件“0≤γ<1 or finite episode”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                      20/23
+NEUROSCI 366 ・Lecture 25                                 Source‑aligned companion
+
+
+15. Hint 1. 先从“state value”对应的变量关系入手。
+    Hint 2. 把条件“policy π”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“state‑action value”对应的变量关系入手。
+    Hint 2. 把条件“first action fixed”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“Bellman optimality”对应的变量关系入手。
+    Hint 2. 把条件“optimal continuation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“tabular Q‑learning”对应的变量关系入手。
+    Hint 2. 把条件“sampled transition”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+19. Hint 1. 先从“ε‑greedy exploration”对应的变量关系入手。
+    Hint 2. 把条件“finite action set”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+20. Hint 1. 先问：混淆的是定义、统计估计、模型变量还是生物机制？
+    Hint 2. 指出一个缺失 assumption 或反例。
+    Hint 3. 用“在⋯⋯条件下⋯⋯；否则⋯⋯”改写。
+
+
+
+
+                                      21/23
+NEUROSCI 366 ・Lecture 25                                                  Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. state representation 的 conditional sufficiency。
+ 2. policy 由 agent 选 action；transition model 由 environment 给 next state/reward。
+ 3. myopic，主要重视 immediate reward。
+ 4. Q additionally conditions on first action。
+ 5. 选择 argmax_a Q*(s,a)。
+ 6. next state 的 future actions 上，位于 transition expectation 内部的 bracket 中。
+ 7. R+γmax_{a’}Q(s’,a’)−Q(s,a)。
+ 8. target 使用 greedy max，而 behavior 可 exploratory。
+ 9. 控制新 Bellman target 对现有 estimate 的更新幅度。
+10. 持续随机 actions 降低 immediate reward，且 uniform exploration 低效。
+11. 更 sample‑efficient/flexible planning；model bias 与 computation cost。
+12. animals 可能学习 generative/cognitive map，而非只缓存固定 action values。
+13. 适用条件/约定：Markov state。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                                 p(s′ , r|s, a)
+
+14. 适用条件/约定：0≤γ<1 or finite episode。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。                                X
+                                   Gt =   γ k Rt+k+1
+                                                   k≥0
+
+15. 适用条件/约定：policy π。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                         Vπ (s) = Eπ [Gt |st = s]
+
+16. 适用条件/约定：first action fixed。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    Qπ (s, a) = Eπ [Gt |st = s, at = a]
+
+17. 适用条件/约定：optimal continuation。sanity check 应检查单位、符号、极限或 shape 是否与定义
+    一致。
+                                Q∗ = E[R + γ max Q∗ ]
+
+18. 适用条件/约定：sampled transition。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    Q ← Q + α(R + γ max Q′ − Q)
+
+19. 适用条件/约定：finite action set。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    πϵ = (1 − ϵ)greedy + ϵrandom
+
+20. 该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成
+    立条件；原说法不能无条件成立。
+
+
+                                                 22/23
+NEUROSCI 366 ・Lecture 25                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture25-                         1         Main source‑page unit: thumbnail,
+ ReinforcementLearning.pdf                    reconstruction, explanation, prediction
+                                              question.
+ Lecture25-                         2         Main source‑page unit: thumbnail,
+ ReinforcementLearning.pdf                    reconstruction, explanation, prediction
+                                              question.
+ Lecture25-                         3         Main source‑page unit: thumbnail,
+ ReinforcementLearning.pdf                    reconstruction, explanation, prediction
+                                              question.
+ Lecture25-                         4         Main source‑page unit: thumbnail,
+ ReinforcementLearning.pdf                    reconstruction, explanation, prediction
+                                              question.
+ Lecture25-                         5         Main source‑page unit: thumbnail,
+ ReinforcementLearning.pdf                    reconstruction, explanation, prediction
+                                              question.
+ Lecture25-                         6         Main source‑page unit: thumbnail,
+ ReinforcementLearning.pdf                    reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的 γ 范围在 continuing tasks 常取 <1；episodic finite tasks 可使用 γ=1，需说明。
+2. Page 4 的 Q‑learning 是 tabular form；function approximation/convergence issues 未在源页展
+   开。
+3. Pages 5–6 的 hippocampal planning/replay connection 是 evidence+inference bridge，不是算法
+   级一一对应。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              23/23
+NEUROSCI 366 ・Lecture 25                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/23
+

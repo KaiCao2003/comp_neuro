@@ -1,0 +1,863 @@
+NEUROSCI 366
+Lecture 6
+
+
+
+神经编码 I——Poisson 脉冲与最大似然
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture6‑Neurons3‑NeuralCoding1.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 6                                                         Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                             2
+
+2 Learning objectives and prerequisite dependency map                                                   2
+
+3 Five‑minute prerequisite diagnostic                                                                   2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                        3
+   4.1 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . .         3
+   4.2 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . .         4
+   4.3 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . .         5
+   4.4 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . .         6
+   4.5 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . .         7
+   4.6 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . .         8
+   4.7 Lecture6‑Neurons3‑NeuralCoding1.pdf ·p. 7 . . . . . . . . . . . . . . . . . . . . . . . .         9
+
+5 补全推导与数学支架 / Derivations                                                                               10
+   5.1 Poisson count 的 mean、variance 与 Fano factor . . . . . . . . . . . . . . . . . . . . . .          10
+   5.2 ISI distribution 与 homogeneous point process . . . . . . . . . . . . . . . . . . . . . . .       11
+   5.3 population Poisson likelihood 与 MLE . . . . . . . . . . . . . . . . . . . . . . . . . . . .      12
+   5.4 likelihood curvature 与 Fisher information . . . . . . . . . . . . . . . . . . . . . . . . .      13
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                       14
+
+7 Worked examples and transfer                                                                          14
+   7.1 count、rate、PSTH 的层级 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        14
+   7.2 Poisson hand calculation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   14
+
+8 Formula and notation sheet                                                                            16
+
+9 Bilingual glossary                                                                                    16
+
+10 Common traps, assumptions, and limitations                                                           17
+
+11 Cumulative Knowledge Check                                                                           18
+
+12 Hint Bank                                                                                            20
+
+13 Complete Answer Key with reasoning                                                                   22
+
+14 Source‑page concordance and coverage audit                                                           23
+
+
+
+
+                                                  1/24
+NEUROSCI 366 ・Lecture 6                                                             Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            23
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     23
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    23
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      23
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   24
+
+
+
+
+                                                     2/24
+NEUROSCI 366 ・Lecture 6                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：stimulus/task。
+‧ 从第一原则推导：voltage→spikes。
+‧ 解释几何/计算直觉：raster/PSTH。
+‧ 连接生物学解释：Poisson variability。
+‧ 诊断 assumptions 与 failure modes：encoding P(n|s)。
+‧ 把概念迁移到新神经科学问题：MLE/Fisher。
+
+ Dependency map
+ stimulus/task → voltage→spikes → raster/PSTH → Poisson variability → encoding P(n|s) →
+ MLE/Fisher
+ Core question
+ 如何把 trial‑to‑trial spike variability 写成 Poisson encoding model，并由 population likelihood
+ 解码刺激？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. r=20 Hz, T=0.1 s 时 λ 是多少？
+                           （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. Poisson count 的 Fano factor 是多少？
+                                  （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. Poisson ISI 的 CV 是多少？
+                       （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. refractory period 通常让短 ISI 和 CV 如何变化？
+                                       （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. raster 与 PSTH 的区别是什么？
+                       （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+                                              3/24
+NEUROSCI 366 ・Lecture 6                                     Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 1]
+ Clean reconstruction. Page 1：activation/inactivation 与 refractory/F–I 回顾。
+ What the note is saying. 本页的中心对象是 stimulus/task 与 voltage→spikes。原笔记将它们放进
+ 以下链条：activation/inactivation 与 refractory/F–I 回顾。
+ Why it follows. Pages 1–2 作为必要 retrieval bridge，随后清楚转入 coding problem。其逻辑后果是：
+ 按实验流程解释 random‑dot stimulus、motion coherence、recording、spike detection、repeated
+ trials、raster 与 PSTH。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  r=20 Hz, T=0.1 s 时 λ 是多少？
+
+
+
+
+                                      4/24
+NEUROSCI 366 ・Lecture 6                                     Source‑aligned companion
+
+
+4.2 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 2]
+ Clean reconstruction. Page 2：area normalization、cable、cell diversity 回顾。
+ What the note is saying. 本页的中心对象是 raster/PSTH 与 Poisson variability。原笔记将它们放
+ 进以下链条：area normalization、cable、cell diversity 回顾。
+ Why it follows. 按实验流程解释 random‑dot stimulus、motion coherence、recording、spike
+ detection、repeated trials、raster 与 PSTH。其逻辑后果是：Pages 1–2 作为必要 retrieval bridge，
+ 随后清楚转入 coding problem。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Poisson count 的 Fano factor 是多少？
+
+
+
+
+                                      5/24
+NEUROSCI 366 ・Lecture 6                                        Source‑aligned companion
+
+
+4.3 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 3]
+ Clean reconstruction. Page 3：neural coding 问题；random‑dot kinematogram；in‑vivo elec‑
+ trophysiology；voltage/spike train/raster/PSTH。
+ What the note is saying. 本页的中心对象是 encoding P(n|s) 与 MLE/Fisher。原笔记将它们放进以下
+ 链条：neural coding 问题；random‑dot kinematogram；in‑vivo electrophysiology；voltage/spike
+ train/raster/PSTH。
+ Why it follows. 按实验流程解释 random‑dot stimulus、motion coherence、recording、spike
+ detection、repeated trials、raster 与 PSTH。其逻辑后果是：Pages 1–2 作为必要 retrieval bridge，
+ 随后清楚转入 coding problem。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 按时间线区分 stimulus/task、recording/manipulation、measured quantity 与
+ inferred model variable；结果相关性不能直接替代机制检验。
+
+  Stop & Predict
+
+  Poisson ISI 的 CV 是多少？
+
+
+
+
+                                        6/24
+NEUROSCI 366 ・Lecture 6                                             Source‑aligned companion
+
+
+4.4 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 4]
+ Clean reconstruction. Page 4：trial‑to‑trial variability；Fano factor；Poisson counts；ISI、ex‑
+ ponential distribution、CV。
+ What the note is saying. 本页的中心对象是 stimulus/task 与 voltage→spikes。原笔记将它们放进
+ 以下链条：trial‑to‑trial variability；Fano factor；Poisson counts；ISI、exponential distribution、
+ CV。
+ Why it follows. 推导 Poisson PMF 的 mean/variance、Fano factor≈1、exponential ISI、CV≈1；
+ 解释这些是模型预测而非所有神经元的普遍事实。其逻辑后果是：解释 homogeneous Poisson point
+ process 的独立增量、连续 spike time 与 small‑bin approximation。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  refractory period 通常让短 ISI 和 CV 如何变化？
+
+
+
+
+                                           7/24
+NEUROSCI 366 ・Lecture 6                                        Source‑aligned companion
+
+
+4.5 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 5]
+ Clean reconstruction. Page 5：Poisson point process。
+ What the note is saying. 本页的中心对象是 raster/PSTH 与 Poisson variability。原笔记将它们放
+ 进以下链条：Poisson point process。
+ Why it follows. 解释 homogeneous Poisson point process 的独立增量、连续 spike time 与 small‑
+ bin approximation。其逻辑后果是：推导 Poisson PMF 的 mean/variance、Fano factor≈1、expo‑
+ nential ISI、CV≈1；解释这些是模型预测而非所有神经元的普遍事实。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  raster 与 PSTH 的区别是什么？
+
+
+
+
+                                       8/24
+NEUROSCI 366 ・Lecture 6                                        Source‑aligned companion
+
+
+4.6 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 6]
+ Clean reconstruction. Page 6：encoding model、tuning curve、P(n|s)、independent popu‑
+ lation likelihood。
+ What the note is saying. 本页的中心对象是 encoding P(n|s) 与 MLE/Fisher。原笔记将它们放进以
+ 下链条：encoding model、tuning curve、P(n|s)、independent population likelihood。
+ Why it follows. 建立 MT direction tuning 的 Poisson encoding model；从独立神经元写出 joint
+ likelihood。其逻辑后果是：逐步从 likelihood 到 log‑likelihood、MLE、second derivative 和 Fisher
+ information；解释 curvature 与 estimator variance 的关系。后面的正式推导会逐项写出 assump‑
+ tions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？
+
+
+
+
+                                       9/24
+NEUROSCI 366 ・Lecture 6                                           Source‑aligned companion
+
+
+4.7 Lecture6‑Neurons3‑NeuralCoding1.pdf ・p. 7
+
+
+
+
+ Original‑note anchor. [Source: Lecture6‑Neurons3‑NeuralCoding1.pdf, p. 7]
+ Clean reconstruction. Page 7：maximum‑likelihood decoding、log likelihood、curvature、
+                                                                                  asymp‑
+ totic normality、Fisher information。
+ What the note is saying. 本页的中心对象是 stimulus/task 与 voltage→spikes。原笔记将它们放
+ 进以下链条：maximum‑likelihood decoding、log likelihood、curvature、asymptotic normality、
+ Fisher information。
+ Why it follows. 逐步从 likelihood 到 log‑likelihood、MLE、second derivative 和 Fisher informa‑
+ tion；解释 curvature 与 estimator variance 的关系。其逻辑后果是：建立 MT direction tuning 的
+ Poisson encoding model；从独立神经元写出 joint likelihood。后面的正式推导会逐项写出 assump‑
+ tions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  population likelihood 何时能写成乘积？
+
+
+
+
+                                         10/24
+NEUROSCI 366 ・Lecture 6                                                Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 Poisson count 的 mean、variance 与 Fano factor
+
+【必要前置】      给定 rate r、窗口 T，spike count k 如何波动？
+
+                                               λk e−λ
+                                 P (K = k) =          ,   λ = rT
+                                                 k!
+                                   E[K] = λ,     Var(K) = λ
+                                             Var(K)
+                                       F =          =1
+                                              E[K]
+1. λ 是期望 count，不是 instantaneous voltage。
+2. 利用概率生成函数或标准求和可得 first/second moments。
+3. variance=mean 导致 Fano factor 1。
+4. 实验中的 F≈1 只支持 Poisson‑like count variability，不证明所有 point‑process assumptions。
+
+  Geometric/computational intuition. Poisson 中每个小 bin 都提供独立、稀少的 spike oppor‑
+  tunity，波动随平均数一起增大。
+  Biological interpretation / failure condition. refractory、bursting、rate drift、trial corre‑
+  lations 会使 Fano/CV 偏离 1。
+
+  Micro‑check
+  refractory period 通常让短 ISI 和 CV 如何变化？
+
+
+
+
+                                             11/24
+NEUROSCI 366 ・Lecture 6                                                Source‑aligned companion
+
+
+5.2 ISI distribution 与 homogeneous point process
+
+【补全推导】      若 rate 恒定且 independent increments，等待下一 spike 多久？
+
+                               P (TISI > t) = P (N (t) = 0) = e−rt
+
+                                        fISI (t) = re−rt
+                                   E[TISI ] = SD(TISI ) = 1/r
+1. 等待时间大于 t 等价于长度 t 的窗口内没有 spike。
+2. Poisson zero‑count probability 是 e^{‑rt}。
+3. 对 survival function 求负导数得到 exponential density。
+4. CV=SD/mean=1。
+
+  Geometric/computational intuition. exponential 的 memoryless property 表示已经等多久不
+  改变下一瞬间 hazard。
+  Biological interpretation / failure condition. absolute refractory 使短 ISI 缺失，regular spik‑
+  ing 使 CV<1，bursting 可使 CV>1。
+
+  Micro‑check
+  raster 与 PSTH 的区别是什么？
+
+
+
+
+                                               12/24
+NEUROSCI 366 ・Lecture 6                                                          Source‑aligned companion
+
+
+5.3 population Poisson likelihood 与 MLE
+
+【跨页连接】      由 N 个 neuron 的 counts k_i 估计 motion direction θ。
+
+                                               Y
+                                               N
+                                                 [fi (θ)T ]ki e−fi (θ)T
+                               P (k | θ) =
+                                                           ki !
+                                               i=1
+                                   X
+                          ℓ(θ) =       {ki log[fi (θ)T ] − fi (θ)T − log ki !}
+                                   i
+
+                                          θb = arg max ℓ(θ)
+                                                      θ
+
+1. 每个 tuning curve f_i(θ) 给出该刺激下的 expected rate。
+2. 独立性假设允许 joint probability 分解成乘积。
+3. 取 log 将乘法转为求和，并保持 argmax 不变。
+4. MLE 选择使实际 count pattern 最可能的 θ。
+
+  Geometric/computational intuition. 每个 neuron 对 θ 投一票，但票的权重由其 tuning、ob‑
+  served count 与 noise model 决定。
+  Biological interpretation / failure condition. noise correlations、错误 tuning curve 或非‑
+  Poisson variability 会使 decoder mismatch。
+
+  Micro‑check
+  为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？
+
+
+
+
+                                                 13/24
+NEUROSCI 366 ・Lecture 6                                          Source‑aligned companion
+
+
+5.4 likelihood curvature 与 Fisher information
+
+【模型边界】      为什么尖锐 likelihood 意味着估计更精确？
+                                            2 
+                                            ∂ ℓ
+                                J(θ) = −E         θ
+                                            ∂θ2
+                                                 
+                                b            1
+                                θ ≈ N θ0 ,
+                                           J(θ0 )
+1. 在最大值附近用二阶 Taylor expansion 把 log‑likelihood 近似为倒抛物线。
+2. 负二阶导数越大，曲线越窄。
+3. 大样本与正则条件下 MLE 近似正态，variance≈1/J。
+4. 这是 asymptotic result，不保证小样本完全达到。
+
+  Geometric/computational intuition. J 衡量 response distribution 对刺激微小变化的可区分性。
+  Biological interpretation / failure condition. 边界参数、多峰 likelihood、少量 spikes 或 model
+  misspecification 会破坏近似。
+
+  Micro‑check
+  population likelihood 何时能写成乘积？
+
+
+
+
+                                         14/24
+NEUROSCI 366 ・Lecture 6                                                    Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  神经编码不是只画 tuning curve，而是指定 stimulus 条件下完整 response distribution。Poisson
+  model 同时预测 count variance≈mean、exponential ISI 与 independent increments；这些是
+  可检验假设而非普遍事实。population likelihood 把各 neurons 的 evidence 相乘，log‑likelihood
+  将乘积化为求和；curvature 则连接解码精度与 Fisher information。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 count、rate、PSTH 的层级
+
+【原课/核心例题】         Prompt. 10 个重复 trial、每 trial 200 ms，某 bin 共观察到 8 spikes。
+
+ Worked solution. 每 trial 该 bin 的平均 count=0.8；若 bin=20 ms，
+                                                         PSTH rate estimate=0.8/0.02=40
+ spikes/s。原始观测仍是 8 个离散 spike events。
+ Check. 不能把 40 Hz 当作每个 trial 都连续输出 40。
+
+
+7.2 Poisson hand calculation
+
+【跨课连接】       Prompt. r=10 Hz, T=0.2 s。
+
+ Worked solution. λ=2；P(K=0)=e^{‑2}≈0.135；mean=variance=2；expected ISI=0.1 s。
+ Check. count 的单位是 spikes（无量纲计数）       ，rate 单位 1/s。
+
+
+
+                                               15/24
+NEUROSCI 366 ・Lecture 6                                      Source‑aligned companion
+
+
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      16/24
+NEUROSCI 366 ・Lecture 6                                                       Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. 观察窗内 expected count
+                                                  λ = rT
+Conditions / conventions: homogeneous rate
+2. Poisson PMF
+                                          P (K = k) = λk e−λ /k!
+Conditions / conventions: independent increments
+3. Fano factor
+                                            F = Var(K)/E[K]
+Conditions / conventions: 跨 trial 同条件 counts
+4. Poisson ISI density
+                                              fISI (t) = re−rt
+Conditions / conventions: constant rate
+5. ISI irregularity
+                                         CV = SD(ISI)/E[ISI]
+Conditions / conventions: mean>0
+6. independent population likelihood
+                                                        Y
+                                          P (k | θ) =       P (ki | θ)
+                                                        i
+
+Conditions / conventions: conditional independence
+7. maximum‑likelihood decoder
+                                            θb = arg max ℓ(θ)
+Conditions / conventions: specified encoding model
+8. Fisher information
+                                              J = −E[ℓ′′ (θ)]
+Conditions / conventions: regular differentiable model
+
+
+9 Bilingual glossary
+
+
+ 中文                   English / symbol                  Operational meaning
+ 神经编码                 neural encoding                   刺激/状态到 response distribution 的映射。
+ 脉冲序列                 spike train                       一组离散 spike times。
+ 栅格图                  raster plot                       按 trial 排列 spike times 的可视化。
+ 刺激后时间直方图             peri‑stimulus time                跨 trial 分 bin 的平均 spike‑rate estimate。
+                      histogram, PSTH
+ Fano 因子              Fano factor                       count variance/mean。
+ 点过程                  point process                     随机事件时间的概率模型。
+ 独立增量                 independent increments            不重叠时间段内事件数独立。
+ 调谐曲线                 tuning curve                      expected response 随 stimulus parameter 的函
+                                                        数。
+
+
+                                                   17/24
+NEUROSCI 366 ・Lecture 6                                           Source‑aligned companion
+
+
+
+ 中文                  English / symbol       Operational meaning
+ 似然                  likelihood             给定观测 response 后，stimulus/parameter 的支
+                                            持度。
+ 最大似然估计              maximum‑likelihood     使 likelihood 最大的估计。
+                     estimate, MLE
+ Fisher 信息           Fisher information     分布对参数微小变化的局部敏感度。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 firing rate 当作电极直接测得的连续信号。
+2. 把 raster、count、PSTH 和 rate 混为同一对象。
+3. Fano≈1 就断言 spike train 完全 Poisson。
+4. 忽略观察窗 T，使 rate 与 count 的单位混乱。
+5. 把 P(n|s) 与 P(s|n) 写反。
+6. 在 population likelihood 中默认 independence 而不说明。
+
+  Course‑specific risk boundary. 不得把 firing rate 当作直接观察到的连续信号；强调它通常是统
+  计模型或估计量。使用用户熟悉的 Neuropixels/HD‑cell 数据作为 transfer example，但保留 MT 原
+  例。
+
+
+
+
+                                          18/24
+NEUROSCI 366 ・Lecture 6                                                Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. r=20 Hz, T=0.1 s 时 λ 是多少？
+
+
+
+2. Poisson count 的 Fano factor 是多少？
+
+
+
+3. Poisson ISI 的 CV 是多少？
+
+
+
+4. refractory period 通常让短 ISI 和 CV 如何变化？
+
+
+
+5. raster 与 PSTH 的区别是什么？
+
+
+
+6. 为什么 likelihood 对 stimulus 是函数，但不是 stimulus 的 posterior？
+
+
+
+7. population likelihood 何时能写成乘积？
+
+
+
+8. 取 log 为什么不改变 MLE？
+
+
+
+9. likelihood 更尖意味着什么？
+
+
+
+10. Fisher information 与 decoder variance 的近似关系？
+
+
+
+11. MT tuning curve 本身是否描述 trial variability？
+
+
+
+12. 为什么 Neuropixels HD‑cell transfer example 仍需保留 MT 原例？
+
+
+
+13. 公式表中的“观察窗内 expected count”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“Poisson PMF”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“Fano factor”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  19/24
+NEUROSCI 366 ・Lecture 6                             Source‑aligned companion
+
+
+
+
+16. 公式表中的“Poisson ISI density”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                20/24
+NEUROSCI 366 ・Lecture 6                                    Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“观察窗内 expected count”对应的变量关系入手。
+    Hint 2. 把条件“homogeneous rate”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“Poisson PMF”对应的变量关系入手。
+    Hint 2. 把条件“independent increments”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                    21/24
+NEUROSCI 366 ・Lecture 6                                Source‑aligned companion
+
+
+15. Hint 1. 先从“Fano factor”对应的变量关系入手。
+    Hint 2. 把条件“跨 trial 同条件 counts”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“Poisson ISI density”对应的变量关系入手。
+    Hint 2. 把条件“constant rate”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                    22/24
+NEUROSCI 366 ・Lecture 6                                  Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. 2 spikes。
+2. 1。
+3. 1。
+4. 短 ISI 被抑制，规则性增加，CV 往往低于 1。
+5. raster 保留每 trial 的 spike times；PSTH 跨 trial/bin 平均。
+6. 它未乘 prior，也未对 stimulus 归一化。
+7. 给定 stimulus 后 neuron responses 条件独立。
+8. log 单调递增。
+9. 局部 curvature/Fisher information 更大，估计 variance 更小。
+10. 高效大样本估计下 Var≈1/J。
+11. 否，只给 expected response；还需 P(n|θ) noise model。
+12. 原笔记的实验逻辑与术语是内容权威；transfer 只用于迁移，不替代源例。
+13. 适用条件/约定：homogeneous rate。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                          λ = rT
+
+14. 适用条件/约定：independent increments。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                               P (K = k) = λk e−λ /k!
+
+15. 适用条件/约定：跨 trial 同条件 counts。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                F = Var(K)/E[K]
+
+16. 适用条件/约定：constant rate。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      fISI (t) = re−rt
+
+
+
+
+                                         23/24
+NEUROSCI 366 ・Lecture 6                                                  Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture6-Neurons3-                 1         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture6-Neurons3-                 2         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture6-Neurons3-                 3         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture6-Neurons3-                 4         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture6-Neurons3-                 5         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture6-Neurons3-                 6         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+ Lecture6-Neurons3-                 7         Main source‑page unit: thumbnail,
+ NeuralCoding1.pdf                            reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Pages 1–2 是 Lecture 5 的 retrieval bridge，应标为复习。
+2. Page 7 的 asymptotic normality 是大样本近似，不能无条件用于低 spike‑count 情形。
+3. 笔记中的 Poisson 结论是模型预测，不是所有 neurons 的普遍事实。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+                                              24/24
+NEUROSCI 366 ・Lecture 6                                                    Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               25/24
+

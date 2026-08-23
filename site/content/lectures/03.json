@@ -1,0 +1,2146 @@
+{
+  "lecture": 3,
+  "slug": "03",
+  "zhTitle": "微分方程与 Euler 数值模拟",
+  "enTitle": "Differential Equations and Euler Simulation",
+  "companionFile": "NEUROSCI366_Lecture03_Differential_Equations_Euler_Companion.pdf",
+  "companionPages": 26,
+  "companionHref": "/resources/companions/NEUROSCI366_Lecture03_Differential_Equations_Euler_Companion.pdf",
+  "sourceFiles": [
+    {
+      "file": "Lecture3-Differential-Equations.pdf",
+      "role": "primary",
+      "pages": 4,
+      "href": "/resources/original/Lecture3-Differential-Equations.pdf"
+    },
+    {
+      "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+      "role": "supplement",
+      "pages": 1,
+      "href": "/resources/original/Lecture3_Diff_Eq_MATLAB.pdf"
+    },
+    {
+      "file": "Lecture3_Diff_Eq_MATLAB.m",
+      "role": "code",
+      "pages": null,
+      "href": "/resources/original/Lecture3_Diff_Eq_MATLAB.m"
+    }
+  ],
+  "codeSources": [
+    {
+      "file": "Lecture3_Diff_Eq_MATLAB.m",
+      "text": "%% Clear workspace before starting work\n\nclear all;\n\n%% Part 1\n\ndt = 0.001; % Delta t in seconds\nT = 0.250; % Simulation duration in seconds\nt_values = 0:dt:T; \nnum_t = length(t_values);\n\ntau = 0.01; % Time constant in seconds\nomega = 220; % Input oscillation frequency in radians per second\nt0 = 0.150; % Input oscillation frequency in seconds\n\n% Define input pattern\nI = NaN(num_t,1);\nfor t = 1:num_t % There are more numerically efficient ways to do this, but this is fast enough for this problem, and I thought it would be a useful demonstration\n    if t_values(t) < 0.050\n        I(t) = 0;\n    elseif t_values(t) < 0.100\n        I(t) = 2;\n    elseif t_values(t) < 0.150\n        I(t) = 1;\n    elseif t_values(t) < 0.200\n        I(t) = cos(omega*(t_values(t)-t0));\n    elseif t_values(t) < 0.250\n        I(t) = 0;\n    end\nend\n\nx = NaN(num_t,1);\nx0 = 0;\nx(1) = x0;\nfor t = 2:num_t\n    x(t) = x(t-1)+dt/tau*(-x(t-1)+I(t-1));\nend\n\nclose all;\nfigure,\nsubplot(1,2,1)\nplot(t_values,I);\nsubplot(1,2,2)\nplot(t_values,x);\n\n%% Part 2\n\ndt = 0.0001; % Delta t in au\nT = 10; % Simulation duration in au\n \nt_values = 0:dt:T; \nnum_t = length(t_values);\n\nx = NaN(num_t,2);\nx1_0 = 0;\nx2_0 = 1;\nx(1,:) = [x1_0, x2_0];\nfor t = 2:num_t\n    x(t,1) = x(t-1,1)+dt*(x(t-1,2));\n    x(t,2) = x(t-1,2)+dt*(-x(t-1,1));\nend\n\nclose all;\n\nfigure,\nsubplot(1,2,1)\nplot(t_values,x(:,1))\nsubplot(1,2,2)\nplot(t_values,x(:,2))\n"
+    }
+  ],
+  "objectives": [
+    "定义并区分：状态 x(t)。",
+    "从第一原则推导：导数/ODE。",
+    "解释几何/计算直觉：初始条件。",
+    "连接生物学解释：解析解。",
+    "诊断 assumptions 与 failure modes：Euler 离散化。",
+    "把概念迁移到新神经科学问题：稳定性与误差。"
+  ],
+  "dependencyMap": "状态 x(t) → 导数/ODE → 初始条件 → 解析解 → Euler 离散化 → 稳定性与误差",
+  "coreQuestion": "如何从\"状态的瞬时变化规律\"得到时间轨迹，并在没有解析解时用 Euler method 安全地近似？",
+  "diagnostic": [
+    "dx/dt=x, x(0)=2 的解是什么？",
+    "τ dx/dt=−x+I 的 steady state 是什么？",
+    "t=τ 时初始 gap 剩多少？",
+    "写出 explicit Euler 更新。",
+    "对衰减方程，Δt/τ=1.5 会怎样？"
+  ],
+  "sourceUnits": [
+    {
+      "id": "lecture-03-source-1",
+      "order": 1,
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "page": 1,
+      "reconstruction": "Notes Page 1：function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。",
+      "noteMeaning": "状态 x(t) 与导数/ODE：function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。",
+      "reasoning": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。因此，从\"导数是瞬时变化率、微分方程用变化规律定义函数\"搭桥，但最终给出正式 notation。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "dx/dt=x, x(0)=2 的解是什么？"
+    },
+    {
+      "id": "lecture-03-source-2",
+      "order": 2,
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "page": 2,
+      "reconstruction": "Notes Page 2：验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。",
+      "noteMeaning": "初始条件与解析解：验证解； separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。",
+      "reasoning": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。因此，对 tau dx/dt=- x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、振荡、发散的行为。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "τ dx/dt=−x+I 的 steady state 是什么？"
+    },
+    {
+      "id": "lecture-03-source-3",
+      "order": 3,
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "page": 3,
+      "reconstruction": "Notes Page 3：解析解、exponential decay/approach、time constant；Euler method 的差分推导。",
+      "noteMeaning": "Euler 离散化与稳定性与误差：解析解、exponential decay/approach、time constant；Euler method 的差分推导。",
+      "reasoning": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "t=τ 时初始 gap 剩多少？"
+    },
+    {
+      "id": "lecture-03-source-4",
+      "order": 4,
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "page": 4,
+      "reconstruction": "Notes Page 4：second-order ODE 改写为 coupled first-order equations； harmonic oscillator。",
+      "noteMeaning": "状态 x(t) 与导数/ODE：second-order ODE 改写为 coupled first-order equations；harmonic oscillator。",
+      "reasoning": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。",
+      "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
+      "stopPredict": "写出 explicit Euler 更新。"
+    },
+    {
+      "id": "lecture-03-source-5",
+      "order": 5,
+      "sourceFile": "Lecture3_Diff_Eq_MATLAB.pdf",
+      "page": 1,
+      "reconstruction": "MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。",
+      "noteMeaning": "初始条件与解析解：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。",
+      "reasoning": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。因此，完整解释如何把 d²x/dt²=-x 改成 dx/dt=y, dy/dt=-x， 以及 phase-space 含义。",
+      "figureReading": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。",
+      "stopPredict": "对衰减方程，Δt/τ=1.5 会怎样？"
+    }
+  ],
+  "specialSection": [
+    "1 %% Clear workspace before starting work 2 3 clear all; 4 5 %% Part 1 6 7 dt = 0.001; % Delta t in seconds 8 T = 0.250; % Simulation duration in seconds 9 t_values = 0:dt:T; 10 num_t = length(t_values); 11 12 tau = 0.01; % Time constant in seconds 13 omega = 220; % Input oscillation frequency in radians per second 14 t0 = 0.150; % Input oscillation frequency in seconds 15 16 % Define input pattern 17 I = NaN(num_t,1); 18 for t = 1:num_t % There are more numerically efficient ways to do this, but this is fast enough for this problem, and I thought it would be a useful demonstration 19 if t_values(t) < 0.050 20 I(t) = 0; 21 elseif t_values(t) < 0.100 22 I(t) = 2; 23 elseif t_values(t) < 0.150 24 I(t) = 1; 25 elseif t_values(t) < 0.200 26 I(t) = cos(omega*(t_values(t)-t0)); 27 elseif t_values(t) < 0.250 28 I(t) = 0; 29 end 30 end 31 32 x = NaN(num_t,1); 33 x0 = 0; 34 x(1) = x0; 35 for t = 2:num_t 36 x(t) = x(t-1)+dt/tau*(-x(t-1)+I(t-1)); 37 end 38 39 close all; 40 figure, 41 subplot(1,2,1) 42 plot(t_values,I); 43 subplot(1,2,2) 44 plot(t_values,x); 45 46 %% Part 2 47 48 dt = 0.0001; % Delta t in au 49 T = 10; % Simulation duration in au 50 51 t_values = 0:dt:T; 52 num_t = length(t_values); 53 54 x = NaN(num_t,2); 55 x1_0 = 0; 56 x2_0 = 1; 57 x(1,:) = [x1_0, x2_0]; 58 for t = 2:num_t 59 x(t,1) = x(t-1,1)+dt*(x(t-1,2)); 60 x(t,2) = x(t-1,2)+dt*(-x(t-1,1)); 61 end 62 63 close all;",
+    "64 65 figure, 66 subplot(1,2,1) 67 plot(t_values,x(:,1)) 68 subplot(1,2,2) 69 plot(t_values,x(:,2))",
+    "行号 作用 说明 影响 1-3 Reset clear allis pedagogically harmless but No model change. heavier thanclearvars. 7-15 Time grid and t0is a time shift/onset, not a frequency; the Units: seconds. parameters source comment is inconsistent with its use. 17-30 Piecewise Strict< 0.250leavesI(end)=NaNatt=T=0. The state may input 250; use a finalelseor<=. remain finite because Euler usesI( i-1), but the input plot has a missing endpoint. 32-44 Euler x(i)=x(i-1)+dt*(-x(i-1)+I(i-1))/ Check dt/tau stability integration tauis explicit Euler using the previous and units. state/right-hand side. 48-61 Second-order The harmonic oscillator is implemented State vector shape is conversion asx'=y,y'=-xwith two first-order updates. 2×1 conceptually. 63-69 Numerical Explicit Euler has update eigenvalues1±i Numerical instability behavior dt, modulus >1, so the orbit slowly spirals is not biological outward. energy input."
+  ],
+  "derivations": [
+    "6.1 separation of variables：指数增长",
+    "【必要前置】 求 dx/dt=x, x(0)=x0。 dx = dt x x(t) ln =t x0 x(t) = x0 et 1. 把所有 x 项移到左边、t 项移到右边。 2. 从初始状态 x0 积分到 x(t)，避免遗漏积分常数。 3. 指数化并用 x(0)=x0 验证。 4. 代回原式：d(x0e^t)/dt=x0e^t=x(t)。",
+    "Geometric/computational intuition. 变化率与当前量成比例，所以每个相同时间间隔都乘以相同因子。 Biological interpretation / failure condition. 若 x 穿过 0，直接除以 x 需要分段讨论；初值 x0=0 的解恒为 0。",
+    "思考题：写出 explicit Euler 更新。",
+    "6.2 常输入一阶系统的解析解",
+    "【补全推导】 求 τ dx/dt=−x+I，I 为常数。 dx τ = −(x − I) dt",
+    "x(t) = I + (x0 − I)e−t/τ = x0 e−t/τ + (1 − e−t/τ )I 1. 定义 gap z=x−I，则 τ dz/dt=−z。 2. 分离变量得到 z(t)=z(0)e^{-t/τ}。 3. 代回 z(0)=x0−I。 4. t→∞ 时 x→I；t=τ 时初始 gap 剩 e^{-1}≈0.37。",
+    "Geometric/computational intuition. 系统并不是直接\"复制\"输入，而是以 time constant τ 低通追踪 steady state。 Biological interpretation / failure condition. I(t) 若随时间变化，常输入 closed form 不能直接代用，需要 convolution 或数值积分。",
+    "思考题：对衰减方程，Δt/τ=1.5 会怎样？",
+    "6.3 Euler update 与稳定性",
+    "【跨页连接】 把 dx/dt=f(x,t) 转成离散计算，并判断步长。",
+    "xn+1 = xn + ∆t f (xn , tn )",
+    "∆t zn+1 = 1 − zn τ ∆t ∆t 1− < 1 ⇐⇒ 0 < <2 τ τ 1. 用前向差分 (x_{n+1}−x_n)/Δt 近似导数。 2. 右端必须在已知的 n 时刻求值，得到 explicit Euler。 3. 对衰减方程，误差每步乘以 1−Δt/τ。 4. 0<Δt/τ<1 单调衰减；1< 比值 <2 交替衰减；≥2 不衰减或发散。",
+    "Geometric/computational intuition. Euler 用当前切线走一个小步；步太大时切线会越过目标并放大误差。 Biological interpretation / failure condition. stiff system、快速门控或振荡系统可能需要更小步长或高阶/隐式 solver。",
+    "思考题：Δt/τ=2.2 会怎样？",
+    "6.4 二阶 oscillator 改写为一阶系统",
+    "【模型边界】 把 d²x/dt²=−x 写成 state-space form。",
+    "dx y= dt",
+    "d x 0 1 x = dt y −1 0 y x(t) = sin t, y(t) = cos t (x0 = 0, y0 = 1) 1. 把 velocity y 作为第二个状态。 2. 第一式定义 position 的变化；第二式由原二阶方程给出 velocity 的变化。 3. 在 phase plane 中 exact trajectory 是圆，能量 x²+y² 保持。 4. explicit Euler 的更新矩阵模长大于 1，因此代码会缓慢向外螺旋。",
+    "Geometric/computational intuition. 高阶方程没有消失；它被展开成多个共同决定未来的一阶状态。 Biological interpretation / failure condition. 误把 x(:,1)、x(:,2) 当作两个独立神经元，而不是同一 oscillator 的 position/velocity 状态。",
+    "思考题：为什么右端使用 x_n 而不是 x_{n+1}？"
+  ],
+  "synthesis": [
+    "微分方程用局部变化率定义完整时间轨迹；初始条件选择具体解。解析解提供精确结构和极限检查， Euler method 则把导数定义改写为可迭代更新。数值结果是否可信取决于步长相对 time constant 的大小，而不只是代码是否运行。高阶方程可通过新增状态变量改写为一阶耦合系统，这是后续 network dynamics 的基础。"
+  ],
+  "workedExamples": [
+    "8.1 三步 Euler 手算",
+    "【例题】题目：τ=10 ms, Δt=1 ms, I=2, x0=0。",
+    "Worked solution. x1=0+0.1(2)=0.2；x2=0.2+0.1(1.8)=0.38；x3=0.38+0.1(1.62)=0.542。精确值在 3 ms 为 2(1−e^{-0.3})≈0.518。 Check. Euler 稍高估本例上升，但接近；减小 Δt 应收敛到精确解。",
+    "8.2 step 与 oscillatory input 的 filtering",
+    "【拓展例题】题目：源代码依次给 I=0、2、1、cos(ω(t−t0))、0。",
+    "Worked solution. x 在前两段以 τ=10 ms 指数逼近新的 steady state；对 ω=220 rad/s 的振荡，系统幅度被低通衰减并产生相位滞后；最后回到 0。 Check. 不要把 x 误认为 I 的延迟复制：幅度和相位都由 τ 与 ω 决定。"
+  ],
+  "formulas": [
+    {
+      "id": "L03-F01",
+      "lecture": 3,
+      "name": "first-order initial-value problem",
+      "expression": "ẋ = f (x, t), x(0) = x0",
+      "latex": "\\dot{x}=f(x,t),\\quad x(0)=x_0",
+      "conditions": "f 足够规则以保证解",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-F02",
+      "lecture": 3,
+      "name": "ODE 的积分形式",
+      "expression": "x(t) = x0 + f (x(t′ ), t′ )dt′ 0",
+      "latex": "x(t)=x_0+\\int_0^t f(x(t'),t')\\,dt'",
+      "conditions": "积分沿真实轨迹",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-F03",
+      "lecture": 3,
+      "name": "常输入一阶系统",
+      "expression": "x(t) = I + (x0 − I)e−t/τ",
+      "latex": "x(t)=I+(x_0-I)e^{-t/\\tau}",
+      "conditions": "I 常数、τ>0",
+      "sectionId": "lecture-03-source-5",
+      "sourceFile": "Lecture3_Diff_Eq_MATLAB.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-F04",
+      "lecture": 3,
+      "name": "explicit Euler",
+      "expression": "xn+1 = xn + ∆tf (xn , tn )",
+      "latex": "x_{n+1}=x_n+\\Delta t\\,f(x_n,t_n)",
+      "conditions": "Δt 足够小",
+      "sectionId": "lecture-03-source-4",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L03-F05",
+      "lecture": 3,
+      "name": "衰减方程 Euler 稳定区间",
+      "expression": "0 < ∆t/τ < 2",
+      "latex": "0<\\frac{\\Delta t}{\\tau}<2",
+      "conditions": "线性一阶测试方程",
+      "sectionId": "lecture-03-source-5",
+      "sourceFile": "Lecture3_Diff_Eq_MATLAB.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-F06",
+      "lecture": 3,
+      "name": "harmonic oscillator 的一阶形式",
+      "expression": "ẋ = y, ẏ = −x",
+      "latex": "\\dot{x}=y,\\quad \\dot{y}=-x",
+      "conditions": "无阻尼、单位角频率",
+      "sectionId": "lecture-03-source-4",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L03-F07",
+      "lecture": 3,
+      "name": "exact oscillator 的守恒量（常数因子略）",
+      "expression": "E = x2 + y 2",
+      "latex": "E=x^2+y^2",
+      "conditions": "连续精确动力学",
+      "sectionId": "lecture-03-source-4",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 4
+    }
+  ],
+  "glossary": [
+    {
+      "id": "L03-G01",
+      "lecture": 3,
+      "zh": "微分方程",
+      "en": "differential equation",
+      "definition": "用导数约束未知函数的方程。",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-G02",
+      "lecture": 3,
+      "zh": "初始条件",
+      "en": "initial condition",
+      "definition": "在起始时刻指定状态，从解族中选出具体轨迹。",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-G03",
+      "lecture": 3,
+      "zh": "解析解",
+      "en": "analytic solution",
+      "definition": "用已知函数写出的精确表达式。",
+      "sectionId": "lecture-03-source-4",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L03-G04",
+      "lecture": 3,
+      "zh": "数值解",
+      "en": "numerical solution",
+      "definition": "在离散时间点上近似状态。",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-G05",
+      "lecture": 3,
+      "zh": "时间常数",
+      "en": "time constant",
+      "definition": "一阶指数过程消除约 63% 初始 gap 的时间尺度。",
+      "sectionId": "lecture-03-source-2",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 2
+    },
+    {
+      "id": "L03-G06",
+      "lecture": 3,
+      "zh": "稳态",
+      "en": "steady state",
+      "definition": "状态不再随时间变化的解。",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    },
+    {
+      "id": "L03-G07",
+      "lecture": 3,
+      "zh": "Euler 方法",
+      "en": "Euler method",
+      "definition": "沿当前导数做前向小步的数值积分。",
+      "sectionId": "lecture-03-source-3",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L03-G08",
+      "lecture": 3,
+      "zh": "截断误差",
+      "en": "truncation error",
+      "definition": "有限差分忽略高阶 Taylor 项造成的局部误差。",
+      "sectionId": "lecture-03-source-3",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L03-G09",
+      "lecture": 3,
+      "zh": "稳定性",
+      "en": "numerical stability",
+      "definition": "小扰动是否在离散迭代中衰减而非被放大。",
+      "sectionId": "lecture-03-source-3",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 3
+    },
+    {
+      "id": "L03-G10",
+      "lecture": 3,
+      "zh": "耦合方程",
+      "en": "coupled equations",
+      "definition": "多个状态的导数相互依赖。",
+      "sectionId": "lecture-03-source-4",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 4
+    },
+    {
+      "id": "L03-G11",
+      "lecture": 3,
+      "zh": "相空间",
+      "en": "phase space",
+      "definition": "以所有状态变量为坐标表示轨迹的空间。",
+      "sectionId": "lecture-03-source-1",
+      "sourceFile": "Lecture3-Differential-Equations.pdf",
+      "sourcePage": 1
+    }
+  ],
+  "commonTraps": [
+    "把导数当作有限时间段的总变化，而忘记它是 Δt→0 的瞬时变化率。",
+    "求 separation solution 时遗漏初始条件或积分常数。",
+    "认为代码能运行就意味着 Δt 足够小。",
+    "Euler 更新使用 I(t_n) 而不是未知的 I(t_{n+1})；索引错一位会改变算法。",
+    "把 oscillatory exact dynamics 与 explicit Euler 的向外螺旋混为一谈。",
+    "混淆 time constant τ 与模拟步长 Δt。",
+    "代码解释需要把每一行 MATLAB 与对应 differential equation、离散更新和图形联系起来；源代码中的潜在 bug/注释错误需要单独列出。"
+  ],
+  "errata": [
+    "1. Lecture3_Diff_Eq_MATLAB.m line 14 的注释把 t0 写成 input oscillation frequency；实际是 0.150 s 的时间偏移/相位参考。 2. Part 1 的 elseif t_values(t) < 0.250 未覆盖终点 t=T=0.250，因此 I(end) 保持 NaN。x(end) 仍使用 I(end−1)，但 I 图最后一点缺失；应加入 else I(t)=0 或覆盖终点。 3. Part 2 的 explicit Euler 对无阻尼 oscillator 数值不守恒，理论上会缓慢增幅；这不是原连续系统的物理增长。 4. clear all 可改为 clearvars；figure,的逗号可省略以提高可读性。"
+  ],
+  "questions": [
+    {
+      "id": "L03-Q01",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：dx/dt=x, x(0)=2 的解是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "x(t)=2e^t。"
+        },
+        {
+          "id": "b",
+          "text": "状态不再随时间变化的解。"
+        },
+        {
+          "id": "c",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "d",
+          "text": "无阻尼、单位角频率"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“稳态（steady state）”的定义。",
+        "c": "这是“first-order initial-value problem”的适用条件。",
+        "d": "这是“harmonic oscillator 的一阶形式”的适用条件。"
+      },
+      "explanation": "x(t)=2e^t。"
+    },
+    {
+      "id": "L03-Q02",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：τ dx/dt=−x+I 的 steady state 是什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Δt 足够小"
+        },
+        {
+          "id": "b",
+          "text": "x*=I。"
+        },
+        {
+          "id": "c",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "d",
+          "text": "连续精确动力学"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“explicit Euler”的适用条件。",
+        "c": "这是“ODE 的积分形式”的适用条件。",
+        "d": "这是“exact oscillator 的守恒量（常数因子略）”的适用条件。"
+      },
+      "explanation": "x*=I。"
+    },
+    {
+      "id": "L03-Q03",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：t=τ 时初始 gap 剩多少？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "一阶指数过程消除约 63% 初始 gap 的时间尺度。"
+        },
+        {
+          "id": "b",
+          "text": "小扰动是否在离散迭代中衰减而非被放大。"
+        },
+        {
+          "id": "c",
+          "text": "e^{-1}≈0.37，即约 37%。"
+        },
+        {
+          "id": "d",
+          "text": "以所有状态变量为坐标表示轨迹的空间。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“时间常数（time constant）”的定义。",
+        "b": "这是“稳定性（numerical stability）”的定义。",
+        "d": "这是“相空间（phase space）”的定义。"
+      },
+      "explanation": "e^{-1}≈0.37，即约 37%。"
+    },
+    {
+      "id": "L03-Q04",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 3 讲：写出 explicit Euler 更新。",
+      "choices": [
+        {
+          "id": "a",
+          "text": "这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。"
+        },
+        {
+          "id": "b",
+          "text": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+        },
+        {
+          "id": "c",
+          "text": "更新矩阵特征值 1±iΔt，模长 √(1+Δt²)>1，每步放大。"
+        },
+        {
+          "id": "d",
+          "text": "x_{n+1}=x_n+Δt f(x_n,t_n)。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“为什么右端使用 x_n 而不是 x_{n+1}？”。",
+        "b": "该选项回答的是“若将 Δt 减半，global error 一般如何变？”。",
+        "c": "该选项回答的是“为什么 oscillator 的 explicit Euler 轨迹向外螺旋？”。"
+      },
+      "explanation": "x_{n+1}=x_n+Δt f(x_n,t_n)。"
+    },
+    {
+      "id": "L03-Q05",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3_Diff_Eq_MATLAB.pdf"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：对衰减方程，Δt/τ=1.5 会怎样？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "误差因子 −0.5，围绕稳态交替但幅度衰减。"
+        },
+        {
+          "id": "b",
+          "text": "小扰动是否在离散迭代中衰减而非被放大。"
+        },
+        {
+          "id": "c",
+          "text": "用导数约束未知函数的方程。"
+        },
+        {
+          "id": "d",
+          "text": "线性一阶测试方程"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“稳定性（numerical stability）”的定义。",
+        "c": "这是“微分方程（differential equation）”的定义。",
+        "d": "这是“衰减方程 Euler 稳定区间”的适用条件。"
+      },
+      "explanation": "误差因子 −0.5，围绕稳态交替但幅度衰减。"
+    },
+    {
+      "id": "L03-Q06",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3_Diff_Eq_MATLAB.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：Δt/τ=2.2 会怎样？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "沿当前导数做前向小步的数值积分。"
+        },
+        {
+          "id": "b",
+          "text": "误差因子 −1.2，交替且发散。"
+        },
+        {
+          "id": "c",
+          "text": "用已知函数写出的精确表达式。"
+        },
+        {
+          "id": "d",
+          "text": "以所有状态变量为坐标表示轨迹的空间。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“Euler 方法（Euler method）”的定义。",
+        "c": "这是“解析解（analytic solution）”的定义。",
+        "d": "这是“相空间（phase space）”的定义。"
+      },
+      "explanation": "误差因子 −1.2，交替且发散。"
+    },
+    {
+      "id": "L03-Q07",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：为什么右端使用 x_n 而不是 x_{n+1}？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        },
+        {
+          "id": "b",
+          "text": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。"
+        },
+        {
+          "id": "c",
+          "text": "这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。"
+        },
+        {
+          "id": "d",
+          "text": "因此，完整解释如何把 d²x/dt²=-x 改成 dx/dt=y, dy/dt=-x， 以及 phase-space 含义。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。",
+        "b": "这条推理对应 Lecture3-Differential-Equations.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture3_Diff_Eq_MATLAB.pdf 第 1 页。"
+      },
+      "explanation": "这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。"
+    },
+    {
+      "id": "L03-Q08",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：把 d²x/dt²=−x 改写成两个一阶方程。",
+      "choices": [
+        {
+          "id": "a",
+          "text": "线性一阶测试方程"
+        },
+        {
+          "id": "b",
+          "text": "一阶指数过程消除约 63% 初始 gap 的时间尺度。"
+        },
+        {
+          "id": "c",
+          "text": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+        },
+        {
+          "id": "d",
+          "text": "令 y=dx/dt，则 dx/dt=y, dy/dt=−x。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“衰减方程 Euler 稳定区间”的适用条件。",
+        "b": "这是“时间常数（time constant）”的定义。",
+        "c": "该选项回答的是“若将 Δt 减半，global error 一般如何变？”。"
+      },
+      "explanation": "令 y=dx/dt，则 dx/dt=y, dy/dt=−x。"
+    },
+    {
+      "id": "L03-Q09",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 4,
+      "type": "debug",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 3 讲：源代码 Part 1 为什么 I(end) 是 NaN？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "所有分支都使用严格 <，最后时间点恰为 0.250 未命中任何分支。"
+        },
+        {
+          "id": "b",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        },
+        {
+          "id": "c",
+          "text": "更新矩阵特征值 1±iΔt，模长 √(1+Δt²)>1，每步放大。"
+        },
+        {
+          "id": "d",
+          "text": "令 y=dx/dt，则 dx/dt=y, dy/dt=−x。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。",
+        "c": "该选项回答的是“为什么 oscillator 的 explicit Euler 轨迹向外螺旋？”。",
+        "d": "该选项回答的是“把 d²x/dt²=−x 改写成两个一阶方程。”。"
+      },
+      "explanation": "所有分支都使用严格 <，最后时间点恰为 0.250 未命中任何分支。"
+    },
+    {
+      "id": "L03-Q10",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：为什么 oscillator 的 explicit Euler 轨迹向外螺旋？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。"
+        },
+        {
+          "id": "b",
+          "text": "更新矩阵特征值 1±iΔt，模长 √(1+Δt²)>1，每步放大。"
+        },
+        {
+          "id": "c",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        },
+        {
+          "id": "d",
+          "text": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项回答的是“为什么右端使用 x_n 而不是 x_{n+1}？”。",
+        "c": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。",
+        "d": "该选项回答的是“若将 Δt 减半，global error 一般如何变？”。"
+      },
+      "explanation": "更新矩阵特征值 1±iΔt，模长 √(1+Δt²)>1，每步放大。"
+    },
+    {
+      "id": "L03-Q11",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：若将 Δt 减半，global error 一般如何变？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        },
+        {
+          "id": "b",
+          "text": "因此，完整解释如何把 d²x/dt²=-x 改成 dx/dt=y, dy/dt=-x， 以及 phase-space 含义。"
+        },
+        {
+          "id": "c",
+          "text": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+        },
+        {
+          "id": "d",
+          "text": "系统对过去输入有加权记忆；需要 convolution/积分或逐步数值求解。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。",
+        "b": "这条推理对应 Lecture3_Diff_Eq_MATLAB.pdf 第 1 页。",
+        "d": "该选项回答的是“time-varying input 时为什么不能直接把 I(t) 填进常输入 closed form？”。"
+      },
+      "explanation": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+    },
+    {
+      "id": "L03-Q12",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3_Diff_Eq_MATLAB.pdf"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：time-varying input 时为什么不能直接把 I(t) 填进常输入 closed form？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        },
+        {
+          "id": "b",
+          "text": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+        },
+        {
+          "id": "c",
+          "text": "这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。"
+        },
+        {
+          "id": "d",
+          "text": "系统对过去输入有加权记忆；需要 convolution/积分或逐步数值求解。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。",
+        "b": "该选项回答的是“若将 Δt 减半，global error 一般如何变？”。",
+        "c": "该选项回答的是“为什么右端使用 x_n 而不是 x_{n+1}？”。"
+      },
+      "explanation": "系统对过去输入有加权记忆；需要 convolution/积分或逐步数值求解。"
+    },
+    {
+      "id": "L03-Q13",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：根据 Lecture3-Differential-Equations.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。"
+        },
+        {
+          "id": "b",
+          "text": "验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。"
+        },
+        {
+          "id": "c",
+          "text": "解析解、exponential decay/approach、time constant；Euler method 的差分推导。"
+        },
+        {
+          "id": "d",
+          "text": "MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“初始条件与解析解”，不是题干指定的关系。",
+        "c": "该陈述解释的是“解析解、exponential decay/approach、time constant”，不是题干指定的关系。",
+        "d": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。"
+      },
+      "explanation": "function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。"
+    },
+    {
+      "id": "L03-Q14",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：若要解释\"function、derivative、integral、first-order ODE、initial condition\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。"
+        },
+        {
+          "id": "b",
+          "text": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+        },
+        {
+          "id": "c",
+          "text": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。"
+        },
+        {
+          "id": "d",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“second-order ODE 改写为 coupled first-order equations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。"
+      },
+      "explanation": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+    },
+    {
+      "id": "L03-Q15",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 2,
+          "section": "lecture-03-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：根据 Lecture3-Differential-Equations.pdf 第 2 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。"
+        },
+        {
+          "id": "b",
+          "text": "second-order ODE 改写为 coupled first-order equations； harmonic oscillator。"
+        },
+        {
+          "id": "c",
+          "text": "验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。"
+        },
+        {
+          "id": "d",
+          "text": "MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“function、derivative、integral、first-order ODE、initial condition”，不是题干指定的关系。",
+        "b": "该陈述解释的是“second-order ODE 改写为 coupled first-order equations”，不是题干指定的关系。",
+        "d": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。"
+      },
+      "explanation": "验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。"
+    },
+    {
+      "id": "L03-Q16",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 2,
+          "section": "lecture-03-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 1,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：若要解释\"初始条件与解析解\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。"
+        },
+        {
+          "id": "b",
+          "text": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。"
+        },
+        {
+          "id": "c",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        },
+        {
+          "id": "d",
+          "text": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。",
+        "b": "该陈述解释的是“second-order ODE 改写为 coupled first-order equations”，不是题干指定的关系。",
+        "c": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。"
+      },
+      "explanation": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+    },
+    {
+      "id": "L03-Q17",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：根据 Lecture3-Differential-Equations.pdf 第 3 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解析解、exponential decay/approach、time constant；Euler method 的差分推导。"
+        },
+        {
+          "id": "b",
+          "text": "function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。"
+        },
+        {
+          "id": "c",
+          "text": "验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。"
+        },
+        {
+          "id": "d",
+          "text": "second-order ODE 改写为 coupled first-order equations； harmonic oscillator。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“function、derivative、integral、first-order ODE、initial condition”，不是题干指定的关系。",
+        "c": "该陈述解释的是“初始条件与解析解”，不是题干指定的关系。",
+        "d": "该陈述解释的是“second-order ODE 改写为 coupled first-order equations”，不是题干指定的关系。"
+      },
+      "explanation": "解析解、exponential decay/approach、time constant；Euler method 的差分推导。"
+    },
+    {
+      "id": "L03-Q18",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：若要解释\"解析解、exponential decay/approach、time constant\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。"
+        },
+        {
+          "id": "b",
+          "text": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+        },
+        {
+          "id": "c",
+          "text": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。"
+        },
+        {
+          "id": "d",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。",
+        "c": "该陈述解释的是“second-order ODE 改写为 coupled first-order equations”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。"
+      },
+      "explanation": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+    },
+    {
+      "id": "L03-Q19",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：根据 Lecture3-Differential-Equations.pdf 第 4 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。"
+        },
+        {
+          "id": "b",
+          "text": "解析解、exponential decay/approach、time constant；Euler method 的差分推导。"
+        },
+        {
+          "id": "c",
+          "text": "second-order ODE 改写为 coupled first-order equations； harmonic oscillator。"
+        },
+        {
+          "id": "d",
+          "text": "MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“初始条件与解析解”，不是题干指定的关系。",
+        "b": "该陈述解释的是“解析解、exponential decay/approach、time constant”，不是题干指定的关系。",
+        "d": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。"
+      },
+      "explanation": "second-order ODE 改写为 coupled first-order equations； harmonic oscillator。"
+    },
+    {
+      "id": "L03-Q20",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3-Differential-Equations.pdf"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：若要解释\"second-order ODE 改写为 coupled first-order equations\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+        },
+        {
+          "id": "b",
+          "text": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。"
+        },
+        {
+          "id": "c",
+          "text": "这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。"
+        },
+        {
+          "id": "d",
+          "text": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“function、derivative、integral、first-order ODE、initial condition”，不是题干指定的关系。",
+        "b": "该陈述解释的是“MATLAB PDF/.m Part 1”，不是题干指定的关系。",
+        "c": "该选项回答的是“为什么右端使用 x_n 而不是 x_{n+1}？”。"
+      },
+      "explanation": "对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、 振荡、发散的行为。"
+    },
+    {
+      "id": "L03-Q21",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3_Diff_Eq_MATLAB.pdf"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 3 讲：根据 Lecture3_Diff_Eq_MATLAB.pdf 第 1 页，哪一项概括了该页主题？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。"
+        },
+        {
+          "id": "b",
+          "text": "function、derivative、integral、first-order ODE、initial condition；最简单积分解；两个 canonical examples。"
+        },
+        {
+          "id": "c",
+          "text": "验证解；separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。"
+        },
+        {
+          "id": "d",
+          "text": "解析解、exponential decay/approach、time constant；Euler method 的差分推导。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“function、derivative、integral、first-order ODE、initial condition”，不是题干指定的关系。",
+        "c": "该陈述解释的是“初始条件与解析解”，不是题干指定的关系。",
+        "d": "该陈述解释的是“解析解、exponential decay/approach、time constant”，不是题干指定的关系。"
+      },
+      "explanation": "MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。"
+    },
+    {
+      "id": "L03-Q22",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3_Diff_Eq_MATLAB.pdf"
+      ],
+      "difficulty": 2,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：若要解释\"MATLAB PDF/.m Part 1\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I； 解释 steady state、initial gap、time constant 和 limiting cases。"
+        },
+        {
+          "id": "b",
+          "text": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。"
+        },
+        {
+          "id": "c",
+          "text": "因此，对 tau dx/dt=- x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、振荡、发散的行为。"
+        },
+        {
+          "id": "d",
+          "text": "因此，从导数定义推导 Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“function、derivative、integral、first-order ODE、initial condition”，不是题干指定的关系。",
+        "c": "该陈述解释的是“初始条件与解析解”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture3-Differential-Equations.pdf 第 3 页。"
+      },
+      "explanation": "逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot prediction。"
+    },
+    {
+      "id": "L03-Q23",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Differential Equations and Euler Simulation",
+        "Lecture3_Diff_Eq_MATLAB.pdf"
+      ],
+      "difficulty": 3,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 3 讲：阅读与\"MATLAB PDF/.m Part 1\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+        },
+        {
+          "id": "b",
+          "text": "因此，从\"导数是瞬时变化率、微分方程用变化规律定义函数\"搭桥，但最终给出正式 notation。"
+        },
+        {
+          "id": "c",
+          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+        },
+        {
+          "id": "d",
+          "text": "一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“function、derivative、integral、first-order ODE、initial condition”，不是题干指定的关系。",
+        "b": "这条推理对应 Lecture3-Differential-Equations.pdf 第 1 页。",
+        "d": "该选项回答的是“若将 Δt 减半，global error 一般如何变？”。"
+      },
+      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+    },
+    {
+      "id": "L03-Q24",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "微分方程",
+        "differential equation"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"用导数约束未知函数的方程。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "初始条件（initial condition）"
+        },
+        {
+          "id": "b",
+          "text": "解析解（analytic solution）"
+        },
+        {
+          "id": "c",
+          "text": "数值解（numerical solution）"
+        },
+        {
+          "id": "d",
+          "text": "微分方程（differential equation）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“初始条件（initial condition）”指：在起始时刻指定状态，从解族中选出具体轨迹。",
+        "b": "“解析解（analytic solution）”指：用已知函数写出的精确表达式。",
+        "c": "“数值解（numerical solution）”指：在离散时间点上近似状态。"
+      },
+      "explanation": "微分方程（differential equation）：用导数约束未知函数的方程。"
+    },
+    {
+      "id": "L03-Q25",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "初始条件",
+        "initial condition"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"在起始时刻指定状态，从解族中选出具体轨迹。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "初始条件（initial condition）"
+        },
+        {
+          "id": "b",
+          "text": "解析解（analytic solution）"
+        },
+        {
+          "id": "c",
+          "text": "数值解（numerical solution）"
+        },
+        {
+          "id": "d",
+          "text": "时间常数（time constant）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“解析解（analytic solution）”指：用已知函数写出的精确表达式。",
+        "c": "“数值解（numerical solution）”指：在离散时间点上近似状态。",
+        "d": "“时间常数（time constant）”指：一阶指数过程消除约 63% 初始 gap 的时间尺度。"
+      },
+      "explanation": "初始条件（initial condition）：在起始时刻指定状态，从解族中选出具体轨迹。"
+    },
+    {
+      "id": "L03-Q26",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "解析解",
+        "analytic solution"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"用已知函数写出的精确表达式。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "数值解（numerical solution）"
+        },
+        {
+          "id": "b",
+          "text": "解析解（analytic solution）"
+        },
+        {
+          "id": "c",
+          "text": "时间常数（time constant）"
+        },
+        {
+          "id": "d",
+          "text": "稳态（steady state）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“数值解（numerical solution）”指：在离散时间点上近似状态。",
+        "c": "“时间常数（time constant）”指：一阶指数过程消除约 63% 初始 gap 的时间尺度。",
+        "d": "“稳态（steady state）”指：状态不再随时间变化的解。"
+      },
+      "explanation": "解析解（analytic solution）：用已知函数写出的精确表达式。"
+    },
+    {
+      "id": "L03-Q27",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "数值解",
+        "numerical solution"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"在离散时间点上近似状态。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "时间常数（time constant）"
+        },
+        {
+          "id": "b",
+          "text": "稳态（steady state）"
+        },
+        {
+          "id": "c",
+          "text": "数值解（numerical solution）"
+        },
+        {
+          "id": "d",
+          "text": "Euler 方法（Euler method）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“时间常数（time constant）”指：一阶指数过程消除约 63% 初始 gap 的时间尺度。",
+        "b": "“稳态（steady state）”指：状态不再随时间变化的解。",
+        "d": "“Euler 方法（Euler method）”指：沿当前导数做前向小步的数值积分。"
+      },
+      "explanation": "数值解（numerical solution）：在离散时间点上近似状态。"
+    },
+    {
+      "id": "L03-Q28",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 2,
+          "section": "lecture-03-source-2"
+        }
+      ],
+      "conceptTags": [
+        "时间常数",
+        "time constant"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"一阶指数过程消除约 63% 初始 gap 的时间尺度。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "稳态（steady state）"
+        },
+        {
+          "id": "b",
+          "text": "Euler 方法（Euler method）"
+        },
+        {
+          "id": "c",
+          "text": "截断误差（truncation error）"
+        },
+        {
+          "id": "d",
+          "text": "时间常数（time constant）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“稳态（steady state）”指：状态不再随时间变化的解。",
+        "b": "“Euler 方法（Euler method）”指：沿当前导数做前向小步的数值积分。",
+        "c": "“截断误差（truncation error）”指：有限差分忽略高阶 Taylor 项造成的局部误差。"
+      },
+      "explanation": "时间常数（time constant）：一阶指数过程消除约 63% 初始 gap 的时间尺度。"
+    },
+    {
+      "id": "L03-Q29",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "稳态",
+        "steady state"
+      ],
+      "difficulty": 4,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"状态不再随时间变化的解。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "稳态（steady state）"
+        },
+        {
+          "id": "b",
+          "text": "Euler 方法（Euler method）"
+        },
+        {
+          "id": "c",
+          "text": "截断误差（truncation error）"
+        },
+        {
+          "id": "d",
+          "text": "稳定性（numerical stability）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“Euler 方法（Euler method）”指：沿当前导数做前向小步的数值积分。",
+        "c": "“截断误差（truncation error）”指：有限差分忽略高阶 Taylor 项造成的局部误差。",
+        "d": "“稳定性（numerical stability）”指：小扰动是否在离散迭代中衰减而非被放大。"
+      },
+      "explanation": "稳态（steady state）：状态不再随时间变化的解。"
+    },
+    {
+      "id": "L03-Q30",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Euler 方法",
+        "Euler method"
+      ],
+      "difficulty": 5,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"沿当前导数做前向小步的数值积分。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "截断误差（truncation error）"
+        },
+        {
+          "id": "b",
+          "text": "Euler 方法（Euler method）"
+        },
+        {
+          "id": "c",
+          "text": "稳定性（numerical stability）"
+        },
+        {
+          "id": "d",
+          "text": "耦合方程（coupled equations）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“截断误差（truncation error）”指：有限差分忽略高阶 Taylor 项造成的局部误差。",
+        "c": "“稳定性（numerical stability）”指：小扰动是否在离散迭代中衰减而非被放大。",
+        "d": "“耦合方程（coupled equations）”指：多个状态的导数相互依赖。"
+      },
+      "explanation": "Euler 方法（Euler method）：沿当前导数做前向小步的数值积分。"
+    },
+    {
+      "id": "L03-Q31",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "截断误差",
+        "truncation error"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"有限差分忽略高阶 Taylor 项造成的局部误差。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "稳定性（numerical stability）"
+        },
+        {
+          "id": "b",
+          "text": "耦合方程（coupled equations）"
+        },
+        {
+          "id": "c",
+          "text": "截断误差（truncation error）"
+        },
+        {
+          "id": "d",
+          "text": "相空间（phase space）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“稳定性（numerical stability）”指：小扰动是否在离散迭代中衰减而非被放大。",
+        "b": "“耦合方程（coupled equations）”指：多个状态的导数相互依赖。",
+        "d": "“相空间（phase space）”指：以所有状态变量为坐标表示轨迹的空间。"
+      },
+      "explanation": "截断误差（truncation error）：有限差分忽略高阶 Taylor 项造成的局部误差。"
+    },
+    {
+      "id": "L03-Q32",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 3,
+          "section": "lecture-03-source-3"
+        }
+      ],
+      "conceptTags": [
+        "稳定性",
+        "numerical stability"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"小扰动是否在离散迭代中衰减而非被放大。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "耦合方程（coupled equations）"
+        },
+        {
+          "id": "b",
+          "text": "相空间（phase space）"
+        },
+        {
+          "id": "c",
+          "text": "微分方程（differential equation）"
+        },
+        {
+          "id": "d",
+          "text": "稳定性（numerical stability）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“耦合方程（coupled equations）”指：多个状态的导数相互依赖。",
+        "b": "“相空间（phase space）”指：以所有状态变量为坐标表示轨迹的空间。",
+        "c": "“微分方程（differential equation）”指：用导数约束未知函数的方程。"
+      },
+      "explanation": "稳定性（numerical stability）：小扰动是否在离散迭代中衰减而非被放大。"
+    },
+    {
+      "id": "L03-Q33",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "耦合方程",
+        "coupled equations"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 3 讲：本讲把\"多个状态的导数相互依赖。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "耦合方程（coupled equations）"
+        },
+        {
+          "id": "b",
+          "text": "相空间（phase space）"
+        },
+        {
+          "id": "c",
+          "text": "微分方程（differential equation）"
+        },
+        {
+          "id": "d",
+          "text": "初始条件（initial condition）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“相空间（phase space）”指：以所有状态变量为坐标表示轨迹的空间。",
+        "c": "“微分方程（differential equation）”指：用导数约束未知函数的方程。",
+        "d": "“初始条件（initial condition）”指：在起始时刻指定状态，从解族中选出具体轨迹。"
+      },
+      "explanation": "耦合方程（coupled equations）：多个状态的导数相互依赖。"
+    },
+    {
+      "id": "L03-Q34",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "first-order initial-value problem"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"first-order initial-value problem\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "b",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "c",
+          "text": "I 常数、τ>0"
+        },
+        {
+          "id": "d",
+          "text": "Δt 足够小"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“ODE 的积分形式”的条件，不是题干公式的条件。",
+        "c": "这是“常输入一阶系统”的条件，不是题干公式的条件。",
+        "d": "这是“explicit Euler”的条件，不是题干公式的条件。"
+      },
+      "explanation": "first-order initial-value problem 的适用条件：f 足够规则以保证解"
+    },
+    {
+      "id": "L03-Q35",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 1,
+          "section": "lecture-03-source-1"
+        }
+      ],
+      "conceptTags": [
+        "ODE 的积分形式"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"ODE 的积分形式\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "b",
+          "text": "I 常数、τ>0"
+        },
+        {
+          "id": "c",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "d",
+          "text": "Δt 足够小"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“first-order initial-value problem”的条件，不是题干公式的条件。",
+        "b": "这是“常输入一阶系统”的条件，不是题干公式的条件。",
+        "d": "这是“explicit Euler”的条件，不是题干公式的条件。"
+      },
+      "explanation": "ODE 的积分形式的适用条件：积分沿真实轨迹"
+    },
+    {
+      "id": "L03-Q36",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "常输入一阶系统"
+      ],
+      "difficulty": 1,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"常输入一阶系统\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "b",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "c",
+          "text": "Δt 足够小"
+        },
+        {
+          "id": "d",
+          "text": "I 常数、τ>0"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“first-order initial-value problem”的条件，不是题干公式的条件。",
+        "b": "这是“ODE 的积分形式”的条件，不是题干公式的条件。",
+        "c": "这是“explicit Euler”的条件，不是题干公式的条件。"
+      },
+      "explanation": "常输入一阶系统的适用条件：I 常数、τ>0"
+    },
+    {
+      "id": "L03-Q37",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "explicit Euler"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"explicit Euler\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Δt 足够小"
+        },
+        {
+          "id": "b",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "c",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "d",
+          "text": "I 常数、τ>0"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“first-order initial-value problem”的条件，不是题干公式的条件。",
+        "c": "这是“ODE 的积分形式”的条件，不是题干公式的条件。",
+        "d": "这是“常输入一阶系统”的条件，不是题干公式的条件。"
+      },
+      "explanation": "explicit Euler 的适用条件：Δt 足够小"
+    },
+    {
+      "id": "L03-Q38",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3_Diff_Eq_MATLAB.pdf",
+          "page": 1,
+          "section": "lecture-03-source-5"
+        }
+      ],
+      "conceptTags": [
+        "衰减方程 Euler 稳定区间"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"衰减方程 Euler 稳定区间\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "b",
+          "text": "线性一阶测试方程"
+        },
+        {
+          "id": "c",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "d",
+          "text": "I 常数、τ>0"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“first-order initial-value problem”的条件，不是题干公式的条件。",
+        "c": "这是“ODE 的积分形式”的条件，不是题干公式的条件。",
+        "d": "这是“常输入一阶系统”的条件，不是题干公式的条件。"
+      },
+      "explanation": "衰减方程 Euler 稳定区间的适用条件：线性一阶测试方程"
+    },
+    {
+      "id": "L03-Q39",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "harmonic oscillator 的一阶形式"
+      ],
+      "difficulty": 4,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"harmonic oscillator 的一阶形式\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "b",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "c",
+          "text": "无阻尼、单位角频率"
+        },
+        {
+          "id": "d",
+          "text": "I 常数、τ>0"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“first-order initial-value problem”的条件，不是题干公式的条件。",
+        "b": "这是“ODE 的积分形式”的条件，不是题干公式的条件。",
+        "d": "这是“常输入一阶系统”的条件，不是题干公式的条件。"
+      },
+      "explanation": "harmonic oscillator 的一阶形式的适用条件：无阻尼、单位角频率"
+    },
+    {
+      "id": "L03-Q40",
+      "lecture": 3,
+      "sectionId": "lecture-03-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture3-Differential-Equations.pdf",
+          "page": 4,
+          "section": "lecture-03-source-4"
+        }
+      ],
+      "conceptTags": [
+        "exact oscillator 的守恒量（常数因子略）"
+      ],
+      "difficulty": 5,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 3 讲：使用\"exact oscillator 的守恒量（常数因子略）\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "f 足够规则以保证解"
+        },
+        {
+          "id": "b",
+          "text": "积分沿真实轨迹"
+        },
+        {
+          "id": "c",
+          "text": "I 常数、τ>0"
+        },
+        {
+          "id": "d",
+          "text": "连续精确动力学"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“first-order initial-value problem”的条件，不是题干公式的条件。",
+        "b": "这是“ODE 的积分形式”的条件，不是题干公式的条件。",
+        "c": "这是“常输入一阶系统”的条件，不是题干公式的条件。"
+      },
+      "explanation": "exact oscillator 的守恒量（常数因子略） 的适用条件：连续精确动力学"
+    }
+  ]
+}

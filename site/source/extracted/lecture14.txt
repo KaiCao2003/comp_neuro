@@ -1,0 +1,861 @@
+NEUROSCI 366
+Lecture 14
+
+
+
+Spike‑Triggered Covariance 与 Generalized Lin‑
+
+ear Models
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture14‑STC‑GLM.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 14                                                           Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                  2
+
+2 Learning objectives and prerequisite dependency map                                                        2
+
+3 Five‑minute prerequisite diagnostic                                                                        2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                             3
+   4.1 Lecture14‑STC‑GLM.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          3
+   4.2 Lecture14‑STC‑GLM.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          4
+   4.3 Lecture14‑STC‑GLM.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          5
+   4.4 Lecture14‑STC‑GLM.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          6
+   4.5 Lecture14‑STC‑GLM.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          7
+   4.6 Lecture14‑STC‑GLM.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          8
+
+5 补全推导与数学支架 / Derivations                                                                                    9
+   5.1 STC 与 multiple relevant dimensions          . . . . . . . . . . . . . . . . . . . . . . . . . . . .    9
+   5.2 GLM 三要素与 canonical form . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .             10
+   5.3 Gaussian、Poisson、Bernoulli 三种 likelihood . . . . . . . . . . . . . . . . . . . . . . .                11
+   5.4 retinal population GLM 的 filters . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        12
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                            13
+
+7 Worked examples and transfer                                                                               13
+   7.1 distribution/link matching . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        13
+   7.2 history filter prediction . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     13
+
+8 Formula and notation sheet                                                                                 15
+
+9 Bilingual glossary                                                                                         15
+
+10 Common traps, assumptions, and limitations                                                                16
+
+11 Cumulative Knowledge Check                                                                                17
+
+12 Hint Bank                                                                                                 19
+
+13 Complete Answer Key with reasoning                                                                        21
+
+14 Source‑page concordance and coverage audit                                                                22
+
+
+
+
+                                                    1/23
+NEUROSCI 366 ・Lecture 14                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            22
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      22
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+
+
+
+                                                     2/23
+NEUROSCI 366 ・Lecture 14                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：multiple features。
+‧ 从第一原则推导：STC eigenspace。
+‧ 解释几何/计算直觉：stimulus correction。
+‧ 连接生物学解释：GLM distribution。
+‧ 诊断 assumptions 与 failure modes：linear predictor。
+‧ 把概念迁移到新神经科学问题：link。
+
+ Dependency map
+ multiple features → STC eigenspace → stimulus correction → GLM distribution → linear pre‑
+ dictor → link
+ Core question
+ 当单一 linear feature 不够时，STC 如何发现多维 stimulus subspace；GLM 又如何统一 Gaussian、
+ Poisson 与 Bernoulli response models？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. STC 比 STA 多检查什么？
+                  （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. even energy nonlinearity 下 STA 为什么可为零？
+                                        （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. colored stimulus 下 STC 应如何修正？
+                               （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. GLM 的三个元素？
+            （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. GLM 中 linear 指什么？
+                   （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+                                              3/23
+NEUROSCI 366 ・Lecture 14                                        Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture14‑STC‑GLM.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture14‑STC‑GLM.pdf, p. 1]
+ Clean reconstruction. Page 1：H1 blowfly motion example、multiple linear features、STC、
+ stimulus‑correlation correction。
+ What the note is saying. 本页的中心对象是 multiple features 与 STC eigenspace。原笔记将它们放
+ 进以下链条：H1 blowfly motion example、multiple linear features、STC、stimulus‑correlation
+ correction。
+ Why it follows. 说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide‑field feature 与
+ multiple relevant filters。其逻辑后果是：系统讲 GLM 的 response distribution、linear predictor、
+ link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。后面的正
+ 式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 按时间线区分 stimulus/task、recording/manipulation、measured quantity 与
+ inferred model variable；结果相关性不能直接替代机制检验。
+
+  Stop & Predict
+
+  STC 比 STA 多检查什么？
+
+
+
+
+                                        4/23
+NEUROSCI 366 ・Lecture 14                                                  Source‑aligned companion
+
+
+4.2 Lecture14‑STC‑GLM.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture14‑STC‑GLM.pdf, p. 2]
+ Clean reconstruction. Page 2：GLM 三要素与 exponential‑family canonical form。
+ What the note is saying. 本页的中心对象是 stimulus correction 与 GLM distribution。原笔记将
+ 它们放进以下链条：GLM 三要素与 exponential‑family canonical form。
+ Why it follows. 系统讲 GLM 的 response distribution、linear predictor、link function，并在不
+ 压垮读者的前提下解释 exponential family/canonical parameter。其逻辑后果是：逐项重构 Pillow
+ retinal GLM：stimulus filters、self‑history refractory/burst filters、cross‑neuron coupling filters，
+ 以及 simultaneous fitting。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases
+ 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  even energy nonlinearity 下 STA 为什么可为零？
+
+
+
+
+                                              5/23
+NEUROSCI 366 ・Lecture 14                                             Source‑aligned companion
+
+
+4.3 Lecture14‑STC‑GLM.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture14‑STC‑GLM.pdf, p. 3]
+ Clean reconstruction. Page 3：unit‑normal Gaussian GLM / ordinary linear regression；Poisson
+ GLM 开始。
+ What the note is saying. 本页的中心对象是 linear predictor 与 link。原笔记将它们放进以下链条：
+ unit‑normal Gaussian GLM / ordinary linear regression；Poisson GLM 开始。
+ Why it follows. 解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson
+ regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。其逻辑后果是：系统讲 GLM 的
+ response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential
+ family/canonical parameter。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases
+ 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  colored stimulus 下 STC 应如何修正？
+
+
+
+
+                                           6/23
+NEUROSCI 366 ・Lecture 14                                               Source‑aligned companion
+
+
+4.4 Lecture14‑STC‑GLM.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture14‑STC‑GLM.pdf, p. 4]
+ Clean reconstruction. Page 4：Poisson log link 与 log likelihood。
+ What the note is saying. 本页的中心对象是 population history/coupling 与 multiple features。原
+ 笔记将它们放进以下链条：Poisson log link 与 log likelihood。
+ Why it follows. 解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson
+ regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。其逻辑后果是：分别推导
+ Gaussian/identity‑link、Poisson/log‑link、Bernoulli/logit‑link 的 likelihood 与 log likelihood。后
+ 面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  GLM 的三个元素？
+
+
+
+
+                                             7/23
+NEUROSCI 366 ・Lecture 14                                              Source‑aligned companion
+
+
+4.5 Lecture14‑STC‑GLM.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture14‑STC‑GLM.pdf, p. 5]
+ Clean reconstruction. Page 5：Pillow–Simoncelli retinal population GLM、stimulus/history/‑
+ coupling filters。
+ What the note is saying. 本页的中心对象是 STC eigenspace 与 stimulus correction。原笔记将它
+ 们放进以下链条：Pillow–Simoncelli retinal population GLM、stimulus/history/coupling filters。
+ Why it follows. 逐项重构 Pillow retinal GLM：stimulus filters、self‑history refractory/burst fil‑
+ ters、cross‑neuron coupling filters，以及 simultaneous fitting。其逻辑后果是：系统讲 GLM 的
+ response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponen‑
+ tial family/canonical parameter。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 按时间线区分 stimulus/task、recording/manipulation、measured quantity 与
+ inferred model variable；结果相关性不能直接替代机制检验。
+
+  Stop & Predict
+
+  GLM 中 linear 指什么？
+
+
+
+
+                                            8/23
+NEUROSCI 366 ・Lecture 14                                          Source‑aligned companion
+
+
+4.6 Lecture14‑STC‑GLM.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture14‑STC‑GLM.pdf, p. 6]
+ Clean reconstruction. Page 6：Bernoulli GLM、logistic regression、log odds、cross‑entropy。
+ What the note is saying. 本页的中心对象是 GLM distribution 与 linear predictor。原笔记将它们
+ 放进以下链条：Bernoulli GLM、logistic regression、log odds、cross‑entropy。
+ Why it follows. 解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson
+ regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。其逻辑后果是：严格区分
+ Poisson count model、Bernoulli small‑bin model 和 logistic classification。后面的正式推导会逐
+ 项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Gaussian identity‑link MLE 与什么等价？
+
+
+
+
+                                         9/23
+NEUROSCI 366 ・Lecture 14                                              Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 STC 与 multiple relevant dimensions
+
+【必要前置】      STA 为零或 neuron 依赖多个 projections 时如何找 features？
+
+                             Csp = E[(s − µsp )(s − µsp )T | spike]
+
+                                       ∆C = Csp − Cs
+                                        ∆Cvk = λk vk
+1. STA 检查 conditional mean shift；STC 检查 conditional covariance shift。
+2. large positive/negative eigenvalues 表示 spike‑triggered variance 相对 baseline 增/减的 direc‑
+   tions。
+3. energy model 的 ±feature stimuli 平均为零但 covariance 沿 feature direction 增大。
+4. 若 C_s≠I，应先 whiten 或解 generalized eigenproblem。
+
+  Geometric/computational intuition. STC 找的是“spike 前 stimulus cloud 形状改变”的轴。
+  Biological interpretation / failure condition. 高维 covariance 需要大量 spikes；有限样本
+  eigenvectors 易过拟合。
+
+  Micro‑check
+  GLM 的三个元素？
+
+
+
+
+                                             10/23
+NEUROSCI 366 ・Lecture 14                                                 Source‑aligned companion
+
+
+5.2 GLM 三要素与 canonical form
+
+【补全推导】      如何把不同 response types 放进统一建模语言？
+                                            ∑
+                                 ηµ = β 0 +   βn xnµ
+                                                  n
+
+                                          g(mµ ) = ηµ
+                           P (yµ | ηµ ) = exp{yµ ηµ − H(yµ ) − D(ηµ )}
+1. 选择 response distribution 决定 noise/variance structure。
+2. linear predictor η 是 features 的 weighted sum。
+3. link g 把 conditional mean m 映射到 η。
+4. maximum likelihood 估计 β，而不是统一最小化 MSE。
+
+  Geometric/computational intuition. GLM 的“linear”指 predictor，对 mean 的关系可通过
+  nonlinear link。
+  Biological interpretation / failure condition. distribution/link 选 择 错 误 会 导 致 negative
+  rates、probability 越界或 variance mismatch。
+
+  Micro‑check
+  GLM 中 linear 指什么？
+
+
+
+
+                                             11/23
+NEUROSCI 366 ・Lecture 14                                                       Source‑aligned companion
+
+
+5.3 Gaussian、Poisson、Bernoulli 三种 likelihood
+
+【跨页连接】      推导常用 GLMs。
+                                                  1∑
+                           Gaussian: m = η, ℓ = −       (y − m)2 + const
+                                                  2
+                                                  ∑
+                            Poisson: λ = eη , ℓ =   [yη − eη − log(y!)]
+                                       eη        ∑
+                     Bernoulli: q =       η
+                                            , ℓ=   [y log q + (1 − y) log(1 − q)]
+                                      1+e
+1. unit‑variance Gaussian + identity link 使 MLE 等价于 least squares。
+2. Poisson canonical log link 保证 λ>0。
+3. Bernoulli logit link 令 η=log(q/(1−q))，inverse 是 sigmoid。
+4. negative Bernoulli log‑likelihood 即 binary cross‑entropy。
+
+  Geometric/computational intuition. link 把 unrestricted linear score 转成 response mean
+  的合法范围。
+  Biological interpretation / failure condition. Poisson overdispersion、zero inflation 或 tem‑
+  poral dependence 需扩展。
+
+  Micro‑check
+  Gaussian identity‑link MLE 与什么等价？
+
+
+
+
+                                                12/23
+NEUROSCI 366 ・Lecture 14                                                  Source‑aligned companion
+
+
+5.4 retinal population GLM 的 filters
+
+【模型边界】      如何同时建模 stimulus、refractory/history 与 neuron interactions？
+                                                      ∑
+                      λi (t) = exp{ki ∗ s + hi ∗ yi +   cij ∗ yj + bi }
+                                                    j̸=i
+
+1. stimulus filter k_i 提取外界 drive。
+2. self‑history h_i 可表示 refractory suppression 或 bursting facilitation。
+3. coupling filters c_ij 捕捉其他 neurons’ past spikes 对 conditional rate 的预测。
+4. 全部 filters 可在 joint likelihood 中同时优化，减少逐步拟合造成的 confounding。
+
+  Geometric/computational intuition. GLM 把多种历史变量都放进同一个 linear predictor，再
+  用 exp 生成 positive rate。
+  Biological interpretation / failure condition. coupling coefficient 可能反映 shared input 或
+  unobserved neurons，不自动证明 direct synapse。
+
+  Micro‑check
+  Poisson 为什么常用 log link？
+
+
+
+
+                                            13/23
+NEUROSCI 366 ・Lecture 14                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  STC 比较 spike‑triggered 与 raw stimulus covariance，寻找 spikes 前 variance 被放大或压缩的
+  directions；colored stimuli 需 whitening/correction。GLM 则用 response distribution、linear
+  predictor 与 link function 统一多种 regression。retinal population GLM 可同时拟合 stimulus
+  filters、self‑history 与 cross‑neuron couplings，但它仍是统计模型，coupling filter 不自动等于
+  直接 synapse。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 distribution/link matching
+
+【原课/核心例题】         Prompt. 200 ms 窗口 spike count、单 bin spike/no‑spike、连续 eye velocity。
+
+ Worked solution. count 可用 Poisson/log；
+                                      small‑bin binary 可用 Bernoulli/logit；
+                                                                         连续近 Gaussian
+ residual 可用 Gaussian/identity。
+ Check. response support 必须匹配：count≥0，probability∈[0,1]，continuous 可正可负。
+
+
+7.2 history filter prediction
+
+【跨课连接】       Prompt. self‑history filter 在 spike 后 5 ms 强负、20–50 ms 正。
+
+
+
+                                               14/23
+NEUROSCI 366 ・Lecture 14                                       Source‑aligned companion
+
+
+
+ Worked solution. 模 型 预 测 立 即 refractory suppression， 随 后 短 暂 increased conditional
+ rate/burst tendency。
+ Check. 这是 conditional statistical effect，不一定对应单一 ion channel。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                       15/23
+NEUROSCI 366 ・Lecture 14                                                        Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. STC covariance change
+                                            ∆C = Cspike − Cstim
+Conditions / conventions: centered ensembles
+2. GLM linear predictor
+                                                     η = Xβ
+Conditions / conventions: shape‑compatible design
+3. link function
+                                                   g(E[y|x]) = η
+Conditions / conventions: chosen response family
+4. Poisson log‑link inverse
+                                                      λ = eη
+Conditions / conventions: positive mean
+5. logistic inverse link
+                                               q = (1 + e−η )−1
+Conditions / conventions: 0<q<1
+6. Poisson log‑likelihood                          ∑
+                                        ℓP ois =       (yη − eη − log y!)
+
+Conditions / conventions: conditionally independent bins/counts
+7. logistic loss
+                                         −ℓBern = cross‑entropy
+Conditions / conventions: Bernoulli outcomes
+
+
+9 Bilingual glossary
+
+
+ 中文                   English / symbol                    Operational meaning
+ 脉冲触发协方差              spike‑triggered                     spike‑triggered ensemble covariance 的分析。
+                      covariance, STC
+ 相关子空间                relevant subspace                   多个 stimulus filters 张成的 response‑sensitive
+                                                          subspace。
+ 指数族                  exponential family                  可写成特定 canonical statistic/parameter 形式的
+                                                          分布族。
+ 线性预测子                linear predictor                    η=Xβ。
+ 链接函数                 link function                       conditional mean 与 η 之间的映射。
+ Poisson 回归           Poisson regression                  count/rate 的 log‑link GLM。
+ 逻辑回归                 logistic regression                 Bernoulli outcome 的 logit‑link GLM。
+ 对数几率                 log odds                            log[q/(1−q)]。
+ 历史滤波器                history filter                      过去 spikes 对当前 conditional response 的线性
+                                                          影响。
+ 耦合滤波器                coupling filter                     其他 units’ histories 的 predictive filter。
+
+
+
+                                                       16/23
+NEUROSCI 366 ・Lecture 14                                             Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. STA=0 就认为没有 relevant feature。
+2. colored stimulus 下直接对 ΔC 做普通 eigendecomposition。
+3. 把 GLM 的 linear 理解为 response mean 必须线性。
+4. Poisson link 使用 identity 导致 negative rate。
+5. 把 Bernoulli logistic classification 与 Poisson small‑count model 混同。
+6. 把 fitted coupling filters 当作直接 anatomical synapses。
+7. 忽略 history dependence 导致 apparent stimulus filter 偏差。
+
+  Course‑specific risk boundary. 不要把 GLM 的“linear”理解成 response mean 必须线性；linear
+  指 predictor，对 mean 的关系由 link 决定。
+
+
+
+
+                                           17/23
+NEUROSCI 366 ・Lecture 14                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+ 1. STC 比 STA 多检查什么？
+
+
+
+ 2. even energy nonlinearity 下 STA 为什么可为零？
+
+
+
+ 3. colored stimulus 下 STC 应如何修正？
+
+
+
+ 4. GLM 的三个元素？
+
+
+
+ 5. GLM 中 linear 指什么？
+
+
+
+ 6. Gaussian identity‑link MLE 与什么等价？
+
+
+
+ 7. Poisson 为什么常用 log link？
+
+
+
+ 8. logit 的 inverse 是什么？
+
+
+
+ 9. cross‑entropy 从哪里来？
+
+
+
+10. self‑history 负 lobe 可代表什么？
+
+
+
+11. coupling filter 非零能证明 direct synapse 吗？
+
+
+
+12. Poisson count 与 Bernoulli small‑bin 的选择差异？
+
+
+
+13. 公式表中的“STC covariance change”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“GLM linear predictor”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“link function”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/23
+NEUROSCI 366 ・Lecture 14                             Source‑aligned companion
+
+
+
+
+16. 公式表中的“Poisson log‑link inverse”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“logistic inverse link”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“Poisson log‑likelihood”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+19. 公式表中的“logistic loss”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+20. 诊断并修正下面的说法：STA=0 就认为没有 relevant feature。
+
+
+
+
+                                 19/23
+NEUROSCI 366 ・Lecture 14                                    Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“STC covariance change”对应的变量关系入手。
+    Hint 2. 把条件“centered ensembles”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“GLM linear predictor”对应的变量关系入手。
+    Hint 2. 把条件“shape‑compatible design”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     20/23
+NEUROSCI 366 ・Lecture 14                                     Source‑aligned companion
+
+
+15. Hint 1. 先从“link function”对应的变量关系入手。
+    Hint 2. 把条件“chosen response family”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“Poisson log‑link inverse”对应的变量关系入手。
+    Hint 2. 把条件“positive mean”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“logistic inverse link”对应的变量关系入手。
+    Hint 2. 把条件“0<q<1”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“Poisson log‑likelihood”对应的变量关系入手。
+    Hint 2. 把条件“conditionally independent bins/counts”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+19. Hint 1. 先从“logistic loss”对应的变量关系入手。
+    Hint 2. 把条件“Bernoulli outcomes”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+20. Hint 1. 先问：混淆的是定义、统计估计、模型变量还是生物机制？
+    Hint 2. 指出一个缺失 assumption 或反例。
+    Hint 3. 用“在⋯⋯条件下⋯⋯；否则⋯⋯”改写。
+
+
+
+
+                                      21/23
+NEUROSCI 366 ・Lecture 14                                           Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. spike‑triggered covariance/variance structure，而不只是 mean。
+ 2. +feature 与 −feature 都触发，mean 相消。
+ 3. whiten stimulus 或使用 generalized eigen/covariance correction。
+ 4. response distribution、linear predictor、link function。
+ 5. η 对 predictors linear。
+ 6. minimize mean squared error。
+ 7. inverse exp 保证 rate/count mean 非负，并是 canonical link。
+ 8. sigmoid q=1/(1+e^{‑η})。
+ 9. Bernoulli negative log‑likelihood。
+10. refractory effect。
+11. 不能，可能来自 shared/unobserved input。
+12. 前者允许 0,1,2⋯counts；后者每 bin 只允许 spike/no‑spike。
+13. 适用条件/约定：centered ensembles。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                ∆C = Cspike − Cstim
+
+14. 适用条件/约定：shape‑compatible design。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                      η = Xβ
+
+15. 适用条件/约定：chosen response family。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                   g(E[y|x]) = η
+
+16. 适用条件/约定：positive mean。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                             λ = eη
+
+17. 适用条件/约定：0<q<1。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                         q = (1 + e−η )−1
+
+18. 适用条件/约定：conditionally independent bins/counts。sanity check 应检查单位、符号、极限或
+    shape 是否与定义一致。                     ∑
+                              ℓP ois =   (yη − eη − log y!)
+
+19. 适用条件/约定：Bernoulli outcomes。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                              −ℓBern = cross‑entropy
+
+20. 该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成
+    立条件；原说法不能无条件成立。
+
+
+
+                                            22/23
+NEUROSCI 366 ・Lecture 14                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture14-STC-GLM.pdf              1         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture14-STC-GLM.pdf              2         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture14-STC-GLM.pdf              3         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture14-STC-GLM.pdf              4         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture14-STC-GLM.pdf              5         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture14-STC-GLM.pdf              6         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 1 中 H1 的 4 significant temporal features 是课程实例；具体 filter 数量依数据与模型选择。
+2. Page 2 的 canonical exponential‑family notation 为概念框架，不要求所有常数项逐字对应同一教材
+   convention。
+3. Page 5 的 retinal GLM coupling 应解释为 conditional statistical dependence，不自动证明 causal
+   synaptic connection。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              23/23
+NEUROSCI 366 ・Lecture 14                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/23
+

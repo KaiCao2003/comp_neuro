@@ -1,0 +1,900 @@
+NEUROSCI 366
+Lecture 3
+
+
+
+微分方程与 Euler 数值模拟 / Differential Equations
+
+and Euler Simulation
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture3‑Differential‑Equations.pdf
+ ‧ Lecture3_Diff_Eq_MATLAB.pdf
+ ‧ Lecture3_Diff_Eq_MATLAB.m
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 3                                                           Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                 3
+
+2 Learning objectives and prerequisite dependency map                                                       3
+
+3 Five‑minute prerequisite diagnostic                                                                       3
+
+4 Source‑aligned lesson / 按原笔记页序                                                                            4
+   4.1 Lecture3‑Differential‑Equations.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . .         4
+   4.2 Lecture3‑Differential‑Equations.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . .         5
+   4.3 Lecture3‑Differential‑Equations.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . .         6
+   4.4 Lecture3‑Differential‑Equations.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . .         7
+   4.5 Lecture3_Diff_Eq_MATLAB.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .           8
+
+5 MATLAB source audit / 代码逐行审计                                                                              9
+
+6 补全推导与数学支架 / Derivations                                                                                   11
+   6.1 separation of variables：指数增长           . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   11
+   6.2 常输入一阶系统的解析解 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .                12
+   6.3 Euler update 与稳定性 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          13
+   6.4 二阶 oscillator 改写为一阶系统 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .              14
+
+7 Cross‑page synthesis / 跨页因果与数学链                                                                           15
+
+8 Worked examples and transfer                                                                              15
+   8.1 三步 Euler 手算 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        15
+   8.2 step 与 oscillatory input 的 filtering . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       15
+
+9 Formula and notation sheet                                                                                17
+
+10 Bilingual glossary                                                                                       17
+
+11 Common traps, assumptions, and limitations                                                               18
+
+12 Cumulative Knowledge Check                                                                               19
+
+13 Hint Bank                                                                                                21
+
+14 Complete Answer Key with reasoning                                                                       23
+
+15 Source‑page concordance and coverage audit                                                               24
+
+
+
+
+                                                  1/25
+NEUROSCI 366 ・Lecture 3                                                             Source‑aligned companion
+
+
+16 Errata, uncertainty log, and external endnotes                                                            24
+   16.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     24
+   16.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    24
+   16.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      24
+   16.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   25
+
+
+
+
+                                                     2/25
+NEUROSCI 366 ・Lecture 3                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：状态 x(t)。
+‧ 从第一原则推导：导数/ODE。
+‧ 解释几何/计算直觉：初始条件。
+‧ 连接生物学解释：解析解。
+‧ 诊断 assumptions 与 failure modes：Euler 离散化。
+‧ 把概念迁移到新神经科学问题：稳定性与误差。
+
+ Dependency map
+ 状态 x(t) → 导数/ODE → 初始条件 → 解析解 → Euler 离散化 → 稳定性与误差
+ Core question
+ 如何从“状态的瞬时变化规律”得到时间轨迹，并在没有解析解时用 Euler method 安全地近似？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. dx/dt=x, x(0)=2 的解是什么？
+                        （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. τ dx/dt=−x+I 的 steady state 是什么？
+                                  （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. t=τ 时初始 gap 剩多少？
+                  （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. 写出 explicit Euler 更新。
+                       （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 对衰减方程，Δt/τ=1.5 会怎样？
+                     （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+
+                                              3/25
+NEUROSCI 366 ・Lecture 3                                           Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture3‑Differential‑Equations.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture3‑Differential‑Equations.pdf, p. 1]
+ Clean reconstruction. Notes Page 1：function、derivative、integral、first‑order ODE、initial
+ condition；最简单积分解；两个 canonical examples。
+ What the note is saying. 本页的中心对象是状态 x(t) 与导数/ODE。原笔记将它们放进以下链条：
+ function、derivative、integral、first‑order ODE、initial condition；最简单积分解；两个 canonical
+ examples。
+ Why it follows. 逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I；
+ 解释 steady state、initial gap、time constant 和 limiting cases。其逻辑后果是：从“导数是瞬时变
+ 化率、微分方程用变化规律定义函数”搭桥，但最终给出正式 notation。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  dx/dt=x, x(0)=2 的解是什么？
+
+
+
+
+                                          4/25
+NEUROSCI 366 ・Lecture 3                                       Source‑aligned companion
+
+
+4.2 Lecture3‑Differential‑Equations.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture3‑Differential‑Equations.pdf, p. 2]
+ Clean reconstruction. Notes Page 2：验证解；separation of variables；指数增长；神经科学常见
+ 方程 tau dx/dt=-x+I 的变量替换。
+ What the note is saying. 本页的中心对象是初始条件与解析解。原笔记将它们放进以下链条：验证解；
+ separation of variables；指数增长；神经科学常见方程 tau dx/dt=-x+I 的变量替换。
+ Why it follows. 逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I；
+ 解释 steady state、initial gap、time constant 和 limiting cases。其逻辑后果是：对 tau dx/dt=-
+ x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、振荡、发散的行为。后面的正式推导
+ 会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  τ dx/dt=−x+I 的 steady state 是什么？
+
+
+
+
+                                         5/25
+NEUROSCI 366 ・Lecture 3                                          Source‑aligned companion
+
+
+4.3 Lecture3‑Differential‑Equations.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture3‑Differential‑Equations.pdf, p. 3]
+ Clean reconstruction. Notes Page 3：解析解、exponential decay/approach、time constant；Euler
+ method 的差分推导。
+ What the note is saying. 本页的中心对象是 Euler 离散化与稳定性与误差。原笔记将它们放进以下链
+ 条：解析解、exponential decay/approach、time constant；Euler method 的差分推导。
+ Why it follows. 逐行推导 separation of variables 和 x(t)=x0 e^{-t/tau}+(1-e^{-t/tau})I；
+ 解释 steady state、initial gap、time constant 和 limiting cases。其逻辑后果是：从导数定义推导
+ Euler update；解释 truncation error、步长、稳定性和为什么要使用上一时刻的右端项。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  t=τ 时初始 gap 剩多少？
+
+
+
+
+                                         6/25
+NEUROSCI 366 ・Lecture 3                                          Source‑aligned companion
+
+
+4.4 Lecture3‑Differential‑Equations.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture3‑Differential‑Equations.pdf, p. 4]
+ Clean reconstruction. Notes Page 4：second‑order ODE 改写为 coupled first‑order equations；
+ harmonic oscillator。
+ What the note is saying. 本页的中心对象是状态 x(t) 与导数/ODE。原笔记将它们放进以下链条：
+ second‑order ODE 改写为 coupled first‑order equations；harmonic oscillator。
+ Why it follows. 对 tau dx/dt=-x+I 给出解析解与 Euler 解的对照，并展示不同 dt/tau 下准确、
+ 振荡、发散的行为。其逻辑后果是：从导数定义推导 Euler update；解释 truncation error、步长、稳定性
+ 和为什么要使用上一时刻的右端项。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  写出 explicit Euler 更新。
+
+
+
+
+                                         7/25
+NEUROSCI 366 ・Lecture 3                                       Source‑aligned companion
+
+
+4.5 Lecture3_Diff_Eq_MATLAB.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture3_Diff_Eq_MATLAB.pdf, p. 1]
+ Clean reconstruction. MATLAB PDF/.m Part 1：piecewise input 驱动一阶系统；Part 2：二阶振
+ 荡器的一阶耦合实现。
+ What the note is saying. 本页的中心对象是初始条件与解析解。原笔记将它们放进以下链条：piece‑
+ wise input 驱动一阶系统；Part 2：二阶振荡器的一阶耦合实现。
+ Why it follows. 逐行解释.m：变量单位、array shape、piecewise branches、loop indexing、plot pre‑
+ diction。其逻辑后果是：完整解释如何把 d²x/dt²=-x 改成 dx/dt=y, dy/dt=-x，           以及 phase‑space
+ 含义。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  对衰减方程，Δt/τ=1.5 会怎样？
+
+
+
+
+                                        8/25
+     NEUROSCI 366 ・Lecture 3                                                          Source‑aligned companion
+
+
+
+     5 MATLAB source audit / 代码逐行审计
+
+        Authority. The listing below is the actual uploaded source; instructional intent and
+        production‑quality recommendations are kept separate.
+
+ 1   %% Clear workspace before starting work
+ 2
+ 3   clear all;
+ 4
+ 5   %% Part 1
+ 6
+ 7   dt = 0.001; % Delta t in seconds
+ 8   T = 0.250; % Simulation duration in seconds
+ 9   t_values = 0:dt:T;
+10   num_t = length(t_values);
+11
+12   tau = 0.01; % Time constant in seconds
+13   omega = 220; % Input oscillation frequency in radians per second
+14   t0 = 0.150; % Input oscillation frequency in seconds
+15
+16   % Define input pattern
+17   I = NaN(num_t,1);
+18   for t = 1:num_t % There are more numerically efficient ways to do this, but this is fast enough for this
+         problem, and I thought it would be a useful demonstration
+19       if t_values(t) < 0.050
+20           I(t) = 0;
+21       elseif t_values(t) < 0.100
+22           I(t) = 2;
+23       elseif t_values(t) < 0.150
+24           I(t) = 1;
+25       elseif t_values(t) < 0.200
+26           I(t) = cos(omega*(t_values(t)-t0));
+27       elseif t_values(t) < 0.250
+28           I(t) = 0;
+29       end
+30   end
+31
+32   x = NaN(num_t,1);
+33   x0 = 0;
+34   x(1) = x0;
+35   for t = 2:num_t
+36       x(t) = x(t-1)+dt/tau*(-x(t-1)+I(t-1));
+37   end
+38
+39   close all;
+40   figure,
+41   subplot(1,2,1)
+42   plot(t_values,I);
+43   subplot(1,2,2)
+44   plot(t_values,x);
+45
+46   %% Part 2
+47
+48   dt = 0.0001; % Delta t in au
+49   T = 10; % Simulation duration in au
+50
+51   t_values = 0:dt:T;
+52   num_t = length(t_values);
+53
+54   x = NaN(num_t,2);
+55   x1_0 = 0;
+56   x2_0 = 1;
+57   x(1,:) = [x1_0, x2_0];
+58   for t = 2:num_t
+59       x(t,1) = x(t-1,1)+dt*(x(t-1,2));
+60       x(t,2) = x(t-1,2)+dt*(-x(t-1,1));
+61   end
+62
+63   close all;
+
+
+
+                                                        9/25
+     NEUROSCI 366 ・Lecture 3                                                    Source‑aligned companion
+
+
+64
+65   figure,
+66   subplot(1,2,1)
+67   plot(t_values,x(:,1))
+68   subplot(1,2,2)
+69   plot(t_values,x(:,2))
+
+
+
+     Lines      Role            Audit finding                                    Consequence
+     1–3        Reset           clear allis pedagogically harmless but           No model change.
+                                heavier thanclearvars.
+     7–15       Time grid and   t0is a time shift/onset, not a frequency; the    Units: seconds.
+                parameters      source comment is inconsistent with its use.
+     17–30      Piecewise       Strict< 0.250leavesI(end)=NaNatt=T=0.            The state may
+                input           250; use a finalelseor<=.                        remain finite
+                                                                                 because Euler usesI(
+                                                                                 i-1), but the input
+                                                                                 plot has a missing
+                                                                                 endpoint.
+     32–44      Euler           x(i)=x(i-1)+dt*(-x(i-1)+I(i-1))/                 Check dt/tau stability
+                integration     tauis explicit Euler using the previous          and units.
+                                state/right‑hand side.
+     48–61      Second‑order    The harmonic oscillator is implemented           State vector shape is
+                conversion      asx'=y,y'=-xwith two first‑order updates.        2×1 conceptually.
+     63–69      Numerical       Explicit Euler has update eigenvalues1±i         Numerical instability
+                behavior        dt, modulus >1, so the orbit slowly spirals      is not biological
+                                outward.                                         energy input.
+
+
+
+
+                                                  10/25
+NEUROSCI 366 ・Lecture 3                                      Source‑aligned companion
+
+
+
+6 补全推导与数学支架 / Derivations
+
+6.1 separation of variables：指数增长
+
+【必要前置】      求 dx/dt=x, x(0)=x0。
+                                      dx
+                                          = dt
+                                       x
+                                       x(t)
+                                    ln      =t
+                                         x0
+                                    x(t) = x0 et
+1. 把所有 x 项移到左边、t 项移到右边。
+2. 从初始状态 x0 积分到 x(t)，避免遗漏积分常数。
+3. 指数化并用 x(0)=x0 验证。
+4. 代回原式：d(x0e^t)/dt=x0e^t=x(t)。
+
+  Geometric/computational intuition. 变化率与当前量成比例，所以每个相同时间间隔都乘以相同
+  因子。
+  Biological interpretation / failure condition. 若 x 穿过 0，直接除以 x 需要分段讨论；初值 x0=0
+  的解恒为 0。
+
+  Micro‑check
+  写出 explicit Euler 更新。
+
+
+
+
+                                       11/25
+NEUROSCI 366 ・Lecture 3                                                         Source‑aligned companion
+
+
+6.2 常输入一阶系统的解析解
+
+【补全推导】      求 τ dx/dt=−x+I，I 为常数。
+                                               dx
+                                           τ      = −(x − I)
+                                               dt
+
+                          x(t) = I + (x0 − I)e−t/τ = x0 e−t/τ + (1 − e−t/τ )I
+1. 定义 gap z=x−I，则 τ dz/dt=−z。
+2. 分离变量得到 z(t)=z(0)e^{‑t/τ}。
+3. 代回 z(0)=x0−I。
+4. t→∞ 时 x→I；t=τ 时初始 gap 剩 e^{‑1}≈0.37。
+
+  Geometric/computational intuition. 系统并不是直接“复制”输入，而是以 time constant τ 低
+  通追踪 steady state。
+  Biological interpretation / failure condition. I(t) 若随时间变化，常输入 closed form 不能直接
+  代用，需要 convolution 或数值积分。
+
+  Micro‑check
+  对衰减方程，Δt/τ=1.5 会怎样？
+
+
+
+
+                                                  12/25
+NEUROSCI 366 ・Lecture 3                                     Source‑aligned companion
+
+
+6.3 Euler update 与稳定性
+
+【跨页连接】      把 dx/dt=f(x,t) 转成离散计算，并判断步长。
+
+                              xn+1 = xn + ∆t f (xn , tn )
+                                               
+                                            ∆t
+                                zn+1 = 1 −        zn
+                                             τ
+                                 ∆t            ∆t
+                            1−      < 1 ⇐⇒ 0 <    <2
+                                 τ             τ
+1. 用前向差分 (x_{n+1}−x_n)/Δt 近似导数。
+2. 右端必须在已知的 n 时刻求值，得到 explicit Euler。
+3. 对衰减方程，误差每步乘以 1−Δt/τ。
+4. 0<Δt/τ<1 单调衰减；1< 比值 <2 交替衰减；≥2 不衰减或发散。
+
+  Geometric/computational intuition. Euler 用当前切线走一个小步；步太大时切线会越过目标并
+  放大误差。
+  Biological interpretation / failure condition. stiff system、快速门控或振荡系统可能需要更小
+  步长或高阶/隐式 solver。
+
+  Micro‑check
+  Δt/τ=2.2 会怎样？
+
+
+
+
+                                        13/25
+NEUROSCI 366 ・Lecture 3                                                     Source‑aligned companion
+
+
+6.4 二阶 oscillator 改写为一阶系统
+
+【模型边界】      把 d²x/dt²=−x 写成 state‑space form。
+
+                                                  dx
+                                             y=
+                                                  dt
+                                                
+                                      d x      0 1 x
+                                           =
+                                      dt y    −1 0 y
+                          x(t) = sin t,   y(t) = cos t   (x0 = 0, y0 = 1)
+1. 把 velocity y 作为第二个状态。
+2. 第一式定义 position 的变化；第二式由原二阶方程给出 velocity 的变化。
+3. 在 phase plane 中 exact trajectory 是圆，能量 x²+y² 保持。
+4. explicit Euler 的更新矩阵模长大于 1，因此代码会缓慢向外螺旋。
+
+  Geometric/computational intuition. 高阶方程没有消失；它被展开成多个共同决定未来的一阶状
+  态。
+  Biological interpretation / failure condition. 误把 x(:,1)、x(:,2) 当作两个独立神经元，而不是
+  同一 oscillator 的 position/velocity 状态。
+
+  Micro‑check
+  为什么右端使用 x_n 而不是 x_{n+1}？
+
+
+
+
+                                              14/25
+NEUROSCI 366 ・Lecture 3                                                    Source‑aligned companion
+
+
+
+7 Cross‑page synthesis / 跨页因果与数学链
+
+  微分方程用局部变化率定义完整时间轨迹；初始条件选择具体解。解析解提供精确结构和极限检查，
+  Euler method 则把导数定义改写为可迭代更新。数值结果是否可信取决于步长相对 time constant 的
+  大小，而不只是代码是否运行。高阶方程可通过新增状态变量改写为一阶耦合系统，这是后续 network
+  dynamics 的基础。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+8 Worked examples and transfer
+
+8.1 三步 Euler 手算
+
+【原课/核心例题】         Prompt. τ=10 ms, Δt=1 ms, I=2, x0=0。
+
+ Worked solution. x1=0+0.1(2)=0.2；x2=0.2+0.1(1.8)=0.38；x3=0.38+0.1(1.62)=0.542。精确值在 3
+ ms 为 2(1−e^{‑0.3})≈0.518。
+ Check. Euler 稍高估本例上升，但接近；减小 Δt 应收敛到精确解。
+
+
+8.2 step 与 oscillatory input 的 filtering
+
+【跨课连接】       Prompt. 源代码依次给 I=0、2、1、cos(ω(t−t0))、0。
+
+
+
+
+                                               15/25
+NEUROSCI 366 ・Lecture 3                                      Source‑aligned companion
+
+
+
+ Worked solution. x 在前两段以 τ=10 ms 指数逼近新的 steady state；对 ω=220 rad/s 的振荡，系统
+ 幅度被低通衰减并产生相位滞后；最后回到 0。
+ Check. 不要把 x 误认为 I 的延迟复制：幅度和相位都由 τ 与 ω 决定。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      16/25
+NEUROSCI 366 ・Lecture 3                                                      Source‑aligned companion
+
+
+
+9 Formula and notation sheet
+
+1. first‑order initial‑value problem
+
+                                        ẋ = f (x, t), x(0) = x0
+
+Conditions / conventions: f 足够规则以保证解
+2. ODE 的积分形式                                      Z t
+                                   x(t) = x0 +          f (x(t′ ), t′ )dt′
+                                                   0
+
+Conditions / conventions: 积分沿真实轨迹
+3. 常输入一阶系统
+                                       x(t) = I + (x0 − I)e−t/τ
+Conditions / conventions: I 常数、τ>0
+4. explicit Euler
+                                       xn+1 = xn + ∆tf (xn , tn )
+Conditions / conventions: Δt 足够小
+5. 衰减方程 Euler 稳定区间
+                                             0 < ∆t/τ < 2
+Conditions / conventions: 线性一阶测试方程
+6. harmonic oscillator 的一阶形式
+                                             ẋ = y, ẏ = −x
+Conditions / conventions: 无阻尼、单位角频率
+7. exact oscillator 的守恒量（常数因子略）
+
+                                              E = x2 + y 2
+
+Conditions / conventions: 连续精确动力学
+
+
+10 Bilingual glossary
+
+
+ 中文                  English / symbol                  Operational meaning
+ 微分方程                differential equation             用导数约束未知函数的方程。
+ 初始条件                initial condition                 在起始时刻指定状态，从解族中选出具体轨迹。
+ 解析解                 analytic solution                 用已知函数写出的精确表达式。
+ 数值解                 numerical solution                在离散时间点上近似状态。
+ 时间常数                time constant                     一阶指数过程消除约 63% 初始 gap 的时间尺度。
+ 稳态                  steady state                      状态不再随时间变化的解。
+ Euler 方法            Euler method                      沿当前导数做前向小步的数值积分。
+ 截断误差                truncation error                  有限差分忽略高阶 Taylor 项造成的局部误差。
+ 稳定性                 numerical stability               小扰动是否在离散迭代中衰减而非被放大。
+ 耦合方程                coupled equations                 多个状态的导数相互依赖。
+ 相空间                 phase space                       以所有状态变量为坐标表示轨迹的空间。
+
+
+
+
+                                                 17/25
+NEUROSCI 366 ・Lecture 3                                       Source‑aligned companion
+
+
+
+11 Common traps, assumptions, and limitations
+
+1. 把导数当作有限时间段的总变化，而忘记它是 Δt→0 的瞬时变化率。
+2. 求 separation solution 时遗漏初始条件或积分常数。
+3. 认为代码能运行就意味着 Δt 足够小。
+4. Euler 更新使用 I(t_n) 而不是未知的 I(t_{n+1})；索引错一位会改变算法。
+5. 把 oscillatory exact dynamics 与 explicit Euler 的向外螺旋混为一谈。
+6. 混淆 time constant τ 与模拟步长 Δt。
+
+  Course‑specific risk boundary. 不要只解释代码语法。必须把每一行 MATLAB 与对应 differential
+  equation、离散更新和图形联系起来；源代码中的潜在 bug/注释错误必须单独列出。
+
+
+
+
+                                      18/25
+NEUROSCI 366 ・Lecture 3                                                Source‑aligned companion
+
+
+
+12 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. dx/dt=x, x(0)=2 的解是什么？
+
+
+
+2. τ dx/dt=−x+I 的 steady state 是什么？
+
+
+
+3. t=τ 时初始 gap 剩多少？
+
+
+
+4. 写出 explicit Euler 更新。
+
+
+
+5. 对衰减方程，Δt/τ=1.5 会怎样？
+
+
+
+6. Δt/τ=2.2 会怎样？
+
+
+
+7. 为什么右端使用 x_n 而不是 x_{n+1}？
+
+
+
+8. 把 d²x/dt²=−x 改写成两个一阶方程。
+
+
+
+9. 源代码 Part 1 为什么 I(end) 是 NaN？
+
+
+
+10. 为什么 oscillator 的 explicit Euler 轨迹向外螺旋？
+
+
+
+11. 若将 Δt 减半，global error 一般如何变？
+
+
+
+12. time‑varying input 时为什么不能直接把 I(t) 填进常输入 closed form？
+
+
+
+13. 公式表中的“first‑order initial‑value problem”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“ODE 的积分形式”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“常输入一阶系统”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  19/25
+NEUROSCI 366 ・Lecture 3           Source‑aligned companion
+
+
+
+
+                          20/25
+NEUROSCI 366 ・Lecture 3                                       Source‑aligned companion
+
+
+
+13 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“first‑order initial‑value problem”对应的变量关系入手。
+    Hint 2. 把条件“f 足够规则以保证解”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“ODE 的积分形式”对应的变量关系入手。
+    Hint 2. 把条件“积分沿真实轨迹”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                      21/25
+NEUROSCI 366 ・Lecture 3                      Source‑aligned companion
+
+
+15. Hint 1. 先从“常输入一阶系统”对应的变量关系入手。
+    Hint 2. 把条件“I 常数、τ>0”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                  22/25
+NEUROSCI 366 ・Lecture 3                                                      Source‑aligned companion
+
+
+
+14 Complete Answer Key with reasoning
+
+1. x(t)=2e^t。
+2. x*=I。
+3. e^{‑1}≈0.37，即约 37%。
+4. x_{n+1}=x_n+Δt f(x_n,t_n)。
+5. 误差因子 −0.5，围绕稳态交替但幅度衰减。
+6. 误差因子 −1.2，交替且发散。
+7. 这是 explicit Euler；x_n 已知，可直接计算。使用 x_{n+1} 会成为 implicit scheme。
+8. 令 y=dx/dt，则 dx/dt=y, dy/dt=−x。
+9. 所有分支都使用严格 <，最后时间点恰为 0.250 未命中任何分支。
+10. 更新矩阵特征值 1±iΔt，模长 √(1+Δt²)>1，每步放大。
+11. 一阶 Euler 的 global error 约与 Δt 成正比，因此大致减半。
+12. 系统对过去输入有加权记忆；需要 convolution/积分或逐步数值求解。
+13. 适用条件/约定：f 足够规则以保证解。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      ẋ = f (x, t), x(0) = x0
+
+14. 适用条件/约定：积分沿真实轨迹。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                                  Z t
+                                    x(t) = x0 +         f (x(t′ ), t′ )dt′
+                                                   0
+
+
+15. 适用条件/约定：I 常数、τ>0。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                     x(t) = I + (x0 − I)e−t/τ
+
+
+
+
+                                            23/25
+NEUROSCI 366 ・Lecture 3                                                  Source‑aligned companion
+
+
+
+15 Source‑page concordance and coverage audit
+
+
+ Source file                        Page       Coverage status
+ Lecture3-Differential-             1          Main source‑page unit: thumbnail,
+ Equations.pdf                                 reconstruction, explanation, prediction
+                                               question.
+ Lecture3-Differential-             2          Main source‑page unit: thumbnail,
+ Equations.pdf                                 reconstruction, explanation, prediction
+                                               question.
+ Lecture3-Differential-             3          Main source‑page unit: thumbnail,
+ Equations.pdf                                 reconstruction, explanation, prediction
+                                               question.
+ Lecture3-Differential-             4          Main source‑page unit: thumbnail,
+ Equations.pdf                                 reconstruction, explanation, prediction
+                                               question.
+ Lecture3_Diff_Eq_MATLAB.           1          Main source‑page unit: thumbnail,
+ pdf                                           reconstruction, explanation, prediction
+                                               question.
+ Lecture3_Diff_Eq_MATLAB.m          lines 1–   Full source listing and line‑group audit
+                                    69         included; syntax, shape, units, indexing,
+                                               numerical stability and edge cases checked.
+
+
+
+16 Errata, uncertainty log, and external endnotes
+
+16.1 Errata / source cautions
+
+1. Lecture3_Diff_Eq_MATLAB.m line 14 的注释把 t0 写成 input oscillation frequency；实际是 0.150
+   s 的时间偏移/相位参考。
+2. Part 1 的 elseif t_values(t) < 0.250 未覆盖终点 t=T=0.250，因此 I(end) 保持 NaN。x(end)
+   仍使用 I(end−1)，但 I 图最后一点缺失；应加入 else I(t)=0 或覆盖终点。
+3. Part 2 的 explicit Euler 对无阻尼 oscillator 数值不守恒，理论上会缓慢增幅；这不是原连续系统的物
+   理增长。
+4. clear all 可改为 clearvars；figure,的逗号可省略以提高可读性。
+
+
+16.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+16.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+                                               24/25
+NEUROSCI 366 ・Lecture 3                                                    Source‑aligned companion
+
+
+16.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               25/25
+

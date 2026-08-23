@@ -1,0 +1,792 @@
+NEUROSCI 366
+Lecture 21
+
+
+
+眼动积分器、参数退化与 Sloppy Models
+
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture21‑OculomotorIntegrator.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 21                                                            Source‑aligned companion
+
+
+
+Contents
+
+1 How to use this companion                                                                                  2
+
+2 Learning objectives and prerequisite dependency map                                                        2
+
+3 Five‑minute prerequisite diagnostic                                                                        2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                             3
+   4.1 Lecture21‑OculomotorIntegrator.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . .             3
+   4.2 Lecture21‑OculomotorIntegrator.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . .             4
+   4.3 Lecture21‑OculomotorIntegrator.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . .             5
+   4.4 Lecture21‑OculomotorIntegrator.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . .             6
+   4.5 Lecture21‑OculomotorIntegrator.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . .             7
+
+5 补全推导与数学支架 / Derivations                                                                                    8
+   5.1 general 2×2 eigenvalues 与 integrator condition . . . . . . . . . . . . . . . . . . . . . .             8
+   5.2 one‑parameter relation 的教学特例 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .               9
+   5.3 nonlinear circuit fit 重写为 linear regression . . . . . . . . . . . . . . . . . . . . . . . .            9
+   5.4 Hessian eigenbasis 与 sloppiness . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         10
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                            11
+
+7 Worked examples and transfer                                                                               11
+   7.1 perfect‑integrator family . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       11
+   7.2 stiff/sloppy contour . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      12
+
+8 Formula and notation sheet                                                                                 13
+
+9 Bilingual glossary                                                                                         13
+
+10 Common traps, assumptions, and limitations                                                                14
+
+11 Cumulative Knowledge Check                                                                                15
+
+12 Hint Bank                                                                                                 17
+
+13 Complete Answer Key with reasoning                                                                        19
+
+14 Source‑page concordance and coverage audit                                                                20
+
+15 Errata, uncertainty log, and external endnotes                                                            20
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     20
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    20
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      20
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   20
+
+                                                     1/20
+NEUROSCI 366 ・Lecture 21                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：velocity→position。
+‧ 从第一原则推导：bilateral integrator。
+‧ 解释几何/计算直觉：dominant λ=1。
+‧ 连接生物学解释：weight‑family degeneracy。
+‧ 诊断 assumptions 与 failure modes：nonlinear synapse fit。
+‧ 把概念迁移到新神经科学问题：least squares/Hessian。
+
+ Dependency map
+ velocity→position → bilateral integrator → dominant λ=1 → weight‑family degeneracy → non‑
+ linear synapse fit → least squares/Hessian
+ Core question
+ 眼动 velocity command 如何通过 recurrent network 积分为 persistent position，为什么许多不同
+ 参数组合能实现同一功能，以及 Hessian 如何揭示 stiff/sloppy directions？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. oculomotor integrator 的输入与输出？
+                               （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. 2×2 perfect integrator 的 determinant condition？（卡住时先看 Source‑page unit 2，再看补全推
+   导。）
+3. 为什么该 condition 不唯一确定 4 个 weights？
+                                   （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. W12=0 时 family formula 如何处理？
+                              （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 另一 eigenvalue 为什么重要？
+                      （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+                                              2/20
+NEUROSCI 366 ・Lecture 21                                              Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture21‑OculomotorIntegrator.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture21‑OculomotorIntegrator.pdf, p. 1]
+ Clean reconstruction. Page 1：eye velocity→position integration、brainstem/cerebellar archi‑
+ tecture、linear position tuning。
+ What the note is saying. 本页的中心对象是 velocity→position 与 bilateral integrator。原笔记将它
+ 们放进以下链条：eye velocity→position integration、brainstem/cerebellar architecture、linear
+ position tuning。
+ Why it follows. 解释为何 saccade velocity command 必须被积分为 persistent eye position；连
+ 接 long‑timescale mode。其逻辑后果是：重构 bilateral excitatory/inhibitory architecture 与 left‑
+ /right linear tuning curves。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases
+ 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  oculomotor integrator 的输入与输出？
+
+
+
+
+                                            3/20
+NEUROSCI 366 ・Lecture 21                                           Source‑aligned companion
+
+
+4.2 Lecture21‑OculomotorIntegrator.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture21‑OculomotorIntegrator.pdf, p. 2]
+ Clean reconstruction. Page 2：two‑neuron weight matrix、eigenvalues、perfect‑integrator re‑
+ quirement、family of solutions。
+ What the note is saying. 本页的中心对象是 dominant λ=1 与 weight‑family degeneracy。原笔记
+ 将它们放进以下链条：two‑neuron weight matrix、eigenvalues、perfect‑integrator requirement、
+ family of solutions。
+ Why it follows. 完整推导 general 2×2 weight matrix eigenvalues，并说明 perfect integrator 需
+ 要 dominant eigenvalue=1；推导 notes 中的 one‑parameter family relation。其逻辑后果是：解
+ 释 many‑to‑one mapping：许多 synaptic weight combinations 可产生相同 integration dynam‑
+ ics；区分 parameter degeneracy 与 measurement noise。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  2×2 perfect integrator 的 determinant condition？
+
+
+
+
+                                          4/20
+NEUROSCI 366 ・Lecture 21                                            Source‑aligned companion
+
+
+4.3 Lecture21‑OculomotorIntegrator.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture21‑OculomotorIntegrator.pdf, p. 3]
+ Clean reconstruction. Page 3：biological parameter variability、Marder/Goldman logic、non‑
+ linear synaptic functions、fitting setup。
+ What the note is saying. 本页的中心对象是 nonlinear synapse fit 与 least squares/Hessian。原
+ 笔记将它们放进以下链条：biological parameter variability、Marder/Goldman logic、nonlinear
+ synaptic functions、fitting setup。
+ Why it follows. 从 measured F–I inverse 与 nonlinear synaptic functions 重写 fitting problem；
+ 标注 all indices/shapes。其逻辑后果是：解释 many‑to‑one mapping：许多 synaptic weight com‑
+ binations 可产生相同 integration dynamics；区分 parameter degeneracy 与 measurement noise。
+ 后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么该 condition 不唯一确定 4 个 weights？
+
+
+
+
+                                           5/20
+NEUROSCI 366 ・Lecture 21                                              Source‑aligned companion
+
+
+4.4 Lecture21‑OculomotorIntegrator.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture21‑OculomotorIntegrator.pdf, p. 4]
+ Clean reconstruction. Page 4：nonlinear fitting rewritten as linear regression、loss/Hessian。
+ What the note is saying. 本页的中心对象是 stiff vs sloppy ensemble 与 velocity→position。原笔
+ 记将它们放进以下链条：nonlinear fitting rewritten as linear regression、loss/Hessian。
+ Why it follows. 从 measured F–I inverse 与 nonlinear synaptic functions 重写 fitting problem；标
+ 注 all indices/shapes。其逻辑后果是：重构 bilateral excitatory/inhibitory architecture 与 left/right
+ linear tuning curves。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  W12=0 时 family formula 如何处理？
+
+
+
+
+                                            6/20
+NEUROSCI 366 ・Lecture 21                                           Source‑aligned companion
+
+
+4.5 Lecture21‑OculomotorIntegrator.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture21‑OculomotorIntegrator.pdf, p. 5]
+ Clean reconstruction. Page 5：Hessian eigenbasis、stiff/sloppy parameter dimensions、ensem‑
+ ble interpretation。
+ What the note is saying. 本页的中心对象是 bilateral integrator 与 dominant λ=1。原笔记将它们放
+ 进以下链条：Hessian eigenbasis、stiff/sloppy parameter dimensions、ensemble interpretation。
+ Why it follows. 逐步完成 quadratic loss、least‑squares solution、Hessian decomposition；解释
+ Hessian eigenvalues 代表 parameter sensitivity。其逻辑后果是：解释 many‑to‑one mapping：许
+ 多 synaptic weight combinations 可产生相同 integration dynamics；区分 parameter degeneracy
+ 与 measurement noise。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与
+ failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  另一 eigenvalue 为什么重要？
+
+
+
+
+                                          7/20
+NEUROSCI 366 ・Lecture 21                                                      Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 general 2×2 eigenvalues 与 integrator condition
+
+【必要前置】      W=[[W11,W12],[W21,W22]] 何时有 eigenvalue 1？
+                                       p
+                            W11 + W22 ± (W11 − W22 )2 + 4W12 W21
+                       λ± =
+                                            2
+                           det(I − W ) = (1 − W11 )(1 − W22 ) − W12 W21 = 0
+1. 由 det(W−λI)=0 得 quadratic formula。
+2. perfect integrator 要求 dominant λ+=1。
+3. 直接令 λ=1 代入 characteristic polynomial 得 det(I−W)=0。
+4. 这是一条 scalar constraint，四个 weights 中通常仍有三维 solution family（加入结构约束后减少）。
+
+  Geometric/computational intuition. 功能约束的是某个 population mode 的 net feedback，而
+  不是每条 synapse 的唯一值。
+  Biological interpretation / failure condition. 另一 eigenvalue 必须稳定，且 nonlinear oper‑
+  ating range/robustness 也需满足。
+
+  Micro‑check
+  W12=0 时 family formula 如何处理？
+
+
+
+
+                                                8/20
+NEUROSCI 366 ・Lecture 21                                                     Source‑aligned companion
+
+
+5.2 one‑parameter relation 的教学特例
+
+【补全推导】      给定三项如何解第四项？
+                                     (1 − W11 )(1 − W22 )
+                             W21 =                              (W12 ̸= 0)
+                                            W12
+
+1. 从 det(I−W)=0 隔离 W21。
+2. 若 W12=0，不能除；此时需 (1−W11)(1−W22)=0，即至少一个 self‑weight 为 1。
+3. 正/负 signs 还受 excitatory/inhibitory architecture 限制。
+4. 同一 integration time scale 可由许多 combinations 达到。
+
+  Geometric/computational intuition. 这是 parameter compensation：一项变强可由另一项变
+  弱抵消。
+  Biological interpretation / failure condition. 只满足 algebraic eigenvalue 不保证 biological
+  conductances/units 合法。
+
+  Micro‑check
+  另一 eigenvalue 为什么重要？
+
+
+
+5.3 nonlinear circuit fit 重写为 linear regression
+
+【跨页连接】      固定 measured F–I inverse 与 synaptic transfer functions 后估计 weights。
+
+                                        Yiµ = Fi−1 (hi (pµ ))
+                                               X
+                                        Ybiµ =    Wij Xjµ
+                                                 j
+
+                                       c = Y X T (XX T )−1
+                                       W
+1. 每个 eye position p_μ 提供一组 neuron rates。
+2. 把 presynaptic excitatory/inhibitory nonlinearities 评估后放入 design X。
+3. postsynaptic inverse F–I 给 target current Y。
+4. 对每个 output neuron 独立做 least squares，weights 与 bias 是线性参数。
+
+  Geometric/computational intuition. 模型整体有 nonlinear components，但一旦这些 compo‑
+  nents 固定，剩余 weight fitting 可 linear。
+  Biological interpretation / failure condition. 若 nonlinear functions 也未知或 measurement
+  noise 结构复杂，problem 不再是简单 OLS。
+
+  Micro‑check
+  nonlinear circuit fit 如何变 linear？
+
+
+
+
+                                                9/20
+NEUROSCI 366 ・Lecture 21                                                  Source‑aligned companion
+
+
+5.4 Hessian eigenbasis 与 sloppiness
+
+【模型边界】      哪些 parameter combinations 真正被数据约束？
+
+                                            1         c )T H vec(W − W
+                                                                     c)
+                           L(W ) = Lmin +     vec(W − W
+                                            2
+
+                                             H = V DV T
+                                                 1X
+                                            ∆L =     λk zk2
+                                                 2
+                                                    k
+
+1. H 的 eigenvector 是 parameter‑space direction，不是 neural activity mode。
+2. 大 λ direction 小变化即显著恶化 fit，称 stiff。
+3. 小 λ direction 可大幅变化而 loss 变化小，称 sloppy。
+4. 笔记实例中约 4 个 stiff、46 个 sloppy dimensions，说明 many adequate models。
+
+  Geometric/computational intuition. elongated error valley 表示参数可互相补偿。
+  Biological interpretation / failure condition. sloppy 不等于参数生物上不重要；可能只是当前
+  数据/experiment 不敏感。
+
+  Micro‑check
+  Hessian eigenvalue 大表示什么？
+
+
+
+
+                                                 10/20
+NEUROSCI 366 ・Lecture 21                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  oculomotor integrator 需要在 saccade 后保持 eye position，因此 network 必须产生接近 λ=1 的
+  long‑timescale mode。对 general 2×2 W，perfect integration 只约束 det(I−W)=0，留下 many‑to‑
+  one 的 weight family；复杂 biological models 中这种 parameter degeneracy 更强。把 measured
+  tuning 与 synaptic nonlinearities 固定后，fitting 可重写为 linear regression；Hessian eigen‑
+  values 区分少数 stiff combinations 与大量 sloppy combinations，支持分析 adequate‑model
+  ensemble 而非唯一 best fit。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 perfect‑integrator family
+
+【原课/核心例题】         Prompt. W11=0.8, W22=0.7, W12=0.2。
+
+
+
+                                               11/20
+NEUROSCI 366 ・Lecture 21                                       Source‑aligned companion
+
+
+
+ Worked solution.     W21=(0.2×0.3)/0.2=0.3， 使 det(I−W)=0。 还 需 检 查 另 一 eigenvalue
+ W11+W22−1=0.5<1，故 transverse mode stable。
+ Check. integrator condition 与 secondary stability 必须同时检查。
+
+
+7.2 stiff/sloppy contour
+
+【跨课连接】      Prompt. H eigenvalues 100 与 0.01。
+
+ Worked solution. 同样 ΔL 下 allowable displacement ∝1/√λ；sloppy direction 可移动 100 倍于
+ stiff direction。
+ Check. 比较的是 parameter combination，不一定是单个 weight。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                          12/20
+NEUROSCI 366 ・Lecture 21                                                  Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. eye position integration
+                                                        Z t
+                                        x(t) = x(0) +         v(t′ )dt′
+                                                         0
+
+Conditions / conventions: velocity command
+2. eigenvalue 1 condition
+                                            det(I − W ) = 0
+Conditions / conventions: perfect linear integrator
+3. weight compensation family
+
+                                    W21 = (1 − W11 )(1 − W22 )/W12
+
+Conditions / conventions: W12≠0
+4. row‑wise OLS fit
+                                         Ŵ = Y X T (XX T )−1
+Conditions / conventions: XX^T invertible
+5. Hessian eigendecomposition
+                                             H = V DV T
+Conditions / conventions: H symmetric
+6. local parameter sensitivity
+                                              1X
+                                            ∆L =  λk zk2
+                                              2
+Conditions / conventions: quadratic approximation
+
+
+9 Bilingual glossary
+
+
+ 中文                   English / symbol              Operational meaning
+ 眼动积分器                oculomotor integrator         把 eye velocity command 转为持续 eye position
+                                                    signal 的 circuit。
+ 线吸引子                 line attractor                一连续族近 stable states，可存储 graded value。
+ 参数退化                 parameter degeneracy          不同 parameter combinations 产生相似
+                                                    output/function。
+ 模型可辨识性               identifiability               数据能否唯一/充分约束 parameters。
+ Hessian              Hessian                       loss 对 parameters 的 local curvature matrix。
+ 刚性方向                 stiff direction               loss 对其变化高度敏感的 parameter
+                                                    combination。
+ 松散方向                 sloppy direction              loss 对其变化不敏感的 parameter combination。
+ 模型集合                 model ensemble                一组都能充分解释数据的 parameterizations。
+ 权衡补偿                 parameter compensation        一个参数变化由其他参数抵消。
+
+
+
+
+                                                 13/20
+NEUROSCI 366 ・Lecture 21                                           Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 eye position persistence 误认为 sensory afterimage，而非 velocity integration。
+2. 只要求 λ=1，不检查其他 modes stability。
+3. W12=0 时仍使用除法 family formula。
+4. 把 many‑to‑one parameter mapping 当作 measurement noise。
+5. 把 neural‑state low dimensionality 与 parameter‑space sloppiness 混淆。
+6. 把 sloppy parameter 解释为生物学上无关。
+7. 只报告 best‑fit weights，不报告 uncertainty/ensemble。
+
+  Course‑specific risk boundary. 清 楚 区 分 neural‑state low dimensionality 与 parameter‑
+  space sloppiness；它们是不同空间中的不同概念。
+
+
+
+
+                                          14/20
+NEUROSCI 366 ・Lecture 21                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. oculomotor integrator 的输入与输出？
+
+
+
+2. 2×2 perfect integrator 的 determinant condition？
+
+
+
+3. 为什么该 condition 不唯一确定 4 个 weights？
+
+
+
+4. W12=0 时 family formula 如何处理？
+
+
+
+5. 另一 eigenvalue 为什么重要？
+
+
+
+6. nonlinear circuit fit 如何变 linear？
+
+
+
+7. Hessian eigenvalue 大表示什么？
+
+
+
+8. 小 eigenvalue 表示什么？
+
+
+
+9. sloppiness 与 PCA low dimensionality 在什么空间？
+
+
+
+10. 为什么分析 model ensemble？
+
+
+
+11. parameter degeneracy 与 measurement noise 区别？
+
+
+
+12. 如何设计实验约束 sloppy direction？
+
+
+
+13. 公式表中的“eye position integration”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“eigenvalue 1 condition”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“weight compensation family”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  15/20
+NEUROSCI 366 ・Lecture 21                              Source‑aligned companion
+
+
+
+
+16. 公式表中的“row‑wise OLS fit”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“Hessian eigendecomposition”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“local parameter sensitivity”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                  16/20
+NEUROSCI 366 ・Lecture 21                                      Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“eye position integration”对应的变量关系入手。
+    Hint 2. 把条件“velocity command”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“eigenvalue 1 condition”对应的变量关系入手。
+    Hint 2. 把条件“perfect linear integrator”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                      17/20
+NEUROSCI 366 ・Lecture 21                                    Source‑aligned companion
+
+
+15. Hint 1. 先从“weight compensation family”对应的变量关系入手。
+    Hint 2. 把条件“W12≠0”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“row‑wise OLS fit”对应的变量关系入手。
+    Hint 2. 把条件“XX^T invertible”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“Hessian eigendecomposition”对应的变量关系入手。
+    Hint 2. 把条件“H symmetric”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“local parameter sensitivity”对应的变量关系入手。
+    Hint 2. 把条件“quadratic approximation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                     18/20
+NEUROSCI 366 ・Lecture 21                                               Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. eye velocity command → persistent eye position representation。
+2. det(I−W)=0。
+3. 只有一个 scalar constraint，留下多维 solution family。
+4. 不能除；需 W11=1 或 W22=1。
+5. 若 ≥1，transverse mode 不稳定，无法稳定存储 position。
+6. 固定 F–I inverse 与 synaptic nonlinear features 后，unknown weights 对 prediction 线性。
+7. 该 parameter combination stiff，fit 对变化敏感。
+8. sloppy direction，可大幅变化而 loss 小变。
+9. 前者 parameter space，后者 neural activity/data space。
+10. many parameter sets 几乎等价，单一 best fit 会夸大精确性。
+11. 退化是模型 mapping 本身 many‑to‑one；noise 是观测随机误差。
+12. 选择对该 parameter combination prediction 差异大的 perturbation/measurement。
+13. 适用条件/约定：velocity command。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                                     Z t
+                                     x(t) = x(0) +         v(t′ )dt′
+                                                      0
+
+
+14. 适用条件/约定：perfect linear integrator。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                     det(I − W ) = 0
+
+15. 适用条件/约定：W12≠0。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                 W21 = (1 − W11 )(1 − W22 )/W12
+
+16. 适用条件/约定：XX^T invertible。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      Ŵ = Y X T (XX T )−1
+
+17. 适用条件/约定：H symmetric。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                          H = V DV T
+
+18. 适用条件/约定：quadratic approximation。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                                        1X
+                                   ∆L =      λk zk2
+                                        2
+
+
+
+
+                                            19/20
+NEUROSCI 366 ・Lecture 21                                                   Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+ Source file                         Page       Coverage status
+ Lecture21-                          1          Main source‑page unit: thumbnail,
+ OculomotorIntegrator.pdf                       reconstruction, explanation, prediction
+                                                question.
+ Lecture21-                          2          Main source‑page unit: thumbnail,
+ OculomotorIntegrator.pdf                       reconstruction, explanation, prediction
+                                                question.
+ Lecture21-                          3          Main source‑page unit: thumbnail,
+ OculomotorIntegrator.pdf                       reconstruction, explanation, prediction
+                                                question.
+ Lecture21-                          4          Main source‑page unit: thumbnail,
+ OculomotorIntegrator.pdf                       reconstruction, explanation, prediction
+                                                question.
+ Lecture21-                          5          Main source‑page unit: thumbnail,
+ OculomotorIntegrator.pdf                       reconstruction, explanation, prediction
+                                                question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的 perfect‑integrator condition 约束 eigenvalue；source 中的 algebraic family 需同时处理
+   W12=0 特例。
+2. Page 4 的 matrix orientation 依 Y、X 的 row/column convention；本教材统一为 examples 在
+   columns。
+3. Page 5 的 4 stiff/46 sloppy 是该具体 fit 的结果，不是所有 integrator models 的常数。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+                                               20/20
+

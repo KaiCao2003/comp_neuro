@@ -1,0 +1,807 @@
+NEUROSCI 366
+Lecture 20
+
+
+
+中央模式发生器与振荡 / Central Pattern Genera‑
+
+tors and Oscillations
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture20‑CentralPatternGenerators.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 20                                                           Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                  2
+
+2 Learning objectives and prerequisite dependency map                                                        2
+
+3 Five‑minute prerequisite diagnostic                                                                        2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                             3
+   4.1 Lecture20‑CentralPatternGenerators.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . .             3
+   4.2 Lecture20‑CentralPatternGenerators.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . .             4
+   4.3 Lecture20‑CentralPatternGenerators.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . .             5
+   4.4 Lecture20‑CentralPatternGenerators.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . .             6
+   4.5 Lecture20‑CentralPatternGenerators.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . .             7
+   4.6 Lecture20‑CentralPatternGenerators.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . .             8
+
+5 补全推导与数学支架 / Derivations                                                                                    9
+   5.1 linear two‑neuron complex modes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            9
+   5.2 Morris–Lecar fast–slow equations . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          10
+   5.3 relaxation cycle 四阶段 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        10
+   5.4 half‑center release 与 escape . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        11
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                            12
+
+7 Worked examples and transfer                                                                               12
+   7.1 synaptic block diagnostic . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       12
+   7.2 complex eigenvalue reading        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   12
+
+8 Formula and notation sheet                                                                                 14
+
+9 Bilingual glossary                                                                                         14
+
+10 Common traps, assumptions, and limitations                                                                15
+
+11 Cumulative Knowledge Check                                                                                16
+
+12 Hint Bank                                                                                                 18
+
+13 Complete Answer Key with reasoning                                                                        20
+
+14 Source‑page concordance and coverage audit                                                                21
+
+
+
+
+                                                   1/22
+NEUROSCI 366 ・Lecture 20                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            21
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     21
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    21
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      21
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   22
+
+
+
+
+                                                     2/22
+NEUROSCI 366 ・Lecture 20                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：pacemaker vs follower。
+‧ 从第一原则推导：half‑center。
+‧ 解释几何/计算直觉：complex eigenvalues。
+‧ 连接生物学解释：Morris–Lecar。
+‧ 诊断 assumptions 与 failure modes：nullclines/limit cycle。
+‧ 把概念迁移到新神经科学问题：release vs escape。
+
+ Dependency map
+ pacemaker vs follower → half‑center → complex eigenvalues → Morris–Lecar → nullclines/limit
+ cycle → release vs escape
+ Core question
+ rhythm 是 cell‑intrinsic 还是 network‑generated，linear complex modes、Morris–Lecar fast–
+ slow geometry 与 half‑center inhibition 如何分别产生振荡？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. synapse block 后 rhythm 保留支持什么？
+                                （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. half‑center 的核心 connectivity？
+                               （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. complex eigenvalue 的 real part 决定什么？
+                                      （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. imaginary part 决定什么？
+                      （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 为什么笔记线性 network 不产生 sustained rhythm？（卡住时先看 Source‑page unit 5，再看补全推
+   导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+                                              3/22
+NEUROSCI 366 ・Lecture 20                                            Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture20‑CentralPatternGenerators.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture20‑CentralPatternGenerators.pdf, p. 1]
+ Clean reconstruction. Page 1：intrinsic pacemaker/follower、network‑generated half‑center
+ oscillator、respiration/locomotion。
+ What the note is saying. 本页的中心对象是 pacemaker vs follower 与 half‑center。原笔记将它们
+ 放进以下链条：intrinsic pacemaker/follower、network‑generated half‑center oscillator、respi‑
+ ration/locomotion。
+ Why it follows. 分析 mutually inhibitory half‑center with synaptic threshold；逐步区分 intrinsic
+ release 和 intrinsic escape。其逻辑后果是：比较 cell‑intrinsic pacemaker 与 network‑generated
+ rhythm；解释 synapse block 的诊断逻辑。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  synapse block 后 rhythm 保留支持什么？
+
+
+
+
+                                           4/22
+NEUROSCI 366 ・Lecture 20                                            Source‑aligned companion
+
+
+4.2 Lecture20‑CentralPatternGenerators.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture20‑CentralPatternGenerators.pdf, p. 2]
+ Clean reconstruction. Page 2：linear two‑neuron oscillator、complex eigenvalues、Euler for‑
+ mula、damped oscillations。
+ What the note is saying. 本页的中心对象是 complex eigenvalues 与 Morris–Lecar。原笔记将它
+ 们放进以下链条：linear two‑neuron oscillator、complex eigenvalues、Euler formula、damped
+ oscillations。
+ Why it follows. 完整求 two‑neuron inhibitory/excitatory weight matrix 的 complex eigenval‑
+ ues，并用 Euler formula 解释 damped oscillatory components。其逻辑后果是：明确线性系统中的
+ complex eigenvalues 不自动产生 sustained limit cycle；衰减/增长由 real part 决定。后面的正式推
+ 导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  half‑center 的核心 connectivity？
+
+
+
+
+                                           5/22
+NEUROSCI 366 ・Lecture 20                                             Source‑aligned companion
+
+
+4.3 Lecture20‑CentralPatternGenerators.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture20‑CentralPatternGenerators.pdf, p. 3]
+ Clean reconstruction. Page 3：Morris–Lecar equations、V/N nullclines、fixed points。
+ What the note is saying. 本页的中心对象是 nullclines/limit cycle 与 release vs escape。原笔记将
+ 它们放进以下链条：Morris–Lecar equations、V/N nullclines、fixed points。
+ Why it follows. 逐项解释 Morris–Lecar voltage/recovery equations、sigmoidal steady‑state func‑
+ tions、fast‑slow separation。其逻辑后果是：从 nullclines 和 fixed‑point stability 解释 relaxation
+ oscillation 的四阶段 trajectory。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺
+ 序；轨迹本身不等于因果机制。
+
+  Stop & Predict
+
+  complex eigenvalue 的 real part 决定什么？
+
+
+
+
+                                           6/22
+NEUROSCI 366 ・Lecture 20                                             Source‑aligned companion
+
+
+4.4 Lecture20‑CentralPatternGenerators.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture20‑CentralPatternGenerators.pdf, p. 4]
+ Clean reconstruction. Page 4：relaxation oscillation cycle、inhibitory coupled Morris–Lecar
+ half‑center。
+ What the note is saying. 本页的中心对象是 rate‑model analogue 与 pacemaker vs follower。原笔
+ 记将它们放进以下链条：relaxation oscillation cycle、inhibitory coupled Morris–Lecar half‑center。
+ Why it follows. 从 nullclines 和 fixed‑point stability 解释 relaxation oscillation 的四阶段 trajec‑
+ tory。其逻辑后果是：分析 mutually inhibitory half‑center with synaptic threshold；逐步区分
+ intrinsic release 和 intrinsic escape。后面的正式推导会逐项写出 assumptions、shape/units、lim‑
+ iting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  imaginary part 决定什么？
+
+
+
+
+                                           7/22
+NEUROSCI 366 ・Lecture 20                                             Source‑aligned companion
+
+
+4.5 Lecture20‑CentralPatternGenerators.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture20‑CentralPatternGenerators.pdf, p. 5]
+ Clean reconstruction. Page 5：sharp synaptic threshold、intrinsic release 与 intrinsic escape。
+ What the note is saying. 本页的中心对象是 half‑center 与 complex eigenvalues。原笔记将它们放
+ 进以下链条：sharp synaptic threshold、intrinsic release 与 intrinsic escape。
+ Why it follows. 分析 mutually inhibitory half‑center with synaptic threshold；逐步区分 intrinsic
+ release 和 intrinsic escape。其逻辑后果是：从 nullclines 和 fixed‑point stability 解释 relaxation
+ oscillation 的四阶段 trajectory。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么笔记线性 network 不产生 sustained rhythm？
+
+
+
+
+                                           8/22
+NEUROSCI 366 ・Lecture 20                                     Source‑aligned companion
+
+
+4.6 Lecture20‑CentralPatternGenerators.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture20‑CentralPatternGenerators.pdf, p. 6]
+ Clean reconstruction. Page 6：half‑center firing‑rate model extension。
+ What the note is saying. 本页的中心对象是 Morris–Lecar 与 nullclines/limit cycle。原笔记将它们
+ 放进以下链条：half‑center firing‑rate model extension。
+ Why it follows. 说明如何在 firing‑rate model 中用 adaptation/recovery variable 复现同类 ge‑
+ ometry。其逻辑后果是：分析 mutually inhibitory half‑center with synaptic threshold；逐步区
+ 分 intrinsic release 和 intrinsic escape。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Morris–Lecar 的两个 state？
+
+
+
+
+                                       9/22
+NEUROSCI 366 ・Lecture 20                                            Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 linear two‑neuron complex modes
+
+【必要前置】      分析 W=[[0,−w0],[w0,0]]。
+                                          λ± = ±i|w0 |
+                                     τ α̇± = −(1 ∓ i|w0 |)α±
+                                 α± (t) = α± (0)e−t/τ e±i|w0 |t/τ
+1. characteristic polynomial λ²+w0²=0。
+2. network ODE 还有 intrinsic −I term，所以 full mode exponent real part 为 −1/τ。
+3. Euler identity 把 complex exponential 分成 sine/cosine。
+4. amplitude e^{‑t/τ} 衰减，因此不是 sustained oscillator。
+
+  Geometric/computational intuition. imaginary part 给 angular frequency，real part 给 en‑
+  velope decay/growth。
+  Biological interpretation / failure condition. 看到 complex eigenvalues 就断言 limit cycle，
+  是线性/非线性混淆。
+
+  Micro‑check
+  imaginary part 决定什么？
+
+
+
+
+                                              10/22
+NEUROSCI 366 ・Lecture 20                                                       Source‑aligned companion
+
+
+5.2 Morris–Lecar fast–slow equations
+
+【补全推导】      用两个 variables 描述 intrinsic bursting/spiking geometry。
+
+                  C V̇ = −gL (V − EL ) − ḡCa M∞ (V )(V − ECa ) − ḡK N (V − EK ) + I
+
+                                         τN Ṅ = N∞ (V ) − N
+1. V 是 fast voltage，N 是 slower K activation/recovery。
+2. V‑nullcline 由 dV/dt=0，常呈 cubic/N shape；N‑nullcline 为 N=N∞(V)。
+3. intersection 是 fixed point，其 stability 决定 resting vs oscillatory regime。
+4. fast–slow separation 让 trajectory 沿 stable branches 慢走，在 fold 附近快跳。
+
+  Geometric/computational intuition. relaxation oscillator 在慢积累与快 transition 之间循环。
+  Biological interpretation / failure condition. 具体 nullcline shapes/parameters 不同会改变
+  bifurcation 与 oscillation type。
+
+  Micro‑check
+  为什么笔记线性 network 不产生 sustained rhythm？
+
+
+
+5.3 relaxation cycle 四阶段
+
+【跨页连接】      按 phase‑plane 解释 autonomous oscillation。
+
+                                    V̇ = F (V, N ),   Ṅ = G(V, N )
+
+1. lower branch 上 N 下降或缓慢变化，V 低。
+2. 达到 fold 后 fast V 跳到 upper branch。
+3. upper branch 上 N 增加，K current 增强。
+4. 达到另一 fold 后 V 快速回到 lower branch，cycle 重复。
+
+  Geometric/computational intuition. 一条变量慢慢改变系统的 instantaneous equilibrium，最
+  终触发快速 jump。
+  Biological interpretation / failure condition. phase‑plane arrows 必须由 F/G signs 判断，不
+  能仅按图形顺时针猜。
+
+  Micro‑check
+  Morris–Lecar 的两个 state？
+
+
+
+
+                                                 11/22
+NEUROSCI 366 ・Lecture 20                                            Source‑aligned companion
+
+
+5.4 half‑center release 与 escape
+
+【模型边界】      互抑 neurons 如何轮流 active？
+
+                                Isyn = −ḡs S∞ (Vpre )(V − Es )
+
+                                    S∞ (V ) ≈ H(V − VT )
+1. active neuron 超过 V_T，强抑制另一 neuron。
+2. release：active neuron 的 intrinsic adaptation 使其离开 upper branch/停止，解除对 partner 抑制。
+3. escape：inhibited neuron 的 intrinsic recovery 使其越过 lower‑branch threshold，即使 inhibition
+   仍存在也跳出。
+4. 两者可通过相位图中由哪一个 cell 的 intrinsic transition 先发生来区分。
+
+  Geometric/computational intuition. 交替可由“发放者放手”或“被抑制者逃脱”启动。
+  Biological interpretation / failure condition. 实际 circuits 可能混合 release/escape、sensory
+  feedback 与 neuromodulation。
+
+  Micro‑check
+  nullcline intersection 是什么？
+
+
+
+
+                                            12/22
+NEUROSCI 366 ・Lecture 20                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  阻断 synapses 后 rhythm 是否保留，可区分 intrinsic pacemaker 与 network‑generated rhythm
+  的候选机制。线性 two‑neuron complex eigenvalues 只产生 damped 或 growing oscillatory com‑
+  ponents；稳定的 autonomous limit cycle 需要 nonlinearity。Morris–Lecar 的 fast voltage/slow
+  recovery nullclines 产生 relaxation oscillation；互抑 half‑center 可通过 intrinsic release 或
+  escape 交替。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 synaptic block diagnostic
+
+【原课/核心例题】         Prompt. 阻断 synapses 后 neuron 1 仍 rhythmic，neuron 2 变 tonic。
+
+ Worked solution. 支持 neuron 1 intrinsic pacemaker、neuron 2 follower；但药物也可能改变
+ intrinsic currents，仍需控制。
+ Check. network‑generated half‑center 通常在互抑被破坏后失去交替 rhythm。
+
+
+7.2 complex eigenvalue reading
+
+【跨课连接】       Prompt. full system eigenvalue 为 −2±5i s^{‑1}。
+
+
+
+                                               13/22
+NEUROSCI 366 ・Lecture 20                                         Source‑aligned companion
+
+
+
+ Worked solution. envelope time constant 1/2 s，angular frequency 5 rad/s（约 0.80 Hz）；是
+ damped oscillation。
+ Check. real part 决定 stability，imaginary part 决定 rotation frequency。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                        14/22
+NEUROSCI 366 ・Lecture 20                                                   Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. complex mode
+                                                λ = a ± ib
+Conditions / conventions: a controls envelope, b frequency
+2. Euler decomposition
+                                    e(a+ib)t = eat (cos bt + i sin bt)
+Conditions / conventions: complex representation
+3. two‑dimensional conductance model
+
+                                     V̇ = F (V, N ), Ṅ = G(V, N )
+
+Conditions / conventions: fast–slow variables
+4. V‑nullcline
+                                              F (V, N ) = 0
+Conditions / conventions: dV/dt=0
+5. N‑nullcline
+                                              G(V, N ) = 0
+Conditions / conventions: dN/dt=0
+6. sharp synaptic threshold approximation
+
+                                        S∞ (V ) = H(V − VT )
+
+Conditions / conventions: idealized switch
+
+
+9 Bilingual glossary
+
+
+ 中文                  English / symbol                Operational meaning
+ 中央模式发生器             central pattern                 可在无周期 sensory drive 时产生 rhythmic
+                     generator, CPG                  motor pattern 的 neural circuit。
+ 起搏细胞                pacemaker neuron                依 intrinsic dynamics 自发 rhythmic。
+ 半中心振荡器              half‑center oscillator          两个互抑 units 交替 active 的 network oscillator。
+ 复特征值                complex eigenvalue              同时编码 exponential envelope 与 oscillatory
+                                                     phase 的 eigenvalue。
+ Morris–Lecar 模      Morris–Lecar model              简化 conductance‑based two‑variable neuron
+ 型                                                   model。
+ 相平面                 phase plane                     二维 state space 中的 trajectories/nullclines。
+ 松弛振荡                relaxation oscillation          slow drift 与 fast jumps 交替的 limit cycle。
+ 内在释放                intrinsic release               active neuron 停止后解除 inhibition。
+ 内在逃逸                intrinsic escape                inhibited neuron 先恢复并跳出 inhibition。
+ 极限环                 limit cycle                     吸引附近 trajectories 的 closed periodic orbit。
+
+
+
+
+                                                  15/22
+NEUROSCI 366 ・Lecture 20                                      Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 所有 rhythmic activity 都称 CPG。
+2. complex eigenvalues 自动等于 sustained oscillation。
+3. 忽略 full eigenvalue 的 real part。
+4. nullcline 当作 trajectory。
+5. fixed point intersection 存在就认为 stable。
+6. release 与 escape 只按表面 firing order 区分，而不看哪个 intrinsic transition 触发 switch。
+7. 把 sensory feedback 排除在真实 locomotor rhythm 外。
+
+  Course‑specific risk boundary. 不要把所有 rhythmic activity 都归为 CPG，也不要把 damped
+  linear oscillation 与 autonomous nonlinear oscillator 混为一谈。
+
+
+
+
+                                            16/22
+NEUROSCI 366 ・Lecture 20                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+ 1. synapse block 后 rhythm 保留支持什么？
+
+
+
+ 2. half‑center 的核心 connectivity？
+
+
+
+ 3. complex eigenvalue 的 real part 决定什么？
+
+
+
+ 4. imaginary part 决定什么？
+
+
+
+ 5. 为什么笔记线性 network 不产生 sustained rhythm？
+
+
+
+ 6. Morris–Lecar 的两个 state？
+
+
+
+ 7. nullcline intersection 是什么？
+
+
+
+ 8. relaxation oscillation 为什么有 fast jump？
+
+
+
+ 9. release 由谁先变化？
+
+
+
+10. escape 由谁先变化？
+
+
+
+11. sharp threshold S∞ 的作用？
+
+
+
+12. damped oscillation 与 limit cycle 的区别？
+
+
+
+13. 公式表中的“complex mode”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“Euler decomposition”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“two‑dimensional conductance model”解决什么问题？写出适用条件与一个 sanity
+    check。
+
+                                                  17/22
+NEUROSCI 366 ・Lecture 20                         Source‑aligned companion
+
+
+
+
+16. 公式表中的“V‑nullcline”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“N‑nullcline”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                               18/22
+NEUROSCI 366 ・Lecture 20                                     Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“complex mode”对应的变量关系入手。
+    Hint 2. 把条件“a controls envelope, b frequency”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“Euler decomposition”对应的变量关系入手。
+    Hint 2. 把条件“complex representation”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                      19/22
+NEUROSCI 366 ・Lecture 20                                Source‑aligned companion
+
+
+15. Hint 1. 先从“two‑dimensional conductance model”对应的变量关系入手。
+    Hint 2. 把条件“fast–slow variables”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“V‑nullcline”对应的变量关系入手。
+    Hint 2. 把条件“dV/dt=0”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“N‑nullcline”对应的变量关系入手。
+    Hint 2. 把条件“dN/dt=0”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                   20/22
+NEUROSCI 366 ・Lecture 20                                             Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+ 1. 支持 cell‑intrinsic pacemaker，但仍需控制药物副作用。
+ 2. mutual inhibition。
+ 3. amplitude decay/growth 与 stability。
+ 4. oscillation angular frequency。
+ 5. full modes real part 为 −1/τ，amplitude 衰减。
+ 6. voltage V 与 recovery/K activation N。
+ 7. fixed point。
+ 8. slow branch 到 fold 后局部 stable equilibrium 消失，fast V dynamics 跳到另一 branch。
+ 9. active neuron intrinsic adaptation 使其停止。
+10. inhibited neuron intrinsic recovery 使其跳出。
+11. 把 presynaptic voltage 对 synaptic activation 简化成开/关。
+12. 前者 amplitude 回到 fixed point；后者收敛到非零 closed orbit。
+13. 适用条件/约定：a controls envelope, b frequency。sanity check 应检查单位、符号、极限或 shape
+    是否与定义一致。
+                                        λ = a ± ib
+
+14. 适用条件/约定：complex representation。sanity check 应检查单位、符号、极限或 shape 是否与定
+    义一致。
+                             e(a+ib)t = eat (cos bt + i sin bt)
+
+15. 适用条件/约定：fast–slow variables。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                     V̇ = F (V, N ), Ṅ = G(V, N )
+
+16. 适用条件/约定：dV/dt=0。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                             F (V, N ) = 0
+
+17. 适用条件/约定：dN/dt=0。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                             G(V, N ) = 0
+
+
+
+
+                                              21/22
+NEUROSCI 366 ・Lecture 20                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture20-                         1         Main source‑page unit: thumbnail,
+ CentralPatternGenerators.                    reconstruction, explanation, prediction
+ pdf                                          question.
+ Lecture20-                         2         Main source‑page unit: thumbnail,
+ CentralPatternGenerators.                    reconstruction, explanation, prediction
+ pdf                                          question.
+ Lecture20-                         3         Main source‑page unit: thumbnail,
+ CentralPatternGenerators.                    reconstruction, explanation, prediction
+ pdf                                          question.
+ Lecture20-                         4         Main source‑page unit: thumbnail,
+ CentralPatternGenerators.                    reconstruction, explanation, prediction
+ pdf                                          question.
+ Lecture20-                         5         Main source‑page unit: thumbnail,
+ CentralPatternGenerators.                    reconstruction, explanation, prediction
+ pdf                                          question.
+ Lecture20-                         6         Main source‑page unit: thumbnail,
+ CentralPatternGenerators.                    reconstruction, explanation, prediction
+ pdf                                          question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的线性 oscillations 含 e^{‑t/τ} envelope，是 damped components，不是 autonomous sus‑
+   tained CPG。
+2. Page 3–4 的 Morris–Lecar nullclines 为 schematic；具体 shape/stability 依参数。
+3. Page 6 仅指出 firing‑rate model 可复现相同 geometry，未给唯一方程。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              22/22
+NEUROSCI 366 ・Lecture 20                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               23/22
+

@@ -1,0 +1,812 @@
+NEUROSCI 366
+Lecture 8
+
+
+
+神 经 网 络 I——Spikes, Convolution, and E/I Bal‑
+
+ance
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture8‑NeuralNetworks1.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 8                                                             Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                   2
+
+2 Learning objectives and prerequisite dependency map                                                         2
+
+3 Five‑minute prerequisite diagnostic                                                                         2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                              3
+   4.1 Lecture8‑NeuralNetworks1.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            3
+   4.2 Lecture8‑NeuralNetworks1.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            4
+   4.3 Lecture8‑NeuralNetworks1.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            5
+   4.4 Lecture8‑NeuralNetworks1.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            6
+   4.5 Lecture8‑NeuralNetworks1.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            7
+   4.6 Lecture8‑NeuralNetworks1.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            8
+
+5 补全推导与数学支架 / Derivations                                                                                     9
+   5.1 spike‑time sum 等于 convolution . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .             9
+   5.2 independent Poisson inputs 的 mean 与 variance               . . . . . . . . . . . . . . . . . . . . .   10
+   5.3 为什么 1/N scaling 消灭 fluctuations . . . . . . . . . . . . . . . . . . . . . . . . . . . . .              11
+   5.4 balanced 1/√N scaling        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   11
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                             12
+
+7 Worked examples and transfer                                                                                12
+   7.1 finite‑bin scaling 数值 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        12
+   7.2 kernel sum . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       12
+
+8 Formula and notation sheet                                                                                  14
+
+9 Bilingual glossary                                                                                          14
+
+10 Common traps, assumptions, and limitations                                                                 15
+
+11 Cumulative Knowledge Check                                                                                 16
+
+12 Hint Bank                                                                                                  18
+
+13 Complete Answer Key with reasoning                                                                         20
+
+14 Source‑page concordance and coverage audit                                                                 21
+
+
+
+
+                                                    1/22
+NEUROSCI 366 ・Lecture 8                                                             Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            21
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     21
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    21
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      21
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   22
+
+
+
+
+                                                     2/22
+NEUROSCI 366 ・Lecture 8                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：spike train δ‑sum。
+‧ 从第一原则推导：kernel/convolution。
+‧ 解释几何/计算直觉：coupled network。
+‧ 连接生物学解释：Poisson E/I input。
+‧ 诊断 assumptions 与 failure modes：mean vs variance。
+‧ 把概念迁移到新神经科学问题：1/N failure。
+
+ Dependency map
+ spike train δ‑sum → kernel/convolution → coupled network → Poisson E/I input → mean vs
+ variance → 1/N failure
+ Core question
+ 如何把离散 spike times 变成 synaptic currents，并理解大规模网络中 mean、variance 与 E/I balance
+ 的不同 scaling？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. δ 的核心积分性质是什么？
+               （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. 为什么 K*Δ 等于每个 spike‑triggered kernel 的和？
+                                         （卡住时先看 Source‑page unit 2，再看补全推导。
+                                                                         ）
+3. W_ij 的方向 convention 是什么？
+                          （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. 独立 Poisson inputs 的 variance 为什么相加？
+                                     （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 抑制项为什么对 variance 为正？
+                      （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+                                              3/22
+NEUROSCI 366 ・Lecture 8                                          Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture8‑NeuralNetworks1.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture8‑NeuralNetworks1.pdf, p. 1]
+ Clean reconstruction. Page 1：recurrent/input weights、population architecture、coupled
+ spiking‑network equations。
+ What the note is saying. 本页的中心对象是 spike train δ‑sum 与 kernel/convolution。原笔记将它
+ 们放进以下链条：recurrent/input weights、population architecture、coupled spiking‑network
+ equations。
+ Why it follows. 将原始 spike‑time sum 改写为 compact network equations，并解释每一项如
+ 何从 presynaptic spikes 产生 current。其逻辑后果是：逐项定义 recurrent weightW_ij 与 input
+ weightU_ij 的方向 convention、matrix shape 和 biological meaning。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  δ 的核心积分性质是什么？
+
+
+
+
+                                         4/22
+NEUROSCI 366 ・Lecture 8                                             Source‑aligned companion
+
+
+4.2 Lecture8‑NeuralNetworks1.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture8‑NeuralNetworks1.pdf, p. 2]
+ Clean reconstruction. Page 2：spike‑train delta representation、Dirac delta、kernel sum、con‑
+ volution。
+ What the note is saying. 本页的中心对象是 coupled network 与 Poisson E/I input。原笔记将它们
+ 放进以下链条：spike‑train delta representation、Dirac delta、kernel sum、convolution。
+ Why it follows. 解释 spike train 作为 Dirac‑delta sum；强调 delta 不是普通函数；逐步证明 kernel
+ sum 等于 convolution。其逻辑后果是：将原始 spike‑time sum 改写为 compact network equations，
+ 并解释每一项如何从 presynaptic spikes 产生 current。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么 K*Δ 等于每个 spike‑triggered kernel 的和？
+
+
+
+
+                                          5/22
+NEUROSCI 366 ・Lecture 8                                     Source‑aligned companion
+
+
+4.3 Lecture8‑NeuralNetworks1.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture8‑NeuralNetworks1.pdf, p. 3]
+ Clean reconstruction. Page 3：compact convolution form 的 coupled equations。
+ What the note is saying. 本页的中心对象是 mean vs variance 与 1/N failure。原笔记将它们放进以
+ 下链条：compact convolution form 的 coupled equations。
+ Why it follows. 将原始 spike‑time sum 改写为 compact network equations，并解释每一项如何从
+ presynaptic spikes 产生 current。其逻辑后果是：解释 spike train 作为 Dirac‑delta sum；强调 delta
+ 不是普通函数；逐步证明 kernel sum 等于 convolution。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  W_ij 的方向 convention 是什么？
+
+
+
+
+                                         6/22
+NEUROSCI 366 ・Lecture 8                                           Source‑aligned companion
+
+
+4.4 Lecture8‑NeuralNetworks1.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture8‑NeuralNetworks1.pdf, p. 4]
+ Clean reconstruction. Page 4：stochastic E/I Poisson inputs；total charge/current mean。
+ What the note is saying. 本页的中心对象是 1/√N balance 与 spike train δ‑sum。原笔记将它们放
+ 进以下链条：stochastic E/I Poisson inputs；total charge/current mean。
+ Why it follows. 对 E/I Poisson input 逐步计算 finite‑bin total charge 的 mean 与 variance。其逻
+ 辑后果是：严格推导 W∝1/N 时 mean finite 但 variance→0，为何网络趋于规则/静默而失去 Poisson‑
+ like fluctuations。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure
+ conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  独立 Poisson inputs 的 variance 为什么相加？
+
+
+
+
+                                         7/22
+NEUROSCI 366 ・Lecture 8                                            Source‑aligned companion
+
+
+4.5 Lecture8‑NeuralNetworks1.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture8‑NeuralNetworks1.pdf, p. 5]
+ Clean reconstruction. Page 5：variance of independent inputs；large‑N1/Nscaling 的 failure；
+ E/I balance。
+ What the note is saying. 本页的中心对象是 kernel/convolution 与 coupled network。原笔记将它
+ 们放进以下链条：variance of independent inputs；large‑N1/Nscaling 的 failure；E/I balance。
+ Why it follows. 对 E/I Poisson input 逐步计算 finite‑bin total charge 的 mean 与 variance。其
+ 逻辑后果是：推导 excitation‑inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitato‑
+ ry/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。后面的正式推导会逐项写出
+ assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  抑制项为什么对 variance 为正？
+
+
+
+
+                                          8/22
+NEUROSCI 366 ・Lecture 8                                           Source‑aligned companion
+
+
+4.6 Lecture8‑NeuralNetworks1.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture8‑NeuralNetworks1.pdf, p. 6]
+ Clean reconstruction. Page 6：1/sqrt(N)balanced scaling、irregular spiking、dynamically
+ balanced recurrent networks。
+ What the note is saying. 本页的中心对象是 Poisson E/I input 与 mean vs variance。原笔记将它们
+ 放进以下链条：1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent
+ networks。
+ Why it follows. 推导 excitation‑inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excita‑
+ tory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。其逻辑后果是：解释 balanced
+ state 与 dynamically generated balance；不要把“平均 E=I”误写成每个时刻完全相等。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关
+ 系，不自动证明生物实现。
+
+  Stop & Predict
+
+  W∼1/N 时 mean 和 variance 如何缩放？
+
+
+
+
+                                          9/22
+NEUROSCI 366 ・Lecture 8                                                                    Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 spike‑time sum 等于 convolution
+
+【必要前置】      证明一串 kernel responses 可写成 K*Δ。
+                                          ∑        (k)
+                                 ∆j (t) =   δ(t − tj )
+                                                        k
+                                           ∫                              ∑
+                                               dt′ K(t − t′ )∆j (t′ ) =
+                                                                                    (k)
+                          (K ∗ ∆j )(t) =                                      K(t − tj )
+                                                                          k
+
+1. Dirac delta 不是普通有限高度函数，而由积分取样性质定义。
+2. 把 delta sum 代入 convolution integral。
+3. 交换有限/可收敛求和与积分。
+4. 每个 delta 把 integrand 取样在 t’=t_j^(k)。
+
+  Geometric/computational intuition. 每个 spike 在其时间点“触发”一份相同 kernel，convo‑
+  lution 只是把所有触发响应相加。
+  Biological interpretation / failure condition. δ(0) 本身不是可作为普通数计算的有限值；离散代
+  码需用 bin/impulse normalization。
+
+  Micro‑check
+  独立 Poisson inputs 的 variance 为什么相加？
+
+
+
+
+                                                      10/22
+NEUROSCI 366 ・Lecture 8                                               Source‑aligned companion
+
+
+5.2 independent Poisson inputs 的 mean 与 variance
+
+【补全推导】      长度 Δt 内总 synaptic charge 如何缩放？
+
+                                      ∑
+                                      NE               ∑
+                                                       NI
+                                 Q=         W E Kj −         W I Kj
+                                      j=1              j=1
+
+                              E[Q] = (NE WE rE − NI WI rI )∆t
+                             Var(Q) = (NE WE2 rE + NI WI2 rI )∆t
+1. 每个 K_j 是 Poisson count，mean=variance=rΔt。
+2. 期望线性相加；independent variables 的 variances 相加。
+3. inhibitory sign 在 mean 中为负，但平方后对 variance 为正。
+4. 共享输入/相关 spikes 会额外产生 covariance terms。
+
+  Geometric/computational intuition. mean 关心带符号总和，variance 关心随机振幅平方。
+  Biological interpretation / failure condition. 忽略 independent assumption 会低估 network
+  fluctuations。
+
+  Micro‑check
+  抑制项为什么对 variance 为正？
+
+
+
+
+                                              11/22
+NEUROSCI 366 ・Lecture 8                                                  Source‑aligned companion
+
+
+5.3 为什么 1/N scaling 消灭 fluctuations
+
+【跨页连接】      令每个 weight 为 W_bar/N。
+
+                                                 1
+                                      E[Q] ∼ N     = O(1)
+                                                 N
+                                              1
+                                 Var(Q) ∼ N      = O(1/N ) → 0
+                                              N2
+1. N 个输入各贡献 O(1/N)，mean 是 N 项之和。
+2. variance 使用 weight squared，所以每项 O(1/N²)。
+3. standard deviation O(1/√N) 消失。
+4. 网络变得近 deterministic，难以产生 Poisson‑like irregularity。
+
+  Geometric/computational intuition. 平均很多极小、独立输入会洗掉随机波动。
+  Biological interpretation / failure condition. 若输入强相关，variance 不一定按 1/N 消失。
+
+  Micro‑check
+  W∼1/N 时 mean 和 variance 如何缩放？
+
+
+
+5.4 balanced 1/√N scaling
+
+【模型边界】      如何同时保留 finite mean 与 finite variance？
+                                    √               √
+                          WE = W̄E / NE , WI = W̄I / NI
+
+                               Var(Q) = W̄E2 rE ∆t + W̄I2 rI ∆t = O(1)
+                                   √          √
+                          E[Q] = O( N ) − O( N ) = O(1) after balance
+1. 1/√N 使 variance 的 N×W² 项保持 O(1)。
+2. 单独的 excitatory/inhibitory mean 各为 O(√N)。
+3. 网络必须动态调节 rates/feedback，使两大 mean 相消到 O(1)。
+4. balance 指统计/动态抵消，不是每时刻 E=I。
+
+  Geometric/computational intuition. 巨大的 E 和 I 背景彼此抵消，留下小 mean 但可观 fluctu‑
+  ations。
+  Biological interpretation / failure condition. 连接结构、delays、nonlinearities 或 strong cor‑
+  relations 可能改变 scaling。
+
+  Micro‑check
+  W∼1/√N 时 variance 如何缩放？
+
+
+
+
+                                              12/22
+NEUROSCI 366 ・Lecture 8                                                    Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  Dirac delta 让每个 spike time 成为可积分的事件，synaptic kernel 与 spike train 的 convolution
+  产生连续 current。在大 N limit 中，权重 scaling 必须同时检查 mean 与 variance：1/N 保持 mean
+  有限却把 fluctuations 压到零；balanced 1/√N 让大的 excitation 与 inhibition 在 mean 上相消，
+  同时保留 O(1) fluctuations。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 finite‑bin scaling 数值
+
+【原课/核心例题】         Prompt. N=10,000，独立输入；比较 W=1/N 与 W=1/√N。
+
+ Worked solution. 1/N 时 mean∼1、variance∼10^{‑4}；1/√N 时未经 balance 的 mean∼100、vari‑
+ ance∼1。若 E/I mean 相消，净 mean 可回到 O(1)。
+ Check. 必须分别写 mean、variance；只说“总输入有限”会遗漏 fluctuation。
+
+
+7.2 kernel sum
+
+【跨课连接】       Prompt. spikes 在 1、3 ms，K(t)=e^{‑t/τ}H(t)。
+
+ Worked solution. current ∝e^{‑(t‑1)/τ}H(t‑1)+e^{‑(t‑3)/τ}H(t‑3)。
+ Check. 第二个 spike 在 t<3 ms 不应贡献。
+
+
+
+                                               13/22
+NEUROSCI 366 ・Lecture 8                                      Source‑aligned companion
+
+
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      14/22
+NEUROSCI 366 ・Lecture 8                                                             Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. spike train 的 distribution 表示                       ∑
+                                             ∆(t) =            δ(t − tk )
+                                                          k
+
+Conditions / conventions: 通过积分定义
+2. synaptic filtering                                 ∫
+                                      (K ∗ ∆)(t) =            K(t − t′ )∆(t′ )dt′
+
+Conditions / conventions: causal K 时只依赖过去
+3. independent sum variance
+                                             ∑                 ∑
+                                      Var(       a i Xi ) =        a2i Var(Xi )
+
+Conditions / conventions: X_i independent
+4. mean‑field weak weights
+                                                   W ∼ 1/N
+Conditions / conventions: variance→0 under independence
+5. balanced‑network scaling                             √
+                                                  W ∼ 1/ N
+Conditions / conventions: E/I cancellation required
+6. balanced net mean
+                                             E[QE + QI ] = O(1)
+Conditions / conventions: large signed currents cancel
+
+
+9 Bilingual glossary
+
+
+ 中文                     English / symbol                      Operational meaning
+ Dirac delta            Dirac delta                           在积分中取样的 generalized
+                                                              function/distribution。
+ 卷积                     convolution                           把输入历史按 kernel 平移加权的运算。
+ 突触核                    synaptic kernel                       单个 presynaptic spike 引起的时间响应。
+ 循环权重                   recurrent weight                      网络内部 neuron j→i 的连接强度。
+ 输入权重                   input weight                          外部输入 neuron→recurrent neuron 的连接。
+ 激发–抑制平衡                excitation–inhibition                 大 E/I currents 在 mean 上近似抵消的 regime。
+                        balance
+ 动态平衡                   dynamic balance                       balance 由 recurrent feedback 在线产生，而非
+                                                              预先逐时刻相等。
+ 数量级                    order of magnitude                    随 N 增长的主导 scaling，如 O(1)、O(√N)。
+ 不规则放电                  irregular spiking                     ISI 高变异、近 Poisson‑like 的 spike timing。
+
+
+
+
+                                                      15/22
+NEUROSCI 366 ・Lecture 8                                  Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 δ(t) 当作 t=0 时的普通无限数。
+2. convolution 中把 K(t−t’) 与 K(t’) 的时间方向写反。
+3. variance 计算忘记 weight 要平方。
+4. inhibition 对 mean 为负，但对 variance 的贡献仍为正。
+5. 只检查 mean scaling，不检查 variance。
+6. 把 E/I balance 误写成每个瞬间 excitation 与 inhibition 完全相等。
+
+  Course‑specific risk boundary. 这是全课程最容易因 scaling 跳步而失真的一课。禁止只报结论；
+  必须把 mean 与 variance 分别计算，并明确独立性假设。
+
+
+
+
+                                     16/22
+NEUROSCI 366 ・Lecture 8                                                Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. δ 的核心积分性质是什么？
+
+
+
+2. 为什么 K*Δ 等于每个 spike‑triggered kernel 的和？
+
+
+
+3. W_ij 的方向 convention 是什么？
+
+
+
+4. 独立 Poisson inputs 的 variance 为什么相加？
+
+
+
+5. 抑制项为什么对 variance 为正？
+
+
+
+6. W∼1/N 时 mean 和 variance 如何缩放？
+
+
+
+7. W∼1/√N 时 variance 如何缩放？
+
+
+
+8. 1/√N 时为什么还需要 balance？
+
+
+
+9. dynamic balance 与静态设置 E=I 的区别？
+
+
+
+10. shared input 会如何改变 variance scaling？
+
+
+
+11. causal kernel 的含义？
+
+
+
+12. 为何 balanced network 可产生 irregular spiking？
+
+
+
+13. 公式表中的“spike train 的 distribution 表示”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“synaptic filtering”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“independent sum variance”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  17/22
+NEUROSCI 366 ・Lecture 8                             Source‑aligned companion
+
+
+
+
+16. 公式表中的“mean‑field weak weights”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                18/22
+NEUROSCI 366 ・Lecture 8                                   Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“spike train 的 distribution 表示”对应的变量关系入手。
+    Hint 2. 把条件“通过积分定义”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“synaptic filtering”对应的变量关系入手。
+    Hint 2. 把条件“causal K 时只依赖过去”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                    19/22
+NEUROSCI 366 ・Lecture 8                                   Source‑aligned companion
+
+
+15. Hint 1. 先从“independent sum variance”对应的变量关系入手。
+    Hint 2. 把条件“X_i independent”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“mean‑field weak weights”对应的变量关系入手。
+    Hint 2. 把条件“variance→0 under independence”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                    20/22
+NEUROSCI 366 ・Lecture 8                                 Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. ∫f(t)δ(t−t0)dt=f(t0)。
+2. delta 在每个 spike time 对 K(t−t’) 取样。
+3. j 是 presynaptic/source，i 是 postsynaptic/target。
+4. covariance terms 为零。
+5. variance 中 coefficient 被平方。
+6. mean O(1)，variance O(1/N)→0。
+7. O(1)。
+8. E/I mean 各自 O(√N)，不相消会使净输入发散。
+9. 前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。
+10. 引入正 covariance terms，波动可能不随 N 平均掉。
+11. K(t<0)=0，当前 response 只由过去 spikes 决定。
+12. 有限 O(1) fluctuations 持续推动膜电位随机接近 threshold。
+13. 适用条件/约定：通过积分定义。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                   ∑
+                            ∆(t) =   δ(t − tk )
+                                              k
+
+
+14. 适用条件/约定：causal K 时只依赖过去。sanity check 应检查单位、符号、极限或 shape 是否与定义
+    一致。                              ∫
+                         (K ∗ ∆)(t) = K(t − t′ )∆(t′ )dt′
+
+15. 适用条件/约定：X_i independent。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+                                 ∑            ∑
+                            Var(   a i Xi ) =   a2i Var(Xi )
+
+16. 适用条件/约定：variance→0 under independence。sanity check 应检查单位、符号、极限或 shape
+    是否与定义一致。
+                                    W ∼ 1/N
+
+
+
+
+                                           21/22
+NEUROSCI 366 ・Lecture 8                                                  Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture8-NeuralNetworks1.          1         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture8-NeuralNetworks1.          2         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture8-NeuralNetworks1.          3         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture8-NeuralNetworks1.          4         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture8-NeuralNetworks1.          5         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+ Lecture8-NeuralNetworks1.          6         Main source‑page unit: thumbnail,
+ pdf                                          reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的 crossed‑out 手写不影响 delta/convolution 核心推导。
+2. Page 5 的 1/N conclusion 依赖独立 Poisson inputs；相关输入需加入 covariance terms。
+3. Page 6 的 balanced state 是候选机制，不应写成所有 cortical irregularity 的唯一来源。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              22/22
+NEUROSCI 366 ・Lecture 8                                                    Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               23/22
+

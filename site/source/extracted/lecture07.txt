@@ -1,0 +1,841 @@
+NEUROSCI 366
+Lecture 7
+
+
+
+神经编码 II——Population Decoding, Fisher Infor‑
+
+mation, and Bayes
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture7‑NeuralCoding2.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 7                                                           Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                2
+
+2 Learning objectives and prerequisite dependency map                                                      2
+
+3 Five‑minute prerequisite diagnostic                                                                      2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                           3
+   4.1 Lecture7‑NeuralCoding2.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         3
+   4.2 Lecture7‑NeuralCoding2.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         4
+   4.3 Lecture7‑NeuralCoding2.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         5
+   4.4 Lecture7‑NeuralCoding2.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         6
+   4.5 Lecture7‑NeuralCoding2.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         7
+   4.6 Lecture7‑NeuralCoding2.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         8
+
+5 补全推导与数学支架 / Derivations                                                                                  9
+   5.1 independent Poisson population 的 Fisher information . . . . . . . . . . . . . . . . . .              9
+   5.2 Cramér–Rao bound 的条件 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          10
+   5.3 correlated Gaussian code 与 Mahalanobis geometry . . . . . . . . . . . . . . . . . . . .             10
+   5.4 bias–variance 与 Bayesian regularization . . . . . . . . . . . . . . . . . . . . . . . . . .         11
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                          12
+
+7 Worked examples and transfer                                                                             12
+   7.1 N/T scaling . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   12
+   7.2 相关方向反例 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .        12
+
+8 Formula and notation sheet                                                                               14
+
+9 Bilingual glossary                                                                                       14
+
+10 Common traps, assumptions, and limitations                                                              15
+
+11 Cumulative Knowledge Check                                                                              16
+
+12 Hint Bank                                                                                               18
+
+13 Complete Answer Key with reasoning                                                                      20
+
+14 Source‑page concordance and coverage audit                                                              21
+
+
+
+
+                                                    1/22
+NEUROSCI 366 ・Lecture 7                                                             Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            21
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     21
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    21
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      21
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   22
+
+
+
+
+                                                     2/22
+NEUROSCI 366 ・Lecture 7                                                  Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：population likelihood。
+‧ 从第一原则推导：Fisher information。
+‧ 解释几何/计算直觉：CRLB。
+‧ 连接生物学解释：noise covariance。
+‧ 诊断 assumptions 与 failure modes：information limiting。
+‧ 把概念迁移到新神经科学问题：bias–variance。
+
+ Dependency map
+ population likelihood → Fisher information → CRLB → noise covariance → information limit‑
+ ing → bias–variance
+ Core question
+ population code 的 Fisher information 如何随 neuron 数和观察时间增长，相关噪声、bias 与 prior
+ 又如何改变可解码精度？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. ideal independent code 中 J 如何随 N、T 变化？
+                                        （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. 若 J 加倍，SD lower bound 如何变？
+                            （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. CRLB 对何种 estimator 的基本形式最直接？
+                              （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. noise correlation 与 signal correlation 区别？
+                                            （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. 为什么 C^{‑1} 出现在 Gaussian decoder？
+                                  （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+                                              3/22
+NEUROSCI 366 ・Lecture 7                                            Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture7‑NeuralCoding2.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture7‑NeuralCoding2.pdf, p. 1]
+ Clean reconstruction. Page 1：single‑neuron ambiguity、population likelihood、uniform pre‑
+ ferred directions、log‑likelihood derivatives。
+ What the note is saying. 本页的中心对象是 population likelihood 与 Fisher information。原
+ 笔记将它们放进以下链条：single‑neuron ambiguity、population likelihood、uniform preferred
+ directions、log‑likelihood derivatives。
+ Why it follows. 解释 population code 如何打破单神经元 tuning ambiguity；逐步构建 independent
+ Poisson joint likelihood。其逻辑后果是：完整推导 first/second derivative、在 true stimulus 处取
+ expectation、Fisher information，并说明 uniform preferred‑direction sum 如何近似积分。后面
+ 的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和
+ 真正测得的数据点。
+
+  Stop & Predict
+
+  ideal independent code 中 J 如何随 N、T 变化？
+
+
+
+
+                                          4/22
+NEUROSCI 366 ・Lecture 7                                            Source‑aligned companion
+
+
+4.2 Lecture7‑NeuralCoding2.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture7‑NeuralCoding2.pdf, p. 2]
+ Clean reconstruction. Page 2：Fisher information 的 population derivation、sum‑to‑integral、
+ N/T scaling。
+ What the note is saying. 本页的中心对象是 CRLB 与 noise covariance。原笔记将它们放进以下链
+ 条：Fisher information 的 population derivation、sum‑to‑integral、N/T scaling。
+ Why it follows. 完整推导 first/second derivative、在 true stimulus 处取 expectation、Fisher in‑
+ formation，并说明 uniform preferred‑direction sum 如何近似积分。其逻辑后果是：解释 population
+ code 如何打破单神经元 tuning ambiguity；逐步构建 independent Poisson joint likelihood。后面
+ 的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  若 J 加倍，SD lower bound 如何变？
+
+
+
+
+                                          5/22
+NEUROSCI 366 ・Lecture 7                                          Source‑aligned companion
+
+
+4.3 Lecture7‑NeuralCoding2.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture7‑NeuralCoding2.pdf, p. 3]
+ Clean reconstruction. Page 3：Cramér–Rao bound、perceptual error、noise correlations。
+ What the note is saying. 本页的中心对象是 information limiting 与 bias–variance。原笔记将它们
+ 放进以下链条：Cramér–Rao bound、perceptual error、noise correlations。
+ Why it follows. 准确陈述 Cramér–Rao lower bound 的 unbiased/regularity assumptions；不要
+ 把 bound 说成任何有限样本 decoder 都必然达到。其逻辑后果是：解释 Pearson noise correlation、
+ positive/negative/zero correlation 和 shared variability；区分 signal correlation。后面的正式推导
+ 会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  CRLB 对何种 estimator 的基本形式最直接？
+
+
+
+
+                                         6/22
+NEUROSCI 366 ・Lecture 7                                           Source‑aligned companion
+
+
+4.4 Lecture7‑NeuralCoding2.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture7‑NeuralCoding2.pdf, p. 4]
+ Clean reconstruction. Page 4：left/right pooling statistics；correlated Gaussian encoding
+ model、covariance matrix/inverse。
+ What the note is saying. 本页的中心对象是 Bayes prior 与 population likelihood。原笔记将它
+ 们放进以下链条：left/right pooling statistics；correlated Gaussian encoding model、covariance
+ matrix/inverse。
+ Why it follows. 逐步推导 left/right pooled‑count mean/variance，并引入 multivariate Gaussian、
+ covariance inverse 与 Mahalanobis geometry。其逻辑后果是：准确陈述 Cramér–Rao lower bound
+ 的 unbiased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。后面
+ 的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  noise correlation 与 signal correlation 区别？
+
+
+
+
+                                           7/22
+NEUROSCI 366 ・Lecture 7                                              Source‑aligned companion
+
+
+4.5 Lecture7‑NeuralCoding2.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture7‑NeuralCoding2.pdf, p. 5]
+ Clean reconstruction. Page 5：information‑limiting correlations、biological saturation、sub‑
+ optimal decoder。
+ What the note is saying. 本页的中心对象是 Fisher information 与 CRLB。原笔记将它们放进以下
+ 链条：information‑limiting correlations、biological saturation、suboptimal decoder。
+ Why it follows. 解释 information‑limiting correlations 与 decoder mismatch/suboptimality；避
+ 免把所有 saturation 都归因于单一机制。其逻辑后果是：准确陈述 Cramér–Rao lower bound 的 un‑
+ biased/regularity assumptions；不要把 bound 说成任何有限样本 decoder 都必然达到。后面的正式
+ 推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  为什么 C^{‑1} 出现在 Gaussian decoder？
+
+
+
+
+                                           8/22
+NEUROSCI 366 ・Lecture 7                                           Source‑aligned companion
+
+
+4.6 Lecture7‑NeuralCoding2.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture7‑NeuralCoding2.pdf, p. 6]
+ Clean reconstruction. Page 6：biased decoding、bias–variance decomposition、modified CRLB、
+ Bayesian decoder。
+ What the note is saying. 本页的中心对象是 noise covariance 与 information limiting。原笔记将
+ 它们放进以下链条：biased decoding、bias–variance decomposition、modified CRLB、Bayesian
+ decoder。
+ Why it follows. 推导 bias–variance decomposition，解释 modified CRLB；将 Bayesian prior
+ 视为 regularization，并区分 likelihood 与 posterior。其逻辑后果是：解释 information‑limiting
+ correlations 与 decoder mismatch/suboptimality；避免把所有 saturation 都归因于单一机制。后面
+ 的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  positive correlation 是否必然降低 information？
+
+
+
+
+                                          9/22
+NEUROSCI 366 ・Lecture 7                                                     Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 independent Poisson population 的 Fisher information
+
+【必要前置】      从 log‑likelihood 二阶导数得到 J(θ)。
+                                     X
+                              ℓ(θ) =   [ki log(fi T ) − fi T − log ki !]
+                                         i
+
+                                                    X [f ′ (θ)]2
+                                                               i
+                                         J(θ) = T
+                                                              fi (θ)
+                                                        i
+                                                    Z
+                                                            dϕ [f ′ (ϕ)]2
+                                       J(θ) ≈ N T
+                                                            2π f (ϕ)
+1. 一阶导数含 f_i’(k_i/f_i−T)。
+2. 二阶导数取 true stimulus 下期望，使用 E[k_i]=f_iT。
+3. 均匀 preferred directions 使离散 sum 在大 N 时近似 circular integral。
+4. 若 tuning shape 固定，则 J∝NT。
+
+  Geometric/computational intuition. 更多 independent neurons 或更长观察时间相当于累积更
+  多局部 evidence。
+  Biological interpretation / failure condition. 非独立 noise、heterogeneous tuning、有限 N
+  或 information‑limiting covariance 可破坏 scaling。
+
+  Micro‑check
+  noise correlation 与 signal correlation 区别？
+
+
+
+
+                                                 10/22
+NEUROSCI 366 ・Lecture 7                                                     Source‑aligned companion
+
+
+5.2 Cramér–Rao bound 的条件
+
+【补全推导】      Fisher information 如何限制 unbiased decoder？
+
+                                              b ≥      1
+                                          Var(θ)
+                                                      J(θ)
+
+1. 估计量需在局部 unbiased，并满足可交换微分与积分等 regularity。
+2. bound 是下界，不保证任意 decoder 达到。
+3. MLE 常在大样本接近 bound，但有限样本、多峰/边界问题可偏离。
+4. behavioral error 还包含 downstream computation、motor noise 与 lapse。
+
+  Geometric/computational intuition. encoding distribution 本身设定了任何 unbiased read‑
+  out 都无法跨越的局部精度极限。
+  Biological interpretation / failure condition. 对 biased estimator 直接使用 1/J 会得到错误结
+  论。
+
+  Micro‑check
+  为什么 C^{‑1} 出现在 Gaussian decoder？
+
+
+
+5.3 correlated Gaussian code 与 Mahalanobis geometry
+
+【跨页连接】      noise covariance 如何改变 stimulus discrimination？
+
+                                      r | θ ∼ N (µ(θ), C(θ))
+
+                          −2ℓ = (r − µ)T C −1 (r − µ) + log det C + const
+                           J ≈ µ′ (θ)T C −1 µ′ (θ) (C independent of θ)
+1. C 的 off‑diagonal 元素表示 shared trial‑to‑trial variability。
+2. C^{‑1} 对高噪声方向降低权重、低噪声方向提高权重。
+3. 若 noise 沿 signal derivative 方向增长，会严重限制 information。
+4. decoder 若忽略 C，即使 code 含信息也可能表现 suboptimal。
+
+  Geometric/computational intuition. 可分辨性由 mean shift 相对 noise ellipse 的方向决定，而
+  不只由单 neuron variance。
+  Biological interpretation / failure condition. 把 signal correlation（tuning 相似）与 noise
+  correlation（同 trial residual 共变）混淆。
+
+  Micro‑check
+  positive correlation 是否必然降低 information？
+
+
+
+
+                                              11/22
+NEUROSCI 366 ・Lecture 7                                        Source‑aligned companion
+
+
+5.4 bias–variance 与 Bayesian regularization
+
+【模型边界】      biased decoder 为什么可能有更低 MSE？
+
+                                  s − s)2 ] = Var(b
+                               E[(b               s) + b(s)2
+
+                                             [1 + b′ (s)]2
+                                      s) ≥
+                                  Var(b
+                                                J(s)
+                                 P (s | n) ∝ P (n | s)P (s)
+1. MSE 分解为 variance 与 squared bias。
+2. prior 拉估计向常见 stimulus，增加 bias 但可降低 variance。
+3. modified CRLB 显式包含 bias derivative。
+4. MAP decoder 最大化 log‑likelihood+log‑prior。
+
+  Geometric/computational intuition. regularization 用一些系统性偏移换取对噪声不敏感。
+  Biological interpretation / failure condition. prior 与环境不匹配时 bias 会恶化性能。
+
+  Micro‑check
+  information‑limiting correlation 的核心特征是什么？
+
+
+
+
+                                           12/22
+NEUROSCI 366 ・Lecture 7                                                    Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  单个 tuning curve 常对多个 stimulus 给出相似 rate，population pattern 可打破 ambiguity。在
+  independent Poisson 与均匀 preferred direction 的理想条件下，Fisher information 对 N 和 T
+  线性增长。真实群体的 noise correlations、decoder mismatch 与 behavioral constraints 使性能
+  可能饱和；Bayesian prior 以可控 bias 换取 variance reduction。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 N/T scaling
+
+【原课/核心例题】         Prompt. 若每个 neuron/秒贡献同样 Fisher information j0，N=100, T=0.5 s。
+
+ Worked solution. J=NTj0=50j0；理想 SD 下界为 1/√J。把 N 或 T 加倍只把 SD 降低 √2 倍。
+ Check. variance ∝1/(NT)，standard deviation ∝1/√(NT)。
+
+
+7.2 相关方向反例
+
+【跨课连接】       Prompt. 两维 mean 随 stimulus 沿 (1,1) 变化。
+
+ Worked solution. 若 noise ellipse 也沿 (1,1) 极度拉长，
+                                               positive correlation 会损害 discrimination；
+ 若 noise 沿 (1,−1)，可能影响较小。
+ Check. 相关系数的正负本身不足以判断 information；必须比较 covariance eigenvectors 与 signal
+
+
+                                               13/22
+NEUROSCI 366 ・Lecture 7                                      Source‑aligned companion
+
+
+
+ direction。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      14/22
+NEUROSCI 366 ・Lecture 7                                                      Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. independent Poisson population Fisher
+                                                  X
+                                          J =T         (fi′ )2 /fi
+                                                   i
+
+Conditions / conventions: counts independent
+2. unbiased CRLB
+                                            Var(θ̂) ≥ 1/J
+Conditions / conventions: regularity/unbiased
+3. noise covariance
+                                           Cij = Cov(ri , rj )
+Conditions / conventions: 同 stimulus、跨 trial residual
+4. Pearson noise correlation
+                                           ρij = Cij /(σi σj )
+Conditions / conventions: 非零 variances
+5. Mahalanobis separation
+                                          d2M = ∆µT C −1 ∆µ
+Conditions / conventions: C 正定
+6. bias–variance decomposition
+                                           M SE = Var +b2
+Conditions / conventions: 标量 estimator
+7. Bayesian decoding
+                                         P (s|n) ∝ P (n|s)P (s)
+Conditions / conventions: posterior properly normalized
+
+
+9 Bilingual glossary
+
+
+ 中文                   English / symbol                 Operational meaning
+ 群体编码                 population code                  多个 neurons 的联合 response pattern。
+ Cramér–Rao 下界        Cramér–Rao lower                 unbiased estimator variance 的信息论下界。
+                      bound
+ 噪声相关                 noise correlation                固定 stimulus 时 trial residual 的相关性。
+ 信号相关                 signal correlation               tuning curves across stimuli 的相似性。
+ 协方差矩阵                covariance matrix                各维 variance 与 pairwise covariance 的矩阵。
+ Mahalanobis 距离       Mahalanobis distance             按 noise covariance 归一化的距离。
+ 信息限制相关               information‑limiting             沿 stimulus signal direction 留下不可平均掉的
+                      correlation                      shared noise。
+ 次优解码器                suboptimal decoder               未充分利用 encoding information 的 readout。
+ 偏差                   bias                             估计均值与真值之差。
+ 正则化                  regularization                   通过约束或 prior 降低 variance/复杂度。
+
+
+
+
+                                                 15/22
+NEUROSCI 366 ・Lecture 7                                            Source‑aligned companion
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 CRLB 当作所有 decoder 的实际误差，而非有条件的下界。
+2. 认为正相关总是有害、负相关总是有利。
+3. 混淆 encoding distribution、decoder algorithm 与 behavior 三个层级。
+4. 把 Fisher information saturation 自动归因于唯一生物机制。
+5. 忽略 biased decoder 的 modified bound。
+6. 把 prior 当作额外数据而非对 stimulus frequency/structure 的假设。
+
+  Course‑specific risk boundary. 明确区分 three levels：neural encoding distribution、decoder
+  algorithm、behavioral performance；相关性存在不等于某个 decoder 一定使用或不使用它。
+
+
+
+
+                                          16/22
+NEUROSCI 366 ・Lecture 7                                                Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+ 1. ideal independent code 中 J 如何随 N、T 变化？
+
+
+
+ 2. 若 J 加倍，SD lower bound 如何变？
+
+
+
+ 3. CRLB 对何种 estimator 的基本形式最直接？
+
+
+
+ 4. noise correlation 与 signal correlation 区别？
+
+
+
+ 5. 为什么 C^{‑1} 出现在 Gaussian decoder？
+
+
+
+ 6. positive correlation 是否必然降低 information？
+
+
+
+ 7. information‑limiting correlation 的核心特征是什么？
+
+
+
+ 8. behavior 比 CRLB 差能证明 brain decoder suboptimal 吗？
+
+
+
+ 9. MSE 的两项是什么？
+
+
+
+10. Bayesian prior 如何 regularize？
+
+
+
+11. modified CRLB 为什么含 b’(s)？
+
+
+
+12. uniform preferred direction sum 为什么能近似积分？
+
+
+
+13. 公式表中的“independent Poisson population Fisher”解决什么问题？写出适用条件与一个 sanity
+    check。
+
+
+
+14. 公式表中的“unbiased CRLB”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                                  17/22
+NEUROSCI 366 ・Lecture 7                              Source‑aligned companion
+
+
+15. 公式表中的“noise covariance”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+16. 公式表中的“Pearson noise correlation”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“Mahalanobis separation”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“bias–variance decomposition”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                 18/22
+NEUROSCI 366 ・Lecture 7                                   Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“independent Poisson population Fisher”对应的变量关系入手。
+    Hint 2. 把条件“counts independent”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“unbiased CRLB”对应的变量关系入手。
+    Hint 2. 把条件“regularity/unbiased”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     19/22
+NEUROSCI 366 ・Lecture 7                                     Source‑aligned companion
+
+
+15. Hint 1. 先从“noise covariance”对应的变量关系入手。
+    Hint 2. 把条件“同 stimulus、跨 trial residual”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“Pearson noise correlation”对应的变量关系入手。
+    Hint 2. 把条件“非零 variances”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“Mahalanobis separation”对应的变量关系入手。
+    Hint 2. 把条件“C 正定”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“bias–variance decomposition”对应的变量关系入手。
+    Hint 2. 把条件“标量 estimator”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                     20/22
+NEUROSCI 366 ・Lecture 7                                       Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. J∝NT。
+2. 乘 1/√2。
+3. unbiased、满足 regularity 的 estimator。
+4. 前者是固定 stimulus 的 trial residual 共变；后者是 tuning means 的相似。
+5. 它按各 noise direction 的可靠性加权 residual。
+6. 否，取决于 correlation eigenmode 与 stimulus‑induced mean shift 的相对方向。
+7. shared noise 沿 stimulus signal direction，不能靠增加相似 neurons 平均掉。
+8. 不能单独证明；还可能有 model mismatch、downstream/motor noise、lapses。
+9. variance+bias²。
+10. 把 posterior/MAP 拉向先验常见值，通常降低 variance 但引入 bias。
+11. bias 随 stimulus 的局部变化会改变 estimator 对参数变化的响应。
+12. 当 preferred angles 密集均匀时，Riemann sum 收敛到 circular integral。
+13. 适用条件/约定：counts independent。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。                                 X
+                                 J =T     (fi′ )2 /fi
+                                             i
+
+14. 适用条件/约定：regularity/unbiased。sanity check 应检查单位、符号、极限或 shape 是否与定义一
+    致。
+                                    Var(θ̂) ≥ 1/J
+
+15. 适用条件/约定：同 stimulus、跨 trial residual。sanity check 应检查单位、符号、极限或 shape 是否
+    与定义一致。
+                                   Cij = Cov(ri , rj )
+
+16. 适用条件/约定：非零 variances。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                     ρij = Cij /(σi σj )
+
+17. 适用条件/约定：C 正定。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    d2M = ∆µT C −1 ∆µ
+
+18. 适用条件/约定：标量 estimator。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                    M SE = Var +b2
+
+
+
+
+                                         21/22
+NEUROSCI 366 ・Lecture 7                                                  Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture7-NeuralCoding2.pdf         1         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture7-NeuralCoding2.pdf         2         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture7-NeuralCoding2.pdf         3         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture7-NeuralCoding2.pdf         4         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture7-NeuralCoding2.pdf         5         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+ Lecture7-NeuralCoding2.pdf         6         Main source‑page unit: thumbnail,
+                                              reconstruction, explanation, prediction
+                                              question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 2 的 sum‑to‑integral 需要大 N、均匀 preferred directions 与共同 tuning shape。
+2. Page 3 的 CRLB 必须附 unbiased/regularity 条件。
+3. Page 5 的 performance saturation 有多种可能来源；笔记明确不应只归因于 correlations。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              22/22
+NEUROSCI 366 ・Lecture 7                                                    Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               23/22
+

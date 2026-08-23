@@ -1,0 +1,862 @@
+NEUROSCI 366
+Lecture 13
+
+
+
+Spike‑Triggered Average 与 White‑Noise System
+
+Identification
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 13                                                            Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                   2
+
+2 Learning objectives and prerequisite dependency map                                                         2
+
+3 Five‑minute prerequisite diagnostic                                                                         2
+
+4 Source‑aligned lesson / 按原笔记页序                                                                              3
+   4.1 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ·p. 1 . . . . . . . . . . . . . . . . . . . .                3
+   4.2 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ·p. 2 . . . . . . . . . . . . . . . . . . . .                4
+   4.3 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ·p. 3 . . . . . . . . . . . . . . . . . . . .                5
+   4.4 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ·p. 4 . . . . . . . . . . . . . . . . . . . .                6
+   4.5 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ·p. 5 . . . . . . . . . . . . . . . . . . . .                7
+   4.6 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ·p. 6 . . . . . . . . . . . . . . . . . . . .                8
+
+5 补全推导与数学支架 / Derivations                                                                                     9
+   5.1 continuous、pixel 与 matrix notation 对齐 . . . . . . . . . . . . . . . . . . . . . . . . .                 9
+   5.2 least‑squares filter 与 Hessian . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .       10
+   5.3 white noise 使 filter estimate ∝ STA . . . . . . . . . . . . . . . . . . . . . . . . . . . . .          11
+   5.4 恢复 nonlinearity 与 failure modes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            12
+
+6 Cross‑page synthesis / 跨页因果与数学链                                                                             13
+
+7 Worked examples and transfer                                                                                13
+   7.1 STA scale 与方向        . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   13
+   7.2 symmetric nonlinearity 反例 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .            13
+
+8 Formula and notation sheet                                                                                  15
+
+9 Bilingual glossary                                                                                          15
+
+10 Common traps, assumptions, and limitations                                                                 16
+
+11 Cumulative Knowledge Check                                                                                 17
+
+12 Hint Bank                                                                                                  19
+
+13 Complete Answer Key with reasoning                                                                         21
+
+14 Source‑page concordance and coverage audit                                                                 22
+
+
+
+
+                                                    1/23
+NEUROSCI 366 ・Lecture 13                                                            Source‑aligned companion
+
+
+15 Errata, uncertainty log, and external endnotes                                                            22
+   15.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     22
+   15.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    22
+   15.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      22
+   15.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   23
+
+
+
+
+                                                     2/23
+NEUROSCI 366 ・Lecture 13                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：white‑noise stimulus。
+‧ 从第一原则推导：spike‑triggered ensemble。
+‧ 解释几何/计算直觉：matrix notation。
+‧ 连接生物学解释：least squares/Hessian。
+‧ 诊断 assumptions 与 failure modes：white covariance。
+‧ 把概念迁移到新神经科学问题：STA proportionality。
+
+ Dependency map
+ white‑noise stimulus → spike‑triggered ensemble → matrix notation → least squares/Hessian
+ → white covariance → STA proportionality
+ Core question
+ 在 white‑noise stimulation 下，为什么 spike‑triggered average 能估计 LNP 的 linear filter，并在哪
+ 些条件下会灾难性失败？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. S、K、L 的 shapes？
+                 （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. least‑squares normal equation 是什么？
+                                    （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. Hessian 由什么决定？
+                （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. white noise 为什么让 loss contours 近圆形？
+                                     （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. small‑bin h_t 与 k_t 的关系？
+                          （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+                                              3/23
+NEUROSCI 366 ・Lecture 13                                            Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf, p. 1]
+ Clean reconstruction. Page 1：white‑noise LNP system identification；STA experimental pro‑
+ cedure。
+ What the note is saying. 本页的中心对象是 white‑noise stimulus 与 spike‑triggered ensemble。
+ 原笔记将它们放进以下链条：white‑noise LNP system identification；STA experimental procedure。
+ Why it follows. 逐步解释 white‑noise stimulus、spike‑triggered ensemble、average preceding
+ spike 和 STA 的实验意义。其逻辑后果是：给出完整 LNP fitting workflow，并深入解释 STA 可能 catas‑
+ trophically fail 的条件：multiple relevant dimensions、symmetric nonlinearities、
+                                                                           correlated/non‑
+ Gaussian stimuli、insufficient data 等。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 按时间线区分 stimulus/task、recording/manipulation、measured quantity 与
+ inferred model variable；结果相关性不能直接替代机制检验。
+
+  Stop & Predict
+
+  S、K、L 的 shapes？
+
+
+
+
+                                           4/23
+NEUROSCI 366 ・Lecture 13                                        Source‑aligned companion
+
+
+4.2 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf, p. 2]
+ Clean reconstruction. Page 2：continuous、pixelized 与 matrix notation。
+ What the note is saying. 本页的中心对象是 matrix notation 与 least squares/Hessian。原笔记将
+ 它们放进以下链条：continuous、pixelized 与 matrix notation。
+ Why it follows. 统一 continuous convolution、pixel index notation 和 matrix form；给出 S、K、
+ h 的 shape。其逻辑后果是：逐步解释 white‑noise stimulus、spike‑triggered ensemble、average
+ preceding spike 和 STA 的实验意义。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  least‑squares normal equation 是什么？
+
+
+
+
+                                        5/23
+NEUROSCI 366 ・Lecture 13                                           Source‑aligned companion
+
+
+4.3 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf, p. 3]
+ Clean reconstruction. Page 3：linear neuron、least‑squares system identification、loss con‑
+ tours/Hessian。
+ What the note is saying. 本页的中心对象是 white covariance 与 STA proportionality。原笔记将
+ 它们放进以下链条：linear neuron、least‑squares system identification、loss contours/Hessian。
+ Why it follows. 从 linear neuron 的 mean‑squared loss 推导 normal equations 与 Hessian；解释
+ circular/elliptical loss geometry。其逻辑后果是：从“已知 stimulus 和 spikes，如何反推 linear filter
+ 与 nonlinearity”定义 system‑identification problem。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  Hessian 由什么决定？
+
+
+
+
+                                          6/23
+NEUROSCI 366 ・Lecture 13                                        Source‑aligned companion
+
+
+4.4 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf, p. 4]
+ Clean reconstruction. Page 4：white‑noise covariance、isotropic Hessian。
+ What the note is saying. 本页的中心对象是 nonlinearity/failures 与 white‑noise stimulus。原笔
+ 记将它们放进以下链条：white‑noise covariance、isotropic Hessian。
+ Why it follows. 从 linear neuron 的 mean‑squared loss 推导 normal equations 与 Hessian；解
+ 释 circular/elliptical loss geometry。其逻辑后果是：从 white Gaussian stimulus covariance 推导
+ SS^T≈Tσ_s²I，再逐步推导 kernel estimate 与 STA 的 proportionality，包括 bin width 与 spike
+ count scaling。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure
+ conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  white noise 为什么让 loss contours 近圆形？
+
+
+
+
+                                        7/23
+NEUROSCI 366 ・Lecture 13                                         Source‑aligned companion
+
+
+4.5 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf, p. 5]
+ Clean reconstruction. Page 5：kernel estimator 到 spike‑triggered average 的完整推导。
+ What the note is saying. 本页的中心对象是 spike‑triggered ensemble 与 matrix notation。原笔
+ 记将它们放进以下链条：kernel estimator 到 spike‑triggered average 的完整推导。
+ Why it follows. 逐步解释 white‑noise stimulus、spike‑triggered ensemble、average preceding
+ spike 和 STA 的实验意义。其逻辑后果是：从 white Gaussian stimulus covariance 推导 SS^T≈Tσ_
+ s²I，再逐步推导 kernel estimate 与 STA 的 proportionality，包括 bin width 与 spike count scaling。
+ 后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  small‑bin h_t 与 k_t 的关系？
+
+
+
+
+                                         8/23
+NEUROSCI 366 ・Lecture 13                                            Source‑aligned companion
+
+
+4.6 Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture13‑SpikeTriggeredAverage‑UPDATE.pdf, p. 6]
+ Clean reconstruction. Page 6：恢复 nonlinearity、标准 workflow、heuristic success/failure。
+ What the note is saying. 本页的中心对象是 least squares/Hessian 与 white covariance。原笔记将
+ 它们放进以下链条：恢复 nonlinearity、标准 workflow、heuristic success/failure。
+ Why it follows. 解释 small‑Δt Poisson/Bernoulli approximation，如何从 empirical spike proba‑
+ bility 恢复 nonlinearity。其逻辑后果是：给出完整 LNP fitting workflow，并深入解释 STA 可能 catas‑
+ trophically fail 的条件：multiple relevant dimensions、symmetric nonlinearities、
+                                                                           correlated/non‑
+ Gaussian stimuli、insufficient data 等。后面的正式推导会逐项写出 assumptions、shape/units、
+ limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  Khat 为什么与 STA 同方向？
+
+
+
+
+                                           9/23
+NEUROSCI 366 ・Lecture 13                                          Source‑aligned companion
+
+
+
+5 补全推导与数学支架 / Derivations
+
+5.1 continuous、pixel 与 matrix notation 对齐
+
+【必要前置】      把 spatiotemporal convolution 写成可拟合的线性代数。
+
+                                              X
+                                              P
+                                       Lt =         Kp Spt
+                                              p=1
+
+
+                                         L = ST K
+                              S ∈ RP ×T , K ∈ RP ×1 , L ∈ RT ×1
+1. p 可同时编码 x、y 与过去 time lag。
+2. 每个 column S_:t 是 time t 前的 stimulus history vector。
+3. K 与每个 stimulus vector 做 inner product，产生 scalar drive L_t。
+4. 明确 shape 后，continuous convolution 与 matrix form 是同一运算的离散化。
+
+  Geometric/computational intuition. 系统辨识把每个 time bin 当作一个高维 stimulus exam‑
+  ple。
+  Biological interpretation / failure condition. time indexing/lag orientation 错一位会使估计
+  filter 在时间上翻转。
+
+  Micro‑check
+  white noise 为什么让 loss contours 近圆形？
+
+
+
+
+                                              10/23
+NEUROSCI 366 ・Lecture 13                                              Source‑aligned companion
+
+
+5.2 least‑squares filter 与 Hessian
+
+【补全推导】      在线性 neuron h≈S^TK 下估计 K。
+                                               1
+                                     L(K) =      ∥h − S T K∥2
+                                              2T
+                                       b = (SS T )−1 Sh
+                                       K
+                                                 1
+                                         HK =      SS T
+                                                 T
+1. gradient 为 −S(h−S^TK)/T。
+2. 设 gradient=0 得 normal equation SS^TK=Sh。
+3. Hessian/curvature 由 stimulus covariance 决定。
+4. elliptical contours 表示不同 filter directions 的可辨识度不同。
+
+  Geometric/computational intuition. 若 stimulus 没有激发某方向，该方向 filter 无法从数据中
+  估计。
+  Biological interpretation / failure condition. SS^T singular/ill‑conditioned 时需 whitening、
+  regularization 或更多刺激。
+
+  Micro‑check
+  small‑bin h_t 与 k_t 的关系？
+
+
+
+
+                                              11/23
+NEUROSCI 366 ・Lecture 13                                            Source‑aligned companion
+
+
+5.3 white noise 使 filter estimate ∝ STA
+
+【跨页连接】      从 normal equation 推导 STA。
+
+                                       SS T ≈ T σs2 I
+
+                                       b ≈    1
+                                       K           Sh
+                                             T σs2
+
+
+      kt        1                                  X             nsp
+ ht =    ⇒ Sh =                                             st =     ST A
+      ∆t        ∆t                                               ∆t
+                                              t∈spikes
+1. independent zero‑mean pixels/time bins 使 off‑diagonal covariance 平均为 0。
+2. 每个 dimension variance 相同，使 Hessian isotropic。
+3. small bin 下 k_t∈{0,1}，response vector 只在 spike bins 取非零。
+4. 因此 Khat 与 spikes 前 stimulus average 同方向，scale 由 T、σ²、Δt、spike count 决定。
+
+  Geometric/computational intuition. white stimulus 不偏爱任何 feature direction，所以 spike
+  前重复出现的 structure 指向 neuron 的 relevant filter。
+  Biological interpretation / failure condition. colored stimulus 需乘 stimulus covariance
+  inverse；直接 STA 会被 stimulus correlations 扭曲。
+
+  Micro‑check
+  Khat 为什么与 STA 同方向？
+
+
+
+
+                                           12/23
+NEUROSCI 366 ・Lecture 13                                              Source‑aligned companion
+
+
+5.4 恢复 nonlinearity 与 failure modes
+
+【模型边界】      已估 K 后如何估 F，并判断 STA 何时失败？
+
+                                  P (kt = 1 | Lt ) ≈ ∆t F(Lt )
+
+                                    b      P (spike | L)
+                                    F(L) =
+                                                ∆t
+1. 把每个 time bin 投影到 L=K^Ts。
+2. 按 L 分 bin，估计 spike fraction，再除以 Δt 得 rate。
+3. 若 response 依赖多个 filters，单一 L 丢失信息。
+4. 若 F(L)=F(−L) 为 even/symmetric，positive 与 negative features 在 STA 中抵消，STA 可为 0。
+
+  Geometric/computational intuition. filter 找“相关方向”，nonlinearity 描述沿该方向如何转
+  成 spikes。
+  Biological interpretation / failure condition. multiple dimensions、symmetric nonlineari‑
+  ties、non‑Gaussian/correlated stimuli、history effects 与 insufficient spikes。
+
+  Micro‑check
+  colored stimulus 下应如何修正？
+
+
+
+
+                                             13/23
+NEUROSCI 366 ・Lecture 13                                                   Source‑aligned companion
+
+
+
+6 Cross‑page synthesis / 跨页因果与数学链
+
+  STA 既是 descriptive average，也是在线性、Gaussian white stimulus 与合适 nonlinearity 条件下
+  的 filter estimator。matrix least squares 揭示其来源：white stimulus 使 design covariance 近似
+  scalar identity，normal equation 因而简化为 stimulus 与 response 的相关。恢复 nonlinearity 后
+  得到可预测新刺激的 LNP model；但多个 relevant dimensions、even‑symmetric nonlinearities
+  或 correlated stimulus 会使 STA 为零或偏差。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+7 Worked examples and transfer
+
+7.1 STA scale 与方向
+
+【原课/核心例题】         Prompt. 两个实验 stimulus variance 不同，但 neuron filter 相同。
+
+ Worked solution. raw STA amplitude 会随 σ_s²、rate/spike count 与 bin width 改变；比较 filter
+ direction/normalized shape 前需按 derivation scale 或标准化。
+ Check. STA 是 filter 的 proportional estimator，不是无条件等幅度。
+
+
+
+7.2 symmetric nonlinearity 反例
+
+【跨课连接】       Prompt. neuron 对 |K^Ts| 大时都放电。
+
+
+
+                                               14/23
+NEUROSCI 366 ・Lecture 13                                     Source‑aligned companion
+
+
+
+ Worked solution. spikes 前既有 +K‑like 也有 −K‑like stimuli，平均相消，STA≈0；STC 可找到
+ variance 增大的 K direction。
+ Check. STA=0 不等于没有 stimulus selectivity。
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      15/23
+NEUROSCI 366 ・Lecture 13                                                      Source‑aligned companion
+
+
+
+8 Formula and notation sheet
+
+1. pixelized linear drive
+                                                  L = ST K
+Conditions / conventions: S:P×T
+2. least‑squares filter
+                                               K̂ = (SS T )−1 Sh
+Conditions / conventions: SS^T invertible
+3. loss Hessian
+                                                 H = SS T /T
+Conditions / conventions: linear squared loss
+4. white‑noise covariance
+                                                 SS T ≈ T σs2 I
+Conditions / conventions: large T、independent equal‑variance pixels
+5. spike‑triggered average
+                                                      1      X
+                                            ST A =                    st
+                                                     nsp
+                                                           t∈spikes
+
+Conditions / conventions: aligned stimulus histories
+6. STA/filter relation
+                                                  K̂ ∝ ST A
+Conditions / conventions: white Gaussian single‑filter assumptions
+7. small‑bin nonlinearity estimate
+
+                                            P (spike|L) ≈ ∆tF (L)
+
+Conditions / conventions: Δt rate≪1
+
+
+9 Bilingual glossary
+
+
+ 中文                      English / symbol               Operational meaning
+ 系统辨识                    system identification          由输入和输出数据反推系统模型。
+ 白噪声                     white noise                    不同 dimensions/time bins 不相关且功率均匀的
+                                                        理想随机刺激。
+ 脉冲触发集合                  spike‑triggered ensemble       所有 spike 前 stimulus histories 的集合。
+ 脉冲触发平均                  spike‑triggered average,       spike‑triggered ensemble 的均值。
+                         STA
+ 设计矩阵                    design matrix                  按 examples/time bins 组织 stimulus vectors 的
+                                                        矩阵。
+ Hessian                 Hessian                        loss 对参数的二阶导数矩阵。
+ 各向同性                    isotropic                      所有方向 curvature/variance 相同。
+ 白化                      whitening                      移除 covariance correlations、使变量近 unit
+                                                        covariance。
+ 相关刺激                    correlated stimulus            stimulus dimensions 具有非零 covariance。
+
+
+                                                     16/23
+NEUROSCI 366 ・Lecture 13                                            Source‑aligned companion
+
+
+
+ 中文                  English / symbol        Operational meaning
+ 相关维度                relevant dimension      response dependence 的 stimulus projection
+                                             direction。
+
+
+
+10 Common traps, assumptions, and limitations
+
+1. 把 STA 仅当作图片平均，而不说明 time lag alignment。
+2. matrix orientation 不标，混淆 S^TK 与 KS。
+3. 遗漏 white covariance 的 large‑sample 与 equal‑variance assumptions。
+4. 把 STA amplitude 无条件等同于 physical filter gain。
+5. STA=0 就断言 neuron 无 receptive field。
+6. 恢复 F 时忘记除以 bin width。
+7. 用 training fit 判断模型，不做 held‑out prediction。
+
+  Course‑specific risk boundary. 区分 STA 作为 descriptive average、linear‑filter estimator 和
+  LNP model component；三者在特定假设下联系，但不是无条件等价。
+
+
+
+
+                                          17/23
+NEUROSCI 366 ・Lecture 13                                               Source‑aligned companion
+
+
+
+11 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. S、K、L 的 shapes？
+
+
+
+2. least‑squares normal equation 是什么？
+
+
+
+3. Hessian 由什么决定？
+
+
+
+4. white noise 为什么让 loss contours 近圆形？
+
+
+
+5. small‑bin h_t 与 k_t 的关系？
+
+
+
+6. Khat 为什么与 STA 同方向？
+
+
+
+7. colored stimulus 下应如何修正？
+
+
+
+8. even nonlinearity 为什么使 STA≈0？
+
+
+
+9. multiple relevant dimensions 时单一 STA 缺什么？
+
+
+
+10. 如何估计 nonlinearity？
+
+
+
+11. 为什么必须 cross‑validation？
+
+
+
+12. STA 的 descriptive、estimator、model component 三种身份如何区分？
+
+
+
+13. 公式表中的“pixelized linear drive”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“least‑squares filter”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“loss Hessian”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/23
+NEUROSCI 366 ・Lecture 13                             Source‑aligned companion
+
+
+
+
+16. 公式表中的“white‑noise covariance”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“spike‑triggered average”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“STA/filter relation”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                 19/23
+NEUROSCI 366 ・Lecture 13                            Source‑aligned companion
+
+
+
+12 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“pixelized linear drive”对应的变量关系入手。
+    Hint 2. 把条件“S:P×T”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“least‑squares filter”对应的变量关系入手。
+    Hint 2. 把条件“SS^T invertible”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                     20/23
+NEUROSCI 366 ・Lecture 13                                       Source‑aligned companion
+
+
+15. Hint 1. 先从“loss Hessian”对应的变量关系入手。
+    Hint 2. 把条件“linear squared loss”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“white‑noise covariance”对应的变量关系入手。
+    Hint 2. 把条件“large T、independent equal‑variance pixels”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“spike‑triggered average”对应的变量关系入手。
+    Hint 2. 把条件“aligned stimulus histories”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“STA/filter relation”对应的变量关系入手。
+    Hint 2. 把条件“white Gaussian single‑filter assumptions”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                       21/23
+NEUROSCI 366 ・Lecture 13                                           Source‑aligned companion
+
+
+
+13 Complete Answer Key with reasoning
+
+1. S:P×T，K:P×1，L:T×1。
+2. SS^T K=Sh。
+3. stimulus covariance/design SS^T/T。
+4. covariance≈σ²I，各方向 curvature 相同。
+5. h_t=k_t/Δt，k_t 通常 0 或 1。
+6. Sh 只累加 spike bins 的 stimulus；white covariance inverse 是 scalar identity。
+7. 乘/求解 stimulus covariance inverse，即 whitening/normal equation。
+8. +K 和 −K stimulus 都触发 spikes，均值抵消。
+9. 只保留均值方向，不能表示多维 subspace。
+10. 投影 L，估 P(spike|L)，除以 Δt。
+11. 避免模型只拟合 stimulus/spike noise，检验对新数据预测。
+12. 描述是条件平均；estimator 需假设；model component 是 fitted LNP 的 filter。
+13. 适用条件/约定：S:P×T。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                           L = ST K
+
+14. 适用条件/约定：SS^T invertible。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                        K̂ = (SS T )−1 Sh
+
+15. 适用条件/约定：linear squared loss。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                          H = SS T /T
+
+16. 适用条件/约定：large T、independent equal‑variance pixels。sanity check 应检查单位、符号、极
+    限或 shape 是否与定义一致。
+                                   SS T ≈ T σs2 I
+
+17. 适用条件/约定：aligned stimulus histories。sanity check 应检查单位、符号、极限或 shape 是否与
+    定义一致。
+                                          1 X
+                                  ST A =          st
+                                         nsp
+                                                   t∈spikes
+
+18. 适用条件/约定：white Gaussian single‑filter assumptions。sanity check 应检查单位、符号、极限
+    或 shape 是否与定义一致。
+                                        K̂ ∝ ST A
+
+
+
+
+                                           22/23
+NEUROSCI 366 ・Lecture 13                                                 Source‑aligned companion
+
+
+
+14 Source‑page concordance and coverage audit
+
+
+ Source file                        Page      Coverage status
+ Lecture13-                         1         Main source‑page unit: thumbnail,
+ SpikeTriggeredAverage-                       reconstruction, explanation, prediction
+ UPDATE.pdf                                   question.
+ Lecture13-                         2         Main source‑page unit: thumbnail,
+ SpikeTriggeredAverage-                       reconstruction, explanation, prediction
+ UPDATE.pdf                                   question.
+ Lecture13-                         3         Main source‑page unit: thumbnail,
+ SpikeTriggeredAverage-                       reconstruction, explanation, prediction
+ UPDATE.pdf                                   question.
+ Lecture13-                         4         Main source‑page unit: thumbnail,
+ SpikeTriggeredAverage-                       reconstruction, explanation, prediction
+ UPDATE.pdf                                   question.
+ Lecture13-                         5         Main source‑page unit: thumbnail,
+ SpikeTriggeredAverage-                       reconstruction, explanation, prediction
+ UPDATE.pdf                                   question.
+ Lecture13-                         6         Main source‑page unit: thumbnail,
+ SpikeTriggeredAverage-                       reconstruction, explanation, prediction
+ UPDATE.pdf                                   question.
+
+
+
+15 Errata, uncertainty log, and external endnotes
+
+15.1 Errata / source cautions
+
+1. Page 4 的 isotropic Hessian 是 large‑sample approximation，不是有限数据精确等式。
+2. Page 5 的 proportionality constant 包含 T、stimulus variance、Δt 与 spike count；不能省略后比
+   较绝对 gain。
+3. Page 6 明确称 workflow heuristic；本教材补充列出 catastrophic failure conditions。
+
+
+15.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+15.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+
+
+                                              23/23
+NEUROSCI 366 ・Lecture 13                                                   Source‑aligned companion
+
+
+15.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/23
+

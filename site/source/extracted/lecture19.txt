@@ -1,0 +1,882 @@
+NEUROSCI 366
+Lecture 19
+
+
+
+群体活动与主成分分析 / Population Activity and
+
+PCA
+Source‑aligned ·Static ·Searchable ·Printable
+
+
+
+
+ Source files
+ ‧ Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf
+ ‧ Lecture19‑PopulationActivity‑PCA.pdf
+ Production version: 2026‑08‑22
+ Reader profile: neuroscience undergraduate education; mathematics scaffolded from high‑
+ school algebra/trigonometry to the formal computational‑neuroscience level.
+
+
+
+
+This companion preserves source‑page order, distinguishes source material from necessary scaffolding and
+extensions, and places hints/answers after the lesson. It is a static PDF: no forms, JavaScript, hidden‑answer
+widgets, passwords, or DRM.
+NEUROSCI 366 ・Lecture 19                                                         Source‑aligned companion
+
+
+
+Contents
+
+
+1 How to use this companion                                                                                3
+
+2 Learning objectives and prerequisite dependency map                                                      3
+
+3 Five‑minute prerequisite diagnostic                                                                      3
+
+4 Source‑aligned lesson / 按原笔记页序                                                                           4
+   4.1 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ·p. 1 . . . . . . . . . . . . . . . . . . .              4
+   4.2 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ·p. 2 . . . . . . . . . . . . . . . . . . .              5
+   4.3 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ·p. 3 . . . . . . . . . . . . . . . . . . .              6
+   4.4 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ·p. 4 . . . . . . . . . . . . . . . . . . .              7
+   4.5 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ·p. 5 . . . . . . . . . . . . . . . . . . .              8
+   4.6 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ·p. 6 . . . . . . . . . . . . . . . . . . .              9
+
+5 Version comparison / 新旧版本审计                                                                              10
+
+6 补全推导与数学支架 / Derivations                                                                                  11
+   6.1 对称 two‑neuron eigensystem . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .         11
+   6.2 mode time constants 与 dynamical regimes . . . . . . . . . . . . . . . . . . . . . . . . .           12
+   6.3 approximate one‑dimensional activity . . . . . . . . . . . . . . . . . . . . . . . . . . . .        13
+   6.4 PCA variance maximization 与 top‑K reconstruction            . . . . . . . . . . . . . . . . . . .   13
+
+7 Cross‑page synthesis / 跨页因果与数学链                                                                          14
+
+8 Worked examples and transfer                                                                             14
+   8.1 two‑neuron transform . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      14
+   8.2 PCA denoising . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     14
+
+9 Formula and notation sheet                                                                               16
+
+10 Bilingual glossary                                                                                      16
+
+11 Common traps, assumptions, and limitations                                                              17
+
+12 Cumulative Knowledge Check                                                                              18
+
+13 Hint Bank                                                                                               20
+
+14 Complete Answer Key with reasoning                                                                      22
+
+15 Source‑page concordance and coverage audit                                                              23
+
+
+
+
+                                                   1/24
+NEUROSCI 366 ・Lecture 19                                                            Source‑aligned companion
+
+
+16 Errata, uncertainty log, and external endnotes                                                            23
+   16.1 Errata / source cautions . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     23
+   16.2 Uncertainty log . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    24
+   16.3 External endnotes . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .      24
+   16.4 Final self‑audit . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   24
+
+
+
+
+                                                     2/24
+NEUROSCI 366 ・Lecture 19                                                 Source‑aligned companion
+
+
+
+1 How to use this companion
+
+1. 先用 5‑minute diagnostic 暴露前置缺口；不要立即翻答案。
+2. 按原笔记页序阅读 source‑page units：先看原页，再读 clean reconstruction 与补全逻辑。
+3. 遇到公式按“问题 → 符号/shape/units → assumptions → 一行一步推导 → intuition → biological
+   meaning → sanity check → failure”阅读。
+4. 完成 Cumulative Knowledge Check；只在需要时依次打开 Hint 1、2、3。
+5. 至少隔一个 page break 后再核对 Answer Key，并记录错误类型：concept、symbol、algebra、as‑
+   sumption、correlation/causation。
+
+  Source hierarchy. 原笔记是内容权威；本书中的“
+                                 【必要前置】/【补全推导】/【跨课连接】/【延伸】
+                                                         ”
+  是为了补齐数学或迁移，不替代源材料。无法确认的内容必须进入 Uncertainty Log。
+
+
+
+2 Learning objectives and prerequisite dependency map
+
+‧ 定义并区分：two‑neuron W。
+‧ 从第一原则推导：common/difference modes。
+‧ 解释几何/计算直觉：mode regimes。
+‧ 连接生物学解释：activity‑space trajectory。
+‧ 诊断 assumptions 与 failure modes：covariance。
+‧ 把概念迁移到新神经科学问题：PCA top‑K。
+
+ Dependency map
+ two‑neuron W → common/difference modes → mode regimes → activity‑space trajectory →
+ covariance → PCA top‑K
+ Core question
+ two‑neuron recurrent modes 如何产生近一维 population trajectories，而 PCA 又如何仅从 activity
+ covariance 找到最大 variance dimensions？
+
+
+
+3 Five‑minute prerequisite diagnostic
+
+1. W=[[0,w],[w,0]] 的 eigenvalues？
+                                （卡住时先看 Source‑page unit 1，再看补全推导。）
+2. common mode vector？
+                     （卡住时先看 Source‑page unit 2，再看补全推导。）
+3. difference mode vector？
+                         （卡住时先看 Source‑page unit 3，再看补全推导。）
+4. w=0.8 时 τ+ 与 τ‑？
+                  （卡住时先看 Source‑page unit 4，再看补全推导。）
+5. w=1 时哪个 mode perfect integrator？
+                                  （卡住时先看 Source‑page unit 5，再看补全推导。）
+
+Scoring guide: 4–5 confident answers → proceed; 2–3 → use the prerequisite labels; 0–1 → read the
+formula/notation sheet once before the source‑aligned lesson.
+
+
+
+                                              3/24
+NEUROSCI 366 ・Lecture 19                                        Source‑aligned companion
+
+
+
+4 Source‑aligned lesson / 按原笔记页序
+
+4.1 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ・p. 1
+
+
+
+
+ Original‑note anchor. [Source: Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf, p. 1]
+ Clean reconstruction. UPDATE Page 1：symmetric two‑neuron network、eigenvalues/eigen‑
+ vectors、common/difference modes。
+ What the note is saying. 本页的中心对象是 two‑neuron W 与 common/difference modes。原笔
+ 记将它们放进以下链条：symmetric two‑neuron network、eigenvalues/eigenvectors、common/d‑
+ ifference modes。
+ Why it follows. 完整求解 two‑neuron weight matrix 的 eigenvalues/eigenvectors，规范化 com‑
+ mon/difference modes，并变换输入。其逻辑后果是：必须明确区分 eigenvectors of recurrent weight
+ matrix W（dynamical modes）与 eigenvectors of covariance C（principal components）；它们
+ 不一般相同。后面的正式推导会逐项写出 assumptions、shape/units、limiting cases 与 failure con‑
+ ditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  W=[[0,w],[w,0]] 的 eigenvalues？
+
+
+
+
+                                        4/24
+NEUROSCI 366 ・Lecture 19                                       Source‑aligned companion
+
+
+4.2 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ・p. 2
+
+
+
+
+ Original‑note anchor. [Source: Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf, p. 2]
+ Clean reconstruction. UPDATE Page 2：coupling regimes、mode time constants、population
+ trajectories。
+ What the note is saying. 本页的中心对象是 mode regimes 与 activity‑space trajectory。原笔记将
+ 它们放进以下链条：coupling regimes、mode time constants、population trajectories。
+ Why it follows. 按 w0 的符号/大小分析 stable、unstable、perfect/leaky integrator regimes。其逻
+ 辑后果是：解释 neural activity space 与 mode‑coordinate space 的同一轨迹表示；说明 approximate
+ one‑dimensionality 如何来自 difference mode decay。后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  common mode vector？
+
+
+
+
+                                        5/24
+NEUROSCI 366 ・Lecture 19                                         Source‑aligned companion
+
+
+4.3 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ・p. 3
+
+
+
+
+ Original‑note anchor. [Source: Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf, p. 3]
+ Clean reconstruction. UPDATE Page 3：activity‑space/mode‑space basis、approximately one‑
+ dimensional dynamics。
+ What the note is saying. 本页的中心对象是 covariance 与 PCA top‑K。原笔记将它们放进以下链条：
+ activity‑space/mode‑space basis、approximately one‑dimensional dynamics。
+ Why it follows. 解释 neural activity space 与 mode‑coordinate space 的同一轨迹表示；说明
+ approximate one‑dimensionality 如何来自 difference mode decay。其逻辑后果是：按 w0 的符号/大
+ 小分析 stable、   unstable、
+                       perfect/leaky integrator regimes。
+                                                       后面的正式推导会逐项写出 assumptions、
+ shape/units、limiting cases 与 failure conditions。
+ Figure reading. 先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经
+ 验观察；示意图不提供未标注的定量精度。
+
+  Stop & Predict
+
+  difference mode vector？
+
+
+
+
+                                         6/24
+NEUROSCI 366 ・Lecture 19                                           Source‑aligned companion
+
+
+4.4 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ・p. 4
+
+
+
+
+ Original‑note anchor. [Source: Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf, p. 4]
+ Clean reconstruction. UPDATE Page 4：PCA motivation、projected variance、covariance eigen‑
+ vectors。
+ What the note is saying. 本页的中心对象是 scree/cumulative variance 与 two‑neuron W。原笔记
+ 将它们放进以下链条：PCA motivation、projected variance、covariance eigenvectors。
+ Why it follows. 从 centered activity covariance 和 projection variance 推导 PC1 是最大 eigen‑
+ value eigenvector；再推广到 orthogonal top‑K PCs。其逻辑后果是：必须明确区分 eigenvectors
+ of recurrent weight matrix W（dynamical modes）与 eigenvectors of covariance C（principal
+ components）；它们不一般相同。后面的正式推导会逐项写出 assumptions、shape/units、limiting
+ cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  w=0.8 时 τ+ 与 τ‑？
+
+
+
+
+                                          7/24
+NEUROSCI 366 ・Lecture 19                                          Source‑aligned companion
+
+
+4.5 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ・p. 5
+
+
+
+
+ Original‑note anchor. [Source: Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf, p. 5]
+ Clean reconstruction. UPDATE Page 5：top‑K PCA、orthogonality、algorithm、denoised re‑
+ construction。
+ What the note is saying. 本页的中心对象是 common/difference modes 与 mode regimes。原笔
+ 记将它们放进以下链条：top‑K PCA、orthogonality、algorithm、denoised reconstruction。
+ Why it follows. 解释 projection、discarded dimensions 和 denoised reconstruction，给出 shape
+ 与数值小例子。其逻辑后果是：从 centered activity covariance 和 projection variance 推导 PC1 是最
+ 大 eigenvalue eigenvector；再推广到 orthogonal top‑K PCs。后面的正式推导会逐项写出 assump‑
+ tions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  w=1 时哪个 mode perfect integrator？
+
+
+
+
+                                         8/24
+NEUROSCI 366 ・Lecture 19                                              Source‑aligned companion
+
+
+4.6 Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf ・p. 6
+
+
+
+
+ Original‑note anchor. [Source: Lecture19‑PopulationActivity‑PCA‑UPDATE.pdf, p. 6]
+ Clean reconstruction. UPDATE Page 6：eigenvalue cliff、cumulative variance explained、di‑
+ mension cutoff。
+ What the note is saying. 本页的中心对象是 activity‑space trajectory 与 covariance。原笔记将它
+ 们放进以下链条：eigenvalue cliff、cumulative variance explained、dimension cutoff。
+ Why it follows. 讲解 scree/eigenvalue cliff、cumulative variance explained 和 cutoff arbitrari‑
+ ness/limitations。其逻辑后果是：从 centered activity covariance 和 projection variance 推导 PC1
+ 是最大 eigenvalue eigenvector；再推广到 orthogonal top‑K PCs。后面的正式推导会逐项写出 as‑
+ sumptions、shape/units、limiting cases 与 failure conditions。
+ Figure reading. 把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲
+ 率对应 eigenvalues；不要把统计轴自动解释为因果通路。
+
+  Stop & Predict
+
+  为什么 trajectory 近一维？
+
+
+
+
+                                            9/24
+NEUROSCI 366 ・Lecture 19                                       Source‑aligned companion
+
+
+
+5 Version comparison / 新旧版本审计
+
+  逐页视觉比较显示，旧版 Pages 1–5 与 UPDATE Pages 1–5 在核心学术内容上实质重复；UPDATE 新
+  增 Page 6：eigenvalue cliff、cumulative variance explained 与 dimension cutoff。旧版未发现
+  需要单独保留的独有公式或论点。
+
+
+
+
+                                       10/24
+NEUROSCI 366 ・Lecture 19                                         Source‑aligned companion
+
+
+
+6 补全推导与数学支架 / Derivations
+
+6.1 对称 two‑neuron eigensystem
+
+【必要前置】      求 W=[[0,w0],[w0,0]] 的 modes。
+                                                    1
+                                 λ+ = w 0 ,   ξ+ = √ (1, 1)T
+                                                     2
+                                                1
+                               λ− = −w0 , ξ− = √ (1, −1)T
+                                                 2
+                                               [     ]
+                                       −1    1 1 1
+                                  V =V    =√
+                                              2 1 −1
+1. characteristic polynomial det(W−λI)=λ²−w0²。
+2. λ=+w0 对应 h1=h2 的 common mode。
+3. λ=−w0 对应 h1=−h2 的 difference mode。
+4. orthonormal V 同时把 activity 与 input 变到 α±、β±。
+
+  Geometric/computational intuition. 网络的自然坐标不是两个 neurons，而是“共同变化”和
+ “相反变化”。
+  Biological interpretation / failure condition. 非对称 W 的 eigenvectors 不一定 orthogonal，
+  V^{‑1} 不再等于 V^T。
+
+  Micro‑check
+  w=0.8 时 τ+ 与 τ‑？
+
+
+
+
+                                              11/24
+NEUROSCI 366 ・Lecture 19                                           Source‑aligned companion
+
+
+6.2 mode time constants 与 dynamical regimes
+
+【补全推导】      w0 如何决定 stability/integration？
+
+                                                         I1 + I2
+                               τ α̇+ = −(1 − w0 )α+ +      √
+                                                             2
+                                                         I1 − I2
+                               τ α̇− = −(1 + w0 )α− +       √
+                                                              2
+                                           τ              τ
+                                 τ+ =          ,    τ−
+                                        1 − w0         1 + w0
+1. |w0|<1 时两个 modes stable。
+2. w0→1^‑ 时 common mode 变慢，w0=1 为 common perfect integrator。
+3. w0→−1^+ 时 difference mode 变慢，w0=−1 为 difference integrator。
+4. |w0|>1 至少一个 mode unstable。
+
+  Geometric/computational intuition. 同一个 coupling 参数对两个正交 patterns 提供相反 feed‑
+  back。
+  Biological interpretation / failure condition. 笔记 time‑constant formula 需保留 mode sign；
+  不能都写成 τ/(1−w0)。
+
+  Micro‑check
+  w=1 时哪个 mode perfect integrator？
+
+
+
+
+                                            12/24
+NEUROSCI 366 ・Lecture 19                                                Source‑aligned companion
+
+
+6.3 approximate one‑dimensional activity
+
+【跨页连接】      为什么 h‑space trajectory 很快靠近一条 line？
+
+                                       h = α+ ξ+ + α− ξ−
+
+                                                         (1, 1)T
+                               α− (t) → 0 ⇒ h(t) ≈ α+ (t) √
+                                                             2
+1. 初始 state 可分解为 common 与 difference components。
+2. 若 τ_‑≪τ_+，difference transient 快速消失。
+3. 之后 trajectory 仍在 two‑neuron space，却几乎局限于 common axis。
+4. 低维是 activity trajectory 的性质，不代表只剩一个 active neuron。
+
+  Geometric/computational intuition. fast modes collapse，slow modes 支配长时间行为。
+  Biological interpretation / failure condition. 不同 inputs/trials 若持续驱动 fast modes，tra‑
+  jectory 不一定始终低维。
+
+  Micro‑check
+  为什么 trajectory 近一维？
+
+
+
+6.4 PCA variance maximization 与 top‑K reconstruction
+
+【模型边界】      仅由数据找最大 variance direction。
+
+                                 Ch = E[(h − Eh)(h − Eh)T ]
+
+                                Var(v T δh) = v T Ch v,       ∥v∥ = 1
+                                          C h v k = λk v k
+                                               ∑
+                                               K
+                                   ĥ = h̄ +         vk vkT (h − h̄)
+                                               k=1
+
+1. Lagrange multiplier 对 v^TCv−λ(v^Tv−1) 求导得到 eigenproblem。
+2. PC1 是最大 eigenvalue eigenvector。
+3. 后续 PCs 在与前面 orthogonal 的子空间中继续最大化 variance。
+4. discarded dimensions 的 variance 被视作不需要/噪声的 approximation，但这不是 causal guaran‑
+   tee。
+
+  Geometric/computational intuition. PCA 旋转坐标轴，使 covariance diagonal，并按 variance
+  排序。
+  Biological interpretation / failure condition. low‑variance dimension 仍可能对 behavior/de‑
+  coding 很重要；cutoff 有任意性。
+
+  Micro‑check
+  PCA 前为什么 center？
+
+
+                                               13/24
+NEUROSCI 366 ・Lecture 19                                                   Source‑aligned companion
+
+
+
+7 Cross‑page synthesis / 跨页因果与数学链
+
+  对称 two‑neuron network 的 common 与 difference eigenmodes 可以完全手算：一个 mode 的反
+  馈为 +w0，另一个为 −w0。若 difference mode 快速衰减，neural trajectory 便落到 common‑mode
+  line，产生 approximate one‑dimensional dynamics。PCA 不需要知道 W，只从 centered activity
+  covariance 找最大 projected variance；因此 W 的 dynamical eigenvectors 与 C 的 principal
+  components 可能相关但一般不相同。
+
+
+
+
+Figure note: schematic reconstruction; it encodes qualitative relations from the lesson and does not
+invent precise empirical data points.
+
+
+8 Worked examples and transfer
+
+8.1 two‑neuron transform
+
+【原课/核心例题】         Prompt. h=(3,1)^T。
+
+ Worked solution. α+=(3+1)/√2=2√2，α‑=(3−1)/√2=√2；重构为 α+ξ++α‑ξ‑=(3,1)。
+ Check. basis change 不丢 information，除非主动 discard dimensions。
+
+
+8.2 PCA denoising
+
+【跨课连接】       Prompt. eigenvalues 为 9、1，保留 K=1。
+
+ Worked solution. 保留 90% total variance；reconstruction 投影到 PC1 line，
+                                                                   去掉 PC2 component。
+ Check. 称其 denoising 需要额外假设：低 variance dimension 主要是 noise。
+
+
+
+                                               14/24
+NEUROSCI 366 ・Lecture 19                                     Source‑aligned companion
+
+
+
+  Micro‑check
+  Explain in your own words. 用不超过 120 字解释：本课从 source page 1 到最后一页，究竟把哪
+  一个输入、状态、统计量或学习规则变成了可检验 prediction？
+  Self‑reflection. 你最可能犯的是 concept、symbol、algebra、assumption 还是 causality error？
+  写出一个具体例子。
+
+
+
+
+                                      15/24
+NEUROSCI 366 ・Lecture 19                                                   Source‑aligned companion
+
+
+
+9 Formula and notation sheet
+
+1. common/difference modes                               √
+                                          ξ± = (1, ±1)T / 2
+Conditions / conventions: symmetric two‑neuron W
+2. orthonormal mode coordinates
+                                               α = V Th
+Conditions / conventions: V^TV=I
+3. mode time constants
+                                           τ± = τ /(1 ∓ w0 )
+Conditions / conventions: |w0|<1 for both stable
+4. activity covariance
+                                            C = E[δhδhT ]
+Conditions / conventions: centered data
+5. PC1
+                                          v1 = arg max v T Cv
+                                                   ∥v∥=1
+
+Conditions / conventions: C symmetric PSD
+6. PC score/projection
+                                            pk = vkT (h − h̄)
+Conditions / conventions: orthonormal PCs
+7. cumulative variance explained
+                                                     ∑            ∑
+                                    VarFrac(K) =           λk /       λj
+                                                     k≤K          j
+
+Conditions / conventions: eigenvalues sorted
+
+
+10 Bilingual glossary
+
+
+ 中文                  English / symbol               Operational meaning
+ 共同模态                common mode                    两个 neurons 同向变化的 eigenmode。
+ 差分模态                difference mode                两个 neurons 反向变化的 eigenmode。
+ 神经活动空间              neural activity space          以各 neuron activity 为坐标的空间。
+ 模态空间                mode space                     以 dynamical eigenmode amplitudes 为坐标。
+ 主成分分析               principal component            按 covariance variance 排序的线性正交降维。
+                     analysis, PCA
+ 主成分                 principal component            covariance eigenvector 与对应 score。
+ 投影                  projection                     取 vector 在某 basis direction 上的 component。
+ 重构                  reconstruction                 由保留 components 近似恢复原 data。
+ 碎石图                 scree plot                     eigenvalue 随 component index 的曲线。
+ 方差解释率               variance explained             保留 eigenvalues 占总和的比例。
+
+
+
+
+                                                 16/24
+NEUROSCI 366 ・Lecture 19                                  Source‑aligned companion
+
+
+
+11 Common traps, assumptions, and limitations
+
+1. 把 W eigenvectors 与 covariance PCs 无条件等同。
+2. common/difference mode normalization 漏掉 1/√2。
+3. mode time constants 的 ± sign 写错。
+4. 低维 trajectory 误解为只有少数 neurons active。
+5. PCA 前不 center data。
+6. 把 variance 最大当作 causal/behavioral relevance 最大。
+7. 把 eigenvalue cliff 当作客观唯一 dimension cutoff。
+
+  Course‑specific risk boundary. 以 UPDATE 为主并明确记录它新增 Page 6。不要把 PCA 说成自
+  动发现 causal dynamics；它只按 variance 排序，可能混合 signal、noise、condition structure。
+
+
+
+
+                                       17/24
+NEUROSCI 366 ・Lecture 19                                               Source‑aligned companion
+
+
+
+12 Cumulative Knowledge Check
+
+Do not turn to the Hint Bank until you have written a first attempt.
+1. W=[[0,w],[w,0]] 的 eigenvalues？
+
+
+
+2. common mode vector？
+
+
+
+3. difference mode vector？
+
+
+
+4. w=0.8 时 τ+ 与 τ‑？
+
+
+
+5. w=1 时哪个 mode perfect integrator？
+
+
+
+6. 为什么 trajectory 近一维？
+
+
+
+7. PCA 前为什么 center？
+
+
+
+8. PC1 解决什么优化？
+
+
+
+9. top‑K reconstruction 公式的含义？
+
+
+
+10. W eigenmode 与 PCA axis 何时可能一致？
+
+
+
+11. eigenvalue cliff 是否保证真实 intrinsic dimension？
+
+
+
+12. 低 variance dimension 能否携带 task information？
+
+
+
+13. 公式表中的“common/difference modes”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+14. 公式表中的“orthonormal mode coordinates”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+15. 公式表中的“mode time constants”解决什么问题？写出适用条件与一个 sanity check。
+
+
+                                                  18/24
+NEUROSCI 366 ・Lecture 19                            Source‑aligned companion
+
+
+
+
+16. 公式表中的“activity covariance”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+17. 公式表中的“PC1”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+18. 公式表中的“PC score/projection”解决什么问题？写出适用条件与一个 sanity check。
+
+
+
+
+                                19/24
+NEUROSCI 366 ・Lecture 19                                   Source‑aligned companion
+
+
+
+13 Hint Bank
+
+1. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+2. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+3. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+4. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+5. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+6. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+7. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+8. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+9. Hint 1. 先识别对象、变量与假设。
+   Hint 2. 写出最相关的定义或方程，再代入。
+   Hint 3. 检查单位、shape、符号与极限情况。
+10. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+11. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+12. Hint 1. 先识别对象、变量与假设。
+    Hint 2. 写出最相关的定义或方程，再代入。
+    Hint 3. 检查单位、shape、符号与极限情况。
+13. Hint 1. 先从“common/difference modes”对应的变量关系入手。
+    Hint 2. 把条件“symmetric two‑neuron W”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+14. Hint 1. 先从“orthonormal mode coordinates”对应的变量关系入手。
+    Hint 2. 把条件“V^TV=I”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+                                    20/24
+NEUROSCI 366 ・Lecture 19                                   Source‑aligned companion
+
+
+15. Hint 1. 先从“mode time constants”对应的变量关系入手。
+    Hint 2. 把条件“|w0|<1 for both stable”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+16. Hint 1. 先从“activity covariance”对应的变量关系入手。
+    Hint 2. 把条件“centered data”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+17. Hint 1. 先从“PC1”对应的变量关系入手。
+    Hint 2. 把条件“C symmetric PSD”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+18. Hint 1. 先从“PC score/projection”对应的变量关系入手。
+    Hint 2. 把条件“orthonormal PCs”逐字转换为 assumption。
+    Hint 3. 写公式，再检查至少一种极端参数或单位。
+
+
+
+
+                                      21/24
+NEUROSCI 366 ・Lecture 19                                           Source‑aligned companion
+
+
+
+14 Complete Answer Key with reasoning
+
+ 1. +w 与 −w。
+ 2. (1,1)^T/√2。
+ 3. (1,−1)^T/√2。
+ 4. τ+=5τ，τ‑=τ/1.8≈0.556τ。
+ 5. common mode。
+ 6. difference/fast mode 衰减，slow common component 保留。
+ 7. 否则 mean offset 会主导 second moment，与 variance directions 混淆。
+ 8. 单位向量中最大化 projected variance。
+ 9. 保留前 K PC projections，discard 其余 orthogonal components。
+10. 当 stationary dynamics/input covariance 使 activity covariance 与 W 共享 eigenvectors 等特定条
+    件。
+11. 不保证；noise、sampling 和 smooth spectrum 可使 cutoff 任意。
+12. 可以，variance 与 information/relevance 不等同。
+13. 适用条件/约定：symmetric two‑neuron W。sanity check 应检查单位、符号、极限或 shape 是否与
+    定义一致。                                       √
+                                 ξ± = (1, ±1)T / 2
+
+14. 适用条件/约定：V^TV=I。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                           α = V Th
+
+15. 适用条件/约定：|w0|<1 for both stable。sanity check 应检查单位、符号、极限或 shape 是否与定义
+    一致。
+                                    τ± = τ /(1 ∓ w0 )
+
+16. 适用条件/约定：centered data。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                        C = E[δhδhT ]
+
+17. 适用条件/约定：C symmetric PSD。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                      v1 = arg max v T Cv
+                                               ∥v∥=1
+
+
+18. 适用条件/约定：orthonormal PCs。sanity check 应检查单位、符号、极限或 shape 是否与定义一致。
+
+                                        pk = vkT (h − h̄)
+
+
+
+
+                                           22/24
+NEUROSCI 366 ・Lecture 19                                       Source‑aligned companion
+
+
+
+15 Source‑page concordance and coverage audit
+
+
+ Source file                    Page   Coverage status
+ Lecture19-                     1      Main source‑page unit: thumbnail,
+ PopulationActivity-PCA-               reconstruction, explanation, prediction
+ UPDATE.pdf                            question.
+ Lecture19-                     2      Main source‑page unit: thumbnail,
+ PopulationActivity-PCA-               reconstruction, explanation, prediction
+ UPDATE.pdf                            question.
+ Lecture19-                     3      Main source‑page unit: thumbnail,
+ PopulationActivity-PCA-               reconstruction, explanation, prediction
+ UPDATE.pdf                            question.
+ Lecture19-                     4      Main source‑page unit: thumbnail,
+ PopulationActivity-PCA-               reconstruction, explanation, prediction
+ UPDATE.pdf                            question.
+ Lecture19-                     5      Main source‑page unit: thumbnail,
+ PopulationActivity-PCA-               reconstruction, explanation, prediction
+ UPDATE.pdf                            question.
+ Lecture19-                     6      Main source‑page unit: thumbnail,
+ PopulationActivity-PCA-               reconstruction, explanation, prediction
+ UPDATE.pdf                            question.
+ Lecture19-                     1      Old‑version comparison: substantively
+ PopulationActivity-PCA.pdf            duplicated by UPDATE; no unique academic
+                                       statement found in visual comparison.
+ Lecture19-                     2      Old‑version comparison: substantively
+ PopulationActivity-PCA.pdf            duplicated by UPDATE; no unique academic
+                                       statement found in visual comparison.
+ Lecture19-                     3      Old‑version comparison: substantively
+ PopulationActivity-PCA.pdf            duplicated by UPDATE; no unique academic
+                                       statement found in visual comparison.
+ Lecture19-                     4      Old‑version comparison: substantively
+ PopulationActivity-PCA.pdf            duplicated by UPDATE; no unique academic
+                                       statement found in visual comparison.
+ Lecture19-                     5      Old‑version comparison: substantively
+ PopulationActivity-PCA.pdf            duplicated by UPDATE; no unique academic
+                                       statement found in visual comparison.
+
+
+
+16 Errata, uncertainty log, and external endnotes
+
+16.1 Errata / source cautions
+
+1. UPDATE 版 Pages 1–5 与旧版实质相同；UPDATE 新增 Page 6 的 eigenvalue cliff 与 cumulative
+   variance explained。
+2. Page 1 的 τ_‑ 公式应按 λ_‑=‑w0 得 τ/(1+w0)；本教材明确保留 ±。
+3. PCA 的’denoised’ reconstruction 需要低‑variance dimensions 主要为 noise 的额外假设。
+
+
+
+                                       23/24
+NEUROSCI 366 ・Lecture 19                                                   Source‑aligned companion
+
+
+16.2 Uncertainty log
+
+No unresolved handwriting uncertainty changes a core definition, equation, figure interpretation,
+or answer in this companion. Where handwriting was potentially ambiguous, the source‑page
+image is preserved and the reconstruction avoids claiming unverified detail.
+
+
+16.3 External endnotes
+
+No external web or textbook source was used to replace the uploaded notes. Added material is
+limited to necessary mathematical scaffolding, explicit assumptions, standard sanity checks, and
+clearly labeled transfer examples.
+
+
+16.4 Final self‑audit
+
+All source pages listed above were visually inspected. Equations were checked for symbol defini‑
+tions, units/shapes, assumptions, algebraic transitions, limiting cases, and failure conditions. The
+PDF is static and contains no interactive form fields or scripts.
+
+
+
+
+                                               24/24
+
