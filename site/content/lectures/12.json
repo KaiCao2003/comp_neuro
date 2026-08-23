@@ -100,6 +100,335 @@
       "stopPredict": "Gabor 的 φ 控制什么？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能以 photoreceptor-RGC-V1-MT/IT/LIP 的课程级图说明视觉 hierarchy，并区分 anatomical pathway、receptive-field computation 与功能标签。",
+      "能完整解释 LNP 模型的 linear filter、static nonlinearity 与 conditional Poisson output，并说明为何 early vision 常以 contrast 而非 raw luminance 为输入。",
+      "能从 spatial convolution 构造 ON/OFF Difference-of-Gaussians receptive field，并预测 uniform field、center spot 与 surround illumination 的响应符号。",
+      "能拆解 Gabor kernel 的 Gaussian envelope、carrier frequency、orientation、phase 与 saturation，解释 V1 simple-cell orientation tuning。",
+      "能把 receptive field 扩展到 space-time，区分 separable 与 nonseparable kernels，并用 x-t 斜率推断 direction selectivity。"
+    ],
+    "prerequisiteBridge": [
+      "receptive field 不是单纯的屏幕区域，而是 stimulus pattern 到 neural response 的关系。一个 linear spatial receptive field K(x,y) 给每个位置一个正负 weight；stimulus contrast s(x,y) 与 K 在所有位置相乘并求和，得到 scalar drive L。正 weight 偏好亮 contrast，负 weight 偏好暗 contrast，具体符号还取决于 ON/OFF convention。",
+      "contrast 定义 s=(I-I_0)/I_0，其中 I 是局部 luminance、I_0 是适应后的平均 luminance。除以 I_0 使同样的相对变化在不同背景亮度下可比较。Poisson model 则把 nonnegative rate r 与时间窗 T 转成 count distribution n~Poisson(rT)；它描述 conditional variability，不意味着真实 spikes 完全独立。",
+      "二维 rotation 只需高中三角：x'=x cosθ+y sinθ，y'=y cosθ-x sinθ。cosine carrier cos(kx'+φ) 的 k 控制 spatial angular frequency，φ 控制 phase。加入时间后，每个 stimulus history 变成 x-y-t volume；moving edge 在 x-t plane 画出斜线，其 slope 由 velocity 决定。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L12-D1",
+        "prompt": "在 I_0=100、局部 I=120 时 contrast 是多少？若 I_0=200、局部 I=220，raw increment 相同但 contrast 如何变化？",
+        "answer": "第一种 contrast 为 0.2；第二种为 0.1。",
+        "explanation": "contrast 测量相对变化。相同 20-unit luminance increment 在较亮 background 上比例更小，因此 early visual model 不应只比较 raw difference。",
+        "remediationModuleId": "L12-M1"
+      },
+      {
+        "id": "L12-D2",
+        "prompt": "若 ON-center kernel 的 total integral 为零，uniform positive contrast 覆盖 center 与 surround 时 linear response 应是什么？",
+        "answer": "接近零，因为 center 的正 contribution 与 surround 的负 contribution 抵消。",
+        "explanation": "零积分 center-surround 抑制 common luminance component，保留空间差异。实际 cell 可能因不完全平衡、nonlinearity 与 adaptation 而不精确为零。",
+        "remediationModuleId": "L12-M1"
+      },
+      {
+        "id": "L12-D3",
+        "prompt": "Gabor kernel 中增大 k 而保持 Gaussian envelope 不变，会改变哪一种 tuning？",
+        "answer": "会提高 carrier 的 spatial frequency，使 ON/OFF lobes 更密；preferred orientation 由 rotation θ 决定。",
+        "explanation": "k 控制沿 x' 方向每单位距离的 phase 变化，θ 控制 carrier coordinate 的方向，φ 则平移亮暗 lobes。",
+        "remediationModuleId": "L12-M2"
+      },
+      {
+        "id": "L12-D4",
+        "prompt": "为什么一个完全 separable 的 K(x,t)=K_x(x)K_t(t) 通常不能仅靠 linear response 区分相反方向、同速度的 moving edge？",
+        "answer": "因为 spatial preference 在所有 time lags 都只有同一形状和位置，没有 x-t tilted structure 来编码先后位置关系。",
+        "explanation": "direction selectivity 需要空间位置与时间延迟耦合；nonseparable kernel 的 preferred position 随 lag 改变，才能匹配一方向 trajectory 而拒绝反方向。",
+        "remediationModuleId": "L12-M3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L12-M1",
+        "title": "视觉层级、LNP 与 center-surround computation",
+        "sourceRefs": [
+          {
+            "file": "Lecture12-IntroToVision.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture12-IntroToVision.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "视觉系统如何从 luminance image 建立局部 contrast feature，并用一个最小概率模型连接 receptive field 与 spikes？",
+        "paragraphs": [
+          "原稿把 photoreceptors、retinal ganglion cells（RGCs）、V1、MT、IT 与 LIP 放在层级图中。retina 先编码 local contrast；V1 强调 orientation 等局部结构；MT 与 dorsal stream 关联 motion/action-relevant variables；IT 与 ventral stream 关联 object features；LIP 常用于 decision-related representations。该图是课程级计算地图，不表示信息只沿单向 feedforward path 流动。",
+          "沿 hierarchy，classical receptive-field size 通常变大，选择的 feature 更复杂，history dependence 与 context 也增加；更高层 cell 可能对位置、phase 或局部细节更 invariant。feature selectivity 回答“什么 stimulus pattern 改变 response”，receptive field 还回答“哪些位置和时间 lag 的 pattern 有影响”。这两个问题不能只用一个热图颜色概括。",
+          "LNP model 依次包含 linear、nonlinear、Poisson 三步。linear stage L=K*s 测量 stimulus 与 receptive-field template 的匹配；nonlinearity r=F(L) rectifies、thresholds 或 saturates drive，确保 rate 合理；Poisson stage n~Poisson(rT) 描述给定 stimulus 后的 count variability。LNP 是 descriptive model，不声称每一步对应一个独立 anatomical box。",
+          "RGC center-surround 常用 Difference of Gaussians（DoG）近似。ON-center 用窄正 Gaussian 减去宽负 Gaussian；OFF-center 整体反号。若两部分 integral 接近平衡，uniform field 被抵消，center 与 surround 的差异被放大。threshold-linear rectification [L]_+=max(L,0) 再把 ON 与 OFF drive 分成非负 feature maps。"
+        ],
+        "keyPoints": [
+          "视觉 hierarchy 同时包含 anatomy 与 computational abstraction，不能把 region label 当成唯一功能。",
+          "LNP 的 linear drive 可正可负，rate 经 nonlinearity 变为非负，spike count 再由 conditional distribution 产生。",
+          "DoG center-surround 抑制 common luminance，突出 local contrast 与 edges。"
+        ],
+        "derivation": {
+          "title": "从 contrast 与 convolution 到 ON-center DoG",
+          "setup": "令 r^2=x^2+y^2，normalized 2D Gaussian 为 G_σ(r)=(2πσ^2)^{-1}exp[-r^2/(2σ^2)]，其 total integral 为 1。",
+          "steps": [
+            {
+              "title": "先把 luminance 归一化",
+              "explanation": "以 adaptation level I_0 为基线，定义无量纲 contrast。I=I_0 时 s=0，亮于基线为正，暗于基线为负。",
+              "latex": "s(x,y,t)=\\frac{I(x,y,t)-I_0}{I_0}"
+            },
+            {
+              "title": "定义平移 receptive-field drive",
+              "explanation": "以 cell center (x_0,y_0) 为参考，将 kernel 与每个 stimulus 位置相乘并积分。kernel argument 的差值表达同一 RF 在不同中心位置共享形状。",
+              "latex": "L(x_0,y_0)=\\iint K(x_0-x',y_0-y')s(x',y')\\,dx'\\,dy'"
+            },
+            {
+              "title": "构造 center-surround 并检查 uniform response",
+              "explanation": "令 K=A G_{σ_c}-B G_{σ_s}，σ_s>σ_c。若 A=B，K 的 integral 为零，uniform s_0 给 L=s_0∫K=0。",
+              "latex": "K_{\\mathrm{ON}}(r)=A G_{\\sigma_c}(r)-B G_{\\sigma_s}(r),\\qquad \\sigma_s>\\sigma_c"
+            }
+          ],
+          "symbolNotes": [
+            "σ_c、σ_s 是 spatial distance units；A、B 控制 integrated center/surround strength，而不只是 peak height。",
+            "K 的单位需使 K×area×contrast 得到 linear drive；离散 pixels 时 integral 变成带 pixel-area factor 的 sum。"
+          ],
+          "unitsCheck": "contrast 无量纲；若 x,y 以 degree of visual angle 表示，normalized Gaussian 单位为 degree^{-2}，积分后 L 与 A、B 的 drive 单位一致。",
+          "limitCheck": "σ_s=σ_c 且 A=B 时整个 kernel 为零；surround 很宽但 B 未按 area 缩放时，比较 peak height 会误判 total inhibitory strength。"
+        },
+        "workedExample": {
+          "title": "三位置离散 center-surround sign prediction",
+          "problem": "用离散 kernel K=(-0.5,1,-0.5) 表示 left surround、center、right surround。比较 stimuli s_A=(0,1,0) 与 s_B=(1,1,1)，并做 rectification。",
+          "steps": [
+            "L_A=(-0.5)0+1×1+(-0.5)0=1，rectified response [L_A]_+=1。",
+            "L_B=-0.5+1-0.5=0，uniform contrast 被平衡 kernel 抵消。",
+            "若用 OFF-center kernel -K，stimulus A 得 -1，经过 [L]_+ 后为 0。"
+          ],
+          "result": "ON-center 对局部亮点有正 drive，对均匀亮场无 linear drive；OFF-center 对同一亮点被抑制。",
+          "sanityCheck": "kernel weights sum 为零正是 uniform cancellation 的离散条件；若 sum 不为零，uniform field 会留下 residual response。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“ON cell 喜欢亮、OFF cell 喜欢暗”不足以描述 center-surround receptive field？",
+          "answer": "response 取决于 contrast 的位置与 surround context：亮点在 ON center 可兴奋，亮 surround 可抵消；同一 global luminance 对平衡 kernel 可能无 response，因此 polarity 与 spatial pattern 必须同时说明。"
+        },
+        "pitfalls": [
+          "把 receptive field 当成纯几何边界，不写 kernel 内部的正负 weights、time lags 与 response definition。",
+          "比较 Gaussian center/surround 时只看 peak，不考虑 width、integrated strength 和 kernel sign convention。"
+        ]
+      },
+      {
+        "id": "L12-M2",
+        "title": "Feature maps、Gabor simple cells 与 orientation tuning",
+        "sourceRefs": [
+          {
+            "file": "Lecture12-IntroToVision.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture12-IntroToVision.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "如何用一个 localized sinusoidal filter 同时选择位置、orientation、spatial frequency 与 phase，并把其响应组成 feature map？",
+        "paragraphs": [
+          "对同一个 kernel 在所有 retinal locations 做 convolution，可得到 feature map：每个 map pixel 不是原图 intensity，而是该位置周围 patch 与 feature template 的 match。ON 与 OFF kernels 产生两张 polarity-specific maps，rectification 保留各自偏好方向的 positive drive。这与 convolutional neural network 的共享 filters 在形式上相似，但 biological wiring、learning rule 与 boundary handling 不因此相同。",
+          "V1 simple-cell receptive field 常呈交替 ON/OFF elongated lobes。Gabor kernel 用 Gaussian envelope 限定位置与 size，用 cosine carrier 产生 alternating lobes。θ 旋转 coordinate system，k 控制 spatial frequency，φ 控制 phase。orientation tuning 来自 edge 与 lobes 对齐时正贡献相加，orthogonal edge 则在正负区域间抵消。",
+          "若 θ 改变，preferred orientation 随 coordinate axis 改变；若 φ 改变，亮暗 lobe pattern 沿 carrier direction 平移，而 orientation 与 frequency 不变。若 k 增大，单位距离内 lobes 变密。把三个参数混在一个“方向”标签里，会无法预测 phase reversal 或不同 bar width 的 response。",
+          "linear Gabor drive 可用 rectifying-saturating nonlinearity 转成 firing rate，例如 r=r_max[L]_+^2/(α^2+[L]_+^2)。小 positive L 时 response 上升，大 L 时趋近 r_max，negative L 被截断。localized sinusoidal analysis 与 wavelet/JPEG 有数学亲缘，因为它们都用局部 scale/orientation components 表示图像；这不表示 cortex 实现同一 codec。"
+        ],
+        "keyPoints": [
+          "feature map 的每个位置存 filter response，不是原图复制。",
+          "Gabor 的 envelope 控制 localization，θ 控制 orientation，k 控制 frequency，φ 控制 phase。",
+          "nonlinearity 决定 sign、threshold 和 saturation，因此同一 linear kernel 可产生不同 tuning amplitude。"
+        ],
+        "derivation": {
+          "title": "Rotated Gabor 如何产生 orientation-selective drive",
+          "setup": "取原坐标 (x,y)，以 θ 定义 carrier-aligned coordinates；Gaussian widths σ_x,σ_y 可不同，形成 elongated envelope。",
+          "steps": [
+            {
+              "title": "旋转 coordinate system",
+              "explanation": "x' 是沿 preferred carrier normal 的坐标，y' 与其垂直。rotation 保持距离，不改变 stimulus content，只改变表达 basis。",
+              "latex": "x'=x\\cos\\theta+y\\sin\\theta,\\qquad y'=y\\cos\\theta-x\\sin\\theta"
+            },
+            {
+              "title": "写 localized carrier",
+              "explanation": "Gaussian 让 filter 只看有限区域，cosine 让该区域内出现正负交替 lobes；normalization 可按需要选择。",
+              "latex": "K(x,y)=A\\exp\\!\\left[-\\frac{x'^2}{2\\sigma_x^2}-\\frac{y'^2}{2\\sigma_y^2}\\right]\\cos(kx'+\\phi)"
+            },
+            {
+              "title": "解释 tuning",
+              "explanation": "与相同 k、θ、φ 的 grating 做 inner product 时同号区域重合，sum 大；相差 π phase 时 linear response 反号，rectification 可使两者 firing responses 不同。",
+              "latex": "L=\\iint K(x,y)s(x,y)\\,dx\\,dy,\\qquad r=F(L)"
+            }
+          ],
+          "symbolNotes": [
+            "k 是 radians per spatial distance；cycles per degree 等于 k/(2π)。θ 与 grating bar orientation 相差 90° 还是相同，取决于用 wave-vector normal 还是 bar axis 命名。",
+            "φ 是 radians，改变 ON/OFF lobe alignment；σ_x,σ_y 与 x,y 使用相同 spatial units。"
+          ],
+          "unitsCheck": "kx' 与 φ 都必须无量纲，因此 k 的单位是 inverse distance；exponential 的 x'^2/σ_x^2 也无量纲。",
+          "limitCheck": "σ_x,σ_y→∞ 时失去 localization；k→0 时 carrier 接近常数，kernel 更像 Gaussian blob 而非 oriented alternating filter。"
+        },
+        "workedExample": {
+          "title": "同 orientation、不同 phase 的 simple-cell response",
+          "problem": "理想化令 filter 对 matching grating 的 linear drive 为 L=A cos(φ_s-φ_K)，A=10。比较 phase difference 0、π/2、π，并用 r=[L]_+。",
+          "steps": [
+            "difference 0 时 L=10cos0=10，r=10。",
+            "difference π/2 时 L=10cos(π/2)=0，r=0。",
+            "difference π 时 L=10cosπ=-10，rectification 后 r=0。"
+          ],
+          "result": "simple-cell firing 同时依赖 orientation/frequency match 与 bright-dark phase alignment。",
+          "sanityCheck": "如果不 rectifying，phase π 的 response 是 -10 而不是无 response；neural firing rate 的非负限制来自 nonlinear stage。"
+        },
+        "selfCheck": {
+          "prompt": "为什么改变 Gabor phase φ 不等于改变 preferred orientation θ？",
+          "answer": "φ 沿固定 carrier axis 平移正负 lobes，决定亮边还是暗边与 filter 对齐；θ 旋转整个 coordinate system，决定哪一方向的 edge 或 grating 与 elongated lobes 对齐。"
+        },
+        "pitfalls": [
+          "混淆 grating wave-vector direction 与 bar orientation，未说明两者通常相差 90°。",
+          "把 rectification 或 saturation 当成 linear receptive field 本身，忽略 L 与 firing rate r 是不同变量。"
+        ]
+      },
+      {
+        "id": "L12-M3",
+        "title": "Spatiotemporal receptive fields 与 motion as space-time orientation",
+        "sourceRefs": [
+          {
+            "file": "Lecture12-IntroToVision.pdf",
+            "page": 5
+          },
+          {
+            "file": "Lecture12-IntroToVision.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "为什么 direction selectivity 需要把“哪里”与“多久以前”联合起来，而不是分别使用一个 spatial filter 和一个 temporal filter？",
+        "paragraphs": [
+          "加入时间后，linear drive 要对过去 stimulus history 积分：K(x',y',τ) 与 s(x-x',y-y',t-τ) 相乘，τ≥0 表示 look-back time。kernel 的 temporal lobes 可 biphasic，使 static image 的持续 component 相互抵消；center 与 surround 若 temporal course 不同，RGC receptive field 通常是 nonseparable。",
+          "separable kernel K(x,y,t)=K_s(x,y)K_t(t) 的所有 time slices 只有统一 spatial pattern，差别只是 scalar amplitude。它能表达同一位置 feature 随时间先兴奋后抑制，却不能移动 preferred location。nonseparable kernel 的 positive/negative lobes 会随 lag 改变位置，因此把 space 与 time order 绑定起来。",
+          "一条以 velocity v 向右移动的 vertical edge 满足 x(t)=x_0+vt。在 x-t diagram 中这是 slope dx/dt=v 的斜线。若 receptive field 的 positive lobes 沿同一斜线排列，edge 依时间顺序穿过所有 positive zones，inner product 大；反方向 edge 走相反斜线，会撞上 positive/negative mismatch。",
+          "原稿第 6 页给出的 rightward-motion RF 正是这种 tilted pattern。direction selectivity 仍可由 multiple filters、quadratic motion energy 或 recurrence 实现，所以 tilted linear RF 是一个可检验的最小 description。eye movements、coordinate transforms 与 finite display refresh 会改变 stimulus trajectory，实验解释时必须明确 reference frame。"
+        ],
+        "keyPoints": [
+          "spatiotemporal convolution 使用过去 stimulus history，time lag orientation 必须明确。",
+          "separable kernel 的 spatial profile 不随 lag 移动；tilted nonseparable kernel 可编码 velocity sign。",
+          "motion 在 x-t plane 中是 orientation，velocity 对应 trajectory slope。"
+        ],
+        "derivation": {
+          "title": "Moving edge 与 tilted RF 的匹配条件",
+          "setup": "忽略 y，令 moving edge 的 contrast 集中在 x=x_0+vt；取一个 RF ridge 集中在 x=x_c-vτ，其中 τ 是过去 lag。",
+          "steps": [
+            {
+              "title": "写历史中的 edge 位置",
+              "explanation": "当前时刻 t 回看 τ，edge 在 t-τ 时的位置是 x_0+v(t-τ)=x_0+vt-vτ，因此 history trajectory 随 lag 的 slope 为 -v。",
+              "latex": "x_{\\mathrm{edge}}(t-\\tau)=x_0+vt-v\\tau"
+            },
+            {
+              "title": "与 RF ridge 对齐",
+              "explanation": "若 RF ridge 选择 x=x_c-vτ，并令 x_c=x_0+vt，则每个 lag 的 edge 都落在 positive ridge 上，contributions 同号相加。",
+              "latex": "x_{\\mathrm{RF}}(\\tau)=x_c-v\\tau"
+            },
+            {
+              "title": "反方向造成 mismatch",
+              "explanation": "把 velocity 改为 -v，history trajectory 变为 x_0-vt+vτ，slope 符号反转，不再与原 ridge 重合，且可能跨越抑制 lobes。",
+              "latex": "v\\mapsto -v\\quad\\Longrightarrow\\quad \\text{opposite space-time orientation}"
+            }
+          ],
+          "symbolNotes": [
+            "τ 是非负 look-back time，不是 absolute clock time；RF 图若把过去画在上或下，visual slope sign 会随 plotting convention 改变。",
+            "v 的单位是 spatial distance/time，例如 degree/s；x 与 RF position 使用相同 spatial reference frame。"
+          ],
+          "unitsCheck": "vτ 具有 distance 单位，可与 x 相加；spatiotemporal integral 还包含 dx dτ，kernel normalization 应匹配 drive units。",
+          "limitCheck": "v=0 时 ridge 不倾斜，对 static feature；若 temporal window 极短，两个相反 direction trajectories 尚未分开，direction discrimination 会变弱。"
+        },
+        "workedExample": {
+          "title": "三帧离散 trajectory matching",
+          "problem": "在 times t-2,t-1,t 的三个 frames 中，rightward edge positions 是 0,1,2。RF 在对应 lags 的 positive positions 也设为 0,1,2，每次 match 给 +1；mismatch 给 0。比较 rightward 与 leftward positions 2,1,0。",
+          "steps": [
+            "rightward sequence 在三个 lags 全部 match，总 linear drive 为 1+1+1=3。",
+            "leftward sequence 只有中间 position 1 match，另外两帧 mismatch，总 drive 为 1。",
+            "加入 threshold 2 后，rightward response 通过，leftward response 被截为 0。"
+          ],
+          "result": "相同三个位置信息因 temporal order 不同而产生不同 response，direction selectivity 来自 space-time conjunction。",
+          "sanityCheck": "若把三个 frames 无序平均，两种 sequence 都包含 positions {0,1,2}，差异消失；因此 temporal order 是不可省略的信息。"
+        },
+        "selfCheck": {
+          "prompt": "一个 temporal biphasic kernel 为什么不自动保证 direction selectivity？",
+          "answer": "若 kernel 仍可分成固定 spatial profile 乘 temporal waveform，它只改变同一空间 feature 的时间加权，没有把不同 locations 与特定 lags 配对；direction 需要 space-time nonseparability 或等价的多通道 nonlinear computation。"
+        },
+        "pitfalls": [
+          "把 time lag 与 absolute time 混用，导致 receptive field 在时间轴上翻转并把 preferred direction 判反。",
+          "只看单帧 spatial RF 就解释 motion tuning，未检查不同位置在不同 lag 的联合 pattern。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L12-FIG-A1",
+      "lecture": 12,
+      "lectureTitle": "视觉导论：层级、感受野与 LNP 模型",
+      "moduleId": "L12-M2",
+      "title": "从 ON/OFF 局部对比通道到定向 Gabor-like 感受野",
+      "alt": "流程图从视网膜图像 patch 经过 ON 和 OFF center-surround 对比通道、空间排列的正负子区，形成定向的 Gabor-like 线性驱动。",
+      "caption": "ON/OFF center-surround filters 先把绝对亮度改写为局部 contrast；将多个 polarity-specific subfields 沿一条轴排列后，正负贡献在匹配方向上相加、在正交方向上抵消，于是形成 elongated、orientation-selective 的 Gabor-like linear receptive field。该流程区分了局部 DoG 对比计算与随后子区排列产生的 orientation tuning。",
+      "sourceRefs": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 3
+        },
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 4
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "image-patch",
+          "label": "局部图像\npatch",
+          "x": 11,
+          "y": 55
+        },
+        {
+          "id": "on-off",
+          "label": "ON / OFF\ncenter-surround",
+          "x": 37,
+          "y": 55
+        },
+        {
+          "id": "aligned-subfields",
+          "label": "排列的正负\nsubfields",
+          "x": 63,
+          "y": 55,
+          "tone": "accent"
+        },
+        {
+          "id": "gabor-drive",
+          "label": "Gabor-like drive\norientation tuning",
+          "x": 89,
+          "y": 55
+        }
+      ],
+      "edges": [
+        {
+          "from": "image-patch",
+          "to": "on-off",
+          "label": "local contrast"
+        },
+        {
+          "from": "on-off",
+          "to": "aligned-subfields",
+          "label": "feature maps"
+        },
+        {
+          "from": "aligned-subfields",
+          "to": "gabor-drive",
+          "label": "signed sum"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 contrast 与 spatial convolution",
@@ -271,9 +600,9 @@
       "zh": "中心-周围",
       "en": "center-surround",
       "definition": "中心与外围具有相反符号的 RF organization。",
-      "sectionId": "lecture-12-source-2",
+      "sectionId": "lecture-12-source-1",
       "sourceFile": "Lecture12-IntroToVision.pdf",
-      "sourcePage": 2
+      "sourcePage": 1
     },
     {
       "id": "L12-G07",
@@ -327,7 +656,42 @@
     "需避免把 receptive field 只说成屏幕上的\"位置\"；它是刺激到响应关系。说明 linear RF、classical RF 与实验定义的差异。sparse-noise RF mapping 可作为迁移例。"
   ],
   "errata": [
-    "1. Page 1 的 region/function 是课程级 hierarchy schematic，不是完整视觉解剖。 2. Page 4 的 wavelet/JPEG connection 是形式类比；biological representation 与工程 codec 不等同。 3. Page 5 将 ON RGC 作为 nonseparable example 是概念性说明；实际 temporal substructure 依细胞类型。"
+    {
+      "id": "L12-E01",
+      "lecture": 12,
+      "lectureTitle": "视觉导论：层级、感受野与 LNP 模型",
+      "kind": "caution",
+      "sourceFile": "Lecture12-IntroToVision.pdf",
+      "sourcePage": 1,
+      "sectionId": "L12-M1",
+      "originalIssue": "Page 1 的 region/function 是课程级 hierarchy schematic，不是完整视觉解剖。",
+      "explanation": "该图是课程级计算地图，不表示信息只沿单向 feedforward path 流动。",
+      "correction": null
+    },
+    {
+      "id": "L12-E02",
+      "lecture": 12,
+      "lectureTitle": "视觉导论：层级、感受野与 LNP 模型",
+      "kind": "caution",
+      "sourceFile": "Lecture12-IntroToVision.pdf",
+      "sourcePage": 4,
+      "sectionId": "L12-M2",
+      "originalIssue": "Page 4 的 wavelet/JPEG connection 是形式类比；biological representation 与工程 codec 不等同。",
+      "explanation": "localized sinusoidal analysis 与 wavelet/JPEG 有数学亲缘，因为它们都用局部 scale/orientation components 表示图像；这不表示 cortex 实现同一 codec。",
+      "correction": null
+    },
+    {
+      "id": "L12-E03",
+      "lecture": 12,
+      "lectureTitle": "视觉导论：层级、感受野与 LNP 模型",
+      "kind": "caution",
+      "sourceFile": "Lecture12-IntroToVision.pdf",
+      "sourcePage": 5,
+      "sectionId": "L12-M3",
+      "originalIssue": "Page 5 将 ON RGC 作为 nonseparable example 是概念性说明；实际 temporal substructure 依细胞类型。",
+      "explanation": "kernel 的 temporal lobes 可 biphasic，使 static image 的持续 component 相互抵消；center 与 surround 若 temporal course 不同，RGC receptive field 通常是 nonseparable。",
+      "correction": "实际 temporal substructure 依细胞类型"
+    }
   ],
   "questions": [
     {
@@ -345,7 +709,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 12 讲：contrast 为什么除以 I0？",
@@ -373,7 +737,7 @@
         "c": "该选项回答的是“Gabor 的 φ 控制什么？”。",
         "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 4 页。"
       },
-      "explanation": "使亮度差相对背景归一化，并得到 dimensionless contrast。"
+      "explanation": "使亮度差相对背景归一化，并得到 dimensionless contrast。 retina 先编码 local contrast；V1 强调 orientation 等局部结构；MT 与 dorsal stream 关联 motion/action-relevant variables；IT 与 ventral stream 关联 object features；LIP 常用于 decision-related representations。"
     },
     {
       "id": "L12-Q02",
@@ -390,7 +754,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：ON-center DoG 的 center 与 surround 符号？",
@@ -418,7 +782,7 @@
         "b": "该选项回答的是“rectification 在 ON/OFF feature map 中做什么？”。",
         "d": "这是“中心-周围（center-surround）”的定义。"
       },
-      "explanation": "center 正、surround 负。"
+      "explanation": "center 正、surround 负。 若两部分 integral 接近平衡，uniform field 被抵消，center 与 surround 的差异被放大。"
     },
     {
       "id": "L12-Q03",
@@ -435,7 +799,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 12 讲：uniform field 对零积分 center-surround 的 linear response？",
@@ -463,7 +827,7 @@
         "b": "这是“linear receptive-field drive”的适用条件。",
         "c": "这是“方向选择性（direction selectivity）”的定义。"
       },
-      "explanation": "近 0。"
+      "explanation": "近 0。 V1 simple-cell receptive field 常呈交替 ON/OFF elongated lobes。"
     },
     {
       "id": "L12-Q04",
@@ -480,7 +844,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 12 讲：rectification 在 ON/OFF feature map 中做什么？",
@@ -508,7 +872,7 @@
         "c": "该选项回答的是“rotation formula 中 θ 改变什么？”。",
         "d": "这是“中心-周围（center-surround）”的定义。"
       },
-      "explanation": "保留偏好符号的 positive drive，截断负值。"
+      "explanation": "保留偏好符号的 positive drive，截断负值。 ON 与 OFF kernels 产生两张 polarity-specific maps，rectification 保留各自偏好方向的 positive drive。"
     },
     {
       "id": "L12-Q05",
@@ -525,7 +889,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：Gabor 的 k 控制什么？",
@@ -553,7 +917,7 @@
         "c": "这是“LNP spike generation”的适用条件。",
         "d": "该选项回答的是“ON-center DoG 的 center 与 surround 符号？”。"
       },
-      "explanation": "spatial frequency。"
+      "explanation": "spatial frequency。 separable kernel K(x,y,t)=K_s(x,y)K_t(t) 的所有 time slices 只有统一 spatial pattern，差别只是 scalar amplitude。"
     },
     {
       "id": "L12-Q06",
@@ -570,7 +934,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 12 讲：Gabor 的 φ 控制什么？",
@@ -598,7 +962,7 @@
         "b": "这是“特征图（feature map）”的定义。",
         "d": "该选项回答的是“contrast 为什么除以 I0？”。"
       },
-      "explanation": "spatial phase/ON-OFF lobe placement。"
+      "explanation": "spatial phase/ON-OFF lobe placement。 separable kernel K(x,y,t)=K_s(x,y)K_t(t) 的所有 time slices 只有统一 spatial pattern，差别只是 scalar amplitude。"
     },
     {
       "id": "L12-Q07",
@@ -615,7 +979,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：rotation formula 中 θ 改变什么？",
@@ -643,7 +1007,7 @@
         "b": "这是“中心-周围（center-surround）”的定义。",
         "c": "该选项回答的是“rectification 在 ON/OFF feature map 中做什么？”。"
       },
-      "explanation": "filter preferred orientation。"
+      "explanation": "filter preferred orientation。 若 θ 改变，preferred orientation 随 coordinate axis 改变；若 φ 改变，亮暗 lobe pattern 沿 carrier direction 平移，而 orientation 与 frequency 不变。"
     },
     {
       "id": "L12-Q08",
@@ -660,7 +1024,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 12 讲：separable RF 如何写？",
@@ -671,24 +1035,24 @@
         },
         {
           "id": "b",
-          "text": "相反 spacetime tilt/slope。"
+          "text": "中心与外围具有相反符号的 RF organization。"
         },
         {
           "id": "c",
-          "text": "Gaussian-windowed sinusoid。"
+          "text": "相反 spacetime tilt/slope。"
         },
         {
           "id": "d",
-          "text": "rank-1 space-time structure"
+          "text": "Gaussian-windowed sinusoid。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该选项回答的是“相反 direction 对应什么？”。",
-        "c": "这是“Gabor 核（Gabor kernel）”的定义。",
-        "d": "这是“separable RF”的适用条件。"
+        "b": "这是“中心-周围（center-surround）”的定义。",
+        "c": "该选项回答的是“相反 direction 对应什么？”。",
+        "d": "这是“Gabor 核（Gabor kernel）”的定义。"
       },
-      "explanation": "K(x,y,t)=K_s(x,y)K_t(t)。"
+      "explanation": "K(x,y,t)=K_s(x,y)K_t(t)。 separable kernel K(x,y,t)=K_s(x,y)K_t(t) 的所有 time slices 只有统一 spatial pattern，差别只是 scalar amplitude。"
     },
     {
       "id": "L12-Q09",
@@ -705,7 +1069,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "figure",
       "cognitiveLevel": "evaluate",
       "stem": "第 12 讲：为什么 motion 在 x-t 图上是斜线？",
@@ -733,7 +1097,7 @@
         "c": "这是“背侧通路（dorsal stream）”的定义。",
         "d": "这是“可分离（separable）”的定义。"
       },
-      "explanation": "position 随 time 线性改变，轨迹 x=vt+x0。"
+      "explanation": "position 随 time 线性改变，轨迹 x=vt+x0。 若 θ 改变，preferred orientation 随 coordinate axis 改变；若 φ 改变，亮暗 lobe pattern 沿 carrier direction 平移，而 orientation 与 frequency 不变。"
     },
     {
       "id": "L12-Q10",
@@ -750,7 +1114,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：相反 direction 对应什么？",
@@ -778,7 +1142,7 @@
         "b": "这是“中心-周围（center-surround）”的定义。",
         "d": "该选项回答的是“separable RF 如何写？”。"
       },
-      "explanation": "相反 spacetime tilt/slope。"
+      "explanation": "相反 spacetime tilt/slope。 在 x-t diagram 中这是 slope dx/dt=v 的斜线。 判断依据：一条以 velocity v 向右移动的 vertical edge 满足 x(t)=x_0+vt。在 x-t diagram 中这是 slope dx/dt=v 的斜线。若 receptive field 的 positive lobes 沿同一斜线排列，edge 依时间顺序穿过所有 positive zones，inner product 大；反方向 edge 走相反斜线，会撞上 positive/negative mismatch。"
     },
     {
       "id": "L12-Q11",
@@ -795,7 +1159,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 12 讲：LNP 中 Poisson 层描述什么？",
@@ -823,7 +1187,7 @@
         "b": "这是“LNP 模型（linear-nonlinear-Poisson model, LNP）”的定义。",
         "c": "该选项回答的是“sparse-noise RF map 为何需考虑坐标系？”。"
       },
-      "explanation": "给定 linear+nonlinear predicted rate 后的 spike-count variability。"
+      "explanation": "给定 linear+nonlinear predicted rate 后的 spike-count variability。 linear Gabor drive 可用 rectifying-saturating nonlinearity 转成 firing rate，例如 r=r_max[L]_+^2/(α^2+[L]_+^2)。"
     },
     {
       "id": "L12-Q12",
@@ -840,7 +1204,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：sparse-noise RF map 为何需考虑坐标系？",
@@ -859,64 +1223,19 @@
         },
         {
           "id": "d",
-          "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
+          "text": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
         "b": "这是“LNP 模型（linear-nonlinear-Poisson model, LNP）”的定义。",
         "c": "该选项回答的是“LNP 中 Poisson 层描述什么？”。",
-        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 3 页。"
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 5 页。"
       },
-      "explanation": "同一 world/screen stimulus 在不同 head/eye pose 下有不同 egocentric angle。"
+      "explanation": "同一 world/screen stimulus 在不同 head/eye pose 下有不同 egocentric angle。 对同一个 kernel 在所有 retinal locations 做 convolution，可得到 feature map：每个 map pixel 不是原图 intensity，而是该位置周围 patch 与 feature template 的 match。"
     },
     {
       "id": "L12-Q13",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 1,
-          "section": "lecture-12-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 12 讲：根据 Lecture12-IntroToVision.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。"
-        },
-        {
-          "id": "b",
-          "text": "visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity。"
-        },
-        {
-          "id": "c",
-          "text": "V1 simple cell、orientation tuning、Gabor kernel、rotation、 saturating nonlinearity、wavelet/JPEG。"
-        },
-        {
-          "id": "d",
-          "text": "rightward-motion receptive-field example。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "c": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。",
-        "d": "该陈述解释的是“rightward-motion receptive-field example”，不是题干指定的关系。"
-      },
-      "explanation": "visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity。"
-    },
-    {
-      "id": "L12-Q14",
       "lecture": 12,
       "sectionId": "lecture-12-source-1",
       "sourceAnchors": [
@@ -941,72 +1260,27 @@
         },
         {
           "id": "b",
-          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
+          "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
         },
         {
           "id": "c",
-          "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
+          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
         },
         {
           "id": "d",
           "text": "因此，解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "b": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。",
+        "c": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。",
         "d": "该陈述解释的是“rightward-motion receptive-field example”，不是题干指定的关系。"
       },
-      "explanation": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
+      "explanation": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。 沿 hierarchy，classical receptive-field size 通常变大，选择的 feature 更复杂，history dependence 与 context 也增加；更高层 cell 可能对位置、phase 或局部细节更 invariant。"
     },
     {
-      "id": "L12-Q15",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 1,
-          "section": "lecture-12-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 12 讲：阅读与\"visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "c",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "b": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。",
-        "c": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L12-Q16",
+      "id": "L12-Q14",
       "lecture": 12,
       "sectionId": "lecture-12-source-2",
       "sourceAnchors": [
@@ -1020,52 +1294,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 12 讲：根据 Lecture12-IntroToVision.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。"
-        },
-        {
-          "id": "b",
-          "text": "visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity。"
-        },
-        {
-          "id": "c",
-          "text": "V1 simple cell、orientation tuning、Gabor kernel、rotation、 saturating nonlinearity、wavelet/JPEG。"
-        },
-        {
-          "id": "d",
-          "text": "spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime、direction selectivity。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "c": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。",
-        "d": "该陈述解释的是“spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime”，不是题干指定的关系。"
-      },
-      "explanation": "LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。"
-    },
-    {
-      "id": "L12-Q17",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 2,
-          "section": "lecture-12-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 12 讲：若要解释\"LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians\"中的机制或推导，哪条推理链成立？",
@@ -1076,72 +1305,27 @@
         },
         {
           "id": "b",
-          "text": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。"
+          "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
         },
         {
           "id": "c",
-          "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
+          "text": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。"
         },
         {
           "id": "d",
           "text": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "c": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。",
-        "d": "该陈述解释的是“spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime”，不是题干指定的关系。"
-      },
-      "explanation": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。"
-    },
-    {
-      "id": "L12-Q18",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 2,
-          "section": "lecture-12-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 12 讲：阅读与\"LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
         "b": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。",
-        "d": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。"
+        "d": "该陈述解释的是“spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime”，不是题干指定的关系。"
       },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+      "explanation": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。 RGC center-surround 常用 Difference of Gaussians（DoG）近似。"
     },
     {
-      "id": "L12-Q19",
+      "id": "L12-Q15",
       "lecture": 12,
       "sectionId": "lecture-12-source-3",
       "sourceAnchors": [
@@ -1156,147 +1340,12 @@
         "Lecture12-IntroToVision.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 12 讲：根据 Lecture12-IntroToVision.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "V1 simple cell、orientation tuning、Gabor kernel、rotation、 saturating nonlinearity、wavelet/JPEG。"
-        },
-        {
-          "id": "b",
-          "text": "spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime、direction selectivity。"
-        },
-        {
-          "id": "c",
-          "text": "rightward-motion receptive-field example。"
-        },
-        {
-          "id": "d",
-          "text": "threshold-linear rectification、ON/OFF feature maps、CNN connection。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。",
-        "b": "该陈述解释的是“spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime”，不是题干指定的关系。",
-        "c": "该陈述解释的是“rightward-motion receptive-field example”，不是题干指定的关系。"
-      },
-      "explanation": "threshold-linear rectification、ON/OFF feature maps、CNN connection。"
-    },
-    {
-      "id": "L12-Q20",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 3,
-          "section": "lecture-12-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 12 讲：若要解释\"threshold-linear rectification、ON/OFF feature maps、CNN connection\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
-        },
-        {
-          "id": "b",
-          "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
-        },
-        {
-          "id": "c",
-          "text": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。"
-        },
-        {
-          "id": "d",
-          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "c": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "d": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。"
-      },
-      "explanation": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
-    },
-    {
-      "id": "L12-Q21",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 4,
-          "section": "lecture-12-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 12 讲：根据 Lecture12-IntroToVision.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity。"
-        },
-        {
-          "id": "b",
-          "text": "V1 simple cell、orientation tuning、Gabor kernel、rotation、 saturating nonlinearity、wavelet/JPEG。"
-        },
-        {
-          "id": "c",
-          "text": "LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。"
-        },
-        {
-          "id": "d",
-          "text": "threshold-linear rectification、ON/OFF feature maps、CNN connection。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "c": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "d": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
-      },
-      "explanation": "V1 simple cell、orientation tuning、Gabor kernel、rotation、 saturating nonlinearity、wavelet/JPEG。"
-    },
-    {
-      "id": "L12-Q22",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 4,
-          "section": "lecture-12-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 2,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 12 讲：若要解释\"V1 simple cell、orientation tuning、Gabor kernel\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
           "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
         },
         {
@@ -1310,63 +1359,108 @@
         {
           "id": "d",
           "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "b": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "d": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
-      },
-      "explanation": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
-    },
-    {
-      "id": "L12-Q23",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 4,
-          "section": "lecture-12-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 12 讲：阅读与\"V1 simple cell、orientation tuning、Gabor kernel\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "b",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "c",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "d",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
         "b": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "c": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
+        "c": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。"
       },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+      "explanation": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。 ON 与 OFF kernels 产生两张 polarity-specific maps，rectification 保留各自偏好方向的 positive drive。"
     },
     {
-      "id": "L12-Q24",
+      "id": "L12-Q16",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 3,
+          "section": "lecture-12-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Introduction to Vision",
+        "Lecture12-IntroToVision.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 12 讲：阅读\"从 ON/OFF 局部对比通道到定向 Gabor-like 感受野\"图时，哪项观察正确？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "ON/OFF center-surround filters 先把绝对亮度改写为局部 contrast；将多个 polarity-specific subfields 沿一条轴排列后，正负贡献在匹配方向上相加、在正交方向上抵消，于是形成 elongated、orientation-selective 的 Gabor-like linear receptive field。"
+        },
+        {
+          "id": "b",
+          "text": "因此，解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
+        },
+        {
+          "id": "c",
+          "text": "因此，定义 feature selectivity 与 receptive field，并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
+        },
+        {
+          "id": "d",
+          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、 rectification/saturation 与 wavelet representation。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这条推理对应 Lecture12-IntroToVision.pdf 第 6 页。",
+        "c": "这条推理对应 Lecture12-IntroToVision.pdf 第 3 页。",
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 6 页。"
+      },
+      "explanation": "ON/OFF center-surround filters 先把绝对亮度改写为局部 contrast；将多个 polarity-specific subfields 沿一条轴排列后，正负贡献在匹配方向上相加、在正交方向上抵消，于是形成 elongated、orientation-selective 的 Gabor-like linear receptive field。 V1 simple-cell receptive field 常呈交替 ON/OFF elongated lobes。"
+    },
+    {
+      "id": "L12-Q17",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 4,
+          "section": "lecture-12-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Introduction to Vision",
+        "Lecture12-IntroToVision.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 12 讲：若要解释\"V1 simple cell、orientation tuning、Gabor kernel\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。"
+        },
+        {
+          "id": "b",
+          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
+        },
+        {
+          "id": "c",
+          "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
+        },
+        {
+          "id": "d",
+          "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
+        "c": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。",
+        "d": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。"
+      },
+      "explanation": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。 Gabor kernel 用 Gaussian envelope 限定位置与 size，用 cosine carrier 产生 alternating lobes。"
+    },
+    {
+      "id": "L12-Q18",
       "lecture": 12,
       "sectionId": "lecture-12-source-5",
       "sourceAnchors": [
@@ -1381,127 +1475,37 @@
         "Lecture12-IntroToVision.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 12 讲：根据 Lecture12-IntroToVision.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime、direction selectivity。"
-        },
-        {
-          "id": "b",
-          "text": "visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity。"
-        },
-        {
-          "id": "c",
-          "text": "LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。"
-        },
-        {
-          "id": "d",
-          "text": "threshold-linear rectification、ON/OFF feature maps、CNN connection。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "c": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "d": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
-      },
-      "explanation": "spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime、direction selectivity。"
-    },
-    {
-      "id": "L12-Q25",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 5,
-          "section": "lecture-12-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 12 讲：若要解释\"spatiotemporal RF、separable/nonseparable temporal kernels、 motion in spacetime\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
-        },
-        {
-          "id": "b",
-          "text": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。"
-        },
-        {
-          "id": "c",
           "text": "推导 spatial convolution notation，重构 ON/OFF center-surround Difference-ofGaussians，并解释参数/符号。"
         },
         {
-          "id": "d",
-          "text": "解释 threshold-linear rectification 如何生成 feature maps，以及与 CNN convolution 的形式联系。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "c": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "d": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
-      },
-      "explanation": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。"
-    },
-    {
-      "id": "L12-Q26",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 6,
-          "section": "lecture-12-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Introduction to Vision",
-        "Lecture12-IntroToVision.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 12 讲：根据 Lecture12-IntroToVision.pdf 第 6 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity。"
-        },
-        {
           "id": "b",
-          "text": "LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians。"
+          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
         },
         {
           "id": "c",
-          "text": "rightward-motion receptive-field example。"
+          "text": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。"
         },
         {
           "id": "d",
-          "text": "threshold-linear rectification、ON/OFF feature maps、CNN connection。"
+          "text": "定义 feature selectivity 与 receptive field， 并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。",
-        "b": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
-        "d": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
+        "a": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
+        "b": "该陈述解释的是“V1 simple cell、orientation tuning、Gabor kernel”，不是题干指定的关系。",
+        "d": "该陈述解释的是“visual hierarchy、retina→V1→dorsal/ventral streams、feature selectivity、RF size/complexity”，不是题干指定的关系。"
       },
-      "explanation": "rightward-motion receptive-field example。"
+      "explanation": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。 kernel 的 temporal lobes 可 biphasic，使 static image 的持续 component 相互抵消；center 与 surround 若 temporal course 不同，RGC receptive field 通常是 nonseparable。"
     },
     {
-      "id": "L12-Q27",
+      "id": "L12-Q19",
       "lecture": 12,
       "sectionId": "lecture-12-source-6",
       "sourceAnchors": [
@@ -1515,7 +1519,7 @@
         "Introduction to Vision",
         "Lecture12-IntroToVision.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 12 讲：若要解释\"rightward-motion receptive-field example\"中的机制或推导，哪条推理链成立？",
@@ -1543,10 +1547,144 @@
         "b": "该陈述解释的是“LNP model、contrast、ON/OFF RGC、spatial convolution、Difference of Gaussians”，不是题干指定的关系。",
         "c": "该陈述解释的是“threshold-linear rectification、ON/OFF feature maps、CNN connection”，不是题干指定的关系。"
       },
-      "explanation": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、 rectification/saturation 与 wavelet representation。"
+      "explanation": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、 rectification/saturation 与 wavelet representation。 kernel 的 temporal lobes 可 biphasic，使 static image 的持续 component 相互抵消；center 与 surround 若 temporal course 不同，RGC receptive field 通常是 nonseparable。"
     },
     {
-      "id": "L12-Q28",
+      "id": "L12-Q20",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 1,
+          "section": "lecture-12-source-1"
+        }
+      ],
+      "conceptTags": [
+        "视觉层级、LNP 与 center-surround computation"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 12 讲：为什么\"ON cell 喜欢亮、OFF cell 喜欢暗\"不足以描述 center-surround receptive field？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "response 取决于 contrast 的位置与 surround context：亮点在 ON center 可兴奋，亮 surround 可抵消；同一 global luminance 对平衡 kernel 可能无 response，因此 polarity 与 spatial pattern 必须同时说明。"
+        },
+        {
+          "id": "b",
+          "text": "φ 沿固定 carrier axis 平移正负 lobes，决定亮边还是暗边与 filter 对齐；θ 旋转整个 coordinate system，决定哪一方向的 edge 或 grating 与 elongated lobes 对齐。"
+        },
+        {
+          "id": "c",
+          "text": "若 kernel 仍可分成固定 spatial profile 乘 temporal waveform，它只改变同一空间 feature 的时间加权，没有把不同 locations 与特定 lags 配对；direction 需要 space-time nonseparability 或等价的多通道 nonlinear computation。"
+        },
+        {
+          "id": "d",
+          "text": "因此，定义 feature selectivity 与 receptive field，并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 3 页。"
+      },
+      "explanation": "response 取决于 contrast 的位置与 surround context：亮点在 ON center 可兴奋，亮 surround 可抵消；同一 global luminance 对平衡 kernel 可能无 response，因此 polarity 与 spatial pattern 必须同时说明。 RGC center-surround 常用 Difference of Gaussians（DoG）近似。ON-center 用窄正 Gaussian 减去宽负 Gaussian；OFF-center 整体反号。若两部分 integral 接近平衡，uniform field 被抵消，center 与 surround 的差异被放大。threshold-linear rectification [L]_+=max(L,0) 再把 ON 与 OFF drive 分成非负 feature maps。"
+    },
+    {
+      "id": "L12-Q21",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 1,
+          "section": "lecture-12-source-1"
+        }
+      ],
+      "conceptTags": [
+        "视觉层级、LNP 与 center-surround computation",
+        "三位置离散 center-surround sign prediction"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：完成\"用离散 kernel K=(-0.5,1,-0.5) 表示 left surround、center、right surround。比较 stimuli s_A=(0,1,0) 与 s_B=(1,1,1)，并做 rectification。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "simple-cell firing 同时依赖 orientation/frequency match 与 bright-dark phase alignment。"
+        },
+        {
+          "id": "b",
+          "text": "ON-center 对局部亮点有正 drive，对均匀亮场无 linear drive；OFF-center 对同一亮点被抑制。"
+        },
+        {
+          "id": "c",
+          "text": "相同三个位置信息因 temporal order 不同而产生不同 response，direction selectivity 来自 space-time conjunction。"
+        },
+        {
+          "id": "d",
+          "text": "center 正、surround 负。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“ON-center DoG 的 center 与 surround 符号？”。"
+      },
+      "explanation": "ON-center 对局部亮点有正 drive，对均匀亮场无 linear drive；OFF-center 对同一亮点被抑制。 计算路径：L_A=(-0.5)0+1×1+(-0.5)0=1，rectified response [L_A]_+=1。 L_B=-0.5+1-0.5=0，uniform contrast 被平衡 kernel 抵消。 若用 OFF-center kernel -K，stimulus A 得 -1，经过 [L]_+ 后为 0。"
+    },
+    {
+      "id": "L12-Q22",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 1,
+          "section": "lecture-12-source-1"
+        }
+      ],
+      "conceptTags": [
+        "视觉层级、LNP 与 center-surround computation",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 12 讲：得到\"ON-center 对局部亮点有正 drive，对均匀亮场无 linear drive；OFF-center 对同一亮点被抑制。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "如果不 rectifying，phase π 的 response 是 -10 而不是无 response；neural firing rate 的非负限制来自 nonlinear stage。"
+        },
+        {
+          "id": "b",
+          "text": "若把三个 frames 无序平均，两种 sequence 都包含 positions {0,1,2}，差异消失；因此 temporal order 是不可省略的信息。"
+        },
+        {
+          "id": "c",
+          "text": "kernel weights sum 为零正是 uniform cancellation 的离散条件；若 sum 不为零，uniform field 会留下 residual response。"
+        },
+        {
+          "id": "d",
+          "text": "因此，逐项解释 LNP：linear filter、nonlinearity、Poisson output；定义 contrast 而非 raw luminance。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 2 页。"
+      },
+      "explanation": "kernel weights sum 为零正是 uniform cancellation 的离散条件；若 sum 不为零，uniform field 会留下 residual response。 这个检查对应题设\"用离散 kernel K=(-0.5,1,-0.5) 表示 left surround、center、right surround。比较 stimuli s_A=(0,1,0) 与 s_B=(1,1,1)，并做 rectification。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L12-Q23",
       "lecture": 12,
       "sectionId": "lecture-12-source-3",
       "sourceAnchors": [
@@ -1557,38 +1695,261 @@
         }
       ],
       "conceptTags": [
-        "感受野",
-        "receptive field"
+        "Feature maps、Gabor simple cells 与 orientation tuning"
       ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 12 讲：本讲把\"stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。\"称为什么？",
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 12 讲：为什么改变 Gabor phase φ 不等于改变 preferred orientation θ？",
       "choices": [
         {
           "id": "a",
-          "text": "感受野（receptive field）"
+          "text": "response 取决于 contrast 的位置与 surround context：亮点在 ON center 可兴奋，亮 surround 可抵消；同一 global luminance 对平衡 kernel 可能无 response，因此 polarity 与 spatial pattern 必须同时说明。"
         },
         {
           "id": "b",
-          "text": "特征选择性（feature selectivity）"
+          "text": "若 kernel 仍可分成固定 spatial profile 乘 temporal waveform，它只改变同一空间 feature 的时间加权，没有把不同 locations 与特定 lags 配对；direction 需要 space-time nonseparability 或等价的多通道 nonlinear computation。"
         },
         {
           "id": "c",
-          "text": "背侧通路（dorsal stream）"
+          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、 rectification/saturation 与 wavelet representation。"
         },
         {
           "id": "d",
-          "text": "腹侧通路（ventral stream）"
+          "text": "φ 沿固定 carrier axis 平移正负 lobes，决定亮边还是暗边与 filter 对齐；θ 旋转整个 coordinate system，决定哪一方向的 edge 或 grating 与 elongated lobes 对齐。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这条推理对应 Lecture12-IntroToVision.pdf 第 6 页。"
+      },
+      "explanation": "φ 沿固定 carrier axis 平移正负 lobes，决定亮边还是暗边与 filter 对齐；θ 旋转整个 coordinate system，决定哪一方向的 edge 或 grating 与 elongated lobes 对齐。 linear Gabor drive 可用 rectifying-saturating nonlinearity 转成 firing rate，例如 r=r_max[L]_+^2/(α^2+[L]_+^2)。小 positive L 时 response 上升，大 L 时趋近 r_max，negative L 被截断。localized sinusoidal analysis 与 wavelet/JPEG 有数学亲缘，因为它们都用局部 scale/orientation components 表示图像；这不表示 cortex 实现同一 codec。"
+    },
+    {
+      "id": "L12-Q24",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 3,
+          "section": "lecture-12-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Feature maps、Gabor simple cells 与 orientation tuning",
+        "同 orientation、不同 phase 的 simple-cell response"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：完成\"理想化令 filter 对 matching grating 的 linear drive 为 L=A cos(φ_s-φ_K)，A=10。比较 phase difference 0、π/2、π，并用 r=[L]_+。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "simple-cell firing 同时依赖 orientation/frequency match 与 bright-dark phase alignment。"
+        },
+        {
+          "id": "b",
+          "text": "ON-center 对局部亮点有正 drive，对均匀亮场无 linear drive；OFF-center 对同一亮点被抑制。"
+        },
+        {
+          "id": "c",
+          "text": "相同三个位置信息因 temporal order 不同而产生不同 response，direction selectivity 来自 space-time conjunction。"
+        },
+        {
+          "id": "d",
+          "text": "逐项解释 LNP：linear filter、 nonlinearity、 Poisson output；定义 contrast 而非 raw luminance。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "“特征选择性（feature selectivity）”指：对某类 stimulus structure 的 preferential response。",
-        "c": "“背侧通路（dorsal stream）”指：与 motion/action-related processing 相关的视觉通路概括。",
-        "d": "“腹侧通路（ventral stream）”指：与 object identity-related processing 相关的视觉通路概括。"
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 4 页。"
       },
-      "explanation": "感受野（receptive field）：stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。"
+      "explanation": "simple-cell firing 同时依赖 orientation/frequency match 与 bright-dark phase alignment。 计算路径：difference 0 时 L=10cos0=10，r=10。 difference π/2 时 L=10cos(π/2)=0，r=0。 difference π 时 L=10cosπ=-10，rectification 后 r=0。"
+    },
+    {
+      "id": "L12-Q25",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 3,
+          "section": "lecture-12-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Feature maps、Gabor simple cells 与 orientation tuning",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 12 讲：得到\"simple-cell firing 同时依赖 orientation/frequency match 与 bright-dark phase alignment。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "kernel weights sum 为零正是 uniform cancellation 的离散条件；若 sum 不为零，uniform field 会留下 residual response。"
+        },
+        {
+          "id": "b",
+          "text": "如果不 rectifying，phase π 的 response 是 -10 而不是无 response；neural firing rate 的非负限制来自 nonlinear stage。"
+        },
+        {
+          "id": "c",
+          "text": "若把三个 frames 无序平均，两种 sequence 都包含 positions {0,1,2}，差异消失；因此 temporal order 是不可省略的信息。"
+        },
+        {
+          "id": "d",
+          "text": "逐项解释 Gabor kernel、 rotated coordinates、 orientation/phase、rectification/saturation 与 wavelet representation。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 4 页。"
+      },
+      "explanation": "如果不 rectifying，phase π 的 response 是 -10 而不是无 response；neural firing rate 的非负限制来自 nonlinear stage。 这个检查对应题设\"理想化令 filter 对 matching grating 的 linear drive 为 L=A cos(φ_s-φ_K)，A=10。比较 phase difference 0、π/2、π，并用 r=[L]_+。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L12-Q26",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 5,
+          "section": "lecture-12-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spatiotemporal receptive fields 与 motion as space-time orientation"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 12 讲：一个 temporal biphasic kernel 为什么不自动保证 direction selectivity？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "response 取决于 contrast 的位置与 surround context：亮点在 ON center 可兴奋，亮 surround 可抵消；同一 global luminance 对平衡 kernel 可能无 response，因此 polarity 与 spatial pattern 必须同时说明。"
+        },
+        {
+          "id": "b",
+          "text": "φ 沿固定 carrier axis 平移正负 lobes，决定亮边还是暗边与 filter 对齐；θ 旋转整个 coordinate system，决定哪一方向的 edge 或 grating 与 elongated lobes 对齐。"
+        },
+        {
+          "id": "c",
+          "text": "若 kernel 仍可分成固定 spatial profile 乘 temporal waveform，它只改变同一空间 feature 的时间加权，没有把不同 locations 与特定 lags 配对；direction 需要 space-time nonseparability 或等价的多通道 nonlinear computation。"
+        },
+        {
+          "id": "d",
+          "text": "因此，定义 feature selectivity 与 receptive field，并解释层级上 RF size、feature complexity、history dependence 和 invariance 的变化。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture12-IntroToVision.pdf 第 3 页。"
+      },
+      "explanation": "若 kernel 仍可分成固定 spatial profile 乘 temporal waveform，它只改变同一空间 feature 的时间加权，没有把不同 locations 与特定 lags 配对；direction 需要 space-time nonseparability 或等价的多通道 nonlinear computation。 原稿第 6 页给出的 rightward-motion RF 正是这种 tilted pattern。direction selectivity 仍可由 multiple filters、quadratic motion energy 或 recurrence 实现，所以 tilted linear RF 是一个可检验的最小 description。eye movements、coordinate transforms 与 finite display refresh 会改变 stimulus trajectory，实验解释时必须明确 reference frame。"
+    },
+    {
+      "id": "L12-Q27",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 5,
+          "section": "lecture-12-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spatiotemporal receptive fields 与 motion as space-time orientation",
+        "三帧离散 trajectory matching"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：完成\"在 times t-2,t-1,t 的三个 frames 中，rightward edge positions 是 0,1,2。RF 在对应 lags 的 positive positions 也设为 0,1,2，每次 match 给 +1；mismatch 给 0。比较 rightward 与 leftward positions 2,1,0。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "ON-center 对局部亮点有正 drive，对均匀亮场无 linear drive；OFF-center 对同一亮点被抑制。"
+        },
+        {
+          "id": "b",
+          "text": "simple-cell firing 同时依赖 orientation/frequency match 与 bright-dark phase alignment。"
+        },
+        {
+          "id": "c",
+          "text": "扩展到 spatiotemporal convolution；比较 separable 与 nonseparable RF，解释 motion 作为 spacetime orientation。"
+        },
+        {
+          "id": "d",
+          "text": "相同三个位置信息因 temporal order 不同而产生不同 response，direction selectivity 来自 space-time conjunction。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这条推理对应 Lecture12-IntroToVision.pdf 第 5 页。"
+      },
+      "explanation": "相同三个位置信息因 temporal order 不同而产生不同 response，direction selectivity 来自 space-time conjunction。 计算路径：rightward sequence 在三个 lags 全部 match，总 linear drive 为 1+1+1=3。 leftward sequence 只有中间 position 1 match，另外两帧 mismatch，总 drive 为 1。 加入 threshold 2 后，rightward response 通过，leftward response 被截为 0。"
+    },
+    {
+      "id": "L12-Q28",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 5,
+          "section": "lecture-12-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Spatiotemporal receptive fields 与 motion as space-time orientation",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 12 讲：得到\"相同三个位置信息因 temporal order 不同而产生不同 response，direction selectivity 来自 space-time conjunction。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若把三个 frames 无序平均，两种 sequence 都包含 positions {0,1,2}，差异消失；因此 temporal order 是不可省略的信息。"
+        },
+        {
+          "id": "b",
+          "text": "kernel weights sum 为零正是 uniform cancellation 的离散条件；若 sum 不为零，uniform field 会留下 residual response。"
+        },
+        {
+          "id": "c",
+          "text": "如果不 rectifying，phase π 的 response 是 -10 而不是无 response；neural firing rate 的非负限制来自 nonlinear stage。"
+        },
+        {
+          "id": "d",
+          "text": "对 motion direction 的 preferential response。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“方向选择性（direction selectivity）”的定义。"
+      },
+      "explanation": "若把三个 frames 无序平均，两种 sequence 都包含 positions {0,1,2}，差异消失；因此 temporal order 是不可省略的信息。 这个检查对应题设\"在 times t-2,t-1,t 的三个 frames 中，rightward edge positions 是 0,1,2。RF 在对应 lags 的 positive positions 也设为 0,1,2，每次 match 给 +1；mismatch 给 0。比较 rightward 与 leftward positions 2,1,0。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L12-Q29",
@@ -1602,10 +1963,55 @@
         }
       ],
       "conceptTags": [
+        "感受野",
+        "receptive field"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 12 讲：本讲把\"stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "特征选择性（feature selectivity）"
+        },
+        {
+          "id": "b",
+          "text": "感受野（receptive field）"
+        },
+        {
+          "id": "c",
+          "text": "背侧通路（dorsal stream）"
+        },
+        {
+          "id": "d",
+          "text": "腹侧通路（ventral stream）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“特征选择性（feature selectivity）”指：对某类 stimulus structure 的 preferential response。",
+        "c": "“背侧通路（dorsal stream）”指：与 motion/action-related processing 相关的视觉通路概括。",
+        "d": "“腹侧通路（ventral stream）”指：与 object identity-related processing 相关的视觉通路概括。"
+      },
+      "explanation": "感受野（receptive field）：stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。"
+    },
+    {
+      "id": "L12-Q30",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 3,
+          "section": "lecture-12-source-3"
+        }
+      ],
+      "conceptTags": [
         "特征选择性",
         "feature selectivity"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 12 讲：本讲把\"对某类 stimulus structure 的 preferential response。\"称为什么？",
@@ -1616,27 +2022,27 @@
         },
         {
           "id": "b",
-          "text": "特征选择性（feature selectivity）"
+          "text": "腹侧通路（ventral stream）"
         },
         {
           "id": "c",
-          "text": "腹侧通路（ventral stream）"
+          "text": "特征选择性（feature selectivity）"
         },
         {
           "id": "d",
           "text": "LNP 模型（linear-nonlinear-Poisson model, LNP）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“背侧通路（dorsal stream）”指：与 motion/action-related processing 相关的视觉通路概括。",
-        "c": "“腹侧通路（ventral stream）”指：与 object identity-related processing 相关的视觉通路概括。",
+        "b": "“腹侧通路（ventral stream）”指：与 object identity-related processing 相关的视觉通路概括。",
         "d": "“LNP 模型（linear-nonlinear-Poisson model, LNP）”指：linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。"
       },
       "explanation": "特征选择性（feature selectivity）：对某类 stimulus structure 的 preferential response。"
     },
     {
-      "id": "L12-Q30",
+      "id": "L12-Q31",
       "lecture": 12,
       "sectionId": "lecture-12-source-1",
       "sourceAnchors": [
@@ -1650,7 +2056,7 @@
         "背侧通路",
         "dorsal stream"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 12 讲：本讲把\"与 motion/action-related processing 相关的视觉通路概括。\"称为什么？",
@@ -1665,23 +2071,23 @@
         },
         {
           "id": "c",
-          "text": "背侧通路（dorsal stream）"
+          "text": "中心-周围（center-surround）"
         },
         {
           "id": "d",
-          "text": "中心-周围（center-surround）"
+          "text": "背侧通路（dorsal stream）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“腹侧通路（ventral stream）”指：与 object identity-related processing 相关的视觉通路概括。",
         "b": "“LNP 模型（linear-nonlinear-Poisson model, LNP）”指：linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。",
-        "d": "“中心-周围（center-surround）”指：中心与外围具有相反符号的 RF organization。"
+        "c": "“中心-周围（center-surround）”指：中心与外围具有相反符号的 RF organization。"
       },
       "explanation": "背侧通路（dorsal stream）：与 motion/action-related processing 相关的视觉通路概括。"
     },
     {
-      "id": "L12-Q31",
+      "id": "L12-Q32",
       "lecture": 12,
       "sectionId": "lecture-12-source-1",
       "sourceAnchors": [
@@ -1702,73 +2108,28 @@
       "choices": [
         {
           "id": "a",
-          "text": "LNP 模型（linear-nonlinear-Poisson model, LNP）"
-        },
-        {
-          "id": "b",
-          "text": "中心-周围（center-surround）"
-        },
-        {
-          "id": "c",
-          "text": "特征图（feature map）"
-        },
-        {
-          "id": "d",
           "text": "腹侧通路（ventral stream）"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "“LNP 模型（linear-nonlinear-Poisson model, LNP）”指：linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。",
-        "b": "“中心-周围（center-surround）”指：中心与外围具有相反符号的 RF organization。",
-        "c": "“特征图（feature map）”指：同一 filter 在各位置的 rectified response。"
-      },
-      "explanation": "腹侧通路（ventral stream）：与 object identity-related processing 相关的视觉通路概括。"
-    },
-    {
-      "id": "L12-Q32",
-      "lecture": 12,
-      "sectionId": "lecture-12-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture12-IntroToVision.pdf",
-          "page": 2,
-          "section": "lecture-12-source-2"
-        }
-      ],
-      "conceptTags": [
-        "LNP 模型",
-        "linear-nonlinear-Poisson model, LNP"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 12 讲：本讲把\"linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "LNP 模型（linear-nonlinear-Poisson model, LNP）"
         },
         {
           "id": "b",
-          "text": "中心-周围（center-surround）"
+          "text": "LNP 模型（linear-nonlinear-Poisson model, LNP）"
         },
         {
           "id": "c",
-          "text": "特征图（feature map）"
+          "text": "中心-周围（center-surround）"
         },
         {
           "id": "d",
-          "text": "Gabor 核（Gabor kernel）"
+          "text": "特征图（feature map）"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "“中心-周围（center-surround）”指：中心与外围具有相反符号的 RF organization。",
-        "c": "“特征图（feature map）”指：同一 filter 在各位置的 rectified response。",
-        "d": "“Gabor 核（Gabor kernel）”指：Gaussian-windowed sinusoid。"
+        "b": "“LNP 模型（linear-nonlinear-Poisson model, LNP）”指：linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。",
+        "c": "“中心-周围（center-surround）”指：中心与外围具有相反符号的 RF organization。",
+        "d": "“特征图（feature map）”指：同一 filter 在各位置的 rectified response。"
       },
-      "explanation": "LNP 模型（linear-nonlinear-Poisson model, LNP）：linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。"
+      "explanation": "腹侧通路（ventral stream）：与 object identity-related processing 相关的视觉通路概括。"
     },
     {
       "id": "L12-Q33",
@@ -1782,10 +2143,55 @@
         }
       ],
       "conceptTags": [
+        "LNP 模型",
+        "linear-nonlinear-Poisson model, LNP"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 12 讲：本讲把\"linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "中心-周围（center-surround）"
+        },
+        {
+          "id": "b",
+          "text": "LNP 模型（linear-nonlinear-Poisson model, LNP）"
+        },
+        {
+          "id": "c",
+          "text": "特征图（feature map）"
+        },
+        {
+          "id": "d",
+          "text": "Gabor 核（Gabor kernel）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“中心-周围（center-surround）”指：中心与外围具有相反符号的 RF organization。",
+        "c": "“特征图（feature map）”指：同一 filter 在各位置的 rectified response。",
+        "d": "“Gabor 核（Gabor kernel）”指：Gaussian-windowed sinusoid。"
+      },
+      "explanation": "LNP 模型（linear-nonlinear-Poisson model, LNP）：linear filter、nonlinearity 与 Poisson spike-count noise 组成的 cascade。"
+    },
+    {
+      "id": "L12-Q34",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 1,
+          "section": "lecture-12-source-1"
+        }
+      ],
+      "conceptTags": [
         "中心-周围",
         "center-surround"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 12 讲：本讲把\"中心与外围具有相反符号的 RF organization。\"称为什么？",
@@ -1796,27 +2202,27 @@
         },
         {
           "id": "b",
-          "text": "中心-周围（center-surround）"
+          "text": "Gabor 核（Gabor kernel）"
         },
         {
           "id": "c",
-          "text": "Gabor 核（Gabor kernel）"
+          "text": "中心-周围（center-surround）"
         },
         {
           "id": "d",
           "text": "可分离（separable）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“特征图（feature map）”指：同一 filter 在各位置的 rectified response。",
-        "c": "“Gabor 核（Gabor kernel）”指：Gaussian-windowed sinusoid。",
+        "b": "“Gabor 核（Gabor kernel）”指：Gaussian-windowed sinusoid。",
         "d": "“可分离（separable）”指：space 与 time components 可写为乘积。"
       },
-      "explanation": "中心-周围（center-surround）：中心与外围具有相反符号的 RF organization。"
+      "explanation": "中心-周围（center-surround）：中心与外围具有相反符号的 RF organization。 RGC center-surround 常用 Difference of Gaussians（DoG）近似。"
     },
     {
-      "id": "L12-Q34",
+      "id": "L12-Q35",
       "lecture": 12,
       "sectionId": "lecture-12-source-3",
       "sourceAnchors": [
@@ -1830,7 +2236,7 @@
         "特征图",
         "feature map"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 12 讲：本讲把\"同一 filter 在各位置的 rectified response。\"称为什么？",
@@ -1845,23 +2251,23 @@
         },
         {
           "id": "c",
-          "text": "特征图（feature map）"
+          "text": "方向选择性（direction selectivity）"
         },
         {
           "id": "d",
-          "text": "方向选择性（direction selectivity）"
+          "text": "特征图（feature map）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“Gabor 核（Gabor kernel）”指：Gaussian-windowed sinusoid。",
         "b": "“可分离（separable）”指：space 与 time components 可写为乘积。",
-        "d": "“方向选择性（direction selectivity）”指：对 motion direction 的 preferential response。"
+        "c": "“方向选择性（direction selectivity）”指：对 motion direction 的 preferential response。"
       },
       "explanation": "特征图（feature map）：同一 filter 在各位置的 rectified response。"
     },
     {
-      "id": "L12-Q35",
+      "id": "L12-Q36",
       "lecture": 12,
       "sectionId": "lecture-12-source-4",
       "sourceAnchors": [
@@ -1875,38 +2281,38 @@
         "Gabor 核",
         "Gabor kernel"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 12 讲：本讲把\"Gaussian-windowed sinusoid。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "可分离（separable）"
+          "text": "Gabor 核（Gabor kernel）"
         },
         {
           "id": "b",
-          "text": "方向选择性（direction selectivity）"
+          "text": "可分离（separable）"
         },
         {
           "id": "c",
-          "text": "感受野（receptive field）"
+          "text": "方向选择性（direction selectivity）"
         },
         {
           "id": "d",
-          "text": "Gabor 核（Gabor kernel）"
+          "text": "感受野（receptive field）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“可分离（separable）”指：space 与 time components 可写为乘积。",
-        "b": "“方向选择性（direction selectivity）”指：对 motion direction 的 preferential response。",
-        "c": "“感受野（receptive field）”指：stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。"
+        "b": "“可分离（separable）”指：space 与 time components 可写为乘积。",
+        "c": "“方向选择性（direction selectivity）”指：对 motion direction 的 preferential response。",
+        "d": "“感受野（receptive field）”指：stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。"
       },
-      "explanation": "Gabor 核（Gabor kernel）：Gaussian-windowed sinusoid。"
+      "explanation": "Gabor 核（Gabor kernel）：Gaussian-windowed sinusoid。 Gabor kernel 用 Gaussian envelope 限定位置与 size，用 cosine carrier 产生 alternating lobes。"
     },
     {
-      "id": "L12-Q36",
+      "id": "L12-Q37",
       "lecture": 12,
       "sectionId": "lecture-12-source-5",
       "sourceAnchors": [
@@ -1927,11 +2333,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "可分离（separable）"
+          "text": "方向选择性（direction selectivity）"
         },
         {
           "id": "b",
-          "text": "方向选择性（direction selectivity）"
+          "text": "可分离（separable）"
         },
         {
           "id": "c",
@@ -1942,16 +2348,16 @@
           "text": "特征选择性（feature selectivity）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "“方向选择性（direction selectivity）”指：对 motion direction 的 preferential response。",
+        "a": "“方向选择性（direction selectivity）”指：对 motion direction 的 preferential response。",
         "c": "“感受野（receptive field）”指：stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。",
         "d": "“特征选择性（feature selectivity）”指：对某类 stimulus structure 的 preferential response。"
       },
-      "explanation": "可分离（separable）：space 与 time components 可写为乘积。"
+      "explanation": "可分离（separable）：space 与 time components 可写为乘积。 separable kernel K(x,y,t)=K_s(x,y)K_t(t) 的所有 time slices 只有统一 spatial pattern，差别只是 scalar amplitude。"
     },
     {
-      "id": "L12-Q37",
+      "id": "L12-Q38",
       "lecture": 12,
       "sectionId": "lecture-12-source-5",
       "sourceAnchors": [
@@ -1965,7 +2371,7 @@
         "方向选择性",
         "direction selectivity"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 12 讲：本讲把\"对 motion direction 的 preferential response。\"称为什么？",
@@ -1976,27 +2382,27 @@
         },
         {
           "id": "b",
-          "text": "方向选择性（direction selectivity）"
+          "text": "特征选择性（feature selectivity）"
         },
         {
           "id": "c",
-          "text": "特征选择性（feature selectivity）"
+          "text": "方向选择性（direction selectivity）"
         },
         {
           "id": "d",
           "text": "背侧通路（dorsal stream）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“感受野（receptive field）”指：stimulus pattern 到 response 的局部/功能关系， 不只是屏幕位置。",
-        "c": "“特征选择性（feature selectivity）”指：对某类 stimulus structure 的 preferential response。",
+        "b": "“特征选择性（feature selectivity）”指：对某类 stimulus structure 的 preferential response。",
         "d": "“背侧通路（dorsal stream）”指：与 motion/action-related processing 相关的视觉通路概括。"
       },
       "explanation": "方向选择性（direction selectivity）：对 motion direction 的 preferential response。"
     },
     {
-      "id": "L12-Q38",
+      "id": "L12-Q39",
       "lecture": 12,
       "sectionId": "lecture-12-source-1",
       "sourceAnchors": [
@@ -2024,23 +2430,23 @@
         },
         {
           "id": "c",
-          "text": "I0>0"
+          "text": "conditional Poisson"
         },
         {
           "id": "d",
-          "text": "conditional Poisson"
+          "text": "I0>0"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "这是“linear receptive-field drive”的条件，不是题干公式的条件。",
         "b": "这是“static nonlinearity”的条件，不是题干公式的条件。",
-        "d": "这是“LNP spike generation”的条件，不是题干公式的条件。"
+        "c": "这是“LNP spike generation”的条件，不是题干公式的条件。"
       },
-      "explanation": "visual contrast 的适用条件：I0>0"
+      "explanation": "visual contrast 的适用条件：I0>0 retina 先编码 local contrast；V1 强调 orientation 等局部结构；MT 与 dorsal stream 关联 motion/action-relevant variables；IT 与 ventral stream 关联 object features；LIP 常用于 decision-related representations。"
     },
     {
-      "id": "L12-Q39",
+      "id": "L12-Q40",
       "lecture": 12,
       "sectionId": "lecture-12-source-2",
       "sourceAnchors": [
@@ -2053,38 +2459,38 @@
       "conceptTags": [
         "linear receptive-field drive"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：使用\"linear receptive-field drive\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "I0>0"
+          "text": "linear shift-invariant approximation"
         },
         {
           "id": "b",
-          "text": "rate nonnegative/saturating as specified"
+          "text": "I0>0"
         },
         {
           "id": "c",
-          "text": "conditional Poisson"
+          "text": "rate nonnegative/saturating as specified"
         },
         {
           "id": "d",
-          "text": "linear shift-invariant approximation"
+          "text": "conditional Poisson"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“visual contrast”的条件，不是题干公式的条件。",
-        "b": "这是“static nonlinearity”的条件，不是题干公式的条件。",
-        "c": "这是“LNP spike generation”的条件，不是题干公式的条件。"
+        "b": "这是“visual contrast”的条件，不是题干公式的条件。",
+        "c": "这是“static nonlinearity”的条件，不是题干公式的条件。",
+        "d": "这是“LNP spike generation”的条件，不是题干公式的条件。"
       },
       "explanation": "linear receptive-field drive 的适用条件：linear shift-invariant approximation"
     },
     {
-      "id": "L12-Q40",
+      "id": "L12-Q41",
       "lecture": 12,
       "sectionId": "lecture-12-source-4",
       "sourceAnchors": [
@@ -2097,14 +2503,146 @@
       "conceptTags": [
         "static nonlinearity"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 12 讲：使用\"static nonlinearity\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
+          "text": "I0>0"
+        },
+        {
+          "id": "b",
           "text": "rate nonnegative/saturating as specified"
+        },
+        {
+          "id": "c",
+          "text": "linear shift-invariant approximation"
+        },
+        {
+          "id": "d",
+          "text": "conditional Poisson"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“visual contrast”的条件，不是题干公式的条件。",
+        "c": "这是“linear receptive-field drive”的条件，不是题干公式的条件。",
+        "d": "这是“LNP spike generation”的条件，不是题干公式的条件。"
+      },
+      "explanation": "static nonlinearity 的适用条件：rate nonnegative/saturating as specified linear Gabor drive 可用 rectifying-saturating nonlinearity 转成 firing rate，例如 r=r_max[L]_+^2/(α^2+[L]_+^2)。"
+    },
+    {
+      "id": "L12-Q42",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 2,
+          "section": "lecture-12-source-2"
+        }
+      ],
+      "conceptTags": [
+        "LNP spike generation"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：使用\"LNP spike generation\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "I0>0"
+        },
+        {
+          "id": "b",
+          "text": "linear shift-invariant approximation"
+        },
+        {
+          "id": "c",
+          "text": "conditional Poisson"
+        },
+        {
+          "id": "d",
+          "text": "rate nonnegative/saturating as specified"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“visual contrast”的条件，不是题干公式的条件。",
+        "b": "这是“linear receptive-field drive”的条件，不是题干公式的条件。",
+        "d": "这是“static nonlinearity”的条件，不是题干公式的条件。"
+      },
+      "explanation": "LNP spike generation 的适用条件：conditional Poisson LNP model 依次包含 linear、nonlinear、Poisson 三步。"
+    },
+    {
+      "id": "L12-Q43",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 2,
+          "section": "lecture-12-source-2"
+        }
+      ],
+      "conceptTags": [
+        "center-surround RF"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：使用\"center-surround RF\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "I0>0"
+        },
+        {
+          "id": "b",
+          "text": "linear shift-invariant approximation"
+        },
+        {
+          "id": "c",
+          "text": "rate nonnegative/saturating as specified"
+        },
+        {
+          "id": "d",
+          "text": "surround wider"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“visual contrast”的条件，不是题干公式的条件。",
+        "b": "这是“linear receptive-field drive”的条件，不是题干公式的条件。",
+        "c": "这是“static nonlinearity”的条件，不是题干公式的条件。"
+      },
+      "explanation": "center-surround RF 的适用条件：surround wider RGC center-surround 常用 Difference of Gaussians（DoG）近似。"
+    },
+    {
+      "id": "L12-Q44",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 4,
+          "section": "lecture-12-source-4"
+        }
+      ],
+      "conceptTags": [
+        "simple-cell orientation filter"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：使用\"simple-cell orientation filter\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "localized sinusoid"
         },
         {
           "id": "b",
@@ -2116,16 +2654,60 @@
         },
         {
           "id": "d",
-          "text": "conditional Poisson"
+          "text": "rate nonnegative/saturating as specified"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
         "b": "这是“visual contrast”的条件，不是题干公式的条件。",
         "c": "这是“linear receptive-field drive”的条件，不是题干公式的条件。",
-        "d": "这是“LNP spike generation”的条件，不是题干公式的条件。"
+        "d": "这是“static nonlinearity”的条件，不是题干公式的条件。"
       },
-      "explanation": "static nonlinearity 的适用条件：rate nonnegative/saturating as specified"
+      "explanation": "simple-cell orientation filter 的适用条件：localized sinusoid"
+    },
+    {
+      "id": "L12-Q45",
+      "lecture": 12,
+      "sectionId": "lecture-12-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture12-IntroToVision.pdf",
+          "page": 5,
+          "section": "lecture-12-source-5"
+        }
+      ],
+      "conceptTags": [
+        "separable RF"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 12 讲：使用\"separable RF\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "I0>0"
+        },
+        {
+          "id": "b",
+          "text": "rank-1 space-time structure"
+        },
+        {
+          "id": "c",
+          "text": "linear shift-invariant approximation"
+        },
+        {
+          "id": "d",
+          "text": "rate nonnegative/saturating as specified"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“visual contrast”的条件，不是题干公式的条件。",
+        "c": "这是“linear receptive-field drive”的条件，不是题干公式的条件。",
+        "d": "这是“static nonlinearity”的条件，不是题干公式的条件。"
+      },
+      "explanation": "separable RF 的适用条件：rank-1 space-time structure separable kernel K(x,y,t)=K_s(x,y)K_t(t) 的所有 time slices 只有统一 spatial pattern，差别只是 scalar amplitude。"
     }
   ]
 }

@@ -47,6 +47,15 @@ describe('seeded selection', () => {
     expect(selected).toEqual(['Q3']);
   });
 
+  it('keeps an immediate retry miss in review until a later correct revisit', () => {
+    let state = createEmptyStudyState('install');
+    state = applyAttempt(state, 'Q0', false, '2026-08-23T10:00:00.000Z');
+    state = applyAttempt(state, 'Q0', true, '2026-08-23T10:01:00.000Z');
+    expect(state.questions.Q0).toMatchObject({ lastCorrect: true, needsReview: true, lastIncorrectAt: '2026-08-23T10:00:00.000Z' });
+    state = applyAttempt(state, 'Q0', true, '2026-08-23T17:00:00.000Z');
+    expect(state.questions.Q0.needsReview).toBeUndefined();
+  });
+
   it('reserves room for a delayed miss when unseen questions are available', () => {
     let state = createEmptyStudyState('install');
     state = applyAttempt(state, 'Q0', false, '2026-08-20T12:00:00.000Z');

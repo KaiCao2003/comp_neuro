@@ -89,6 +89,397 @@
       "stopPredict": "ξ vector 方向与 grating orientation 的关系？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能从输入信号与噪声的相对强度出发，解释高 SNR 时去相关滤波和低 SNR 时空间平均为何对应不同目标。",
+      "能把平移不变的图像统计写成只依赖位移的相关函数，并说明复指数为何是卷积算子的自然基底。",
+      "能逐步推出卷积定理与输出功率谱公式，并由自然图像近似的 1/|ξ|² 功率谱得到 whitening 滤波器的频率趋势。",
+      "能设计跨光照或跨刺激统计的 LNP 比较，区分线性滤波器改变、静态非线性改变和单纯响应尺度改变。"
+    ],
+    "prerequisiteBridge": [
+      "先把 SNR 当成“可预测的信号变化”与“不可预测噪声变化”的比，而不是一张图像看起来清楚与否。若四个相邻感受器接收近似相同的慢变信号，每个感受器又带有独立零均值噪声，把四者取平均会保留共同信号，却把噪声标准差缩小到原来的一半。反过来，高空间频率处若真实结构足够强，过度平均会连结构一起抹去。因此滤波器是否该平滑，必须同时问输入结构和噪声分别占多少。",
+      "Fourier 表示并没有引入新的物理刺激，它只是把同一图像改写成不同频率、方向和相位的波相加。Euler 关系 e^{iθ}=cosθ+i sinθ 把正弦与余弦合并为一个复指数；计算中出现的虚数是记账工具，真实图像最终仍为实数。二维频率向量 ξ 指向亮度变化最快的方向，而条纹本身与 ξ 垂直；|ξ| 越大，单位距离内振荡次数越多。这个方向关系是后面读 power spectrum 图与感受野频率响应图的基础。",
+      "回忆 LNP 模型的三步：刺激先与时空滤波器做内积或卷积，得到线性驱动；驱动再经过静态非线性，得到瞬时发放率；最后由随机发放过程产生 spike。比较两个适应条件时，如果只比较平均 firing rate，就无法判断是滤波器、非线性增益还是基线发生变化。需要在每个条件下使用可控刺激独立估计线性核与输入输出曲线，并用保留数据检验预测，这样才把“适应”变成可反驳的参数变化陈述。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l16-d1",
+        "prompt": "四个相邻感受器都接收数值 8 的共同信号，每个感受器噪声彼此独立且标准差为 2。四者取平均后，信号均值和噪声标准差各是多少？",
+        "answer": "共同信号平均后仍为 8；独立噪声的平均方差是 4/4=1，所以噪声标准差为 1。",
+        "explanation": "平均不会削弱在四个通道上相同的信号，但独立噪声方差相加后还要除以 4²。这正是低 SNR 下空间 pooling 能提高可读性的定量原因。",
+        "remediationModuleId": "l16-m1"
+      },
+      {
+        "id": "l16-d2",
+        "prompt": "二维 grating 写成 cos(ξ·x)。条纹等亮线与频率向量 ξ 平行还是垂直？",
+        "answer": "等亮线满足 ξ·x 为常数，因此沿等亮线移动时要保持点积不变；条纹方向与 ξ 垂直。",
+        "explanation": "ξ 描述相位增长最快的方向，而不是条纹延伸方向。混淆这两个方向会把 orientation tuning 图旋转九十度。",
+        "remediationModuleId": "l16-m2"
+      },
+      {
+        "id": "l16-d3",
+        "prompt": "若 y(x)=(K*s)(x)，在 Fourier domain 中 ŷ(ξ) 应写成什么？",
+        "answer": "ŷ(ξ)=K̂(ξ)ŝ(ξ)，即空间域卷积变为每个频率处的复数乘法。",
+        "explanation": "乘法中的幅值决定该频率被放大或压低，相位决定该频率分量被平移多少；这让每个 frequency mode 可以单独分析。",
+        "remediationModuleId": "l16-m2"
+      },
+      {
+        "id": "l16-d4",
+        "prompt": "自然图像输入功率谱近似 P_in(ξ)∝1/|ξ|²。若只追求完全 whitening，|K̂(ξ)| 应随 |ξ| 怎样变化？",
+        "answer": "|K̂(ξ)| 应近似正比于 |ξ|，因为 |K̂|²P_in 要成为与频率无关的常数。",
+        "explanation": "这是理想无噪声结论；真实视网膜还受光学低通、感受器噪声和代谢约束，所以最高频端不会无限放大。",
+        "remediationModuleId": "l16-m3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l16-m1",
+        "title": "SNR 决定滤波目标：去冗余还是先降噪",
+        "sourceRefs": [
+          {
+            "file": "Lecture16-Adaptation.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "同一个视觉系统为什么会在明亮条件下加强 center-surround，却在昏暗条件下更像空间平均器？",
+        "paragraphs": [
+          "第 1 页把滤波器形状放在 SNR 轴上理解。高 SNR 表示输入中的细节相对于内部与光子噪声足够可靠，此时相邻像素往往高度相关，若原样传递会让有限的输出动态范围重复编码相似信息。中心兴奋、周围抑制的差分核会削弱共同的慢变分量并保留边缘，使输出之间的相关性下降。这里的“强 surround”是规范性预测：在给定统计与成本假设下，它说明什么滤波较有效率，并不单独证明某个突触回路怎样实现。",
+          "低 SNR 时，差分运算会遇到另一种问题：两个通道相减不仅相减共同信号，也把各自独立的噪声带进结果。若真实高频信号已经淹没在噪声里，继续放大高频只会浪费发放范围。空间 pooling 把多个近邻测量求和或平均，对于跨像素共享的低频结构是相干相加，对于彼此独立的噪声则按方差相加，所以输出 SNR 上升。此时较宽、较同号的感受野比尖锐 center-surround 更有用。",
+          "中间 SNR 不是在两个标签间硬切换，而是连续权衡。本节需要区分两种 convention：幅度 SNR_amp=S/σ，功率 SNR_power=P_s/P_n；在同一线性测量与带宽下 SNR_power=SNR_amp²。下面的 pooling 推导使用 amplitude SNR，所以平均 n 个独立噪声测量后提高 √n；频谱讨论使用 power ratio P_s(ξ)/P_n(ξ)。该比值大时，滤波器可以投入增益来校正输入冗余，比值小时则应收缩。不同空间频率的 SNR 不同，因此“光更暗”可能同时扩大空间 pooling、削弱 surround，并改变总体增益，而不只是给整个滤波器乘一个数。",
+          "这一页的图应按条件预测来读：先确认横轴或曲线表示 SNR，而不是时间；再比较 center、surround 的相对面积和宽度；最后写出可测量结果，例如低光下 estimated RF 的高频增益下降、空间范围扩大。若实验只观察到 firing rate 下降，不能直接推出滤波器已经变宽，因为同样现象也可能来自非线性阈值上移或可用 spikes 减少。"
+        ],
+        "keyPoints": [
+          "高 SNR 下，可靠的高频信息允许 center-surround 通过差分减少相邻通道冗余。",
+          "低 SNR 下，空间平均保留共同信号并降低独立噪声标准差，代价是空间分辨率下降。",
+          "适应应描述为频率依赖的 filter 与 nonlinearity 变化，而不只是平均发放率变化。"
+        ],
+        "derivation": {
+          "title": "n 个相邻测量取平均时噪声怎样缩小",
+          "setup": "令每个通道 x_j=s+ε_j，共同信号 s 在局部近似相同；噪声 ε_j 独立、均值 0、方差 σ²。定义平均输出 y=(1/n)Σ_j x_j。",
+          "steps": [
+            {
+              "title": "分离共同信号与噪声",
+              "explanation": "把每个 x_j 代入平均式，共同信号出现 n 次，除以 n 后仍为 s；剩余项是 n 个噪声的平均。",
+              "latex": "y=s+\\frac{1}{n}\\sum_{j=1}^{n}\\epsilon_j"
+            },
+            {
+              "title": "计算平均噪声方差",
+              "explanation": "独立性使交叉 covariance 为零，所以和的方差等于各方差之和；外面的 1/n 在方差中变成 1/n²。",
+              "latex": "\\operatorname{Var}\\!\\left(\\frac{1}{n}\\sum_j\\epsilon_j\\right)=\\frac{1}{n^2}n\\sigma^2=\\frac{\\sigma^2}{n}"
+            },
+            {
+              "title": "转换为标准差与 SNR",
+              "explanation": "标准差取方差平方根，成为 σ/√n。若信号幅度不变，以幅度除以噪声标准差定义的 SNR 提高 √n 倍。",
+              "latex": "\\sigma_{\\mathrm{avg}}=\\frac{\\sigma}{\\sqrt n},\\qquad \\mathrm{SNR}_{\\mathrm{avg}}=\\sqrt n\\,\\mathrm{SNR}_{\\mathrm{single}}"
+            }
+          ],
+          "symbolNotes": [
+            "独立噪声是假设；若噪声正相关，平均带来的方差下降会小于 1/n。",
+            "局部共同信号假设只适合空间变化慢于 pooling 范围的成分，细边缘会被平均削弱。"
+          ],
+          "unitsCheck": "x、s、ε 与 y 具有相同的亮度或电压单位；n 和 SNR 是无量纲数，方差单位是原单位的平方。",
+          "limitCheck": "n=1 时噪声不变；n 增大时独立噪声趋小，但若信号在窗口内变化，偏差会同时增大，不能靠无限扩大窗口获得无限性能。"
+        },
+        "workedExample": {
+          "title": "比较四点平均与相邻差分",
+          "problem": "平坦区域的共同信号为 10，每个像素独立噪声标准差为 2。计算四点平均的噪声标准差；再计算两个像素差 x1-x2 的噪声标准差。",
+          "steps": [
+            "四点平均保留共同值 10，噪声方差为 2²/4=1，标准差为 1。",
+            "相邻差分消掉共同值 10-10=0；噪声是 ε1-ε2，方差为 2²+2²=8。",
+            "差分噪声标准差为 √8≈2.83，比单像素还大；只有边缘信号足够强时，这个代价才值得。"
+          ],
+          "result": "低 SNR 平坦区域偏好平均，高 SNR 且存在可靠边缘时才有理由用较强差分。",
+          "sanityCheck": "若两通道噪声完全相同而非独立，差分噪声会抵消；结果说明必须先说明噪声相关结构。"
+        },
+        "selfCheck": {
+          "prompt": "为什么低光下观察到 surround 变弱，不能简写成视觉系统“不再关心边缘”？",
+          "answer": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+        },
+        "pitfalls": [
+          "把高 SNR 等同于高平均亮度；SNR 还取决于频率、内部噪声和刺激对比度。",
+          "只比较 receptive-field 峰值，不比较中心与周围的积分、宽度和估计不确定度。"
+        ]
+      },
+      {
+        "id": "l16-m2",
+        "title": "从平移不变统计到 Fourier 对角化",
+        "sourceRefs": [
+          {
+            "file": "Lecture16-Adaptation.pdf",
+            "page": 2
+          },
+          {
+            "file": "Lecture16-Adaptation.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "为什么把图像改写成不同空间频率后，卷积滤波就能按频率逐项计算？",
+        "paragraphs": [
+          "第 2 页先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 Δx 决定，而不由绝对坐标决定，可写 C(x,x')=C(x-x')。这不是声称每张照片处处相同，而是统计集合在平移后保持同样规律。这样的 covariance matrix 具有重复的位移结构，复指数模式在卷积或相关运算后只改变复数幅值，不改变频率，因此成为自然基底。",
+          "二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。点积 ξ·x 把二维位置投影到频率向量上；沿 ξ 方向走，phase 改变最快，沿垂直方向走，phase 不变，所以看到的亮暗条纹与 ξ 垂直。一个实图像需要成对的 +ξ 与 -ξ 分量，使虚部相消。读频谱时中心附近代表慢变化，离中心越远代表更细的空间结构。",
+          "第 3 页的卷积定理把 y(x)=∫K(x-x')s(x')dx' 转成 ŷ(ξ)=K̂(ξ)ŝ(ξ)。关键不是背结果，而是把 Fourier integral 写开、交换积分顺序，再用 u=x-x' 换元。换元后指数 e^{-iξ·(u+x')} 分成只含 u 和只含 x' 的两个因子，于是两个积分分别成为 K̂ 与 ŝ。每个 ξ 都能独立相乘，原本巨大的平移不变线性算子就被对角化。",
+          "K̂(ξ) 一般是复数。它的模 |K̂| 是该频率的增益，argument 是 phase shift。对称 center-surround 核常有近似零相位或 π 相位，所以重点常落在幅频响应；若感受野不对称或包含时间延迟，相位同样携带信息。把 receptive field 只画成空间小图而不看频率响应，会难以直接判断它更偏好缓慢梯度、边缘还是某个带通范围。"
+        ],
+        "keyPoints": [
+          "平移不变 covariance 只依赖位置差，使 Fourier modes 成为彼此不混合的统计方向。",
+          "频率向量 ξ 与图像条纹方向垂直，|ξ| 控制空间振荡速度。",
+          "卷积在 Fourier 域变成逐频率复数乘法，模控制增益，相角控制位移。"
+        ],
+        "derivation": {
+          "title": "逐项推出卷积定理",
+          "setup": "定义 y(x)=∫K(x-x')s(x')dx'，并采用 f̂(ξ)=∫f(x)e^{-iξ·x}dx 的 Fourier convention。",
+          "steps": [
+            {
+              "title": "把卷积代入输出的 Fourier transform",
+              "explanation": "将 y 的积分表达式放进 ŷ，并把对 x 与 x' 的积分写在同一式中。",
+              "latex": "\\hat y(\\xi)=\\int\\!\\int K(x-x')s(x')e^{-i\\xi\\cdot x}\\,dx'\\,dx"
+            },
+            {
+              "title": "用相对位移换元",
+              "explanation": "令 u=x-x'，则 x=u+x' 且 dx=du；指数被分成依赖 u 与依赖 x' 的乘积。",
+              "latex": "e^{-i\\xi\\cdot x}=e^{-i\\xi\\cdot u}e^{-i\\xi\\cdot x'}"
+            },
+            {
+              "title": "识别两个 Fourier transforms",
+              "explanation": "含 u 的积分正是 K̂(ξ)，含 x' 的积分正是 ŝ(ξ)，两者相乘得到输出频率分量。",
+              "latex": "\\hat y(\\xi)=\\left[\\int K(u)e^{-i\\xi\\cdot u}du\\right]\\left[\\int s(x')e^{-i\\xi\\cdot x'}dx'\\right]=\\hat K(\\xi)\\hat s(\\xi)"
+            }
+          ],
+          "symbolNotes": [
+            "ξ 的单位是 radians per degree 或 radians per distance；若采用 cycles per degree，Fourier 指数中会出现 2π。",
+            "卷积核写 K(x-x') 表示从输入位置 x' 到输出位置 x 的权重只依赖相对位移，这是平移不变假设。"
+          ],
+          "unitsCheck": "若空间积分 dx' 有面积单位，为使 y 与 s 同单位，K 必须带 inverse-area；Fourier transform 的尺度单位取决于所用 convention，但等式两边一致。",
+          "limitCheck": "K 为 delta function 时 K̂=1，所有频率原样通过；K 为很宽的平均核时，K̂ 集中在低频，符合平滑直觉。"
+        },
+        "workedExample": {
+          "title": "一个 sinusoid 通过具有幅值与相位的滤波器",
+          "problem": "输入 s(x)=3cos(2x)。滤波器在 ξ=2 处的响应为 K̂(2)=0.5e^{-iπ/4}，求输出 sinusoid 的幅值与 phase shift。",
+          "steps": [
+            "输入只含 ξ=+2 和 ξ=-2 的共轭频率对，实空间幅值为 3。",
+            "每个频率分量乘以 K̂；模 0.5 把幅值从 3 缩到 1.5。",
+            "相角 -π/4 给正频率分量增加 -π/4 phase，因此输出可写 y(x)=1.5cos(2x-π/4)。"
+          ],
+          "result": "滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 π/4。",
+          "sanityCheck": "线性平移不变滤波不会把单一 sinusoid 变成新频率；若计算出现 ξ=4，说明把乘法误当成了非线性平方。"
+        },
+        "selfCheck": {
+          "prompt": "为什么说 Fourier modes 把平移不变线性滤波器“对角化”？",
+          "answer": "每个输入 mode e^{iξ·x} 经过卷积后仍是同一个 ξ，只乘一个复数 K̂(ξ)，不同 ξ 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+        },
+        "pitfalls": [
+          "把频率向量方向画成条纹延伸方向，导致 orientation 解读旋转九十度。",
+          "只使用 |K̂| 而忽略 phase；不对称空间核与时空核的 phase 会影响定位和延迟。"
+        ]
+      },
+      {
+        "id": "l16-m3",
+        "title": "自然图像功率谱、whitening 与可检验的适应",
+        "sourceRefs": [
+          {
+            "file": "Lecture16-Adaptation.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture16-Adaptation.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "1/|ξ|² 输入统计怎样预测滤波器频率形状，又怎样用 LNP 实验判断系统是否真的随环境调整？",
+        "paragraphs": [
+          "第 4 页把自然图像的 ensemble power spectrum 近似写成 P_in(ξ)∝1/|ξ|²：低频上的亮度缓变通常比高频细节有更大方差。线性滤波后，输出频率系数为 K̂ŝ，因此输出功率为 |K̂|²P_in。若目标是在无噪声、无增益上限的理想模型中让各频率输出方差相同，就令 |K̂|²P_in 为常数，从而得到 |K̂|∝|ξ|。空间中这表现为抑制低频、相对增强边缘的差分结构。",
+          "理想 whitening 不能直接延伸到任意高频。眼球光学与 photoreceptor integration 本身压低极高频，使可用 signal power 下降；输出噪声若在频率间近似平坦，盲目采用 |ξ| 增益会把最高频噪声大量放大。有效滤波器因而常在可靠的中频段上升，到 noise-dominated 区域再次下降，形成带通。随着亮度下降，可靠频段收窄，最优滤波从较强 center-surround 向更平滑的 pooling 移动。",
+          "第 5 页把预测落到 LNP measurement。应在高、低光照或不同 spatial correlation 条件下分别呈现足够丰富的刺激，估计 filter k_c，再估计条件专属 nonlinearity f_c。比较 filter 时先固定规范化，例如令 ||k_c||=1 并把符号按主要 lobe 对齐，否则 k 乘常数、f 的横轴除同一常数会产生相同预测。随后比较 spatial profile、Fourier gain、中心周围积分比以及 cross-condition prediction。",
+          "强证据来自可区分的反事实：若只变 nonlinearity，用条件 A 的 filter 配合条件 B 的 nonlinearity 应接近 B 的数据；若 filter 真正改变，这种交换会系统性漏掉某些 stimulus directions。还要用相同 spike 数或 bootstrap confidence interval 处理低光下估计更噪的问题。适应结论应报告参数变化及其预测改进，而不是把两张看似不同的核图当作完成证明。"
+        ],
+        "keyPoints": [
+          "线性滤波使输出功率谱满足 P_out(ξ)=|K̂(ξ)|²P_in(ξ)。",
+          "P_in∝1/|ξ|² 的无噪声 whitening 解给出 |K̂|∝|ξ|，但光学与噪声使真实解在高频回落。",
+          "跨条件 LNP 比较必须固定 filter scale、独立估计 nonlinearity，并用 held-out prediction 检验参数交换。"
+        ],
+        "derivation": {
+          "title": "由输入功率谱推出 whitening 增益",
+          "setup": "对每个频率 ξ，输出 coefficient ŷ=K̂ŝ。定义功率为复数 coefficient 的期望平方模 P(ξ)=E[|ŝ(ξ)|²]。",
+          "steps": [
+            {
+              "title": "计算输出功率",
+              "explanation": "确定性的滤波增益可移出期望；复数乘积的平方模等于两个平方模相乘。",
+              "latex": "P_{\\mathrm{out}}(\\xi)=E[|\\hat K\\hat s|^2]=|\\hat K(\\xi)|^2P_{\\mathrm{in}}(\\xi)"
+            },
+            {
+              "title": "写出 whitening 条件",
+              "explanation": "各频率输出方差相同，记为常数 c；解出所需的 squared gain。",
+              "latex": "|\\hat K(\\xi)|^2=\\frac{c}{P_{\\mathrm{in}}(\\xi)}"
+            },
+            {
+              "title": "代入自然图像近似",
+              "explanation": "若 P_in=a/|ξ|²，则 squared gain=c|ξ|²/a，取非负幅值平方根得到线性随 |ξ| 上升。",
+              "latex": "|\\hat K(\\xi)|=\\sqrt{\\frac{c}{a}}\\,|\\xi|"
+            }
+          ],
+          "symbolNotes": [
+            "P_in 是 ensemble average power，不是某一张图在每个频率上的固定值。",
+            "whitening 只规定 |K̂|，不规定 phase；空间局部性、causality 等条件还会限制可实现的 K。"
+          ],
+          "unitsCheck": "若输入与输出采用同一信号单位，|K̂| 可视作无量纲增益；P 的单位是 signal²，常数 c 与 P_out 同单位。",
+          "limitCheck": "|ξ|→0 时理想增益趋零，表示去除 global mean；|ξ|→∞ 时公式发散，暴露了无噪声和无限带宽假设，真实系统必须正则化。"
+        },
+        "workedExample": {
+          "title": "两个频率的 whitening 与噪声代价",
+          "problem": "设 P_in(1)=16、P_in(4)=1，希望两者输出 signal power 都为 4。求两个增益；若两频率的输入后噪声 power 都为 1，再算输出噪声 power。",
+          "steps": [
+            "由 |K|²P_in=4，低频增益 |K(1)|=√(4/16)=0.5。",
+            "高频增益 |K(4)|=√(4/1)=2，这与频率相差四倍、增益相差四倍一致。",
+            "噪声也乘 squared gain，所以低频输出噪声为 0.25，高频输出噪声为 4；高频 signal 虽被拉平，SNR 仍更差。"
+          ],
+          "result": "纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。",
+          "sanityCheck": "把增益代回 signal power：0.5²×16=4，2²×1=4；两项确实相等。"
+        },
+        "selfCheck": {
+          "prompt": "跨两个适应条件比较 LNP filter 时，为什么必须先固定 filter 的尺度规范？",
+          "answer": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+        },
+        "pitfalls": [
+          "把 1/|ξ|² 当成每张自然图像都严格服从的定律；它是数据集合上的近似趋势。",
+          "在低 spike 条件下直接比较噪声很大的 filter 图，不用重采样误差与 held-out prediction 排除估计方差。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L16-FIG-A1",
+      "lecture": 16,
+      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "moduleId": "l16-m3",
+      "title": "自然图像 whitening 的理想高频增益会被噪声截断",
+      "alt": "归一化空间频率响应图比较理想线性上升的 whitening 增益、考虑噪声后的带通增益和低信噪比下更窄的低频响应。",
+      "caption": "若自然图像功率近似 P_in(ξ)∝1/|ξ|²，且暂时忽略 noise 与 gain limits，使 P_out=|K̂|²P_in 平坦需要 |K̂|∝|ξ|。真实 optics 会压低极高频 signal，而近似平坦的 output noise 不会随之消失，因此 noise-aware filter 在高频回落；SNR 再降低时，可靠频带进一步收窄并更偏向 pooling。三条曲线均为归一化理论示意，不表示经验测量值。",
+      "sourceRefs": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 4
+        },
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 5
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "spatial frequency |ξ|（归一化）",
+      "yLabel": "filter gain |K̂(ξ)|（归一化）",
+      "curves": [
+        {
+          "label": "ideal whitening",
+          "points": [
+            [
+              0,
+              5
+            ],
+            [
+              20,
+              22
+            ],
+            [
+              40,
+              40
+            ],
+            [
+              60,
+              58
+            ],
+            [
+              80,
+              76
+            ],
+            [
+              100,
+              94
+            ]
+          ],
+          "dashed": true
+        },
+        {
+          "label": "noise-aware",
+          "points": [
+            [
+              0,
+              6
+            ],
+            [
+              15,
+              20
+            ],
+            [
+              30,
+              44
+            ],
+            [
+              45,
+              67
+            ],
+            [
+              60,
+              75
+            ],
+            [
+              75,
+              58
+            ],
+            [
+              90,
+              27
+            ],
+            [
+              100,
+              12
+            ]
+          ]
+        },
+        {
+          "label": "lower SNR",
+          "points": [
+            [
+              0,
+              18
+            ],
+            [
+              15,
+              40
+            ],
+            [
+              30,
+              53
+            ],
+            [
+              45,
+              42
+            ],
+            [
+              60,
+              25
+            ],
+            [
+              75,
+              12
+            ],
+            [
+              100,
+              5
+            ]
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "x": 75,
+          "y": 58,
+          "label": "noise-dominated roll-off"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 SNR 与 optimal spatial profile",
@@ -318,7 +709,42 @@
     "需避免把 Fourier transform 教成纯公式表。需要始终回答 spatial frequency 对图像和 receptive field 的物理含义，以及 amplitude/phase 分别表示什么。"
   ],
   "errata": [
-    "1. Page 2-3 的 Fourier convention 使用 2π；其他教材可能把 2π 放在 inverse transform，需保持一致。 2. Page 4 的 natural-image 1/|ξ|² 是 approximate empirical scaling。 3. Page 5 仅概述 LNP adaptation measurement；完整实验需 held-out model comparison。"
+    {
+      "id": "L16-E01",
+      "lecture": 16,
+      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "kind": "uncertainty",
+      "sourceFile": "Lecture16-Adaptation.pdf",
+      "sourcePage": 2,
+      "sectionId": "l16-m2",
+      "originalIssue": "Page 2-3 的 Fourier convention 使用 2π；其他教材可能把 2π 放在 inverse transform，需保持一致。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": "Page 2-3 的 Fourier convention 使用 2π"
+    },
+    {
+      "id": "L16-E02",
+      "lecture": 16,
+      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "kind": "caution",
+      "sourceFile": "Lecture16-Adaptation.pdf",
+      "sourcePage": 4,
+      "sectionId": "lecture-16-source-4",
+      "originalIssue": "Page 4 的 natural-image 1/|ξ|² 是 approximate empirical scaling。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L16-E03",
+      "lecture": 16,
+      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "kind": "caution",
+      "sourceFile": "Lecture16-Adaptation.pdf",
+      "sourcePage": 5,
+      "sectionId": "l16-m3",
+      "originalIssue": "Page 5 仅概述 LNP adaptation measurement；完整实验需 held-out model comparison。",
+      "explanation": "第 5 页把预测落到 LNP measurement。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -336,7 +762,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 16 讲：高 SNR 时 center-surround 为什么更强？",
@@ -364,7 +790,7 @@
         "c": "该选项回答的是“aliasing 何时发生？”。",
         "d": "该选项回答的是“为何不无限 boost very high frequency？”。"
       },
-      "explanation": "可安全减去 correlated signals、提高 decorrelation，而不太放大 noise。"
+      "explanation": "可安全减去 correlated signals、提高 decorrelation，而不太放大 noise。 下面的 pooling 推导使用 amplitude SNR，所以平均 n 个独立噪声测量后提高 √n；频谱讨论使用 power ratio P_s(ξ)/P_n(ξ)。"
     },
     {
       "id": "L16-Q02",
@@ -381,7 +807,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：低 SNR 时为何 spatial averaging？",
@@ -409,7 +835,7 @@
         "b": "该选项回答的是“|ξ| 表示什么？”。",
         "d": "该选项回答的是“aliasing 何时发生？”。"
       },
-      "explanation": "平均独立/局部 noise，提高 reliability。"
+      "explanation": "平均独立/局部 noise，提高 reliability。 每个 ξ 都能独立相乘，原本巨大的平移不变线性算子就被对角化。 判断依据：第 3 页的卷积定理把 y(x)=∫K(x-x')s(x')dx' 转成 ŷ(ξ)=K̂(ξ)ŝ(ξ)。关键不是背结果，而是把 Fourier integral 写开、交换积分顺序，再用 u=x-x' 换元。换元后指数 e^{-iξ·(u+x')} 分成只含 u 和只含 x' 的两个因子，于是两个积分分别成为 K̂ 与 ŝ。每个 ξ 都能独立相乘，原本巨大的平移不变线性算子就被对角化。"
     },
     {
       "id": "L16-Q03",
@@ -426,7 +852,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "calculation",
       "cognitiveLevel": "analyze",
       "stem": "第 16 讲：translation invariance 对 covariance 的表达？",
@@ -454,7 +880,7 @@
         "b": "这条推理对应 Lecture16-Adaptation.pdf 第 2 页。",
         "c": "这是“Fourier 变换（Fourier transform）”的定义。"
       },
-      "explanation": "只依 displacement ρ1−ρ2。"
+      "explanation": "只依 displacement ρ1−ρ2。 这样的 covariance matrix 具有重复的位移结构，复指数模式在卷积或相关运算后只改变复数幅值，不改变频率，因此成为自然基底。"
     },
     {
       "id": "L16-Q04",
@@ -471,7 +897,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 16 讲：|ξ| 表示什么？",
@@ -499,7 +925,7 @@
         "c": "这是“复指数（complex exponential）”的定义。",
         "d": "该选项回答的是“amplitude 与 phase 分别表示什么？”。"
       },
-      "explanation": "spatial frequency magnitude/cycles per distance。"
+      "explanation": "spatial frequency magnitude/cycles per distance。 高 SNR 表示输入中的细节相对于内部与光子噪声足够可靠，此时相邻像素往往高度相关，若原样传递会让有限的输出动态范围重复编码相似信息。"
     },
     {
       "id": "L16-Q05",
@@ -516,7 +942,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：ξ vector 方向与 grating orientation 的关系？",
@@ -544,7 +970,7 @@
         "c": "这是“perfect whitening magnitude”的适用条件。",
         "d": "该选项回答的是“convolution 在 Fourier domain 变成什么？”。"
       },
-      "explanation": "ξ 指向 phase 变化最快方向，垂直于条纹。"
+      "explanation": "ξ 指向 phase 变化最快方向，垂直于条纹。 适应结论应报告参数变化及其预测改进，而不是把两张看似不同的核图当作完成证明。"
     },
     {
       "id": "L16-Q06",
@@ -561,7 +987,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "equation",
       "cognitiveLevel": "understand",
       "stem": "第 16 讲：Euler identity 是什么？",
@@ -589,7 +1015,7 @@
         "b": "这是“混叠（aliasing）”的定义。",
         "d": "这是“Fourier transform”的适用条件。"
       },
-      "explanation": "e^{iθ}=cosθ+i sinθ。"
+      "explanation": "e^{iθ}=cosθ+i sinθ。 第 2 页先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 Δx 决定，而不由绝对坐标决定，可写 C(x,x')=C(x-x')。"
     },
     {
       "id": "L16-Q07",
@@ -606,7 +1032,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：convolution 在 Fourier domain 变成什么？",
@@ -634,7 +1060,7 @@
         "b": "这是“平移不变性（translation invariance）”的定义。",
         "c": "这是“perfect whitening magnitude”的适用条件。"
       },
-      "explanation": "pointwise multiplication。"
+      "explanation": "pointwise multiplication。 二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。 判断依据：二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。点积 ξ·x 把二维位置投影到频率向量上；沿 ξ 方向走，phase 改变最快，沿垂直方向走，phase 不变，所以看到的亮暗条纹与 ξ 垂直。一个实图像需要成对的 +ξ 与 -ξ 分量，使虚部相消。读频谱时中心附近代表慢变化，离中心越远代表更细的空间结构。"
     },
     {
       "id": "L16-Q08",
@@ -651,7 +1077,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 16 讲：natural power ∝1/|ξ|² 时 whitening gain trend？",
@@ -679,7 +1105,7 @@
         "c": "这是“低通（low-pass）”的定义。",
         "d": "这是“translation-invariant covariance”的适用条件。"
       },
-      "explanation": "|Khat|∝|ξ|。"
+      "explanation": "|Khat|∝|ξ|。 第 4 页把自然图像的 ensemble power spectrum 近似写成 P_in(ξ)∝1/|ξ|²：低频上的亮度缓变通常比高频细节有更大方差。"
     },
     {
       "id": "L16-Q09",
@@ -696,7 +1122,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 16 讲：为何不无限 boost very high frequency？",
@@ -724,7 +1150,7 @@
         "c": "该选项回答的是“|ξ| 表示什么？”。",
         "d": "这是“功率谱（power spectrum）”的定义。"
       },
-      "explanation": "optical/photoreceptor attenuation 与 noise/capacity cost。"
+      "explanation": "optical/photoreceptor attenuation 与 noise/capacity cost。 眼球光学与 photoreceptor integration 本身压低极高频，使可用 signal power 下降；输出噪声若在频率间近似平坦，盲目采用 |ξ| 增益会把最高频噪声大量放大。"
     },
     {
       "id": "L16-Q10",
@@ -741,7 +1167,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：amplitude 与 phase 分别表示什么？",
@@ -769,7 +1195,7 @@
         "b": "这是“功率谱（power spectrum）”的定义。",
         "d": "该选项回答的是“ξ vector 方向与 grating orientation 的关系？”。"
       },
-      "explanation": "component strength 与 spatial alignment/shift。"
+      "explanation": "component strength 与 spatial alignment/shift。 下面的 pooling 推导使用 amplitude SNR，所以平均 n 个独立噪声测量后提高 √n；频谱讨论使用 power ratio P_s(ξ)/P_n(ξ)。"
     },
     {
       "id": "L16-Q11",
@@ -786,7 +1212,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 16 讲：如何用 LNP 检验 adaptation？",
@@ -814,7 +1240,7 @@
         "b": "这条推理对应 Lecture16-Adaptation.pdf 第 5 页。",
         "c": "这条推理对应 Lecture16-Adaptation.pdf 第 1 页。"
       },
-      "explanation": "在不同 statistics/light levels 分别 fit filters/nonlinearities，并 cross-validate。"
+      "explanation": "在不同 statistics/light levels 分别 fit filters/nonlinearities，并 cross-validate。 第 5 页把预测落到 LNP measurement。 判断依据：第 5 页把预测落到 LNP measurement。应在高、低光照或不同 spatial correlation 条件下分别呈现足够丰富的刺激，估计 filter k_c，再估计条件专属 nonlinearity f_c。比较 filter 时先固定规范化，例如令 ||k_c||=1 并把符号按主要 lobe 对齐，否则 k 乘常数、f 的横轴除同一常数会产生相同预测。随后比较 spatial profile、Fourier gain、中心周围积分比以及 cross-condition prediction。"
     },
     {
       "id": "L16-Q12",
@@ -831,7 +1257,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：aliasing 何时发生？",
@@ -859,55 +1285,10 @@
         "c": "该选项回答的是“为何不无限 boost very high frequency？”。",
         "d": "这是“适应（adaptation）”的定义。"
       },
-      "explanation": "sampling frequency 不足以表示最高 spatial/temporal frequency。"
+      "explanation": "sampling frequency 不足以表示最高 spatial/temporal frequency。 高 SNR 表示输入中的细节相对于内部与光子噪声足够可靠，此时相邻像素往往高度相关，若原样传递会让有限的输出动态范围重复编码相似信息。"
     },
     {
       "id": "L16-Q13",
-      "lecture": 16,
-      "sectionId": "lecture-16-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture16-Adaptation.pdf",
-          "page": 1,
-          "section": "lecture-16-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Adaptation",
-        "Lecture16-Adaptation.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 16 讲：根据 Lecture16-Adaptation.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "natural-scene structure、translation-invariant correlation function、Fourier transform。"
-        },
-        {
-          "id": "b",
-          "text": "SNR、high/intermediate/low SNR 下 center-surround 与 averaging。"
-        },
-        {
-          "id": "c",
-          "text": "complex exponential、Euler identity、convolution theorem、 frequency-domain RF。"
-        },
-        {
-          "id": "d",
-          "text": "LNP model 中的 adaptation measurement。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
-        "c": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。",
-        "d": "该陈述解释的是“LNP model 中的 adaptation measurement”，不是题干指定的关系。"
-      },
-      "explanation": "SNR、high/intermediate/low SNR 下 center-surround 与 averaging。"
-    },
-    {
-      "id": "L16-Q14",
       "lecture": 16,
       "sectionId": "lecture-16-source-1",
       "sourceAnchors": [
@@ -932,27 +1313,27 @@
         },
         {
           "id": "b",
-          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
+          "text": "因此，分别解释 high-SNR strong surround/decorrelation、low-SNR spatial averaging、intermediate interpolation，并用图形预测。"
         },
         {
           "id": "c",
-          "text": "因此，分别解释 high-SNR strong surround/decorrelation、low-SNR spatial averaging、intermediate interpolation，并用图形预测。"
+          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
         },
         {
           "id": "d",
           "text": "解释 power spectrum 与 natural-image approximate1/|xi|²scaling； 推导 perfect-whitening filter 的频率趋势。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
-        "b": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。",
+        "c": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。",
         "d": "该陈述解释的是“power spectrum、natural-image1/|xi|²、perfect decorrelation filter”，不是题干指定的关系。"
       },
-      "explanation": "因此，分别解释 high-SNR strong surround/decorrelation、low-SNR spatial averaging、intermediate interpolation，并用图形预测。"
+      "explanation": "因此，分别解释 high-SNR strong surround/decorrelation、low-SNR spatial averaging、intermediate interpolation，并用图形预测。 这一页的图应按条件预测来读：先确认横轴或曲线表示 SNR，而不是时间；再比较 center、surround 的相对面积和宽度；最后写出可测量结果，例如低光下 estimated RF 的高频增益下降、空间范围扩大。"
     },
     {
-      "id": "L16-Q15",
+      "id": "L16-Q14",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -966,128 +1347,38 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 16 讲：根据 Lecture16-Adaptation.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "SNR、high/intermediate/low SNR 下 center-surround 与 averaging。"
-        },
-        {
-          "id": "b",
-          "text": "complex exponential、Euler identity、convolution theorem、 frequency-domain RF。"
-        },
-        {
-          "id": "c",
-          "text": "power spectrum、natural-image1/|xi|²、perfect decorrelation filter、photoreceptor low-pass 与 SNR adaptation。"
-        },
-        {
-          "id": "d",
-          "text": "natural-scene structure、translation-invariant correlation function、Fourier transform。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "b": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。",
-        "c": "该陈述解释的是“power spectrum、natural-image1/|xi|²、perfect decorrelation filter”，不是题干指定的关系。"
-      },
-      "explanation": "natural-scene structure、translation-invariant correlation function、Fourier transform。"
-    },
-    {
-      "id": "L16-Q16",
-      "lecture": 16,
-      "sectionId": "lecture-16-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture16-Adaptation.pdf",
-          "page": 2,
-          "section": "lecture-16-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Adaptation",
-        "Lecture16-Adaptation.pdf"
-      ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 16 讲：若要解释\"natural-scene structure、translation-invariant correlation function、Fourier transform\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "定义 translation invariance 与 correlation function； 解释为何自然图像可用 displacement statistics 描述。"
-        },
-        {
-          "id": "b",
           "text": "因此，分别解释 high-SNR strong surround/decorrelation、low-SNR spatial averaging、intermediate interpolation，并用图形预测。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "解释 power spectrum 与 natural-image approximate1/|xi|²scaling； 推导 perfect-whitening filter 的频率趋势。"
+        },
+        {
+          "id": "c",
+          "text": "定义 translation invariance 与 correlation function； 解释为何自然图像可用 displacement statistics 描述。"
         },
         {
           "id": "d",
           "text": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
         }
       ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "c": "该陈述解释的是“power spectrum、natural-image1/|xi|²、perfect decorrelation filter”，不是题干指定的关系。",
-        "d": "该陈述解释的是“LNP model 中的 adaptation measurement”，不是题干指定的关系。"
-      },
-      "explanation": "定义 translation invariance 与 correlation function； 解释为何自然图像可用 displacement statistics 描述。"
-    },
-    {
-      "id": "L16-Q17",
-      "lecture": 16,
-      "sectionId": "lecture-16-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture16-Adaptation.pdf",
-          "page": 3,
-          "section": "lecture-16-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Adaptation",
-        "Lecture16-Adaptation.pdf"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 16 讲：根据 Lecture16-Adaptation.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "SNR、high/intermediate/low SNR 下 center-surround 与 averaging。"
-        },
-        {
-          "id": "b",
-          "text": "complex exponential、Euler identity、convolution theorem、 frequency-domain RF。"
-        },
-        {
-          "id": "c",
-          "text": "natural-scene structure、translation-invariant correlation function、Fourier transform。"
-        },
-        {
-          "id": "d",
-          "text": "power spectrum、natural-image1/|xi|²、perfect decorrelation filter、photoreceptor low-pass 与 SNR adaptation。"
-        }
-      ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "c": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
-        "d": "该陈述解释的是“power spectrum、natural-image1/|xi|²、perfect decorrelation filter”，不是题干指定的关系。"
+        "b": "该陈述解释的是“power spectrum、natural-image1/|xi|²、perfect decorrelation filter”，不是题干指定的关系。",
+        "d": "该陈述解释的是“LNP model 中的 adaptation measurement”，不是题干指定的关系。"
       },
-      "explanation": "complex exponential、Euler identity、convolution theorem、 frequency-domain RF。"
+      "explanation": "定义 translation invariance 与 correlation function； 解释为何自然图像可用 displacement statistics 描述。 第 2 页先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 Δx 决定，而不由绝对坐标决定，可写 C(x,x')=C(x-x')。"
     },
     {
-      "id": "L16-Q18",
+      "id": "L16-Q15",
       "lecture": 16,
       "sectionId": "lecture-16-source-3",
       "sourceAnchors": [
@@ -1101,7 +1392,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 16 讲：若要解释\"complex exponential、Euler identity、convolution theorem、 frequency-domain RF\"中的机制或推导，哪条推理链成立？",
@@ -1116,23 +1407,23 @@
         },
         {
           "id": "c",
-          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
+          "text": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
         },
         {
           "id": "d",
-          "text": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
+          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
         "b": "该陈述解释的是“power spectrum、natural-image1/|xi|²、perfect decorrelation filter”，不是题干指定的关系。",
-        "d": "该陈述解释的是“LNP model 中的 adaptation measurement”，不是题干指定的关系。"
+        "c": "该陈述解释的是“LNP model 中的 adaptation measurement”，不是题干指定的关系。"
       },
-      "explanation": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
+      "explanation": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。 二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。 判断依据：二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。点积 ξ·x 把二维位置投影到频率向量上；沿 ξ 方向走，phase 改变最快，沿垂直方向走，phase 不变，所以看到的亮暗条纹与 ξ 垂直。一个实图像需要成对的 +ξ 与 -ξ 分量，使虚部相消。读频谱时中心附近代表慢变化，离中心越远代表更细的空间结构。"
     },
     {
-      "id": "L16-Q19",
+      "id": "L16-Q16",
       "lecture": 16,
       "sectionId": "lecture-16-source-4",
       "sourceAnchors": [
@@ -1147,51 +1438,6 @@
         "Lecture16-Adaptation.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 16 讲：根据 Lecture16-Adaptation.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "SNR、high/intermediate/low SNR 下 center-surround 与 averaging。"
-        },
-        {
-          "id": "b",
-          "text": "natural-scene structure、translation-invariant correlation function、Fourier transform。"
-        },
-        {
-          "id": "c",
-          "text": "complex exponential、Euler identity、convolution theorem、 frequency-domain RF。"
-        },
-        {
-          "id": "d",
-          "text": "power spectrum、natural-image1/|xi|²、perfect decorrelation filter、photoreceptor low-pass 与 SNR adaptation。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "b": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
-        "c": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。"
-      },
-      "explanation": "power spectrum、natural-image1/|xi|²、perfect decorrelation filter、photoreceptor low-pass 与 SNR adaptation。"
-    },
-    {
-      "id": "L16-Q20",
-      "lecture": 16,
-      "sectionId": "lecture-16-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture16-Adaptation.pdf",
-          "page": 4,
-          "section": "lecture-16-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Adaptation",
-        "Lecture16-Adaptation.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 16 讲：若要解释\"power spectrum、natural-image1/|xi|²、perfect decorrelation filter\"中的机制或推导，哪条推理链成立？",
@@ -1219,10 +1465,10 @@
         "c": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。",
         "d": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。"
       },
-      "explanation": "因此，说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
+      "explanation": "因此，说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。 第 4 页把自然图像的 ensemble power spectrum 近似写成 P_in(ξ)∝1/|ξ|²：低频上的亮度缓变通常比高频细节有更大方差。"
     },
     {
-      "id": "L16-Q21",
+      "id": "L16-Q17",
       "lecture": 16,
       "sectionId": "lecture-16-source-4",
       "sourceAnchors": [
@@ -1236,38 +1482,38 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "第 16 讲：阅读与\"power spectrum、natural-image1/|xi|²、perfect decorrelation filter\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "stem": "第 16 讲：阅读\"自然图像 whitening 的理想高频增益会被噪声截断\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "c",
           "text": "解释 power spectrum 与 natural-image approximate1/|xi|²scaling； 推导 perfect-whitening filter 的频率趋势。"
         },
         {
+          "id": "b",
+          "text": "若自然图像功率近似 P_in(ξ)∝1/|ξ|²，且暂时忽略 noise 与 gain limits，使 P_out=|K̂|²P_in 平坦需要 |K̂|∝|ξ|。"
+        },
+        {
+          "id": "c",
+          "text": "从 Atick-Redlich 延续解释 SNR 如何在 redundancy reduction 与 denoising 之间改变 optimal filter。"
+        },
+        {
           "id": "d",
-          "text": "使 output spectrum/covariance 近 flat/identity。"
+          "text": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture16-Adaptation.pdf 第 4 页。",
-        "d": "这是“白化（whitening）”的定义。"
+        "a": "这条推理对应 Lecture16-Adaptation.pdf 第 4 页。",
+        "c": "这条推理对应 Lecture16-Adaptation.pdf 第 1 页。",
+        "d": "这条推理对应 Lecture16-Adaptation.pdf 第 5 页。"
       },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+      "explanation": "若自然图像功率近似 P_in(ξ)∝1/|ξ|²，且暂时忽略 noise 与 gain limits，使 P_out=|K̂|²P_in 平坦需要 |K̂|∝|ξ|。 眼球光学与 photoreceptor integration 本身压低极高频，使可用 signal power 下降；输出噪声若在频率间近似平坦，盲目采用 |ξ| 增益会把最高频噪声大量放大。"
     },
     {
-      "id": "L16-Q22",
+      "id": "L16-Q18",
       "lecture": 16,
       "sectionId": "lecture-16-source-5",
       "sourceAnchors": [
@@ -1281,52 +1527,7 @@
         "Adaptation",
         "Lecture16-Adaptation.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 16 讲：根据 Lecture16-Adaptation.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "SNR、high/intermediate/low SNR 下 center-surround 与 averaging。"
-        },
-        {
-          "id": "b",
-          "text": "natural-scene structure、translation-invariant correlation function、Fourier transform。"
-        },
-        {
-          "id": "c",
-          "text": "LNP model 中的 adaptation measurement。"
-        },
-        {
-          "id": "d",
-          "text": "complex exponential、Euler identity、convolution theorem、 frequency-domain RF。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "b": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
-        "d": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。"
-      },
-      "explanation": "LNP model 中的 adaptation measurement。"
-    },
-    {
-      "id": "L16-Q23",
-      "lecture": 16,
-      "sectionId": "lecture-16-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture16-Adaptation.pdf",
-          "page": 5,
-          "section": "lecture-16-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Adaptation",
-        "Lecture16-Adaptation.pdf"
-      ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 16 讲：若要解释\"LNP model 中的 adaptation measurement\"中的机制或推导，哪条推理链成立？",
@@ -1341,23 +1542,425 @@
         },
         {
           "id": "c",
-          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
+          "text": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
         },
         {
           "id": "d",
-          "text": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
+          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
+        "b": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
+        "d": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。"
+      },
+      "explanation": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。 第 5 页把预测落到 LNP measurement。 判断依据：第 5 页把预测落到 LNP measurement。应在高、低光照或不同 spatial correlation 条件下分别呈现足够丰富的刺激，估计 filter k_c，再估计条件专属 nonlinearity f_c。比较 filter 时先固定规范化，例如令 ||k_c||=1 并把符号按主要 lobe 对齐，否则 k 乘常数、f 的横轴除同一常数会产生相同预测。随后比较 spatial profile、Fourier gain、中心周围积分比以及 cross-condition prediction。"
+    },
+    {
+      "id": "L16-Q19",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 1,
+          "section": "lecture-16-source-1"
+        }
+      ],
+      "conceptTags": [
+        "SNR 决定滤波目标：去冗余还是先降噪"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 16 讲：为什么低光下观察到 surround 变弱，不能简写成视觉系统\"不再关心边缘\"？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "每个输入 mode e^{iξ·x} 经过卷积后仍是同一个 ξ，只乘一个复数 K̂(ξ)，不同 ξ 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+        },
+        {
+          "id": "b",
+          "text": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+        },
+        {
+          "id": "c",
+          "text": "因此，分别解释 high-SNR strong surround/decorrelation、low-SNR spatial averaging、intermediate interpolation，并用图形预测。"
+        },
+        {
+          "id": "d",
+          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“SNR、high/intermediate/low SNR 下 center-surround 与 averaging”，不是题干指定的关系。",
-        "b": "该陈述解释的是“natural-scene structure、translation-invariant correlation function、Fourier transform”，不是题干指定的关系。",
-        "c": "该陈述解释的是“complex exponential、Euler identity、convolution theorem、 frequency-domain RF”，不是题干指定的关系。"
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这条推理对应 Lecture16-Adaptation.pdf 第 1 页。"
       },
-      "explanation": "说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
+      "explanation": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。 这一页的图应按条件预测来读：先确认横轴或曲线表示 SNR，而不是时间；再比较 center、surround 的相对面积和宽度；最后写出可测量结果，例如低光下 estimated RF 的高频增益下降、空间范围扩大。若实验只观察到 firing rate 下降，不能直接推出滤波器已经变宽，因为同样现象也可能来自非线性阈值上移或可用 spikes 减少。"
+    },
+    {
+      "id": "L16-Q20",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 1,
+          "section": "lecture-16-source-1"
+        }
+      ],
+      "conceptTags": [
+        "SNR 决定滤波目标：去冗余还是先降噪",
+        "比较四点平均与相邻差分"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 16 讲：完成\"平坦区域的共同信号为 10，每个像素独立噪声标准差为 2。计算四点平均的噪声标准差；再计算两个像素差 x1-x2 的噪声标准差。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "低 SNR 平坦区域偏好平均，高 SNR 且存在可靠边缘时才有理由用较强差分。"
+        },
+        {
+          "id": "b",
+          "text": "滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 π/4。"
+        },
+        {
+          "id": "c",
+          "text": "纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。"
+        },
+        {
+          "id": "d",
+          "text": "平均独立/局部 noise，提高 reliability。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“低 SNR 时为何 spatial averaging？”。"
+      },
+      "explanation": "低 SNR 平坦区域偏好平均，高 SNR 且存在可靠边缘时才有理由用较强差分。 计算路径：四点平均保留共同值 10，噪声方差为 2²/4=1，标准差为 1。 相邻差分消掉共同值 10-10=0；噪声是 ε1-ε2，方差为 2²+2²=8。 差分噪声标准差为 √8≈2.83，比单像素还大；只有边缘信号足够强时，这个代价才值得。"
+    },
+    {
+      "id": "L16-Q21",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 1,
+          "section": "lecture-16-source-1"
+        }
+      ],
+      "conceptTags": [
+        "SNR 决定滤波目标：去冗余还是先降噪",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 16 讲：得到\"低 SNR 平坦区域偏好平均，高 SNR 且存在可靠边缘时才有理由用较强差分。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "线性平移不变滤波不会把单一 sinusoid 变成新频率；若计算出现 ξ=4，说明把乘法误当成了非线性平方。"
+        },
+        {
+          "id": "b",
+          "text": "若两通道噪声完全相同而非独立，差分噪声会抵消；结果说明必须先说明噪声相关结构。"
+        },
+        {
+          "id": "c",
+          "text": "把增益代回 signal power：0.5²×16=4，2²×1=4；两项确实相等。"
+        },
+        {
+          "id": "d",
+          "text": "各 frequency component 的平均 squared amplitude。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“功率谱（power spectrum）”的定义。"
+      },
+      "explanation": "若两通道噪声完全相同而非独立，差分噪声会抵消；结果说明必须先说明噪声相关结构。 这个检查对应题设\"平坦区域的共同信号为 10，每个像素独立噪声标准差为 2。计算四点平均的噪声标准差；再计算两个像素差 x1-x2 的噪声标准差。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L16-Q22",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 2,
+          "section": "lecture-16-source-2"
+        }
+      ],
+      "conceptTags": [
+        "从平移不变统计到 Fourier 对角化"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 16 讲：为什么说 Fourier modes 把平移不变线性滤波器\"对角化\"？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+        },
+        {
+          "id": "b",
+          "text": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+        },
+        {
+          "id": "c",
+          "text": "每个输入 mode e^{iξ·x} 经过卷积后仍是同一个 ξ，只乘一个复数 K̂(ξ)，不同 ξ 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+        },
+        {
+          "id": "d",
+          "text": "从 sine/cosine 和 Euler identity 引入 complex exponential；逐项解释 Fourier transform 的 spatial-frequency vector。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture16-Adaptation.pdf 第 3 页。"
+      },
+      "explanation": "每个输入 mode e^{iξ·x} 经过卷积后仍是同一个 ξ，只乘一个复数 K̂(ξ)，不同 ξ 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。 K̂(ξ) 一般是复数。它的模 |K̂| 是该频率的增益，argument 是 phase shift。对称 center-surround 核常有近似零相位或 π 相位，所以重点常落在幅频响应；若感受野不对称或包含时间延迟，相位同样携带信息。把 receptive field 只画成空间小图而不看频率响应，会难以直接判断它更偏好缓慢梯度、边缘还是某个带通范围。"
+    },
+    {
+      "id": "L16-Q23",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 2,
+          "section": "lecture-16-source-2"
+        }
+      ],
+      "conceptTags": [
+        "从平移不变统计到 Fourier 对角化",
+        "一个 sinusoid 通过具有幅值与相位的滤波器"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 16 讲：完成\"输入 s(x)=3cos(2x)。滤波器在 ξ=2 处的响应为 K̂(2)=0.5e^{-iπ/4}，求输出 sinusoid 的幅值与 phase shift。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "低 SNR 平坦区域偏好平均，高 SNR 且存在可靠边缘时才有理由用较强差分。"
+        },
+        {
+          "id": "b",
+          "text": "纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。"
+        },
+        {
+          "id": "c",
+          "text": "统一表示 sine/cosine amplitude 与 phase。"
+        },
+        {
+          "id": "d",
+          "text": "滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 π/4。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这是“复指数（complex exponential）”的定义。"
+      },
+      "explanation": "滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 π/4。 计算路径：输入只含 ξ=+2 和 ξ=-2 的共轭频率对，实空间幅值为 3。 每个频率分量乘以 K̂；模 0.5 把幅值从 3 缩到 1.5。 相角 -π/4 给正频率分量增加 -π/4 phase，因此输出可写 y(x)=1.5cos(2x-π/4)。"
     },
     {
       "id": "L16-Q24",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 2,
+          "section": "lecture-16-source-2"
+        }
+      ],
+      "conceptTags": [
+        "从平移不变统计到 Fourier 对角化",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 16 讲：得到\"滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 π/4。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "线性平移不变滤波不会把单一 sinusoid 变成新频率；若计算出现 ξ=4，说明把乘法误当成了非线性平方。"
+        },
+        {
+          "id": "b",
+          "text": "若两通道噪声完全相同而非独立，差分噪声会抵消；结果说明必须先说明噪声相关结构。"
+        },
+        {
+          "id": "c",
+          "text": "把增益代回 signal power：0.5²×16=4，2²×1=4；两项确实相等。"
+        },
+        {
+          "id": "d",
+          "text": "可安全减去 correlated signals、提高 decorrelation，而不太放大 noise。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“高 SNR 时 center-surround 为什么更强？”。"
+      },
+      "explanation": "线性平移不变滤波不会把单一 sinusoid 变成新频率；若计算出现 ξ=4，说明把乘法误当成了非线性平方。 这个检查对应题设\"输入 s(x)=3cos(2x)。滤波器在 ξ=2 处的响应为 K̂(2)=0.5e^{-iπ/4}，求输出 sinusoid 的幅值与 phase shift。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L16-Q25",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 4,
+          "section": "lecture-16-source-4"
+        }
+      ],
+      "conceptTags": [
+        "自然图像功率谱、whitening 与可检验的适应"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 16 讲：跨两个适应条件比较 LNP filter 时，为什么必须先固定 filter 的尺度规范？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+        },
+        {
+          "id": "b",
+          "text": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+        },
+        {
+          "id": "c",
+          "text": "每个输入 mode e^{iξ·x} 经过卷积后仍是同一个 ξ，只乘一个复数 K̂(ξ)，不同 ξ 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+        },
+        {
+          "id": "d",
+          "text": "因此，说明 photoreceptor/optical low-pass 与 output noise 如何改变 efficient filter，并连接 light-level adaptation。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture16-Adaptation.pdf 第 4 页。"
+      },
+      "explanation": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。 强证据来自可区分的反事实：若只变 nonlinearity，用条件 A 的 filter 配合条件 B 的 nonlinearity 应接近 B 的数据；若 filter 真正改变，这种交换会系统性漏掉某些 stimulus directions。还要用相同 spike 数或 bootstrap confidence interval 处理低光下估计更噪的问题。适应结论应报告参数变化及其预测改进，而不是把两张看似不同的核图当作完成证明。"
+    },
+    {
+      "id": "L16-Q26",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 4,
+          "section": "lecture-16-source-4"
+        }
+      ],
+      "conceptTags": [
+        "自然图像功率谱、whitening 与可检验的适应",
+        "两个频率的 whitening 与噪声代价"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 16 讲：完成\"设 P_in(1)=16、P_in(4)=1，希望两者输出 signal power 都为 4。求两个增益；若两频率的输入后噪声 power 都为 1，再算输出噪声 power。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "低 SNR 平坦区域偏好平均，高 SNR 且存在可靠边缘时才有理由用较强差分。"
+        },
+        {
+          "id": "b",
+          "text": "滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 π/4。"
+        },
+        {
+          "id": "c",
+          "text": "纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。"
+        },
+        {
+          "id": "d",
+          "text": "signal magnitude/power 相对 noise 的比。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这是“信噪比（signal-to-noise ratio, SNR）”的定义。"
+      },
+      "explanation": "纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。 计算路径：由 |K|²P_in=4，低频增益 |K(1)|=√(4/16)=0.5。 高频增益 |K(4)|=√(4/1)=2，这与频率相差四倍、增益相差四倍一致。 噪声也乘 squared gain，所以低频输出噪声为 0.25，高频输出噪声为 4；高频 signal 虽被拉平，SNR 仍更差。"
+    },
+    {
+      "id": "L16-Q27",
+      "lecture": 16,
+      "sectionId": "lecture-16-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture16-Adaptation.pdf",
+          "page": 4,
+          "section": "lecture-16-source-4"
+        }
+      ],
+      "conceptTags": [
+        "自然图像功率谱、whitening 与可检验的适应",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 16 讲：得到\"纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若两通道噪声完全相同而非独立，差分噪声会抵消；结果说明必须先说明噪声相关结构。"
+        },
+        {
+          "id": "b",
+          "text": "线性平移不变滤波不会把单一 sinusoid 变成新频率；若计算出现 ξ=4，说明把乘法误当成了非线性平方。"
+        },
+        {
+          "id": "c",
+          "text": "可安全减去 correlated signals、提高 decorrelation，而不太放大 noise。"
+        },
+        {
+          "id": "d",
+          "text": "把增益代回 signal power：0.5²×16=4，2²×1=4；两项确实相等。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "该选项回答的是“高 SNR 时 center-surround 为什么更强？”。"
+      },
+      "explanation": "把增益代回 signal power：0.5²×16=4，2²×1=4；两项确实相等。 这个检查对应题设\"设 P_in(1)=16、P_in(4)=1，希望两者输出 signal power 都为 4。求两个增益；若两频率的输入后噪声 power 都为 1，再算输出噪声 power。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L16-Q28",
       "lecture": 16,
       "sectionId": "lecture-16-source-5",
       "sourceAnchors": [
@@ -1371,7 +1974,7 @@
         "适应",
         "adaptation"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"response/model parameters 随 stimulus statistics 或 state 改变。\"称为什么？",
@@ -1402,7 +2005,7 @@
       "explanation": "适应（adaptation）：response/model parameters 随 stimulus statistics 或 state 改变。"
     },
     {
-      "id": "L16-Q25",
+      "id": "L16-Q29",
       "lecture": 16,
       "sectionId": "lecture-16-source-4",
       "sourceAnchors": [
@@ -1416,7 +2019,7 @@
         "信噪比",
         "signal-to-noise ratio, SNR"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"signal magnitude/power 相对 noise 的比。\"称为什么？",
@@ -1444,10 +2047,10 @@
         "c": "“空间频率（spatial frequency）”指：单位距离内 sinusoidal cycles；向量还编码方向。",
         "d": "“Fourier 变换（Fourier transform）”指：在位置与 frequency 表示之间转换。"
       },
-      "explanation": "信噪比（signal-to-noise ratio, SNR）：signal magnitude/power 相对 noise 的比。"
+      "explanation": "信噪比（signal-to-noise ratio, SNR）：signal magnitude/power 相对 noise 的比。 眼球光学与 photoreceptor integration 本身压低极高频，使可用 signal power 下降；输出噪声若在频率间近似平坦，盲目采用 |ξ| 增益会把最高频噪声大量放大。"
     },
     {
-      "id": "L16-Q26",
+      "id": "L16-Q30",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -1489,10 +2092,10 @@
         "b": "“Fourier 变换（Fourier transform）”指：在位置与 frequency 表示之间转换。",
         "d": "“复指数（complex exponential）”指：统一表示 sine/cosine amplitude 与 phase。"
       },
-      "explanation": "平移不变性（translation invariance）：统计或算子不依 absolute position。"
+      "explanation": "平移不变性（translation invariance）：统计或算子不依 absolute position。 每个 ξ 都能独立相乘，原本巨大的平移不变线性算子就被对角化。"
     },
     {
-      "id": "L16-Q27",
+      "id": "L16-Q31",
       "lecture": 16,
       "sectionId": "lecture-16-source-1",
       "sourceAnchors": [
@@ -1506,7 +2109,7 @@
         "空间频率",
         "spatial frequency"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"单位距离内 sinusoidal cycles；向量还编码方向。\"称为什么？",
@@ -1534,10 +2137,10 @@
         "b": "“复指数（complex exponential）”指：统一表示 sine/cosine amplitude 与 phase。",
         "c": "“功率谱（power spectrum）”指：各 frequency component 的平均 squared amplitude。"
       },
-      "explanation": "空间频率（spatial frequency）：单位距离内 sinusoidal cycles；向量还编码方向。"
+      "explanation": "空间频率（spatial frequency）：单位距离内 sinusoidal cycles；向量还编码方向。 不同空间频率的 SNR 不同，因此\"光更暗\"可能同时扩大空间 pooling、削弱 surround，并改变总体增益，而不只是给整个滤波器乘一个数。"
     },
     {
-      "id": "L16-Q28",
+      "id": "L16-Q32",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -1551,7 +2154,7 @@
         "Fourier 变换",
         "Fourier transform"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"在位置与 frequency 表示之间转换。\"称为什么？",
@@ -1579,10 +2182,10 @@
         "c": "“功率谱（power spectrum）”指：各 frequency component 的平均 squared amplitude。",
         "d": "“白化（whitening）”指：使 output spectrum/covariance 近 flat/identity。"
       },
-      "explanation": "Fourier 变换（Fourier transform）：在位置与 frequency 表示之间转换。"
+      "explanation": "Fourier 变换（Fourier transform）：在位置与 frequency 表示之间转换。 二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。"
     },
     {
-      "id": "L16-Q29",
+      "id": "L16-Q33",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -1596,7 +2199,7 @@
         "复指数",
         "complex exponential"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"统一表示 sine/cosine amplitude 与 phase。\"称为什么？",
@@ -1624,10 +2227,10 @@
         "c": "“白化（whitening）”指：使 output spectrum/covariance 近 flat/identity。",
         "d": "“低通（low-pass）”指：保留低频、抑制高频。"
       },
-      "explanation": "复指数（complex exponential）：统一表示 sine/cosine amplitude 与 phase。"
+      "explanation": "复指数（complex exponential）：统一表示 sine/cosine amplitude 与 phase。 这样的 covariance matrix 具有重复的位移结构，复指数模式在卷积或相关运算后只改变复数幅值，不改变频率，因此成为自然基底。"
     },
     {
-      "id": "L16-Q30",
+      "id": "L16-Q34",
       "lecture": 16,
       "sectionId": "lecture-16-source-3",
       "sourceAnchors": [
@@ -1641,7 +2244,7 @@
         "功率谱",
         "power spectrum"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"各 frequency component 的平均 squared amplitude。\"称为什么？",
@@ -1672,7 +2275,7 @@
       "explanation": "功率谱（power spectrum）：各 frequency component 的平均 squared amplitude。"
     },
     {
-      "id": "L16-Q31",
+      "id": "L16-Q35",
       "lecture": 16,
       "sectionId": "lecture-16-source-3",
       "sourceAnchors": [
@@ -1717,7 +2320,7 @@
       "explanation": "白化（whitening）：使 output spectrum/covariance 近 flat/identity。"
     },
     {
-      "id": "L16-Q32",
+      "id": "L16-Q36",
       "lecture": 16,
       "sectionId": "lecture-16-source-4",
       "sourceAnchors": [
@@ -1731,7 +2334,7 @@
         "低通",
         "low-pass"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"保留低频、抑制高频。\"称为什么？",
@@ -1759,10 +2362,10 @@
         "c": "“适应（adaptation）”指：response/model parameters 随 stimulus statistics 或 state 改变。",
         "d": "“信噪比（signal-to-noise ratio, SNR）”指：signal magnitude/power 相对 noise 的比。"
       },
-      "explanation": "低通（low-pass）：保留低频、抑制高频。"
+      "explanation": "低通（low-pass）：保留低频、抑制高频。 第 4 页把自然图像的 ensemble power spectrum 近似写成 P_in(ξ)∝1/|ξ|²：低频上的亮度缓变通常比高频细节有更大方差。"
     },
     {
-      "id": "L16-Q33",
+      "id": "L16-Q37",
       "lecture": 16,
       "sectionId": "lecture-16-source-5",
       "sourceAnchors": [
@@ -1776,7 +2379,7 @@
         "混叠",
         "aliasing"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 16 讲：本讲把\"sampling 不足使高频伪装成低频。\"称为什么？",
@@ -1804,10 +2407,10 @@
         "c": "“信噪比（signal-to-noise ratio, SNR）”指：signal magnitude/power 相对 noise 的比。",
         "d": "“平移不变性（translation invariance）”指：统计或算子不依 absolute position。"
       },
-      "explanation": "混叠（aliasing）：sampling 不足使高频伪装成低频。"
+      "explanation": "混叠（aliasing）：sampling 不足使高频伪装成低频。 第 4 页把自然图像的 ensemble power spectrum 近似写成 P_in(ξ)∝1/|ξ|²：低频上的亮度缓变通常比高频细节有更大方差。"
     },
     {
-      "id": "L16-Q34",
+      "id": "L16-Q38",
       "lecture": 16,
       "sectionId": "lecture-16-source-5",
       "sourceAnchors": [
@@ -1820,7 +2423,7 @@
       "conceptTags": [
         "signal-to-noise ratio"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：使用\"signal-to-noise ratio\"时，哪项条件或约定不可省略？",
@@ -1848,10 +2451,10 @@
         "b": "这是“Fourier transform”的条件，不是题干公式的条件。",
         "d": "这是“Euler identity”的条件，不是题干公式的条件。"
       },
-      "explanation": "signal-to-noise ratio 的适用条件：同一 frequency/measurement convention"
+      "explanation": "signal-to-noise ratio 的适用条件：同一 frequency/measurement convention 第 5 页把预测落到 LNP measurement。"
     },
     {
-      "id": "L16-Q35",
+      "id": "L16-Q39",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -1864,7 +2467,7 @@
       "conceptTags": [
         "translation-invariant covariance"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：使用\"translation-invariant covariance\"时，哪项条件或约定不可省略？",
@@ -1895,7 +2498,7 @@
       "explanation": "translation-invariant covariance 的适用条件：stationary field"
     },
     {
-      "id": "L16-Q36",
+      "id": "L16-Q40",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -1908,7 +2511,7 @@
       "conceptTags": [
         "Fourier transform"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：使用\"Fourier transform\"时，哪项条件或约定不可省略？",
@@ -1936,10 +2539,10 @@
         "c": "这是“translation-invariant covariance”的条件，不是题干公式的条件。",
         "d": "这是“Euler identity”的条件，不是题干公式的条件。"
       },
-      "explanation": "Fourier transform 的适用条件：chosen normalization"
+      "explanation": "Fourier transform 的适用条件：chosen normalization 二维 Fourier 分量 e^{iξ·x} 同时编码频率方向与相位。"
     },
     {
-      "id": "L16-Q37",
+      "id": "L16-Q41",
       "lecture": 16,
       "sectionId": "lecture-16-source-2",
       "sourceAnchors": [
@@ -1952,7 +2555,7 @@
       "conceptTags": [
         "Euler identity"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：使用\"Euler identity\"时，哪项条件或约定不可省略？",
@@ -1980,10 +2583,10 @@
         "c": "这是“translation-invariant covariance”的条件，不是题干公式的条件。",
         "d": "这是“Fourier transform”的条件，不是题干公式的条件。"
       },
-      "explanation": "Euler identity 的适用条件：complex representation"
+      "explanation": "Euler identity 的适用条件：complex representation 第 2 页先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 Δx 决定，而不由绝对坐标决定，可写 C(x,x')=C(x-x')。"
     },
     {
-      "id": "L16-Q38",
+      "id": "L16-Q42",
       "lecture": 16,
       "sectionId": "lecture-16-source-3",
       "sourceAnchors": [
@@ -2024,10 +2627,10 @@
         "b": "这是“translation-invariant covariance”的条件，不是题干公式的条件。",
         "d": "这是“Fourier transform”的条件，不是题干公式的条件。"
       },
-      "explanation": "convolution theorem 的适用条件：linear shift-invariant filtering"
+      "explanation": "convolution theorem 的适用条件：linear shift-invariant filtering 第 2 页先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 Δx 决定，而不由绝对坐标决定，可写 C(x,x')=C(x-x')。"
     },
     {
-      "id": "L16-Q39",
+      "id": "L16-Q43",
       "lecture": 16,
       "sectionId": "lecture-16-source-3",
       "sourceAnchors": [
@@ -2040,7 +2643,7 @@
       "conceptTags": [
         "power spectrum"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：使用\"power spectrum\"时，哪项条件或约定不可省略？",
@@ -2068,10 +2671,10 @@
         "b": "这是“translation-invariant covariance”的条件，不是题干公式的条件。",
         "c": "这是“Fourier transform”的条件，不是题干公式的条件。"
       },
-      "explanation": "power spectrum 的适用条件：ensemble/time average"
+      "explanation": "power spectrum 的适用条件：ensemble/time average 第 2 页先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 Δx 决定，而不由绝对坐标决定，可写 C(x,x')=C(x-x')。"
     },
     {
-      "id": "L16-Q40",
+      "id": "L16-Q44",
       "lecture": 16,
       "sectionId": "lecture-16-source-4",
       "sourceAnchors": [
@@ -2084,7 +2687,7 @@
       "conceptTags": [
         "perfect whitening magnitude"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 16 讲：使用\"perfect whitening magnitude\"时，哪项条件或约定不可省略？",

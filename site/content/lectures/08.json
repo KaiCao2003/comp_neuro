@@ -100,6 +100,376 @@
       "stopPredict": "W∼1/N 时 mean 和 variance 如何缩放？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能读懂 recurrent 权重 W_{ij} 与输入权重 U_{ij} 的方向、shape 和在耦合膜方程中的作用。",
+      "能把 spike train 表示为 Dirac δ 函数之和，并用卷积把离散脉冲转成具有时间过程的突触输入。",
+      "能在有限时间窗内计算独立兴奋与抑制 Poisson 输入的总电荷均值和方差。",
+      "能比较 W∼1/N 与 W∼1/√N 两种大网络缩放，解释前者为何抹去波动、后者为何需要 E/I 强抵消。",
+      "能从电压轨迹区分兴奋主导、抑制主导与平衡波动驱动的发放，并说明动态平衡不等于每个瞬间电流精确为零。"
+    ],
+    "prerequisiteBridge": [
+      "单神经元方程把输入电流 I(t) 当作已知函数；网络中每个神经元的脉冲又成为其他神经元的输入，因此方程彼此耦合。约定 W_{ij} 表示网络内神经元 j 到 i 的权重：第一个索引是接收者，第二个是发送者。若有 N 个网络神经元，W 是 N×N；M 个外部输入通过 U∈R^{N×M} 驱动网络。先写索引方向可避免把 W 与 Wᵀ 混用。",
+      "Dirac δ 不是在 t=0 取一个普通无限数的函数，而是由积分性质定义的理想事件：除事件点外为零，总面积为 1，且 ∫δ(t−t_k)g(t)dt=g(t_k)。因此 spike train Δ(t)=Σ_kδ(t−t_k) 的单位是 1/时间。与突触核 K_s 卷积后，每个事件复制一份平移的核，得到普通的时间函数。",
+      "独立随机变量相加时均值直接相加，方差也相加；若乘权重 W，均值乘 W，方差乘 W²。Poisson 计数在短窗 Δt 的均值与方差都是 rΔt。兴奋权重取正，抑制可写成负权重或在总和中显式相减，但整套推导必须保持同一约定。",
+      "大 N 缩放是在问连接数增长时，单个权重应怎样随 N 变小，才能让总输入保持有意义。均值涉及 N W，方差涉及 N W²，二者对 W 的幂次不同，所以无法仅靠一种独立、同号输入同时保持二者有限。平衡网络让兴奋和抑制的巨大均值互相抵消，同时保留各自方差相加形成的有限波动。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L08-D1",
+        "prompt": "若 W_{ij} 表示 j→i，N 个网络神经元的电压向量为 V，输入项应使用 W 的第 i 行还是第 i 列？",
+        "answer": "神经元 i 接收所有 j 的输入，应使用 W 的第 i 行并沿 j 求和。",
+        "explanation": "固定接收者 i，发送者索引 j 变化；混用转置会把出连接模式当成入连接模式。",
+        "remediationModuleId": "L08-M1"
+      },
+      {
+        "id": "L08-D2",
+        "prompt": "spike train Δ(t)=δ(t−1)+δ(t−3)，卷积 K*Δ 在 t=4 等于什么？",
+        "answer": "等于 K(4−1)+K(4−3)=K(3)+K(1)，每个过去脉冲贡献一份按时间差取值的核。",
+        "explanation": "δ 的筛选性质把卷积积分化成事件求和；未来脉冲若核是因果的则不贡献。",
+        "remediationModuleId": "L08-M1"
+      },
+      {
+        "id": "L08-D3",
+        "prompt": "N 个独立 Poisson 输入、每个权重 W。总输入均值和方差对 N、W 分别怎样缩放？",
+        "answer": "均值按 NW 缩放，方差按 NW²缩放，标准差按 √N|W| 缩放。",
+        "explanation": "方差对权重平方敏感；这正是 1/N 与 1/√N 缩放产生不同波动极限的原因。",
+        "remediationModuleId": "L08-M2"
+      },
+      {
+        "id": "L08-D4",
+        "prompt": "W∼1/N 时为何 Poisson 输入的试次波动在 N→∞ 消失？",
+        "answer": "总方差 NW²∼N/N²=1/N→0，虽然总均值 NW∼1 保持有限。",
+        "explanation": "下游神经元收到近乎确定的平均驱动，因而不是产生 Poisson-like 不规则发放的理想极限。",
+        "remediationModuleId": "L08-M2"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L08-M1",
+        "title": "耦合网络、δ spike train 与突触卷积",
+        "sourceRefs": [
+          {
+            "file": "Lecture8-NeuralNetworks1.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture8-NeuralNetworks1.pdf",
+            "page": 2
+          },
+          {
+            "file": "Lecture8-NeuralNetworks1.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "怎样用一套索引和卷积记号，把每个神经元的所有历史脉冲写进 N 个耦合膜方程？",
+        "paragraphs": [
+          "网络含 N 个相互连接神经元和 M 个外部输入。W_{ij} 是 j→i 的 recurrent 权重，U_{ij} 是外部输入 j→网络神经元 i 的权重。对每个 i，膜方程包含漏电、所有网络发送者以及所有外部发送者。W 的对角线是否允许自连接是模型选择；网络是否 recurrent 由 W 中反馈路径决定，不由图上节点摆放决定。",
+          "第 j 个神经元的 spike train 写成 Δ_j(t)=Σ_kδ(t−t_k^{(j)})。δ 的面积为 1，使对任意平滑 g 有 ∫δ(t−t_k)g(t)dt=g(t_k)。事件发生时刻保留为 t_k，而脉冲波形细节被省略。若时间用秒，Δ 的单位为 s⁻¹；它不能直接当作有限电流值采样。",
+          "突触核 K_s(t) 描述一个脉冲后电流或电导随时间的变化。卷积 (K_s*Δ_j)(t)=∫K_s(t−t')Δ_j(t')dt'，利用 δ 性质化为 Σ_kK_s(t−t_k^{(j)})。因果核在负时间为零，所以只有 t_k≤t 的历史事件贡献。重叠事件的响应在线性突触近似下直接相加。",
+          "耦合方程可紧凑写成 C dV_i/dt=−G_L(V_i−E_L)+Σ_jW_{ij}(K_s*Δ_j)+Σ_jU_{ij}(K_s*X_j)。Δ_i 又由 V_i 的阈值—重置机制产生，因此系统含连续电压状态与离散事件反馈。给定初值、外部 spike trains、核、权重和事件规则后，网络轨迹才被完整指定。",
+          "卷积记号把“对所有历史脉冲求和”与“脉冲后的时间形状”分开，使换核无需改网络索引。它也暴露线性假设：如果突触饱和、短时易化或抑制电导依赖 V，单一固定核与简单叠加可能失败，需要增加突触状态或使用电导型电流。"
+        ],
+        "keyPoints": [
+          "W_{ij} 的第一个索引是接收者 i，第二个是发送者 j。",
+          "δ spike train 是事件分布，与核卷积后成为普通时间过程。",
+          "网络方程同时包含连续膜状态和由阈值产生的离散反馈事件。"
+        ],
+        "derivation": {
+          "title": "用 δ 的筛选性质把卷积化为核之和",
+          "setup": "发送者 j 在时刻 t_k^{(j)} 发放，Δ_j(t)=Σ_kδ(t−t_k^{(j)})；突触响应定义为 I_j=K_s*Δ_j。",
+          "steps": [
+            {
+              "title": "写卷积定义",
+              "explanation": "在所有可能事件时刻 t' 上积分核与 spike train 的乘积。",
+              "latex": "(K_s*\\Delta_j)(t)=\\int_{-\\infty}^{\\infty}K_s(t-t')\\Delta_j(t')\\,dt'"
+            },
+            {
+              "title": "代入事件和",
+              "explanation": "把 Δ_j(t')=Σ_kδ(t'−t_k^{(j)}) 代入，并利用积分与有限或收敛求和可交换。",
+              "latex": "\\sum_k\\int K_s(t-t')\\delta\\!\\left(t'-t_k^{(j)}\\right)dt'"
+            },
+            {
+              "title": "应用筛选性质",
+              "explanation": "δ 将 t' 固定在 t_k^{(j)}，每项变为 K_s(t−t_k^{(j)})。"
+            },
+            {
+              "title": "得到事件表示",
+              "explanation": "总突触轨迹是所有事件触发核的线性叠加。",
+              "latex": "(K_s*\\Delta_j)(t)=\\sum_k K_s\\!\\left(t-t_k^{(j)}\\right)"
+            },
+            {
+              "title": "施加因果性",
+              "explanation": "若 K_s(u)=0 对 u<0，未来事件 t_k>t 的项自动为零。"
+            }
+          ],
+          "symbolNotes": [
+            "t 是当前观察时刻，t' 是积分哑变量，t_k^{(j)} 是发送者 j 的第 k 个脉冲时刻。",
+            "核与权重必须成套定义：峰值归一、无量纲 K_s 时，W 表示电流幅度；面积归一、单位为 1/时间的 K_s 时，W 表示冲激面积或电荷，W K_s 才具有电流单位。"
+          ],
+          "unitsCheck": "Δ 的单位 1/s，卷积积分含 dt' 的 s，故 K_s*Δ 与 K_s 同单位；再乘 W 后必须与膜方程中的电流单位一致。",
+          "limitCheck": "没有脉冲时求和为空、响应为零；核趋于 δ 时，卷积趋回未平滑 spike train；相同脉冲重合时响应幅度相加。"
+        },
+        "workedExample": {
+          "title": "两个脉冲的指数核叠加",
+          "problem": "脉冲发生在 1 ms 与 3 ms。本例只计算核形状，采用峰值归一的无量纲因果核 K(u)=e^{−u/2 ms}H(u)，实际电流幅度由外部权重承担。求 t=2 ms 与 4 ms 的无量纲总核响应。",
+          "steps": [
+            "t=2 ms 时，1 ms 脉冲的延迟为 1 ms，贡献 e^{−1/2}≈0.6065；3 ms 脉冲尚未发生，贡献 0。",
+            "所以 t=2 ms 的总响应约 0.6065。",
+            "t=4 ms 时，两次延迟分别为 3 ms 和 1 ms，贡献 e^{−3/2}≈0.2231 与 e^{−1/2}≈0.6065。",
+            "相加得到 0.2231+0.6065=0.8296。"
+          ],
+          "result": "响应在 2 ms 约为 0.6065，在 4 ms 约为 0.8296。",
+          "sanityCheck": "第二个脉冲加入后可使总响应上升；每个单独指数贡献都不超过事件瞬间的 1。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 δ(t_k) 不能当作一个需要在代码中直接存储的无穷大数？",
+          "answer": "δ 由积分作用定义；数值实现通常记录事件索引并向后累加离散核，或用有限 bin 中面积为 1 的近似，直接存无穷大会破坏单位和运算。"
+        },
+        "pitfalls": [
+          "把 W_{ij} 解读成 i→j，导致网络连接方向转置。",
+          "用非因果核让未来脉冲影响当前状态。",
+          "把 δ 的高度当作物理电流幅度，忽略面积与权重的单位约定。"
+        ]
+      },
+      {
+        "id": "L08-M2",
+        "title": "随机 E/I 输入的均值、方差与 1/N 失效",
+        "sourceRefs": [
+          {
+            "file": "Lecture8-NeuralNetworks1.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture8-NeuralNetworks1.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "许多独立 Poisson 输入汇聚到一个 LIF 神经元时，总输入的平均和波动如何缩放，为什么保持均值有限会让波动消失？",
+        "paragraphs": [
+          "考虑 N_E 个兴奋输入，每个率 r_E、权重 W_E>0；N_I 个抑制输入，每个率 r_I、幅度 W_I>0，并在总电荷中相减。先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。总电荷 Q=Σ_E W_E K_j−Σ_I W_I K_j。符号影响均值，但方差中的权重平方使兴奋和抑制波动都作正贡献。",
+          "利用 E[K]=Var(K)=rΔt，得到 E[Q]=(N_EW_Er_E−N_IW_Ir_I)Δt；独立性给 Var(Q)=(N_EW_E²r_E+N_IW_I²r_I)Δt。均值可以由 E/I 抵消，方差不能因正负号直接抵消。若输入间相关，还需加入成对协方差，独立公式将低估或改变波动。",
+          "先尝试 W_E、W_I∼1/N。每一类均值 N W 保持 O(1)，所以无需精细抵消就不会发散；但方差 N W²∼1/N→0，标准差∼1/√N→0。大网络输入变成近乎确定的平均电流。下游确定性 LIF 若平均电流阈上会规则发放，阈下则沉默，不能保留 Poisson-like 试次波动。",
+          "这不是说有限 N 下波动严格为零，而是随连接数增加系统性缩小。核平滑会进一步在时间上平均高频波动，但不改变权重平方进入方差的核心结构。判断模拟属于哪一极限，应测量不同 N 下均值与方差，而不是只查看一个网络规模的电压图。",
+          "若希望均值和波动都有限，单纯同号独立输入做不到：W∼1/N 保均值却丢方差，W∼1/√N 保方差却使每一类均值按 √N 增长。出路是让兴奋和抑制的大均值在总体上抵消，这引向下一页的平衡态。这里抵消的是带符号的一阶均值，不会抵消由独立事件产生的方差；正因为均值和方差遵循不同的加法规则，平衡才能同时避免发散并保留波动。"
+        ],
+        "keyPoints": [
+          "E/I 总均值带符号相减，独立方差以权重平方相加。",
+          "W∼1/N 使均值 O(1) 而方差 O(1/N)，随机波动在大 N 消失。",
+          "保持有限波动需要更强的 1/√N 权重及 E/I 均值抵消。"
+        ],
+        "derivation": {
+          "title": "Poisson 汇聚输入的均值与方差",
+          "setup": "在 Δt 中，兴奋计数 K_j^E∼Poisson(r_EΔt)，抑制计数 K_j^I∼Poisson(r_IΔt)，所有输入独立。",
+          "steps": [
+            {
+              "title": "写总电荷",
+              "explanation": "兴奋按 +W_E 相加，抑制按 −W_I 相加。",
+              "latex": "Q=\\sum_{j=1}^{N_E}W_EK_j^E-\\sum_{j=1}^{N_I}W_IK_j^I"
+            },
+            {
+              "title": "求均值",
+              "explanation": "期望线性且每个 Poisson 均值为 rΔt。",
+              "latex": "\\mathbb{E}[Q]=(N_EW_Er_E-N_IW_Ir_I)\\Delta t"
+            },
+            {
+              "title": "求方差",
+              "explanation": "独立和的方差相加，负号平方后仍为正；Poisson 方差等于均值。",
+              "latex": "\\operatorname{Var}(Q)=(N_EW_E^2r_E+N_IW_I^2r_I)\\Delta t"
+            },
+            {
+              "title": "代入 1/N 缩放",
+              "explanation": "若 N_E、N_I 都与 N 同阶且 W∼N⁻¹，则均值各为 O(1)，方差为 O(N⁻¹)。"
+            },
+            {
+              "title": "解释电压结果",
+              "explanation": "输入标准差为 O(N⁻¹/²)，大 N 下电压主要响应确定平均，随机越阈机会消失。"
+            }
+          ],
+          "symbolNotes": [
+            "W_I 写成正幅度，并在 Q 中显式带负号；也可用负权重，但不能重复加负号。",
+            "Δt 必须短到率近似恒定；K 是该窗事件计数。"
+          ],
+          "unitsCheck": "若 W 是每脉冲电荷，Q 为电荷；rΔt 无单位，均值为电荷，方差为电荷平方。",
+          "limitCheck": "N_E=N_I、W_E=W_I、r_E=r_I 时均值为零但方差为两类正贡献之和；N→∞ 且 W∼1/N 时方差趋零。"
+        },
+        "workedExample": {
+          "title": "一万输入下 1/N 缩放的波动",
+          "problem": "N_E=N_I=10000，r_E=r_I=10 Hz，Δt=1 ms，W_E=W_I=1/N，单位任意。计算每类均值幅度、净均值、总方差和标准差。",
+          "steps": [
+            "W=1/10000=10⁻⁴；每类均值为 NWrΔt=10000·10⁻⁴·10·0.001=0.01。",
+            "E/I 对称，所以净均值 0.01−0.01=0。",
+            "每类方差 N W² rΔt=10000·10⁻⁸·10·0.001=10⁻⁶。",
+            "总方差为 2×10⁻⁶，标准差为 sqrt(2×10⁻⁶)≈0.001414。"
+          ],
+          "result": "两类平均各 0.01 并抵消；总标准差仅约 0.00141，且继续随 N 增大而下降。",
+          "sanityCheck": "方差必须为正，即使 E/I 均值完全抵消；标准差约为单类均值 0.01 的 14%。"
+        },
+        "selfCheck": {
+          "prompt": "为什么抑制项在均值中带负号，却在独立方差中仍带正号？",
+          "answer": "方差衡量偏离均值的平方；乘以 −W 只翻转波动方向，平方幅度仍为 W²，因此兴奋和抑制的独立不确定性都增加总方差。"
+        },
+        "pitfalls": [
+          "在方差公式中保留抑制负号，算出可能为负的方差。",
+          "把权重缩放只代入均值，未对方差使用 W²。",
+          "由有限网络的一条不规则轨迹直接推断大 N 极限仍不规则。"
+        ]
+      },
+      {
+        "id": "L08-M3",
+        "title": "1/√N 强耦合、E/I 平衡与不规则发放",
+        "sourceRefs": [
+          {
+            "file": "Lecture8-NeuralNetworks1.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "怎样让许多输入在大网络中保留有限随机波动，同时避免兴奋或抑制平均驱动随 √N 发散？",
+        "paragraphs": [
+          "若权重按 W∼1/√N，方差 N W²∼O(1)，所以总输入标准差在 N 增大时保持有限。代价是每一类均值 N W∼√N：兴奋与抑制单独都很大。要让净均值仍为 O(1)，必须满足领先阶平衡 N_EW_Er_E≈N_IW_Ir_I，使两个 O(√N) 项相消，只留下有限残差。",
+          "平衡不要求每个毫秒的兴奋电流恰等于抑制电流。它约束条件平均或大尺度领先项；独立脉冲的瞬时差仍有 O(1) 波动。LIF 电压因这些差值做不规则游走，偶尔越阈发放。兴奋主导时平均斜率持续向上，发放较规则；抑制主导时电压停在阈下；平衡态依靠波动驱动产生不规则间隔。",
+          "平衡条件对相对误差很敏感。因为被抵消的两项各为 O(√N)，若它们的相对失配保持常数，净输入也随 √N 增长。网络动力学需要通过 E→I、I→E、自连接与外部驱动的反馈调节发放率，使平均抑制追踪平均兴奋。动态平衡是网络产生的状态，不只是手工把两个外部率设成相等。",
+          "讲义引用的动态平衡框架表明 recurrent E/I 网络可自发维持这种抵消，并产生接近 Poisson 的变异。这里“接近”应由 ISI、Fano、相关和状态依赖检验；不规则发放也可能来自外部噪声或慢速调制。平衡网络是候选机制，不是由一条锯齿电压轨迹就能唯一确定。",
+          "缩放分析提供可自动检验的模拟预测：改变 K 或 N，同时按 1/√K 调整权重；记录 E、I 平均绝对幅度、净均值、方差和发放 CV。正确平衡极限中，E 与 I 均值随 √K 增大、彼此抵消，净均值与方差保持 O(1)。只画净电流会隐藏背后的巨大抵消。"
+        ],
+        "keyPoints": [
+          "W∼1/√N 保持方差 O(1)，但使 E 与 I 单独均值为 O(√N)。",
+          "平衡消除领先阶均值而保留瞬时波动，不是逐时刻零电流。",
+          "recurrent 反馈可动态调节 E/I 率，使强耦合网络进入不规则平衡态。"
+        ],
+        "derivation": {
+          "title": "1/√N 缩放下有限方差与平衡条件",
+          "setup": "令 N_E=a_EN、N_I=a_IN，W_E=w_E/√N、W_I=w_I/√N，率与 Δt 不随 N 改变。",
+          "steps": [
+            {
+              "title": "代入均值",
+              "explanation": "E 类平均为 a_E√N w_Er_EΔt，I 类类似，净均值的领先阶为 √N 乘二者差。",
+              "latex": "\\mathbb{E}[Q]=\\sqrt{N}\\,(a_Ew_Er_E-a_Iw_Ir_I)\\Delta t"
+            },
+            {
+              "title": "施加领先阶平衡",
+              "explanation": "为避免净均值发散，要求 a_Ew_Er_E−a_Iw_Ir_I=O(N^{-1/2})；极限主项相等。",
+              "latex": "a_Ew_Er_E\\approx a_Iw_Ir_I"
+            },
+            {
+              "title": "代入方差",
+              "explanation": "N_EW_E²=a_EN·w_E²/N=a_Ew_E²，N 消失。",
+              "latex": "\\operatorname{Var}(Q)=(a_Ew_E^2r_E+a_Iw_I^2r_I)\\Delta t"
+            },
+            {
+              "title": "解释剩余波动",
+              "explanation": "均值主项抵消不改变独立方差的正和，因此标准差保持 O(1)。"
+            },
+            {
+              "title": "连接不规则越阈",
+              "explanation": "有限净均值配合有限波动，使电压可能以不规则时间越过阈值，而非完全确定或完全沉默。"
+            }
+          ],
+          "symbolNotes": [
+            "a_E、a_I 是两类输入数量占 N 的比例，w_E、w_I 是不随 N 改变的缩放后强度。",
+            "“≈”表示大 N 领先阶平衡，有限网络允许 O(1) 净残差。"
+          ],
+          "unitsCheck": "a 与 N 无单位；w/√N 继承单突触权重单位；均值和方差单位与上一模块一致。",
+          "limitCheck": "若平衡差为固定非零常数，净均值随 √N 发散；若权重改为 1/N，方差再次趋零。"
+        },
+        "workedExample": {
+          "title": "同一万输入的 1/√N 平衡",
+          "problem": "沿用 N_E=N_I=10000、r=10 Hz、Δt=1 ms，改取 W=1/√N=0.01。E/I 平均完全相等。计算每类均值、净均值、总方差和标准差。",
+          "steps": [
+            "每类均值为 10000·0.01·10·0.001=1。",
+            "对称条件下净均值为 1−1=0，但两项各比 1/N 缩放时的 0.01 大 100 倍。",
+            "每类方差为 10000·0.01²·10·0.001=0.01。",
+            "总方差为 0.02，标准差 sqrt(0.02)≈0.1414，随 N 的领先阶保持有限。"
+          ],
+          "result": "强 E/I 平均各为 1 并抵消，净均值 0；总标准差约 0.141，保留可驱动电压的波动。",
+          "sanityCheck": "从 1/N 改到 1/√N，单权重增 100 倍，方差增 10000 倍，由 2×10⁻⁶ 变 0.02。"
+        },
+        "selfCheck": {
+          "prompt": "为什么只报告净输入均值接近零不足以证明网络处于强平衡态？",
+          "answer": "弱输入也可产生零净均值；强平衡还要求 E 与 I 单独均值很大、领先阶互相抵消，同时净方差保持有限，并应检查这种缩放随连接数变化。"
+        },
+        "pitfalls": [
+          "把平衡理解成每一时刻 E 电流与 I 电流完全相等，进而错误预测零波动。",
+          "只画 E+I 的净曲线，不分别验证两个大分量及其 N 缩放。",
+          "看到不规则发放就把平衡网络当成唯一原因，未比较外部噪声与非平稳驱动。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L08-FIG-A1",
+      "lecture": 8,
+      "lectureTitle": "神经网络 I：脉冲表示、卷积与 E/I 平衡",
+      "moduleId": "L08-M3",
+      "title": "强耦合网络保留的是平衡后的有限波动",
+      "alt": "大量兴奋与抑制脉冲分别经核滤波后形成相反的大输入并在净输入中抵消的流程图",
+      "caption": "W∼1/√N 时，兴奋与抑制的条件均值各为 O(√N)，必须在领先阶相消；它们的瞬时差仍为 O(1)，所以净输入不是逐时刻为零，而能继续驱动不规则发放。",
+      "sourceRefs": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "e-spikes",
+          "label": "大量 E spikes\nW_E>0",
+          "x": 16,
+          "y": 75
+        },
+        {
+          "id": "e-sum",
+          "label": "核滤波后 E 总和\n+O(√N)",
+          "x": 52,
+          "y": 75
+        },
+        {
+          "id": "i-spikes",
+          "label": "大量 I spikes\nW_I<0",
+          "x": 16,
+          "y": 25
+        },
+        {
+          "id": "i-sum",
+          "label": "核滤波后 I 总和\n−O(√N)",
+          "x": 52,
+          "y": 25
+        },
+        {
+          "id": "net",
+          "label": "净输入 O(1)\n有限波动",
+          "x": 86,
+          "y": 50,
+          "tone": "accent"
+        }
+      ],
+      "edges": [
+        {
+          "from": "e-spikes",
+          "to": "e-sum",
+          "label": "卷积并求和"
+        },
+        {
+          "from": "i-spikes",
+          "to": "i-sum",
+          "label": "卷积并求和"
+        },
+        {
+          "from": "e-sum",
+          "to": "net",
+          "label": "大均值"
+        },
+        {
+          "from": "i-sum",
+          "to": "net",
+          "label": "领先阶抵消"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 spike-time sum 等于 convolution",
@@ -305,7 +675,42 @@
     "本讲的 scaling 推导容易因跳步失真。不能只报结论； 需要把 mean 与 variance 分别计算，并明确独立性假设。"
   ],
   "errata": [
-    "1. Page 2 的 crossed-out 手写不影响 delta/convolution 核心推导。 2. Page 5 的 1/N conclusion 依赖独立 Poisson inputs；相关输入需加入 covariance terms。 3. Page 6 的 balanced state 是候选机制，不应写成所有 cortical irregularity 的唯一来源。"
+    {
+      "id": "L08-E01",
+      "lecture": 8,
+      "lectureTitle": "神经网络 I：脉冲表示、卷积与 E/I 平衡",
+      "kind": "caution",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 2,
+      "sectionId": "lecture-08-source-2",
+      "originalIssue": "Page 2 的 crossed-out 手写不影响 delta/convolution 核心推导。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L08-E02",
+      "lecture": 8,
+      "lectureTitle": "神经网络 I：脉冲表示、卷积与 E/I 平衡",
+      "kind": "caution",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 5,
+      "sectionId": "L08-M2",
+      "originalIssue": "Page 5 的 1/N conclusion 依赖独立 Poisson inputs；相关输入需加入 covariance terms。",
+      "explanation": "若输入间相关，还需加入成对协方差，独立公式将低估或改变波动。",
+      "correction": "相关输入需加入 covariance terms"
+    },
+    {
+      "id": "L08-E03",
+      "lecture": 8,
+      "lectureTitle": "神经网络 I：脉冲表示、卷积与 E/I 平衡",
+      "kind": "erratum",
+      "sourceFile": "Lecture8-NeuralNetworks1.pdf",
+      "sourcePage": 6,
+      "sectionId": "L08-M3",
+      "originalIssue": "Page 6 的 balanced state 是候选机制，不应写成所有 cortical irregularity 的唯一来源。",
+      "explanation": "平衡网络是候选机制，不是由一条锯齿电压轨迹就能唯一确定。",
+      "correction": "Page 6 的 balanced state 是候选机制，不应写成所有 cortical irregularity 的唯一来源"
+    }
   ],
   "questions": [
     {
@@ -323,7 +728,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 8 讲：δ 的核心积分性质是什么？",
@@ -351,7 +756,7 @@
         "c": "该选项回答的是“独立 Poisson inputs 的 variance 为什么相加？”。",
         "d": "这是“Dirac delta（Dirac delta）”的定义。"
       },
-      "explanation": "∫f(t)δ(t−t0)dt=f(t0)。"
+      "explanation": "∫f(t)δ(t−t0)dt=f(t0)。 卷积 (K_s*Δ_j)(t)=∫K_s(t−t')Δ_j(t')dt'，利用 δ 性质化为 Σ_kK_s(t−t_k^{(j)})。"
     },
     {
       "id": "L08-Q02",
@@ -368,7 +773,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：为什么 K*Δ 等于每个 spike-triggered kernel 的和？",
@@ -396,7 +801,7 @@
         "b": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 2 页。",
         "d": "该选项回答的是“shared input 会如何改变 variance scaling？”。"
       },
-      "explanation": "delta 在每个 spike time 对 K(t−t') 取样。"
+      "explanation": "delta 在每个 spike time 对 K(t−t') 取样。 第 j 个神经元的 spike train 写成 Δ_j(t)=Σ_kδ(t−t_k^{(j)})。 判断依据：第 j 个神经元的 spike train 写成 Δ_j(t)=Σ_kδ(t−t_k^{(j)})。δ 的面积为 1，使对任意平滑 g 有 ∫δ(t−t_k)g(t)dt=g(t_k)。事件发生时刻保留为 t_k，而脉冲波形细节被省略。若时间用秒，Δ 的单位为 s⁻¹；它不能直接当作有限电流值采样。"
     },
     {
       "id": "L08-Q03",
@@ -413,7 +818,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 8 讲：W_ij 的方向 convention 是什么？",
@@ -441,7 +846,7 @@
         "b": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。",
         "c": "该选项回答的是“dynamic balance 与静态设置 E=I 的区别？”。"
       },
-      "explanation": "j 是 presynaptic/source，i 是 postsynaptic/target。"
+      "explanation": "j 是 presynaptic/source，i 是 postsynaptic/target。 W_{ij} 是 j→i 的 recurrent 权重，U_{ij} 是外部输入 j→网络神经元 i 的权重。"
     },
     {
       "id": "L08-Q04",
@@ -458,7 +863,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "calculation",
       "cognitiveLevel": "evaluate",
       "stem": "第 8 讲：独立 Poisson inputs 的 variance 为什么相加？",
@@ -486,7 +891,7 @@
         "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。",
         "d": "该选项回答的是“W∼1/N 时 mean 和 variance 如何缩放？”。"
       },
-      "explanation": "covariance terms 为零。"
+      "explanation": "covariance terms 为零。 先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。 判断依据：考虑 N_E 个兴奋输入，每个率 r_E、权重 W_E>0；N_I 个抑制输入，每个率 r_I、幅度 W_I>0，并在总电荷中相减。先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。总电荷 Q=Σ_E W_E K_j−Σ_I W_I K_j。符号影响均值，但方差中的权重平方使兴奋和抑制波动都作正贡献。"
     },
     {
       "id": "L08-Q05",
@@ -503,7 +908,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：抑制项为什么对 variance 为正？",
@@ -531,7 +936,7 @@
         "c": "这是“mean-field weak weights”的适用条件。",
         "d": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。"
       },
-      "explanation": "variance 中 coefficient 被平方。"
+      "explanation": "variance 中 coefficient 被平方。 符号影响均值，但方差中的权重平方使兴奋和抑制波动都作正贡献。 判断依据：考虑 N_E 个兴奋输入，每个率 r_E、权重 W_E>0；N_I 个抑制输入，每个率 r_I、幅度 W_I>0，并在总电荷中相减。先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。总电荷 Q=Σ_E W_E K_j−Σ_I W_I K_j。符号影响均值，但方差中的权重平方使兴奋和抑制波动都作正贡献。"
     },
     {
       "id": "L08-Q06",
@@ -548,7 +953,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "calculation",
       "cognitiveLevel": "understand",
       "stem": "第 8 讲：W∼1/N 时 mean 和 variance 如何缩放？",
@@ -576,7 +981,7 @@
         "b": "该选项回答的是“抑制项为什么对 variance 为正？”。",
         "d": "该选项回答的是“1/√N 时为什么还需要 balance？”。"
       },
-      "explanation": "mean O(1)，variance O(1/N)→0。"
+      "explanation": "mean O(1)，variance O(1/N)→0。 缩放分析提供可自动检验的模拟预测：改变 K 或 N，同时按 1/√K 调整权重；记录 E、I 平均绝对幅度、净均值、方差和发放 CV。"
     },
     {
       "id": "L08-Q07",
@@ -593,7 +998,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：W∼1/√N 时 variance 如何缩放？",
@@ -621,7 +1026,7 @@
         "b": "该选项回答的是“W∼1/N 时 mean 和 variance 如何缩放？”。",
         "c": "这是“mean-field weak weights”的适用条件。"
       },
-      "explanation": "O(1)。"
+      "explanation": "O(1)。 缩放分析提供可自动检验的模拟预测：改变 K 或 N，同时按 1/√K 调整权重；记录 E、I 平均绝对幅度、净均值、方差和发放 CV。"
     },
     {
       "id": "L08-Q08",
@@ -638,7 +1043,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "comparison",
       "cognitiveLevel": "analyze",
       "stem": "第 8 讲：1/√N 时为什么还需要 balance？",
@@ -666,7 +1071,7 @@
         "c": "这是“突触核（synaptic kernel）”的定义。",
         "d": "这是“mean-field weak weights”的适用条件。"
       },
-      "explanation": "E/I mean 各自 O(√N)，不相消会使净输入发散。"
+      "explanation": "E/I mean 各自 O(√N)，不相消会使净输入发散。 若输入间相关，还需加入成对协方差，独立公式将低估或改变波动。 判断依据：利用 E[K]=Var(K)=rΔt，得到 E[Q]=(N_EW_Er_E−N_IW_Ir_I)Δt；独立性给 Var(Q)=(N_EW_E²r_E+N_IW_I²r_I)Δt。均值可以由 E/I 抵消，方差不能因正负号直接抵消。若输入间相关，还需加入成对协方差，独立公式将低估或改变波动。"
     },
     {
       "id": "L08-Q09",
@@ -683,7 +1088,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 8 讲：dynamic balance 与静态设置 E=I 的区别？",
@@ -711,7 +1116,7 @@
         "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。",
         "d": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。"
       },
-      "explanation": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+      "explanation": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。 它约束条件平均或大尺度领先项；独立脉冲的瞬时差仍有 O(1) 波动。 判断依据：平衡不要求每个毫秒的兴奋电流恰等于抑制电流。它约束条件平均或大尺度领先项；独立脉冲的瞬时差仍有 O(1) 波动。LIF 电压因这些差值做不规则游走，偶尔越阈发放。兴奋主导时平均斜率持续向上，发放较规则；抑制主导时电压停在阈下；平衡态依靠波动驱动产生不规则间隔。"
     },
     {
       "id": "L08-Q10",
@@ -728,7 +1133,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：shared input 会如何改变 variance scaling？",
@@ -756,7 +1161,7 @@
         "b": "这是“数量级（order of magnitude）”的定义。",
         "d": "这是“mean-field weak weights”的适用条件。"
       },
-      "explanation": "引入正 covariance terms，波动可能不随 N 平均掉。"
+      "explanation": "引入正 covariance terms，波动可能不随 N 平均掉。 它约束条件平均或大尺度领先项；独立脉冲的瞬时差仍有 O(1) 波动。 判断依据：平衡不要求每个毫秒的兴奋电流恰等于抑制电流。它约束条件平均或大尺度领先项；独立脉冲的瞬时差仍有 O(1) 波动。LIF 电压因这些差值做不规则游走，偶尔越阈发放。兴奋主导时平均斜率持续向上，发放较规则；抑制主导时电压停在阈下；平衡态依靠波动驱动产生不规则间隔。"
     },
     {
       "id": "L08-Q11",
@@ -773,7 +1178,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 8 讲：causal kernel 的含义？",
@@ -801,7 +1206,7 @@
         "b": "这是“synaptic filtering”的适用条件。",
         "c": "该选项回答的是“为什么 K*Δ 等于每个 spike-triggered kernel 的和？”。"
       },
-      "explanation": "K(t<0)=0，当前 response 只由过去 spikes 决定。"
+      "explanation": "K(t<0)=0，当前 response 只由过去 spikes 决定。 W 的对角线是否允许自连接是模型选择；网络是否 recurrent 由 W 中反馈路径决定，不由图上节点摆放决定。"
     },
     {
       "id": "L08-Q12",
@@ -818,7 +1223,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：为何 balanced network 可产生 irregular spiking？",
@@ -846,55 +1251,10 @@
         "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 1 页。",
         "d": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。"
       },
-      "explanation": "有限 O(1) fluctuations 持续推动膜电位随机接近 threshold。"
+      "explanation": "有限 O(1) fluctuations 持续推动膜电位随机接近 threshold。 兴奋主导时平均斜率持续向上，发放较规则；抑制主导时电压停在阈下；平衡态依靠波动驱动产生不规则间隔。"
     },
     {
       "id": "L08-Q13",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 1,
-          "section": "lecture-08-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
-        },
-        {
-          "id": "b",
-          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
-        },
-        {
-          "id": "c",
-          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
-        },
-        {
-          "id": "d",
-          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
-        "d": "该陈述解释的是“variance of independent inputs”，不是题干指定的关系。"
-      },
-      "explanation": "recurrent/input weights、population architecture、coupled spiking-network equations。"
-    },
-    {
-      "id": "L08-Q14",
       "lecture": 8,
       "sectionId": "lecture-08-source-1",
       "sourceAnchors": [
@@ -919,72 +1279,27 @@
         },
         {
           "id": "b",
-          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
         },
         {
           "id": "c",
-          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
         },
         {
           "id": "d",
           "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
-        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
         "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
       },
-      "explanation": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+      "explanation": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。 W_{ij} 是 j→i 的 recurrent 权重，U_{ij} 是外部输入 j→网络神经元 i 的权重。"
     },
     {
-      "id": "L08-Q15",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 1,
-          "section": "lecture-08-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 8 讲：阅读与\"recurrent/input weights、population architecture、coupled spiking-network equations\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
-        },
-        {
-          "id": "c",
-          "text": "balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
-        },
-        {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "b": "该选项回答的是“dynamic balance 与静态设置 E=I 的区别？”。",
-        "c": "这是“动态平衡（dynamic balance）”的定义。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L08-Q16",
+      "id": "L08-Q14",
       "lecture": 8,
       "sectionId": "lecture-08-source-2",
       "sourceAnchors": [
@@ -998,52 +1313,7 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
-        },
-        {
-          "id": "b",
-          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
-        },
-        {
-          "id": "c",
-          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
-        },
-        {
-          "id": "d",
-          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
-        "d": "该陈述解释的是“variance of independent inputs”，不是题干指定的关系。"
-      },
-      "explanation": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
-    },
-    {
-      "id": "L08-Q17",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 2,
-          "section": "lecture-08-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 8 讲：若要解释\"spike-train delta representation、Dirac delta、kernel sum、convolution\"中的机制或推导，哪条推理链成立？",
@@ -1054,72 +1324,27 @@
         },
         {
           "id": "b",
-          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
         },
         {
           "id": "c",
-          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
         },
         {
           "id": "d",
           "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
         }
       ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
-        "c": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
-        "d": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。"
-      },
-      "explanation": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
-    },
-    {
-      "id": "L08-Q18",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 3,
-          "section": "lecture-08-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
-        },
-        {
-          "id": "b",
-          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
-        },
-        {
-          "id": "c",
-          "text": "compact convolution form 的 coupled equations。"
-        },
-        {
-          "id": "d",
-          "text": "1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。"
-        }
-      ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。",
-        "b": "该陈述解释的是“variance of independent inputs”，不是题干指定的关系。",
-        "d": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。"
+        "b": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
+        "d": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。"
       },
-      "explanation": "compact convolution form 的 coupled equations。"
+      "explanation": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。 第 j 个神经元的 spike train 写成 Δ_j(t)=Σ_kδ(t−t_k^{(j)})。 判断依据：第 j 个神经元的 spike train 写成 Δ_j(t)=Σ_kδ(t−t_k^{(j)})。δ 的面积为 1，使对任意平滑 g 有 ∫δ(t−t_k)g(t)dt=g(t_k)。事件发生时刻保留为 t_k，而脉冲波形细节被省略。若时间用秒，Δ 的单位为 s⁻¹；它不能直接当作有限电流值采样。"
     },
     {
-      "id": "L08-Q19",
+      "id": "L08-Q15",
       "lecture": 8,
       "sectionId": "lecture-08-source-3",
       "sourceAnchors": [
@@ -1161,10 +1386,10 @@
         "b": "该陈述解释的是“1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks”，不是题干指定的关系。",
         "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。"
       },
-      "explanation": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+      "explanation": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。 Δ_i 又由 V_i 的阈值-重置机制产生，因此系统含连续电压状态与离散事件反馈。"
     },
     {
-      "id": "L08-Q20",
+      "id": "L08-Q16",
       "lecture": 8,
       "sectionId": "lecture-08-source-4",
       "sourceAnchors": [
@@ -1178,26 +1403,26 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 4 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"stochastic E/I Poisson inputs\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
         },
         {
           "id": "b",
-          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
         },
         {
           "id": "c",
-          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
         },
         {
           "id": "d",
-          "text": "compact convolution form 的 coupled equations。"
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
         }
       ],
       "correctChoiceId": "a",
@@ -1206,27 +1431,27 @@
         "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
         "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
       },
-      "explanation": "stochastic E/I Poisson inputs；total charge/current mean。"
+      "explanation": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。 先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。 判断依据：考虑 N_E 个兴奋输入，每个率 r_E、权重 W_E>0；N_I 个抑制输入，每个率 r_I、幅度 W_I>0，并在总电荷中相减。先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。总电荷 Q=Σ_E W_E K_j−Σ_I W_I K_j。符号影响均值，但方差中的权重平方使兴奋和抑制波动都作正贡献。"
     },
     {
-      "id": "L08-Q21",
+      "id": "L08-Q17",
       "lecture": 8,
-      "sectionId": "lecture-08-source-4",
+      "sectionId": "lecture-08-source-5",
       "sourceAnchors": [
         {
           "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 4,
-          "section": "lecture-08-source-4"
+          "page": 5,
+          "section": "lecture-08-source-5"
         }
       ],
       "conceptTags": [
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
-      "stem": "第 8 讲：若要解释\"stochastic E/I Poisson inputs\"中的机制或推导，哪条推理链成立？",
+      "stem": "第 8 讲：若要解释\"variance of independent inputs\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
@@ -1251,100 +1476,10 @@
         "c": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
         "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
       },
-      "explanation": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
+      "explanation": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。 先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。 判断依据：考虑 N_E 个兴奋输入，每个率 r_E、权重 W_E>0；N_I 个抑制输入，每个率 r_I、幅度 W_I>0，并在总电荷中相减。先忽略核形状，把 Δt 内每个输入的计数记为 Poisson。总电荷 Q=Σ_E W_E K_j−Σ_I W_I K_j。符号影响均值，但方差中的权重平方使兴奋和抑制波动都作正贡献。"
     },
     {
-      "id": "L08-Q22",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 5,
-          "section": "lecture-08-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "recurrent/input weights、population architecture、coupled spiking-network equations。"
-        },
-        {
-          "id": "b",
-          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
-        },
-        {
-          "id": "c",
-          "text": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
-        },
-        {
-          "id": "d",
-          "text": "compact convolution form 的 coupled equations。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "d": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
-      },
-      "explanation": "variance of independent inputs；large-N1/Nscaling 的 failure； E/I balance。"
-    },
-    {
-      "id": "L08-Q23",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 5,
-          "section": "lecture-08-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
-      ],
-      "difficulty": 3,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 8 讲：若要解释\"variance of independent inputs\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
-        },
-        {
-          "id": "b",
-          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
-        },
-        {
-          "id": "c",
-          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
-        },
-        {
-          "id": "d",
-          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“recurrent/input weights、population architecture、coupled spiking-network equations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。"
-      },
-      "explanation": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
-    },
-    {
-      "id": "L08-Q24",
+      "id": "L08-Q18",
       "lecture": 8,
       "sectionId": "lecture-08-source-6",
       "sourceAnchors": [
@@ -1359,37 +1494,37 @@
         "Lecture8-NeuralNetworks1.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 8 讲：根据 Lecture8-NeuralNetworks1.pdf 第 6 页，哪一项概括了该页主题？",
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 8 讲：若要解释\"1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。"
+          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
         },
         {
           "id": "b",
-          "text": "spike-train delta representation、Dirac delta、kernel sum、convolution。"
+          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
         },
         {
           "id": "c",
-          "text": "compact convolution form 的 coupled equations。"
+          "text": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
         },
         {
           "id": "d",
-          "text": "stochastic E/I Poisson inputs；total charge/current mean。"
+          "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。",
+        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
+        "b": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。",
         "d": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。"
       },
-      "explanation": "1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks。"
+      "explanation": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。 讲义引用的动态平衡框架表明 recurrent E/I 网络可自发维持这种抵消，并产生接近 Poisson 的变异。"
     },
     {
-      "id": "L08-Q25",
+      "id": "L08-Q19",
       "lecture": 8,
       "sectionId": "lecture-08-source-6",
       "sourceAnchors": [
@@ -1403,14 +1538,14 @@
         "Neural Networks I",
         "Lecture8-NeuralNetworks1.pdf"
       ],
-      "difficulty": 5,
-      "type": "assumption",
+      "difficulty": 4,
+      "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "第 8 讲：若要解释\"1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks\"中的机制或推导，哪条推理链成立？",
+      "stem": "第 8 讲：阅读\"强耦合网络保留的是平衡后的有限波动\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "解释 spike train 作为 Dirac-delta sum；强调 delta 不是普通函数；逐步证明 kernel sum 等于 convolution。"
+          "text": "因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。"
         },
         {
           "id": "b",
@@ -1418,20 +1553,288 @@
         },
         {
           "id": "c",
-          "text": "将原始 spike-time sum 改写为 compact network equations，并解释每一项如何从 presynaptic spikes 产生 current。"
+          "text": "因此，逐项定义 recurrent weightW_ij 与 input weightU_ij 的方向 convention、matrix shape 和 biological meaning。"
+        },
+        {
+          "id": "d",
+          "text": "W∼1/√N 时，兴奋与抑制的条件均值各为 O(√N)，必须在领先阶相消；它们的瞬时差仍为 O(1)，所以净输入不是逐时刻为零，而能继续驱动不规则发放。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。",
+        "b": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。",
+        "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 1 页。"
+      },
+      "explanation": "W∼1/√N 时，兴奋与抑制的条件均值各为 O(√N)，必须在领先阶相消；它们的瞬时差仍为 O(1)，所以净输入不是逐时刻为零，而能继续驱动不规则发放。 要让净均值仍为 O(1)，必须满足领先阶平衡 N_EW_Er_E≈N_IW_Ir_I，使两个 O(√N) 项相消，只留下有限残差。"
+    },
+    {
+      "id": "L08-Q20",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "耦合网络、δ spike train 与突触卷积"
+      ],
+      "difficulty": 2,
+      "type": "debug",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：为什么 δ(t_k) 不能当作一个需要在代码中直接存储的无穷大数？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "δ 由积分作用定义；数值实现通常记录事件索引并向后累加离散核，或用有限 bin 中面积为 1 的近似，直接存无穷大会破坏单位和运算。"
+        },
+        {
+          "id": "b",
+          "text": "方差衡量偏离均值的平方；乘以 −W 只翻转波动方向，平方幅度仍为 W²，因此兴奋和抑制的独立不确定性都增加总方差。"
+        },
+        {
+          "id": "c",
+          "text": "弱输入也可产生零净均值；强平衡还要求 E 与 I 单独均值很大、领先阶互相抵消，同时净方差保持有限，并应检查这种缩放随连接数变化。"
         },
         {
           "id": "d",
           "text": "对 E/I Poisson input 逐步计算 finite-bin total charge 的 mean 与 variance。"
         }
       ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 4 页。"
+      },
+      "explanation": "δ 由积分作用定义；数值实现通常记录事件索引并向后累加离散核，或用有限 bin 中面积为 1 的近似，直接存无穷大会破坏单位和运算。 卷积记号把\"对所有历史脉冲求和\"与\"脉冲后的时间形状\"分开，使换核无需改网络索引。它也暴露线性假设：如果突触饱和、短时易化或抑制电导依赖 V，单一固定核与简单叠加可能失败，需要增加突触状态或使用电导型电流。"
+    },
+    {
+      "id": "L08-Q21",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "耦合网络、δ spike train 与突触卷积",
+        "两个脉冲的指数核叠加"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：完成\"脉冲发生在 1 ms 与 3 ms。本例只计算核形状，采用峰值归一的无量纲因果核 K(u)=e^{−u/2 ms}H(u)，实际电流幅度由外部权重承担。求 t=2 ms 与 4 ms 的无量纲总核响应。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两类平均各 0.01 并抵消；总标准差仅约 0.00141，且继续随 N 增大而下降。"
+        },
+        {
+          "id": "b",
+          "text": "响应在 2 ms 约为 0.6065，在 4 ms 约为 0.8296。"
+        },
+        {
+          "id": "c",
+          "text": "强 E/I 平均各为 1 并抵消，净均值 0；总标准差约 0.141，保留可驱动电压的波动。"
+        },
+        {
+          "id": "d",
+          "text": "外部输入 neuron→recurrent neuron 的连接。"
+        }
+      ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“compact convolution form 的 coupled equations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“stochastic E/I Poisson inputs”，不是题干指定的关系。"
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这是“输入权重（input weight）”的定义。"
       },
-      "explanation": "推导 excitation-inhibition cancellation 和 W∝1/sqrt(N)scaling，说明大 excitatory/inhibitory currents 如何相减留下 O(1) mean 与 O(1) variance。"
+      "explanation": "响应在 2 ms 约为 0.6065，在 4 ms 约为 0.8296。 计算路径：t=2 ms 时，1 ms 脉冲的延迟为 1 ms，贡献 e^{−1/2}≈0.6065；3 ms 脉冲尚未发生，贡献 0。 所以 t=2 ms 的总响应约 0.6065。 t=4 ms 时，两次延迟分别为 3 ms 和 1 ms，贡献 e^{−3/2}≈0.2231 与 e^{−1/2}≈0.6065。 相加得到 0.2231+0.6065=0.8296。"
+    },
+    {
+      "id": "L08-Q22",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "耦合网络、δ spike train 与突触卷积",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 8 讲：得到\"响应在 2 ms 约为 0.6065，在 4 ms 约为 0.8296。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "方差必须为正，即使 E/I 均值完全抵消；标准差约为单类均值 0.01 的 14%。"
+        },
+        {
+          "id": "b",
+          "text": "从 1/N 改到 1/√N，单权重增 100 倍，方差增 10000 倍，由 2×10⁻⁶ 变 0.02。"
+        },
+        {
+          "id": "c",
+          "text": "第二个脉冲加入后可使总响应上升；每个单独指数贡献都不超过事件瞬间的 1。"
+        },
+        {
+          "id": "d",
+          "text": "单个 presynaptic spike 引起的时间响应。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“突触核（synaptic kernel）”的定义。"
+      },
+      "explanation": "第二个脉冲加入后可使总响应上升；每个单独指数贡献都不超过事件瞬间的 1。 这个检查对应题设\"脉冲发生在 1 ms 与 3 ms。本例只计算核形状，采用峰值归一的无量纲因果核 K(u)=e^{−u/2 ms}H(u)，实际电流幅度由外部权重承担。求 t=2 ms 与 4 ms 的无量纲总核响应。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L08-Q23",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "随机 E/I 输入的均值、方差与 1/N 失效"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：为什么抑制项在均值中带负号，却在独立方差中仍带正号？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "δ 由积分作用定义；数值实现通常记录事件索引并向后累加离散核，或用有限 bin 中面积为 1 的近似，直接存无穷大会破坏单位和运算。"
+        },
+        {
+          "id": "b",
+          "text": "弱输入也可产生零净均值；强平衡还要求 E 与 I 单独均值很大、领先阶互相抵消，同时净方差保持有限，并应检查这种缩放随连接数变化。"
+        },
+        {
+          "id": "c",
+          "text": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        },
+        {
+          "id": "d",
+          "text": "方差衡量偏离均值的平方；乘以 −W 只翻转波动方向，平方幅度仍为 W²，因此兴奋和抑制的独立不确定性都增加总方差。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。"
+      },
+      "explanation": "方差衡量偏离均值的平方；乘以 −W 只翻转波动方向，平方幅度仍为 W²，因此兴奋和抑制的独立不确定性都增加总方差。 若希望均值和波动都有限，单纯同号独立输入做不到：W∼1/N 保均值却丢方差，W∼1/√N 保方差却使每一类均值按 √N 增长。出路是让兴奋和抑制的大均值在总体上抵消，这引向下一页的平衡态。这里抵消的是带符号的一阶均值，不会抵消由独立事件产生的方差；正因为均值和方差遵循不同的加法规则，平衡才能同时避免发散并保留波动。"
+    },
+    {
+      "id": "L08-Q24",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "随机 E/I 输入的均值、方差与 1/N 失效",
+        "一万输入下 1/N 缩放的波动"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：完成\"N_E=N_I=10000，r_E=r_I=10 Hz，Δt=1 ms，W_E=W_I=1/N，单位任意。计算每类均值幅度、净均值、总方差和标准差。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两类平均各 0.01 并抵消；总标准差仅约 0.00141，且继续随 N 增大而下降。"
+        },
+        {
+          "id": "b",
+          "text": "响应在 2 ms 约为 0.6065，在 4 ms 约为 0.8296。"
+        },
+        {
+          "id": "c",
+          "text": "强 E/I 平均各为 1 并抵消，净均值 0；总标准差约 0.141，保留可驱动电压的波动。"
+        },
+        {
+          "id": "d",
+          "text": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。"
+      },
+      "explanation": "两类平均各 0.01 并抵消；总标准差仅约 0.00141，且继续随 N 增大而下降。 计算路径：W=1/10000=10⁻⁴；每类均值为 NWrΔt=10000·10⁻⁴·10·0.001=0.01。 E/I 对称，所以净均值 0.01−0.01=0。 每类方差 N W² rΔt=10000·10⁻⁸·10·0.001=10⁻⁶。 总方差为 2×10⁻⁶，标准差为 sqrt(2×10⁻⁶)≈0.001414。"
+    },
+    {
+      "id": "L08-Q25",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 4,
+          "section": "lecture-08-source-4"
+        }
+      ],
+      "conceptTags": [
+        "随机 E/I 输入的均值、方差与 1/N 失效",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 8 讲：得到\"两类平均各 0.01 并抵消；总标准差仅约 0.00141，且继续随 N 增大而下降。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第二个脉冲加入后可使总响应上升；每个单独指数贡献都不超过事件瞬间的 1。"
+        },
+        {
+          "id": "b",
+          "text": "方差必须为正，即使 E/I 均值完全抵消；标准差约为单类均值 0.01 的 14%。"
+        },
+        {
+          "id": "c",
+          "text": "从 1/N 改到 1/√N，单权重增 100 倍，方差增 10000 倍，由 2×10⁻⁶ 变 0.02。"
+        },
+        {
+          "id": "d",
+          "text": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。"
+      },
+      "explanation": "方差必须为正，即使 E/I 均值完全抵消；标准差约为单类均值 0.01 的 14%。 这个检查对应题设\"N_E=N_I=10000，r_E=r_I=10 Hz，Δt=1 ms，W_E=W_I=1/N，单位任意。计算每类均值幅度、净均值、总方差和标准差。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L08-Q26",
@@ -1445,41 +1848,130 @@
         }
       ],
       "conceptTags": [
-        "Neural Networks I",
-        "Lecture8-NeuralNetworks1.pdf"
+        "1/√N 强耦合、E/I 平衡与不规则发放"
       ],
-      "difficulty": 1,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 8 讲：阅读与\"1/sqrt(N)balanced scaling、irregular spiking、dynamically balanced recurrent networks\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 8 讲：为什么只报告净输入均值接近零不足以证明网络处于强平衡态？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "δ 由积分作用定义；数值实现通常记录事件索引并向后累加离散核，或用有限 bin 中面积为 1 的近似，直接存无穷大会破坏单位和运算。"
         },
         {
           "id": "b",
-          "text": "因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。"
+          "text": "方差衡量偏离均值的平方；乘以 −W 只翻转波动方向，平方幅度仍为 W²，因此兴奋和抑制的独立不确定性都增加总方差。"
         },
         {
           "id": "c",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "弱输入也可产生零净均值；强平衡还要求 E 与 I 单独均值很大、领先阶互相抵消，同时净方差保持有限，并应检查这种缩放随连接数变化。"
         },
         {
           "id": "d",
-          "text": "前者由 recurrent dynamics 随时间调节，允许瞬时差异和 fluctuations。"
+          "text": "E/I mean 各自 O(√N)，不相消会使净输入发散。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“spike-train delta representation、Dirac delta、kernel sum、convolution”，不是题干指定的关系。",
-        "b": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。",
-        "d": "该选项回答的是“dynamic balance 与静态设置 E=I 的区别？”。"
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该选项回答的是“1/√N 时为什么还需要 balance？”。"
       },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+      "explanation": "弱输入也可产生零净均值；强平衡还要求 E 与 I 单独均值很大、领先阶互相抵消，同时净方差保持有限，并应检查这种缩放随连接数变化。 缩放分析提供可自动检验的模拟预测：改变 K 或 N，同时按 1/√K 调整权重；记录 E、I 平均绝对幅度、净均值、方差和发放 CV。正确平衡极限中，E 与 I 均值随 √K 增大、彼此抵消，净均值与方差保持 O(1)。只画净电流会隐藏背后的巨大抵消。"
     },
     {
       "id": "L08-Q27",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "1/√N 强耦合、E/I 平衡与不规则发放",
+        "同一万输入的 1/√N 平衡"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：完成\"沿用 N_E=N_I=10000、r=10 Hz、Δt=1 ms，改取 W=1/√N=0.01。E/I 平均完全相等。计算每类均值、净均值、总方差和标准差。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "响应在 2 ms 约为 0.6065，在 4 ms 约为 0.8296。"
+        },
+        {
+          "id": "b",
+          "text": "两类平均各 0.01 并抵消；总标准差仅约 0.00141，且继续随 N 增大而下降。"
+        },
+        {
+          "id": "c",
+          "text": "因此，解释 balanced state 与 dynamically generated balance；不要把\"平均 E=I\"误写成每个时刻完全相等。"
+        },
+        {
+          "id": "d",
+          "text": "强 E/I 平均各为 1 并抵消，净均值 0；总标准差约 0.141，保留可驱动电压的波动。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这条推理对应 Lecture8-NeuralNetworks1.pdf 第 6 页。"
+      },
+      "explanation": "强 E/I 平均各为 1 并抵消，净均值 0；总标准差约 0.141，保留可驱动电压的波动。 计算路径：每类均值为 10000·0.01·10·0.001=1。 对称条件下净均值为 1−1=0，但两项各比 1/N 缩放时的 0.01 大 100 倍。 每类方差为 10000·0.01²·10·0.001=0.01。 总方差为 0.02，标准差 sqrt(0.02)≈0.1414，随 N 的领先阶保持有限。"
+    },
+    {
+      "id": "L08-Q28",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "1/√N 强耦合、E/I 平衡与不规则发放",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 8 讲：得到\"强 E/I 平均各为 1 并抵消，净均值 0；总标准差约 0.141，保留可驱动电压的波动。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 1/N 改到 1/√N，单权重增 100 倍，方差增 10000 倍，由 2×10⁻⁶ 变 0.02。"
+        },
+        {
+          "id": "b",
+          "text": "第二个脉冲加入后可使总响应上升；每个单独指数贡献都不超过事件瞬间的 1。"
+        },
+        {
+          "id": "c",
+          "text": "方差必须为正，即使 E/I 均值完全抵消；标准差约为单类均值 0.01 的 14%。"
+        },
+        {
+          "id": "d",
+          "text": "较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“激发-抑制平衡（excitation-inhibition balance）”的定义。"
+      },
+      "explanation": "从 1/N 改到 1/√N，单权重增 100 倍，方差增 10000 倍，由 2×10⁻⁶ 变 0.02。 这个检查对应题设\"沿用 N_E=N_I=10000、r=10 Hz、Δt=1 ms，改取 W=1/√N=0.01。E/I 平均完全相等。计算每类均值、净均值、总方差和标准差。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L08-Q29",
       "lecture": 8,
       "sectionId": "lecture-08-source-2",
       "sourceAnchors": [
@@ -1493,7 +1985,7 @@
         "Dirac delta",
         "Dirac delta"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 8 讲：本讲把\"在积分中取样的 generalized function/distribution。\"称为什么？",
@@ -1504,114 +1996,24 @@
         },
         {
           "id": "b",
-          "text": "突触核（synaptic kernel）"
-        },
-        {
-          "id": "c",
-          "text": "循环权重（recurrent weight）"
-        },
-        {
-          "id": "d",
           "text": "Dirac delta（Dirac delta）"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。",
-        "b": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。",
-        "c": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。"
-      },
-      "explanation": "Dirac delta（Dirac delta）：在积分中取样的 generalized function/distribution。"
-    },
-    {
-      "id": "L08-Q28",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 1,
-          "section": "lecture-08-source-1"
-        }
-      ],
-      "conceptTags": [
-        "卷积",
-        "convolution"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 8 讲：本讲把\"把输入历史按 kernel 平移加权的运算。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "卷积（convolution）"
-        },
-        {
-          "id": "b",
-          "text": "突触核（synaptic kernel）"
         },
         {
           "id": "c",
-          "text": "循环权重（recurrent weight）"
-        },
-        {
-          "id": "d",
-          "text": "输入权重（input weight）"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。",
-        "c": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。",
-        "d": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。"
-      },
-      "explanation": "卷积（convolution）：把输入历史按 kernel 平移加权的运算。"
-    },
-    {
-      "id": "L08-Q29",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 1,
-          "section": "lecture-08-source-1"
-        }
-      ],
-      "conceptTags": [
-        "突触核",
-        "synaptic kernel"
-      ],
-      "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 8 讲：本讲把\"单个 presynaptic spike 引起的时间响应。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "循环权重（recurrent weight）"
-        },
-        {
-          "id": "b",
           "text": "突触核（synaptic kernel）"
         },
         {
-          "id": "c",
-          "text": "输入权重（input weight）"
-        },
-        {
           "id": "d",
-          "text": "激发-抑制平衡（excitation-inhibition balance）"
+          "text": "循环权重（recurrent weight）"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。",
-        "c": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。",
-        "d": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+        "a": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。",
+        "c": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。",
+        "d": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。"
       },
-      "explanation": "突触核（synaptic kernel）：单个 presynaptic spike 引起的时间响应。"
+      "explanation": "Dirac delta（Dirac delta）：在积分中取样的 generalized function/distribution。"
     },
     {
       "id": "L08-Q30",
@@ -1625,41 +2027,131 @@
         }
       ],
       "conceptTags": [
+        "卷积",
+        "convolution"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"把输入历史按 kernel 平移加权的运算。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "突触核（synaptic kernel）"
+        },
+        {
+          "id": "b",
+          "text": "循环权重（recurrent weight）"
+        },
+        {
+          "id": "c",
+          "text": "卷积（convolution）"
+        },
+        {
+          "id": "d",
+          "text": "输入权重（input weight）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。",
+        "b": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。",
+        "d": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。"
+      },
+      "explanation": "卷积（convolution）：把输入历史按 kernel 平移加权的运算。 卷积记号把\"对所有历史脉冲求和\"与\"脉冲后的时间形状\"分开，使换核无需改网络索引。"
+    },
+    {
+      "id": "L08-Q31",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
+        "突触核",
+        "synaptic kernel"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"单个 presynaptic spike 引起的时间响应。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "循环权重（recurrent weight）"
+        },
+        {
+          "id": "b",
+          "text": "输入权重（input weight）"
+        },
+        {
+          "id": "c",
+          "text": "激发-抑制平衡（excitation-inhibition balance）"
+        },
+        {
+          "id": "d",
+          "text": "突触核（synaptic kernel）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“循环权重（recurrent weight）”指：网络内部 neuron j→i 的连接强度。",
+        "b": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。",
+        "c": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
+      },
+      "explanation": "突触核（synaptic kernel）：单个 presynaptic spike 引起的时间响应。 突触核 K_s(t) 描述一个脉冲后电流或电导随时间的变化。"
+    },
+    {
+      "id": "L08-Q32",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 1,
+          "section": "lecture-08-source-1"
+        }
+      ],
+      "conceptTags": [
         "循环权重",
         "recurrent weight"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 8 讲：本讲把\"网络内部 neuron j→i 的连接强度。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "输入权重（input weight）"
+          "text": "循环权重（recurrent weight）"
         },
         {
           "id": "b",
-          "text": "激发-抑制平衡（excitation-inhibition balance）"
+          "text": "输入权重（input weight）"
         },
         {
           "id": "c",
-          "text": "循环权重（recurrent weight）"
+          "text": "激发-抑制平衡（excitation-inhibition balance）"
         },
         {
           "id": "d",
           "text": "动态平衡（dynamic balance）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。",
-        "b": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。",
+        "b": "“输入权重（input weight）”指：外部输入 neuron→recurrent neuron 的连接。",
+        "c": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。",
         "d": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
       },
-      "explanation": "循环权重（recurrent weight）：网络内部 neuron j→i 的连接强度。"
+      "explanation": "循环权重（recurrent weight）：网络内部 neuron j→i 的连接强度。 W_{ij} 是 j→i 的 recurrent 权重，U_{ij} 是外部输入 j→网络神经元 i 的权重。"
     },
     {
-      "id": "L08-Q31",
+      "id": "L08-Q33",
       "lecture": 8,
       "sectionId": "lecture-08-source-1",
       "sourceAnchors": [
@@ -1684,27 +2176,27 @@
         },
         {
           "id": "b",
-          "text": "动态平衡（dynamic balance）"
+          "text": "输入权重（input weight）"
         },
         {
           "id": "c",
-          "text": "数量级（order of magnitude）"
+          "text": "动态平衡（dynamic balance）"
         },
         {
           "id": "d",
-          "text": "输入权重（input weight）"
+          "text": "数量级（order of magnitude）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“激发-抑制平衡（excitation-inhibition balance）”指：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。",
-        "b": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
-        "c": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。"
+        "c": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
+        "d": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。"
       },
-      "explanation": "输入权重（input weight）：外部输入 neuron→recurrent neuron 的连接。"
+      "explanation": "输入权重（input weight）：外部输入 neuron→recurrent neuron 的连接。 W_{ij} 是 j→i 的 recurrent 权重，U_{ij} 是外部输入 j→网络神经元 i 的权重。"
     },
     {
-      "id": "L08-Q32",
+      "id": "L08-Q34",
       "lecture": 8,
       "sectionId": "lecture-08-source-6",
       "sourceAnchors": [
@@ -1718,125 +2210,35 @@
         "激发-抑制平衡",
         "excitation-inhibition balance"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 8 讲：本讲把\"较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。\"称为什么？",
       "choices": [
         {
           "id": "a",
+          "text": "动态平衡（dynamic balance）"
+        },
+        {
+          "id": "b",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "c",
           "text": "激发-抑制平衡（excitation-inhibition balance）"
         },
         {
-          "id": "b",
-          "text": "动态平衡（dynamic balance）"
-        },
-        {
-          "id": "c",
-          "text": "数量级（order of magnitude）"
-        },
-        {
           "id": "d",
           "text": "不规则放电（irregular spiking）"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
-        "c": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。",
-        "d": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。"
-      },
-      "explanation": "激发-抑制平衡（excitation-inhibition balance）：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
-    },
-    {
-      "id": "L08-Q33",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 6,
-          "section": "lecture-08-source-6"
-        }
-      ],
-      "conceptTags": [
-        "动态平衡",
-        "dynamic balance"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 8 讲：本讲把\"balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "数量级（order of magnitude）"
-        },
-        {
-          "id": "b",
-          "text": "动态平衡（dynamic balance）"
-        },
-        {
-          "id": "c",
-          "text": "不规则放电（irregular spiking）"
-        },
-        {
-          "id": "d",
-          "text": "Dirac delta（Dirac delta）"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。",
-        "c": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。",
-        "d": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。"
-      },
-      "explanation": "动态平衡（dynamic balance）：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
-    },
-    {
-      "id": "L08-Q34",
-      "lecture": 8,
-      "sectionId": "lecture-08-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture8-NeuralNetworks1.pdf",
-          "page": 5,
-          "section": "lecture-08-source-5"
-        }
-      ],
-      "conceptTags": [
-        "数量级",
-        "order of magnitude"
-      ],
-      "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 8 讲：本讲把\"随 N 增长的主导 scaling，如 O(1)、O(√N)。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "不规则放电（irregular spiking）"
-        },
-        {
-          "id": "b",
-          "text": "Dirac delta（Dirac delta）"
-        },
-        {
-          "id": "c",
-          "text": "数量级（order of magnitude）"
-        },
-        {
-          "id": "d",
-          "text": "卷积（convolution）"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。",
-        "b": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。",
-        "d": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。"
+        "a": "“动态平衡（dynamic balance）”指：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。",
+        "b": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。",
+        "d": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。"
       },
-      "explanation": "数量级（order of magnitude）：随 N 增长的主导 scaling，如 O(1)、O(√N)。"
+      "explanation": "激发-抑制平衡（excitation-inhibition balance）：较大的 excitation 与 inhibition currents 在均值上近似抵消的状态。"
     },
     {
       "id": "L08-Q35",
@@ -1850,10 +2252,100 @@
         }
       ],
       "conceptTags": [
+        "动态平衡",
+        "dynamic balance"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "b",
+          "text": "不规则放电（irregular spiking）"
+        },
+        {
+          "id": "c",
+          "text": "Dirac delta（Dirac delta）"
+        },
+        {
+          "id": "d",
+          "text": "动态平衡（dynamic balance）"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "“数量级（order of magnitude）”指：随 N 增长的主导 scaling，如 O(1)、O(√N)。",
+        "b": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。",
+        "c": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。"
+      },
+      "explanation": "动态平衡（dynamic balance）：balance 由 recurrent feedback 在线产生，而非预先逐时刻相等。"
+    },
+    {
+      "id": "L08-Q36",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 5,
+          "section": "lecture-08-source-5"
+        }
+      ],
+      "conceptTags": [
+        "数量级",
+        "order of magnitude"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 8 讲：本讲把\"随 N 增长的主导 scaling，如 O(1)、O(√N)。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "数量级（order of magnitude）"
+        },
+        {
+          "id": "b",
+          "text": "不规则放电（irregular spiking）"
+        },
+        {
+          "id": "c",
+          "text": "Dirac delta（Dirac delta）"
+        },
+        {
+          "id": "d",
+          "text": "卷积（convolution）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“不规则放电（irregular spiking）”指：ISI 高变异、近 Poisson-like 的 spike timing。",
+        "c": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。",
+        "d": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。"
+      },
+      "explanation": "数量级（order of magnitude）：随 N 增长的主导 scaling，如 O(1)、O(√N)。 若希望均值和波动都有限，单纯同号独立输入做不到：W∼1/N 保均值却丢方差，W∼1/√N 保方差却使每一类均值按 √N 增长。"
+    },
+    {
+      "id": "L08-Q37",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
         "不规则放电",
         "irregular spiking"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 8 讲：本讲把\"ISI 高变异、近 Poisson-like 的 spike timing。\"称为什么？",
@@ -1864,27 +2356,27 @@
         },
         {
           "id": "b",
-          "text": "卷积（convolution）"
+          "text": "不规则放电（irregular spiking）"
         },
         {
           "id": "c",
-          "text": "突触核（synaptic kernel）"
+          "text": "卷积（convolution）"
         },
         {
           "id": "d",
-          "text": "不规则放电（irregular spiking）"
+          "text": "突触核（synaptic kernel）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“Dirac delta（Dirac delta）”指：在积分中取样的 generalized function/distribution。",
-        "b": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。",
-        "c": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。"
+        "c": "“卷积（convolution）”指：把输入历史按 kernel 平移加权的运算。",
+        "d": "“突触核（synaptic kernel）”指：单个 presynaptic spike 引起的时间响应。"
       },
       "explanation": "不规则放电（irregular spiking）：ISI 高变异、近 Poisson-like 的 spike timing。"
     },
     {
-      "id": "L08-Q36",
+      "id": "L08-Q38",
       "lecture": 8,
       "sectionId": "lecture-08-source-1",
       "sourceAnchors": [
@@ -1897,38 +2389,38 @@
       "conceptTags": [
         "spike train 的 distribution 表示"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：使用\"spike train 的 distribution 表示\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "通过积分定义"
-        },
-        {
-          "id": "b",
           "text": "causal K 时只依赖过去"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "X_i independent"
+        },
+        {
+          "id": "c",
+          "text": "通过积分定义"
         },
         {
           "id": "d",
           "text": "variance→0 under independence"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
-        "c": "这是“independent sum variance”的条件，不是题干公式的条件。",
+        "a": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "b": "这是“independent sum variance”的条件，不是题干公式的条件。",
         "d": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
       },
       "explanation": "spike train 的 distribution 表示的适用条件：通过积分定义"
     },
     {
-      "id": "L08-Q37",
+      "id": "L08-Q39",
       "lecture": 8,
       "sectionId": "lecture-08-source-1",
       "sourceAnchors": [
@@ -1941,7 +2433,7 @@
       "conceptTags": [
         "synaptic filtering"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：使用\"synaptic filtering\"时，哪项条件或约定不可省略？",
@@ -1952,27 +2444,27 @@
         },
         {
           "id": "b",
-          "text": "causal K 时只依赖过去"
-        },
-        {
-          "id": "c",
           "text": "X_i independent"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "variance→0 under independence"
+        },
+        {
+          "id": "d",
+          "text": "causal K 时只依赖过去"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
-        "c": "这是“independent sum variance”的条件，不是题干公式的条件。",
-        "d": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
+        "b": "这是“independent sum variance”的条件，不是题干公式的条件。",
+        "c": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
       },
-      "explanation": "synaptic filtering 的适用条件：causal K 时只依赖过去"
+      "explanation": "synaptic filtering 的适用条件：causal K 时只依赖过去 它也暴露线性假设：如果突触饱和、短时易化或抑制电导依赖 V，单一固定核与简单叠加可能失败，需要增加突触状态或使用电导型电流。"
     },
     {
-      "id": "L08-Q38",
+      "id": "L08-Q40",
       "lecture": 8,
       "sectionId": "lecture-08-source-3",
       "sourceAnchors": [
@@ -1992,31 +2484,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "通过积分定义"
+          "text": "X_i independent"
         },
         {
           "id": "b",
-          "text": "causal K 时只依赖过去"
+          "text": "通过积分定义"
         },
         {
           "id": "c",
-          "text": "X_i independent"
+          "text": "causal K 时只依赖过去"
         },
         {
           "id": "d",
           "text": "variance→0 under independence"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
-        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "b": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "c": "这是“synaptic filtering”的条件，不是题干公式的条件。",
         "d": "这是“mean-field weak weights”的条件，不是题干公式的条件。"
       },
-      "explanation": "independent sum variance 的适用条件：X_i independent"
+      "explanation": "independent sum variance 的适用条件：X_i independent 事件发生时刻保留为 t_k，而脉冲波形细节被省略。"
     },
     {
-      "id": "L08-Q39",
+      "id": "L08-Q41",
       "lecture": 8,
       "sectionId": "lecture-08-source-1",
       "sourceAnchors": [
@@ -2029,7 +2521,7 @@
       "conceptTags": [
         "mean-field weak weights"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：使用\"mean-field weak weights\"时，哪项条件或约定不可省略？",
@@ -2040,27 +2532,27 @@
         },
         {
           "id": "b",
-          "text": "causal K 时只依赖过去"
+          "text": "variance→0 under independence"
         },
         {
           "id": "c",
-          "text": "X_i independent"
+          "text": "causal K 时只依赖过去"
         },
         {
           "id": "d",
-          "text": "variance→0 under independence"
+          "text": "X_i independent"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
-        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
-        "c": "这是“independent sum variance”的条件，不是题干公式的条件。"
+        "c": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "d": "这是“independent sum variance”的条件，不是题干公式的条件。"
       },
-      "explanation": "mean-field weak weights 的适用条件：variance→0 under independence"
+      "explanation": "mean-field weak weights 的适用条件：variance→0 under independence 事件发生时刻保留为 t_k，而脉冲波形细节被省略。"
     },
     {
-      "id": "L08-Q40",
+      "id": "L08-Q42",
       "lecture": 8,
       "sectionId": "lecture-08-source-5",
       "sourceAnchors": [
@@ -2073,35 +2565,79 @@
       "conceptTags": [
         "balanced-network scaling"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 8 讲：使用\"balanced-network scaling\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "E/I cancellation required"
-        },
-        {
-          "id": "b",
           "text": "通过积分定义"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "E/I cancellation required"
         },
         {
           "id": "d",
           "text": "X_i independent"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
-        "c": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
         "d": "这是“independent sum variance”的条件，不是题干公式的条件。"
       },
-      "explanation": "balanced-network scaling 的适用条件：E/I cancellation required"
+      "explanation": "balanced-network scaling 的适用条件：E/I cancellation required 考虑 N_E 个兴奋输入，每个率 r_E、权重 W_E>0；N_I 个抑制输入，每个率 r_I、幅度 W_I>0，并在总电荷中相减。"
+    },
+    {
+      "id": "L08-Q43",
+      "lecture": 8,
+      "sectionId": "lecture-08-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture8-NeuralNetworks1.pdf",
+          "page": 6,
+          "section": "lecture-08-source-6"
+        }
+      ],
+      "conceptTags": [
+        "balanced net mean"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 8 讲：使用\"balanced net mean\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "通过积分定义"
+        },
+        {
+          "id": "b",
+          "text": "causal K 时只依赖过去"
+        },
+        {
+          "id": "c",
+          "text": "X_i independent"
+        },
+        {
+          "id": "d",
+          "text": "large signed currents cancel"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“spike train 的 distribution 表示”的条件，不是题干公式的条件。",
+        "b": "这是“synaptic filtering”的条件，不是题干公式的条件。",
+        "c": "这是“independent sum variance”的条件，不是题干公式的条件。"
+      },
+      "explanation": "balanced net mean 的适用条件：large signed currents cancel 它约束条件平均或大尺度领先项；独立脉冲的瞬时差仍有 O(1) 波动。"
     }
   ]
 }

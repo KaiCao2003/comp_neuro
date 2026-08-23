@@ -1,0 +1,639 @@
+[
+  {
+    "id": "L10-FIG-A1",
+    "lecture": 10,
+    "lectureTitle": "突触可塑性",
+    "moduleId": "L10-M3",
+    "title": "Oja rule 同时选择主统计方向并限制权重范数",
+    "alt": "流程图展示中心化输入先产生线性输出，Hebbian 增长项与 Oja 归一化项合成权重更新，最后得到有界的主协方差模态。",
+    "caption": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 -h²w 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。这个结论依赖 stationary input、合适的小 learning rate 与非退化的最大 eigenvalue。",
+    "sourceRefs": [
+      {
+        "file": "Lecture10-SynapticPlasticity.pdf",
+        "page": 5
+      },
+      {
+        "file": "Lecture10-SynapticPlasticity.pdf",
+        "page": 6
+      }
+    ],
+    "schematic": true,
+    "kind": "flow",
+    "nodes": [
+      {
+        "id": "centered-input",
+        "label": "中心化输入\nx",
+        "x": 11,
+        "y": 55
+      },
+      {
+        "id": "linear-output",
+        "label": "线性输出\nh = wᵀx",
+        "x": 37,
+        "y": 55
+      },
+      {
+        "id": "oja-update",
+        "label": "Hebb: h x\n归一化: -h²w",
+        "x": 63,
+        "y": 55,
+        "tone": "accent"
+      },
+      {
+        "id": "bounded-mode",
+        "label": "有界权重\n主 covariance mode",
+        "x": 89,
+        "y": 55
+      }
+    ],
+    "edges": [
+      {
+        "from": "centered-input",
+        "to": "linear-output",
+        "label": "projection"
+      },
+      {
+        "from": "linear-output",
+        "to": "oja-update",
+        "label": "η(hx - h²w)"
+      },
+      {
+        "from": "oja-update",
+        "to": "bounded-mode",
+        "label": "反复更新"
+      }
+    ]
+  },
+  {
+    "id": "L11-FIG-A1",
+    "lecture": 11,
+    "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+    "moduleId": "L11-M1",
+    "title": "负梯度沿局部斜率下降损失",
+    "alt": "归一化的一维凸损失曲线和一串逐步接近最低点的梯度下降迭代点。",
+    "caption": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 Δw=-η∇L 沿相反方向移动。图中的 marker 只表示归一化的迭代顺序，不是实验数据；它说明合适步长可逐次靠近 minimum，但 Taylor 近似不能保证过大的 learning rate 仍会下降。",
+    "sourceRefs": [
+      {
+        "file": "Lecture11-MachineLearning.pdf",
+        "page": 1
+      },
+      {
+        "file": "Lecture11-MachineLearning.pdf",
+        "page": 2
+      }
+    ],
+    "schematic": true,
+    "kind": "plot",
+    "xLabel": "参数 w（归一化）",
+    "yLabel": "loss L(w)（归一化）",
+    "curves": [
+      {
+        "label": "凸 loss",
+        "points": [
+          [5, 95],
+          [15, 66],
+          [25, 42],
+          [35, 24],
+          [45, 13],
+          [50, 11],
+          [55, 13],
+          [65, 24],
+          [75, 42],
+          [85, 66],
+          [95, 95]
+        ]
+      },
+      {
+        "label": "gradient steps",
+        "points": [
+          [12, 74],
+          [31, 30],
+          [43, 15],
+          [49, 11]
+        ],
+        "dashed": true,
+        "markers": true
+      }
+    ],
+    "annotations": [
+      {
+        "x": 50,
+        "y": 11,
+        "label": "minimum"
+      }
+    ]
+  },
+  {
+    "id": "L12-FIG-A1",
+    "lecture": 12,
+    "lectureTitle": "视觉导论：层级、感受野与 LNP 模型",
+    "moduleId": "L12-M2",
+    "title": "从 ON/OFF 局部对比通道到定向 Gabor-like 感受野",
+    "alt": "流程图从视网膜图像 patch 经过 ON 和 OFF center-surround 对比通道、空间排列的正负子区，形成定向的 Gabor-like 线性驱动。",
+    "caption": "ON/OFF center-surround filters 先把绝对亮度改写为局部 contrast；将多个 polarity-specific subfields 沿一条轴排列后，正负贡献在匹配方向上相加、在正交方向上抵消，于是形成 elongated、orientation-selective 的 Gabor-like linear receptive field。该流程区分了局部 DoG 对比计算与随后子区排列产生的 orientation tuning。",
+    "sourceRefs": [
+      {
+        "file": "Lecture12-IntroToVision.pdf",
+        "page": 3
+      },
+      {
+        "file": "Lecture12-IntroToVision.pdf",
+        "page": 4
+      }
+    ],
+    "schematic": true,
+    "kind": "flow",
+    "nodes": [
+      {
+        "id": "image-patch",
+        "label": "局部图像\npatch",
+        "x": 11,
+        "y": 55
+      },
+      {
+        "id": "on-off",
+        "label": "ON / OFF\ncenter-surround",
+        "x": 37,
+        "y": 55
+      },
+      {
+        "id": "aligned-subfields",
+        "label": "排列的正负\nsubfields",
+        "x": 63,
+        "y": 55,
+        "tone": "accent"
+      },
+      {
+        "id": "gabor-drive",
+        "label": "Gabor-like drive\norientation tuning",
+        "x": 89,
+        "y": 55
+      }
+    ],
+    "edges": [
+      {
+        "from": "image-patch",
+        "to": "on-off",
+        "label": "local contrast"
+      },
+      {
+        "from": "on-off",
+        "to": "aligned-subfields",
+        "label": "feature maps"
+      },
+      {
+        "from": "aligned-subfields",
+        "to": "gabor-drive",
+        "label": "signed sum"
+      }
+    ]
+  },
+  {
+    "id": "L13-FIG-A1",
+    "lecture": 13,
+    "lectureTitle": "脉冲触发平均与白噪声系统辨识",
+    "moduleId": "L13-M3",
+    "title": "LNP forward model 与 STA reverse estimate 构成同一闭环检验",
+    "alt": "流程图显示白噪声刺激历史经线性投影和非线性产生脉冲，再把脉冲前刺激对齐平均得到与滤波器方向平行的 STA。",
+    "caption": "forward LNP 先把 stimulus history 投影到 L=kᵀs，再经 F(L) 给 conditional firing rate 并产生 spikes；reverse analysis 则对每个 spike 前的 stimulus history 对齐平均。对 zero-mean white Gaussian input、单一 relevant dimension 与足够样本，STA 与 k 同方向；colored input、even nonlinearity 或多个 relevant dimensions 会破坏这个简单关系。",
+    "sourceRefs": [
+      {
+        "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 5
+      },
+      {
+        "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
+        "page": 6
+      }
+    ],
+    "schematic": true,
+    "kind": "flow",
+    "nodes": [
+      {
+        "id": "stimulus-history",
+        "label": "white-noise\nstimulus history s",
+        "x": 11,
+        "y": 55
+      },
+      {
+        "id": "linear-projection",
+        "label": "linear projection\nL = kᵀs",
+        "x": 37,
+        "y": 55
+      },
+      {
+        "id": "spikes",
+        "label": "F(L) + spike\ngeneration",
+        "x": 63,
+        "y": 55,
+        "tone": "accent"
+      },
+      {
+        "id": "sta",
+        "label": "spike-aligned mean\nSTA ∥ k",
+        "x": 89,
+        "y": 55
+      }
+    ],
+    "edges": [
+      {
+        "from": "stimulus-history",
+        "to": "linear-projection",
+        "label": "forward"
+      },
+      {
+        "from": "linear-projection",
+        "to": "spikes",
+        "label": "conditional rate"
+      },
+      {
+        "from": "spikes",
+        "to": "sta",
+        "label": "回看并平均"
+      }
+    ]
+  },
+  {
+    "id": "L14-FIG-A1",
+    "lecture": 14,
+    "lectureTitle": "Spike-Triggered Covariance 与广义线性模型",
+    "moduleId": "L14-M3",
+    "title": "Population GLM 把 stimulus、self-history 与 coupling 放进同一 conditional predictor",
+    "alt": "三个输入分支分别表示刺激历史、自身脉冲历史和其他神经元历史，它们经过滤波后汇入线性预测器，再经 inverse link 产生条件脉冲概率。",
+    "caption": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor η_i(t) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。simultaneous fitting 可减少 omitted-covariate 混淆，但 coupling coefficient 仍只表示给定已纳入变量后的 predictive dependence，不能直接当作 anatomical synapse。",
+    "sourceRefs": [
+      {
+        "file": "Lecture14-STC-GLM.pdf",
+        "page": 5
+      },
+      {
+        "file": "Lecture14-STC-GLM.pdf",
+        "page": 6
+      }
+    ],
+    "schematic": true,
+    "kind": "flow",
+    "nodes": [
+      {
+        "id": "stimulus",
+        "label": "stimulus history\nkᵢ * s",
+        "x": 10,
+        "y": 82
+      },
+      {
+        "id": "self-history",
+        "label": "self-history\nhᵢ * yᵢ",
+        "x": 10,
+        "y": 55
+      },
+      {
+        "id": "coupling",
+        "label": "other neurons\nΣ cᵢⱼ * yⱼ",
+        "x": 10,
+        "y": 28
+      },
+      {
+        "id": "predictor",
+        "label": "linear predictor\nηᵢ(t) + bias",
+        "x": 45,
+        "y": 55,
+        "tone": "accent"
+      },
+      {
+        "id": "inverse-link",
+        "label": "inverse link\nexp / sigmoid",
+        "x": 70,
+        "y": 55
+      },
+      {
+        "id": "response",
+        "label": "conditional\nspike response",
+        "x": 94,
+        "y": 55
+      }
+    ],
+    "edges": [
+      {
+        "from": "stimulus",
+        "to": "predictor"
+      },
+      {
+        "from": "self-history",
+        "to": "predictor"
+      },
+      {
+        "from": "coupling",
+        "to": "predictor"
+      },
+      {
+        "from": "predictor",
+        "to": "inverse-link",
+        "label": "ηᵢ"
+      },
+      {
+        "from": "inverse-link",
+        "to": "response",
+        "label": "mean / probability"
+      }
+    ]
+  },
+  {
+    "id": "L15-FIG-A1",
+    "lecture": 15,
+    "lectureTitle": "高效编码与信息论",
+    "moduleId": "L15-M3",
+    "title": "Noisy sensory channel 中的去冗余必须服从保真与输出代价约束",
+    "alt": "流程图从含输入噪声的感觉信号，经线性编码器和输出噪声通道，到以保留信息和输出代价共同约束的去相关输出码。",
+    "caption": "encoder A 会同时变换 signal 与 input noise，而 output noise 在 A 之后加入；所以仅令 output covariance diagonal 并不保证有效编码。Atick–Redlich 思路是在 retained information 与 output power 或 dynamic-range constraint 下减少 redundancy：whitening 可消除二阶相关，但任意 orthogonal rotation 仍可保持 whitened covariance，localized center-surround 还需要 symmetry、locality 等额外约束。",
+    "sourceRefs": [
+      {
+        "file": "Lecture15-EfficientCoding.pdf",
+        "page": 5
+      },
+      {
+        "file": "Lecture15-EfficientCoding.pdf",
+        "page": 6
+      }
+    ],
+    "schematic": true,
+    "kind": "flow",
+    "nodes": [
+      {
+        "id": "noisy-input",
+        "label": "noisy input\nx = s + ηₓ",
+        "x": 11,
+        "y": 55
+      },
+      {
+        "id": "encoder",
+        "label": "linear encoder A\nsignal + input noise",
+        "x": 37,
+        "y": 55,
+        "tone": "accent"
+      },
+      {
+        "id": "noisy-output",
+        "label": "output channel\ny = Ax + ηᵧ",
+        "x": 63,
+        "y": 55
+      },
+      {
+        "id": "constrained-code",
+        "label": "保留 information\n降低 redundancy / cost",
+        "x": 89,
+        "y": 55
+      }
+    ],
+    "edges": [
+      {
+        "from": "noisy-input",
+        "to": "encoder",
+        "label": "Cₓ"
+      },
+      {
+        "from": "encoder",
+        "to": "noisy-output",
+        "label": "A Cₓ Aᵀ"
+      },
+      {
+        "from": "noisy-output",
+        "to": "constrained-code",
+        "label": "MI + output constraint"
+      }
+    ]
+  },
+  {
+    "id": "L16-FIG-A1",
+    "lecture": 16,
+    "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+    "moduleId": "l16-m3",
+    "title": "自然图像 whitening 的理想高频增益会被噪声截断",
+    "alt": "归一化空间频率响应图比较理想线性上升的 whitening 增益、考虑噪声后的带通增益和低信噪比下更窄的低频响应。",
+    "caption": "若自然图像功率近似 P_in(ξ)∝1/|ξ|²，且暂时忽略 noise 与 gain limits，使 P_out=|K̂|²P_in 平坦需要 |K̂|∝|ξ|。真实 optics 会压低极高频 signal，而近似平坦的 output noise 不会随之消失，因此 noise-aware filter 在高频回落；SNR 再降低时，可靠频带进一步收窄并更偏向 pooling。三条曲线均为归一化理论示意，不表示经验测量值。",
+    "sourceRefs": [
+      {
+        "file": "Lecture16-Adaptation.pdf",
+        "page": 4
+      },
+      {
+        "file": "Lecture16-Adaptation.pdf",
+        "page": 5
+      }
+    ],
+    "schematic": true,
+    "kind": "plot",
+    "xLabel": "spatial frequency |ξ|（归一化）",
+    "yLabel": "filter gain |K̂(ξ)|（归一化）",
+    "curves": [
+      {
+        "label": "ideal whitening",
+        "points": [
+          [0, 5],
+          [20, 22],
+          [40, 40],
+          [60, 58],
+          [80, 76],
+          [100, 94]
+        ],
+        "dashed": true
+      },
+      {
+        "label": "noise-aware",
+        "points": [
+          [0, 6],
+          [15, 20],
+          [30, 44],
+          [45, 67],
+          [60, 75],
+          [75, 58],
+          [90, 27],
+          [100, 12]
+        ]
+      },
+      {
+        "label": "lower SNR",
+        "points": [
+          [0, 18],
+          [15, 40],
+          [30, 53],
+          [45, 42],
+          [60, 25],
+          [75, 12],
+          [100, 5]
+        ]
+      }
+    ],
+    "annotations": [
+      {
+        "x": 75,
+        "y": 58,
+        "label": "noise-dominated roll-off"
+      }
+    ]
+  },
+  {
+    "id": "L17-FIG-A1",
+    "lecture": 17,
+    "lectureTitle": "视觉网络：级联、复杂细胞与循环动力学",
+    "moduleId": "l17-m3",
+    "title": "Surround input 移动 I-nullcline 后，稳定交点的 E 与 I 可同时下降",
+    "alt": "归一化兴奋和抑制发放率相平面中，一条兴奋 nullcline 与 center 和 surround 两条抑制 nullclines 相交；surround 交点位于更低的兴奋和抑制率。",
+    "caption": "在局部线性 E/I rate model 中，nullcline 交点给 steady state。增加对 I population 的 surround drive 会把 I-nullcline 上移；与固定 E-nullcline 的新交点可同时具有更低 r_E 和 r_I，因此 surround suppression 不要求 inhibitory firing 必然增加。曲线是按课程方程归一化后的几何示意；完整稳定性仍需 Jacobian eigenvalues，而不能只凭两线相交判断。",
+    "sourceRefs": [
+      {
+        "file": "Lecture17-VisualNetworks.pdf",
+        "page": 4
+      },
+      {
+        "file": "Lecture17-VisualNetworks.pdf",
+        "page": 5
+      }
+    ],
+    "schematic": true,
+    "kind": "state-space",
+    "xLabel": "excitatory rate r_E（归一化）",
+    "yLabel": "inhibitory rate r_I（归一化）",
+    "nullclines": [
+      {
+        "label": "E-nullcline",
+        "points": [
+          [0, 45],
+          [100, 65]
+        ]
+      },
+      {
+        "label": "I-nullcline: center",
+        "points": [
+          [0, 15],
+          [80, 95]
+        ]
+      },
+      {
+        "label": "I-nullcline: surround",
+        "points": [
+          [0, 30],
+          [70, 100]
+        ],
+        "dashed": true
+      }
+    ],
+    "trajectories": [
+      {
+        "label": "toward center fixed point",
+        "points": [
+          [70, 78],
+          [58, 66],
+          [47, 58],
+          [38, 53]
+        ]
+      },
+      {
+        "label": "toward surround fixed point",
+        "points": [
+          [48, 74],
+          [34, 61],
+          [24, 52],
+          [19, 49]
+        ],
+        "dashed": true
+      }
+    ],
+    "fixedPoints": [
+      {
+        "x": 38,
+        "y": 53,
+        "label": "center",
+        "stable": true
+      },
+      {
+        "x": 19,
+        "y": 49,
+        "label": "surround",
+        "stable": true
+      }
+    ],
+    "annotations": [
+      {
+        "x": 27,
+        "y": 37,
+        "label": "I drive ↑"
+      }
+    ]
+  },
+  {
+    "id": "L18-FIG-A1",
+    "lecture": 18,
+    "lectureTitle": "运动系统与线性神经动力学",
+    "moduleId": "l18-m2",
+    "title": "换到 eigenbasis 后，耦合的 neuron dynamics 分解为独立 modes",
+    "alt": "流程图从神经元坐标中的群体活动，经 V 逆变换得到 mode amplitudes，在对角 eigenvalue 空间中独立演化，再由 V 重建神经元活动。",
+    "caption": "若 recurrent matrix W 可对角化为 W=VΛV⁻¹，activity h=Vα 把 neuron-space pattern 改写为 eigenmode amplitudes。左乘 V⁻¹ 后，每个 α_i 独立满足 τα̇_i=-(1-λ_i)α_i+Ĩ_i；因此 λ_i 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。basis change 是数学坐标变换，不表示一个 mode 等于一个 anatomical neuron。",
+    "sourceRefs": [
+      {
+        "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 2
+      },
+      {
+        "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+        "page": 3
+      }
+    ],
+    "schematic": true,
+    "kind": "flow",
+    "nodes": [
+      {
+        "id": "neuron-space",
+        "label": "neuron space\nh",
+        "x": 11,
+        "y": 55
+      },
+      {
+        "id": "mode-coordinates",
+        "label": "mode coordinates\nα = V⁻¹h",
+        "x": 37,
+        "y": 55,
+        "tone": "accent"
+      },
+      {
+        "id": "mode-dynamics",
+        "label": "decoupled dynamics\nλᵢ controls αᵢ",
+        "x": 63,
+        "y": 55
+      },
+      {
+        "id": "reconstruction",
+        "label": "reconstruct pattern\nh = Vα",
+        "x": 89,
+        "y": 55
+      },
+      {
+        "id": "population-input",
+        "label": "input projection\nĨ = V⁻¹I",
+        "x": 37,
+        "y": 18
+      }
+    ],
+    "edges": [
+      {
+        "from": "neuron-space",
+        "to": "mode-coordinates",
+        "label": "V⁻¹"
+      },
+      {
+        "from": "mode-coordinates",
+        "to": "mode-dynamics",
+        "label": "Λ diagonal"
+      },
+      {
+        "from": "population-input",
+        "to": "mode-dynamics",
+        "label": "Ĩᵢ"
+      },
+      {
+        "from": "mode-dynamics",
+        "to": "reconstruction",
+        "label": "V"
+      }
+    ]
+  }
+]

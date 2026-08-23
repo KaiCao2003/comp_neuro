@@ -100,6 +100,656 @@
       "stopPredict": "Morris-Lecar 的两个 state？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "用 synaptic-block logic 区分 cell-intrinsic pacemaker、follower 与 network-generated half-center rhythm，并陈述实验诊断的限制。",
+      "求解 two-neuron rotation matrix 的 complex eigenvalues，用 real part 与 imaginary part 分别判断 envelope stability 和 oscillation frequency。",
+      "逐项解释 Morris-Lecar voltage/recovery equations，依据 nullclines、fixed points 与 fast-slow separation 重建 relaxation cycle。",
+      "在互抑 half-center 中区分 intrinsic release 与 intrinsic escape，指出是哪一个细胞的哪次 intrinsic transition 触发 phase switch。",
+      "把 conductance model 的 phase-plane geometry 迁移到带 adaptation 的 firing-rate model，同时保留模型层级差异。"
+    ],
+    "prerequisiteBridge": [
+      "振荡需要同时回答“是否往返变化”和“振幅是否长期保持”。复数 z=a+ib 可以用平面上的横纵坐标理解；Euler relation e^{ibt}=cos(bt)+i sin(bt) 把旋转写成正弦与余弦。若动态解含 e^{(a+ib)t}，a 控制包络增长或衰减，|b| 控制角频率。仅看到 b≠0 只能说明轨迹有旋转成分，不能说明存在长期稳定的节律。",
+      "二维 phase plane 把每个状态写成点 (V,N)。V-nullcline 是 dV/dt=0 的点集，N-nullcline 是 dN/dt=0 的点集；两线交点才是 fixed point。离开 nullcline 后，dV/dt 与 dN/dt 的符号决定箭头方向。nullcline 不是 trajectory，交点也不自动稳定；需要查看附近 arrows 是朝向还是离开交点。",
+      "fast-slow system 含一个快速变量和一个慢变量。Morris-Lecar 中 membrane voltage V 受 current balance 快速改变，K activation/recovery N 较慢。轨迹常沿 V-nullcline 的 stable branch 慢移，到 fold 后 V 快跳到另一 branch。理解这一“慢走—快跳”结构后，pacemaker relaxation oscillation、互抑 half-center 和 rate-adaptation oscillator 可用同一几何语言比较。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l20-d1",
+        "prompt": "一个 neuron 的线性 mode eigenvalue 为 -2+6i s^-1。振幅长期增长还是衰减？",
+        "answer": "振幅按 e^{-2t} 衰减，6 rad/s 只决定旋转角频率。",
+        "explanation": "先读 real part 决定 envelope，再读 imaginary part 决定 oscillation。若把 complex 直接等同于 sustained rhythm，请复习线性 complex modes。",
+        "remediationModuleId": "l20-m2"
+      },
+      {
+        "id": "l20-d2",
+        "prompt": "V-nullcline 与 N-nullcline 的交点表示什么？",
+        "answer": "交点同时满足 dV/dt=0 与 dN/dt=0，因此是二维系统的 fixed point。",
+        "explanation": "交点的 stability 还要看附近 vector field；仅有交点不能判断它是稳定、鞍点还是不稳定点。",
+        "remediationModuleId": "l20-m3"
+      },
+      {
+        "id": "l20-d3",
+        "prompt": "阻断 synapses 后某 cell 仍保持近似原频率节律，最直接支持哪类候选机制？",
+        "answer": "支持该 cell 具有 cell-intrinsic pacemaker mechanism，但药物副作用与残余耦合仍需控制。",
+        "explanation": "这是支持而非逻辑证明；诊断依赖 block 是否充分且没有改变 intrinsic currents。",
+        "remediationModuleId": "l20-m1"
+      },
+      {
+        "id": "l20-d4",
+        "prompt": "release 与 escape 的核心判据是什么？",
+        "answer": "看 phase switch 是由 active cell 停止并解除抑制，还是由 inhibited cell 自身恢复后越过门槛逃出抑制。",
+        "explanation": "不能只看最后哪个 cell 先 spike；要追踪触发 transition 的 intrinsic variable 和 nullcline crossing。",
+        "remediationModuleId": "l20-m5"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l20-m1",
+        "title": "节律来源：pacemaker、follower 与 network half-center",
+        "sourceRefs": [
+          {
+            "file": "Lecture20-CentralPatternGenerators.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "阻断突触后节律是否保留，能怎样缩小机制范围，又为什么不能单独完成证明？",
+        "paragraphs": [
+          "原页先区分两种来源。cell-intrinsic pacemaker 即使失去周期性 synaptic input，靠自身 voltage-gated currents 仍能产生 rhythm；follower 本身不振荡，只跟随 pacemaker 的 synaptic drive。第二种来源是 network-generated rhythm：单个细胞可保持 tonic 或 silent，但 reciprocal inhibition 使两个细胞交替 active，形成 half-center oscillator。respiration 与 walking muscle alternation 是课程中的功能例子。",
+          "synaptic block 是干预逻辑而非标签游戏。若 neuron 1 的节律在 block 后保留而 neuron 2 变成 tonic 或 silent，结果符合“1 是 pacemaker、2 是 follower”。若两者自然状态交替而 block 后都失去节律，则符合 network-generated candidate。关键 observation 是同一细胞在自然与 block 条件下的 time series，不是仅比较不同动物的平均 frequency。",
+          "该试验不能排除所有替代解释。阻断药可能改变 intrinsic conductances，block 可能不完全，electrical coupling 可能保留，sensory feedback 也可能在 intact preparation 中参与。较强设计应同时记录 membrane potential、验证 synaptic current 消失、使用 washout 或不同阻断方法，并检查 single-cell current injection 能否重新诱发 rhythm。结果应写成“支持某候选机制”，而非“证明唯一机制”。",
+          "CPG 指在缺少相同周期的外部指令时，central neural circuit 仍能组织 patterned motor output。这个定义不要求真实行为完全独立于 sensory feedback；感觉输入可以重置 phase、调节 speed 或稳定 gait。把所有 rhythmic neural activity 都称为 CPG 会混淆 oscillator、sensory entrainment 与 downstream follower response。"
+        ],
+        "keyPoints": [
+          "block 后 intrinsic rhythm 保留支持 pacemaker，交替节律消失支持 network dependence。",
+          "synaptic-block observation 需要验证 block 完整性与 intrinsic-current side effects。",
+          "half-center 的基本 motif 是 reciprocal inhibition 与 phase alternation。",
+          "CPG 可被 sensory feedback 调制，并不等于行为处于 open loop。"
+        ],
+        "derivation": {
+          "title": "用干预结果比较机制假设",
+          "setup": "把三种候选机制各自对 intact 与 synaptic-block 条件的预测列清，再用观测排除不相容者。",
+          "steps": [
+            {
+              "title": "写 pacemaker 预测",
+              "explanation": "pacemaker 的 rhythm 由 intrinsic state variables 产生，所以充分 block 后该 cell 仍应振荡，频率可因 tonic input 改变。"
+            },
+            {
+              "title": "写 follower 预测",
+              "explanation": "follower 的周期 drive 被移除后不应保持原节律，常转为 tonic、silent 或只响应 injected pulses。"
+            },
+            {
+              "title": "写 half-center 预测",
+              "explanation": "mutual inhibition 被破坏后 coordinated alternation 消失；单 cells 是否仍振荡取决于它们自身是否也有 pacemaker currents。"
+            },
+            {
+              "title": "加入控制条件",
+              "explanation": "只有在确认 synaptic transmission 消失且 membrane health 保持时，observed contrast 才能指向 rhythm source。"
+            }
+          ],
+          "symbolNotes": [
+            "这里的“保留”应由 frequency、phase regularity 与 waveform 等可测量指标定义。",
+            "机制预测针对同一 preparation 的 counterfactual 条件。"
+          ],
+          "unitsCheck": "频率用 Hz、周期用 s，二者应满足 f=1/T；若 block 后比较，记录窗口需足够长。",
+          "limitCheck": "若两个 cells 同时具有 intrinsic oscillation 与 reciprocal inhibition，block 结果会显示混合机制，不能强迫归入单一类别。"
+        },
+        "workedExample": {
+          "title": "根据 block 结果诊断候选网络",
+          "problem": "intact 时 cells A/B 以 2 Hz 交替；block 后 A 仍以 1.8 Hz 振荡，B 维持 constant firing。给出最小机制解释与下一步控制。",
+          "steps": [
+            "A 的节律近似保留，先把 A 列为 intrinsic pacemaker candidate。",
+            "B 失去 modulation，符合 follower candidate；intact alternation 可由 A 对 B 的周期 drive 或更复杂 inhibition 形成。",
+            "下一步向 B 注入周期 current 并验证其可跟随，同时测 synaptic current 确认 block 完整，检查 A waveform 是否因药物改变。"
+          ],
+          "result": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。",
+          "sanityCheck": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        "selfCheck": {
+          "prompt": "如果 block 后两 cells 都停止交替但各自仍以不同频率振荡，能否称为纯 network-generated rhythm？",
+          "answer": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        "pitfalls": [
+          "把“节律在 block 后消失”直接解释成某个 cell 死亡，而不验证 excitability。",
+          "把 CPG 写成不受 sensory feedback 影响的完全自治系统。"
+        ]
+      },
+      {
+        "id": "l20-m2",
+        "title": "线性双神经元系统的复数模态与阻尼振荡",
+        "sourceRefs": [
+          {
+            "file": "Lecture20-CentralPatternGenerators.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "为什么 imaginary eigenvalue component 产生往返变化，而 intrinsic leak 又让这种变化衰减？",
+        "paragraphs": [
+          "原页的 W=[[0,-w0],[w0,0]] 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。完整 rate equation 仍是 τ dh/dt=-h+Wh+I，所以决定 continuous-time stability 的不是 W 单独的 ±iw0，而是 A=(-I+W)/τ 的 eigenvalues (-1±iw0)/τ。real part 固定为 -1/τ，说明无输入时 envelope 必定衰减。",
+          "characteristic polynomial det(W-λI)=λ²+w0²=0 给 λ_W=±i|w0|。沿 complex mode 的解含 e^{(-1±iw0)t/τ}=e^{-t/τ}[cos(|w0|t/τ)±i sin(|w0|t/τ)]。把 conjugate pair 合并可得到真实 h1、h2 的 sine-cosine trajectory。角频率 ω=|w0|/τ rad/s，普通频率 f=ω/(2π)。",
+          "phase-plane 中轨迹绕 fixed point 旋转，同时 radius 按 e^{-t/τ} 缩小，形成 inward spiral。若 full real part 为正，radius 会放大成 outward spiral；若恰为零，线性系统出现 neutrally stable closed orbits，却没有 amplitude selection，noise 会让 radius 漂移。稳定 autonomous limit cycle 通常需要 nonlinearity 让小 amplitude 增长而大 amplitude 收缩。",
+          "因此“有 complex eigenvalues”与“有 sustained CPG rhythm”不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。原页选择随后转向 Morris-Lecar，正是为了引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
+        ],
+        "keyPoints": [
+          "full system eigenvalues 是 (-1±iw0)/τ，而不是只看 W 的 ±iw0。",
+          "real part 决定 envelope，imaginary part 决定 angular frequency。",
+          "negative real part 给 inward spiral 与 damped oscillation。",
+          "stable limit cycle 需要 amplitude regulation，complex eigenvalues 本身不够。"
+        ],
+        "derivation": {
+          "title": "求 complex modes 并还原真实振荡",
+          "setup": "先求 W 的 eigenvalues，再把 intrinsic leak 与 τ 加回 continuous-time generator。",
+          "steps": [
+            {
+              "title": "求 W 的 characteristic roots",
+              "explanation": "det([[-λ,-w0],[w0,-λ]])=λ²+w0²。",
+              "latex": "\\lambda_W=\\pm i|w_0|"
+            },
+            {
+              "title": "得到 full generator roots",
+              "explanation": "A=(-I+W)/τ 会把每个 W eigenvalue 先减 1 再除以 τ。",
+              "latex": "\\lambda_A=\\frac{-1\\pm i|w_0|}{\\tau}"
+            },
+            {
+              "title": "应用 Euler relation",
+              "explanation": "把 complex exponential 分为 decay envelope 与 sine/cosine rotation。",
+              "latex": "e^{\\lambda_A t}=e^{-t/\\tau}[\\cos(\\omega t)\\pm i\\sin(\\omega t)]"
+            },
+            {
+              "title": "换算 frequency",
+              "explanation": "imaginary part 是 rad/s，除以 2π 才是 cycles/s。",
+              "latex": "f=\\frac{|w_0|}{2\\pi\\tau}"
+            }
+          ],
+          "symbolNotes": [
+            "w0 无量纲；τ 用 s 时 λ_A 单位为 s^-1。",
+            "complex eigenvectors 是计算工具，真实 firing-rate trajectory 由 conjugate modes 组合得到。"
+          ],
+          "unitsCheck": "ω 的单位 rad/s，f 的单位 Hz；e^{-t/τ} 的 exponent 必须无量纲。",
+          "limitCheck": "w0=0 时 ω=0，系统只作无振荡指数衰减；τ→∞ 时本模型同时让 decay 与 rotation 变慢。"
+        },
+        "workedExample": {
+          "title": "从 full eigenvalue 读出 waveform",
+          "problem": "给定 τ=0.2 s、w0=4，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。",
+          "steps": [
+            "full eigenvalues=(-1±4i)/0.2=-5±20i s^-1。",
+            "envelope time constant=1/5=0.2 s；f=20/(2π)≈3.18 Hz，period≈0.314 s。",
+            "一周期后 amplitude fraction=e^{-0.314/0.2}=e^{-1.57}≈0.208。"
+          ],
+          "result": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。",
+          "sanityCheck": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        "selfCheck": {
+          "prompt": "若 full eigenvalues 为 0.2±5i s^-1，轨迹会怎样？",
+          "answer": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        },
+        "pitfalls": [
+          "把 rad/s 直接写成 Hz，漏除 2π。",
+          "只报告 imaginary part 而忽略 full equation 的 -h leak。"
+        ]
+      },
+      {
+        "id": "l20-m3",
+        "title": "Morris-Lecar 电流平衡、nullclines 与固定点",
+        "sourceRefs": [
+          {
+            "file": "Lecture20-CentralPatternGenerators.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "如何从 ionic current equation 画出二维 phase plane，并判断 resting 与 oscillatory candidates？",
+        "paragraphs": [
+          "Morris-Lecar 用 V 与 N 两个 state variables 压缩 conductance dynamics。voltage equation 是 C dV/dt=-gL(V-EL)-gCa M∞(V)(V-ECa)-gK N(V-EK)+Ie。每个 g(V-E) 是 conductance 乘 driving force；前面的负号遵守 outward-current convention。M∞(V) 假定 Ca activation 很快，直接取 voltage-dependent steady state；N 则以较慢时间常数追随 N∞(V)。",
+          "recovery equation 可写 τN dN/dt=N∞(V)-N。N<N∞ 时 dN/dt>0，K activation 增加；N>N∞ 时下降。N-nullcline 因此是 N=N∞(V) 的 sigmoid。V-nullcline 由 net membrane current 为零求得，常呈 cubic-like 或 N-shaped curve。两条 nullclines 交点同时令两 derivatives 为零，是 candidate equilibrium。",
+          "读 phase plane 时在每个区域分别判断符号。V-nullcline 左右或上下哪一侧 dV/dt 为正，必须代入一个 test point，不能只按曲线外观猜。N-nullcline 下方通常 N<N∞，所以 arrows 向上；上方 arrows 向下。若交点附近 arrows 汇入，fixed point stable；若一方向汇入另一方向离开，则是 saddle；若整体离开，则 unstable。",
+          "fast-slow separation 的依据是 voltage timescale C/g 与 τN 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
+        ],
+        "keyPoints": [
+          "V equation 是 leak、Ca、K 与 external currents 的电荷平衡。",
+          "V-nullcline 满足 dV/dt=0；N-nullcline 满足 N=N∞(V)。",
+          "nullcline intersections 是 fixed points，stability 还需 vector field。",
+          "fast voltage 与 slow recovery 允许沿 branch 慢行并在 fold 快跳。"
+        ],
+        "derivation": {
+          "title": "由电流平衡得到两条 nullclines",
+          "setup": "把两个 derivatives 分别设为零，并保留每个 conductance 与 reversal potential 的作用。",
+          "steps": [
+            {
+              "title": "写 voltage balance",
+              "explanation": "capacitive current 等于 applied current 减去 leak、Ca 与 K ionic currents。",
+              "latex": "C\\dot V=-g_L(V-E_L)-\\bar g_{Ca}M_\\infty(V)(V-E_{Ca})-\\bar g_KN(V-E_K)+I_e"
+            },
+            {
+              "title": "求 V-nullcline",
+              "explanation": "令 dV/dt=0，把 N 隔离；所得 N 作为 V 的函数，其形状受 activation 与 driving forces 决定。",
+              "latex": "N=\\frac{I_e-g_L(V-E_L)-\\bar g_{Ca}M_\\infty(V)(V-E_{Ca})}{\\bar g_K(V-E_K)}"
+            },
+            {
+              "title": "求 N-nullcline",
+              "explanation": "令 τN dN/dt=N∞(V)-N=0。",
+              "latex": "N=N_\\infty(V)"
+            },
+            {
+              "title": "确定 arrows",
+              "explanation": "在每条 nullcline 两侧选 test point 代入 F(V,N)、G(V,N)，分别记录 V 与 N 增减。"
+            }
+          ],
+          "symbolNotes": [
+            "V、E 用 mV；conductance 用 nS 或 mS/cm²；C 与面积 convention 必须一致。",
+            "N、M∞、N∞ 是 0 到 1 的 dimensionless gating quantities。"
+          ],
+          "unitsCheck": "conductance×voltage 给 current；C dV/dt 也给 current。recovery equation 两边均为 dimensionless change per time。",
+          "limitCheck": "若 gK=0，隔离 N 的 V-nullcline 公式不可用，且 N 不再反馈 voltage；二维 oscillator mechanism随之改变。"
+        },
+        "workedExample": {
+          "title": "用符号判断一个 phase-plane 点的方向",
+          "problem": "某点位于 V-nullcline 上方且代入得 dV/dt<0；同时它位于 N-nullcline 下方。判断初始运动方向。",
+          "steps": [
+            "dV/dt<0 表示 V 向左移动。",
+            "N-nullcline 下方有 N<N∞(V)，所以 dN/dt>0，N 向上移动。",
+            "合成向量指向左上；若下一时刻跨过 nullcline，要重新判断符号。"
+          ],
+          "result": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。",
+          "sanityCheck": "nullcline 上只有对应 derivative 为零；位于“V-nullcline 上方”本身不足以判 dV sign，题目已给 test-point sign。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 nullcline 不是神经元实际运行轨迹？",
+          "answer": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        },
+        "pitfalls": [
+          "把 reversal potential 当作固定 current，而忽略 V-E 的 driving force。",
+          "只凭 cubic curve 形状给 arrows，不用方程在区域中验证符号。"
+        ]
+      },
+      {
+        "id": "l20-m4",
+        "title": "Relaxation cycle 与互抑 half-center 的相位几何",
+        "sourceRefs": [
+          {
+            "file": "Lecture20-CentralPatternGenerators.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "slow recovery 怎样把 state 推到 fold，reciprocal inhibition 又怎样把这种 intrinsic geometry组织成交替输出？",
+        "paragraphs": [
+          "当 fixed point 不稳定且 V-nullcline 有两条 attracting outer branches，trajectory 可循环经历四阶段。低 V branch 上，V 快速贴近 branch，N 缓慢减少；到 lower fold 后再无邻近 stable voltage solution，V 快跳到 high branch；在 high branch 上 N 缓慢增加，增强 hyperpolarizing K current；到 upper fold 后 V 快跳回 low branch。重复这一顺序得到 autonomous relaxation oscillation。",
+          "图中 voltage trace 的缓慢段与 phase-plane branch motion 对应，陡峭上升或下降对应 fast jump。period 主要受 slow N evolution 决定，spike-like transition duration 受 fast V dynamics 决定。若改变 Ie 或 conductances，nullcline 位置移动，fixed point 可能落到 stable branch，cycle 便停止；因此 oscillator 不是单一 waveform，而是 parameter-dependent attractor。",
+          "half-center 把两个 Morris-Lecar cells 互相 inhibitory coupling。对 cell i，synaptic current 可写 -gS∞(Vj)(Vi-Es)，其中 Es 较负。presynaptic cell j 在 high state 时 S∞≈1，把 i 的 V-nullcline 推到受抑位置；j 在 low state 时 S∞≈0，i 恢复 free nullcline。交替节律来自每次 synaptic state 切换对 partner geometry 的重排。",
+          "即使单独 cells 的 fixed point stable，mutual inhibition 与 recovery 也可能让 pair oscillate；反之，不是任意 mutual inhibition 都会振荡。必须同时有能在 active 与 inhibited phases 中缓慢演化的 intrinsic variable、合适 synaptic threshold 和 transition ordering。外界 sensory pulse 可把某 cell 推过 separatrix，从而 reset phase，而不必生成整个 rhythm。"
+        ],
+        "keyPoints": [
+          "relaxation cycle 是低 branch 慢行、上跳、高 branch 慢行、下跳四阶段。",
+          "period 多由 slow recovery 决定，fast jumps 决定 waveform edges。",
+          "active presynaptic cell 通过 inhibitory current移动 partner 的 effective V-nullcline。",
+          "half-center rhythm 需要 intrinsic recovery 与 synaptic switching 协同。"
+        ],
+        "derivation": {
+          "title": "四阶段 trajectory 的符号链",
+          "setup": "沿原页标注的 cycle 顺序，使用 dV/dt 与 dN/dt 的 signs 说明每段发生什么。",
+          "steps": [
+            {
+              "title": "lower branch 慢行",
+              "explanation": "V 已贴近 attracting branch，N 的负向或正向慢变化把 state 推向 lower fold。"
+            },
+            {
+              "title": "lower-to-upper jump",
+              "explanation": "fold 后附近不再有 low-voltage attracting solution，fast dV/dt 使 V 跳到 high branch。"
+            },
+            {
+              "title": "upper branch 慢行",
+              "explanation": "高 V 促进 N activation，K current 增强，state 朝 upper fold 移动。"
+            },
+            {
+              "title": "upper-to-lower jump",
+              "explanation": "到达 upper fold 后 high-voltage solution失去，fast V 向 low branch 跳回并重新开始。"
+            }
+          ],
+          "symbolNotes": [
+            "“上/下 branch”描述 V 大小，“N 增/减”必须由具体 arrow field确认。",
+            "cycle orientation 依坐标与 parameters；不能脱离原方程套用顺时针。"
+          ],
+          "unitsCheck": "phase-plane axes 是 mV 与 dimensionless N；trajectory time 不由图上几何距离单独决定。",
+          "limitCheck": "若 slow-fast separation 消失，cycle 仍可能存在，但“沿 branch 慢走、在 fold 快跳”的近似会变差。"
+        },
+        "workedExample": {
+          "title": "预测增大 recovery time constant 的效果",
+          "problem": "保持 nullcline shapes 不变，将 τN 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。",
+          "steps": [
+            "slow branch motion 大约变慢三倍，因为 dN/dt 缩小。",
+            "cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 τN 放大。",
+            "fast V jump 主要由 C 与 conductances 决定，duration 不应同步放大三倍。"
+          ],
+          "result": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。",
+          "sanityCheck": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。"
+        },
+        "selfCheck": {
+          "prompt": "为什么两个互抑 cells 可以在各自单独不振荡时产生 network rhythm？",
+          "answer": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+        },
+        "pitfalls": [
+          "把 fast jump 当作沿 nullcline运动；跳跃时 state 离开 slow manifold。",
+          "认为 mutual inhibition 单独就足够，不检查 recovery variable 与 threshold ordering。"
+        ]
+      },
+      {
+        "id": "l20-m5",
+        "title": "Intrinsic release 与 intrinsic escape：谁触发换相",
+        "sourceRefs": [
+          {
+            "file": "Lecture20-CentralPatternGenerators.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "观察到两个 cells 交替 firing 时，怎样判断 phase transition 是 active cell 放手还是 inhibited cell 逃脱？",
+        "paragraphs": [
+          "原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。free neuron 使用 F(V,N)=0 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。两套 geometry 的切换让“谁先跨门槛”成为可检查的机制判据。",
+          "release mechanism 中，active cell 在 upper branch 上随着 N 增加而逐渐失去维持 high V 的能力。它先向 low branch 跳并跌破 VT，synapse 关闭，于是 partner 被释放并跳到自己的 high state。换相原因是发放者 intrinsic adaptation；如果固定 active cell 的 recovery variable，phase switch 应被延迟或阻断。",
+          "escape mechanism 中，inhibited cell 在 low state 内 N 逐渐恢复，最终即使 inhibition 仍开着，也跨过受抑 nullcline 的 fold 或 separatrix，跳到 high state。它的上升随后抑制原 active cell。换相原因是被抑制者的 intrinsic recovery；改变 inhibited cell 的 recovery speed 会显著改变 phase duration。",
+          "真实 circuits 可处于 mixed regime：active cell 接近 release 时，partner 也接近 escape，noise 或 sensory input 决定谁先发生。实验上应在 phase transition 前追踪 both cells 的 voltage 与 recovery proxy，并用短 pulse 分别推 active cell向下或 inhibited cell向上。仅从 alternating spike raster 看不出 causal ordering。"
+        ],
+        "keyPoints": [
+          "sharp S∞ threshold 把 synapse 近似成 on/off switch。",
+          "release 由 active cell intrinsic termination 触发。",
+          "escape 由 inhibited cell intrinsic recovery crossing 触发。",
+          "mixed regimes 与 noise 可让两机制共同决定 phase。"
+        ],
+        "derivation": {
+          "title": "用 threshold-crossing 顺序区分 release 与 escape",
+          "setup": "把换相前最后一段分成 presynaptic threshold、inhibited fold 与 synaptic-state变化三件事件。",
+          "steps": [
+            {
+              "title": "定义 synaptic state",
+              "explanation": "当 Vpre>VT 时 inhibition on；Vpre<VT 时 inhibition off。",
+              "latex": "S_\\infty(V_{pre})\\approx H(V_{pre}-V_T)"
+            },
+            {
+              "title": "检查 release ordering",
+              "explanation": "若 active V 先跌破 VT，S 从 1 变 0，随后 partner 上跳，则是 release-dominant。"
+            },
+            {
+              "title": "检查 escape ordering",
+              "explanation": "若 partner 在 S仍为1时先越过受抑 threshold并上跳，随后原 active cell被抑制，则是 escape-dominant。"
+            },
+            {
+              "title": "提出干预测试",
+              "explanation": "选择性减慢 active adaptation应延长 release cycle；减慢 inhibited recovery应延长 escape cycle。"
+            }
+          ],
+          "symbolNotes": [
+            "VT 是 voltage threshold；S∞ 无量纲。",
+            "“先”需要相对于 time resolution 和 synaptic delay 定义。"
+          ],
+          "unitsCheck": "synaptic current gS(V-Es) 是 current；Heaviside S 只选择 conductance是否开启。",
+          "limitCheck": "若 synapse activation平滑而非 sharp，on/off时刻不唯一，应比较 conductance rise与intrinsic transitions的相对先后。"
+        },
+        "workedExample": {
+          "title": "从事件时间判断换相机制",
+          "problem": "记录显示 A active；t=500 ms 时 B 在 inhibition仍为强时突然 depolarize，t=507 ms A 被抑制，t=512 ms A 跌破 VT。判断主导机制。",
+          "steps": [
+            "B 的 depolarization 发生在 A 跌破 VT 之前，说明 B 不是等 inhibition关闭才上升。",
+            "B 上升后先抑制 A，符合 inhibited cell 主动逃出 low state。",
+            "因此标记为 escape-dominant，并应检验操纵 B recovery variable 是否改变 500 ms latency。"
+          ],
+          "result": "事件顺序支持 intrinsic escape，而非 active-cell release。",
+          "sanityCheck": "需要确认 synaptic conductance在 B depolarize时确实仍高；仅用 A spikes可能低估真实 conductance offset。"
+        },
+        "selfCheck": {
+          "prompt": "若 active cell 先跌破 VT，20 ms 后 partner才上跳，这个延迟是否反驳 release？",
+          "answer": "不反驳。release只要求 inhibition解除是上游触发；partner仍需按自身 membrane/recovery dynamics离开低状态，出现有限latency很合理。"
+        },
+        "pitfalls": [
+          "只根据哪一个 cell 先发 spike 命名机制，不看 synaptic state。",
+          "把 release 与 escape 当成互斥类别，忽略 mixed regime 与 stochastic switching。"
+        ]
+      },
+      {
+        "id": "l20-m6",
+        "title": "从 conductance oscillator 到 rate-adaptation half-center",
+        "sourceRefs": [
+          {
+            "file": "Lecture20-CentralPatternGenerators.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "去掉 ion-channel细节后，最少需要哪些 rate-level variables 才能保留 half-center 的几何机制？",
+        "paragraphs": [
+          "第 6 页只给出 extension 方向：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a，仍可构造相似 nullcline geometry。一个最小 pair 可写 τh dhi/dt=-hi+F(Ii-w hj-a_i)，τa dai/dt=-a_i+b h_i。F 是 threshold-saturating nonlinearity，w>0 表示 reciprocal inhibition，b 控制 activity如何积累adaptation。",
+          "在某 cell active 时，h_i高使 a_i缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。partner受到的 inhibition随之减弱并开始上升，随后抑制原 cell。这个过程对应 release-like switching。若 inhibited cell 的 a_j在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。",
+          "rate model 保留的是状态依赖 feedback、slow recovery 与 threshold geometry，不保留具体 Ca/K currents、spike waveform 或 reversal potentials。它适合研究population rhythm、phase relationship与parameter effects，却不能凭一个 rate variable判断某种ionic mechanism。模型层级降低后，参数含义也改变：τh是rate response time，不是 membrane capacitance直接给出的时间常数。",
+          "验证该模型应画 h_i-a_i nullclines、模拟 both rates、改变 w、b、τa，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
+        ],
+        "keyPoints": [
+          "rate-adaptation model 至少需要 fast activity、slow recovery、reciprocal inhibition 与 nonlinearity。",
+          "adaptation积累可触发release，低activity期恢复可支持escape。",
+          "rate variable与voltage/gating variable不是同一生物量。",
+          "模型应通过 phase、frequency、reset 与 perturbation predictions检验。"
+        ],
+        "derivation": {
+          "title": "最小 rate half-center 的 feedback chain",
+          "setup": "从一对 fast rate equations与slow adaptation equations逐步追踪一次换相。",
+          "steps": [
+            {
+              "title": "写 fast rates",
+              "explanation": "每个rate受到tonic input、partner inhibition与自身adaptation。",
+              "latex": "\\tau_h\\dot h_i=-h_i+F(I_i-w h_j-a_i)"
+            },
+            {
+              "title": "写 slow adaptation",
+              "explanation": "activity把a_i推高，缺少activity时a_i回落。",
+              "latex": "\\tau_a\\dot a_i=-a_i+b h_i"
+            },
+            {
+              "title": "追踪active phase",
+              "explanation": "h1高使a1缓慢升高；h2被w h1压低且a2逐渐下降。"
+            },
+            {
+              "title": "达到switch",
+              "explanation": "当cell1 effective drive跌破F threshold或cell2恢复到threshold，rates快速交换高低状态。"
+            }
+          ],
+          "symbolNotes": [
+            "h可用normalized rate或Hz，取决于F；a与I必须使用同一effective-input单位。",
+            "τa应显著大于τh才有清楚fast-slow alternation。"
+          ],
+          "unitsCheck": "若h用Hz而F输出Hz，方程各项为Hz；除以τ后是Hz/s。a与I、w h必须可相加。",
+          "limitCheck": "b=0时activity不再积累adaptation；若单纯reciprocal inhibition没有其他slow process，稳定交替通常失去。"
+        },
+        "workedExample": {
+          "title": "用参数变化预测节律",
+          "problem": "模型原有τh=20 ms、τa=400 ms。只把τa加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。",
+          "steps": [
+            "slow adaptation与recovery都变慢，active phase通常延长。",
+            "两个cells结构对称，所以仍预期近似anti-phase，而不是产生固定phase bias。",
+            "period主要由slowprocess决定，近似增加；frequency因此下降，但不要求精确减半。"
+          ],
+          "result": "预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为switch threshold与nonlinear F也参与。",
+          "sanityCheck": "τh没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
+        },
+        "selfCheck": {
+          "prompt": "为什么只有 h1、h2 两个线性rate变量通常不足以产生稳定half-center limit cycle？",
+          "answer": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+        },
+        "pitfalls": [
+          "把rate-model的a直接命名为某一特定K channel，而没有额外实验。",
+          "只看一条rate trace就判断half-center，未验证partner anti-phase与perturbation response。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L20-FIG-A1",
+      "lecture": 20,
+      "moduleId": "l20-m4",
+      "title": "Morris–Lecar nullclines 与 relaxation cycle",
+      "alt": "电压恢复相平面中的 N 形电压 nullcline、S 形恢复 nullcline、不稳定交点和环绕交点的 relaxation trajectory",
+      "caption": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。闭环的长段对应慢 recovery，近水平跨越对应快 voltage transition；曲线是第 3–4 页机制的归一化示意。",
+      "sourceRefs": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 3
+        },
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 4
+        }
+      ],
+      "schematic": true,
+      "kind": "state-space",
+      "xLabel": "membrane voltage V（low → high）",
+      "yLabel": "recovery variable N",
+      "nullclines": [
+        {
+          "label": "V-nullcline",
+          "points": [
+            [
+              8,
+              18
+            ],
+            [
+              15,
+              55
+            ],
+            [
+              25,
+              75
+            ],
+            [
+              38,
+              62
+            ],
+            [
+              50,
+              40
+            ],
+            [
+              62,
+              22
+            ],
+            [
+              72,
+              20
+            ],
+            [
+              85,
+              55
+            ],
+            [
+              95,
+              88
+            ]
+          ]
+        },
+        {
+          "label": "N = N∞(V)",
+          "points": [
+            [
+              5,
+              12
+            ],
+            [
+              20,
+              14
+            ],
+            [
+              35,
+              20
+            ],
+            [
+              50,
+              40
+            ],
+            [
+              65,
+              70
+            ],
+            [
+              80,
+              86
+            ],
+            [
+              95,
+              90
+            ]
+          ],
+          "dashed": true
+        }
+      ],
+      "trajectories": [
+        {
+          "label": "relaxation cycle",
+          "points": [
+            [
+              24,
+              70
+            ],
+            [
+              17,
+              55
+            ],
+            [
+              12,
+              32
+            ],
+            [
+              28,
+              24
+            ],
+            [
+              70,
+              20
+            ],
+            [
+              82,
+              35
+            ],
+            [
+              90,
+              65
+            ],
+            [
+              83,
+              76
+            ],
+            [
+              55,
+              79
+            ],
+            [
+              24,
+              70
+            ]
+          ]
+        }
+      ],
+      "fixedPoints": [
+        {
+          "x": 50,
+          "y": 40,
+          "label": "unstable fixed point",
+          "stable": false
+        }
+      ],
+      "annotations": [
+        {
+          "x": 18,
+          "y": 57,
+          "label": "slow"
+        },
+        {
+          "x": 49,
+          "y": 15,
+          "label": "fast jump"
+        },
+        {
+          "x": 85,
+          "y": 53,
+          "label": "slow"
+        }
+      ],
+      "lectureTitle": "中央模式发生器与振荡"
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 linear two-neuron complex modes",
@@ -317,7 +967,42 @@
     "需避免把所有 rhythmic activity 都归为 CPG，也需避免把 damped linear oscillation 与 autonomous nonlinear oscillator 混为一谈。"
   ],
   "errata": [
-    "1. Page 2 的线性 oscillations 含 e^{-t/τ} envelope，是 damped components，不是 autonomous sustained CPG。 2. Page 3-4 的 Morris-Lecar nullclines 为 schematic；具体 shape/stability 依参数。 3. Page 6 仅指出 firing-rate model 可复现相同 geometry，未给唯一方程。"
+    {
+      "id": "L20-E01",
+      "lecture": 20,
+      "lectureTitle": "中央模式发生器与振荡",
+      "kind": "caution",
+      "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+      "sourcePage": 2,
+      "sectionId": "l20-m2",
+      "originalIssue": "Page 2 的线性 oscillations 含 e^{-t/τ} envelope，是 damped components，不是 autonomous sustained CPG。",
+      "explanation": "因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。",
+      "correction": null
+    },
+    {
+      "id": "L20-E02",
+      "lecture": 20,
+      "lectureTitle": "中央模式发生器与振荡",
+      "kind": "caution",
+      "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+      "sourcePage": 3,
+      "sectionId": "l20-m3",
+      "originalIssue": "Page 3-4 的 Morris-Lecar nullclines 为 schematic；具体 shape/stability 依参数。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L20-E03",
+      "lecture": 20,
+      "lectureTitle": "中央模式发生器与振荡",
+      "kind": "caution",
+      "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
+      "sourcePage": 6,
+      "sectionId": "l20-m6",
+      "originalIssue": "Page 6 仅指出 firing-rate model 可复现相同 geometry，未给唯一方程。",
+      "explanation": "rate model 保留的是状态依赖 feedback、slow recovery 与 threshold geometry，不保留具体 Ca/K currents、spike waveform 或 reversal potentials。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -335,7 +1020,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 20 讲：synapse block 后 rhythm 保留支持什么？",
@@ -363,7 +1048,7 @@
         "c": "该选项回答的是“release 由谁先变化？”。",
         "d": "这是“松弛振荡（relaxation oscillation）”的定义。"
       },
-      "explanation": "支持 cell-intrinsic pacemaker，但仍需控制药物副作用。"
+      "explanation": "支持 cell-intrinsic pacemaker，但仍需控制药物副作用。 cell-intrinsic pacemaker 即使失去周期性 synaptic input，靠自身 voltage-gated currents 仍能产生 rhythm；follower 本身不振荡，只跟随 pacemaker 的 synaptic drive。"
     },
     {
       "id": "L20-Q02",
@@ -380,7 +1065,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：half-center 的核心 connectivity？",
@@ -408,7 +1093,7 @@
         "b": "这是“sharp synaptic threshold approximation”的适用条件。",
         "d": "这是“Euler decomposition”的适用条件。"
       },
-      "explanation": "mutual inhibition。"
+      "explanation": "mutual inhibition。 原页的 W=[[0,-w0],[w0,0]] 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。"
     },
     {
       "id": "L20-Q03",
@@ -425,7 +1110,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：complex eigenvalue 的 real part 决定什么？",
@@ -453,7 +1138,7 @@
         "b": "该选项回答的是“为什么笔记线性 network 不产生 sustained rhythm？”。",
         "c": "这是“Euler decomposition”的适用条件。"
       },
-      "explanation": "amplitude decay/growth 与 stability。"
+      "explanation": "amplitude decay/growth 与 stability。 Morris-Lecar 用 V 与 N 两个 state variables 压缩 conductance dynamics。"
     },
     {
       "id": "L20-Q04",
@@ -470,7 +1155,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 20 讲：imaginary part 决定什么？",
@@ -498,7 +1183,7 @@
         "c": "这条推理对应 Lecture20-CentralPatternGenerators.pdf 第 2 页。",
         "d": "这是“内在释放（intrinsic release）”的定义。"
       },
-      "explanation": "oscillation angular frequency。"
+      "explanation": "oscillation angular frequency。 重复这一顺序得到 autonomous relaxation oscillation。"
     },
     {
       "id": "L20-Q05",
@@ -515,7 +1200,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：为什么笔记线性 network 不产生 sustained rhythm？",
@@ -543,7 +1228,7 @@
         "c": "这是“半中心振荡器（half-center oscillator）”的定义。",
         "d": "该选项回答的是“escape 由谁先变化？”。"
       },
-      "explanation": "full modes real part 为 −1/τ，amplitude 衰减。"
+      "explanation": "full modes real part 为 −1/τ，amplitude 衰减。 原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。"
     },
     {
       "id": "L20-Q06",
@@ -560,7 +1245,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 20 讲：Morris-Lecar 的两个 state？",
@@ -588,7 +1273,7 @@
         "b": "这是“半中心振荡器（half-center oscillator）”的定义。",
         "d": "该选项回答的是“complex eigenvalue 的 real part 决定什么？”。"
       },
-      "explanation": "voltage V 与 recovery/K activation N。"
+      "explanation": "voltage V 与 recovery/K activation N。 第 6 页只给出 extension 方向：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a，仍可构造相似 nullcline geometry。"
     },
     {
       "id": "L20-Q07",
@@ -605,7 +1290,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "figure",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：nullcline intersection 是什么？",
@@ -633,7 +1318,7 @@
         "b": "这是“V-nullcline”的适用条件。",
         "c": "这是“N-nullcline”的适用条件。"
       },
-      "explanation": "fixed point。"
+      "explanation": "fixed point。 若交点附近 arrows 汇入，fixed point stable；若一方向汇入另一方向离开，则是 saddle；若整体离开，则 unstable。"
     },
     {
       "id": "L20-Q08",
@@ -650,7 +1335,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "comparison",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：relaxation oscillation 为什么有 fast jump？",
@@ -678,7 +1363,7 @@
         "c": "这是“松弛振荡（relaxation oscillation）”的定义。",
         "d": "该选项回答的是“imaginary part 决定什么？”。"
       },
-      "explanation": "slow branch 到 fold 后局部 stable equilibrium 消失，fast V dynamics 跳到另一 branch。"
+      "explanation": "slow branch 到 fold 后局部 stable equilibrium 消失，fast V dynamics 跳到另一 branch。 它先向 low branch 跳并跌破 VT，synapse 关闭，于是 partner 被释放并跳到自己的 high state。"
     },
     {
       "id": "L20-Q09",
@@ -695,7 +1380,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 20 讲：release 由谁先变化？",
@@ -723,7 +1408,7 @@
         "c": "该选项回答的是“synapse block 后 rhythm 保留支持什么？”。",
         "d": "该选项回答的是“为什么笔记线性 network 不产生 sustained rhythm？”。"
       },
-      "explanation": "active neuron intrinsic adaptation 使其停止。"
+      "explanation": "active neuron intrinsic adaptation 使其停止。 在某 cell active 时，h_i高使 a_i缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。"
     },
     {
       "id": "L20-Q10",
@@ -740,7 +1425,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：escape 由谁先变化？",
@@ -768,7 +1453,7 @@
         "b": "该选项回答的是“release 由谁先变化？”。",
         "d": "这是“半中心振荡器（half-center oscillator）”的定义。"
       },
-      "explanation": "inhibited neuron intrinsic recovery 使其跳出。"
+      "explanation": "inhibited neuron intrinsic recovery 使其跳出。 若 inhibited cell 的 a_j在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。"
     },
     {
       "id": "L20-Q11",
@@ -785,7 +1470,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 20 讲：sharp threshold S∞ 的作用？",
@@ -813,7 +1498,7 @@
         "b": "该选项回答的是“damped oscillation 与 limit cycle 的区别？”。",
         "c": "这是“Morris-Lecar 模型（Morris-Lecar model）”的定义。"
       },
-      "explanation": "把 presynaptic voltage 对 synaptic activation 简化成开/关。"
+      "explanation": "把 presynaptic voltage 对 synaptic activation 简化成开/关。 原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。"
     },
     {
       "id": "L20-Q12",
@@ -830,7 +1515,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：damped oscillation 与 limit cycle 的区别？",
@@ -858,55 +1543,10 @@
         "c": "这条推理对应 Lecture20-CentralPatternGenerators.pdf 第 2 页。",
         "d": "该选项回答的是“imaginary part 决定什么？”。"
       },
-      "explanation": "前者 amplitude 回到 fixed point；后者收敛到非零 closed orbit。"
+      "explanation": "前者 amplitude 回到 fixed point；后者收敛到非零 closed orbit。 若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。"
     },
     {
       "id": "L20-Q13",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 1,
-          "section": "lecture-20-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 20 讲：根据 Lecture20-CentralPatternGenerators.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Morris-Lecar equations、V/N nullclines、fixed points。"
-        },
-        {
-          "id": "b",
-          "text": "intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion。"
-        },
-        {
-          "id": "c",
-          "text": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-        },
-        {
-          "id": "d",
-          "text": "relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。"
-      },
-      "explanation": "intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion。"
-    },
-    {
-      "id": "L20-Q14",
       "lecture": 20,
       "sectionId": "lecture-20-source-1",
       "sourceAnchors": [
@@ -931,72 +1571,27 @@
         },
         {
           "id": "b",
-          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
+          "text": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
         },
         {
           "id": "c",
-          "text": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
+          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
         },
         {
           "id": "d",
           "text": "说明如何在 firing-rate model 中用 adaptation/recovery variable 复现同类 geometry。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
         "d": "该陈述解释的是“half-center firing-rate model extension”，不是题干指定的关系。"
       },
-      "explanation": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
+      "explanation": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。 cell-intrinsic pacemaker 即使失去周期性 synaptic input，靠自身 voltage-gated currents 仍能产生 rhythm；follower 本身不振荡，只跟随 pacemaker 的 synaptic drive。"
     },
     {
-      "id": "L20-Q15",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 1,
-          "section": "lecture-20-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 20 讲：阅读与\"intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "b",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        },
-        {
-          "id": "c",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "c": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L20-Q16",
+      "id": "L20-Q14",
       "lecture": 20,
       "sectionId": "lecture-20-source-2",
       "sourceAnchors": [
@@ -1010,52 +1605,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 20 讲：根据 Lecture20-CentralPatternGenerators.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-        },
-        {
-          "id": "b",
-          "text": "Morris-Lecar equations、V/N nullclines、fixed points。"
-        },
-        {
-          "id": "c",
-          "text": "relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center。"
-        },
-        {
-          "id": "d",
-          "text": "sharp synaptic threshold、intrinsic release 与 intrinsic escape。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "c": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。",
-        "d": "该陈述解释的是“sharp synaptic threshold、intrinsic release 与 intrinsic escape”，不是题干指定的关系。"
-      },
-      "explanation": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-    },
-    {
-      "id": "L20-Q17",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 2,
-          "section": "lecture-20-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：若要解释\"linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations\"中的机制或推导，哪条推理链成立？",
@@ -1066,60 +1616,15 @@
         },
         {
           "id": "b",
-          "text": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。"
+          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
         },
         {
           "id": "c",
-          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
+          "text": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。"
         },
         {
           "id": "d",
           "text": "从 nullclines 和 fixed-point stability 解释 relaxation oscillation 的四阶段 trajectory。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "d": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。"
-      },
-      "explanation": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。"
-    },
-    {
-      "id": "L20-Q18",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 2,
-          "section": "lecture-20-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 20 讲：阅读与\"linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "b",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
         }
       ],
       "correctChoiceId": "c",
@@ -1128,10 +1633,10 @@
         "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
         "d": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。"
       },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+      "explanation": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。 因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。"
     },
     {
-      "id": "L20-Q19",
+      "id": "L20-Q15",
       "lecture": 20,
       "sectionId": "lecture-20-source-3",
       "sourceAnchors": [
@@ -1146,82 +1651,37 @@
         "Lecture20-CentralPatternGenerators.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 20 讲：根据 Lecture20-CentralPatternGenerators.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion。"
-        },
-        {
-          "id": "b",
-          "text": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-        },
-        {
-          "id": "c",
-          "text": "sharp synaptic threshold、intrinsic release 与 intrinsic escape。"
-        },
-        {
-          "id": "d",
-          "text": "Morris-Lecar equations、V/N nullclines、fixed points。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。",
-        "b": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“sharp synaptic threshold、intrinsic release 与 intrinsic escape”，不是题干指定的关系。"
-      },
-      "explanation": "Morris-Lecar equations、V/N nullclines、fixed points。"
-    },
-    {
-      "id": "L20-Q20",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 3,
-          "section": "lecture-20-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：若要解释\"Morris-Lecar equations、V/N nullclines、fixed points\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
-        },
-        {
-          "id": "b",
           "text": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "说明如何在 firing-rate model 中用 adaptation/recovery variable 复现同类 geometry。"
+        },
+        {
+          "id": "d",
+          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“half-center firing-rate model extension”，不是题干指定的关系。"
+        "a": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。",
+        "b": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“half-center firing-rate model extension”，不是题干指定的关系。"
       },
-      "explanation": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
+      "explanation": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。 fast-slow separation 的依据是 voltage timescale C/g 与 τN 差异。"
     },
     {
-      "id": "L20-Q21",
+      "id": "L20-Q16",
       "lecture": 20,
       "sectionId": "lecture-20-source-3",
       "sourceAnchors": [
@@ -1235,38 +1695,38 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "第 20 讲：阅读与\"Morris-Lecar equations、V/N nullclines、fixed points\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "stem": "第 20 讲：阅读\"Morris-Lecar nullclines 与 relaxation cycle\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。"
         },
         {
           "id": "b",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
         },
         {
           "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+          "text": "从 nullclines 和 fixed-point stability 解释 relaxation oscillation 的四阶段 trajectory。"
         },
         {
           "id": "d",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "前者 amplitude 回到 fixed point；后者收敛到非零 closed orbit。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。"
+        "b": "这条推理对应 Lecture20-CentralPatternGenerators.pdf 第 3 页。",
+        "c": "这条推理对应 Lecture20-CentralPatternGenerators.pdf 第 4 页。",
+        "d": "该选项回答的是“damped oscillation 与 limit cycle 的区别？”。"
       },
-      "explanation": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+      "explanation": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。 两条 nullclines 交点同时令两 derivatives 为零，是 candidate equilibrium。"
     },
     {
-      "id": "L20-Q22",
+      "id": "L20-Q17",
       "lecture": 20,
       "sectionId": "lecture-20-source-4",
       "sourceAnchors": [
@@ -1280,52 +1740,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 20 讲：根据 Lecture20-CentralPatternGenerators.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-        },
-        {
-          "id": "b",
-          "text": "sharp synaptic threshold、intrinsic release 与 intrinsic escape。"
-        },
-        {
-          "id": "c",
-          "text": "relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center。"
-        },
-        {
-          "id": "d",
-          "text": "intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“sharp synaptic threshold、intrinsic release 与 intrinsic escape”，不是题干指定的关系。",
-        "d": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。"
-      },
-      "explanation": "relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center。"
-    },
-    {
-      "id": "L20-Q23",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 4,
-          "section": "lecture-20-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：若要解释\"relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center\"中的机制或推导，哪条推理链成立？",
@@ -1336,27 +1751,27 @@
         },
         {
           "id": "b",
-          "text": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。"
+          "text": "从 nullclines 和 fixed-point stability 解释 relaxation oscillation 的四阶段 trajectory。"
         },
         {
           "id": "c",
-          "text": "说明如何在 firing-rate model 中用 adaptation/recovery variable 复现同类 geometry。"
+          "text": "完整求 two-neuron inhibitory/excitatory weight matrix 的 complex eigenvalues，并用 Euler formula 解释 damped oscillatory components。"
         },
         {
           "id": "d",
-          "text": "从 nullclines 和 fixed-point stability 解释 relaxation oscillation 的四阶段 trajectory。"
+          "text": "说明如何在 firing-rate model 中用 adaptation/recovery variable 复现同类 geometry。"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。",
-        "b": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“half-center firing-rate model extension”，不是题干指定的关系。"
+        "c": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
+        "d": "该陈述解释的是“half-center firing-rate model extension”，不是题干指定的关系。"
       },
-      "explanation": "从 nullclines 和 fixed-point stability 解释 relaxation oscillation 的四阶段 trajectory。"
+      "explanation": "从 nullclines 和 fixed-point stability 解释 relaxation oscillation 的四阶段 trajectory。 half-center 把两个 Morris-Lecar cells 互相 inhibitory coupling。"
     },
     {
-      "id": "L20-Q24",
+      "id": "L20-Q18",
       "lecture": 20,
       "sectionId": "lecture-20-source-5",
       "sourceAnchors": [
@@ -1371,51 +1786,6 @@
         "Lecture20-CentralPatternGenerators.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 20 讲：根据 Lecture20-CentralPatternGenerators.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "sharp synaptic threshold、intrinsic release 与 intrinsic escape。"
-        },
-        {
-          "id": "b",
-          "text": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-        },
-        {
-          "id": "c",
-          "text": "Morris-Lecar equations、V/N nullclines、fixed points。"
-        },
-        {
-          "id": "d",
-          "text": "relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "d": "该陈述解释的是“relaxation oscillation cycle、inhibitory coupled Morris-Lecar half-center”，不是题干指定的关系。"
-      },
-      "explanation": "sharp synaptic threshold、intrinsic release 与 intrinsic escape。"
-    },
-    {
-      "id": "L20-Q25",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 5,
-          "section": "lecture-20-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：若要解释\"sharp synaptic threshold、intrinsic release 与 intrinsic escape\"中的机制或推导，哪条推理链成立？",
@@ -1426,72 +1796,27 @@
         },
         {
           "id": "b",
-          "text": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
+          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
         },
         {
           "id": "c",
-          "text": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。"
+          "text": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
         },
         {
           "id": "d",
           "text": "把 presynaptic voltage 对 synaptic activation 简化成开/关。"
         }
       ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "d": "该选项回答的是“sharp threshold S∞ 的作用？”。"
-      },
-      "explanation": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。"
-    },
-    {
-      "id": "L20-Q26",
-      "lecture": 20,
-      "sectionId": "lecture-20-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture20-CentralPatternGenerators.pdf",
-          "page": 6,
-          "section": "lecture-20-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Central Pattern Generators and Oscillations",
-        "Lecture20-CentralPatternGenerators.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 20 讲：根据 Lecture20-CentralPatternGenerators.pdf 第 6 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations。"
-        },
-        {
-          "id": "b",
-          "text": "Morris-Lecar equations、V/N nullclines、fixed points。"
-        },
-        {
-          "id": "c",
-          "text": "half-center firing-rate model extension。"
-        },
-        {
-          "id": "d",
-          "text": "sharp synaptic threshold、intrinsic release 与 intrinsic escape。"
-        }
-      ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
         "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "d": "该陈述解释的是“sharp synaptic threshold、intrinsic release 与 intrinsic escape”，不是题干指定的关系。"
+        "d": "该选项回答的是“sharp threshold S∞ 的作用？”。"
       },
-      "explanation": "half-center firing-rate model extension。"
+      "explanation": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。 原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。"
     },
     {
-      "id": "L20-Q27",
+      "id": "L20-Q19",
       "lecture": 20,
       "sectionId": "lecture-20-source-6",
       "sourceAnchors": [
@@ -1505,7 +1830,7 @@
         "Central Pattern Generators and Oscillations",
         "Lecture20-CentralPatternGenerators.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 20 讲：若要解释\"half-center firing-rate model extension\"中的机制或推导，哪条推理链成立？",
@@ -1533,10 +1858,814 @@
         "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
         "c": "该陈述解释的是“intrinsic pacemaker/follower、network-generated half-center oscillator、respiration/locomotion”，不是题干指定的关系。"
       },
-      "explanation": "说明如何在 firing-rate model 中用 adaptation/recovery variable 复现同类 geometry。"
+      "explanation": "说明如何在 firing-rate model 中用 adaptation/recovery variable 复现同类 geometry。 第 6 页只给出 extension 方向：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a，仍可构造相似 nullcline geometry。"
+    },
+    {
+      "id": "L20-Q20",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 1,
+          "section": "lecture-20-source-1"
+        }
+      ],
+      "conceptTags": [
+        "节律来源：pacemaker、follower 与 network half-center"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 20 讲：如果 block 后两 cells 都停止交替但各自仍以不同频率振荡，能否称为纯 network-generated rhythm？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        {
+          "id": "b",
+          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        },
+        {
+          "id": "c",
+          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        },
+        {
+          "id": "d",
+          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。 CPG 指在缺少相同周期的外部指令时，central neural circuit 仍能组织 patterned motor output。这个定义不要求真实行为完全独立于 sensory feedback；感觉输入可以重置 phase、调节 speed 或稳定 gait。把所有 rhythmic neural activity 都称为 CPG 会混淆 oscillator、sensory entrainment 与 downstream follower response。"
+    },
+    {
+      "id": "L20-Q21",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 1,
+          "section": "lecture-20-source-1"
+        }
+      ],
+      "conceptTags": [
+        "节律来源：pacemaker、follower 与 network half-center",
+        "根据 block 结果诊断候选网络"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：完成\"intact 时 cells A/B 以 2 Hz 交替；block 后 A 仍以 1.8 Hz 振荡，B 维持 constant firing。给出最小机制解释与下一步控制。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。"
+        },
+        {
+          "id": "b",
+          "text": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。"
+        },
+        {
+          "id": "c",
+          "text": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。"
+        },
+        {
+          "id": "d",
+          "text": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。 计算路径：A 的节律近似保留，先把 A 列为 intrinsic pacemaker candidate。 B 失去 modulation，符合 follower candidate；intact alternation 可由 A 对 B 的周期 drive 或更复杂 inhibition 形成。 下一步向 B 注入周期 current 并验证其可跟随，同时测 synaptic current 确认 block 完整，检查 A waveform 是否因药物改变。"
+    },
+    {
+      "id": "L20-Q22",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 1,
+          "section": "lecture-20-source-1"
+        }
+      ],
+      "conceptTags": [
+        "节律来源：pacemaker、follower 与 network half-center",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 20 讲：得到\"最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        {
+          "id": "b",
+          "text": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。"
+        },
+        {
+          "id": "c",
+          "text": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        {
+          "id": "d",
+          "text": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。 这个检查对应题设\"intact 时 cells A/B 以 2 Hz 交替；block 后 A 仍以 1.8 Hz 振荡，B 维持 constant firing。给出最小机制解释与下一步控制。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L20-Q23",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 2,
+          "section": "lecture-20-source-2"
+        }
+      ],
+      "conceptTags": [
+        "线性双神经元系统的复数模态与阻尼振荡"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 20 讲：若 full eigenvalues 为 0.2±5i s^-1，轨迹会怎样？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        {
+          "id": "b",
+          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        },
+        {
+          "id": "c",
+          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+        },
+        {
+          "id": "d",
+          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。 因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。原页选择随后转向 Morris-Lecar，正是为了引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
+    },
+    {
+      "id": "L20-Q24",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 2,
+          "section": "lecture-20-source-2"
+        }
+      ],
+      "conceptTags": [
+        "线性双神经元系统的复数模态与阻尼振荡",
+        "从 full eigenvalue 读出 waveform"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：完成\"给定 τ=0.2 s、w0=4，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。"
+        },
+        {
+          "id": "b",
+          "text": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。"
+        },
+        {
+          "id": "c",
+          "text": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。"
+        },
+        {
+          "id": "d",
+          "text": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。 计算路径：full eigenvalues=(-1±4i)/0.2=-5±20i s^-1。 envelope time constant=1/5=0.2 s；f=20/(2π)≈3.18 Hz，period≈0.314 s。 一周期后 amplitude fraction=e^{-0.314/0.2}=e^{-1.57}≈0.208。"
+    },
+    {
+      "id": "L20-Q25",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 2,
+          "section": "lecture-20-source-2"
+        }
+      ],
+      "conceptTags": [
+        "线性双神经元系统的复数模态与阻尼振荡",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 20 讲：得到\"轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        {
+          "id": "b",
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        {
+          "id": "c",
+          "text": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。"
+        },
+        {
+          "id": "d",
+          "text": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。 这个检查对应题设\"给定 τ=0.2 s、w0=4，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L20-Q26",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 3,
+          "section": "lecture-20-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Morris-Lecar 电流平衡、nullclines 与固定点"
+      ],
+      "difficulty": 2,
+      "type": "figure",
+      "cognitiveLevel": "understand",
+      "stem": "第 20 讲：为什么 nullcline 不是神经元实际运行轨迹？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        {
+          "id": "b",
+          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        },
+        {
+          "id": "c",
+          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        },
+        {
+          "id": "d",
+          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。 fast-slow separation 的依据是 voltage timescale C/g 与 τN 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
+    },
+    {
+      "id": "L20-Q27",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 3,
+          "section": "lecture-20-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Morris-Lecar 电流平衡、nullclines 与固定点",
+        "用符号判断一个 phase-plane 点的方向"
+      ],
+      "difficulty": 3,
+      "type": "figure",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：完成\"某点位于 V-nullcline 上方且代入得 dV/dt<0；同时它位于 N-nullcline 下方。判断初始运动方向。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。"
+        },
+        {
+          "id": "b",
+          "text": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。"
+        },
+        {
+          "id": "c",
+          "text": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。"
+        },
+        {
+          "id": "d",
+          "text": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。 计算路径：dV/dt<0 表示 V 向左移动。 N-nullcline 下方有 N<N∞(V)，所以 dN/dt>0，N 向上移动。 合成向量指向左上；若下一时刻跨过 nullcline，要重新判断符号。"
     },
     {
       "id": "L20-Q28",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 3,
+          "section": "lecture-20-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Morris-Lecar 电流平衡、nullclines 与固定点",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 20 讲：得到\"该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。"
+        },
+        {
+          "id": "b",
+          "text": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        {
+          "id": "c",
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        {
+          "id": "d",
+          "text": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。 这个检查对应题设\"某点位于 V-nullcline 上方且代入得 dV/dt<0；同时它位于 N-nullcline 下方。判断初始运动方向。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L20-Q29",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 4,
+          "section": "lecture-20-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Relaxation cycle 与互抑 half-center 的相位几何"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 20 讲：为什么两个互抑 cells 可以在各自单独不振荡时产生 network rhythm？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        {
+          "id": "b",
+          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+        },
+        {
+          "id": "c",
+          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        },
+        {
+          "id": "d",
+          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。 即使单独 cells 的 fixed point stable，mutual inhibition 与 recovery 也可能让 pair oscillate；反之，不是任意 mutual inhibition 都会振荡。必须同时有能在 active 与 inhibited phases 中缓慢演化的 intrinsic variable、合适 synaptic threshold 和 transition ordering。外界 sensory pulse 可把某 cell 推过 separatrix，从而 reset phase，而不必生成整个 rhythm。"
+    },
+    {
+      "id": "L20-Q30",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 4,
+          "section": "lecture-20-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Relaxation cycle 与互抑 half-center 的相位几何",
+        "预测增大 recovery time constant 的效果"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：完成\"保持 nullcline shapes 不变，将 τN 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。"
+        },
+        {
+          "id": "b",
+          "text": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。"
+        },
+        {
+          "id": "c",
+          "text": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。"
+        },
+        {
+          "id": "d",
+          "text": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。 计算路径：slow branch motion 大约变慢三倍，因为 dN/dt 缩小。 cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 τN 放大。 fast V jump 主要由 C 与 conductances 决定，duration 不应同步放大三倍。"
+    },
+    {
+      "id": "L20-Q31",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 4,
+          "section": "lecture-20-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Relaxation cycle 与互抑 half-center 的相位几何",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 20 讲：得到\"预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        {
+          "id": "b",
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        {
+          "id": "c",
+          "text": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。"
+        },
+        {
+          "id": "d",
+          "text": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。 这个检查对应题设\"保持 nullcline shapes 不变，将 τN 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L20-Q32",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 5,
+          "section": "lecture-20-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Intrinsic release 与 intrinsic escape：谁触发换相"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 20 讲：若 active cell 先跌破 VT，20 ms 后 partner才上跳，这个延迟是否反驳 release？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不反驳。release只要求 inhibition解除是上游触发；partner仍需按自身 membrane/recovery dynamics离开低状态，出现有限latency很合理。"
+        },
+        {
+          "id": "b",
+          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        {
+          "id": "c",
+          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        },
+        {
+          "id": "d",
+          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "不反驳。release只要求 inhibition解除是上游触发；partner仍需按自身 membrane/recovery dynamics离开低状态，出现有限latency很合理。 真实 circuits 可处于 mixed regime：active cell 接近 release 时，partner 也接近 escape，noise 或 sensory input 决定谁先发生。实验上应在 phase transition 前追踪 both cells 的 voltage 与 recovery proxy，并用短 pulse 分别推 active cell向下或 inhibited cell向上。仅从 alternating spike raster 看不出 causal ordering。"
+    },
+    {
+      "id": "L20-Q33",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 5,
+          "section": "lecture-20-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Intrinsic release 与 intrinsic escape：谁触发换相",
+        "从事件时间判断换相机制"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：完成\"记录显示 A active；t=500 ms 时 B 在 inhibition仍为强时突然 depolarize，t=507 ms A 被抑制，t=512 ms A 跌破 VT。判断主导机制。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。"
+        },
+        {
+          "id": "b",
+          "text": "事件顺序支持 intrinsic escape，而非 active-cell release。"
+        },
+        {
+          "id": "c",
+          "text": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。"
+        },
+        {
+          "id": "d",
+          "text": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "事件顺序支持 intrinsic escape，而非 active-cell release。 计算路径：B 的 depolarization 发生在 A 跌破 VT 之前，说明 B 不是等 inhibition关闭才上升。 B 上升后先抑制 A，符合 inhibited cell 主动逃出 low state。 因此标记为 escape-dominant，并应检验操纵 B recovery variable 是否改变 500 ms latency。"
+    },
+    {
+      "id": "L20-Q34",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 5,
+          "section": "lecture-20-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Intrinsic release 与 intrinsic escape：谁触发换相",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 20 讲：得到\"事件顺序支持 intrinsic escape，而非 active-cell release。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        {
+          "id": "b",
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        {
+          "id": "c",
+          "text": "需要确认 synaptic conductance在 B depolarize时确实仍高；仅用 A spikes可能低估真实 conductance offset。"
+        },
+        {
+          "id": "d",
+          "text": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "需要确认 synaptic conductance在 B depolarize时确实仍高；仅用 A spikes可能低估真实 conductance offset。 这个检查对应题设\"记录显示 A active；t=500 ms 时 B 在 inhibition仍为强时突然 depolarize，t=507 ms A 被抑制，t=512 ms A 跌破 VT。判断主导机制。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L20-Q35",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 6,
+          "section": "lecture-20-source-6"
+        }
+      ],
+      "conceptTags": [
+        "从 conductance oscillator 到 rate-adaptation half-center"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 20 讲：为什么只有 h1、h2 两个线性rate变量通常不足以产生稳定half-center limit cycle？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+        },
+        {
+          "id": "b",
+          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+        },
+        {
+          "id": "c",
+          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+        },
+        {
+          "id": "d",
+          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。 验证该模型应画 h_i-a_i nullclines、模拟 both rates、改变 w、b、τa，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
+    },
+    {
+      "id": "L20-Q36",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 6,
+          "section": "lecture-20-source-6"
+        }
+      ],
+      "conceptTags": [
+        "从 conductance oscillator 到 rate-adaptation half-center",
+        "用参数变化预测节律"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：完成\"模型原有τh=20 ms、τa=400 ms。只把τa加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为switch threshold与nonlinear F也参与。"
+        },
+        {
+          "id": "b",
+          "text": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。"
+        },
+        {
+          "id": "c",
+          "text": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。"
+        },
+        {
+          "id": "d",
+          "text": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为switch threshold与nonlinear F也参与。 计算路径：slow adaptation与recovery都变慢，active phase通常延长。 两个cells结构对称，所以仍预期近似anti-phase，而不是产生固定phase bias。 period主要由slowprocess决定，近似增加；frequency因此下降，但不要求精确减半。"
+    },
+    {
+      "id": "L20-Q37",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 6,
+          "section": "lecture-20-source-6"
+        }
+      ],
+      "conceptTags": [
+        "从 conductance oscillator 到 rate-adaptation half-center",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 20 讲：得到\"预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为switch threshold与nonlinear F也参与。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+        },
+        {
+          "id": "b",
+          "text": "τh没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
+        },
+        {
+          "id": "c",
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+        },
+        {
+          "id": "d",
+          "text": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "τh没有改变，所以快速rate transition的edge不应与plateau同倍拉长。 这个检查对应题设\"模型原有τh=20 ms、τa=400 ms。只把τa加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L20-Q38",
       "lecture": 20,
       "sectionId": "lecture-20-source-2",
       "sourceAnchors": [
@@ -1550,38 +2679,38 @@
         "中央模式发生器",
         "central pattern generator, CPG"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "中央模式发生器（central pattern generator, CPG）"
-        },
-        {
-          "id": "b",
           "text": "起搏细胞（pacemaker neuron）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "半中心振荡器（half-center oscillator）"
+        },
+        {
+          "id": "c",
+          "text": "中央模式发生器（central pattern generator, CPG）"
         },
         {
           "id": "d",
           "text": "复特征值（complex eigenvalue）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“起搏细胞（pacemaker neuron）”指：依 intrinsic dynamics 自发 rhythmic。",
-        "c": "“半中心振荡器（half-center oscillator）”指：两个互抑 units 交替 active 的 network oscillator。",
+        "a": "“起搏细胞（pacemaker neuron）”指：依 intrinsic dynamics 自发 rhythmic。",
+        "b": "“半中心振荡器（half-center oscillator）”指：两个互抑 units 交替 active 的 network oscillator。",
         "d": "“复特征值（complex eigenvalue）”指：同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。"
       },
       "explanation": "中央模式发生器（central pattern generator, CPG）：无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。"
     },
     {
-      "id": "L20-Q29",
+      "id": "L20-Q39",
       "lecture": 20,
       "sectionId": "lecture-20-source-1",
       "sourceAnchors": [
@@ -1595,7 +2724,7 @@
         "起搏细胞",
         "pacemaker neuron"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"依 intrinsic dynamics 自发 rhythmic。\"称为什么？",
@@ -1606,27 +2735,27 @@
         },
         {
           "id": "b",
-          "text": "起搏细胞（pacemaker neuron）"
-        },
-        {
-          "id": "c",
           "text": "复特征值（complex eigenvalue）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "Morris-Lecar 模型（Morris-Lecar model）"
+        },
+        {
+          "id": "d",
+          "text": "起搏细胞（pacemaker neuron）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“半中心振荡器（half-center oscillator）”指：两个互抑 units 交替 active 的 network oscillator。",
-        "c": "“复特征值（complex eigenvalue）”指：同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。",
-        "d": "“Morris-Lecar 模型（Morris-Lecar model）”指：简化的 conductance-based two-variable neuron model。"
+        "b": "“复特征值（complex eigenvalue）”指：同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。",
+        "c": "“Morris-Lecar 模型（Morris-Lecar model）”指：简化的 conductance-based two-variable neuron model。"
       },
-      "explanation": "起搏细胞（pacemaker neuron）：依 intrinsic dynamics 自发 rhythmic。"
+      "explanation": "起搏细胞（pacemaker neuron）：依 intrinsic dynamics 自发 rhythmic。 若 neuron 1 的节律在 block 后保留而 neuron 2 变成 tonic 或 silent，结果符合\"1 是 pacemaker、2 是 follower\"。"
     },
     {
-      "id": "L20-Q30",
+      "id": "L20-Q40",
       "lecture": 20,
       "sectionId": "lecture-20-source-1",
       "sourceAnchors": [
@@ -1640,38 +2769,38 @@
         "半中心振荡器",
         "half-center oscillator"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"两个互抑 units 交替 active 的 network oscillator。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "复特征值（complex eigenvalue）"
+          "text": "半中心振荡器（half-center oscillator）"
         },
         {
           "id": "b",
-          "text": "Morris-Lecar 模型（Morris-Lecar model）"
+          "text": "复特征值（complex eigenvalue）"
         },
         {
           "id": "c",
-          "text": "半中心振荡器（half-center oscillator）"
+          "text": "Morris-Lecar 模型（Morris-Lecar model）"
         },
         {
           "id": "d",
           "text": "相平面（phase plane）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“复特征值（complex eigenvalue）”指：同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。",
-        "b": "“Morris-Lecar 模型（Morris-Lecar model）”指：简化的 conductance-based two-variable neuron model。",
+        "b": "“复特征值（complex eigenvalue）”指：同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。",
+        "c": "“Morris-Lecar 模型（Morris-Lecar model）”指：简化的 conductance-based two-variable neuron model。",
         "d": "“相平面（phase plane）”指：二维 state space 中的 trajectories/nullclines。"
       },
       "explanation": "半中心振荡器（half-center oscillator）：两个互抑 units 交替 active 的 network oscillator。"
     },
     {
-      "id": "L20-Q31",
+      "id": "L20-Q41",
       "lecture": 20,
       "sectionId": "lecture-20-source-2",
       "sourceAnchors": [
@@ -1696,27 +2825,27 @@
         },
         {
           "id": "b",
-          "text": "相平面（phase plane）"
+          "text": "复特征值（complex eigenvalue）"
         },
         {
           "id": "c",
-          "text": "松弛振荡（relaxation oscillation）"
+          "text": "相平面（phase plane）"
         },
         {
           "id": "d",
-          "text": "复特征值（complex eigenvalue）"
+          "text": "松弛振荡（relaxation oscillation）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“Morris-Lecar 模型（Morris-Lecar model）”指：简化的 conductance-based two-variable neuron model。",
-        "b": "“相平面（phase plane）”指：二维 state space 中的 trajectories/nullclines。",
-        "c": "“松弛振荡（relaxation oscillation）”指：slow drift 与 fast jumps 交替的 limit cycle。"
+        "c": "“相平面（phase plane）”指：二维 state space 中的 trajectories/nullclines。",
+        "d": "“松弛振荡（relaxation oscillation）”指：slow drift 与 fast jumps 交替的 limit cycle。"
       },
       "explanation": "复特征值（complex eigenvalue）：同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。"
     },
     {
-      "id": "L20-Q32",
+      "id": "L20-Q42",
       "lecture": 20,
       "sectionId": "lecture-20-source-6",
       "sourceAnchors": [
@@ -1730,38 +2859,38 @@
         "Morris-Lecar 模型",
         "Morris-Lecar model"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"简化的 conductance-based two-variable neuron model。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "Morris-Lecar 模型（Morris-Lecar model）"
-        },
-        {
-          "id": "b",
           "text": "相平面（phase plane）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "松弛振荡（relaxation oscillation）"
+        },
+        {
+          "id": "c",
+          "text": "Morris-Lecar 模型（Morris-Lecar model）"
         },
         {
           "id": "d",
           "text": "内在释放（intrinsic release）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“相平面（phase plane）”指：二维 state space 中的 trajectories/nullclines。",
-        "c": "“松弛振荡（relaxation oscillation）”指：slow drift 与 fast jumps 交替的 limit cycle。",
+        "a": "“相平面（phase plane）”指：二维 state space 中的 trajectories/nullclines。",
+        "b": "“松弛振荡（relaxation oscillation）”指：slow drift 与 fast jumps 交替的 limit cycle。",
         "d": "“内在释放（intrinsic release）”指：active neuron 停止后解除 inhibition。"
       },
       "explanation": "Morris-Lecar 模型（Morris-Lecar model）：简化的 conductance-based two-variable neuron model。"
     },
     {
-      "id": "L20-Q33",
+      "id": "L20-Q43",
       "lecture": 20,
       "sectionId": "lecture-20-source-6",
       "sourceAnchors": [
@@ -1775,7 +2904,7 @@
         "相平面",
         "phase plane"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"二维 state space 中的 trajectories/nullclines。\"称为什么？",
@@ -1786,27 +2915,27 @@
         },
         {
           "id": "b",
-          "text": "相平面（phase plane）"
-        },
-        {
-          "id": "c",
           "text": "内在释放（intrinsic release）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "内在逃逸（intrinsic escape）"
+        },
+        {
+          "id": "d",
+          "text": "相平面（phase plane）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“松弛振荡（relaxation oscillation）”指：slow drift 与 fast jumps 交替的 limit cycle。",
-        "c": "“内在释放（intrinsic release）”指：active neuron 停止后解除 inhibition。",
-        "d": "“内在逃逸（intrinsic escape）”指：inhibited neuron 先恢复并跳出 inhibition。"
+        "b": "“内在释放（intrinsic release）”指：active neuron 停止后解除 inhibition。",
+        "c": "“内在逃逸（intrinsic escape）”指：inhibited neuron 先恢复并跳出 inhibition。"
       },
       "explanation": "相平面（phase plane）：二维 state space 中的 trajectories/nullclines。"
     },
     {
-      "id": "L20-Q34",
+      "id": "L20-Q44",
       "lecture": 20,
       "sectionId": "lecture-20-source-3",
       "sourceAnchors": [
@@ -1820,38 +2949,38 @@
         "松弛振荡",
         "relaxation oscillation"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"slow drift 与 fast jumps 交替的 limit cycle。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "内在释放（intrinsic release）"
+          "text": "松弛振荡（relaxation oscillation）"
         },
         {
           "id": "b",
-          "text": "内在逃逸（intrinsic escape）"
+          "text": "内在释放（intrinsic release）"
         },
         {
           "id": "c",
-          "text": "松弛振荡（relaxation oscillation）"
+          "text": "内在逃逸（intrinsic escape）"
         },
         {
           "id": "d",
           "text": "极限环（limit cycle）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“内在释放（intrinsic release）”指：active neuron 停止后解除 inhibition。",
-        "b": "“内在逃逸（intrinsic escape）”指：inhibited neuron 先恢复并跳出 inhibition。",
+        "b": "“内在释放（intrinsic release）”指：active neuron 停止后解除 inhibition。",
+        "c": "“内在逃逸（intrinsic escape）”指：inhibited neuron 先恢复并跳出 inhibition。",
         "d": "“极限环（limit cycle）”指：吸引附近 trajectories 的 closed periodic orbit。"
       },
       "explanation": "松弛振荡（relaxation oscillation）：slow drift 与 fast jumps 交替的 limit cycle。"
     },
     {
-      "id": "L20-Q35",
+      "id": "L20-Q45",
       "lecture": 20,
       "sectionId": "lecture-20-source-1",
       "sourceAnchors": [
@@ -1865,7 +2994,7 @@
         "内在释放",
         "intrinsic release"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"active neuron 停止后解除 inhibition。\"称为什么？",
@@ -1876,27 +3005,27 @@
         },
         {
           "id": "b",
-          "text": "极限环（limit cycle）"
+          "text": "内在释放（intrinsic release）"
         },
         {
           "id": "c",
-          "text": "中央模式发生器（central pattern generator, CPG）"
+          "text": "极限环（limit cycle）"
         },
         {
           "id": "d",
-          "text": "内在释放（intrinsic release）"
+          "text": "中央模式发生器（central pattern generator, CPG）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“内在逃逸（intrinsic escape）”指：inhibited neuron 先恢复并跳出 inhibition。",
-        "b": "“极限环（limit cycle）”指：吸引附近 trajectories 的 closed periodic orbit。",
-        "c": "“中央模式发生器（central pattern generator, CPG）”指：无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。"
+        "c": "“极限环（limit cycle）”指：吸引附近 trajectories 的 closed periodic orbit。",
+        "d": "“中央模式发生器（central pattern generator, CPG）”指：无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。"
       },
-      "explanation": "内在释放（intrinsic release）：active neuron 停止后解除 inhibition。"
+      "explanation": "内在释放（intrinsic release）：active neuron 停止后解除 inhibition。 第二种来源是 network-generated rhythm：单个细胞可保持 tonic 或 silent，但 reciprocal inhibition 使两个细胞交替 active，形成 half-center oscillator。"
     },
     {
-      "id": "L20-Q36",
+      "id": "L20-Q46",
       "lecture": 20,
       "sectionId": "lecture-20-source-1",
       "sourceAnchors": [
@@ -1917,31 +3046,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "内在逃逸（intrinsic escape）"
-        },
-        {
-          "id": "b",
           "text": "极限环（limit cycle）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "中央模式发生器（central pattern generator, CPG）"
+        },
+        {
+          "id": "c",
+          "text": "内在逃逸（intrinsic escape）"
         },
         {
           "id": "d",
           "text": "起搏细胞（pacemaker neuron）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“极限环（limit cycle）”指：吸引附近 trajectories 的 closed periodic orbit。",
-        "c": "“中央模式发生器（central pattern generator, CPG）”指：无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。",
+        "a": "“极限环（limit cycle）”指：吸引附近 trajectories 的 closed periodic orbit。",
+        "b": "“中央模式发生器（central pattern generator, CPG）”指：无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。",
         "d": "“起搏细胞（pacemaker neuron）”指：依 intrinsic dynamics 自发 rhythmic。"
       },
       "explanation": "内在逃逸（intrinsic escape）：inhibited neuron 先恢复并跳出 inhibition。"
     },
     {
-      "id": "L20-Q37",
+      "id": "L20-Q47",
       "lecture": 20,
       "sectionId": "lecture-20-source-2",
       "sourceAnchors": [
@@ -1955,7 +3084,7 @@
         "极限环",
         "limit cycle"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 20 讲：本讲把\"吸引附近 trajectories 的 closed periodic orbit。\"称为什么？",
@@ -1966,27 +3095,27 @@
         },
         {
           "id": "b",
-          "text": "极限环（limit cycle）"
-        },
-        {
-          "id": "c",
           "text": "起搏细胞（pacemaker neuron）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "半中心振荡器（half-center oscillator）"
+        },
+        {
+          "id": "d",
+          "text": "极限环（limit cycle）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“中央模式发生器（central pattern generator, CPG）”指：无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。",
-        "c": "“起搏细胞（pacemaker neuron）”指：依 intrinsic dynamics 自发 rhythmic。",
-        "d": "“半中心振荡器（half-center oscillator）”指：两个互抑 units 交替 active 的 network oscillator。"
+        "b": "“起搏细胞（pacemaker neuron）”指：依 intrinsic dynamics 自发 rhythmic。",
+        "c": "“半中心振荡器（half-center oscillator）”指：两个互抑 units 交替 active 的 network oscillator。"
       },
       "explanation": "极限环（limit cycle）：吸引附近 trajectories 的 closed periodic orbit。"
     },
     {
-      "id": "L20-Q38",
+      "id": "L20-Q48",
       "lecture": 20,
       "sectionId": "lecture-20-source-2",
       "sourceAnchors": [
@@ -2006,31 +3135,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "complex representation"
+          "text": "a controls envelope, b frequency"
         },
         {
           "id": "b",
-          "text": "fast-slow variables"
+          "text": "complex representation"
         },
         {
           "id": "c",
-          "text": "a controls envelope, b frequency"
+          "text": "fast-slow variables"
         },
         {
           "id": "d",
           "text": "dV/dt=0"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“Euler decomposition”的条件，不是题干公式的条件。",
-        "b": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。",
+        "b": "这是“Euler decomposition”的条件，不是题干公式的条件。",
+        "c": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。",
         "d": "这是“V-nullcline”的条件，不是题干公式的条件。"
       },
-      "explanation": "complex mode 的适用条件：a controls envelope, b frequency"
+      "explanation": "complex mode 的适用条件：a controls envelope, b frequency 沿 complex mode 的解含 e^{(-1±iw0)t/τ}=e^{-t/τ}[cos(|w0|t/τ)±i sin(|w0|t/τ)]。"
     },
     {
-      "id": "L20-Q39",
+      "id": "L20-Q49",
       "lecture": 20,
       "sectionId": "lecture-20-source-2",
       "sourceAnchors": [
@@ -2043,7 +3172,7 @@
       "conceptTags": [
         "Euler decomposition"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：使用\"Euler decomposition\"时，哪项条件或约定不可省略？",
@@ -2054,27 +3183,27 @@
         },
         {
           "id": "b",
-          "text": "fast-slow variables"
+          "text": "complex representation"
         },
         {
           "id": "c",
-          "text": "dV/dt=0"
+          "text": "fast-slow variables"
         },
         {
           "id": "d",
-          "text": "complex representation"
+          "text": "dV/dt=0"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“complex mode”的条件，不是题干公式的条件。",
-        "b": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。",
-        "c": "这是“V-nullcline”的条件，不是题干公式的条件。"
+        "c": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。",
+        "d": "这是“V-nullcline”的条件，不是题干公式的条件。"
       },
-      "explanation": "Euler decomposition 的适用条件：complex representation"
+      "explanation": "Euler decomposition 的适用条件：complex representation 沿 complex mode 的解含 e^{(-1±iw0)t/τ}=e^{-t/τ}[cos(|w0|t/τ)±i sin(|w0|t/τ)]。"
     },
     {
-      "id": "L20-Q40",
+      "id": "L20-Q50",
       "lecture": 20,
       "sectionId": "lecture-20-source-3",
       "sourceAnchors": [
@@ -2087,14 +3216,102 @@
       "conceptTags": [
         "two-dimensional conductance model"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 20 讲：使用\"two-dimensional conductance model\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
+          "text": "a controls envelope, b frequency"
+        },
+        {
+          "id": "b",
+          "text": "complex representation"
+        },
+        {
+          "id": "c",
           "text": "fast-slow variables"
+        },
+        {
+          "id": "d",
+          "text": "dV/dt=0"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“complex mode”的条件，不是题干公式的条件。",
+        "b": "这是“Euler decomposition”的条件，不是题干公式的条件。",
+        "d": "这是“V-nullcline”的条件，不是题干公式的条件。"
+      },
+      "explanation": "two-dimensional conductance model 的适用条件：fast-slow variables"
+    },
+    {
+      "id": "L20-Q51",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 4,
+          "section": "lecture-20-source-4"
+        }
+      ],
+      "conceptTags": [
+        "V-nullcline"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：使用\"V-nullcline\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "a controls envelope, b frequency"
+        },
+        {
+          "id": "b",
+          "text": "complex representation"
+        },
+        {
+          "id": "c",
+          "text": "fast-slow variables"
+        },
+        {
+          "id": "d",
+          "text": "dV/dt=0"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“complex mode”的条件，不是题干公式的条件。",
+        "b": "这是“Euler decomposition”的条件，不是题干公式的条件。",
+        "c": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。"
+      },
+      "explanation": "V-nullcline 的适用条件：dV/dt=0 当 fixed point 不稳定且 V-nullcline 有两条 attracting outer branches，trajectory 可循环经历四阶段。"
+    },
+    {
+      "id": "L20-Q52",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 5,
+          "section": "lecture-20-source-5"
+        }
+      ],
+      "conceptTags": [
+        "N-nullcline"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：使用\"N-nullcline\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "dN/dt=0"
         },
         {
           "id": "b",
@@ -2106,16 +3323,60 @@
         },
         {
           "id": "d",
-          "text": "dV/dt=0"
+          "text": "fast-slow variables"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
         "b": "这是“complex mode”的条件，不是题干公式的条件。",
         "c": "这是“Euler decomposition”的条件，不是题干公式的条件。",
-        "d": "这是“V-nullcline”的条件，不是题干公式的条件。"
+        "d": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。"
       },
-      "explanation": "two-dimensional conductance model 的适用条件：fast-slow variables"
+      "explanation": "N-nullcline 的适用条件：dN/dt=0 free neuron 使用 F(V,N)=0 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。"
+    },
+    {
+      "id": "L20-Q53",
+      "lecture": 20,
+      "sectionId": "lecture-20-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture20-CentralPatternGenerators.pdf",
+          "page": 5,
+          "section": "lecture-20-source-5"
+        }
+      ],
+      "conceptTags": [
+        "sharp synaptic threshold approximation"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 20 讲：使用\"sharp synaptic threshold approximation\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "a controls envelope, b frequency"
+        },
+        {
+          "id": "b",
+          "text": "idealized switch"
+        },
+        {
+          "id": "c",
+          "text": "complex representation"
+        },
+        {
+          "id": "d",
+          "text": "fast-slow variables"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“complex mode”的条件，不是题干公式的条件。",
+        "c": "这是“Euler decomposition”的条件，不是题干公式的条件。",
+        "d": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。"
+      },
+      "explanation": "sharp synaptic threshold approximation 的适用条件：idealized switch"
     }
   ]
 }

@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { ContinueLink } from '@/components/ContinueLink';
-import { course } from '@/lib/data';
+import { course, figures } from '@/lib/data';
 
 const indexes = [
   ['/course-map/', '课程图谱'], ['/practice/', '练习'], ['/review/', '累计复习'], ['/search/', '搜索'],
-  ['/glossary/', '术语'], ['/formulas/', '公式'], ['/figures/', '图'], ['/sources/', '来源'],
+  ['/glossary/', '术语'], ['/formulas/', '公式'], ...(figures.length ? [['/figures/', '图'] as const] : []), ['/sources/', '来源'],
   ['/errata/', '勘误'], ['/settings/', '设置'], ['/about/', '课程信息'],
 ] as const;
 

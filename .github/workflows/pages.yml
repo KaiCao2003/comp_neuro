@@ -25,6 +25,8 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
       - uses: actions/configure-pages@v5
+      - name: Install PDF metadata tools
+        run: sudo apt-get update && sudo apt-get install --yes poppler-utils
       - name: Install
         working-directory: site
         run: npm ci
@@ -34,6 +36,9 @@ jobs:
       - name: Test
         working-directory: site
         run: npm test
+      - name: Lint
+        working-directory: site
+        run: npm run lint
       - name: Build static export
         working-directory: site
         env:

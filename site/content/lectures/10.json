@@ -100,6 +100,335 @@
       "stopPredict": "如何证明 covariance eigenvalues 非负？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能把 Hebb 假说、LTP/LTD、STDP 时序窗以及 NMDA-Ca2+-AMPA 机制连成一条有条件的解释链，并说明哪些部分是经验规律、哪些部分是候选机制。",
+      "能从中心化 firing-rate Hebb rule 推导期望权重动力学 E[dw/dt]=Cw，逐项说明向量方向、矩阵 shape 与减均值为何允许 depression。",
+      "能用 quadratic form 证明 covariance matrix 对称且 positive semidefinite，并用 eigenbasis 解释最大方差方向为何增长最快。",
+      "能比较 synaptic scaling、Oja rule 与 BCM sliding threshold 如何分别控制总幅度、局部归一化和 LTP/LTD 分界。",
+      "能区分 unsupervised、supervised 与 reward-based learning，并解释 error、reward 或 reward-prediction error 作为 third factor 的门控作用。"
+    ],
+    "prerequisiteBridge": [
+      "先把 firing rate 看成一个时间窗内的平均放电强度，把突触权重 w_i 看成输入 x_i 对 postsynaptic rate h 的影响系数。在线性近似下，h=w^T x 表示把各输入乘权后相加。这里 w 和 x 都是 M×1 column vector，w^T x 是 scalar；这一 shape 约定会贯穿 Hebbian expected dynamics。还要注意，rate approximation 丢掉了单次 spike 的精确时刻，因此它适合分析较慢的平均权重演化，不能替代 STDP 的毫秒级因果顺序。",
+      "随机输入每次不同，因此要区分单次更新与跨试次平均。中心化变量写成 x-μ，其中 μ=E[x]。covariance matrix C=E[(x-μ)(x-μ)^T] 的第 i,j 项描述两个输入偏离各自均值时是否同向变化；对角项是 variance。减均值不是装饰，它把共同偏高与共同偏低都纳入关系，并允许乘积为负。",
+      "一阶微分方程 dw/dt=aw 的解是 w(t)=w(0)e^{at}：a>0 时幅度指数增长，a<0 时衰减。eigenvector v 满足 Cv=λv，意思是矩阵作用后方向不变、只按 λ 缩放。任何能在 eigenvectors 上展开的初始权重，都可分成若干独立增长的 mode；这正是分析 Hebbian blow-up 与稳定化规则所需的数学入口。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L10-D1",
+        "prompt": "在经典 pair-based STDP 约定 Δt=t_post-t_pre 下，若 presynaptic spike 先到、postsynaptic spike 后到，Δt 的符号及常见权重变化方向是什么？",
+        "answer": "Δt>0，经典窗口中常对应 potentiation，即 Δw>0；但这是特定 synapse、状态和 pair protocol 下的经验规律。",
+        "explanation": "pre-before-post 让 glutamate release 与 postsynaptic depolarization 更可能重叠，促进 NMDA current 与 Ca2+ signal。burst、neuromodulator、dendritic location 或不同 voltage state 都可能改变窗口，不能把符号当成普遍定律。",
+        "remediationModuleId": "L10-M1"
+      },
+      {
+        "id": "L10-D2",
+        "prompt": "若 h 和 x_i 都恒为非负，basic Hebb rule dw_i/dt∝hx_i 为什么不能产生 LTD？中心化后哪个量可以变成负数？",
+        "answer": "因为 hx_i≥0，更新只会不变或增加；中心化后的 (h-E[h])(x_i-E[x_i]) 可以为负。",
+        "explanation": "当 input 高于均值而 output 低于均值，或相反时，两个 deviation 异号，乘积为负，于是权重下降。中心化 rule 学的是共同波动而不是共同绝对活动。",
+        "remediationModuleId": "L10-M1"
+      },
+      {
+        "id": "L10-D3",
+        "prompt": "给定 covariance matrix C 和任意 vector v，为什么 v^T C v 不会小于零？",
+        "answer": "因为 v^T C v=E[(v^T(x-μ))^2]，它是 scalar projection 的平方再取平均。",
+        "explanation": "每次样本先投影到 v 方向，得到一个实数；实数平方非负，非负数的期望也非负。该论证同时说明 covariance eigenvalues 在理论上非负。",
+        "remediationModuleId": "L10-M2"
+      },
+      {
+        "id": "L10-D4",
+        "prompt": "若 C=diag(4,1)，basic expected Hebbian dynamics 从 w(0)=(1,1)^T 出发，哪一分量相对占优？权重 norm 是否自动稳定？",
+        "answer": "第一分量按 e^{4t/τ} 增长，比第二分量的 e^{t/τ} 快，因此方向趋近第一轴；norm 仍无界增长。",
+        "explanation": "Hebbian dynamics 能选择 principal covariance direction，却没有负反馈控制幅度。方向选择与 norm 稳定是两个不同问题，后者需要 scaling、Oja 或 BCM 类机制。",
+        "remediationModuleId": "L10-M2"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L10-M1",
+        "title": "从突触时序与受体机制到 firing-rate Hebb rule",
+        "sourceRefs": [
+          {
+            "file": "Lecture10-SynapticPlasticity.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture10-SynapticPlasticity.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "一个局部 synapse 如何把 pre/post activity 的时间关系变成长期权重变化，又如何把这种现象抽象成可计算的 rate rule？",
+        "paragraphs": [
+          "Hebb 的原始命题把共同活动与连接增强联系起来。实验上，高频刺激 CA3 到 CA1 通路后记录到长期增强（long-term potentiation, LTP），低频 protocol 可得到长期抑制（long-term depression, LTD）。这两种现象描述的是诱导后 synaptic efficacy 的持续改变，不等同于瞬时 facilitation，也不能仅凭一条曲线断言唯一分子机制。",
+          "spike-timing-dependent plasticity（STDP）把相对时序纳入更新。令 Δt=t_post-t_pre；经典 pair-based window 常写成 Δt>0 时 Δw=A_+e^{-Δt/τ_+}，Δt<0 时 Δw=-A_-e^{Δt/τ_-}。指数项表达时间间隔越长，局部 coincidence 越弱。A_± 与 τ_± 是 protocol-dependent 参数，不是所有脑区共享的常数。",
+          "课程原稿给出的 canonical mechanism 是：presynaptic terminal 释放 glutamate；AMPA current 帮助 postsynaptic membrane depolarize；depolarization 移走 NMDA pore 中的 Mg2+ block；NMDA-mediated Ca2+ influx 把 pre/post coincidence 转成 intracellular signal。原稿第一页把解除 Mg2+ block 简写成由 presynaptic release 触发，这里需明确更正：presynaptic release 提供 glutamate，block 的解除依赖 postsynaptic depolarization。较强或不同时间形状的 Ca2+ signal 可偏向 kinase 与 AMPA insertion，另一范围可偏向 phosphatase 与 AMPA removal。这里的关键是条件链，不是把 Ca2+ 简写成单向的 LTP 开关。",
+          "rate model 丢弃单个 spike 的毫秒时序，保留一段时间内的活动强弱。basic rule τ_w dw_i/dt=h x_i 在 h,x_i≥0 时只有 potentiation。原稿列出的三类 covariance rule 分别中心化 output、中心化 input，或同时中心化二者；共同目的都是把“高于自身基线的共同变化”与“绝对值很大”分开。双中心化 rule 在统计推导中最直接，因为其期望正好产生 input covariance。"
+        ],
+        "keyPoints": [
+          "LTP/LTD 是长期 efficacy change 的实验现象，STDP window 是对特定时序 protocol 的经验摘要。",
+          "NMDA coincidence detection 依赖 glutamate 与 postsynaptic depolarization 同时存在，Ca2+ 再连接到 AMPA trafficking。",
+          "basic nonnegative Hebb 只增不减；中心化 activity 才让 negative covariance 对应 depression。"
+        ],
+        "derivation": {
+          "title": "从双中心化局部更新到 covariance learning",
+          "setup": "设 x∈R^{M×1}，w∈R^{M×1}，线性输出 h=w^T x；学习比神经活动慢，因此在计算 input ensemble expectation 时把 w 当作固定参数。",
+          "steps": [
+            {
+              "title": "写出中心化局部 rule",
+              "explanation": "对第 i 个 synapse，令 τ_w dw_i/dt=(h-E[h])(x_i-E[x_i])。vector form 为 τ_w dw/dt=(x-μ_x)(h-E[h])，右侧仍是 M×1。",
+              "latex": "\\tau_w\\dot{\\mathbf w}=(\\mathbf x-\\boldsymbol\\mu_x)(h-\\mathbb E[h])"
+            },
+            {
+              "title": "把 output deviation 改写为 input deviation",
+              "explanation": "因为 h=w^T x 且 w 在 ensemble average 内固定，E[h]=w^T μ_x，所以 h-E[h]=w^T(x-μ_x)。",
+              "latex": "h-\\mathbb E[h]=\\mathbf w^{\\mathsf T}(\\mathbf x-\\boldsymbol\\mu_x)"
+            },
+            {
+              "title": "取期望并识别 covariance",
+              "explanation": "代回后先形成 outer product，再让 w 右乘：E[(x-μ)(x-μ)^T]w=C_xw。因此 expected update 是 covariance matrix 对当前 weight direction 的作用。",
+              "latex": "\\tau_w\\mathbb E[\\dot{\\mathbf w}]=\\mathbb E[(\\mathbf x-\\boldsymbol\\mu)(\\mathbf x-\\boldsymbol\\mu)^{\\mathsf T}]\\mathbf w=C_x\\mathbf w"
+            }
+          ],
+          "symbolNotes": [
+            "C_x∈R^{M×M}；C_{ij} 的单位是 input_i×input_j，若 input 已标准化则为无量纲。",
+            "τ_w 是 learning time constant；w 的 orientation 是 column vector，h 是 scalar，transpose 不能省略。"
+          ],
+          "unitsCheck": "若 x 以 Hz 表示、h 也以 Hz 表示，则原始 rule 的右侧含 Hz^2；比例常数或 τ_w 必须吸收单位，使 dw/dt 与 weight/time 一致。课程公式常省略这一生物尺度因子。",
+          "limitCheck": "若 input covariance 为零，expected update 为零；若所有 activity 不中心化且恒为正，rule 退回只增长，无法表达 anticorrelation 或低于基线的 LTD。"
+        },
+        "workedExample": {
+          "title": "两种活动状态为何可造成 potentiation 或 depression",
+          "problem": "某 input 的均值为 5 Hz，postsynaptic output 均值为 10 Hz。比较状态 A：x_i=8,h=14；状态 B：x_i=8,h=7。令一次更新量与 deviation product 成正比。",
+          "steps": [
+            "状态 A 的 deviations 是 +3 与 +4，乘积为 +12，因此该次 sample 推动 potentiation。",
+            "状态 B 的 deviations 是 +3 与 -3，乘积为 -9，因此该次 sample 推动 depression。",
+            "若改用 basic product hx_i，两种状态分别给 112 与 56，都是正数，无法区分共同偏高与一高一低。"
+          ],
+          "result": "中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。",
+          "sanityCheck": "当 x_i 恰等于其均值时 deviation 为零，无论 h 多大，这个 sample 对该 synapse 的 covariance estimate 都不贡献。"
+        },
+        "selfCheck": {
+          "prompt": "为什么不能把经典 STDP window 直接当成 firing-rate covariance rule？",
+          "answer": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+        },
+        "pitfalls": [
+          "把 NMDA-Ca2+ 链写成所有 synapse 都遵守的唯一机制，忽略 neuromodulation、dendritic voltage 与 burst context。",
+          "只说“fire together wire together”，却不说明 baseline centering、更新符号和学习时间尺度。"
+        ]
+      },
+      {
+        "id": "L10-M2",
+        "title": "Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up",
+        "sourceRefs": [
+          {
+            "file": "Lecture10-SynapticPlasticity.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture10-SynapticPlasticity.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "为什么 covariance 的 eigenvectors 会成为 Hebbian learning 的自然坐标，并且最大 eigenvalue 同时带来方向选择与不稳定增长？",
+        "paragraphs": [
+          "expected dynamics τ_w E[dw/dt]=Cw 把学习问题变成线性 dynamical system。C 的一个 eigenvector v_k 满足 Cv_k=λ_kv_k，因此若 w 正好沿 v_k，更新也沿同一方向，只有幅度改变。对于 symmetric covariance，不同 eigenvectors 可取为 orthogonal basis，于是任意初始 w 都能写成 Σ_k a_kv_k。",
+          "covariance 必须对称：C_{ij}=E[(x_i-μ_i)(x_j-μ_j)]，交换两个 scalar 因子的顺序不改变乘积。它也 positive semidefinite（PSD）：任意 v 的 quadratic form v^TCv 等于 projection v^T(x-μ) 的平方期望。PSD 不表示每个 off-diagonal element 都为正；anticorrelated variables 可以给负 covariance，而整体 quadratic form 仍不为负。",
+          "在 eigenbasis 中，每个 coefficient 满足 τ_w da_k/dt=λ_ka_k，解为 a_k(t)=a_k(0)e^{λ_kt/τ_w}。最大 λ 的 mode 比其他 mode 增长更快，所以归一化方向趋向 principal eigenvector。这解释了与 PCA 的形式联系，也同时暴露 basic Hebb 的问题：PSD eigenvalues 非负，所有已有分量都不会由这条期望动力学主动衰减。",
+          "“方向趋向 PC1”与“权重学到稳定 PC1”不能混为一谈。basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。只有额外 normalization 或 competition 控制幅度时，才能讨论稳定的 PCA-like solution；非线性输出、nonstationary input 或多个相近 eigenvalues 会改变收敛速度和结果。"
+        ],
+        "keyPoints": [
+          "covariance symmetric PSD 的核心证据是 v^TCv=E[(v^T(x-μ))^2]≥0。",
+          "eigenbasis 把 coupled weight dynamics 拆成独立指数 mode，λ_k 决定各 mode 的增长率。",
+          "principal direction selection 不等于 norm stability，Hebbian=PCA 只在附加条件下成立。"
+        ],
+        "derivation": {
+          "title": "PSD、eigenvalue 非负与 eigenmode solution",
+          "setup": "设 C=E[(x-μ)(x-μ)^T] 有有限 second moments，且 C 为实对称 M×M matrix。",
+          "steps": [
+            {
+              "title": "把 quadratic form 化为平方",
+              "explanation": "将 C 的定义代入 v^TCv，并利用 expectation 的线性，把左右 v 移入样本表达式；两边 scalar factors 相乘形成同一个 projection 的平方。",
+              "latex": "\\mathbf v^{\\mathsf T}C\\mathbf v=\\mathbb E[(\\mathbf v^{\\mathsf T}(\\mathbf x-\\boldsymbol\\mu))^2]\\ge 0"
+            },
+            {
+              "title": "由 eigenvector 求 eigenvalue 符号",
+              "explanation": "若 Cv=λv 且 v≠0，则 v^TCv=λv^Tv。分母 v^Tv=||v||^2>0，所以 λ=(v^TCv)/||v||^2≥0。",
+              "latex": "\\lambda=\\frac{\\mathbf v^{\\mathsf T}C\\mathbf v}{\\|\\mathbf v\\|_2^2}\\ge 0"
+            },
+            {
+              "title": "展开并求解每个 coefficient",
+              "explanation": "写 w=Σ_ka_kv_k，代入 τ_w dw/dt=Cw。orthogonal eigenvectors 的 coefficients 可逐项比较，得到独立的一阶 ODE。",
+              "latex": "\\tau_w\\dot a_k=\\lambda_k a_k,\\qquad a_k(t)=a_k(0)e^{\\lambda_k t/\\tau_w}"
+            }
+          ],
+          "symbolNotes": [
+            "λ_k 的单位与 covariance 相同；在规范化模型中常由 learning-rate scale 吸收，使 exponent 无量纲。",
+            "a_k 是 weight vector 在 population-wide statistical direction v_k 上的 coordinate，不代表某个单独 synapse。"
+          ],
+          "unitsCheck": "指数 λ_kt/τ_w 必须无量纲；若 λ 带 input^2 单位，则完整模型中的 learning-rate coefficient 应带 reciprocal input^2。",
+          "limitCheck": "λ_k=0 时该 mode 的 coefficient 保持初值；两个最大 eigenvalues 相等时不存在唯一 principal direction，结果依初值和噪声。"
+        },
+        "workedExample": {
+          "title": "两维 covariance 的增长率与方向",
+          "problem": "令 C=diag(4,1)，τ_w=1 s，w(0)=(1,1)^T。计算 t=1 s 时两个分量及其比值。",
+          "steps": [
+            "eigenvectors 是坐标轴 e_1,e_2，eigenvalues 分别为 4 和 1。",
+            "w_1(1)=e^4≈54.60，w_2(1)=e≈2.72。",
+            "比值 w_1/w_2=e^3≈20.09，方向已非常接近第一轴，但 norm 约为 54.67，远大于初始 √2。"
+          ],
+          "result": "最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。",
+          "sanityCheck": "若把 C 改成 zero matrix，则两个分量都保持 1；若交换 diagonal entries，最终占优轴也随之交换。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 covariance 中存在负的 off-diagonal element 仍不违背 PSD？",
+          "answer": "PSD 限制的是任意整体方向上的 variance v^TCv 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 C_ij<0，但所有线性组合的 variance 仍是平方期望。"
+        },
+        "pitfalls": [
+          "把 eigenvector 当作某个具体 neuron 或 synapse；它是整个 input/weight space 中的方向。",
+          "看到 principal direction 占优就忽略所有分量仍指数增长，从而错误宣称 basic Hebb 已经稳定。"
+        ]
+      },
+      {
+        "id": "L10-M3",
+        "title": "稳定化规则与 third-factor learning",
+        "sourceRefs": [
+          {
+            "file": "Lecture10-SynapticPlasticity.pdf",
+            "page": 5
+          },
+          {
+            "file": "Lecture10-SynapticPlasticity.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "系统如何保留 Hebbian feature selection 又阻止权重爆炸，并在需要 target 或 reward 时把学习限制到合适时刻？",
+        "paragraphs": [
+          "synaptic scaling 在较慢时间尺度上整体 rescale 一组 synapses，使 total weight 或 postsynaptic activity 回到目标范围。它可保留相对权重 pattern，却需要某种 cell-wide measurement。原稿强调，若每次 Hebbian change 后把 norm 拉回固定值，方向仍会朝 principal covariance eigenvector 旋转，幅度则不再无限增长。",
+          "Oja rule 将归一化写进局部近似：dw/dt∝hx-h^2w。第一项是 Hebbian correlation，第二项随 output energy 和当前 weight 增长，形成 weight-dependent decay。在 centered linear stationary input 下，expected fixed point 可对齐 principal eigenvector 并具有有限 norm；这不是所有 Oja variants 的普遍性质，而是该简化条件下的结果。",
+          "BCM rule 用 postsynaptic sliding threshold 改变更新符号，例如 dw_i/dt∝h x_i(h-θ)，并让 θ 随近期 h^2 调整。当 h<θ 时同一 presynaptic activity 倾向 LTD，当 h>θ 时倾向 LTP；长期活动升高会推高 θ，使 potentiation 门槛更严。与 Oja 的显式 weight decay 不同，BCM 通过 activity-dependent sign switch 产生竞争与稳定。",
+          "unsupervised learning 只依 input 与 neural activity，可寻找统计结构；supervised learning 还需要 target-output error；reward learning 用 reward 或 expected reward 的偏差选择有利行为。three-factor rule 把 pre activity、post activity 与第三个 modulatory signal 相乘。第三因子决定何时或朝何方向巩固 local eligibility，但不必总是 dopamine，也不等同于 backprop 中可精确定位到每个 weight 的 gradient。"
+        ],
+        "keyPoints": [
+          "scaling 是整体 rescale，Oja 是 Hebbian term 加局部 weight-dependent decay，BCM 是动态 postsynaptic threshold。",
+          "Oja 对 PCA 的连接依赖 centered linear stationary input 和合适 learning rate。",
+          "three-factor learning 在 pre/post coactivity 之外加入 error、reward 或 contextual gate。"
+        ],
+        "derivation": {
+          "title": "Oja fixed point 为何能同时选方向和控 norm",
+          "setup": "采用 centered linear neuron h=w^T x，C=E[xx^T]，expected Oja dynamics E[dw/dt]=η(Cw-(w^TCw)w)。",
+          "steps": [
+            {
+              "title": "计算两个 expectation",
+              "explanation": "E[hx]=E[xx^T]w=Cw；E[h^2]=E[w^Txx^Tw]=w^TCw，是当前方向上的 output variance。",
+              "latex": "\\mathbb E[h\\mathbf x]=C\\mathbf w,\\qquad \\mathbb E[h^2]=\\mathbf w^{\\mathsf T}C\\mathbf w"
+            },
+            {
+              "title": "代入 eigenvector candidate",
+              "explanation": "若 w=a v_k 且 ||v_k||=1，则 Cw=aλ_kv_k，w^TCw=a^2λ_k。dynamics 仍沿 v_k，幅度满足 da/dt=ηλ_ka(1-a^2)。",
+              "latex": "\\dot a=\\eta\\lambda_k a(1-a^2)"
+            },
+            {
+              "title": "判断有限 fixed amplitude",
+              "explanation": "对 λ_k>0，a=±1 是有限 fixed points；当 0<a<1 时增长，当 a>1 时 decay。不同 directions 的 competition 使最大 λ mode 在常见初始化下最稳定占优。",
+              "latex": "a^*\\in\\{0,\\pm1\\}"
+            }
+          ],
+          "symbolNotes": [
+            "η 是 learning rate，必须足够小才能让 online noisy updates 近似 expected ODE。",
+            "这里 fixed norm 为 1 来自 rule 的 scaling convention；不同参数化可得到其他目标 norm。"
+          ],
+          "unitsCheck": "h^2w 与 hx 两项必须同单位；实际生物 rule 需要比例常数或规范化变量来匹配，抽象公式通常把这些尺度并入 η。",
+          "limitCheck": "若 λ_k=0，该方向没有统计驱动力；若 input nonstationary，固定 C 与固定 principal component 的结论失效。"
+        },
+        "workedExample": {
+          "title": "BCM 阈值如何改变同一 synapse 的更新符号",
+          "problem": "令 x_i=2，更新核心为 x_i h(h-θ)。先取 θ=5，比较 h=3 与 h=8；再解释长期高活动如何改变 θ。",
+          "steps": [
+            "h=3 时，2×3×(3-5)=-12，更新为 depression。",
+            "h=8 时，2×8×(8-5)=48，更新为 potentiation。",
+            "若长期 h^2 偏高，sliding threshold dynamics 会提高 θ，使未来同样的 h 更不容易跨过 potentiation threshold。"
+          ],
+          "result": "BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。",
+          "sanityCheck": "当 h=θ 或 x_i=0 时瞬时更新为零；只改变 presynaptic activity 不能替代 postsynaptic threshold crossing。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 reward-based three-factor rule 不能简化为“Hebb rule 再乘 dopamine”这一个句子？",
+          "answer": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+        },
+        "pitfalls": [
+          "把 synaptic scaling、Oja 与 BCM 当成同一个 normalization 名称，忽略它们测量的变量和反馈位置不同。",
+          "把 three-factor rule 的形式相似性当成 backprop 或 reward circuit 的完整生物机制证明。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L10-FIG-A1",
+      "lecture": 10,
+      "lectureTitle": "突触可塑性",
+      "moduleId": "L10-M3",
+      "title": "Oja rule 同时选择主统计方向并限制权重范数",
+      "alt": "流程图展示中心化输入先产生线性输出，Hebbian 增长项与 Oja 归一化项合成权重更新，最后得到有界的主协方差模态。",
+      "caption": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 -h²w 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。这个结论依赖 stationary input、合适的小 learning rate 与非退化的最大 eigenvalue。",
+      "sourceRefs": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 5
+        },
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 6
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "centered-input",
+          "label": "中心化输入\nx",
+          "x": 11,
+          "y": 55
+        },
+        {
+          "id": "linear-output",
+          "label": "线性输出\nh = wᵀx",
+          "x": 37,
+          "y": 55
+        },
+        {
+          "id": "oja-update",
+          "label": "Hebb: h x\n归一化: -h²w",
+          "x": 63,
+          "y": 55,
+          "tone": "accent"
+        },
+        {
+          "id": "bounded-mode",
+          "label": "有界权重\n主 covariance mode",
+          "x": 89,
+          "y": 55
+        }
+      ],
+      "edges": [
+        {
+          "from": "centered-input",
+          "to": "linear-output",
+          "label": "projection"
+        },
+        {
+          "from": "linear-output",
+          "to": "oja-update",
+          "label": "η(hx - h²w)"
+        },
+        {
+          "from": "oja-update",
+          "to": "bounded-mode",
+          "label": "反复更新"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 STDP 与三步生物机制链",
@@ -329,7 +658,42 @@
     "需要明确 Hebbian learning 与 PCA 的联系是特定线性、统计和稳定化条件下的结果，需避免把\"Hebbian = PCA\"写成普遍同义。"
   ],
   "errata": [
-    "1. Page 1 的 AMPA/NMDA/Ca²+ 链是课程级 canonical mechanism，不是所有 synapses 的唯一实现。 2. Page 5 中 Oja/BCM 公式是简化 firing-rate rules；不同文献 normalization 和 threshold dynamics 可略有差异。 3. Page 6 的 backprop/error 与 biological three-factor rules 仅有形式联系，机制不能直接等同。"
+    {
+      "id": "L10-E01",
+      "lecture": 10,
+      "lectureTitle": "突触可塑性",
+      "kind": "caution",
+      "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+      "sourcePage": 1,
+      "sectionId": "L10-M1",
+      "originalIssue": "Page 1 的 AMPA/NMDA/Ca²+ 链是课程级 canonical mechanism，不是所有 synapses 的唯一实现。",
+      "explanation": "A_± 与 τ_± 是 protocol-dependent 参数，不是所有脑区共享的常数。",
+      "correction": null
+    },
+    {
+      "id": "L10-E02",
+      "lecture": 10,
+      "lectureTitle": "突触可塑性",
+      "kind": "caution",
+      "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+      "sourcePage": 5,
+      "sectionId": "L10-M3",
+      "originalIssue": "Page 5 中 Oja/BCM 公式是简化 firing-rate rules；不同文献 normalization 和 threshold dynamics 可略有差异。",
+      "explanation": "与 Oja 的显式 weight decay 不同，BCM 通过 activity-dependent sign switch 产生竞争与稳定。",
+      "correction": null
+    },
+    {
+      "id": "L10-E03",
+      "lecture": 10,
+      "lectureTitle": "突触可塑性",
+      "kind": "caution",
+      "sourceFile": "Lecture10-SynapticPlasticity.pdf",
+      "sourcePage": 6,
+      "sectionId": "L10-M3",
+      "originalIssue": "Page 6 的 backprop/error 与 biological three-factor rules 仅有形式联系，机制不能直接等同。",
+      "explanation": "第三因子决定何时或朝何方向巩固 local eligibility，但不必总是 dopamine，也不等同于 backprop 中可精确定位到每个 weight 的 gradient。",
+      "correction": "Page 6 的 backprop/error 与 biological three-factor rules 仅有形式联系，机制不能直接等同"
+    }
   ],
   "questions": [
     {
@@ -347,7 +711,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 10 讲：经典 STDP 中 pre-before-post 常对应什么？",
@@ -375,7 +739,7 @@
         "b": "这是“主特征向量（principal eigenvector）”的定义。",
         "c": "这是“BCM 规则（BCM rule）”的定义。"
       },
-      "explanation": "在许多 excitatory synapses 中对应 LTP，但并非普遍。"
+      "explanation": "在许多 excitatory synapses 中对应 LTP，但并非普遍。 实验上，高频刺激 CA3 到 CA1 通路后记录到长期增强（long-term potentiation, LTP），低频 protocol 可得到长期抑制（long-term depression, LTD）。"
     },
     {
       "id": "L10-Q02",
@@ -392,7 +756,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 10 讲：NMDA receptor 为什么可作为 coincidence detector？",
@@ -420,7 +784,7 @@
         "c": "该选项回答的是“three-factor rule 的三个因子是什么？”。",
         "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 1 页。"
       },
-      "explanation": "需要 presynaptic glutamate 与 postsynaptic depolarization 移除 Mg²+ block。"
+      "explanation": "需要 presynaptic glutamate 与 postsynaptic depolarization 移除 Mg²+ block。 原稿第一页把解除 Mg2+ block 简写成由 presynaptic release 触发，这里需明确更正：presynaptic release 提供 glutamate，block 的解除依赖 postsynaptic depolarization。"
     },
     {
       "id": "L10-Q03",
@@ -437,7 +801,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "comparison",
       "cognitiveLevel": "analyze",
       "stem": "第 10 讲：basic Hebb rule 为什么容易 weight blow-up？",
@@ -465,7 +829,7 @@
         "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。",
         "d": "这是“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”的定义。"
       },
-      "explanation": "weight 增大使 output/coactivity 增大，进一步加速 weight 增长，形成 positive feedback。"
+      "explanation": "weight 增大使 output/coactivity 增大，进一步加速 weight 增长，形成 positive feedback。 这解释了与 PCA 的形式联系，也同时暴露 basic Hebb 的问题：PSD eigenvalues 非负，所有已有分量都不会由这条期望动力学主动衰减。"
     },
     {
       "id": "L10-Q04",
@@ -482,7 +846,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "calculation",
       "cognitiveLevel": "evaluate",
       "stem": "第 10 讲：centered covariance rule 为什么允许 LTD？",
@@ -510,24 +874,24 @@
         "b": "该选项回答的是“写出 E[dw/dt] 与 covariance 的关系。”。",
         "d": "这是“Oja 规则（Oja rule）”的定义。"
       },
-      "explanation": "pre/post fluctuation 可异号，使乘积为负。"
+      "explanation": "pre/post fluctuation 可异号，使乘积为负。 covariance 必须对称：C_{ij}=E[(x_i-μ_i)(x_j-μ_j)]，交换两个 scalar 因子的顺序不改变乘积。"
     },
     {
       "id": "L10-Q05",
       "lecture": 10,
-      "sectionId": "lecture-10-source-4",
+      "sectionId": "lecture-10-source-5",
       "sourceAnchors": [
         {
           "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 4,
-          "section": "lecture-10-source-4"
+          "page": 5,
+          "section": "lecture-10-source-5"
         }
       ],
       "conceptTags": [
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 10 讲：写出 E[dw/dt] 与 covariance 的关系。",
@@ -555,7 +919,7 @@
         "b": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。",
         "c": "该选项回答的是“经典 STDP 中 pre-before-post 常对应什么？”。"
       },
-      "explanation": "τ_w E[d w/dt]=Cw（在线性 centered 条件下）。"
+      "explanation": "τ_w E[d w/dt]=Cw（在线性 centered 条件下）。 在 centered linear stationary input 下，expected fixed point 可对齐 principal eigenvector 并具有有限 norm；这不是所有 Oja variants 的普遍性质，而是该简化条件下的结果。"
     },
     {
       "id": "L10-Q06",
@@ -572,7 +936,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "calculation",
       "cognitiveLevel": "understand",
       "stem": "第 10 讲：如何证明 covariance eigenvalues 非负？",
@@ -600,7 +964,7 @@
         "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。",
         "d": "这是“协方差规则（covariance rule）”的定义。"
       },
-      "explanation": "v^TCv=E[(v^T(x−μ))²]≥0，再对 eigenvector 除以 ||v||²。"
+      "explanation": "v^TCv=E[(v^T(x−μ))²]≥0，再对 eigenvector 除以 ||v||²。 原稿强调，若每次 Hebbian change 后把 norm 拉回固定值，方向仍会朝 principal covariance eigenvector 旋转，幅度则不再无限增长。"
     },
     {
       "id": "L10-Q07",
@@ -617,7 +981,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 10 讲：basic Hebb 最终偏向哪个 eigenmode？",
@@ -645,7 +1009,7 @@
         "c": "该选项回答的是“经典 STDP 中 pre-before-post 常对应什么？”。",
         "d": "这是“BCM 规则（BCM rule）”的定义。"
       },
-      "explanation": "最大 eigenvalue 对应 principal eigenvector。"
+      "explanation": "最大 eigenvalue 对应 principal eigenvector。 最大 λ 的 mode 比其他 mode 增长更快，所以归一化方向趋向 principal eigenvector。"
     },
     {
       "id": "L10-Q08",
@@ -662,7 +1026,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 10 讲：Oja rule 的 stabilization term 是什么作用？",
@@ -690,7 +1054,7 @@
         "b": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 1 页。",
         "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 5 页。"
       },
-      "explanation": "−h²w 抑制 norm 增长，使 direction 可收敛而 weight 有界。"
+      "explanation": "−h²w 抑制 norm 增长，使 direction 可收敛而 weight 有界。 basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。"
     },
     {
       "id": "L10-Q09",
@@ -707,7 +1071,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 10 讲：BCM threshold 增大时，同一 postsynaptic response 更可能 LTP 还是 LTD？",
@@ -735,7 +1099,7 @@
         "b": "这是“BCM sign switch”的适用条件。",
         "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 5 页。"
       },
-      "explanation": "更可能低于 threshold，从而 LTD。"
+      "explanation": "更可能低于 threshold，从而 LTD。 实验上，高频刺激 CA3 到 CA1 通路后记录到长期增强（long-term potentiation, LTP），低频 protocol 可得到长期抑制（long-term depression, LTD）。"
     },
     {
       "id": "L10-Q10",
@@ -752,7 +1116,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 10 讲：unsupervised、supervised、reward learning 的 teaching signal 区别？",
@@ -780,7 +1144,7 @@
         "c": "该选项回答的是“three-factor rule 的三个因子是什么？”。",
         "d": "这是“三因子规则（three-factor rule）”的定义。"
       },
-      "explanation": "unsupervised 依输入统计；supervised 有 target/error；reward learning 有 scalar reward/RPE 等第三因子。"
+      "explanation": "unsupervised 依输入统计；supervised 有 target/error；reward learning 有 scalar reward/RPE 等第三因子。 unsupervised learning 只依 input 与 neural activity，可寻找统计结构；supervised learning 还需要 target-output error；reward learning 用 reward 或 expected reward 的偏差选择有利行为。"
     },
     {
       "id": "L10-Q11",
@@ -797,7 +1161,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 10 讲：Hebbian=PCA 为什么不是普遍真理？",
@@ -825,7 +1189,7 @@
         "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 3 页。",
         "d": "这是“Oja rule”的适用条件。"
       },
-      "explanation": "需线性 neuron、centered stationary inputs、适当 normalization 等特定条件。"
+      "explanation": "需线性 neuron、centered stationary inputs、适当 normalization 等特定条件。 basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。"
     },
     {
       "id": "L10-Q12",
@@ -842,7 +1206,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 10 讲：three-factor rule 的三个因子是什么？",
@@ -870,55 +1234,10 @@
         "b": "该选项回答的是“unsupervised、supervised、reward learning 的 teaching signal 区别？”。",
         "d": "该选项回答的是“NMDA receptor 为什么可作为 coincidence detector？”。"
       },
-      "explanation": "presynaptic activity、postsynaptic activity 和 gating/teaching signal。"
+      "explanation": "presynaptic activity、postsynaptic activity 和 gating/teaching signal。 原稿第一页把解除 Mg2+ block 简写成由 presynaptic release 触发，这里需明确更正：presynaptic release 提供 glutamate，block 的解除依赖 postsynaptic depolarization。"
     },
     {
       "id": "L10-Q13",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 1,
-          "section": "lecture-10-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 10 讲：根据 Lecture10-SynapticPlasticity.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "firing-rate Hebbian rules、covariance rules、feedforward example。"
-        },
-        {
-          "id": "b",
-          "text": "expected weight dynamics；positive feedback；eigenvector primer。"
-        },
-        {
-          "id": "c",
-          "text": "symmetric/PSD covariance matrix；eigenmode Hebbian growth。"
-        },
-        {
-          "id": "d",
-          "text": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“firing-rate Hebbian rules、covariance rules、feedforward example”，不是题干指定的关系。",
-        "b": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。",
-        "c": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。"
-      },
-      "explanation": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
-    },
-    {
-      "id": "L10-Q14",
       "lecture": 10,
       "sectionId": "lecture-10-source-1",
       "sourceAnchors": [
@@ -939,76 +1258,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
-        },
-        {
-          "id": "b",
           "text": "因此，对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
         },
         {
-          "id": "d",
-          "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。",
-        "c": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。",
-        "d": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。"
-      },
-      "explanation": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
-    },
-    {
-      "id": "L10-Q15",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 2,
-          "section": "lecture-10-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 10 讲：根据 Lecture10-SynapticPlasticity.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
-        },
-        {
-          "id": "b",
-          "text": "firing-rate Hebbian rules、covariance rules、feedforward example。"
-        },
-        {
           "id": "c",
-          "text": "expected weight dynamics；positive feedback；eigenvector primer。"
+          "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
         },
         {
           "id": "d",
-          "text": "synaptic scaling、Oja rule、BCM rule。"
+          "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "c": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。",
-        "d": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。"
+        "a": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。",
+        "b": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。",
+        "c": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。"
       },
-      "explanation": "firing-rate Hebbian rules、covariance rules、feedforward example。"
+      "explanation": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。 原稿第一页把解除 Mg2+ block 简写成由 presynaptic release 触发，这里需明确更正：presynaptic release 提供 glutamate，block 的解除依赖 postsynaptic depolarization。"
     },
     {
-      "id": "L10-Q16",
+      "id": "L10-Q14",
       "lecture": 10,
       "sectionId": "lecture-10-source-2",
       "sourceAnchors": [
@@ -1022,128 +1296,38 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 10 讲：若要解释\"firing-rate Hebbian rules、covariance rules、feedforward example\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
+          "text": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
         },
         {
           "id": "b",
-          "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
+          "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
         },
         {
           "id": "c",
-          "text": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
+          "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
         },
         {
           "id": "d",
           "text": "清楚区分 unsupervised、supervised、reward-based learning；解释 error/reward 的 third factor。"
         }
       ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "b": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“unsupervised、supervised、reward learning、three-factor rules”，不是题干指定的关系。"
-      },
-      "explanation": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
-    },
-    {
-      "id": "L10-Q17",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 2,
-          "section": "lecture-10-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 2,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 10 讲：阅读与\"firing-rate Hebbian rules、covariance rules、feedforward example\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
-        },
-        {
-          "id": "c",
-          "text": "因此，比较 basic Hebb rule 与三种 covariance-centered rules； 解释减均值为何允许 depression。"
-        },
-        {
-          "id": "d",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "b": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。",
-        "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。"
-      },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-    },
-    {
-      "id": "L10-Q18",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 3,
-          "section": "lecture-10-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 10 讲：根据 Lecture10-SynapticPlasticity.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "expected weight dynamics；positive feedback；eigenvector primer。"
-        },
-        {
-          "id": "b",
-          "text": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
-        },
-        {
-          "id": "c",
-          "text": "firing-rate Hebbian rules、covariance rules、feedforward example。"
-        },
-        {
-          "id": "d",
-          "text": "symmetric/PSD covariance matrix；eigenmode Hebbian growth。"
-        }
-      ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
         "b": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "c": "该陈述解释的是“firing-rate Hebbian rules、covariance rules、feedforward example”，不是题干指定的关系。",
-        "d": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。"
+        "c": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。",
+        "d": "该陈述解释的是“unsupervised、supervised、reward learning、three-factor rules”，不是题干指定的关系。"
       },
-      "explanation": "expected weight dynamics；positive feedback；eigenvector primer。"
+      "explanation": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。 双中心化 rule 在统计推导中最直接，因为其期望正好产生 input covariance。"
     },
     {
-      "id": "L10-Q19",
+      "id": "L10-Q15",
       "lecture": 10,
       "sectionId": "lecture-10-source-3",
       "sourceAnchors": [
@@ -1185,55 +1369,10 @@
         "c": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。",
         "d": "该陈述解释的是“unsupervised、supervised、reward learning、three-factor rules”，不是题干指定的关系。"
       },
-      "explanation": "解释 basic Hebbian dynamics 的 positive feedback 与 exponential growth，以及 principal eigenvector/PCA connection。"
+      "explanation": "解释 basic Hebbian dynamics 的 positive feedback 与 exponential growth，以及 principal eigenvector/PCA connection。 expected dynamics τ_w E[dw/dt]=Cw 把学习问题变成线性 dynamical system。"
     },
     {
-      "id": "L10-Q20",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 3,
-          "section": "lecture-10-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 10 讲：阅读与\"expected weight dynamics\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "weight 增大使 output/coactivity 增大，进一步加速 weight 增长，形成 positive feedback。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "b": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。",
-        "d": "该选项回答的是“basic Hebb rule 为什么容易 weight blow-up？”。"
-      },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-    },
-    {
-      "id": "L10-Q21",
+      "id": "L10-Q16",
       "lecture": 10,
       "sectionId": "lecture-10-source-4",
       "sourceAnchors": [
@@ -1247,128 +1386,38 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 10 讲：根据 Lecture10-SynapticPlasticity.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
-        },
-        {
-          "id": "b",
-          "text": "expected weight dynamics；positive feedback；eigenvector primer。"
-        },
-        {
-          "id": "c",
-          "text": "synaptic scaling、Oja rule、BCM rule。"
-        },
-        {
-          "id": "d",
-          "text": "symmetric/PSD covariance matrix；eigenmode Hebbian growth。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "b": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。",
-        "c": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。"
-      },
-      "explanation": "symmetric/PSD covariance matrix；eigenmode Hebbian growth。"
-    },
-    {
-      "id": "L10-Q22",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 4,
-          "section": "lecture-10-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 10 讲：若要解释\"symmetric/PSD covariance matrix\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
-        },
-        {
-          "id": "b",
           "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
+        },
+        {
+          "id": "c",
+          "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
         },
         {
           "id": "d",
           "text": "清楚区分 unsupervised、supervised、reward-based learning；解释 error/reward 的 third factor。"
         }
       ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "c": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“unsupervised、supervised、reward learning、three-factor rules”，不是题干指定的关系。"
-      },
-      "explanation": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
-    },
-    {
-      "id": "L10-Q23",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 4,
-          "section": "lecture-10-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 10 讲：阅读与\"symmetric/PSD covariance matrix\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "c",
-          "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
-        },
-        {
-          "id": "d",
-          "text": "对 feedforward linear neuron 写出 vector/matrix weight dynamics，并由输入统计得到 covariance matrix。"
-        }
-      ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 4 页。",
-        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。"
+        "b": "该陈述解释的是“synaptic scaling、Oja rule、BCM rule”，不是题干指定的关系。",
+        "d": "该陈述解释的是“unsupervised、supervised、reward learning、three-factor rules”，不是题干指定的关系。"
       },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+      "explanation": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。 它也 positive semidefinite（PSD）：任意 v 的 quadratic form v^TCv 等于 projection v^T(x-μ) 的平方期望。"
     },
     {
-      "id": "L10-Q24",
+      "id": "L10-Q17",
       "lecture": 10,
       "sectionId": "lecture-10-source-5",
       "sourceAnchors": [
@@ -1383,51 +1432,6 @@
         "Lecture10-SynapticPlasticity.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 10 讲：根据 Lecture10-SynapticPlasticity.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
-        },
-        {
-          "id": "b",
-          "text": "firing-rate Hebbian rules、covariance rules、feedforward example。"
-        },
-        {
-          "id": "c",
-          "text": "synaptic scaling、Oja rule、BCM rule。"
-        },
-        {
-          "id": "d",
-          "text": "expected weight dynamics；positive feedback；eigenvector primer。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "b": "该陈述解释的是“firing-rate Hebbian rules、covariance rules、feedforward example”，不是题干指定的关系。",
-        "d": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。"
-      },
-      "explanation": "synaptic scaling、Oja rule、BCM rule。"
-    },
-    {
-      "id": "L10-Q25",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 5,
-          "section": "lecture-10-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Synaptic Plasticity",
-        "Lecture10-SynapticPlasticity.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 10 讲：若要解释\"synaptic scaling、Oja rule、BCM rule\"中的机制或推导，哪条推理链成立？",
@@ -1455,55 +1459,55 @@
         "b": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。",
         "c": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。"
       },
-      "explanation": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
+      "explanation": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。 BCM rule 用 postsynaptic sliding threshold 改变更新符号，例如 dw_i/dt∝h x_i(h-θ)，并让 θ 随近期 h^2 调整。"
     },
     {
-      "id": "L10-Q26",
+      "id": "L10-Q18",
       "lecture": 10,
-      "sectionId": "lecture-10-source-6",
+      "sectionId": "lecture-10-source-5",
       "sourceAnchors": [
         {
           "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 6,
-          "section": "lecture-10-source-6"
+          "page": 5,
+          "section": "lecture-10-source-5"
         }
       ],
       "conceptTags": [
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 10 讲：根据 Lecture10-SynapticPlasticity.pdf 第 6 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 10 讲：阅读\"Oja rule 同时选择主统计方向并限制权重范数\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "unsupervised、supervised、reward learning、three-factor rules。"
+          "text": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 -h²w 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。"
         },
         {
           "id": "b",
-          "text": "Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism。"
+          "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
         },
         {
           "id": "c",
-          "text": "expected weight dynamics；positive feedback；eigenvector primer。"
+          "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
         },
         {
           "id": "d",
-          "text": "symmetric/PSD covariance matrix；eigenmode Hebbian growth。"
+          "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。",
-        "c": "该陈述解释的是“expected weight dynamics”，不是题干指定的关系。",
-        "d": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。"
+        "b": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 5 页。",
+        "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 1 页。"
       },
-      "explanation": "unsupervised、supervised、reward learning、three-factor rules。"
+      "explanation": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 -h²w 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。 原稿强调，若每次 Hebbian change 后把 norm 拉回固定值，方向仍会朝 principal covariance eigenvector 旋转，幅度则不再无限增长。"
     },
     {
-      "id": "L10-Q27",
+      "id": "L10-Q19",
       "lecture": 10,
       "sectionId": "lecture-10-source-6",
       "sourceAnchors": [
@@ -1517,7 +1521,7 @@
         "Synaptic Plasticity",
         "Lecture10-SynapticPlasticity.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 10 讲：若要解释\"unsupervised、supervised、reward learning、three-factor rules\"中的机制或推导，哪条推理链成立？",
@@ -1545,10 +1549,412 @@
         "c": "该陈述解释的是“symmetric/PSD covariance matrix”，不是题干指定的关系。",
         "d": "该陈述解释的是“Hebb、LTP/LTD、STDP、AMPA/NMDA/Ca2+ mechanism”，不是题干指定的关系。"
       },
-      "explanation": "清楚区分 unsupervised、supervised、reward-based learning；解释 error/reward 的 third factor。"
+      "explanation": "清楚区分 unsupervised、supervised、reward-based learning；解释 error/reward 的 third factor。 unsupervised learning 只依 input 与 neural activity，可寻找统计结构；supervised learning 还需要 target-output error；reward learning 用 reward 或 expected reward 的偏差选择有利行为。"
+    },
+    {
+      "id": "L10-Q20",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 1,
+          "section": "lecture-10-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从突触时序与受体机制到 firing-rate Hebb rule"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "understand",
+      "stem": "第 10 讲：为什么不能把经典 STDP window 直接当成 firing-rate covariance rule？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "PSD 限制的是任意整体方向上的 variance v^TCv 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 C_ij<0，但所有线性组合的 variance 仍是平方期望。"
+        },
+        {
+          "id": "b",
+          "text": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+        },
+        {
+          "id": "c",
+          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+        },
+        {
+          "id": "d",
+          "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 4 页。"
+      },
+      "explanation": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。 rate model 丢弃单个 spike 的毫秒时序，保留一段时间内的活动强弱。basic rule τ_w dw_i/dt=h x_i 在 h,x_i≥0 时只有 potentiation。原稿列出的三类 covariance rule 分别中心化 output、中心化 input，或同时中心化二者；共同目的都是把\"高于自身基线的共同变化\"与\"绝对值很大\"分开。双中心化 rule 在统计推导中最直接，因为其期望正好产生 input covariance。"
+    },
+    {
+      "id": "L10-Q21",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 1,
+          "section": "lecture-10-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从突触时序与受体机制到 firing-rate Hebb rule",
+        "两种活动状态为何可造成 potentiation 或 depression"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：完成\"某 input 的均值为 5 Hz，postsynaptic output 均值为 10 Hz。比较状态 A：x_i=8,h=14；状态 B：x_i=8,h=7。令一次更新量与 deviation product 成正比。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。"
+        },
+        {
+          "id": "b",
+          "text": "BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。"
+        },
+        {
+          "id": "c",
+          "text": "因此，比较 basic Hebb rule 与三种 covariance-centered rules；解释减均值为何允许 depression。"
+        },
+        {
+          "id": "d",
+          "text": "中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 1 页。"
+      },
+      "explanation": "中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。 计算路径：状态 A 的 deviations 是 +3 与 +4，乘积为 +12，因此该次 sample 推动 potentiation。 状态 B 的 deviations 是 +3 与 -3，乘积为 -9，因此该次 sample 推动 depression。 若改用 basic product hx_i，两种状态分别给 112 与 56，都是正数，无法区分共同偏高与一高一低。"
+    },
+    {
+      "id": "L10-Q22",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 1,
+          "section": "lecture-10-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从突触时序与受体机制到 firing-rate Hebb rule",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 10 讲：得到\"中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "当 x_i 恰等于其均值时 deviation 为零，无论 h 多大，这个 sample 对该 synapse 的 covariance estimate 都不贡献。"
+        },
+        {
+          "id": "b",
+          "text": "若把 C 改成 zero matrix，则两个分量都保持 1；若交换 diagonal entries，最终占优轴也随之交换。"
+        },
+        {
+          "id": "c",
+          "text": "当 h=θ 或 x_i=0 时瞬时更新为零；只改变 presynaptic activity 不能替代 postsynaptic threshold crossing。"
+        },
+        {
+          "id": "d",
+          "text": "因此，比较 basic Hebb rule 与三种 covariance-centered rules； 解释减均值为何允许 depression。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。"
+      },
+      "explanation": "当 x_i 恰等于其均值时 deviation 为零，无论 h 多大，这个 sample 对该 synapse 的 covariance estimate 都不贡献。 这个检查对应题设\"某 input 的均值为 5 Hz，postsynaptic output 均值为 10 Hz。比较状态 A：x_i=8,h=14；状态 B：x_i=8,h=7。令一次更新量与 deviation product 成正比。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L10-Q23",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 3,
+          "section": "lecture-10-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "understand",
+      "stem": "第 10 讲：为什么 covariance 中存在负的 off-diagonal element 仍不违背 PSD？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+        },
+        {
+          "id": "b",
+          "text": "PSD 限制的是任意整体方向上的 variance v^TCv 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 C_ij<0，但所有线性组合的 variance 仍是平方期望。"
+        },
+        {
+          "id": "c",
+          "text": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+        },
+        {
+          "id": "d",
+          "text": "为 eigenvector/eigenvalue、left/right eigenvector、symmetric matrix 建立支架； 证明 covariance matrix symmetric positive semidefinite。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 4 页。"
+      },
+      "explanation": "PSD 限制的是任意整体方向上的 variance v^TCv 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 C_ij<0，但所有线性组合的 variance 仍是平方期望。 \"方向趋向 PC1\"与\"权重学到稳定 PC1\"不能混为一谈。basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。只有额外 normalization 或 competition 控制幅度时，才能讨论稳定的 PCA-like solution；非线性输出、nonstationary input 或多个相近 eigenvalues 会改变收敛速度和结果。"
+    },
+    {
+      "id": "L10-Q24",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 3,
+          "section": "lecture-10-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up",
+        "两维 covariance 的增长率与方向"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：完成\"令 C=diag(4,1)，τ_w=1 s，w(0)=(1,1)^T。计算 t=1 s 时两个分量及其比值。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。"
+        },
+        {
+          "id": "b",
+          "text": "BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。"
+        },
+        {
+          "id": "c",
+          "text": "最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。"
+        },
+        {
+          "id": "d",
+          "text": "因此，比较 basic Hebb rule 与三种 covariance-centered rules；解释减均值为何允许 depression。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 1 页。"
+      },
+      "explanation": "最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。 计算路径：eigenvectors 是坐标轴 e_1,e_2，eigenvalues 分别为 4 和 1。 w_1(1)=e^4≈54.60，w_2(1)=e≈2.72。 比值 w_1/w_2=e^3≈20.09，方向已非常接近第一轴，但 norm 约为 54.67，远大于初始 √2。"
+    },
+    {
+      "id": "L10-Q25",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 3,
+          "section": "lecture-10-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 10 讲：得到\"最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "当 x_i 恰等于其均值时 deviation 为零，无论 h 多大，这个 sample 对该 synapse 的 covariance estimate 都不贡献。"
+        },
+        {
+          "id": "b",
+          "text": "当 h=θ 或 x_i=0 时瞬时更新为零；只改变 presynaptic activity 不能替代 postsynaptic threshold crossing。"
+        },
+        {
+          "id": "c",
+          "text": "−h²w 抑制 norm 增长，使 direction 可收敛而 weight 有界。"
+        },
+        {
+          "id": "d",
+          "text": "若把 C 改成 zero matrix，则两个分量都保持 1；若交换 diagonal entries，最终占优轴也随之交换。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "该选项回答的是“Oja rule 的 stabilization term 是什么作用？”。"
+      },
+      "explanation": "若把 C 改成 zero matrix，则两个分量都保持 1；若交换 diagonal entries，最终占优轴也随之交换。 这个检查对应题设\"令 C=diag(4,1)，τ_w=1 s，w(0)=(1,1)^T。计算 t=1 s 时两个分量及其比值。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L10-Q26",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 5,
+          "section": "lecture-10-source-5"
+        }
+      ],
+      "conceptTags": [
+        "稳定化规则与 third-factor learning"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 10 讲：为什么 reward-based three-factor rule 不能简化为\"Hebb rule 再乘 dopamine\"这一个句子？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+        },
+        {
+          "id": "b",
+          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+        },
+        {
+          "id": "c",
+          "text": "PSD 限制的是任意整体方向上的 variance v^TCv 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 C_ij<0，但所有线性组合的 variance 仍是平方期望。"
+        },
+        {
+          "id": "d",
+          "text": "从 Hebb's postulate 到 LTP/LTD/STDP， 解释 timing curve 和 AMPA insertion/deletion、NMDA Mg2+ block、postsynaptic Ca2+ 的机制链。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 1 页。"
+      },
+      "explanation": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。 unsupervised learning 只依 input 与 neural activity，可寻找统计结构；supervised learning 还需要 target-output error；reward learning 用 reward 或 expected reward 的偏差选择有利行为。three-factor rule 把 pre activity、post activity 与第三个 modulatory signal 相乘。第三因子决定何时或朝何方向巩固 local eligibility，但不必总是 dopamine，也不等同于 backprop 中可精确定位到每个 weight 的 gradient。"
+    },
+    {
+      "id": "L10-Q27",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 5,
+          "section": "lecture-10-source-5"
+        }
+      ],
+      "conceptTags": [
+        "稳定化规则与 third-factor learning",
+        "BCM 阈值如何改变同一 synapse 的更新符号"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：完成\"令 x_i=2，更新核心为 x_i h(h-θ)。先取 θ=5，比较 h=3 与 h=8；再解释长期高活动如何改变 θ。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。"
+        },
+        {
+          "id": "b",
+          "text": "BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。"
+        },
+        {
+          "id": "c",
+          "text": "最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。"
+        },
+        {
+          "id": "d",
+          "text": "因此，比较 basic Hebb rule 与三种 covariance-centered rules； 解释减均值为何允许 depression。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 2 页。"
+      },
+      "explanation": "BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。 计算路径：h=3 时，2×3×(3-5)=-12，更新为 depression。 h=8 时，2×8×(8-5)=48，更新为 potentiation。 若长期 h^2 偏高，sliding threshold dynamics 会提高 θ，使未来同样的 h 更不容易跨过 potentiation threshold。"
     },
     {
       "id": "L10-Q28",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 5,
+          "section": "lecture-10-source-5"
+        }
+      ],
+      "conceptTags": [
+        "稳定化规则与 third-factor learning",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 10 讲：得到\"BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "当 x_i 恰等于其均值时 deviation 为零，无论 h 多大，这个 sample 对该 synapse 的 covariance estimate 都不贡献。"
+        },
+        {
+          "id": "b",
+          "text": "若把 C 改成 zero matrix，则两个分量都保持 1；若交换 diagonal entries，最终占优轴也随之交换。"
+        },
+        {
+          "id": "c",
+          "text": "当 h=θ 或 x_i=0 时瞬时更新为零；只改变 presynaptic activity 不能替代 postsynaptic threshold crossing。"
+        },
+        {
+          "id": "d",
+          "text": "比较 synaptic scaling、Oja normalization 和 BCM sliding threshold 的稳定化方式与生物含义。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture10-SynapticPlasticity.pdf 第 5 页。"
+      },
+      "explanation": "当 h=θ 或 x_i=0 时瞬时更新为零；只改变 presynaptic activity 不能替代 postsynaptic threshold crossing。 这个检查对应题设\"令 x_i=2，更新核心为 x_i h(h-θ)。先取 θ=5，比较 h=3 与 h=8；再解释长期高活动如何改变 θ。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L10-Q29",
       "lecture": 10,
       "sectionId": "lecture-10-source-1",
       "sourceAnchors": [
@@ -1562,7 +1968,7 @@
         "长时程增强",
         "long-term potentiation, LTP"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"synaptic efficacy 的持久增强。\"称为什么？",
@@ -1577,65 +1983,20 @@
         },
         {
           "id": "c",
+          "text": "Hebbian rule（Hebbian learning）"
+        },
+        {
+          "id": "d",
           "text": "长时程增强（long-term potentiation, LTP）"
-        },
-        {
-          "id": "d",
-          "text": "Hebbian rule（Hebbian learning）"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "“长时程抑制（long-term depression, LTD）”指：synaptic efficacy 的持久降低。",
-        "b": "“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”指：weight change 随 pre/post spike timing 变化的经验规则。",
-        "d": "“Hebbian rule（Hebbian learning）”指：共同活动促进连接变化的一类规则。"
-      },
-      "explanation": "长时程增强（long-term potentiation, LTP）：synaptic efficacy 的持久增强。"
-    },
-    {
-      "id": "L10-Q29",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 1,
-          "section": "lecture-10-source-1"
-        }
-      ],
-      "conceptTags": [
-        "长时程抑制",
-        "long-term depression, LTD"
-      ],
-      "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 10 讲：本讲把\"synaptic efficacy 的持久降低。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）"
-        },
-        {
-          "id": "b",
-          "text": "Hebbian rule（Hebbian learning）"
-        },
-        {
-          "id": "c",
-          "text": "协方差规则（covariance rule）"
-        },
-        {
-          "id": "d",
-          "text": "长时程抑制（long-term depression, LTD）"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”指：weight change 随 pre/post spike timing 变化的经验规则。",
-        "b": "“Hebbian rule（Hebbian learning）”指：共同活动促进连接变化的一类规则。",
-        "c": "“协方差规则（covariance rule）”指：用 centered pre/post fluctuations 驱动 plasticity。"
+        "a": "“长时程抑制（long-term depression, LTD）”指：synaptic efficacy 的持久降低。",
+        "b": "“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”指：weight change 随 pre/post spike timing 变化的经验规则。",
+        "c": "“Hebbian rule（Hebbian learning）”指：共同活动促进连接变化的一类规则。"
       },
-      "explanation": "长时程抑制（long-term depression, LTD）：synaptic efficacy 的持久降低。"
+      "explanation": "长时程增强（long-term potentiation, LTP）：synaptic efficacy 的持久增强。 实验上，高频刺激 CA3 到 CA1 通路后记录到长期增强（long-term potentiation, LTP），低频 protocol 可得到长期抑制（long-term depression, LTD）。"
     },
     {
       "id": "L10-Q30",
@@ -1649,21 +2010,66 @@
         }
       ],
       "conceptTags": [
+        "长时程抑制",
+        "long-term depression, LTD"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 10 讲：本讲把\"synaptic efficacy 的持久降低。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "长时程抑制（long-term depression, LTD）"
+        },
+        {
+          "id": "b",
+          "text": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）"
+        },
+        {
+          "id": "c",
+          "text": "Hebbian rule（Hebbian learning）"
+        },
+        {
+          "id": "d",
+          "text": "协方差规则（covariance rule）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”指：weight change 随 pre/post spike timing 变化的经验规则。",
+        "c": "“Hebbian rule（Hebbian learning）”指：共同活动促进连接变化的一类规则。",
+        "d": "“协方差规则（covariance rule）”指：用 centered pre/post fluctuations 驱动 plasticity。"
+      },
+      "explanation": "长时程抑制（long-term depression, LTD）：synaptic efficacy 的持久降低。 实验上，高频刺激 CA3 到 CA1 通路后记录到长期增强（long-term potentiation, LTP），低频 protocol 可得到长期抑制（long-term depression, LTD）。"
+    },
+    {
+      "id": "L10-Q31",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 1,
+          "section": "lecture-10-source-1"
+        }
+      ],
+      "conceptTags": [
         "脉冲时序依赖可塑性",
         "spike-timing-dependent plasticity, STDP"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"weight change 随 pre/post spike timing 变化的经验规则。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）"
+          "text": "Hebbian rule（Hebbian learning）"
         },
         {
           "id": "b",
-          "text": "Hebbian rule（Hebbian learning）"
+          "text": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）"
         },
         {
           "id": "c",
@@ -1674,16 +2080,16 @@
           "text": "主特征向量（principal eigenvector）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "“Hebbian rule（Hebbian learning）”指：共同活动促进连接变化的一类规则。",
+        "a": "“Hebbian rule（Hebbian learning）”指：共同活动促进连接变化的一类规则。",
         "c": "“协方差规则（covariance rule）”指：用 centered pre/post fluctuations 驱动 plasticity。",
         "d": "“主特征向量（principal eigenvector）”指：covariance 最大 eigenvalue 对应方向。"
       },
       "explanation": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）：weight change 随 pre/post spike timing 变化的经验规则。"
     },
     {
-      "id": "L10-Q31",
+      "id": "L10-Q32",
       "lecture": 10,
       "sectionId": "lecture-10-source-4",
       "sourceAnchors": [
@@ -1708,27 +2114,27 @@
         },
         {
           "id": "b",
-          "text": "Hebbian rule（Hebbian learning）"
+          "text": "主特征向量（principal eigenvector）"
         },
         {
           "id": "c",
-          "text": "主特征向量（principal eigenvector）"
+          "text": "Hebbian rule（Hebbian learning）"
         },
         {
           "id": "d",
           "text": "突触缩放（synaptic scaling）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“协方差规则（covariance rule）”指：用 centered pre/post fluctuations 驱动 plasticity。",
-        "c": "“主特征向量（principal eigenvector）”指：covariance 最大 eigenvalue 对应方向。",
+        "b": "“主特征向量（principal eigenvector）”指：covariance 最大 eigenvalue 对应方向。",
         "d": "“突触缩放（synaptic scaling）”指：为保持总体 activity/weight 水平而整体重标定。"
       },
-      "explanation": "Hebbian rule（Hebbian learning）：共同活动促进连接变化的一类规则。"
+      "explanation": "Hebbian rule（Hebbian learning）：共同活动促进连接变化的一类规则。 basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。"
     },
     {
-      "id": "L10-Q32",
+      "id": "L10-Q33",
       "lecture": 10,
       "sectionId": "lecture-10-source-4",
       "sourceAnchors": [
@@ -1742,7 +2148,7 @@
         "协方差规则",
         "covariance rule"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"用 centered pre/post fluctuations 驱动 plasticity。\"称为什么？",
@@ -1757,23 +2163,23 @@
         },
         {
           "id": "c",
-          "text": "协方差规则（covariance rule）"
+          "text": "Oja 规则（Oja rule）"
         },
         {
           "id": "d",
-          "text": "Oja 规则（Oja rule）"
+          "text": "协方差规则（covariance rule）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“主特征向量（principal eigenvector）”指：covariance 最大 eigenvalue 对应方向。",
         "b": "“突触缩放（synaptic scaling）”指：为保持总体 activity/weight 水平而整体重标定。",
-        "d": "“Oja 规则（Oja rule）”指：含局部归一化项的 Hebbian PCA rule。"
+        "c": "“Oja 规则（Oja rule）”指：含局部归一化项的 Hebbian PCA rule。"
       },
       "explanation": "协方差规则（covariance rule）：用 centered pre/post fluctuations 驱动 plasticity。"
     },
     {
-      "id": "L10-Q33",
+      "id": "L10-Q34",
       "lecture": 10,
       "sectionId": "lecture-10-source-3",
       "sourceAnchors": [
@@ -1787,38 +2193,38 @@
         "主特征向量",
         "principal eigenvector"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"covariance 最大 eigenvalue 对应方向。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "突触缩放（synaptic scaling）"
+          "text": "主特征向量（principal eigenvector）"
         },
         {
           "id": "b",
-          "text": "Oja 规则（Oja rule）"
+          "text": "突触缩放（synaptic scaling）"
         },
         {
           "id": "c",
-          "text": "BCM 规则（BCM rule）"
+          "text": "Oja 规则（Oja rule）"
         },
         {
           "id": "d",
-          "text": "主特征向量（principal eigenvector）"
+          "text": "BCM 规则（BCM rule）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“突触缩放（synaptic scaling）”指：为保持总体 activity/weight 水平而整体重标定。",
-        "b": "“Oja 规则（Oja rule）”指：含局部归一化项的 Hebbian PCA rule。",
-        "c": "“BCM 规则（BCM rule）”指：用滑动 postsynaptic threshold 控制 LTP/LTD。"
+        "b": "“突触缩放（synaptic scaling）”指：为保持总体 activity/weight 水平而整体重标定。",
+        "c": "“Oja 规则（Oja rule）”指：含局部归一化项的 Hebbian PCA rule。",
+        "d": "“BCM 规则（BCM rule）”指：用滑动 postsynaptic threshold 控制 LTP/LTD。"
       },
-      "explanation": "主特征向量（principal eigenvector）：covariance 最大 eigenvalue 对应方向。"
+      "explanation": "主特征向量（principal eigenvector）：covariance 最大 eigenvalue 对应方向。 最大 λ 的 mode 比其他 mode 增长更快，所以归一化方向趋向 principal eigenvector。"
     },
     {
-      "id": "L10-Q34",
+      "id": "L10-Q35",
       "lecture": 10,
       "sectionId": "lecture-10-source-5",
       "sourceAnchors": [
@@ -1832,18 +2238,18 @@
         "突触缩放",
         "synaptic scaling"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"为保持总体 activity/weight 水平而整体重标定。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "突触缩放（synaptic scaling）"
+          "text": "Oja 规则（Oja rule）"
         },
         {
           "id": "b",
-          "text": "Oja 规则（Oja rule）"
+          "text": "突触缩放（synaptic scaling）"
         },
         {
           "id": "c",
@@ -1854,16 +2260,16 @@
           "text": "三因子规则（three-factor rule）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "“Oja 规则（Oja rule）”指：含局部归一化项的 Hebbian PCA rule。",
+        "a": "“Oja 规则（Oja rule）”指：含局部归一化项的 Hebbian PCA rule。",
         "c": "“BCM 规则（BCM rule）”指：用滑动 postsynaptic threshold 控制 LTP/LTD。",
         "d": "“三因子规则（three-factor rule）”指：pre、post 与第三调制/teaching signal 共同决定更新。"
       },
-      "explanation": "突触缩放（synaptic scaling）：为保持总体 activity/weight 水平而整体重标定。"
+      "explanation": "突触缩放（synaptic scaling）：为保持总体 activity/weight 水平而整体重标定。 synaptic scaling 在较慢时间尺度上整体 rescale 一组 synapses，使 total weight 或 postsynaptic activity 回到目标范围。"
     },
     {
-      "id": "L10-Q35",
+      "id": "L10-Q36",
       "lecture": 10,
       "sectionId": "lecture-10-source-3",
       "sourceAnchors": [
@@ -1877,7 +2283,7 @@
         "Oja 规则",
         "Oja rule"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"含局部归一化项的 Hebbian PCA rule。\"称为什么？",
@@ -1888,27 +2294,27 @@
         },
         {
           "id": "b",
-          "text": "Oja 规则（Oja rule）"
+          "text": "三因子规则（three-factor rule）"
         },
         {
           "id": "c",
-          "text": "三因子规则（three-factor rule）"
+          "text": "Oja 规则（Oja rule）"
         },
         {
           "id": "d",
           "text": "长时程增强（long-term potentiation, LTP）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“BCM 规则（BCM rule）”指：用滑动 postsynaptic threshold 控制 LTP/LTD。",
-        "c": "“三因子规则（three-factor rule）”指：pre、post 与第三调制/teaching signal 共同决定更新。",
+        "b": "“三因子规则（three-factor rule）”指：pre、post 与第三调制/teaching signal 共同决定更新。",
         "d": "“长时程增强（long-term potentiation, LTP）”指：synaptic efficacy 的持久增强。"
       },
-      "explanation": "Oja 规则（Oja rule）：含局部归一化项的 Hebbian PCA rule。"
+      "explanation": "Oja 规则（Oja rule）：含局部归一化项的 Hebbian PCA rule。 最大 λ 的 mode 比其他 mode 增长更快，所以归一化方向趋向 principal eigenvector。"
     },
     {
-      "id": "L10-Q36",
+      "id": "L10-Q37",
       "lecture": 10,
       "sectionId": "lecture-10-source-1",
       "sourceAnchors": [
@@ -1937,23 +2343,23 @@
         },
         {
           "id": "c",
-          "text": "BCM 规则（BCM rule）"
+          "text": "长时程抑制（long-term depression, LTD）"
         },
         {
           "id": "d",
-          "text": "长时程抑制（long-term depression, LTD）"
+          "text": "BCM 规则（BCM rule）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“三因子规则（three-factor rule）”指：pre、post 与第三调制/teaching signal 共同决定更新。",
         "b": "“长时程增强（long-term potentiation, LTP）”指：synaptic efficacy 的持久增强。",
-        "d": "“长时程抑制（long-term depression, LTD）”指：synaptic efficacy 的持久降低。"
+        "c": "“长时程抑制（long-term depression, LTD）”指：synaptic efficacy 的持久降低。"
       },
       "explanation": "BCM 规则（BCM rule）：用滑动 postsynaptic threshold 控制 LTP/LTD。"
     },
     {
-      "id": "L10-Q37",
+      "id": "L10-Q38",
       "lecture": 10,
       "sectionId": "lecture-10-source-4",
       "sourceAnchors": [
@@ -1967,38 +2373,38 @@
         "三因子规则",
         "three-factor rule"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 10 讲：本讲把\"pre、post 与第三调制/teaching signal 共同决定更新。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "长时程增强（long-term potentiation, LTP）"
+          "text": "三因子规则（three-factor rule）"
         },
         {
           "id": "b",
-          "text": "长时程抑制（long-term depression, LTD）"
+          "text": "长时程增强（long-term potentiation, LTP）"
         },
         {
           "id": "c",
-          "text": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）"
+          "text": "长时程抑制（long-term depression, LTD）"
         },
         {
           "id": "d",
-          "text": "三因子规则（three-factor rule）"
+          "text": "脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“长时程增强（long-term potentiation, LTP）”指：synaptic efficacy 的持久增强。",
-        "b": "“长时程抑制（long-term depression, LTD）”指：synaptic efficacy 的持久降低。",
-        "c": "“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”指：weight change 随 pre/post spike timing 变化的经验规则。"
+        "b": "“长时程增强（long-term potentiation, LTP）”指：synaptic efficacy 的持久增强。",
+        "c": "“长时程抑制（long-term depression, LTD）”指：synaptic efficacy 的持久降低。",
+        "d": "“脉冲时序依赖可塑性（spike-timing-dependent plasticity, STDP）”指：weight change 随 pre/post spike timing 变化的经验规则。"
       },
       "explanation": "三因子规则（three-factor rule）：pre、post 与第三调制/teaching signal 共同决定更新。"
     },
     {
-      "id": "L10-Q38",
+      "id": "L10-Q39",
       "lecture": 10,
       "sectionId": "lecture-10-source-1",
       "sourceAnchors": [
@@ -2018,55 +2424,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "pair-based approximation"
-        },
-        {
-          "id": "b",
           "text": "activities 非负时只 potentiates"
         },
         {
-          "id": "c",
-          "text": "linear neuron、stationary inputs"
-        },
-        {
-          "id": "d",
-          "text": "finite second moments"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
-        "c": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。",
-        "d": "这是“covariance PSD”的条件，不是题干公式的条件。"
-      },
-      "explanation": "STDP timing rule 的适用条件：pair-based approximation"
-    },
-    {
-      "id": "L10-Q39",
-      "lecture": 10,
-      "sectionId": "lecture-10-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture10-SynapticPlasticity.pdf",
-          "page": 6,
-          "section": "lecture-10-source-6"
-        }
-      ],
-      "conceptTags": [
-        "basic rate Hebb"
-      ],
-      "difficulty": 4,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 10 讲：使用\"basic rate Hebb\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "pair-based approximation"
-        },
-        {
           "id": "b",
-          "text": "activities 非负时只 potentiates"
+          "text": "pair-based approximation"
         },
         {
           "id": "c",
@@ -2079,14 +2441,58 @@
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "这是“STDP timing rule”的条件，不是题干公式的条件。",
+        "a": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
         "c": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。",
         "d": "这是“covariance PSD”的条件，不是题干公式的条件。"
       },
-      "explanation": "basic rate Hebb 的适用条件：activities 非负时只 potentiates"
+      "explanation": "STDP timing rule 的适用条件：pair-based approximation spike-timing-dependent plasticity（STDP）把相对时序纳入更新。"
     },
     {
       "id": "L10-Q40",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 6,
+          "section": "lecture-10-source-6"
+        }
+      ],
+      "conceptTags": [
+        "basic rate Hebb"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：使用\"basic rate Hebb\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "pair-based approximation"
+        },
+        {
+          "id": "b",
+          "text": "linear neuron、stationary inputs"
+        },
+        {
+          "id": "c",
+          "text": "activities 非负时只 potentiates"
+        },
+        {
+          "id": "d",
+          "text": "finite second moments"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“STDP timing rule”的条件，不是题干公式的条件。",
+        "b": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。",
+        "d": "这是“covariance PSD”的条件，不是题干公式的条件。"
+      },
+      "explanation": "basic rate Hebb 的适用条件：activities 非负时只 potentiates 在 centered linear stationary input 下，expected fixed point 可对齐 principal eigenvector 并具有有限 norm；这不是所有 Oja variants 的普遍性质，而是该简化条件下的结果。"
+    },
+    {
+      "id": "L10-Q41",
       "lecture": 10,
       "sectionId": "lecture-10-source-3",
       "sourceAnchors": [
@@ -2099,7 +2505,7 @@
       "conceptTags": [
         "centered Hebb expected dynamics"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 10 讲：使用\"centered Hebb expected dynamics\"时，哪项条件或约定不可省略？",
@@ -2114,20 +2520,196 @@
         },
         {
           "id": "c",
-          "text": "linear neuron、stationary inputs"
+          "text": "finite second moments"
         },
         {
           "id": "d",
+          "text": "linear neuron、stationary inputs"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“STDP timing rule”的条件，不是题干公式的条件。",
+        "b": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
+        "c": "这是“covariance PSD”的条件，不是题干公式的条件。"
+      },
+      "explanation": "centered Hebb expected dynamics 的适用条件：linear neuron、stationary inputs"
+    },
+    {
+      "id": "L10-Q42",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 4,
+          "section": "lecture-10-source-4"
+        }
+      ],
+      "conceptTags": [
+        "covariance PSD"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：使用\"covariance PSD\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
           "text": "finite second moments"
+        },
+        {
+          "id": "b",
+          "text": "pair-based approximation"
+        },
+        {
+          "id": "c",
+          "text": "activities 非负时只 potentiates"
+        },
+        {
+          "id": "d",
+          "text": "linear neuron、stationary inputs"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“STDP timing rule”的条件，不是题干公式的条件。",
+        "c": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
+        "d": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。"
+      },
+      "explanation": "covariance PSD 的适用条件：finite second moments PSD 不表示每个 off-diagonal element 都为正；anticorrelated variables 可以给负 covariance，而整体 quadratic form 仍不为负。"
+    },
+    {
+      "id": "L10-Q43",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 4,
+          "section": "lecture-10-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Hebbian eigenmode growth"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：使用\"Hebbian eigenmode growth\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "pair-based approximation"
+        },
+        {
+          "id": "b",
+          "text": "C fixed"
+        },
+        {
+          "id": "c",
+          "text": "activities 非负时只 potentiates"
+        },
+        {
+          "id": "d",
+          "text": "linear neuron、stationary inputs"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“STDP timing rule”的条件，不是题干公式的条件。",
+        "c": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
+        "d": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Hebbian eigenmode growth 的适用条件：C fixed basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。"
+    },
+    {
+      "id": "L10-Q44",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 3,
+          "section": "lecture-10-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Oja rule"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：使用\"Oja rule\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "pair-based approximation"
+        },
+        {
+          "id": "b",
+          "text": "activities 非负时只 potentiates"
+        },
+        {
+          "id": "c",
+          "text": "online PCA approximation"
+        },
+        {
+          "id": "d",
+          "text": "linear neuron、stationary inputs"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "这是“STDP timing rule”的条件，不是题干公式的条件。",
         "b": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
-        "d": "这是“covariance PSD”的条件，不是题干公式的条件。"
+        "d": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。"
       },
-      "explanation": "centered Hebb expected dynamics 的适用条件：linear neuron、stationary inputs"
+      "explanation": "Oja rule 的适用条件：online PCA approximation 这解释了与 PCA 的形式联系，也同时暴露 basic Hebb 的问题：PSD eigenvalues 非负，所有已有分量都不会由这条期望动力学主动衰减。"
+    },
+    {
+      "id": "L10-Q45",
+      "lecture": 10,
+      "sectionId": "lecture-10-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture10-SynapticPlasticity.pdf",
+          "page": 5,
+          "section": "lecture-10-source-5"
+        }
+      ],
+      "conceptTags": [
+        "BCM sign switch"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 10 讲：使用\"BCM sign switch\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "pair-based approximation"
+        },
+        {
+          "id": "b",
+          "text": "activities 非负时只 potentiates"
+        },
+        {
+          "id": "c",
+          "text": "linear neuron、stationary inputs"
+        },
+        {
+          "id": "d",
+          "text": "dynamic threshold"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“STDP timing rule”的条件，不是题干公式的条件。",
+        "b": "这是“basic rate Hebb”的条件，不是题干公式的条件。",
+        "c": "这是“centered Hebb expected dynamics”的条件，不是题干公式的条件。"
+      },
+      "explanation": "BCM sign switch 的适用条件：dynamic threshold 与 Oja 的显式 weight decay 不同，BCM 通过 activity-dependent sign switch 产生竞争与稳定。"
     }
   ]
 }

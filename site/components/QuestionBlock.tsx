@@ -21,9 +21,12 @@ const questionTypeLabel: Record<Question['type'], string> = {
 
 export function QuestionBlock({ question, seed, showSourceLink = true, onSubmit }: { question: Question; seed: string; showSourceLink?: boolean; onSubmit?: (correct: boolean) => void }) {
   const blockRef = useRef<HTMLElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const fieldsetRef = useRef<HTMLFieldSetElement>(null);
   const choices = useMemo(() => seededShuffle(question.choices, `${seed}:${question.id}:choices`), [question, seed]);
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [wrongAttempts, setWrongAttempts] = useState<string[]>([]);
   const correct = selected === question.correctChoiceId;
 
   useEffect(() => {
@@ -48,17 +51,24 @@ export function QuestionBlock({ question, seed, showSourceLink = true, onSubmit 
 
   function submit() {
     if (!selected || submitted) return;
-    setSubmitted(true);
     const isCorrect = selected === question.correctChoiceId;
     recordQuestionAttempt(question.id, isCorrect);
-    onSubmit?.(isCorrect);
+    if (!isCorrect && wrongAttempts.length === 0) {
+      setWrongAttempts([selected]);
+      setSelected(null);
+      requestAnimationFrame(() => fieldsetRef.current?.querySelector<HTMLInputElement>('input')?.focus());
+      return;
+    }
+    setSubmitted(true);
+    onSubmit?.(isCorrect && wrongAttempts.length === 0);
+    requestAnimationFrame(() => feedbackRef.current?.focus());
   }
 
   return (
     <aside className="question-block" aria-labelledby={`${question.id}-stem`} ref={blockRef}>
       <p className="exercise-label">练习 · {questionTypeLabel[question.type]} · 难度 {question.difficulty}</p>
       <p className="question-stem" id={`${question.id}-stem`}>{question.stem}</p>
-      <fieldset disabled={submitted}>
+      <fieldset disabled={submitted} ref={fieldsetRef}>
         <legend className="sr-only">选择一个答案</legend>
         {choices.map((choice) => (
           <label className="answer-choice" key={choice.id}>
@@ -67,10 +77,17 @@ export function QuestionBlock({ question, seed, showSourceLink = true, onSubmit 
           </label>
         ))}
       </fieldset>
-      {!submitted && <button className="text-button" type="button" onClick={submit} disabled={!selected}>提交答案</button>}
+      {!submitted && <button className="text-button" type="button" onClick={submit} disabled={!selected}>{wrongAttempts.length ? '再次提交' : '提交答案'}</button>}
+      {!submitted && wrongAttempts.length > 0 && (
+        <div className="answer-feedback retry-feedback" role="status">
+          <p className="answer-status">第一次答案不正确，再试一次</p>
+          <p>{question.wrongChoiceExplanations[wrongAttempts[0]]}</p>
+        </div>
+      )}
       {submitted && (
-        <div className="answer-feedback" role="status">
-          <p className="answer-status">{correct ? '正确' : '不正确'}</p>
+        <div className="answer-feedback" role="status" tabIndex={-1} ref={feedbackRef}>
+          <p className="answer-status">{correct ? (wrongAttempts.length ? '第二次答对了' : '正确') : '第二次仍不正确'}</p>
+          <p><strong>正确答案：</strong>{question.choices.find((choice) => choice.id === question.correctChoiceId)?.text}</p>
           <p>{question.explanation}</p>
           <details>
             <summary>其他选项为什么不对</summary>

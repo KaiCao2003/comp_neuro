@@ -1,0 +1,135 @@
+import { assetPath } from '@/lib/site';
+import type { FigureCurve, FigureIndexEntry } from '@/lib/types';
+
+const WIDTH = 760;
+const HEIGHT = 400;
+const LEFT = 72;
+const RIGHT = 716;
+const TOP = 52;
+const BOTTOM = 330;
+
+const mapX = (value: number) => LEFT + (Math.max(0, Math.min(100, value)) / 100) * (RIGHT - LEFT);
+const mapY = (value: number) => BOTTOM - (Math.max(0, Math.min(100, value)) / 100) * (BOTTOM - TOP);
+const curvePath = (curve: FigureCurve) => curve.points.map(([x, y], index) => `${index ? 'L' : 'M'} ${mapX(x)} ${mapY(y)}`).join(' ');
+
+function SvgLabel({ x, y, text, className }: { x: number; y: number; text: string; className?: string }) {
+  const lines = text.split('\n');
+  return (
+    <text className={className} x={x} y={y - ((lines.length - 1) * 8)} textAnchor="middle">
+      {lines.map((line, index) => <tspan x={x} dy={index ? 17 : 0} key={`${line}-${index}`}>{line}</tspan>)}
+    </text>
+  );
+}
+
+function Axes({ xLabel, yLabel }: { xLabel: string; yLabel: string }) {
+  return (
+    <g className="scientific-axes">
+      <line x1={LEFT} x2={RIGHT} y1={BOTTOM} y2={BOTTOM} />
+      <line x1={LEFT} x2={LEFT} y1={BOTTOM} y2={TOP} />
+      <text x={(LEFT + RIGHT) / 2} y={382} textAnchor="middle">{xLabel}</text>
+      <text transform={`translate(21 ${(TOP + BOTTOM) / 2}) rotate(-90)`} textAnchor="middle">{yLabel}</text>
+    </g>
+  );
+}
+
+function Curves({ curves, prefix }: { curves: FigureCurve[]; prefix: string }) {
+  return (
+    <>
+      {curves.map((curve, index) => (
+        <g key={`${prefix}-${curve.label}`}>
+          <path className={`scientific-curve curve-${index % 4}`} d={curvePath(curve)} strokeDasharray={curve.dashed ? '10 7' : undefined} />
+          {curve.markers && curve.points.map(([x, y], pointIndex) => <circle className={`curve-marker curve-${index % 4}`} cx={mapX(x)} cy={mapY(y)} r="4" key={`${x}-${y}-${pointIndex}`} />)}
+        </g>
+      ))}
+      <g className="scientific-legend">
+        {curves.map((curve, index) => {
+          const x = LEFT + index * 158;
+          return <g key={`legend-${prefix}-${curve.label}`} transform={`translate(${x} 24)`}><line className={`scientific-curve curve-${index % 4}`} x1="0" x2="28" y1="0" y2="0" strokeDasharray={curve.dashed ? '8 5' : undefined} /><text x="36" y="4">{curve.label}</text></g>;
+        })}
+      </g>
+    </>
+  );
+}
+
+function FlowGraphic({ figure, markerId }: { figure: Extract<FigureIndexEntry, { kind: 'flow' }>; markerId: string }) {
+  const nodes = new Map(figure.nodes.map((node) => [node.id, node]));
+  return (
+    <>
+      <defs><marker id={markerId} markerHeight="7" markerWidth="9" orient="auto" refX="8" refY="3.5"><path d="M0,0 L9,3.5 L0,7 Z" /></marker></defs>
+      <g className="scientific-edges">
+        {figure.edges.map((edge, index) => {
+          const from = nodes.get(edge.from);
+          const to = nodes.get(edge.to);
+          if (!from || !to) return null;
+          const fromX = mapX(from.x); const fromY = mapY(from.y); const toX = mapX(to.x); const toY = mapY(to.y);
+          const dx = toX - fromX; const dy = toY - fromY;
+          const boundaryScale = 1 / Math.max(Math.abs(dx) / 72, Math.abs(dy) / 27, 1);
+          const x1 = fromX + dx * boundaryScale; const y1 = fromY + dy * boundaryScale;
+          const x2 = toX - dx * boundaryScale; const y2 = toY - dy * boundaryScale;
+          return <g key={`${edge.from}-${edge.to}-${index}`}><line x1={x1} y1={y1} x2={x2} y2={y2} markerEnd={`url(#${markerId})`} strokeDasharray={edge.dashed ? '9 6' : undefined} />{edge.label && <SvgLabel className="edge-label" x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 6} text={edge.label} />}</g>;
+        })}
+      </g>
+      <g className="scientific-nodes">
+        {figure.nodes.map((node) => {
+          const x = mapX(node.x); const y = mapY(node.y);
+          return <g className={node.tone === 'accent' ? 'node-accent' : undefined} transform={`translate(${x} ${y})`} key={node.id}><rect x="-72" y="-27" width="144" height="54" /><SvgLabel x={0} y={5} text={node.label} /></g>;
+        })}
+      </g>
+    </>
+  );
+}
+
+function PlotGraphic({ figure }: { figure: Extract<FigureIndexEntry, { kind: 'plot' }> }) {
+  return <><Axes xLabel={figure.xLabel} yLabel={figure.yLabel} /><Curves curves={figure.curves} prefix={figure.id} />{figure.annotations?.map((item, index) => <g className="scientific-annotation" key={`${item.label}-${index}`}><circle cx={mapX(item.x)} cy={mapY(item.y)} r="3" /><SvgLabel x={mapX(item.x)} y={mapY(item.y) - 10} text={item.label} /></g>)}</>;
+}
+
+function TimelineGraphic({ figure, markerId }: { figure: Extract<FigureIndexEntry, { kind: 'timeline' }>; markerId: string }) {
+  const laneY = (lane: number) => TOP + 60 + lane * (220 / Math.max(1, figure.lanes.length - 1));
+  return (
+    <>
+      <defs><marker id={markerId} markerHeight="7" markerWidth="9" orient="auto" refX="8" refY="3.5"><path d="M0,0 L9,3.5 L0,7 Z" /></marker></defs>
+      {figure.lanes.map((lane, index) => <g className="timeline-lane" key={lane}><text x={LEFT - 12} y={laneY(index) + 4} textAnchor="end">{lane}</text><line x1={LEFT} x2={RIGHT} y1={laneY(index)} y2={laneY(index)} /></g>)}
+      {figure.links?.map((link, index) => {
+        const from = figure.events[link.from]; const to = figure.events[link.to];
+        if (!from || !to) return null;
+        const x1 = mapX(from.x); const y1 = laneY(from.lane); const x2 = mapX(to.x); const y2 = laneY(to.lane);
+        return <g className="scientific-edges" key={`link-${index}`}><line x1={x1} y1={y1} x2={x2} y2={y2} markerEnd={`url(#${markerId})`} strokeDasharray={link.dashed ? '9 6' : undefined} />{link.label && <SvgLabel className="edge-label" x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 8} text={link.label} />}</g>;
+      })}
+      {figure.events.map((event, index) => <g className={`timeline-event ${event.tone === 'accent' ? 'event-accent' : ''}`} key={`${event.label}-${index}`}><circle cx={mapX(event.x)} cy={laneY(event.lane)} r="7" /><SvgLabel x={mapX(event.x)} y={laneY(event.lane) - 18} text={event.label} /></g>)}
+      <text className="timeline-direction" x={RIGHT} y={382} textAnchor="end">时间 / 顺序 →</text>
+    </>
+  );
+}
+
+function StateSpaceGraphic({ figure }: { figure: Extract<FigureIndexEntry, { kind: 'state-space' }> }) {
+  return (
+    <>
+      <Axes xLabel={figure.xLabel} yLabel={figure.yLabel} />
+      <Curves curves={figure.nullclines} prefix={`${figure.id}-nullcline`} />
+      {figure.trajectories.map((curve, index) => <path className={`scientific-trajectory trajectory-${index % 2}`} d={curvePath(curve)} key={curve.label} strokeDasharray={curve.dashed ? '9 6' : undefined} />)}
+      {figure.fixedPoints?.map((point) => <g className="fixed-point" key={point.label}><circle className={point.stable ? 'stable' : 'unstable'} cx={mapX(point.x)} cy={mapY(point.y)} r="7" /><SvgLabel x={mapX(point.x)} y={mapY(point.y) - 14} text={point.label} /></g>)}
+      {figure.annotations?.map((item, index) => <SvgLabel className="scientific-annotation" x={mapX(item.x)} y={mapY(item.y)} text={item.label} key={`${item.label}-${index}`} />)}
+    </>
+  );
+}
+
+export function ScientificFigure({ figure, compact = false }: { figure: FigureIndexEntry; compact?: boolean }) {
+  const titleId = `${figure.id}-svg-title`;
+  const descriptionId = `${figure.id}-svg-description`;
+  const markerId = `${figure.id.replace(/[^A-Za-z0-9_-]/g, '-')}-arrow`;
+  return (
+    <figure className={`scientific-figure${compact ? ' scientific-figure-compact' : ''}`} id={figure.id}>
+      <div className="scientific-canvas" role="group" aria-label={`${figure.title} 图形区域，可横向滚动`}>
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-labelledby={`${titleId} ${descriptionId}`}>
+          <title id={titleId}>{figure.alt}</title>
+          <desc id={descriptionId}>{figure.caption}</desc>
+          {figure.kind === 'flow' && <FlowGraphic figure={figure} markerId={markerId} />}
+          {figure.kind === 'plot' && <PlotGraphic figure={figure} />}
+          {figure.kind === 'timeline' && <TimelineGraphic figure={figure} markerId={markerId} />}
+          {figure.kind === 'state-space' && <StateSpaceGraphic figure={figure} />}
+        </svg>
+      </div>
+      <figcaption><strong>{figure.title}。</strong> {figure.caption} <span className="figure-source">来源：{figure.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index ? '；' : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`}>{ref.file}，第 {ref.page} 页</a></span>)}。示意图。</span></figcaption>
+    </figure>
+  );
+}

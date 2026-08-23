@@ -89,6 +89,391 @@
       "stopPredict": "N neurons 的 voltage+synaptic-current model 有多少连续 ODE states？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能用 integrating factor 推导 τ dx/dt=−x+I(t) 的因果解，并把它识别为指数核与输入的卷积。",
+      "能说明归一化指数核的面积、时间常数和因果性，计算阶跃或脉冲输入后的响应。",
+      "能把指数突触卷积改写为一阶突触电流 ODE，并数清 N 神经元网络的 2N 个连续状态与离散事件。",
+      "能从 Poisson 平均把 spike trains 近似为发放率，区分三种 rate model 的动力学假设与适用时间尺度。",
+      "能写出前馈层 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})，检查权重 shape，并解释非线性为何使多层组合不退化成单个线性映射。"
+    ],
+    "prerequisiteBridge": [
+      "非恒定输入的一阶方程不能直接把 I 当常数代入旧的稳态解，但线性系统仍可把每个过去时刻的输入贡献相加。integrating factor 的目标是把方程左侧凑成一个乘积的完整导数。乘以 e^{t/τ} 后，d[xe^{t/τ}]/dt 同时产生 dx/dt 与 x/τ 两项，正好匹配漏项；积分再乘回 e^{-t/τ}，每段历史输入便带有按时间差衰减的权重。",
+      "卷积把每个过去输入复制成延迟核并在当前时刻相加，因果核只使用过去信息。本讲明确改用面积归一约定：指数核总面积为 1，因此恒定输入的长期增益为 1，事件权重表示输入面积。上一讲的数值例使用峰值归一核，权重承担幅度；两种约定都可用，但不能在不调整权重单位的情况下混合。",
+      "脉冲网络追踪每个 V_i 与突触电流 I_i，阈值事件使 spike train 反馈到所有接收者。率模型则在比单个 ISI 更长的时间尺度上平均事件，用连续 h_i(t) 表示条件平均发放率。平均并不会自动闭合方程，还需要一个 F–I 关系 h=F(I) 或带时间常数的响应方程。选择哪种近似取决于突触与发放率响应的相对快慢。",
+      "向量层需要延续 shape 习惯。若输入 h^{(ℓ−1)} 有 n_{ℓ−1} 个分量，下一层有 n_ℓ 个单元，则 U^{(ℓ)} 必须是 n_ℓ×n_{ℓ−1}，乘积才能得到 n_ℓ 维预激活。逐分量非线性 F 如 threshold-linear、sigmoid 或 tanh 作用于该向量。没有非线性时，多层矩阵可合并为一个矩阵，多层深度不会产生新的函数形状。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L09-D1",
+        "prompt": "核 K_τ(t)=τ⁻¹e^{−t/τ}H(t) 的积分是多少？这对恒定输入意味着什么？",
+        "answer": "从 0 到 ∞ 的积分为 1；恒定输入的长期卷积输出等于该输入幅度，而不会多乘一个 τ。",
+        "explanation": "在本讲选定的面积归一与单位直流增益约定下，漏掉 1/τ 会使核面积从 1 变成 τ，并改变权重单位与稳态增益；峰值归一并非普遍错误，但必须同时重定义权重。",
+        "remediationModuleId": "L09-M1"
+      },
+      {
+        "id": "L09-D2",
+        "prompt": "含 N 个膜电压 V_i 和 N 个指数突触电流 I_i 的网络有多少连续 ODE 状态？",
+        "answer": "共有 2N 个连续状态，此外还有阈值、重置和脉冲到达等离散事件。",
+        "explanation": "spike train 不是额外连续状态；它由电压越阈事件生成，并作为冲激输入改变突触电流。",
+        "remediationModuleId": "L09-M2"
+      },
+      {
+        "id": "L09-D3",
+        "prompt": "若 τ_s≪τ_h，为什么可把突触电流 I 近似为其瞬时稳态？",
+        "answer": "I 在 h 明显变化前已经快速放松，使 τ_s dI/dt 相对较小，可近似令 0=−I+Wh+Ux，从而 I≈Wh+Ux。",
+        "explanation": "这是时间尺度分离近似，需比较参数和实际轨迹；不是把导数在所有条件下随意删除。",
+        "remediationModuleId": "L09-M3"
+      },
+      {
+        "id": "L09-D4",
+        "prompt": "两层都是线性且无偏置、无非线性：h=U₁x，y=U₂h。为何深度没有增加表达能力？",
+        "answer": "y=U₂U₁x，可把矩阵乘积定义为单个 U_eff，因此整体仍是一次线性映射。",
+        "explanation": "逐层非线性阻止这种完全合并，使不同输入区域经历不同有效线性关系。",
+        "remediationModuleId": "L09-M3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L09-M1",
+        "title": "integrating factor、因果积分与指数卷积",
+        "sourceRefs": [
+          {
+            "file": "Lecture9-NeuralNetworks2.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "任意时间输入如何通过一阶线性系统留下逐渐衰减的记忆，为什么这段记忆可以写成归一化因果卷积？",
+        "paragraphs": [
+          "考虑 τ dx/dt=−x+I(t)。移项并除以 τ 得 dx/dt+x/τ=I(t)/τ。乘以 e^{t/τ} 后，左侧成为 d[xe^{t/τ}]/dt，这是乘积法则的直接结果。积分上下限若取初始时刻 t₀ 到当前 t，会同时保留初始条件项与受迫积分；若假设系统从遥远过去已稳定且初始瞬态消失，可把下限写成 −∞。",
+          "一般解为 x(t)=x(t₀)e^{−(t−t₀)/τ}+∫_{t₀}^{t}τ⁻¹e^{−(t−t')/τ}I(t')dt'。第一项是初始状态记忆，第二项是输入历史。越久以前的输入时间差 t−t' 越大，权重按指数减小；未来 t'>t 不在积分区间，因此响应因果。",
+          "定义 K_τ(u)=τ⁻¹e^{−u/τ}H(u)，受迫项就是 (K_τ*I)(t)。核面积 ∫₀∞τ⁻¹e^{−u/τ}du=1，均值延迟为 τ。τ 小时响应集中在近期、追踪输入快；τ 大时平滑窗口更长。核不是简单“延迟 τ”，而是对一整段过去赋连续权重。",
+          "卷积与 ODE 是同一线性滤波器的两种表示。卷积直接展示历史权重，适合解析输入贡献；ODE 只需保存当前 x，适合逐步模拟。二者等价要求同一核归一化、初始条件与边界约定。若数值卷积与 ODE 结果不符，应先检查离散 dt 因子和初始瞬态。",
+          "对阶跃 I(t)=I₀H(t)、x(0)=0，积分给 x(t)=I₀(1−e^{−t/τ})；对短冲激 qδ(t)，响应为 qK_τ(t)。这两个基元可以构造更复杂输入。阶跃长期输出 I₀ 验证面积归一，冲激响应面积 q 验证线性系统对总输入量的保存。"
+        ],
+        "keyPoints": [
+          "integrating factor 把一阶线性方程左侧变为乘积的完整导数。",
+          "解由初始瞬态与过去输入的因果卷积组成。",
+          "归一化指数核面积为 1，τ 控制记忆宽度而非稳态增益。"
+        ],
+        "derivation": {
+          "title": "任意输入一阶系统的 integrating-factor 解",
+          "setup": "τ>0，已知 x(t₀)=x₀，求 τ dx/dt=−x+I(t) 在 t≥t₀ 的解。",
+          "steps": [
+            {
+              "title": "写标准形式",
+              "explanation": "移项并除以 τ。",
+              "latex": "\\frac{dx}{dt}+\\frac{x}{\\tau}=\\frac{I(t)}{\\tau}"
+            },
+            {
+              "title": "乘 integrating factor",
+              "explanation": "乘 e^{t/τ}，用乘积法则识别完整导数。",
+              "latex": "\\frac{d}{dt}\\!\\left[x(t)e^{t/\\tau}\\right]=\\frac{1}{\\tau}I(t)e^{t/\\tau}"
+            },
+            {
+              "title": "积分",
+              "explanation": "从 t₀ 到 t 积分，左侧为端点差。",
+              "latex": "x(t)e^{t/\\tau}-x_0e^{t_0/\\tau}=\\int_{t_0}^{t}\\frac{I(t')}{\\tau}e^{t'/\\tau}\\,dt'"
+            },
+            {
+              "title": "乘回衰减因子",
+              "explanation": "整理得到初始项与受迫项。",
+              "latex": "x(t)=x_0e^{-(t-t_0)/\\tau}+\\int_{t_0}^{t}\\frac{e^{-(t-t')/\\tau}}{\\tau}I(t')\\,dt'"
+            },
+            {
+              "title": "识别卷积",
+              "explanation": "用 K_τ(u)=τ⁻¹e^{-u/τ}H(u)，受迫项写成 K_τ*I。"
+            }
+          ],
+          "symbolNotes": [
+            "t' 是历史时间的积分变量，t−t' 是核的延迟参数。",
+            "H(u) 是 Heaviside 函数，用来明确 u<0 时核为零。"
+          ],
+          "unitsCheck": "K_τ 单位为 1/时间，K_τ I dt' 与 I 同单位；方程要求 x 与 I 同单位，t/τ 无单位。",
+          "limitCheck": "I=0 时只剩初始指数衰减；常数输入长期 x→I；τ→0 且输入足够平滑时 x(t)→I(t)。"
+        },
+        "workedExample": {
+          "title": "阶跃输入的三个时间点",
+          "problem": "τ=10 ms，x(0)=0，t≥0 时 I(t)=6。计算 x(10 ms)、x(20 ms)、x(30 ms)，并判断长期值。",
+          "steps": [
+            "阶跃解为 x(t)=6(1−e^{−t/10 ms})。",
+            "t=10 ms 时 x=6(1−e⁻¹)≈6×0.6321=3.793。",
+            "t=20 ms 时 x=6(1−e⁻²)≈5.188；t=30 ms 时 x≈6(1−e⁻³)=5.701。",
+            "t→∞ 时指数消失，x→6，与单位面积核对恒定输入的增益 1 一致。"
+          ],
+          "result": "三个时间点约为 3.79、5.19、5.70，长期趋向 6。",
+          "sanityCheck": "响应应从 0 单调增加、始终低于 6；每过一个 τ，剩余误差再乘 e⁻¹。"
+        },
+        "selfCheck": {
+          "prompt": "若把核误写成 e^{−t/τ}H(t) 而漏掉 1/τ，恒定输入的长期输出会怎样？",
+          "answer": "若仍沿用本讲面积归一时的权重单位，核面积会从 1 变成 τ，恒定输入稳态变为 τI₀；若有意改用峰值归一，则必须同步把权重解释为幅度并重新核对单位。"
+        },
+        "pitfalls": [
+          "integrating factor 只乘部分方程，未用乘积法则核对。",
+          "把积分上限写到 ∞ 而没有因果 Heaviside，导致未来输入影响当前。",
+          "离散卷积求和时漏乘 dt，结果随采样率改变。"
+        ]
+      },
+      {
+        "id": "L09-M2",
+        "title": "指数突触的 ODE 表示与 2N 状态网络",
+        "sourceRefs": [
+          {
+            "file": "Lecture9-NeuralNetworks2.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "为什么使用单指数突触后，不必在每个时间步重新遍历全部脉冲历史，而只需为每个神经元增加一个电流状态？",
+        "paragraphs": [
+          "上一讲把突触电流写成 K_s 与 spike train 的卷积。真实突触常有快上升、慢下降的双指数形状；当上升时间远短于研究时间尺度，可用单指数近似。取归一化 K_s(t)=τ_s⁻¹e^{−t/τ_s}H(t)，它正是一阶滤波方程 τ_s dI/dt=−I+S(t) 的冲激响应。",
+          "对网络神经元 i，输入事件 S_i(t)=Σ_jW_{ij}Δ_j(t)+Σ_jU_{ij}X_j(t)。于是突触状态满足 τ_s dI_i/dt=−I_i+S_i(t)，膜状态满足 C dV_i/dt=−G_L(V_i−E_L)+I_i。每个 i 有 V_i 与 I_i 两个连续变量，N 个神经元合计 2N 个 ODE 状态。",
+          "阈值—重置仍是离散事件：V_j 达到 V_T 时记录 t_k^{(j)}，重置 V_j，并通过 W_{ij} 对各接收者的 I_i 产生冲激跳变。若方程右侧写 Wδ，积分一个无限短事件得到 τ_sΔI_i=W，因此 W 的单位是电流×时间；若希望 W 直接表示电流跳幅，应把事件项写成 τ_sWδ。单位约定必须与核归一化一致。",
+          "ODE 表示具有递归记忆：没有新脉冲时，只用当前 I_i 乘指数衰减，不必保存所有 t_k。时间步模拟仍需处理冲激，常见做法是在事件时直接加跳变量，再对事件间 ODE 积分。把 δ 当作普通数组高度而不除以 dt 或不采用跳变规则，会让结果依赖时间步。",
+          "单指数近似的局限可由数据判断。若突触电流有可见上升阶段，单状态无法同时匹配峰时与衰减；可引入上升和衰减两个状态形成双指数。若电流实际为 G_s(t)(V−E_s)，还需保留反转电位与电压依赖，不能把固定电流核推广到所有膜电压。"
+        ],
+        "keyPoints": [
+          "归一化指数卷积等价于一阶突触状态 ODE。",
+          "N 个膜电压加 N 个突触电流构成 2N 个连续状态，另有阈值事件。",
+          "δ 项的系数单位决定事件造成的跳幅，数值实现必须与归一化一致。"
+        ],
+        "derivation": {
+          "title": "证明指数卷积满足一阶突触 ODE",
+          "setup": "定义 I(t)=∫_{−∞}^{t}τ_s⁻¹e^{−(t−t')/τ_s}S(t')dt'，其中 S 可包含普通输入与脉冲分布。",
+          "steps": [
+            {
+              "title": "写积分形式",
+              "explanation": "因果 Heaviside 把上限限制到当前 t。",
+              "latex": "I(t)=\\int_{-\\infty}^{t}\\frac{e^{-(t-t')/\\tau_s}}{\\tau_s}S(t')\\,dt'"
+            },
+            {
+              "title": "对上限求导",
+              "explanation": "Leibniz 规则给端点项 S(t)/τ_s，并对核求导得到 −I/τ_s。",
+              "latex": "\\frac{dI}{dt}=\\frac{S(t)}{\\tau_s}-\\frac{I(t)}{\\tau_s}"
+            },
+            {
+              "title": "乘时间常数",
+              "explanation": "整理为 τ_s dI/dt=−I+S。",
+              "latex": "\\tau_s\\frac{dI}{dt}=-I+S(t)"
+            },
+            {
+              "title": "代入网络事件",
+              "explanation": "令 S_i=Σ_jW_{ij}Δ_j+Σ_jU_{ij}X_j，得到每个接收者的突触方程。",
+              "latex": "\\tau_s\\frac{dI_i}{dt}=-I_i+\\sum_jW_{ij}\\Delta_j+\\sum_jU_{ij}X_j"
+            },
+            {
+              "title": "数状态",
+              "explanation": "每个 i 的 V_i 与 I_i 各需一个初值，因此连续状态维数为 2N。"
+            }
+          ],
+          "symbolNotes": [
+            "S(t) 是进入滤波器的事件驱动或普通输入，I(t) 是滤波后的突触电流状态。",
+            "τ_s 是突触衰减时间常数，不应与膜时间常数 τ_m 混用。"
+          ],
+          "unitsCheck": "若 I 为电流，则 S 也须为电流；当 S=qδ 时 q 为电流×时间，因 δ 为 1/时间。",
+          "limitCheck": "S=0 时 I 指数衰减；持续常数 S₀ 时 I→S₀；τ_s 很小时 I 快速跟随足够平滑的 S。"
+        },
+        "workedExample": {
+          "title": "单个冲激造成的突触跳变与衰减",
+          "problem": "τ_s=5 ms，事件项为 qδ(t)，q=50 pA·ms，事件前 I(0⁻)=0。求 I(0⁺)、5 ms 和 10 ms 时的电流。",
+          "steps": [
+            "跨越事件对 τ_s dI/dt=−I+qδ 积分；有限宽度趋零时 −I 项积分消失，τ_s[I(0⁺)−I(0⁻)]=q。",
+            "跳幅为 q/τ_s=50 pA·ms/5 ms=10 pA，所以 I(0⁺)=10 pA。",
+            "事件后无新输入，I(t)=10e^{−t/5 ms} pA。",
+            "I(5 ms)=10e⁻¹≈3.679 pA；I(10 ms)=10e⁻²≈1.353 pA。"
+          ],
+          "result": "电流瞬时跳到 10 pA，随后在 5、10 ms 时分别约为 3.68、1.35 pA。",
+          "sanityCheck": "每过一个 τ_s 幅度乘 e⁻¹；响应面积 10 pA×5 ms=50 pA·ms，与 q 相同。"
+        },
+        "selfCheck": {
+          "prompt": "为什么事件驱动实现比把 δ 近似成固定高度的一格更不易随 dt 改变？",
+          "answer": "事件驱动直接施加由积分得到的跳变量，保持冲激面积不变；固定高度若不按 1/dt 缩放，时间步改变时面积和总输入量都会改变。"
+        },
+        "pitfalls": [
+          "把 W 同时当作核面积和电流跳幅，漏掉 τ_s 因子。",
+          "只数 N 个电压状态，忘记指数突触为每个接收者增加一个连续状态。",
+          "认为单指数能表达有限上升时间和电导反转效应。"
+        ]
+      },
+      {
+        "id": "L09-M3",
+        "title": "从 spike 平均到 rate dynamics 与前馈层",
+        "sourceRefs": [
+          {
+            "file": "Lecture9-NeuralNetworks2.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture9-NeuralNetworks2.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture9-NeuralNetworks2.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "在什么时间尺度下可以用连续发放率替代离散脉冲，三种率方程如何由不同快慢假设产生，并怎样退化为前馈网络层？",
+        "paragraphs": [
+          "在包含许多脉冲但输入率近似不变的小窗 Δt 上，Poisson spike train 的平均计数除以 Δt 给发放率 h_j。对突触方程取条件平均，可把 Δ_j 替换为 h_j、外部 X_j 替换为 x_j，得到 τ_s dI_i/dt=−I_i+Σ_jW_{ij}h_j+Σ_jU_{ij}x_j。这个替换描述均值，不保留单试次脉冲波动。",
+          "闭合模型需要 F–I 曲线 h_i=F(I_i)。讲义给出 threshold-linear、sigmoid、linear 与 tanh 等选择。threshold-linear 适合非负发放率和近阈工作区；sigmoid 有上下饱和；纯 linear 可解析但允许负率；tanh 有正负输出，更像中心化活动变量。函数选择决定稳态数目、增益与饱和，不能只因绘图方便互换。",
+          "第一种近似假设发放率响应很快，直接设 h=F(I)，只保留突触动力学。第二种较完整模型另加 τ_h dh/dt=−h+F(I)，同时保留 I 与 h 的响应时间。若突触远快于 rate，即 τ_s≪τ_h，可令 I≈Wh+Ux，得到常用的 τ_h dh/dt=−h+F(Wh+Ux)。每次删去导数都对应明确时间尺度分离。",
+          "当 recurrent 权重 W=0 且考虑稳态，单层映射变为 h=F(Ux)。重复这一操作得到 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})，输入 x=h^{(0)}，最后连接输出 y。每层矩阵的行数是本层单元数、列数是上一层单元数。若加入 bias，应写成 U h+b 并同样检查 shape。",
+          "若 F 是恒等映射，多层整体为 U^{(L)}⋯U^{(1)}x，仍是单个线性变换。非线性使不同层在不同输入区间选择不同有效斜率，从而构成更丰富函数。这里建立的是前向计算结构，不包含权重如何从数据学习；训练目标、梯度和泛化需要额外假设，不能从层叠方程本身推出。"
+        ],
+        "keyPoints": [
+          "spike-to-rate 平均得到条件均值动力学，并舍弃单试次事件波动。",
+          "三种 rate model 分别对应快 rate、保留双时间尺度、快 synapse 的近似。",
+          "前馈稳态层是 h=F(Ux)，权重 shape 由相邻层宽度决定。",
+          "没有非线性时多层线性映射可合并，深度不增加函数类别。"
+        ],
+        "derivation": {
+          "title": "由双时间尺度率模型得到常用单状态形式",
+          "setup": "平均突触与 rate 响应满足 τ_s dI/dt=−I+Wh+Ux，τ_h dh/dt=−h+F(I)，并假设 τ_s≪τ_h。",
+          "steps": [
+            {
+              "title": "识别快慢变量",
+              "explanation": "I 的放松时间 τ_s 远小于 h 的 τ_h，所以在 h 明显变化期间 I 已接近当前稳态。"
+            },
+            {
+              "title": "设置快变量准稳态",
+              "explanation": "在慢时间尺度上近似 τ_s dI/dt≈0，得到 I≈Wh+Ux。",
+              "latex": "0\\approx-I+Wh+Ux\\quad\\Rightarrow\\quad I\\approx Wh+Ux"
+            },
+            {
+              "title": "代回 rate 方程",
+              "explanation": "用准稳态输入替代 I。",
+              "latex": "\\tau_h\\frac{dh}{dt}=-h+F(Wh+Ux)"
+            },
+            {
+              "title": "取无 recurrent 情形",
+              "explanation": "若 W=0，稳态令 dh/dt=0，得到 h=F(Ux)。",
+              "latex": "h=F(Ux)"
+            },
+            {
+              "title": "层叠",
+              "explanation": "把上一层输出当下一层输入，得到 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})。",
+              "latex": "h^{(\\ell)}=F\\!\\left(U^{(\\ell)}h^{(\\ell-1)}\\right)"
+            }
+          ],
+          "symbolNotes": [
+            "h 是发放率向量，I 是平均突触输入向量，W recurrent、U feedforward。",
+            "F 通常逐分量作用；若它耦合分量，需要另行说明。"
+          ],
+          "unitsCheck": "h 为 Hz；若 F 输入为电流、输出为 Hz，W h 与 U x 必须为电流；τ_h dh/dt 与 h 同为 Hz。",
+          "limitCheck": "τ_s 不够小时准稳态近似会产生相位与幅度误差；W=0 且稳态给前馈层；F 为恒等时层叠仍为线性。"
+        },
+        "workedExample": {
+          "title": "手算两层 threshold-linear 前馈网络",
+          "problem": "输入 x=(1,2)ᵀ，第一层 U¹=[[1,−1],[0.5,1]]，F(z)=max(0,z) 逐分量作用；第二层权重 U²=[2,−1]，输出层为线性。求隐藏层与输出，并核对 shape。",
+          "steps": [
+            "U¹ 是 2×2，乘 2×1 输入得到 2×1：z¹=(1·1−1·2,0.5·1+1·2)ᵀ=(−1,2.5)ᵀ。",
+            "逐分量 threshold-linear 得 h¹=(0,2.5)ᵀ。",
+            "U² 是 1×2，可乘 2×1 隐藏向量，得到标量 y=2·0−1·2.5=−2.5。",
+            "若第二层也使用非负 threshold-linear，最终输出会变为 max(0,−2.5)=0；输出非线性必须明示。"
+          ],
+          "result": "隐藏活动为 (0,2.5)ᵀ；线性输出为 −2.5。",
+          "sanityCheck": "每次矩阵乘法内部维度匹配；第一隐藏单元的负预激活被截为零，第二单元保持 2.5。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 τ_s≪τ_h 是删去突触导数的理由，而“模型想简单一点”不是数学理由？",
+          "answer": "时间尺度比给出可检验的小参数和误差预期：快变量在慢变量变化前放松；若没有尺度分离，删导数会改变延迟、稳定性和瞬态，需由数据验证。"
+        },
+        "pitfalls": [
+          "平均 spike train 后仍声称模型保留单试次 Poisson 波动。",
+          "同时令 I=Wh+Ux 又保留独立 I 动力学，却未说明是哪种近似。",
+          "矩阵 shape 不匹配时依赖隐式广播，造成与层结构不同的计算。",
+          "把前馈层叠的存在等同于已经给出学习算法。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L09-FIG-A1",
+      "lecture": 9,
+      "lectureTitle": "神经网络 II：突触动力学与 firing-rate 模型",
+      "moduleId": "L09-M2",
+      "title": "突触时间常数决定单次脉冲保留多久",
+      "alt": "相同初始幅度下快慢两种指数突触状态随时间衰减的对比图",
+      "caption": "对峰值归一的指数响应，较大的 τ_s 使同一脉冲的影响衰减更慢、历史记忆更长；若改用面积归一核 K_s=τ_s⁻¹e^(−t/τ_s)，峰值会同时按 1/τ_s 改变，比较曲线前必须先确认归一化约定。",
+      "sourceRefs": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 2
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "脉冲后的时间（0–5τ_fast）",
+      "yLabel": "峰值归一的突触状态",
+      "curves": [
+        {
+          "label": "快：τ_s=τ_fast",
+          "points": [
+            [
+              0,
+              100
+            ],
+            [
+              20,
+              37
+            ],
+            [
+              40,
+              14
+            ],
+            [
+              60,
+              5
+            ],
+            [
+              80,
+              2
+            ],
+            [
+              100,
+              1
+            ]
+          ]
+        },
+        {
+          "label": "慢：τ_s=3τ_fast",
+          "points": [
+            [
+              0,
+              100
+            ],
+            [
+              20,
+              72
+            ],
+            [
+              40,
+              51
+            ],
+            [
+              60,
+              37
+            ],
+            [
+              80,
+              26
+            ],
+            [
+              100,
+              19
+            ]
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "x": 60,
+          "y": 37,
+          "label": "慢突触保留更多历史"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 integrating factor 与 causal kernel",
@@ -295,7 +680,42 @@
     "需要区分\"spike-rate statistical description\"和\"dynamical firing-rate variable\"；两者相关但并非自动相同。"
   ],
   "errata": [
-    "1. Page 2 指出真实 synaptic kernel 常为 double exponential；单指数是为了得到一阶 ODE 的课程近似。 2. Page 3 的 temporal averaging 需要合适窗口和 stationarity 假设。 3. Page 5 只建立 deep network architecture，不包含权重学习算法。"
+    {
+      "id": "L09-E01",
+      "lecture": 9,
+      "lectureTitle": "神经网络 II：突触动力学与 firing-rate 模型",
+      "kind": "caution",
+      "sourceFile": "Lecture9-NeuralNetworks2.pdf",
+      "sourcePage": 2,
+      "sectionId": "L09-M2",
+      "originalIssue": "Page 2 指出真实 synaptic kernel 常为 double exponential；单指数是为了得到一阶 ODE 的课程近似。",
+      "explanation": "真实突触常有快上升、慢下降的双指数形状；当上升时间远短于研究时间尺度，可用单指数近似。",
+      "correction": null
+    },
+    {
+      "id": "L09-E02",
+      "lecture": 9,
+      "lectureTitle": "神经网络 II：突触动力学与 firing-rate 模型",
+      "kind": "caution",
+      "sourceFile": "Lecture9-NeuralNetworks2.pdf",
+      "sourcePage": 3,
+      "sectionId": "lecture-09-source-3",
+      "originalIssue": "Page 3 的 temporal averaging 需要合适窗口和 stationarity 假设。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": "Page 3 的 temporal averaging 需要合适窗口和 stationarity 假设"
+    },
+    {
+      "id": "L09-E03",
+      "lecture": 9,
+      "lectureTitle": "神经网络 II：突触动力学与 firing-rate 模型",
+      "kind": "caution",
+      "sourceFile": "Lecture9-NeuralNetworks2.pdf",
+      "sourcePage": 5,
+      "sectionId": "L09-M3",
+      "originalIssue": "Page 5 只建立 deep network architecture，不包含权重学习算法。",
+      "explanation": "这里建立的是前向计算结构，不包含权重如何从数据学习；训练目标、梯度和泛化需要额外假设，不能从层叠方程本身推出。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -313,7 +733,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 9 讲：integrating factor 为什么选 e^{t/τ}？",
@@ -341,7 +761,7 @@
         "b": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 3 页。",
         "d": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 2 页。"
       },
-      "explanation": "它使 τx'+x 组合成 τe^{-?} 的 product derivative；具体有 d(xe^{t/τ})/dt=e^{t/τ}(x'+x/τ)。"
+      "explanation": "它使 τx'+x 组合成 τe^{-?} 的 product derivative；具体有 d(xe^{t/τ})/dt=e^{t/τ}(x'+x/τ)。 乘以 e^{t/τ} 后，左侧成为 d[xe^{t/τ}]/dt，这是乘积法则的直接结果。 判断依据：考虑 τ dx/dt=−x+I(t)。移项并除以 τ 得 dx/dt+x/τ=I(t)/τ。乘以 e^{t/τ} 后，左侧成为 d[xe^{t/τ}]/dt，这是乘积法则的直接结果。积分上下限若取初始时刻 t₀ 到当前 t，会同时保留初始条件项与受迫积分；若假设系统从遥远过去已稳定且初始瞬态消失，可把下限写成 −∞。"
     },
     {
       "id": "L09-Q02",
@@ -358,7 +778,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：causal exponential kernel 在 t<0 的值？",
@@ -386,7 +806,7 @@
         "b": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 1 页。",
         "c": "这是“exponential synapse ODE”的适用条件。"
       },
-      "explanation": "0。"
+      "explanation": "0。 上一讲把突触电流写成 K_s 与 spike train 的卷积。 判断依据：上一讲把突触电流写成 K_s 与 spike train 的卷积。真实突触常有快上升、慢下降的双指数形状；当上升时间远短于研究时间尺度，可用单指数近似。取归一化 K_s(t)=τ_s⁻¹e^{−t/τ_s}H(t)，它正是一阶滤波方程 τ_s dI/dt=−I+S(t) 的冲激响应。"
     },
     {
       "id": "L09-Q03",
@@ -403,7 +823,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 9 讲：kernel area 为 1 有什么意义？",
@@ -431,7 +851,7 @@
         "c": "这是“rate response（firing-rate response time）”的定义。",
         "d": "这是“前馈网络（feedforward network）”的定义。"
       },
-      "explanation": "对 constant input 的 DC gain 为 1。"
+      "explanation": "对 constant input 的 DC gain 为 1。 在包含许多脉冲但输入率近似不变的小窗 Δt 上，Poisson spike train 的平均计数除以 Δt 给发放率 h_j。"
     },
     {
       "id": "L09-Q04",
@@ -448,7 +868,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 9 讲：如何把 K*input 改写为 ODE？",
@@ -476,7 +896,7 @@
         "c": "该选项回答的是“kernel area 为 1 有什么意义？”。",
         "d": "这是“F-I 函数（F-I function）”的定义。"
       },
-      "explanation": "τ_s dI/dt=−I+input。"
+      "explanation": "τ_s dI/dt=−I+input。 对突触方程取条件平均，可把 Δ_j 替换为 h_j、外部 X_j 替换为 x_j，得到 τ_s dI_i/dt=−I_i+Σ_jW_{ij}h_j+Σ_jU_{ij}x_j。"
     },
     {
       "id": "L09-Q05",
@@ -493,7 +913,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：N neurons 的 voltage+synaptic-current model 有多少连续 ODE states？",
@@ -521,7 +941,7 @@
         "b": "该选项回答的是“rate model 何时会失败？”。",
         "d": "这是“feedforward layer”的适用条件。"
       },
-      "explanation": "2N，另有 spike/reset events。"
+      "explanation": "2N，另有 spike/reset events。 在包含许多脉冲但输入率近似不变的小窗 Δt 上，Poisson spike train 的平均计数除以 Δt 给发放率 h_j。"
     },
     {
       "id": "L09-Q06",
@@ -538,7 +958,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "assumption",
       "cognitiveLevel": "understand",
       "stem": "第 9 讲：h=F(I) 隐含什么时间尺度假设？",
@@ -566,7 +986,7 @@
         "b": "这是“突触时间常数（synaptic time constant）”的定义。",
         "c": "该选项回答的是“threshold-linear 与 sigmoid 的主要差异？”。"
       },
-      "explanation": "rate adjustment 相对 synaptic/input changes 很快。"
+      "explanation": "rate adjustment 相对 synaptic/input changes 很快。 每次删去导数都对应明确时间尺度分离。 判断依据：第一种近似假设发放率响应很快，直接设 h=F(I)，只保留突触动力学。第二种较完整模型另加 τ_h dh/dt=−h+F(I)，同时保留 I 与 h 的响应时间。若突触远快于 rate，即 τ_s≪τ_h，可令 I≈Wh+Ux，得到常用的 τ_h dh/dt=−h+F(Wh+Ux)。每次删去导数都对应明确时间尺度分离。"
     },
     {
       "id": "L09-Q07",
@@ -583,7 +1003,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：τ_r dh/dt=−h+F(I) 增加了什么？",
@@ -598,20 +1018,20 @@
         },
         {
           "id": "c",
-          "text": "sigmoid 平滑并饱和；threshold-linear 有硬阈值且高输入不饱和。"
+          "text": "τ_s dI/dt=−I+input。"
         },
         {
           "id": "d",
-          "text": "rate adjustment 相对 synaptic/input changes 很快。"
+          "text": "sigmoid 平滑并饱和；threshold-linear 有硬阈值且高输入不饱和。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
         "b": "这是“F-I 函数（F-I function）”的定义。",
-        "c": "该选项回答的是“threshold-linear 与 sigmoid 的主要差异？”。",
-        "d": "该选项回答的是“h=F(I) 隐含什么时间尺度假设？”。"
+        "c": "该选项回答的是“如何把 K*input 改写为 ODE？”。",
+        "d": "该选项回答的是“threshold-linear 与 sigmoid 的主要差异？”。"
       },
-      "explanation": "rate 本身的 finite response time/smoothing。"
+      "explanation": "rate 本身的 finite response time/smoothing。 若突触远快于 rate，即 τ_s≪τ_h，可令 I≈Wh+Ux，得到常用的 τ_h dh/dt=−h+F(Wh+Ux)。"
     },
     {
       "id": "L09-Q08",
@@ -628,7 +1048,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 9 讲：慢 synapse、快 rate 应保留哪个 dynamic variable？",
@@ -656,7 +1076,7 @@
         "c": "这是“rate response（firing-rate response time）”的定义。",
         "d": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 4 页。"
       },
-      "explanation": "保留 I dynamics，令 h≈F(I)。"
+      "explanation": "保留 I dynamics，令 h≈F(I)。 若突触远快于 rate，即 τ_s≪τ_h，可令 I≈Wh+Ux，得到常用的 τ_h dh/dt=−h+F(Wh+Ux)。"
     },
     {
       "id": "L09-Q09",
@@ -673,7 +1093,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 9 讲：threshold-linear 与 sigmoid 的主要差异？",
@@ -701,7 +1121,7 @@
         "b": "该选项回答的是“h=F(I) 隐含什么时间尺度假设？”。",
         "d": "该选项回答的是“τ_r dh/dt=−h+F(I) 增加了什么？”。"
       },
-      "explanation": "sigmoid 平滑并饱和；threshold-linear 有硬阈值且高输入不饱和。"
+      "explanation": "sigmoid 平滑并饱和；threshold-linear 有硬阈值且高输入不饱和。 threshold-linear 适合非负发放率和近阈工作区；sigmoid 有上下饱和；纯 linear 可解析但允许负率；tanh 有正负输出，更像中心化活动变量。"
     },
     {
       "id": "L09-Q10",
@@ -718,7 +1138,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：为什么 tanh 可能产生生物学问题？",
@@ -746,7 +1166,7 @@
         "b": "该选项回答的是“feedforward layer 的 shape check 是什么？”。",
         "c": "该选项回答的是“rate model 何时会失败？”。"
       },
-      "explanation": "输出可为负，需解释为相对 baseline 的 signed activity 而非 absolute firing rate。"
+      "explanation": "输出可为负，需解释为相对 baseline 的 signed activity 而非 absolute firing rate。 threshold-linear 适合非负发放率和近阈工作区；sigmoid 有上下饱和；纯 linear 可解析但允许负率；tanh 有正负输出，更像中心化活动变量。"
     },
     {
       "id": "L09-Q11",
@@ -763,7 +1183,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 9 讲：rate model 何时会失败？",
@@ -791,7 +1211,7 @@
         "c": "该选项回答的是“h=F(I) 隐含什么时间尺度假设？”。",
         "d": "该选项回答的是“τ_r dh/dt=−h+F(I) 增加了什么？”。"
       },
-      "explanation": "精确 spike timing、synchrony、少量 neurons 或快速 transient 关键时。"
+      "explanation": "精确 spike timing、synchrony、少量 neurons 或快速 transient 关键时。 在包含许多脉冲但输入率近似不变的小窗 Δt 上，Poisson spike train 的平均计数除以 Δt 给发放率 h_j。"
     },
     {
       "id": "L09-Q12",
@@ -808,7 +1228,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：feedforward layer 的 shape check 是什么？",
@@ -836,55 +1256,10 @@
         "c": "该选项回答的是“rate model 何时会失败？”。",
         "d": "该选项回答的是“为什么 tanh 可能产生生物学问题？”。"
       },
-      "explanation": "若 W^{(l)} 为 n_l×n_{l-1}，输入 h^{(l-1)} 为 n_{l-1}×1，输出为 n_l×1。"
+      "explanation": "若 W^{(l)} 为 n_l×n_{l-1}，输入 h^{(l-1)} 为 n_{l-1}×1，输出为 n_l×1。 重复这一操作得到 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})，输入 x=h^{(0)}，最后连接输出 y。 判断依据：当 recurrent 权重 W=0 且考虑稳态，单层映射变为 h=F(Ux)。重复这一操作得到 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})，输入 x=h^{(0)}，最后连接输出 y。每层矩阵的行数是本层单元数、列数是上一层单元数。若加入 bias，应写成 U h+b 并同样检查 shape。"
     },
     {
       "id": "L09-Q13",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 1,
-          "section": "lecture-09-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 9 讲：根据 Lecture9-NeuralNetworks2.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "从 Poisson spike variability averaging 到 firing-rate model；F-I function choices。"
-        },
-        {
-          "id": "b",
-          "text": "加入 firing-rate response time；三种 rate-model approximations。"
-        },
-        {
-          "id": "c",
-          "text": "time-dependent linear ODE 的 integrating-factor solution；exponential kernel 与 convolution。"
-        },
-        {
-          "id": "d",
-          "text": "feedforward layered networks 与 deep neural-network foundation。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
-        "b": "该陈述解释的是“加入 firing-rate response time”，不是题干指定的关系。",
-        "d": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
-      },
-      "explanation": "time-dependent linear ODE 的 integrating-factor solution；exponential kernel 与 convolution。"
-    },
-    {
-      "id": "L09-Q14",
       "lecture": 9,
       "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
@@ -913,20 +1288,65 @@
         },
         {
           "id": "c",
-          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
+          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
         },
         {
           "id": "d",
+          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
+        "b": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
+        "d": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
+      },
+      "explanation": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。 卷积直接展示历史权重，适合解析输入贡献；ODE 只需保存当前 x，适合逐步模拟。"
+    },
+    {
+      "id": "L09-Q14",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 2,
+          "section": "lecture-09-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Neural Networks II",
+        "Lecture9-NeuralNetworks2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 9 讲：若要解释\"exponential synapse\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
+        },
+        {
+          "id": "b",
+          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
+        },
+        {
+          "id": "c",
           "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
+        },
+        {
+          "id": "d",
+          "text": "把 spiking network 写成 voltage-current 两套 coupled ODE，并说明 integrateand-fire reset 如何额外耦合。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
-        "b": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
+        "a": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
+        "b": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。"
       },
-      "explanation": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
+      "explanation": "把 spiking network 写成 voltage-current 两套 coupled ODE，并说明 integrateand-fire reset 如何额外耦合。 每个 i 有 V_i 与 I_i 两个连续变量，N 个神经元合计 2N 个 ODE 状态。"
     },
     {
       "id": "L09-Q15",
@@ -943,173 +1363,38 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 9 讲：根据 Lecture9-NeuralNetworks2.pdf 第 2 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 9 讲：阅读\"突触时间常数决定单次脉冲保留多久\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "exponential synapse；synaptic-current ODE；spiking network 的 2N coupled equations。"
+          "text": "对峰值归一的指数响应，较大的 τ_s 使同一脉冲的影响衰减更慢、历史记忆更长；若改用面积归一核 K_s=τ_s⁻¹e^(−t/τ_s)，峰值会同时按 1/τ_s 改变，比较曲线前必须先确认归一化约定。"
         },
         {
           "id": "b",
-          "text": "从 Poisson spike variability averaging 到 firing-rate model；F-I function choices。"
+          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
         },
         {
           "id": "c",
-          "text": "加入 firing-rate response time；三种 rate-model approximations。"
+          "text": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。"
         },
         {
           "id": "d",
-          "text": "feedforward layered networks 与 deep neural-network foundation。"
+          "text": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“加入 firing-rate response time”，不是题干指定的关系。",
-        "d": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
+        "b": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 1 页。",
+        "c": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 3 页。"
       },
-      "explanation": "exponential synapse；synaptic-current ODE；spiking network 的 2N coupled equations。"
+      "explanation": "对峰值归一的指数响应，较大的 τ_s 使同一脉冲的影响衰减更慢、历史记忆更长；若改用面积归一核 K_s=τ_s⁻¹e^(−t/τ_s)，峰值会同时按 1/τ_s 改变，比较曲线前必须先确认归一化约定。 单位约定必须与核归一化一致。 判断依据：上一讲把突触电流写成 K_s 与 spike train 的卷积。真实突触常有快上升、慢下降的双指数形状；当上升时间远短于研究时间尺度，可用单指数近似。取归一化 K_s(t)=τ_s⁻¹e^{−t/τ_s}H(t)，它正是一阶滤波方程 τ_s dI/dt=−I+S(t) 的冲激响应。"
     },
     {
       "id": "L09-Q16",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 2,
-          "section": "lecture-09-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 1,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 9 讲：若要解释\"exponential synapse\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
-        },
-        {
-          "id": "b",
-          "text": "把 spiking network 写成 voltage-current 两套 coupled ODE，并说明 integrateand-fire reset 如何额外耦合。"
-        },
-        {
-          "id": "c",
-          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
-        },
-        {
-          "id": "d",
-          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。",
-        "d": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。"
-      },
-      "explanation": "把 spiking network 写成 voltage-current 两套 coupled ODE，并说明 integrateand-fire reset 如何额外耦合。"
-    },
-    {
-      "id": "L09-Q17",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 2,
-          "section": "lecture-09-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 2,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 9 讲：阅读与\"exponential synapse\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "c",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "d",
-          "text": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "b": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 4 页。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L09-Q18",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 3,
-          "section": "lecture-09-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 9 讲：根据 Lecture9-NeuralNetworks2.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "time-dependent linear ODE 的 integrating-factor solution；exponential kernel 与 convolution。"
-        },
-        {
-          "id": "b",
-          "text": "exponential synapse；synaptic-current ODE；spiking network 的 2N coupled equations。"
-        },
-        {
-          "id": "c",
-          "text": "feedforward layered networks 与 deep neural-network foundation。"
-        },
-        {
-          "id": "d",
-          "text": "从 Poisson spike variability averaging 到 firing-rate model；F-I function choices。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "b": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
-        "c": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
-      },
-      "explanation": "从 Poisson spike variability averaging 到 firing-rate model；F-I function choices。"
-    },
-    {
-      "id": "L09-Q19",
       "lecture": 9,
       "sectionId": "lecture-09-source-3",
       "sourceAnchors": [
@@ -1130,11 +1415,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
+          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
         },
         {
           "id": "b",
-          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
+          "text": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
         },
         {
           "id": "c",
@@ -1145,106 +1430,16 @@
           "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
         }
       ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
-        "d": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
-      },
-      "explanation": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
-    },
-    {
-      "id": "L09-Q20",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 3,
-          "section": "lecture-09-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 9 讲：阅读与\"从 Poisson spike variability averaging 到 firing-rate model\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "c",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "d",
-          "text": "精确 spike timing、synchrony、少量 neurons 或快速 transient 关键时。"
-        }
-      ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
         "c": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
-        "d": "该选项回答的是“rate model 何时会失败？”。"
-      },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-    },
-    {
-      "id": "L09-Q21",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 4,
-          "section": "lecture-09-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 9 讲：根据 Lecture9-NeuralNetworks2.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "time-dependent linear ODE 的 integrating-factor solution；exponential kernel 与 convolution。"
-        },
-        {
-          "id": "b",
-          "text": "exponential synapse；synaptic-current ODE；spiking network 的 2N coupled equations。"
-        },
-        {
-          "id": "c",
-          "text": "加入 firing-rate response time；三种 rate-model approximations。"
-        },
-        {
-          "id": "d",
-          "text": "feedforward layered networks 与 deep neural-network foundation。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "b": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
         "d": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。"
       },
-      "explanation": "加入 firing-rate response time；三种 rate-model approximations。"
+      "explanation": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。 在包含许多脉冲但输入率近似不变的小窗 Δt 上，Poisson spike train 的平均计数除以 Δt 给发放率 h_j。"
     },
     {
-      "id": "L09-Q22",
+      "id": "L09-Q17",
       "lecture": 9,
       "sectionId": "lecture-09-source-4",
       "sourceAnchors": [
@@ -1258,7 +1453,7 @@
         "Neural Networks II",
         "Lecture9-NeuralNetworks2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 9 讲：若要解释\"加入 firing-rate response time\"中的机制或推导，哪条推理链成立？",
@@ -1273,68 +1468,23 @@
         },
         {
           "id": "c",
-          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
+          "text": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。"
         },
         {
           "id": "d",
-          "text": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。"
+          "text": "推导 tau dx/dt=-x+I(t)的 integrating-factor solution 和 causal exponential kernel；解释过去输入的加权记忆。"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
         "b": "该陈述解释的是“feedforward layered networks 与 deep neural-network foundation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。"
+        "d": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。"
       },
-      "explanation": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。"
+      "explanation": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。 若突触远快于 rate，即 τ_s≪τ_h，可令 I≈Wh+Ux，得到常用的 τ_h dh/dt=−h+F(Wh+Ux)。"
     },
     {
-      "id": "L09-Q23",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 5,
-          "section": "lecture-09-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 9 讲：根据 Lecture9-NeuralNetworks2.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "feedforward layered networks 与 deep neural-network foundation。"
-        },
-        {
-          "id": "b",
-          "text": "time-dependent linear ODE 的 integrating-factor solution；exponential kernel 与 convolution。"
-        },
-        {
-          "id": "c",
-          "text": "exponential synapse；synaptic-current ODE；spiking network 的 2N coupled equations。"
-        },
-        {
-          "id": "d",
-          "text": "从 Poisson spike variability averaging 到 firing-rate model；F-I function choices。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
-        "d": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。"
-      },
-      "explanation": "feedforward layered networks 与 deep neural-network foundation。"
-    },
-    {
-      "id": "L09-Q24",
+      "id": "L09-Q18",
       "lecture": 9,
       "sectionId": "lecture-09-source-5",
       "sourceAnchors": [
@@ -1359,72 +1509,429 @@
         },
         {
           "id": "b",
-          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
-        },
-        {
-          "id": "c",
           "text": "因此，证明 exponential convolution 可等价写成 first-order synaptic-current ODE，并区分 membrane time constant、synaptic time constant、rate-response time constant。"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "解释 temporal averaging 如何从 spike counts 得到 rate equations；明确 approximation 所需的 time-scale assumptions。"
+        },
+        {
+          "id": "d",
+          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
+        "b": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
+        "c": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。"
+      },
+      "explanation": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。 重复这一操作得到 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})，输入 x=h^{(0)}，最后连接输出 y。 判断依据：当 recurrent 权重 W=0 且考虑稳态，单层映射变为 h=F(Ux)。重复这一操作得到 h^{(ℓ)}=F(U^{(ℓ)}h^{(ℓ−1)})，输入 x=h^{(0)}，最后连接输出 y。每层矩阵的行数是本层单元数、列数是上一层单元数。若加入 bias，应写成 U h+b 并同样检查 shape。"
+    },
+    {
+      "id": "L09-Q19",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 1,
+          "section": "lecture-09-source-1"
+        }
+      ],
+      "conceptTags": [
+        "integrating factor、因果积分与指数卷积"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 9 讲：若把核误写成 e^{−t/τ}H(t) 而漏掉 1/τ，恒定输入的长期输出会怎样？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若仍沿用本讲面积归一时的权重单位，核面积会从 1 变成 τ，恒定输入稳态变为 τI₀；若有意改用峰值归一，则必须同步把权重解释为幅度并重新核对单位。"
+        },
+        {
+          "id": "b",
+          "text": "事件驱动直接施加由积分得到的跳变量，保持冲激面积不变；固定高度若不按 1/dt 缩放，时间步改变时面积和总输入量都会改变。"
+        },
+        {
+          "id": "c",
+          "text": "时间尺度比给出可检验的小参数和误差预期：快变量在慢变量变化前放松；若没有尺度分离，删导数会改变延迟、稳定性和瞬态，需由数据验证。"
+        },
+        {
+          "id": "d",
+          "text": "若 W^{(l)} 为 n_l×n_{l-1}，输入 h^{(l-1)} 为 n_{l-1}×1，输出为 n_l×1。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该选项回答的是“feedforward layer 的 shape check 是什么？”。"
+      },
+      "explanation": "若仍沿用本讲面积归一时的权重单位，核面积会从 1 变成 τ，恒定输入稳态变为 τI₀；若有意改用峰值归一，则必须同步把权重解释为幅度并重新核对单位。 对阶跃 I(t)=I₀H(t)、x(0)=0，积分给 x(t)=I₀(1−e^{−t/τ})；对短冲激 qδ(t)，响应为 qK_τ(t)。这两个基元可以构造更复杂输入。阶跃长期输出 I₀ 验证面积归一，冲激响应面积 q 验证线性系统对总输入量的保存。"
+    },
+    {
+      "id": "L09-Q20",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 1,
+          "section": "lecture-09-source-1"
+        }
+      ],
+      "conceptTags": [
+        "integrating factor、因果积分与指数卷积",
+        "阶跃输入的三个时间点"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 9 讲：完成\"τ=10 ms，x(0)=0，t≥0 时 I(t)=6。计算 x(10 ms)、x(20 ms)、x(30 ms)，并判断长期值。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "电流瞬时跳到 10 pA，随后在 5、10 ms 时分别约为 3.68、1.35 pA。"
+        },
+        {
+          "id": "b",
+          "text": "三个时间点约为 3.79、5.19、5.70，长期趋向 6。"
+        },
+        {
+          "id": "c",
+          "text": "隐藏活动为 (0,2.5)ᵀ；线性输出为 −2.5。"
+        },
+        {
+          "id": "d",
+          "text": "对 constant input 的 DC gain 为 1。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "c": "该陈述解释的是“exponential synapse”，不是题干指定的关系。",
-        "d": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。"
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“kernel area 为 1 有什么意义？”。"
       },
-      "explanation": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
+      "explanation": "三个时间点约为 3.79、5.19、5.70，长期趋向 6。 计算路径：阶跃解为 x(t)=6(1−e^{−t/10 ms})。 t=10 ms 时 x=6(1−e⁻¹)≈6×0.6321=3.793。 t=20 ms 时 x=6(1−e⁻²)≈5.188；t=30 ms 时 x≈6(1−e⁻³)=5.701。 t→∞ 时指数消失，x→6，与单位面积核对恒定输入的增益 1 一致。"
     },
     {
-      "id": "L09-Q25",
+      "id": "L09-Q21",
       "lecture": 9,
-      "sectionId": "lecture-09-source-5",
+      "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
         {
           "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 5,
-          "section": "lecture-09-source-5"
+          "page": 1,
+          "section": "lecture-09-source-1"
         }
       ],
       "conceptTags": [
-        "Neural Networks II",
-        "Lecture9-NeuralNetworks2.pdf"
+        "integrating factor、因果积分与指数卷积",
+        "sanity check"
       ],
       "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 9 讲：阅读与\"feedforward layered networks 与 deep neural-network foundation\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 9 讲：得到\"三个时间点约为 3.79、5.19、5.70，长期趋向 6。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "每过一个 τ_s 幅度乘 e⁻¹；响应面积 10 pA×5 ms=50 pA·ms，与 q 相同。"
         },
         {
           "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+          "text": "每次矩阵乘法内部维度匹配；第一隐藏单元的负预激活被截为零，第二单元保持 2.5。"
         },
         {
           "id": "c",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "响应应从 0 单调增加、始终低于 6；每过一个 τ，剩余误差再乘 e⁻¹。"
         },
         {
           "id": "d",
-          "text": "从 W=0steady state 引出 feedforward layer composition，并连接 deep networks， 但不要提前进入 Lecture 11 的训练算法。"
+          "text": "population rate 向 F(I) 调整的时间尺度。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“time-dependent linear ODE 的 integrating-factor solution”，不是题干指定的关系。",
-        "b": "该陈述解释的是“从 Poisson spike variability averaging 到 firing-rate model”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 5 页。"
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“rate response（firing-rate response time）”的定义。"
       },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+      "explanation": "响应应从 0 单调增加、始终低于 6；每过一个 τ，剩余误差再乘 e⁻¹。 这个检查对应题设\"τ=10 ms，x(0)=0，t≥0 时 I(t)=6。计算 x(10 ms)、x(20 ms)、x(30 ms)，并判断长期值。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L09-Q22",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 2,
+          "section": "lecture-09-source-2"
+        }
+      ],
+      "conceptTags": [
+        "指数突触的 ODE 表示与 2N 状态网络"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 9 讲：为什么事件驱动实现比把 δ 近似成固定高度的一格更不易随 dt 改变？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若仍沿用本讲面积归一时的权重单位，核面积会从 1 变成 τ，恒定输入稳态变为 τI₀；若有意改用峰值归一，则必须同步把权重解释为幅度并重新核对单位。"
+        },
+        {
+          "id": "b",
+          "text": "时间尺度比给出可检验的小参数和误差预期：快变量在慢变量变化前放松；若没有尺度分离，删导数会改变延迟、稳定性和瞬态，需由数据验证。"
+        },
+        {
+          "id": "c",
+          "text": "因此，逐项比较笔记中的三种 rate-model forms：最一般、fast rate/slow synapse、fast synapse 等近似。"
+        },
+        {
+          "id": "d",
+          "text": "事件驱动直接施加由积分得到的跳变量，保持冲激面积不变；固定高度若不按 1/dt 缩放，时间步改变时面积和总输入量都会改变。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这条推理对应 Lecture9-NeuralNetworks2.pdf 第 4 页。"
+      },
+      "explanation": "事件驱动直接施加由积分得到的跳变量，保持冲激面积不变；固定高度若不按 1/dt 缩放，时间步改变时面积和总输入量都会改变。 单指数近似的局限可由数据判断。若突触电流有可见上升阶段，单状态无法同时匹配峰时与衰减；可引入上升和衰减两个状态形成双指数。若电流实际为 G_s(t)(V−E_s)，还需保留反转电位与电压依赖，不能把固定电流核推广到所有膜电压。"
+    },
+    {
+      "id": "L09-Q23",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 2,
+          "section": "lecture-09-source-2"
+        }
+      ],
+      "conceptTags": [
+        "指数突触的 ODE 表示与 2N 状态网络",
+        "单个冲激造成的突触跳变与衰减"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 9 讲：完成\"τ_s=5 ms，事件项为 qδ(t)，q=50 pA·ms，事件前 I(0⁻)=0。求 I(0⁺)、5 ms 和 10 ms 时的电流。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "电流瞬时跳到 10 pA，随后在 5、10 ms 时分别约为 3.68、1.35 pA。"
+        },
+        {
+          "id": "b",
+          "text": "三个时间点约为 3.79、5.19、5.70，长期趋向 6。"
+        },
+        {
+          "id": "c",
+          "text": "隐藏活动为 (0,2.5)ᵀ；线性输出为 −2.5。"
+        },
+        {
+          "id": "d",
+          "text": "rate adjustment 相对 synaptic/input changes 很快。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“h=F(I) 隐含什么时间尺度假设？”。"
+      },
+      "explanation": "电流瞬时跳到 10 pA，随后在 5、10 ms 时分别约为 3.68、1.35 pA。 计算路径：跨越事件对 τ_s dI/dt=−I+qδ 积分；有限宽度趋零时 −I 项积分消失，τ_s[I(0⁺)−I(0⁻)]=q。 跳幅为 q/τ_s=50 pA·ms/5 ms=10 pA，所以 I(0⁺)=10 pA。 事件后无新输入，I(t)=10e^{−t/5 ms} pA。 I(5 ms)=10e⁻¹≈3.679 pA；I(10 ms)=10e⁻²≈1.353 pA。"
+    },
+    {
+      "id": "L09-Q24",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 2,
+          "section": "lecture-09-source-2"
+        }
+      ],
+      "conceptTags": [
+        "指数突触的 ODE 表示与 2N 状态网络",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 9 讲：得到\"电流瞬时跳到 10 pA，随后在 5、10 ms 时分别约为 3.68、1.35 pA。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "响应应从 0 单调增加、始终低于 6；每过一个 τ，剩余误差再乘 e⁻¹。"
+        },
+        {
+          "id": "b",
+          "text": "每过一个 τ_s 幅度乘 e⁻¹；响应面积 10 pA×5 ms=50 pA·ms，与 q 相同。"
+        },
+        {
+          "id": "c",
+          "text": "每次矩阵乘法内部维度匹配；第一隐藏单元的负预激活被截为零，第二单元保持 2.5。"
+        },
+        {
+          "id": "d",
+          "text": "rate adjustment 相对 synaptic/input changes 很快。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“h=F(I) 隐含什么时间尺度假设？”。"
+      },
+      "explanation": "每过一个 τ_s 幅度乘 e⁻¹；响应面积 10 pA×5 ms=50 pA·ms，与 q 相同。 这个检查对应题设\"τ_s=5 ms，事件项为 qδ(t)，q=50 pA·ms，事件前 I(0⁻)=0。求 I(0⁺)、5 ms 和 10 ms 时的电流。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L09-Q25",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 3,
+          "section": "lecture-09-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 spike 平均到 rate dynamics 与前馈层"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 9 讲：为什么 τ_s≪τ_h 是删去突触导数的理由，而\"模型想简单一点\"不是数学理由？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若仍沿用本讲面积归一时的权重单位，核面积会从 1 变成 τ，恒定输入稳态变为 τI₀；若有意改用峰值归一，则必须同步把权重解释为幅度并重新核对单位。"
+        },
+        {
+          "id": "b",
+          "text": "事件驱动直接施加由积分得到的跳变量，保持冲激面积不变；固定高度若不按 1/dt 缩放，时间步改变时面积和总输入量都会改变。"
+        },
+        {
+          "id": "c",
+          "text": "时间尺度比给出可检验的小参数和误差预期：快变量在慢变量变化前放松；若没有尺度分离，删导数会改变延迟、稳定性和瞬态，需由数据验证。"
+        },
+        {
+          "id": "d",
+          "text": "输出可为负，需解释为相对 baseline 的 signed activity 而非 absolute firing rate。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该选项回答的是“为什么 tanh 可能产生生物学问题？”。"
+      },
+      "explanation": "时间尺度比给出可检验的小参数和误差预期：快变量在慢变量变化前放松；若没有尺度分离，删导数会改变延迟、稳定性和瞬态，需由数据验证。 若 F 是恒等映射，多层整体为 U^{(L)}⋯U^{(1)}x，仍是单个线性变换。非线性使不同层在不同输入区间选择不同有效斜率，从而构成更丰富函数。这里建立的是前向计算结构，不包含权重如何从数据学习；训练目标、梯度和泛化需要额外假设，不能从层叠方程本身推出。"
     },
     {
       "id": "L09-Q26",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 3,
+          "section": "lecture-09-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 spike 平均到 rate dynamics 与前馈层",
+        "手算两层 threshold-linear 前馈网络"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 9 讲：完成\"输入 x=(1,2)ᵀ，第一层 U¹=[[1,−1],[0.5,1]]，F(z)=max(0,z) 逐分量作用；第二层权重 U²=[2,−1]，输出层为线性。求隐藏层与输出，并核对 shape。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "三个时间点约为 3.79、5.19、5.70，长期趋向 6。"
+        },
+        {
+          "id": "b",
+          "text": "电流瞬时跳到 10 pA，随后在 5、10 ms 时分别约为 3.68、1.35 pA。"
+        },
+        {
+          "id": "c",
+          "text": "把一阶线性 ODE 左侧变成乘积导数的函数。"
+        },
+        {
+          "id": "d",
+          "text": "隐藏活动为 (0,2.5)ᵀ；线性输出为 −2.5。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这是“积分因子（integrating factor）”的定义。"
+      },
+      "explanation": "隐藏活动为 (0,2.5)ᵀ；线性输出为 −2.5。 计算路径：U¹ 是 2×2，乘 2×1 输入得到 2×1：z¹=(1·1−1·2,0.5·1+1·2)ᵀ=(−1,2.5)ᵀ。 逐分量 threshold-linear 得 h¹=(0,2.5)ᵀ。 U² 是 1×2，可乘 2×1 隐藏向量，得到标量 y=2·0−1·2.5=−2.5。 若第二层也使用非负 threshold-linear，最终输出会变为 max(0,−2.5)=0；输出非线性必须明示。"
+    },
+    {
+      "id": "L09-Q27",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 3,
+          "section": "lecture-09-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 spike 平均到 rate dynamics 与前馈层",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 9 讲：得到\"隐藏活动为 (0,2.5)ᵀ；线性输出为 −2.5。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "每次矩阵乘法内部维度匹配；第一隐藏单元的负预激活被截为零，第二单元保持 2.5。"
+        },
+        {
+          "id": "b",
+          "text": "响应应从 0 单调增加、始终低于 6；每过一个 τ，剩余误差再乘 e⁻¹。"
+        },
+        {
+          "id": "c",
+          "text": "每过一个 τ_s 幅度乘 e⁻¹；响应面积 10 pA×5 ms=50 pA·ms，与 q 相同。"
+        },
+        {
+          "id": "d",
+          "text": "若 W^{(l)} 为 n_l×n_{l-1}，输入 h^{(l-1)} 为 n_{l-1}×1，输出为 n_l×1。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“feedforward layer 的 shape check 是什么？”。"
+      },
+      "explanation": "每次矩阵乘法内部维度匹配；第一隐藏单元的负预激活被截为零，第二单元保持 2.5。 这个检查对应题设\"输入 x=(1,2)ᵀ，第一层 U¹=[[1,−1],[0.5,1]]，F(z)=max(0,z) 逐分量作用；第二层权重 U²=[2,−1]，输出层为线性。求隐藏层与输出，并核对 shape。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L09-Q28",
       "lecture": 9,
       "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
@@ -1449,27 +1956,27 @@
         },
         {
           "id": "b",
-          "text": "突触时间常数（synaptic time constant）"
+          "text": "积分因子（integrating factor）"
         },
         {
           "id": "c",
-          "text": "rate response（firing-rate response time）"
+          "text": "突触时间常数（synaptic time constant）"
         },
         {
           "id": "d",
-          "text": "积分因子（integrating factor）"
+          "text": "rate response（firing-rate response time）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“因果核（causal kernel）”指：负时间为零、只依赖过去输入的 filter。",
-        "b": "“突触时间常数（synaptic time constant）”指：synaptic current 衰减/积分的时间尺度。",
-        "c": "“rate response（firing-rate response time）”指：population rate 向 F(I) 调整的时间尺度。"
+        "c": "“突触时间常数（synaptic time constant）”指：synaptic current 衰减/积分的时间尺度。",
+        "d": "“rate response（firing-rate response time）”指：population rate 向 F(I) 调整的时间尺度。"
       },
-      "explanation": "积分因子（integrating factor）：把一阶线性 ODE 左侧变成乘积导数的函数。"
+      "explanation": "积分因子（integrating factor）：把一阶线性 ODE 左侧变成乘积导数的函数。 卷积与 ODE 是同一线性滤波器的两种表示。"
     },
     {
-      "id": "L09-Q27",
+      "id": "L09-Q29",
       "lecture": 9,
       "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
@@ -1483,38 +1990,38 @@
         "因果核",
         "causal kernel"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"负时间为零、只依赖过去输入的 filter。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "因果核（causal kernel）"
-        },
-        {
-          "id": "b",
           "text": "突触时间常数（synaptic time constant）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "rate response（firing-rate response time）"
+        },
+        {
+          "id": "c",
+          "text": "因果核（causal kernel）"
         },
         {
           "id": "d",
           "text": "时间尺度分离（time-scale separation）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“突触时间常数（synaptic time constant）”指：synaptic current 衰减/积分的时间尺度。",
-        "c": "“rate response（firing-rate response time）”指：population rate 向 F(I) 调整的时间尺度。",
+        "a": "“突触时间常数（synaptic time constant）”指：synaptic current 衰减/积分的时间尺度。",
+        "b": "“rate response（firing-rate response time）”指：population rate 向 F(I) 调整的时间尺度。",
         "d": "“时间尺度分离（time-scale separation）”指：一个变量比另一个快得多，从而可近似消去。"
       },
-      "explanation": "因果核（causal kernel）：负时间为零、只依赖过去输入的 filter。"
+      "explanation": "因果核（causal kernel）：负时间为零、只依赖过去输入的 filter。 越久以前的输入时间差 t−t' 越大，权重按指数减小；未来 t'>t 不在积分区间，因此响应因果。"
     },
     {
-      "id": "L09-Q28",
+      "id": "L09-Q30",
       "lecture": 9,
       "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
@@ -1528,7 +2035,7 @@
         "突触时间常数",
         "synaptic time constant"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"synaptic current 衰减/积分的时间尺度。\"称为什么？",
@@ -1539,27 +2046,27 @@
         },
         {
           "id": "b",
-          "text": "突触时间常数（synaptic time constant）"
-        },
-        {
-          "id": "c",
           "text": "时间尺度分离（time-scale separation）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "F-I 函数（F-I function）"
+        },
+        {
+          "id": "d",
+          "text": "突触时间常数（synaptic time constant）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“rate response（firing-rate response time）”指：population rate 向 F(I) 调整的时间尺度。",
-        "c": "“时间尺度分离（time-scale separation）”指：一个变量比另一个快得多，从而可近似消去。",
-        "d": "“F-I 函数（F-I function）”指：input current 到 steady firing rate 的非线性。"
+        "b": "“时间尺度分离（time-scale separation）”指：一个变量比另一个快得多，从而可近似消去。",
+        "c": "“F-I 函数（F-I function）”指：input current 到 steady firing rate 的非线性。"
       },
-      "explanation": "突触时间常数（synaptic time constant）：synaptic current 衰减/积分的时间尺度。"
+      "explanation": "突触时间常数（synaptic time constant）：synaptic current 衰减/积分的时间尺度。 越久以前的输入时间差 t−t' 越大，权重按指数减小；未来 t'>t 不在积分区间，因此响应因果。"
     },
     {
-      "id": "L09-Q29",
+      "id": "L09-Q31",
       "lecture": 9,
       "sectionId": "lecture-09-source-4",
       "sourceAnchors": [
@@ -1573,38 +2080,38 @@
         "rate response",
         "firing-rate response time"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"population rate 向 F(I) 调整的时间尺度。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "时间尺度分离（time-scale separation）"
+          "text": "rate response（firing-rate response time）"
         },
         {
           "id": "b",
-          "text": "F-I 函数（F-I function）"
+          "text": "时间尺度分离（time-scale separation）"
         },
         {
           "id": "c",
-          "text": "rate response（firing-rate response time）"
+          "text": "F-I 函数（F-I function）"
         },
         {
           "id": "d",
           "text": "阈值线性（threshold-linear）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“时间尺度分离（time-scale separation）”指：一个变量比另一个快得多，从而可近似消去。",
-        "b": "“F-I 函数（F-I function）”指：input current 到 steady firing rate 的非线性。",
+        "b": "“时间尺度分离（time-scale separation）”指：一个变量比另一个快得多，从而可近似消去。",
+        "c": "“F-I 函数（F-I function）”指：input current 到 steady firing rate 的非线性。",
         "d": "“阈值线性（threshold-linear）”指：低于阈值为零，高于阈值线性增长。"
       },
-      "explanation": "rate response（firing-rate response time）：population rate 向 F(I) 调整的时间尺度。"
+      "explanation": "rate response（firing-rate response time）：population rate 向 F(I) 调整的时间尺度。 每次删去导数都对应明确时间尺度分离。"
     },
     {
-      "id": "L09-Q30",
+      "id": "L09-Q32",
       "lecture": 9,
       "sectionId": "lecture-09-source-3",
       "sourceAnchors": [
@@ -1618,7 +2125,7 @@
         "时间尺度分离",
         "time-scale separation"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"一个变量比另一个快得多，从而可近似消去。\"称为什么？",
@@ -1629,27 +2136,27 @@
         },
         {
           "id": "b",
-          "text": "阈值线性（threshold-linear）"
+          "text": "时间尺度分离（time-scale separation）"
         },
         {
           "id": "c",
-          "text": "sigmoid（sigmoid）"
+          "text": "阈值线性（threshold-linear）"
         },
         {
           "id": "d",
-          "text": "时间尺度分离（time-scale separation）"
+          "text": "sigmoid（sigmoid）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“F-I 函数（F-I function）”指：input current 到 steady firing rate 的非线性。",
-        "b": "“阈值线性（threshold-linear）”指：低于阈值为零，高于阈值线性增长。",
-        "c": "“sigmoid（sigmoid）”指：平滑、有上下饱和的 S 形函数。"
+        "c": "“阈值线性（threshold-linear）”指：低于阈值为零，高于阈值线性增长。",
+        "d": "“sigmoid（sigmoid）”指：平滑、有上下饱和的 S 形函数。"
       },
-      "explanation": "时间尺度分离（time-scale separation）：一个变量比另一个快得多，从而可近似消去。"
+      "explanation": "时间尺度分离（time-scale separation）：一个变量比另一个快得多，从而可近似消去。 每次删去导数都对应明确时间尺度分离。"
     },
     {
-      "id": "L09-Q31",
+      "id": "L09-Q33",
       "lecture": 9,
       "sectionId": "lecture-09-source-3",
       "sourceAnchors": [
@@ -1670,31 +2177,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "F-I 函数（F-I function）"
-        },
-        {
-          "id": "b",
           "text": "阈值线性（threshold-linear）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "sigmoid（sigmoid）"
+        },
+        {
+          "id": "c",
+          "text": "F-I 函数（F-I function）"
         },
         {
           "id": "d",
           "text": "前馈网络（feedforward network）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“阈值线性（threshold-linear）”指：低于阈值为零，高于阈值线性增长。",
-        "c": "“sigmoid（sigmoid）”指：平滑、有上下饱和的 S 形函数。",
+        "a": "“阈值线性（threshold-linear）”指：低于阈值为零，高于阈值线性增长。",
+        "b": "“sigmoid（sigmoid）”指：平滑、有上下饱和的 S 形函数。",
         "d": "“前馈网络（feedforward network）”指：信息沿层次单向传播、无 recurrent loop 的架构。"
       },
       "explanation": "F-I 函数（F-I function）：input current 到 steady firing rate 的非线性。"
     },
     {
-      "id": "L09-Q32",
+      "id": "L09-Q34",
       "lecture": 9,
       "sectionId": "lecture-09-source-3",
       "sourceAnchors": [
@@ -1708,7 +2215,7 @@
         "阈值线性",
         "threshold-linear"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"低于阈值为零，高于阈值线性增长。\"称为什么？",
@@ -1719,27 +2226,27 @@
         },
         {
           "id": "b",
-          "text": "阈值线性（threshold-linear）"
-        },
-        {
-          "id": "c",
           "text": "前馈网络（feedforward network）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "积分因子（integrating factor）"
+        },
+        {
+          "id": "d",
+          "text": "阈值线性（threshold-linear）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“sigmoid（sigmoid）”指：平滑、有上下饱和的 S 形函数。",
-        "c": "“前馈网络（feedforward network）”指：信息沿层次单向传播、无 recurrent loop 的架构。",
-        "d": "“积分因子（integrating factor）”指：把一阶线性 ODE 左侧变成乘积导数的函数。"
+        "b": "“前馈网络（feedforward network）”指：信息沿层次单向传播、无 recurrent loop 的架构。",
+        "c": "“积分因子（integrating factor）”指：把一阶线性 ODE 左侧变成乘积导数的函数。"
       },
-      "explanation": "阈值线性（threshold-linear）：低于阈值为零，高于阈值线性增长。"
+      "explanation": "阈值线性（threshold-linear）：低于阈值为零，高于阈值线性增长。 讲义给出 threshold-linear、sigmoid、linear 与 tanh 等选择。"
     },
     {
-      "id": "L09-Q33",
+      "id": "L09-Q35",
       "lecture": 9,
       "sectionId": "lecture-09-source-3",
       "sourceAnchors": [
@@ -1753,38 +2260,38 @@
         "sigmoid",
         "sigmoid"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"平滑、有上下饱和的 S 形函数。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "前馈网络（feedforward network）"
+          "text": "sigmoid（sigmoid）"
         },
         {
           "id": "b",
-          "text": "积分因子（integrating factor）"
+          "text": "前馈网络（feedforward network）"
         },
         {
           "id": "c",
-          "text": "sigmoid（sigmoid）"
+          "text": "积分因子（integrating factor）"
         },
         {
           "id": "d",
           "text": "因果核（causal kernel）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“前馈网络（feedforward network）”指：信息沿层次单向传播、无 recurrent loop 的架构。",
-        "b": "“积分因子（integrating factor）”指：把一阶线性 ODE 左侧变成乘积导数的函数。",
+        "b": "“前馈网络（feedforward network）”指：信息沿层次单向传播、无 recurrent loop 的架构。",
+        "c": "“积分因子（integrating factor）”指：把一阶线性 ODE 左侧变成乘积导数的函数。",
         "d": "“因果核（causal kernel）”指：负时间为零、只依赖过去输入的 filter。"
       },
-      "explanation": "sigmoid（sigmoid）：平滑、有上下饱和的 S 形函数。"
+      "explanation": "sigmoid（sigmoid）：平滑、有上下饱和的 S 形函数。 threshold-linear 适合非负发放率和近阈工作区；sigmoid 有上下饱和；纯 linear 可解析但允许负率；tanh 有正负输出，更像中心化活动变量。"
     },
     {
-      "id": "L09-Q34",
+      "id": "L09-Q36",
       "lecture": 9,
       "sectionId": "lecture-09-source-2",
       "sourceAnchors": [
@@ -1798,7 +2305,7 @@
         "前馈网络",
         "feedforward network"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 9 讲：本讲把\"信息沿层次单向传播、无 recurrent loop 的架构。\"称为什么？",
@@ -1809,27 +2316,27 @@
         },
         {
           "id": "b",
-          "text": "因果核（causal kernel）"
+          "text": "前馈网络（feedforward network）"
         },
         {
           "id": "c",
-          "text": "突触时间常数（synaptic time constant）"
+          "text": "因果核（causal kernel）"
         },
         {
           "id": "d",
-          "text": "前馈网络（feedforward network）"
+          "text": "突触时间常数（synaptic time constant）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“积分因子（integrating factor）”指：把一阶线性 ODE 左侧变成乘积导数的函数。",
-        "b": "“因果核（causal kernel）”指：负时间为零、只依赖过去输入的 filter。",
-        "c": "“突触时间常数（synaptic time constant）”指：synaptic current 衰减/积分的时间尺度。"
+        "c": "“因果核（causal kernel）”指：负时间为零、只依赖过去输入的 filter。",
+        "d": "“突触时间常数（synaptic time constant）”指：synaptic current 衰减/积分的时间尺度。"
       },
-      "explanation": "前馈网络（feedforward network）：信息沿层次单向传播、无 recurrent loop 的架构。"
+      "explanation": "前馈网络（feedforward network）：信息沿层次单向传播、无 recurrent loop 的架构。 上一讲把突触电流写成 K_s 与 spike train 的卷积。"
     },
     {
-      "id": "L09-Q35",
+      "id": "L09-Q37",
       "lecture": 9,
       "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
@@ -1842,38 +2349,38 @@
       "conceptTags": [
         "causal exponential kernel"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：使用\"causal exponential kernel\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "τ>0"
-        },
-        {
-          "id": "b",
           "text": "transient 已处理"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "单指数 kernel"
+        },
+        {
+          "id": "c",
+          "text": "τ>0"
         },
         {
           "id": "d",
           "text": "rate fast"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
-        "c": "这是“exponential synapse ODE”的条件，不是题干公式的条件。",
+        "a": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
+        "b": "这是“exponential synapse ODE”的条件，不是题干公式的条件。",
         "d": "这是“instantaneous F-I approximation”的条件，不是题干公式的条件。"
       },
-      "explanation": "causal exponential kernel 的适用条件：τ>0"
+      "explanation": "causal exponential kernel 的适用条件：τ>0 二者等价要求同一核归一化、初始条件与边界约定。"
     },
     {
-      "id": "L09-Q36",
+      "id": "L09-Q38",
       "lecture": 9,
       "sectionId": "lecture-09-source-1",
       "sourceAnchors": [
@@ -1886,7 +2393,7 @@
       "conceptTags": [
         "linear low-pass solution"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：使用\"linear low-pass solution\"时，哪项条件或约定不可省略？",
@@ -1897,27 +2404,27 @@
         },
         {
           "id": "b",
-          "text": "transient 已处理"
-        },
-        {
-          "id": "c",
           "text": "单指数 kernel"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "rate fast"
+        },
+        {
+          "id": "d",
+          "text": "transient 已处理"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
-        "c": "这是“exponential synapse ODE”的条件，不是题干公式的条件。",
-        "d": "这是“instantaneous F-I approximation”的条件，不是题干公式的条件。"
+        "b": "这是“exponential synapse ODE”的条件，不是题干公式的条件。",
+        "c": "这是“instantaneous F-I approximation”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear low-pass solution 的适用条件：transient 已处理"
+      "explanation": "linear low-pass solution 的适用条件：transient 已处理 二者等价要求同一核归一化、初始条件与边界约定。"
     },
     {
-      "id": "L09-Q37",
+      "id": "L09-Q39",
       "lecture": 9,
       "sectionId": "lecture-09-source-2",
       "sourceAnchors": [
@@ -1930,38 +2437,38 @@
       "conceptTags": [
         "exponential synapse ODE"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 9 讲：使用\"exponential synapse ODE\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "τ>0"
+          "text": "单指数 kernel"
         },
         {
           "id": "b",
-          "text": "transient 已处理"
+          "text": "τ>0"
         },
         {
           "id": "c",
-          "text": "单指数 kernel"
+          "text": "transient 已处理"
         },
         {
           "id": "d",
           "text": "rate fast"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
-        "b": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
+        "b": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
+        "c": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
         "d": "这是“instantaneous F-I approximation”的条件，不是题干公式的条件。"
       },
-      "explanation": "exponential synapse ODE 的适用条件：单指数 kernel"
+      "explanation": "exponential synapse ODE 的适用条件：单指数 kernel ODE 表示具有递归记忆：没有新脉冲时，只用当前 I_i 乘指数衰减，不必保存所有 t_k。"
     },
     {
-      "id": "L09-Q38",
+      "id": "L09-Q40",
       "lecture": 9,
       "sectionId": "lecture-09-source-3",
       "sourceAnchors": [
@@ -1985,95 +2492,7 @@
         },
         {
           "id": "b",
-          "text": "transient 已处理"
-        },
-        {
-          "id": "c",
-          "text": "单指数 kernel"
-        },
-        {
-          "id": "d",
           "text": "rate fast"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
-        "b": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
-        "c": "这是“exponential synapse ODE”的条件，不是题干公式的条件。"
-      },
-      "explanation": "instantaneous F-I approximation 的适用条件：rate fast"
-    },
-    {
-      "id": "L09-Q39",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 4,
-          "section": "lecture-09-source-4"
-        }
-      ],
-      "conceptTags": [
-        "dynamic rate response"
-      ],
-      "difficulty": 4,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 9 讲：使用\"dynamic rate response\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "smooth population rate"
-        },
-        {
-          "id": "b",
-          "text": "τ>0"
-        },
-        {
-          "id": "c",
-          "text": "transient 已处理"
-        },
-        {
-          "id": "d",
-          "text": "单指数 kernel"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
-        "c": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
-        "d": "这是“exponential synapse ODE”的条件，不是题干公式的条件。"
-      },
-      "explanation": "dynamic rate response 的适用条件：smooth population rate"
-    },
-    {
-      "id": "L09-Q40",
-      "lecture": 9,
-      "sectionId": "lecture-09-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture9-NeuralNetworks2.pdf",
-          "page": 5,
-          "section": "lecture-09-source-5"
-        }
-      ],
-      "conceptTags": [
-        "feedforward layer"
-      ],
-      "difficulty": 5,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 9 讲：使用\"feedforward layer\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "τ>0"
-        },
-        {
-          "id": "b",
-          "text": "shape-compatible weights"
         },
         {
           "id": "c",
@@ -2090,7 +2509,95 @@
         "c": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
         "d": "这是“exponential synapse ODE”的条件，不是题干公式的条件。"
       },
-      "explanation": "feedforward layer 的适用条件：shape-compatible weights"
+      "explanation": "instantaneous F-I approximation 的适用条件：rate fast"
+    },
+    {
+      "id": "L09-Q41",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 4,
+          "section": "lecture-09-source-4"
+        }
+      ],
+      "conceptTags": [
+        "dynamic rate response"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 9 讲：使用\"dynamic rate response\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "τ>0"
+        },
+        {
+          "id": "b",
+          "text": "transient 已处理"
+        },
+        {
+          "id": "c",
+          "text": "smooth population rate"
+        },
+        {
+          "id": "d",
+          "text": "单指数 kernel"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
+        "b": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
+        "d": "这是“exponential synapse ODE”的条件，不是题干公式的条件。"
+      },
+      "explanation": "dynamic rate response 的适用条件：smooth population rate 若突触远快于 rate，即 τ_s≪τ_h，可令 I≈Wh+Ux，得到常用的 τ_h dh/dt=−h+F(Wh+Ux)。"
+    },
+    {
+      "id": "L09-Q42",
+      "lecture": 9,
+      "sectionId": "lecture-09-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture9-NeuralNetworks2.pdf",
+          "page": 5,
+          "section": "lecture-09-source-5"
+        }
+      ],
+      "conceptTags": [
+        "feedforward layer"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 9 讲：使用\"feedforward layer\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "τ>0"
+        },
+        {
+          "id": "b",
+          "text": "transient 已处理"
+        },
+        {
+          "id": "c",
+          "text": "单指数 kernel"
+        },
+        {
+          "id": "d",
+          "text": "shape-compatible weights"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“causal exponential kernel”的条件，不是题干公式的条件。",
+        "b": "这是“linear low-pass solution”的条件，不是题干公式的条件。",
+        "c": "这是“exponential synapse ODE”的条件，不是题干公式的条件。"
+      },
+      "explanation": "feedforward layer 的适用条件：shape-compatible weights 对突触方程取条件平均，可把 Δ_j 替换为 h_j、外部 X_j 替换为 x_j，得到 τ_s dI_i/dt=−I_i+Σ_jW_{ij}h_j+Σ_jU_{ij}x_j。"
     }
   ]
 }

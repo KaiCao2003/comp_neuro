@@ -89,6 +89,360 @@
       "stopPredict": "λ=0 时 τ_eff？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能把 brain、body 与 environment 画成闭环动力系统，区分 feedforward command、sensory feedback、state estimate 与外部扰动。",
+      "能从单神经元一阶方程推广到 τ dh/dt=-h+Wh+I，并正确解释 W_ij 的连接方向与矩阵 shape。",
+      "能在 W 可对角化时把 population activity 转到 eigenbasis，逐步得到互不耦合的 mode equations。",
+      "能由 eigenvalue λ_i 推出 effective time constant τ/(1-λ_i)，判断 λ_i<1、=1、>1 对 decay、integration 与 instability 的意义。",
+      "能求 constant input 下的 fixed point，并区分接近 integrator 的 long memory、perfect integrator 和 runaway positive feedback。"
+    ],
+    "prerequisiteBridge": [
+      "先复习一个标量一阶系统 τ dh/dt=-h+u。没有输入时，负的 -h 把状态拉回零；constant u 让 fixed point 移到 h*=u；解按 e^{-t/τ} 衰减。反馈把输入改成状态的函数，例如 u=λh+I，于是 restoring coefficient 从 1 变成 1-λ。后面的 recurrent population 只是把 h 从一个数换成 vector，把 λ 换成 matrix W；每个 eigenmode 都重复这套标量逻辑。",
+      "矩阵 W 的约定必须在计算前固定。本讲方程写 (Wh)_i=Σ_j W_ij h_j，因此 W_ij 表示 population j 对 population i 的影响：列索引是 source，行索引是 target。h∈R^N 是某一时刻 N 个 units 的 activity column vector，W∈R^{N×N}。一个 eigenvector v 满足 Wv=λv，表示沿 v 方向的 population pattern 经 recurrent multiplication 后方向不变，只被 λ 缩放。",
+      "对角化 W=VΛV^{-1} 要求有 N 个线性无关 eigenvectors；V 的 columns 是 v_i，Λ diagonal entries 是 λ_i。activity 写 h=Vα 后，α=V^{-1}h 是 mode amplitudes，不是另一群真实 neurons。非对称 W 可能有 complex eigenvalues 或不可对角化；这不使动力学失效，只表示要用 real oscillatory blocks、generalized eigenvectors 或直接 matrix exponential。课程的 eigenbasis 推导先处理可对角化情形，以便看清 timescale 与 stability。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l18-d1",
+        "prompt": "在 (Wh)_i=Σ_j W_ijh_j 的约定下，W_ij 表示从 i 到 j，还是从 j 到 i？",
+        "answer": "表示从 source j 到 target i，因为 h_j 乘 W_ij 后贡献到第 i 个输出分量。",
+        "explanation": "不同教材可能采用转置约定；只要先把 matrix multiplication 展开，就能避免把连接图方向读反。",
+        "remediationModuleId": "l18-m2"
+      },
+      {
+        "id": "l18-d2",
+        "prompt": "若 τ=20 ms、某 eigenvalue λ=0，mode 的 effective time constant 是多少？",
+        "answer": "τ_eff=τ/(1-λ)=20 ms，与没有 recurrent feedback 的 intrinsic time constant 相同。",
+        "explanation": "λ=0 表示沿该 mode 的 recurrent input 为零；leak 单独控制 decay。",
+        "remediationModuleId": "l18-m3"
+      },
+      {
+        "id": "l18-d3",
+        "prompt": "若 λ=0.9 与 λ=-0.5，哪个连续时间 mode 衰减更慢？",
+        "answer": "λ=0.9 更慢，τ_eff=10τ；λ=-0.5 给 τ_eff=τ/1.5，负 feedback 使其比 intrinsic decay 更快。",
+        "explanation": "稳定边界在实 eigenvalue 1，而不是绝对值 1；连续时间方程含 -I+W。",
+        "remediationModuleId": "l18-m3"
+      },
+      {
+        "id": "l18-d4",
+        "prompt": "eigenmode amplitude α_i 是否等于第 i 个 neuron 的 firing rate？",
+        "answer": "通常不等于；α_i 是 population vector 在 eigenvector v_i 方向上的 coordinate，一个 mode 往往混合许多 neurons。",
+        "explanation": "只有 W 已在 neuron basis 中 diagonal 时，mode 才与单个 coordinate 重合。把 mode 当 neuron 会误读 distributed dynamics。",
+        "remediationModuleId": "l18-m2"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l18-m1",
+        "title": "运动控制是 brain–body–environment 闭环",
+        "sourceRefs": [
+          {
+            "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "为什么只研究一条从 motor cortex 指向 muscle 的命令箭头，无法解释真实运动中的稳定与校正？",
+        "paragraphs": [
+          "第 1 页把 motor system 放进 brain、body、environment 的耦合中。brain activity 通过 descending pathways 改变 muscle activation，body mechanics 把 activation 转成姿态与速度，environment 通过重力、接触和物体反作用改变 body state；proprioceptive、visual 与 cutaneous signals 再把结果送回 nervous system。每个箭头都有 delay 与 dynamics，因此运动不是静态 stimulus-response lookup，而是闭环随时间演化。",
+          "feedforward command 根据目标与内部模型提前发出动作，适合补偿已知延迟，却会受未预测扰动与模型误差影响。feedback controller 使用感觉到的 state error 修正输出，能抵抗扰动，但过高 gain 与 delay 可能导致 oscillation。生物控制通常组合两者，并让 spinal cord、brainstem、cerebellum、basal ganglia 与 motor cortex 在不同时间尺度和表征层次上参与，而不是由单一区域顺序接管。",
+          "sensory signal 只是带 delay 与 noise 的 observation，不等于系统此刻的真实 body state。state estimate 是结合近期感觉、运动命令副本与 dynamics model，对位置、速度等 latent state 作出的当前推断；feedback 实际上常围绕这个 estimate 计算 error。central pattern generator（CPG）则说明 recurrent circuit 即使没有逐周期的外界命令，也可产生节律性 motor output；sensory feedback 会校正相位和幅度，而不是从零生成每个周期。",
+          "最小标量例子把 body position 写成 dx/dt=u+d，其中 u 是 neural command，d 是外部 disturbance。取反馈 u=-kx，得到 dx/dt=-kx+d。没有持续扰动时，x 以 rate k 回到零；constant disturbance 时，fixed error 是 d/k。提高 k 可减小 steady error，但现实 sensory delay、actuator limit 与 noise 会限制 gain，这为后续 recurrent stability 提供控制论直觉。",
+          "motor cortex 的 distributed activity 也不必逐 neuron 对应一块 muscle。一个 movement 可由 population trajectory 表示，瞬时 activity pattern 决定系统状态，recurrent dynamics 决定 trajectory 如何继续。分析重点从“哪个 neuron 编码哪个动作变量”扩展为“population state 沿哪些 modes 演化、哪些输入改变 initial condition 或 vector field”。线性网络不是完整 motor theory，而是分解时间结构的第一步。"
+        ],
+        "keyPoints": [
+          "brain、body 与 environment 通过 command、mechanics、disturbance 与 sensory feedback 构成闭环。",
+          "feedforward 可预补偿，feedback 可校正扰动；delay、noise 与 gain 决定稳定性代价。",
+          "state estimate 从 noisy delayed observations 推断当前 latent state；CPG 展示 recurrent dynamics 可内生产生节律。",
+          "motor population activity 可作为 dynamical state，不能预设每个 mode 等于单一 muscle 或动作变量。"
+        ],
+        "derivation": {
+          "title": "比例 feedback 怎样拒绝 constant disturbance",
+          "setup": "用归一化的一维 body dynamics dx/dt=u+d，目标 position 为 0，选择 proportional controller u=-kx，其中 k>0。",
+          "steps": [
+            {
+              "title": "代入 feedback law",
+              "explanation": "controller 把正 position error 转成负 command，合并后得到一个带 constant forcing 的一阶方程。",
+              "latex": "\\frac{dx}{dt}=-kx+d"
+            },
+            {
+              "title": "求 fixed point",
+              "explanation": "steady state 满足 derivative 为零，因此 restoring command kx* 与 disturbance d 平衡。",
+              "latex": "x^*=\\frac{d}{k}"
+            },
+            {
+              "title": "求相对 fixed point 的 dynamics",
+              "explanation": "令 e=x-x*，代回后 constant terms 抵消，error 以 e^{-kt} 衰减。",
+              "latex": "\\frac{de}{dt}=-ke,\\qquad e(t)=e(0)e^{-kt}"
+            }
+          ],
+          "symbolNotes": [
+            "k 是 feedback gain，在这个归一化方程中单位为 inverse time。",
+            "d 被写成 position velocity disturbance；若使用带 mass 的 mechanics，units 与 state dimension 会改变。"
+          ],
+          "unitsCheck": "x 是 position，dx/dt、u、d 都是 position/time；因此 kx 也必须是 position/time，k 的单位为 1/time。",
+          "limitCheck": "k→0 时没有 restoring feedback，constant disturbance 使 position 持续漂移；k 增大时理想模型误差变小，但未建模 delay 可使高 gain 不稳定。"
+        },
+        "workedExample": {
+          "title": "持续速度扰动下的 steady position error",
+          "problem": "一维系统 dx/dt=-2x+0.6，初始 x(0)=1。求 fixed point、time constant，并算 t=1 s 时的位置。",
+          "steps": [
+            "fixed point 为 x*=d/k=0.6/2=0.3。",
+            "error e=x-0.3 满足 de/dt=-2e，所以 e(t)=0.7e^{-2t}，time constant 为 1/2 s。",
+            "t=1 时 x=0.3+0.7e^{-2}≈0.3+0.0947=0.3947。"
+          ],
+          "result": "系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。",
+          "sanityCheck": "初始 x=1 时 derivative=-2+0.6=-1.4 为负，轨迹应向较小位置移动；计算结果符合方向。"
+        },
+        "selfCheck": {
+          "prompt": "为什么增加比例 feedback gain 在无延迟模型中改善 disturbance rejection，却不能据此建议生物系统把 gain 无限增大？",
+          "answer": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+        },
+        "pitfalls": [
+          "把 feedforward 与 feedback 当成互斥系统；实际动作常由预测命令与感觉校正共同生成。",
+          "列举 motor regions 后直接为每区分配单一功能，忽略回路、并行通路与课程图的抽象层级。"
+        ]
+      },
+      {
+        "id": "l18-m2",
+        "title": "recurrent population equation 与 eigenmode 分解",
+        "sourceRefs": [
+          {
+            "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+            "page": 2
+          },
+          {
+            "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "怎样把 N 个相互耦合的 rate equations 改写成每个 eigenmode 独立演化的标量方程？",
+        "paragraphs": [
+          "第 2 页从 τ dh/dt=-h+Wh+I 开始。h∈R^N 收集 N 个 units 的 activity，-h 是每个 unit 的 leak，Wh 是 recurrent input，I 是外部 drive。按本讲 convention，W_ij 从 j 指向 i。若直接看 neuron coordinates，每个 derivative 都依赖许多 h_j，方程彼此耦合；目标是寻找一种 coordinate system，使 recurrent multiplication 不再混合 coordinates。",
+          "第 3 页使用 W 的 right eigenvectors。若 Wv_i=λ_i v_i，沿 v_i 的 pattern 经过 W 后只缩放 λ_i。把这些 eigenvectors 作为 V 的 columns，若它们线性无关，就有 W=VΛV^{-1}。activity 展开为 h=Vα，其中 α_i 是第 i 个 population pattern 的 amplitude。这个换 basis 不改变 physical state，只像把二维位移从 x-y 坐标改写成斜轴坐标。",
+          "将 h=Vα 代入原方程并假设 V 不随时间变化，得到 τV dα/dt=-Vα+WVα+I。利用 WV=VΛ，再左乘 V^{-1}，变为 τ dα/dt=-α+Λα+V^{-1}I。因为 Λ 是 diagonal，第 i 行只含 α_i：τ dα_i/dt=-(1-λ_i)α_i+Ĩ_i。复杂 network 的 linear dynamics 因此分解为一组熟悉的一阶系统。",
+          "这个方法的边界同样重要。非对称 W 的 eigenvectors 未必 orthogonal，V^{-1} 不能随意换成 V^T；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。若 W defective，就没有完整 ordinary eigenbasis，需要 Jordan form 或直接计算 e^{(-I+W)t/τ}。课程推导选择可对角化情形，是为了突出 eigenvalue 对 timescale 的控制，不是声称所有 cortical connectivity 都对称。"
+        ],
+        "keyPoints": [
+          "W_ij 的方向由 (Wh)_i 展开决定；本讲是 j→i。",
+          "h=Vα 把 neuron-coordinate activity 分解为 eigenvector patterns 的 amplitudes。",
+          "可对角化时 Λ 不混合 modes，使每个 α_i 遵循独立的一阶 equation。"
+        ],
+        "derivation": {
+          "title": "从 recurrent equation 到 decoupled mode equations",
+          "setup": "假设 W 有完整 eigenvector matrix V，满足 W=VΛV^{-1}。令 h=Vα，并定义 transformed input Ĩ=V^{-1}I。",
+          "steps": [
+            {
+              "title": "代入 activity expansion",
+              "explanation": "V 为常数 matrix，所以 dh/dt=Vdα/dt；把 h 的每一处替换为 Vα。",
+              "latex": "\\tau V\\frac{d\\alpha}{dt}=-V\\alpha+WV\\alpha+I"
+            },
+            {
+              "title": "使用 eigenvector relation",
+              "explanation": "WV=VΛ，因为 V 的每一 column 都是 W 的 eigenvector。",
+              "latex": "\\tau V\\frac{d\\alpha}{dt}=-V\\alpha+V\\Lambda\\alpha+I"
+            },
+            {
+              "title": "左乘 inverse basis",
+              "explanation": "左乘 V^{-1} 消去 V，并把外部输入投影到 mode coordinates。",
+              "latex": "\\tau\\frac{d\\alpha}{dt}=-\\alpha+\\Lambda\\alpha+\\tilde I"
+            },
+            {
+              "title": "读取第 i 个 diagonal equation",
+              "explanation": "Λ 只有 diagonal entry λ_i，因此第 i 个 derivative 不再含其他 α_j。",
+              "latex": "\\tau\\frac{d\\alpha_i}{dt}=-(1-\\lambda_i)\\alpha_i+\\tilde I_i"
+            }
+          ],
+          "symbolNotes": [
+            "V columns 是 right eigenvectors；α 的 coordinates 由 rows of V^{-1} 读取。",
+            "Ĩ_i 是 input 在 left-eigenvector coordinate 中的 component，不一定等于简单 Euclidean dot product。"
+          ],
+          "unitsCheck": "若 V 选为无量纲 normalized patterns，α 与 h 都有 firing-rate units；λ 与 W dimensionless，τ 有 time units，Ĩ 与 h 同单位。",
+          "limitCheck": "W=0 时可取 V=I、λ_i=0，每个 neuron mode 独立按 τ 衰减；W 已 diagonal 时换 basis 不改变 coordinates。"
+        },
+        "workedExample": {
+          "title": "两神经元网络的共同 mode 与差分 mode",
+          "problem": "W=[[0.8,0.1],[0.1,0.8]]，τ=20 ms。找两个 normalized eigenvectors、eigenvalues，并写无输入 mode equations。",
+          "steps": [
+            "共同 pattern v_+=(1,1)/√2：Wv_+=(0.9,0.9)/√2，所以 λ_+=0.9。",
+            "差分 pattern v_-=(1,-1)/√2：Wv_-=(0.7,-0.7)/√2，所以 λ_-=0.7。",
+            "mode equations 为 20 ms·dα_+/dt=-0.1α_+，20 ms·dα_-/dt=-0.3α_-；共同 mode 衰减更慢。"
+          ],
+          "result": "population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=0.7。",
+          "sanityCheck": "matrix trace 1.6 等于 eigenvalues 0.9+0.7，determinant 0.63 等于 0.9×0.7。"
+        },
+        "selfCheck": {
+          "prompt": "在非对称 W 中，为什么不能看到 normalized right eigenvectors 后就把 α 写成 V^T h？",
+          "answer": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 V^TV 不等于 I；正确 coordinate transform 是 α=V^{-1}h，或用对应 left eigenvectors 读取 amplitudes。"
+        },
+        "pitfalls": [
+          "把 W_ij 的 source/target 方向凭习惯决定，不先展开 matrix product。",
+          "默认所有 W 都有 orthonormal eigenbasis；这只对 real symmetric 等特殊 matrices 成立。"
+        ]
+      },
+      {
+        "id": "l18-m3",
+        "title": "eigenvalues 控制 timescale、fixed point 与 integration",
+        "sourceRefs": [
+          {
+            "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "为什么 λ 接近 1 会制造长记忆，而 λ=1 与 λ>1 又分别意味着 perfect integration 和 instability？",
+        "paragraphs": [
+          "第 4 页从无输入 mode equation τ dα_i/dt=-(1-λ_i)α_i 出发。对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。positive recurrent feedback 把 λ 推近 1，会抵消一部分 leak 并延长 memory；negative λ 增强 restoring force，使 mode 更快衰减。连续时间稳定边界看 Re(λ_i)<1，而不是 |λ_i|<1。",
+          "λ_i=1 时 restoring coefficient 恰为零。无 input 时 α_i 保持初值；有 time-varying input 时 τ dα_i/dt=Ĩ_i(t)，state 累积 input integral，这才是 perfect integrator。若 λ_i 略小于 1，则存在很长但有限的 leakage；若 λ_i>1，小扰动按正指数增长。constant input 下代数 fixed point α_i*=Ĩ_i/(1−λ_i) 仍可存在，但它不稳定，除非初值精确落在该点，轨迹都会离开。真实 nonlinear network 可能因 saturation 停在其他 attractor，但那已超出这条线性 mode 的局部稳定范围。",
+          "第 5 页还要求区分 fixed point 与 timescale。constant transformed input Ĩ_i 下，λ_i≠1 时 fixed point 为 α_i*=Ĩ_i/(1-λ_i)。同一个小 denominator 同时带来较长 τ_eff 与较大 steady-state gain，因此接近 integration 会放大 constant bias 与 parameter error。一个目标是保留 memory，另一个风险是 drift；生物系统可通过 negative feedback、multiple timescales 或 nonlinear bounds 处理这种敏感性。",
+          "对 arbitrary time-varying input，mode response 是 initial-condition decay 与 input convolution 的和。kernel exp[-(1-λ_i)(t-s)/τ]/τ 只给过去输入权重；λ_i 越接近 1，kernel 衰减越慢，较久以前的 input 仍影响当前 state。impulse response 因此直接展示 τ_eff，而 transformed input Ĩ_i=V^{-1}I 的大小决定外界驱动能否进入这个慢 mode。",
+          "在 population space 中，每个 mode 的时间过程叠加成 h(t)=Vα(t)。慢 mode 可能主导晚期 trajectory，即使初始 projection 很小；快速 modes 先消失。外部 input 的效果也取决于它投影到哪些 modes，而不只取决于总能量。用 eigenvalues 解释 motor dynamics 时，应报告 model fit、initial conditions、input projection 与 observed timescale，不能从一条旋转轨迹直接认定某个 eigenmode 是行为命令。"
+        ],
+        "keyPoints": [
+          "实 eigenvalue λ<1 时 τ_eff=τ/(1-λ)，越靠近 1，衰减越慢。",
+          "λ=1 消除 leak 并在输入下执行 integration；λ>1 使线性 mode 指数增长。",
+          "接近 1 同时提高 memory time 与 constant-input gain，因此也放大 bias 和连接误差。"
+        ],
+        "derivation": {
+          "title": "mode solution、effective time constant 与 fixed point",
+          "setup": "考虑单个实 mode：τ dα/dt=-(1-λ)α+Ĩ，先令输入为 constant。",
+          "steps": [
+            {
+              "title": "求 constant-input fixed point",
+              "explanation": "令 derivative 为零并在 λ≠1 时解 α*。",
+              "latex": "\\alpha^*=\\frac{\\tilde I}{1-\\lambda}"
+            },
+            {
+              "title": "改写相对 fixed point 的 error",
+              "explanation": "令 e=α-α*；constant input 与 fixed-point term 抵消，留下 homogeneous equation。",
+              "latex": "\\tau\\frac{de}{dt}=-(1-\\lambda)e"
+            },
+            {
+              "title": "积分 homogeneous equation",
+              "explanation": "把 de/e 与 dt 分开积分，得到指数 solution，并把指数 coefficient 写成 effective time constant。",
+              "latex": "e(t)=e(0)e^{-(1-\\lambda)t/\\tau}=e(0)e^{-t/\\tau_{\\mathrm{eff}}},\\qquad \\tau_{\\mathrm{eff}}=\\frac{\\tau}{1-\\lambda}"
+            },
+            {
+              "title": "推广到 time-varying input",
+              "explanation": "用 integrating factor 保留初值项，再把每个过去时刻 s 的 transformed input 按 exponential impulse response 加权。这个 convolution 展示 mode 如何充当 leaky temporal filter。",
+              "latex": "\\alpha(t)=e^{-(1-\\lambda)(t-t_0)/\\tau}\\alpha(t_0)+\\frac{1}{\\tau}\\int_{t_0}^{t}e^{-(1-\\lambda)(t-s)/\\tau}\\tilde I(s)\\,ds"
+            },
+            {
+              "title": "单独处理 λ=1",
+              "explanation": "此时不能使用含 1-λ 的 fixed-point 公式；方程变成 derivative 直接等于 input 除以 τ。",
+              "latex": "\\lambda=1:\\quad \\frac{d\\alpha}{dt}=\\frac{\\tilde I(t)}{\\tau},\\qquad \\alpha(t)=\\alpha(0)+\\frac{1}{\\tau}\\int_0^t\\tilde I(s)ds"
+            }
+          ],
+          "symbolNotes": [
+            "τ_eff 只在稳定实 mode λ<1 时是正的 decay time；λ>1 时更合适描述为 growth time τ/(λ-1)。",
+            "complex λ 带来 oscillation frequency，由 imaginary part 决定，同时由 1-Re(λ) 决定 envelope stability。"
+          ],
+          "unitsCheck": "λ 无量纲，τ 与 τ_eff 都是时间；α 与 Ĩ 同单位，因此 ∫Ĩ ds/τ 仍与 α 同单位。",
+          "limitCheck": "λ=0 给 τ_eff=τ；λ→1^- 时 τ_eff 与 constant gain 都变大；λ>1 时 exponent 符号反转，zero fixed point 不稳定。"
+        },
+        "workedExample": {
+          "title": "从 20 ms intrinsic time 到 1 s memory",
+          "problem": "某 mode 的 τ=20 ms、λ=0.98，初始 amplitude 为 5，无输入。求 τ_eff 与 1 s 后 amplitude；再比较 λ=1。",
+          "steps": [
+            "1-λ=0.02，所以 τ_eff=20 ms/0.02=1000 ms=1 s。",
+            "1 s 后 α=5e^{-1}≈1.84，说明 recurrent feedback 延长但没有消除 decay。",
+            "若 λ=1 且无输入，dα/dt=0，1 s 后仍为 5；若存在持续小 bias，它会被不断积分。"
+          ],
+          "result": "λ=0.98 把 intrinsic 20 ms 延长为 1 s leaky memory；λ=1 才是 perfect integrator。",
+          "sanityCheck": "若误把 τ_eff 写成 τ/(1+λ)，会得到约 10 ms，与 positive feedback 延长记忆的方向相反。"
+        },
+        "selfCheck": {
+          "prompt": "为什么把 λ 从 0.98 调到 0.999 不只是“记得更久”，也会让网络更容易 drift？",
+          "answer": "denominator 1-λ 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+        },
+        "pitfalls": [
+          "把 discrete-time 稳定条件 |λ|<1 直接套到本讲 τdh/dt=(-I+W)h 的 continuous-time equation。",
+          "在 λ=1 时继续使用 α*=Ĩ/(1-λ)，忽略 perfect integrator 对 constant input 没有有限 fixed point。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L18-FIG-A1",
+      "lecture": 18,
+      "lectureTitle": "运动系统与线性神经动力学",
+      "moduleId": "l18-m2",
+      "title": "换到 eigenbasis 后，耦合的 neuron dynamics 分解为独立 modes",
+      "alt": "流程图从神经元坐标中的群体活动，经 V 逆变换得到 mode amplitudes，在对角 eigenvalue 空间中独立演化，再由 V 重建神经元活动。",
+      "caption": "若 recurrent matrix W 可对角化为 W=VΛV⁻¹，activity h=Vα 把 neuron-space pattern 改写为 eigenmode amplitudes。左乘 V⁻¹ 后，每个 α_i 独立满足 τα̇_i=-(1-λ_i)α_i+Ĩ_i；因此 λ_i 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。basis change 是数学坐标变换，不表示一个 mode 等于一个 anatomical neuron。",
+      "sourceRefs": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 2
+        },
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 3
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "neuron-space",
+          "label": "neuron space\nh",
+          "x": 11,
+          "y": 55
+        },
+        {
+          "id": "mode-coordinates",
+          "label": "mode coordinates\nα = V⁻¹h",
+          "x": 37,
+          "y": 55,
+          "tone": "accent"
+        },
+        {
+          "id": "mode-dynamics",
+          "label": "decoupled dynamics\nλᵢ controls αᵢ",
+          "x": 63,
+          "y": 55
+        },
+        {
+          "id": "reconstruction",
+          "label": "reconstruct pattern\nh = Vα",
+          "x": 89,
+          "y": 55
+        },
+        {
+          "id": "population-input",
+          "label": "input projection\nĨ = V⁻¹I",
+          "x": 37,
+          "y": 18
+        }
+      ],
+      "edges": [
+        {
+          "from": "neuron-space",
+          "to": "mode-coordinates",
+          "label": "V⁻¹"
+        },
+        {
+          "from": "mode-coordinates",
+          "to": "mode-dynamics",
+          "label": "Λ diagonal"
+        },
+        {
+          "from": "population-input",
+          "to": "mode-dynamics",
+          "label": "Ĩᵢ"
+        },
+        {
+          "from": "mode-dynamics",
+          "to": "reconstruction",
+          "label": "V"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 从单 neuron 到 recurrent population",
@@ -305,7 +659,42 @@
     "需要区分 individual neuron activity、population mode coordinate 和 behavioral state；需避免把 eigenmode 当成单个\"特殊神经元\"。"
   ],
   "errata": [
-    "1. Page 3 的 diagonalization 依 W diagonalizable；笔记为教学简化。 2. Page 4 的 τ_eff<0 应解释为 exponential growth/unstable fixed point，而非负的物理 time constant。 3. Page 1 的 motor-region functions 是课程级定位，不是完整 anatomy/causal decomposition。"
+    {
+      "id": "L18-E01",
+      "lecture": 18,
+      "lectureTitle": "运动系统与线性神经动力学",
+      "kind": "caution",
+      "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+      "sourcePage": 3,
+      "sectionId": "lecture-18-source-3",
+      "originalIssue": "Page 3 的 diagonalization 依 W diagonalizable；笔记为教学简化。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L18-E02",
+      "lecture": 18,
+      "lectureTitle": "运动系统与线性神经动力学",
+      "kind": "caution",
+      "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+      "sourcePage": 4,
+      "sectionId": "l18-m3",
+      "originalIssue": "Page 4 的 τ_eff<0 应解释为 exponential growth/unstable fixed point，而非负的物理 time constant。",
+      "explanation": "对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。",
+      "correction": "Page 4 的 τ_eff<0 应解释为 exponential growth/unstable fixed point，而非负的物理 time constant"
+    },
+    {
+      "id": "L18-E03",
+      "lecture": 18,
+      "lectureTitle": "运动系统与线性神经动力学",
+      "kind": "caution",
+      "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+      "sourcePage": 1,
+      "sectionId": "l18-m1",
+      "originalIssue": "Page 1 的 motor-region functions 是课程级定位，不是完整 anatomy/causal decomposition。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -323,7 +712,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 18 讲：W_ij 的方向？",
@@ -351,7 +740,7 @@
         "b": "该选项回答的是“λ=0 时 τ_eff？”。",
         "c": "这是“decoupled mode”的适用条件。"
       },
-      "explanation": "j→i。"
+      "explanation": "j→i。 第 1 页把 motor system 放进 brain、body、environment 的耦合中。"
     },
     {
       "id": "L18-Q02",
@@ -368,7 +757,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：h 与 α 分别在哪个空间？",
@@ -396,7 +785,7 @@
         "c": "这是“基变换（change of basis）”的定义。",
         "d": "该选项回答的是“eigenvalues 是否足以描述所有 transient？”。"
       },
-      "explanation": "h 在 neuron activity space，α 在 eigenmode coordinate space。"
+      "explanation": "h 在 neuron activity space，α 在 eigenmode coordinate space。 若直接看 neuron coordinates，每个 derivative 都依赖许多 h_j，方程彼此耦合；目标是寻找一种 coordinate system，使 recurrent multiplication 不再混合 coordinates。"
     },
     {
       "id": "L18-Q03",
@@ -413,7 +802,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 18 讲：对角化需要什么假设？",
@@ -441,7 +830,7 @@
         "c": "该选项回答的是“feedforward 与 feedback control 的核心差异？”。",
         "d": "这是“前馈控制（feedforward control）”的定义。"
       },
-      "explanation": "W 有完整线性独立 eigenvectors，即 diagonalizable。"
+      "explanation": "W 有完整线性独立 eigenvectors，即 diagonalizable。 把这些 eigenvectors 作为 V 的 columns，若它们线性无关，就有 W=VΛV^{-1}。"
     },
     {
       "id": "L18-Q04",
@@ -458,7 +847,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 18 讲：mode equation 是什么？",
@@ -486,7 +875,7 @@
         "b": "这是“完美积分器（perfect integrator）”的定义。",
         "d": "该选项回答的是“λ>1 时 fixed point 如何？”。"
       },
-      "explanation": "τ αdot_i=−(1−λ_i)α_i+β_i。"
+      "explanation": "τ αdot_i=−(1−λ_i)α_i+β_i。 第 4 页从无输入 mode equation τ dα_i/dt=-(1-λ_i)α_i 出发。"
     },
     {
       "id": "L18-Q05",
@@ -503,7 +892,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：λ=0 时 τ_eff？",
@@ -531,7 +920,7 @@
         "b": "该选项回答的是“W_ij 的方向？”。",
         "c": "该选项回答的是“λ=0.9 时 τ_eff？”。"
       },
-      "explanation": "τ。"
+      "explanation": "τ。 对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。"
     },
     {
       "id": "L18-Q06",
@@ -548,7 +937,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 18 讲：λ=0.9 时 τ_eff？",
@@ -576,7 +965,7 @@
         "c": "该选项回答的是“W_ij 的方向？”。",
         "d": "该选项回答的是“λ=0 时 τ_eff？”。"
       },
-      "explanation": "10τ。"
+      "explanation": "10τ。 对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。"
     },
     {
       "id": "L18-Q07",
@@ -593,7 +982,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：λ>1 时 fixed point 如何？",
@@ -621,7 +1010,7 @@
         "c": "该选项回答的是“feedforward 与 feedback control 的核心差异？”。",
         "d": "该选项回答的是“对角化需要什么假设？”。"
       },
-      "explanation": "沿该 mode unstable，small deviations grow。"
+      "explanation": "沿该 mode unstable，small deviations grow。 constant input 下代数 fixed point α_i*=Ĩ_i/(1−λ_i) 仍可存在，但它不稳定，除非初值精确落在该点，轨迹都会离开。"
     },
     {
       "id": "L18-Q08",
@@ -638,7 +1027,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 18 讲：λ=1 时发生什么？",
@@ -666,7 +1055,7 @@
         "b": "该选项回答的是“mode equation 是什么？”。",
         "d": "这是“perfect integrator”的适用条件。"
       },
-      "explanation": "leak 完全抵消，mode 完美积分 input。"
+      "explanation": "leak 完全抵消，mode 完美积分 input。 h∈R^N 收集 N 个 units 的 activity，-h 是每个 unit 的 leak，Wh 是 recurrent input，I 是外部 drive。"
     },
     {
       "id": "L18-Q09",
@@ -683,7 +1072,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 18 讲：为什么 λ≈1 产生 long memory？",
@@ -711,7 +1100,7 @@
         "b": "这是“perfect integrator”的适用条件。",
         "c": "该选项回答的是“λ=1 时发生什么？”。"
       },
-      "explanation": "1−λ 很小，decay rate 小、τ_eff 大。"
+      "explanation": "1−λ 很小，decay rate 小、τ_eff 大。 对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。"
     },
     {
       "id": "L18-Q10",
@@ -728,7 +1117,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：positive feedback 与 runaway 的边界？",
@@ -756,7 +1145,7 @@
         "c": "这是“循环网络（recurrent network）”的定义。",
         "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页。"
       },
-      "explanation": "dominant eigenvalue crossing 1。"
+      "explanation": "dominant eigenvalue crossing 1。 positive recurrent feedback 把 λ 推近 1，会抵消一部分 leak 并延长 memory；negative λ 增强 restoring force，使 mode 更快衰减。"
     },
     {
       "id": "L18-Q11",
@@ -773,7 +1162,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 18 讲：eigenvalues 是否足以描述所有 transient？",
@@ -801,7 +1190,7 @@
         "c": "这是“稳定性（stability）”的定义。",
         "d": "这是“基变换（change of basis）”的定义。"
       },
-      "explanation": "不总是；non-normal matrices 可有 transient amplification。"
+      "explanation": "不总是；non-normal matrices 可有 transient amplification。 课程推导选择可对角化情形，是为了突出 eigenvalue 对 timescale 的控制，不是声称所有 cortical connectivity 都对称。"
     },
     {
       "id": "L18-Q12",
@@ -818,7 +1207,7 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：feedforward 与 feedback control 的核心差异？",
@@ -846,55 +1235,10 @@
         "b": "这是“前馈控制（feedforward control）”的定义。",
         "d": "这是“本体感觉（proprioception）”的定义。"
       },
-      "explanation": "是否根据实时 state/error feedback 修正 command。"
+      "explanation": "是否根据实时 state/error feedback 修正 command。 feedback controller 使用感觉到的 state error 修正输出，能抵抗扰动，但过高 gain 与 delay 可能导致 oscillation。"
     },
     {
       "id": "L18-Q13",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 1,
-          "section": "lecture-18-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 18 讲：根据 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "linear recurrent network equations。"
-        },
-        {
-          "id": "b",
-          "text": "eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes。"
-        },
-        {
-          "id": "c",
-          "text": "fixed points、perfect integrator、leaky integrator、memory timescale。"
-        },
-        {
-          "id": "d",
-          "text": "brain-body-environment coupling、feedforward/feedback control、motor rhythms、motor regions、distributed activity。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。",
-        "c": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。"
-      },
-      "explanation": "brain-body-environment coupling、feedforward/feedback control、motor rhythms、motor regions、distributed activity。"
-    },
-    {
-      "id": "L18-Q14",
       "lecture": 18,
       "sectionId": "lecture-18-source-1",
       "sourceAnchors": [
@@ -915,15 +1259,60 @@
       "choices": [
         {
           "id": "a",
-          "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
-        },
-        {
-          "id": "b",
           "text": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
+        },
+        {
+          "id": "c",
+          "text": "推导 mode-specific effective time constanttau/(1-lambda_i)，解释 lambda<1、 =1、>1 的 stability/decay/growth。"
+        },
+        {
+          "id": "d",
+          "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
+        "b": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。",
+        "c": "该陈述解释的是“mode solution、effective time constants、stable/unstable feedback”，不是题干指定的关系。"
+      },
+      "explanation": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。 第 1 页把 motor system 放进 brain、body、environment 的耦合中。"
+    },
+    {
+      "id": "L18-Q14",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 2,
+          "section": "lecture-18-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Motor Systems and Linear Neural Dynamics",
+        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 18 讲：若要解释\"linear recurrent network equations\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
+        },
+        {
+          "id": "b",
+          "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
+        },
+        {
+          "id": "c",
+          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
         },
         {
           "id": "d",
@@ -932,11 +1321,11 @@
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。",
+        "b": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
+        "c": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。",
         "d": "该陈述解释的是“mode solution、effective time constants、stable/unstable feedback”，不是题干指定的关系。"
       },
-      "explanation": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
+      "explanation": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。 复杂 network 的 linear dynamics 因此分解为一组熟悉的一阶系统。"
     },
     {
       "id": "L18-Q15",
@@ -953,173 +1342,38 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 18 讲：根据 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 2 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 18 讲：阅读\"换到 eigenbasis 后，耦合的 neuron dynamics 分解为独立 modes\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "brain-body-environment coupling、feedforward/feedback control、motor rhythms、motor regions、distributed activity。"
+          "text": "因此，从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+Wh+I。"
         },
         {
           "id": "b",
-          "text": "linear recurrent network equations。"
+          "text": "左乘 V⁻¹ 后，每个 α_i 独立满足 τα̇_i=-(1-λ_i)α_i+Ĩ_i；因此 λ_i 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。"
         },
         {
           "id": "c",
-          "text": "eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes。"
+          "text": "因此，从矩阵形式推导 eigenbasis transformation、 diagonalization 与 decoupled mode equations；标注所有 shape。"
         },
         {
           "id": "d",
-          "text": "mode solution、effective time constants、stable/unstable feedback。"
+          "text": "用 derivative field/fixed-point 图解释 stable vs unstable；区分 positive feedback、 perfect integration 和 runaway instability。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "c": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。",
-        "d": "该陈述解释的是“mode solution、effective time constants、stable/unstable feedback”，不是题干指定的关系。"
+        "a": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 3 页。",
+        "c": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页。"
       },
-      "explanation": "linear recurrent network equations。"
+      "explanation": "左乘 V⁻¹ 后，每个 α_i 独立满足 τα̇_i=-(1-λ_i)α_i+Ĩ_i；因此 λ_i 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。 若直接看 neuron coordinates，每个 derivative 都依赖许多 h_j，方程彼此耦合；目标是寻找一种 coordinate system，使 recurrent multiplication 不再混合 coordinates。"
     },
     {
       "id": "L18-Q16",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 2,
-          "section": "lecture-18-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 1,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 18 讲：若要解释\"linear recurrent network equations\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
-        },
-        {
-          "id": "b",
-          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
-        },
-        {
-          "id": "c",
-          "text": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
-        },
-        {
-          "id": "d",
-          "text": "推导 mode-specific effective time constanttau/(1-lambda_i)，解释 lambda<1、 =1、>1 的 stability/decay/growth。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "b": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。",
-        "d": "该陈述解释的是“mode solution、effective time constants、stable/unstable feedback”，不是题干指定的关系。"
-      },
-      "explanation": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
-    },
-    {
-      "id": "L18-Q17",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 2,
-          "section": "lecture-18-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 2,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 18 讲：阅读与\"linear recurrent network equations\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "c",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        },
-        {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "b": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。",
-        "c": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L18-Q18",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 3,
-          "section": "lecture-18-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 18 讲：根据 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes。"
-        },
-        {
-          "id": "b",
-          "text": "brain-body-environment coupling、feedforward/feedback control、motor rhythms、motor regions、distributed activity。"
-        },
-        {
-          "id": "c",
-          "text": "linear recurrent network equations。"
-        },
-        {
-          "id": "d",
-          "text": "mode solution、effective time constants、stable/unstable feedback。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“mode solution、effective time constants、stable/unstable feedback”，不是题干指定的关系。"
-      },
-      "explanation": "eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes。"
-    },
-    {
-      "id": "L18-Q19",
       "lecture": 18,
       "sectionId": "lecture-18-source-3",
       "sourceAnchors": [
@@ -1144,72 +1398,27 @@
         },
         {
           "id": "b",
-          "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
+          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
         },
         {
           "id": "c",
-          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
+          "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
         },
         {
           "id": "d",
           "text": "因此，梳理 spinal cord、brainstem、cerebellum、 basal ganglia、motor cortex 的课程级功能定位，不扩写成解剖百科。"
         }
       ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "c": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 1 页。"
-      },
-      "explanation": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
-    },
-    {
-      "id": "L18-Q20",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 3,
-          "section": "lecture-18-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 18 讲：阅读与\"eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        }
-      ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "b": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。"
+        "b": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。",
+        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 1 页。"
       },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+      "explanation": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。 非对称 W 的 eigenvectors 未必 orthogonal，V^{-1} 不能随意换成 V^T；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。"
     },
     {
-      "id": "L18-Q21",
+      "id": "L18-Q17",
       "lecture": 18,
       "sectionId": "lecture-18-source-4",
       "sourceAnchors": [
@@ -1223,128 +1432,38 @@
         "Motor Systems and Linear Neural Dynamics",
         "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 18 讲：根据 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "linear recurrent network equations。"
-        },
-        {
-          "id": "b",
-          "text": "eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes。"
-        },
-        {
-          "id": "c",
-          "text": "fixed points、perfect integrator、leaky integrator、memory timescale。"
-        },
-        {
-          "id": "d",
-          "text": "mode solution、effective time constants、stable/unstable feedback。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "b": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。",
-        "c": "该陈述解释的是“fixed points、perfect integrator、leaky integrator、memory timescale”，不是题干指定的关系。"
-      },
-      "explanation": "mode solution、effective time constants、stable/unstable feedback。"
-    },
-    {
-      "id": "L18-Q22",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 4,
-          "section": "lecture-18-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 18 讲：若要解释\"mode solution、effective time constants、stable/unstable feedback\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "推导 mode-specific effective time constanttau/(1-lambda_i)，解释 lambda<1、 =1、>1 的 stability/decay/growth。"
-        },
-        {
-          "id": "b",
           "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
         },
         {
-          "id": "d",
-          "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。"
-      },
-      "explanation": "推导 mode-specific effective time constanttau/(1-lambda_i)，解释 lambda<1、 =1、>1 的 stability/decay/growth。"
-    },
-    {
-      "id": "L18-Q23",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 5,
-          "section": "lecture-18-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 18 讲：根据 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "brain-body-environment coupling、feedforward/feedback control、motor rhythms、motor regions、distributed activity。"
-        },
-        {
-          "id": "b",
-          "text": "fixed points、perfect integrator、leaky integrator、memory timescale。"
-        },
-        {
           "id": "c",
-          "text": "linear recurrent network equations。"
+          "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
         },
         {
           "id": "d",
-          "text": "eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes。"
+          "text": "推导 mode-specific effective time constanttau/(1-lambda_i)，解释 lambda<1、 =1、>1 的 stability/decay/growth。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "d": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。"
+        "b": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
+        "c": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。"
       },
-      "explanation": "fixed points、perfect integrator、leaky integrator、memory timescale。"
+      "explanation": "推导 mode-specific effective time constanttau/(1-lambda_i)，解释 lambda<1、 =1、>1 的 stability/decay/growth。 对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。"
     },
     {
-      "id": "L18-Q24",
+      "id": "L18-Q18",
       "lecture": 18,
       "sectionId": "lecture-18-source-5",
       "sourceAnchors": [
@@ -1365,76 +1484,433 @@
       "choices": [
         {
           "id": "a",
-          "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
+          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
         },
         {
           "id": "b",
-          "text": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
+          "text": "解释 brain、body、environment 是 coupled dynamical system；比较 feedforward 与 feedback/proprioceptive control。"
         },
         {
           "id": "c",
-          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
+          "text": "从 familiar one-neuron linear ODE 推广到 recurrent populationtau dh/dt=-h+ Wh+I。"
         },
         {
           "id": "d",
           "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "b": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
+        "b": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
+        "c": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
         "d": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。"
       },
-      "explanation": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
+      "explanation": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。 无 input 时 α_i 保持初值；有 time-varying input 时 τ dα_i/dt=Ĩ_i(t)，state 累积 input integral，这才是 perfect integrator。"
     },
     {
-      "id": "L18-Q25",
+      "id": "L18-Q19",
       "lecture": 18,
-      "sectionId": "lecture-18-source-5",
+      "sectionId": "lecture-18-source-1",
       "sourceAnchors": [
         {
           "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 5,
-          "section": "lecture-18-source-5"
+          "page": 1,
+          "section": "lecture-18-source-1"
         }
       ],
       "conceptTags": [
-        "Motor Systems and Linear Neural Dynamics",
-        "Lecture18-IntroToMotorSystemsAndDynamics.pdf"
+        "运动控制是 brain–body–environment 闭环"
       ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 18 讲：阅读与\"fixed points、perfect integrator、leaky integrator、memory timescale\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 18 讲：为什么增加比例 feedback gain 在无延迟模型中改善 disturbance rejection，却不能据此建议生物系统把 gain 无限增大？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 V^TV 不等于 I；正确 coordinate transform 是 α=V^{-1}h，或用对应 left eigenvectors 读取 amplitudes。"
         },
         {
           "id": "b",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
         },
         {
           "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+          "text": "denominator 1-λ 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
         },
         {
           "id": "d",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+          "text": "用 derivative field/fixed-point 图解释 stable vs unstable；区分 positive feedback、 perfect integration 和 runaway instability。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页。"
+      },
+      "explanation": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。 motor cortex 的 distributed activity 也不必逐 neuron 对应一块 muscle。一个 movement 可由 population trajectory 表示，瞬时 activity pattern 决定系统状态，recurrent dynamics 决定 trajectory 如何继续。分析重点从\"哪个 neuron 编码哪个动作变量\"扩展为\"population state 沿哪些 modes 演化、哪些输入改变 initial condition 或 vector field\"。线性网络不是完整 motor theory，而是分解时间结构的第一步。"
+    },
+    {
+      "id": "L18-Q20",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 1,
+          "section": "lecture-18-source-1"
+        }
+      ],
+      "conceptTags": [
+        "运动控制是 brain–body–environment 闭环",
+        "持续速度扰动下的 steady position error"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 18 讲：完成\"一维系统 dx/dt=-2x+0.6，初始 x(0)=1。求 fixed point、time constant，并算 t=1 s 时的位置。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=0.7。"
+        },
+        {
+          "id": "b",
+          "text": "λ=0.98 把 intrinsic 20 ms 延长为 1 s leaky memory；λ=1 才是 perfect integrator。"
+        },
+        {
+          "id": "c",
+          "text": "系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。"
+        },
+        {
+          "id": "d",
+          "text": "小 perturbation 是否回到 fixed point。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这是“稳定性（stability）”的定义。"
+      },
+      "explanation": "系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。 计算路径：fixed point 为 x*=d/k=0.6/2=0.3。 error e=x-0.3 满足 de/dt=-2e，所以 e(t)=0.7e^{-2t}，time constant 为 1/2 s。 t=1 时 x=0.3+0.7e^{-2}≈0.3+0.0947=0.3947。"
+    },
+    {
+      "id": "L18-Q21",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 1,
+          "section": "lecture-18-source-1"
+        }
+      ],
+      "conceptTags": [
+        "运动控制是 brain–body–environment 闭环",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 18 讲：得到\"系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "matrix trace 1.6 等于 eigenvalues 0.9+0.7，determinant 0.63 等于 0.9×0.7。"
+        },
+        {
+          "id": "b",
+          "text": "若误把 τ_eff 写成 τ/(1+λ)，会得到约 10 ms，与 positive feedback 延长记忆的方向相反。"
+        },
+        {
+          "id": "c",
+          "text": "是否根据实时 state/error feedback 修正 command。"
+        },
+        {
+          "id": "d",
+          "text": "初始 x=1 时 derivative=-2+0.6=-1.4 为负，轨迹应向较小位置移动；计算结果符合方向。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“brain-body-environment coupling、feedforward/feedback control、motor rhythms”，不是题干指定的关系。",
-        "b": "该陈述解释的是“linear recurrent network equations”，不是题干指定的关系。",
-        "c": "该陈述解释的是“eigenvectors/eigenvalues、matrix diagonalization、change of basis、decoupled modes”，不是题干指定的关系。"
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "该选项回答的是“feedforward 与 feedback control 的核心差异？”。"
       },
-      "explanation": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+      "explanation": "初始 x=1 时 derivative=-2+0.6=-1.4 为负，轨迹应向较小位置移动；计算结果符合方向。 这个检查对应题设\"一维系统 dx/dt=-2x+0.6，初始 x(0)=1。求 fixed point、time constant，并算 t=1 s 时的位置。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L18-Q22",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 2,
+          "section": "lecture-18-source-2"
+        }
+      ],
+      "conceptTags": [
+        "recurrent population equation 与 eigenmode 分解"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 18 讲：在非对称 W 中，为什么不能看到 normalized right eigenvectors 后就把 α 写成 V^T h？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 V^TV 不等于 I；正确 coordinate transform 是 α=V^{-1}h，或用对应 left eigenvectors 读取 amplitudes。"
+        },
+        {
+          "id": "b",
+          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+        },
+        {
+          "id": "c",
+          "text": "denominator 1-λ 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+        },
+        {
+          "id": "d",
+          "text": "用 derivative field/fixed-point 图解释 stable vs unstable；区分 positive feedback、 perfect integration 和 runaway instability。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页。"
+      },
+      "explanation": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 V^TV 不等于 I；正确 coordinate transform 是 α=V^{-1}h，或用对应 left eigenvectors 读取 amplitudes。 这个方法的边界同样重要。非对称 W 的 eigenvectors 未必 orthogonal，V^{-1} 不能随意换成 V^T；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。若 W defective，就没有完整 ordinary eigenbasis，需要 Jordan form 或直接计算 e^{(-I+W)t/τ}。课程推导选择可对角化情形，是为了突出 eigenvalue 对 timescale 的控制，不是声称所有 cortical connectivity 都对称。"
+    },
+    {
+      "id": "L18-Q23",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 2,
+          "section": "lecture-18-source-2"
+        }
+      ],
+      "conceptTags": [
+        "recurrent population equation 与 eigenmode 分解",
+        "两神经元网络的共同 mode 与差分 mode"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 18 讲：完成\"W=[[0.8,0.1],[0.1,0.8]]，τ=20 ms。找两个 normalized eigenvectors、eigenvalues，并写无输入 mode equations。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=-0.30000000000000004。"
+        },
+        {
+          "id": "b",
+          "text": "population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=0.7。"
+        },
+        {
+          "id": "c",
+          "text": "系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。"
+        },
+        {
+          "id": "d",
+          "text": "λ=0.98 把 intrinsic 20 ms 延长为 1 s leaky memory；λ=1 才是 perfect integrator。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该选项在乘加运算中使用了错误的分量或算术结果。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=0.7。 计算路径：共同 pattern v_+=(1,1)/√2：Wv_+=(0.9,0.9)/√2，所以 λ_+=0.9。 差分 pattern v_-=(1,-1)/√2：Wv_-=(0.7,-0.7)/√2，所以 λ_-=0.7。 mode equations 为 20 ms·dα_+/dt=-0.1α_+，20 ms·dα_-/dt=-0.3α_-；共同 mode 衰减更慢。"
+    },
+    {
+      "id": "L18-Q24",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 2,
+          "section": "lecture-18-source-2"
+        }
+      ],
+      "conceptTags": [
+        "recurrent population equation 与 eigenmode 分解",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 18 讲：得到\"population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=0.7。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "初始 x=1 时 derivative=-2+0.6=-1.4 为负，轨迹应向较小位置移动；计算结果符合方向。"
+        },
+        {
+          "id": "b",
+          "text": "若误把 τ_eff 写成 τ/(1+λ)，会得到约 10 ms，与 positive feedback 延长记忆的方向相反。"
+        },
+        {
+          "id": "c",
+          "text": "matrix trace 1.6 等于 eigenvalues 0.9+0.7，determinant 0.63 等于 0.9×0.7。"
+        },
+        {
+          "id": "d",
+          "text": "W eigenvector 对应的 population activity pattern。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这是“特征模态（eigenmode）”的定义。"
+      },
+      "explanation": "matrix trace 1.6 等于 eigenvalues 0.9+0.7，determinant 0.63 等于 0.9×0.7。 这个检查对应题设\"W=[[0.8,0.1],[0.1,0.8]]，τ=20 ms。找两个 normalized eigenvectors、eigenvalues，并写无输入 mode equations。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L18-Q25",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 4,
+          "section": "lecture-18-source-4"
+        }
+      ],
+      "conceptTags": [
+        "eigenvalues 控制 timescale、fixed point 与 integration"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 18 讲：为什么把 λ 从 0.98 调到 0.999 不只是\"记得更久\"，也会让网络更容易 drift？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+        },
+        {
+          "id": "b",
+          "text": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 V^TV 不等于 I；正确 coordinate transform 是 α=V^{-1}h，或用对应 left eigenvectors 读取 amplitudes。"
+        },
+        {
+          "id": "c",
+          "text": "用 derivative field/fixed-point 图解释 stable vs unstable；区分 positive feedback、 perfect integration 和 runaway instability。"
+        },
+        {
+          "id": "d",
+          "text": "denominator 1-λ 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页。"
+      },
+      "explanation": "denominator 1-λ 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。 在 population space 中，每个 mode 的时间过程叠加成 h(t)=Vα(t)。慢 mode 可能主导晚期 trajectory，即使初始 projection 很小；快速 modes 先消失。外部 input 的效果也取决于它投影到哪些 modes，而不只取决于总能量。用 eigenvalues 解释 motor dynamics 时，应报告 model fit、initial conditions、input projection 与 observed timescale，不能从一条旋转轨迹直接认定某个 eigenmode 是行为命令。"
     },
     {
       "id": "L18-Q26",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 4,
+          "section": "lecture-18-source-4"
+        }
+      ],
+      "conceptTags": [
+        "eigenvalues 控制 timescale、fixed point 与 integration",
+        "从 20 ms intrinsic time 到 1 s memory"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 18 讲：完成\"某 mode 的 τ=20 ms、λ=0.98，初始 amplitude 为 5，无输入。求 τ_eff 与 1 s 后 amplitude；再比较 λ=1。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ=0.98 把 intrinsic 20 ms 延长为 1 s leaky memory；λ=1 才是 perfect integrator。"
+        },
+        {
+          "id": "b",
+          "text": "系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。"
+        },
+        {
+          "id": "c",
+          "text": "population activity 被分成同向共同 mode λ=0.9 与反向差分 mode λ=0.7。"
+        },
+        {
+          "id": "d",
+          "text": "从矩阵形式推导 eigenbasis transformation、diagonalization 与 decoupled mode equations；标注所有 shape。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 3 页。"
+      },
+      "explanation": "λ=0.98 把 intrinsic 20 ms 延长为 1 s leaky memory；λ=1 才是 perfect integrator。 计算路径：1-λ=0.02，所以 τ_eff=20 ms/0.02=1000 ms=1 s。 1 s 后 α=5e^{-1}≈1.84，说明 recurrent feedback 延长但没有消除 decay。 若 λ=1 且无输入，dα/dt=0，1 s 后仍为 5；若存在持续小 bias，它会被不断积分。"
+    },
+    {
+      "id": "L18-Q27",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 4,
+          "section": "lecture-18-source-4"
+        }
+      ],
+      "conceptTags": [
+        "eigenvalues 控制 timescale、fixed point 与 integration",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 18 讲：得到\"λ=0.98 把 intrinsic 20 ms 延长为 1 s leaky memory；λ=1 才是 perfect integrator。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "初始 x=1 时 derivative=-2+0.6=-1.4 为负，轨迹应向较小位置移动；计算结果符合方向。"
+        },
+        {
+          "id": "b",
+          "text": "若误把 τ_eff 写成 τ/(1+λ)，会得到约 10 ms，与 positive feedback 延长记忆的方向相反。"
+        },
+        {
+          "id": "c",
+          "text": "matrix trace 1.6 等于 eigenvalues 0.9+0.7，determinant 0.63 等于 0.9×0.7。"
+        },
+        {
+          "id": "d",
+          "text": "解释 lambda 接近 1 如何产生 long memory， 以及有限误差如何造成 leaky integrator。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture18-IntroToMotorSystemsAndDynamics.pdf 第 5 页。"
+      },
+      "explanation": "若误把 τ_eff 写成 τ/(1+λ)，会得到约 10 ms，与 positive feedback 延长记忆的方向相反。 这个检查对应题设\"某 mode 的 τ=20 ms、λ=0.98，初始 amplitude 为 5，无输入。求 τ_eff 与 1 s 后 amplitude；再比较 λ=1。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L18-Q28",
       "lecture": 18,
       "sectionId": "lecture-18-source-1",
       "sourceAnchors": [
@@ -1455,31 +1931,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "前馈控制（feedforward control）"
-        },
-        {
-          "id": "b",
           "text": "反馈控制（feedback control）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "本体感觉（proprioception）"
+        },
+        {
+          "id": "c",
+          "text": "前馈控制（feedforward control）"
         },
         {
           "id": "d",
           "text": "循环网络（recurrent network）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“反馈控制（feedback control）”指：根据 sensory/state error 在线修正 action。",
-        "c": "“本体感觉（proprioception）”指：关于 body position/force 的 sensory feedback。",
+        "a": "“反馈控制（feedback control）”指：根据 sensory/state error 在线修正 action。",
+        "b": "“本体感觉（proprioception）”指：关于 body position/force 的 sensory feedback。",
         "d": "“循环网络（recurrent network）”指：units 之间存在 feedback loops。"
       },
       "explanation": "前馈控制（feedforward control）：主要依据预先模型/command，不依当前 feedback correction。"
     },
     {
-      "id": "L18-Q27",
+      "id": "L18-Q29",
       "lecture": 18,
       "sectionId": "lecture-18-source-1",
       "sourceAnchors": [
@@ -1493,7 +1969,7 @@
         "反馈控制",
         "feedback control"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 18 讲：本讲把\"根据 sensory/state error 在线修正 action。\"称为什么？",
@@ -1504,114 +1980,24 @@
         },
         {
           "id": "b",
+          "text": "循环网络（recurrent network）"
+        },
+        {
+          "id": "c",
+          "text": "特征模态（eigenmode）"
+        },
+        {
+          "id": "d",
           "text": "反馈控制（feedback control）"
-        },
-        {
-          "id": "c",
-          "text": "循环网络（recurrent network）"
-        },
-        {
-          "id": "d",
-          "text": "特征模态（eigenmode）"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "“本体感觉（proprioception）”指：关于 body position/force 的 sensory feedback。",
-        "c": "“循环网络（recurrent network）”指：units 之间存在 feedback loops。",
-        "d": "“特征模态（eigenmode）”指：W eigenvector 对应的 population activity pattern。"
-      },
-      "explanation": "反馈控制（feedback control）：根据 sensory/state error 在线修正 action。"
-    },
-    {
-      "id": "L18-Q28",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 1,
-          "section": "lecture-18-source-1"
-        }
-      ],
-      "conceptTags": [
-        "本体感觉",
-        "proprioception"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 18 讲：本讲把\"关于 body position/force 的 sensory feedback。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "循环网络（recurrent network）"
-        },
-        {
-          "id": "b",
-          "text": "特征模态（eigenmode）"
-        },
-        {
-          "id": "c",
-          "text": "本体感觉（proprioception）"
-        },
-        {
-          "id": "d",
-          "text": "基变换（change of basis）"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "“循环网络（recurrent network）”指：units 之间存在 feedback loops。",
-        "b": "“特征模态（eigenmode）”指：W eigenvector 对应的 population activity pattern。",
-        "d": "“基变换（change of basis）”指：同一 state 在 neuron coordinates 与 mode coordinates 间转换。"
-      },
-      "explanation": "本体感觉（proprioception）：关于 body position/force 的 sensory feedback。"
-    },
-    {
-      "id": "L18-Q29",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 5,
-          "section": "lecture-18-source-5"
-        }
-      ],
-      "conceptTags": [
-        "循环网络",
-        "recurrent network"
-      ],
-      "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 18 讲：本讲把\"units 之间存在 feedback loops。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "特征模态（eigenmode）"
-        },
-        {
-          "id": "b",
-          "text": "基变换（change of basis）"
-        },
-        {
-          "id": "c",
-          "text": "有效时间常数（effective time constant）"
-        },
-        {
-          "id": "d",
-          "text": "循环网络（recurrent network）"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "“特征模态（eigenmode）”指：W eigenvector 对应的 population activity pattern。",
-        "b": "“基变换（change of basis）”指：同一 state 在 neuron coordinates 与 mode coordinates 间转换。",
-        "c": "“有效时间常数（effective time constant）”指：feedback 后 mode 的 decay/integration timescale。"
+        "a": "“本体感觉（proprioception）”指：关于 body position/force 的 sensory feedback。",
+        "b": "“循环网络（recurrent network）”指：units 之间存在 feedback loops。",
+        "c": "“特征模态（eigenmode）”指：W eigenvector 对应的 population activity pattern。"
       },
-      "explanation": "循环网络（recurrent network）：units 之间存在 feedback loops。"
+      "explanation": "反馈控制（feedback control）：根据 sensory/state error 在线修正 action。 feedback controller 使用感觉到的 state error 修正输出，能抵抗扰动，但过高 gain 与 delay 可能导致 oscillation。"
     },
     {
       "id": "L18-Q30",
@@ -1625,13 +2011,58 @@
         }
       ],
       "conceptTags": [
-        "特征模态",
-        "eigenmode"
+        "本体感觉",
+        "proprioception"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
-      "stem": "第 18 讲：本讲把\"W eigenvector 对应的 population activity pattern。\"称为什么？",
+      "stem": "第 18 讲：本讲把\"关于 body position/force 的 sensory feedback。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "本体感觉（proprioception）"
+        },
+        {
+          "id": "b",
+          "text": "循环网络（recurrent network）"
+        },
+        {
+          "id": "c",
+          "text": "特征模态（eigenmode）"
+        },
+        {
+          "id": "d",
+          "text": "基变换（change of basis）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“循环网络（recurrent network）”指：units 之间存在 feedback loops。",
+        "c": "“特征模态（eigenmode）”指：W eigenvector 对应的 population activity pattern。",
+        "d": "“基变换（change of basis）”指：同一 state 在 neuron coordinates 与 mode coordinates 间转换。"
+      },
+      "explanation": "本体感觉（proprioception）：关于 body position/force 的 sensory feedback。"
+    },
+    {
+      "id": "L18-Q31",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 5,
+          "section": "lecture-18-source-5"
+        }
+      ],
+      "conceptTags": [
+        "循环网络",
+        "recurrent network"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 18 讲：本讲把\"units 之间存在 feedback loops。\"称为什么？",
       "choices": [
         {
           "id": "a",
@@ -1639,27 +2070,72 @@
         },
         {
           "id": "b",
-          "text": "基变换（change of basis）"
+          "text": "循环网络（recurrent network）"
         },
         {
           "id": "c",
+          "text": "基变换（change of basis）"
+        },
+        {
+          "id": "d",
           "text": "有效时间常数（effective time constant）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“特征模态（eigenmode）”指：W eigenvector 对应的 population activity pattern。",
+        "c": "“基变换（change of basis）”指：同一 state 在 neuron coordinates 与 mode coordinates 间转换。",
+        "d": "“有效时间常数（effective time constant）”指：feedback 后 mode 的 decay/integration timescale。"
+      },
+      "explanation": "循环网络（recurrent network）：units 之间存在 feedback loops。 positive recurrent feedback 把 λ 推近 1，会抵消一部分 leak 并延长 memory；negative λ 增强 restoring force，使 mode 更快衰减。"
+    },
+    {
+      "id": "L18-Q32",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 1,
+          "section": "lecture-18-source-1"
+        }
+      ],
+      "conceptTags": [
+        "特征模态",
+        "eigenmode"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 18 讲：本讲把\"W eigenvector 对应的 population activity pattern。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "基变换（change of basis）"
+        },
+        {
+          "id": "b",
+          "text": "有效时间常数（effective time constant）"
+        },
+        {
+          "id": "c",
+          "text": "特征模态（eigenmode）"
         },
         {
           "id": "d",
           "text": "固定点（fixed point）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“基变换（change of basis）”指：同一 state 在 neuron coordinates 与 mode coordinates 间转换。",
-        "c": "“有效时间常数（effective time constant）”指：feedback 后 mode 的 decay/integration timescale。",
+        "a": "“基变换（change of basis）”指：同一 state 在 neuron coordinates 与 mode coordinates 间转换。",
+        "b": "“有效时间常数（effective time constant）”指：feedback 后 mode 的 decay/integration timescale。",
         "d": "“固定点（fixed point）”指：derivative 为零的 state。"
       },
       "explanation": "特征模态（eigenmode）：W eigenvector 对应的 population activity pattern。"
     },
     {
-      "id": "L18-Q31",
+      "id": "L18-Q33",
       "lecture": 18,
       "sectionId": "lecture-18-source-3",
       "sourceAnchors": [
@@ -1684,27 +2160,27 @@
         },
         {
           "id": "b",
-          "text": "基变换（change of basis）"
-        },
-        {
-          "id": "c",
           "text": "固定点（fixed point）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "稳定性（stability）"
+        },
+        {
+          "id": "d",
+          "text": "基变换（change of basis）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“有效时间常数（effective time constant）”指：feedback 后 mode 的 decay/integration timescale。",
-        "c": "“固定点（fixed point）”指：derivative 为零的 state。",
-        "d": "“稳定性（stability）”指：小 perturbation 是否回到 fixed point。"
+        "b": "“固定点（fixed point）”指：derivative 为零的 state。",
+        "c": "“稳定性（stability）”指：小 perturbation 是否回到 fixed point。"
       },
       "explanation": "基变换（change of basis）：同一 state 在 neuron coordinates 与 mode coordinates 间转换。"
     },
     {
-      "id": "L18-Q32",
+      "id": "L18-Q34",
       "lecture": 18,
       "sectionId": "lecture-18-source-4",
       "sourceAnchors": [
@@ -1718,125 +2194,35 @@
         "有效时间常数",
         "effective time constant"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 18 讲：本讲把\"feedback 后 mode 的 decay/integration timescale。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "固定点（fixed point）"
-        },
-        {
-          "id": "b",
-          "text": "稳定性（stability）"
-        },
-        {
-          "id": "c",
           "text": "有效时间常数（effective time constant）"
         },
         {
-          "id": "d",
-          "text": "完美积分器（perfect integrator）"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "“固定点（fixed point）”指：derivative 为零的 state。",
-        "b": "“稳定性（stability）”指：小 perturbation 是否回到 fixed point。",
-        "d": "“完美积分器（perfect integrator）”指：无 leak 地累积 input 的 mode。"
-      },
-      "explanation": "有效时间常数（effective time constant）：feedback 后 mode 的 decay/integration timescale。"
-    },
-    {
-      "id": "L18-Q33",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 5,
-          "section": "lecture-18-source-5"
-        }
-      ],
-      "conceptTags": [
-        "固定点",
-        "fixed point"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 18 讲：本讲把\"derivative 为零的 state。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "稳定性（stability）"
-        },
-        {
           "id": "b",
-          "text": "完美积分器（perfect integrator）"
-        },
-        {
-          "id": "c",
-          "text": "前馈控制（feedforward control）"
-        },
-        {
-          "id": "d",
           "text": "固定点（fixed point）"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "“稳定性（stability）”指：小 perturbation 是否回到 fixed point。",
-        "b": "“完美积分器（perfect integrator）”指：无 leak 地累积 input 的 mode。",
-        "c": "“前馈控制（feedforward control）”指：主要依据预先模型/command，不依当前 feedback correction。"
-      },
-      "explanation": "固定点（fixed point）：derivative 为零的 state。"
-    },
-    {
-      "id": "L18-Q34",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 5,
-          "section": "lecture-18-source-5"
-        }
-      ],
-      "conceptTags": [
-        "稳定性",
-        "stability"
-      ],
-      "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 18 讲：本讲把\"小 perturbation 是否回到 fixed point。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "稳定性（stability）"
-        },
-        {
-          "id": "b",
-          "text": "完美积分器（perfect integrator）"
         },
         {
           "id": "c",
-          "text": "前馈控制（feedforward control）"
+          "text": "稳定性（stability）"
         },
         {
           "id": "d",
-          "text": "反馈控制（feedback control）"
+          "text": "完美积分器（perfect integrator）"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "“完美积分器（perfect integrator）”指：无 leak 地累积 input 的 mode。",
-        "c": "“前馈控制（feedforward control）”指：主要依据预先模型/command，不依当前 feedback correction。",
-        "d": "“反馈控制（feedback control）”指：根据 sensory/state error 在线修正 action。"
+        "b": "“固定点（fixed point）”指：derivative 为零的 state。",
+        "c": "“稳定性（stability）”指：小 perturbation 是否回到 fixed point。",
+        "d": "“完美积分器（perfect integrator）”指：无 leak 地累积 input 的 mode。"
       },
-      "explanation": "稳定性（stability）：小 perturbation 是否回到 fixed point。"
+      "explanation": "有效时间常数（effective time constant）：feedback 后 mode 的 decay/integration timescale。"
     },
     {
       "id": "L18-Q35",
@@ -1850,10 +2236,100 @@
         }
       ],
       "conceptTags": [
+        "固定点",
+        "fixed point"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 18 讲：本讲把\"derivative 为零的 state。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "稳定性（stability）"
+        },
+        {
+          "id": "b",
+          "text": "固定点（fixed point）"
+        },
+        {
+          "id": "c",
+          "text": "完美积分器（perfect integrator）"
+        },
+        {
+          "id": "d",
+          "text": "前馈控制（feedforward control）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“稳定性（stability）”指：小 perturbation 是否回到 fixed point。",
+        "c": "“完美积分器（perfect integrator）”指：无 leak 地累积 input 的 mode。",
+        "d": "“前馈控制（feedforward control）”指：主要依据预先模型/command，不依当前 feedback correction。"
+      },
+      "explanation": "固定点（fixed point）：derivative 为零的 state。 constant input 下代数 fixed point α_i*=Ĩ_i/(1−λ_i) 仍可存在，但它不稳定，除非初值精确落在该点，轨迹都会离开。"
+    },
+    {
+      "id": "L18-Q36",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 5,
+          "section": "lecture-18-source-5"
+        }
+      ],
+      "conceptTags": [
+        "稳定性",
+        "stability"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 18 讲：本讲把\"小 perturbation 是否回到 fixed point。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "完美积分器（perfect integrator）"
+        },
+        {
+          "id": "b",
+          "text": "前馈控制（feedforward control）"
+        },
+        {
+          "id": "c",
+          "text": "稳定性（stability）"
+        },
+        {
+          "id": "d",
+          "text": "反馈控制（feedback control）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“完美积分器（perfect integrator）”指：无 leak 地累积 input 的 mode。",
+        "b": "“前馈控制（feedforward control）”指：主要依据预先模型/command，不依当前 feedback correction。",
+        "d": "“反馈控制（feedback control）”指：根据 sensory/state error 在线修正 action。"
+      },
+      "explanation": "稳定性（stability）：小 perturbation 是否回到 fixed point。 constant input 下代数 fixed point α_i*=Ĩ_i/(1−λ_i) 仍可存在，但它不稳定，除非初值精确落在该点，轨迹都会离开。"
+    },
+    {
+      "id": "L18-Q37",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 5,
+          "section": "lecture-18-source-5"
+        }
+      ],
+      "conceptTags": [
         "完美积分器",
         "perfect integrator"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 18 讲：本讲把\"无 leak 地累积 input 的 mode。\"称为什么？",
@@ -1864,27 +2340,27 @@
         },
         {
           "id": "b",
-          "text": "完美积分器（perfect integrator）"
-        },
-        {
-          "id": "c",
           "text": "反馈控制（feedback control）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "本体感觉（proprioception）"
+        },
+        {
+          "id": "d",
+          "text": "完美积分器（perfect integrator）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“前馈控制（feedforward control）”指：主要依据预先模型/command，不依当前 feedback correction。",
-        "c": "“反馈控制（feedback control）”指：根据 sensory/state error 在线修正 action。",
-        "d": "“本体感觉（proprioception）”指：关于 body position/force 的 sensory feedback。"
+        "b": "“反馈控制（feedback control）”指：根据 sensory/state error 在线修正 action。",
+        "c": "“本体感觉（proprioception）”指：关于 body position/force 的 sensory feedback。"
       },
-      "explanation": "完美积分器（perfect integrator）：无 leak 地累积 input 的 mode。"
+      "explanation": "完美积分器（perfect integrator）：无 leak 地累积 input 的 mode。 无 input 时 α_i 保持初值；有 time-varying input 时 τ dα_i/dt=Ĩ_i(t)，state 累积 input integral，这才是 perfect integrator。"
     },
     {
-      "id": "L18-Q36",
+      "id": "L18-Q38",
       "lecture": 18,
       "sectionId": "lecture-18-source-2",
       "sourceAnchors": [
@@ -1897,38 +2373,38 @@
       "conceptTags": [
         "linear recurrent rate network"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：使用\"linear recurrent rate network\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "W diagonalizable"
+          "text": "common τ、linearization"
         },
         {
           "id": "b",
-          "text": "V invertible"
+          "text": "W diagonalizable"
         },
         {
           "id": "c",
-          "text": "common τ、linearization"
+          "text": "V invertible"
         },
         {
           "id": "d",
           "text": "eigenbasis"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“diagonalization”的条件，不是题干公式的条件。",
-        "b": "这是“mode coordinates”的条件，不是题干公式的条件。",
+        "b": "这是“diagonalization”的条件，不是题干公式的条件。",
+        "c": "这是“mode coordinates”的条件，不是题干公式的条件。",
         "d": "这是“decoupled mode”的条件，不是题干公式的条件。"
       },
       "explanation": "linear recurrent rate network 的适用条件：common τ、linearization"
     },
     {
-      "id": "L18-Q37",
+      "id": "L18-Q39",
       "lecture": 18,
       "sectionId": "lecture-18-source-2",
       "sourceAnchors": [
@@ -1941,7 +2417,7 @@
       "conceptTags": [
         "diagonalization"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：使用\"diagonalization\"时，哪项条件或约定不可省略？",
@@ -1952,27 +2428,27 @@
         },
         {
           "id": "b",
-          "text": "V invertible"
+          "text": "W diagonalizable"
         },
         {
           "id": "c",
-          "text": "eigenbasis"
+          "text": "V invertible"
         },
         {
           "id": "d",
-          "text": "W diagonalizable"
+          "text": "eigenbasis"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“linear recurrent rate network”的条件，不是题干公式的条件。",
-        "b": "这是“mode coordinates”的条件，不是题干公式的条件。",
-        "c": "这是“decoupled mode”的条件，不是题干公式的条件。"
+        "c": "这是“mode coordinates”的条件，不是题干公式的条件。",
+        "d": "这是“decoupled mode”的条件，不是题干公式的条件。"
       },
-      "explanation": "diagonalization 的适用条件：W diagonalizable"
+      "explanation": "diagonalization 的适用条件：W diagonalizable 第 3 页使用 W 的 right eigenvectors。"
     },
     {
-      "id": "L18-Q38",
+      "id": "L18-Q40",
       "lecture": 18,
       "sectionId": "lecture-18-source-2",
       "sourceAnchors": [
@@ -1992,31 +2468,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "V invertible"
-        },
-        {
-          "id": "b",
           "text": "common τ、linearization"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "W diagonalizable"
+        },
+        {
+          "id": "c",
+          "text": "V invertible"
         },
         {
           "id": "d",
           "text": "eigenbasis"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "这是“linear recurrent rate network”的条件，不是题干公式的条件。",
-        "c": "这是“diagonalization”的条件，不是题干公式的条件。",
+        "a": "这是“linear recurrent rate network”的条件，不是题干公式的条件。",
+        "b": "这是“diagonalization”的条件，不是题干公式的条件。",
         "d": "这是“decoupled mode”的条件，不是题干公式的条件。"
       },
-      "explanation": "mode coordinates 的适用条件：V invertible"
+      "explanation": "mode coordinates 的适用条件：V invertible 非对称 W 的 eigenvectors 未必 orthogonal，V^{-1} 不能随意换成 V^T；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。"
     },
     {
-      "id": "L18-Q39",
+      "id": "L18-Q41",
       "lecture": 18,
       "sectionId": "lecture-18-source-2",
       "sourceAnchors": [
@@ -2029,7 +2505,7 @@
       "conceptTags": [
         "decoupled mode"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 18 讲：使用\"decoupled mode\"时，哪项条件或约定不可省略？",
@@ -2040,7 +2516,95 @@
         },
         {
           "id": "b",
+          "text": "W diagonalizable"
+        },
+        {
+          "id": "c",
+          "text": "V invertible"
+        },
+        {
+          "id": "d",
           "text": "eigenbasis"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“linear recurrent rate network”的条件，不是题干公式的条件。",
+        "b": "这是“diagonalization”的条件，不是题干公式的条件。",
+        "c": "这是“mode coordinates”的条件，不是题干公式的条件。"
+      },
+      "explanation": "decoupled mode 的适用条件：eigenbasis 非对称 W 的 eigenvectors 未必 orthogonal，V^{-1} 不能随意换成 V^T；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。"
+    },
+    {
+      "id": "L18-Q42",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 4,
+          "section": "lecture-18-source-4"
+        }
+      ],
+      "conceptTags": [
+        "mode time constant"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 18 讲：使用\"mode time constant\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ<1 for stable decay"
+        },
+        {
+          "id": "b",
+          "text": "common τ、linearization"
+        },
+        {
+          "id": "c",
+          "text": "W diagonalizable"
+        },
+        {
+          "id": "d",
+          "text": "V invertible"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“linear recurrent rate network”的条件，不是题干公式的条件。",
+        "c": "这是“diagonalization”的条件，不是题干公式的条件。",
+        "d": "这是“mode coordinates”的条件，不是题干公式的条件。"
+      },
+      "explanation": "mode time constant 的适用条件：λ<1 for stable decay 对于实 λ_i<1，解是 α_i(t)=α_i(0)exp[-(1-λ_i)t/τ]，所以 effective time constant 为 τ_eff=τ/(1-λ_i)。"
+    },
+    {
+      "id": "L18-Q43",
+      "lecture": 18,
+      "sectionId": "lecture-18-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
+          "page": 5,
+          "section": "lecture-18-source-5"
+        }
+      ],
+      "conceptTags": [
+        "perfect integrator"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 18 讲：使用\"perfect integrator\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "common τ、linearization"
+        },
+        {
+          "id": "b",
+          "text": "exact feedback cancellation"
         },
         {
           "id": "c",
@@ -2057,51 +2621,7 @@
         "c": "这是“diagonalization”的条件，不是题干公式的条件。",
         "d": "这是“mode coordinates”的条件，不是题干公式的条件。"
       },
-      "explanation": "decoupled mode 的适用条件：eigenbasis"
-    },
-    {
-      "id": "L18-Q40",
-      "lecture": 18,
-      "sectionId": "lecture-18-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
-          "page": 4,
-          "section": "lecture-18-source-4"
-        }
-      ],
-      "conceptTags": [
-        "mode time constant"
-      ],
-      "difficulty": 5,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 18 讲：使用\"mode time constant\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "common τ、linearization"
-        },
-        {
-          "id": "b",
-          "text": "W diagonalizable"
-        },
-        {
-          "id": "c",
-          "text": "λ<1 for stable decay"
-        },
-        {
-          "id": "d",
-          "text": "V invertible"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "这是“linear recurrent rate network”的条件，不是题干公式的条件。",
-        "b": "这是“diagonalization”的条件，不是题干公式的条件。",
-        "d": "这是“mode coordinates”的条件，不是题干公式的条件。"
-      },
-      "explanation": "mode time constant 的适用条件：λ<1 for stable decay"
+      "explanation": "perfect integrator 的适用条件：exact feedback cancellation 无 input 时 α_i 保持初值；有 time-varying input 时 τ dα_i/dt=Ĩ_i(t)，state 累积 input integral，这才是 perfect integrator。"
     }
   ]
 }

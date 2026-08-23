@@ -100,6 +100,570 @@
       "stopPredict": "提高 coherence 对 RT 与 accuracy 的典型影响？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "用“当前脑状态不只由当前输入决定”的 working definition 组织 decision、working memory 与长期学习，同时指出该定义不是穷尽性定义。",
+      "按 sample、delay、comparison、choice 重建 DMS 与 Romo parametric working-memory 任务，明确 delay 内需要保存的信息。",
+      "从 recurrent eigenmode 推导 graded persistent activity 的有效时间常数，并判断泄漏、完美保持与不稳定边界。",
+      "逐项解释 leaky drift-diffusion 的 evidence、noise、bias、bounds 与 reaction time，预测 psychometric 和 chronometric 曲线。",
+      "用 Wong–Wang phase plane 区分 fixed points、separatrix 与 stochastic choice，并把模型预测和 LIP correlation 分层。"
+    ],
+    "prerequisiteBridge": [
+      "短时记忆问题可以先写成最小状态方程：外界 sample 消失以后，内部变量 x 仍需保留与 sample 有关的值。若 dx/dt=0，值保持；若 dx/dt=-x/τ，值会指数衰减；若 feedback 抵消 leak，有效 τ 可以远大于单细胞膜时间常数。高中层面的指数函数和一阶微分方程直觉足以开始，正式推导会把 recurrent eigenvalue 放进这个衰减率。",
+      "决策则把随时间到来的 noisy evidence 累积到一个变量 a。正 evidence 推向右选项，负 evidence 推向左选项；a 第一次碰到 +B 或 -B 时作选择。每一 trial 的 noise realization 不同，因此相同 stimulus strength 也会产生概率性 choice 和 reaction-time distribution。要区分 drift 改变平均方向、noise 改变分散、initial bias 改变起点、bound 改变速度—准确率权衡。",
+      "phase plane 是把两个状态变量同时画在平面上。每条 nullcline 只令一个 derivative 为零；两线交点才是 fixed point。判断稳定性要看交点附近 arrows，separatrix 划分流向不同 attractors 的初态。这个几何语言可把一维 accumulator 的 bound rule 与 nonlinear recurrent choice attractors联系起来，但二者不是同一模型。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l23-d1",
+        "prompt": "DMS 只需保存“见过样本”，Romo task 还需保存什么？",
+        "answer": "Romo parametric task 需保留第一段 vibration frequency 的连续或分级数值，才能与第二段比较大小。",
+        "explanation": "若 memory 只是一位“出现过”标签，无法解释相近 frequencies 的 graded comparison errors。",
+        "remediationModuleId": "l23-m2"
+      },
+      {
+        "id": "l23-d2",
+        "prompt": "recurrent mode 的 λ=0.9、τ=20 ms 时，有效时间常数是多少？",
+        "answer": "τeff=20/(1-0.9)=200 ms。",
+        "explanation": "先求 eigenvalue gap 1-λ，再除 intrinsic time constant；λ 无时间单位。",
+        "remediationModuleId": "l23-m3"
+      },
+      {
+        "id": "l23-d3",
+        "prompt": "只提高 decision bound B，DDM 通常怎样改变准确率和 reaction time？",
+        "answer": "在其他参数相同且有信息的 trials 中，通常准确率提高、reaction time 变长。",
+        "explanation": "更远的 bound 允许采集更多 evidence，也需要更长 first-passage time。",
+        "remediationModuleId": "l23-m4"
+      },
+      {
+        "id": "l23-d4",
+        "prompt": "LIP firing rate 与模型 decision variable 都呈 ramp，能否据此认定 LIP 实现 DDM？",
+        "answer": "不能；相似时间形状是 correlation，可由共同输入、urgency、condition averaging 或其他 dynamics 产生。",
+        "explanation": "还需 trial-level covariation、perturbation、parameter-linked predictions 与 alternative models 比较。",
+        "remediationModuleId": "l23-m5"
+      },
+      {
+        "id": "l23-d5",
+        "prompt": "phase plane 中轨迹落在 separatrix 上会怎样？",
+        "answer": "在理想确定性系统中它沿边界趋向 saddle；微小噪声或偏差会把轨迹推向任一 choice basin。",
+        "explanation": "separatrix 不是第三个宽阔选择区，而是不同 attractor basins 的边界。",
+        "remediationModuleId": "l23-m6"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l23-m1",
+        "title": "Cognition 的工作定义：脱离当前输入的内部状态",
+        "sourceRefs": [
+          {
+            "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "怎样把 cognition 的课程定义变成可检验的状态依赖，而不是抽象标签？",
+        "paragraphs": [
+          "本课采用 working definition：cognition 使 brain state 或 behavior 不完全由 present sensory input 决定。相同当前刺激在不同记忆、目标或信念状态下可引出不同反应；反过来，外界暂时不变时内部决策变量仍可演化。这一定义便于建模，却不是意识、语言或智能的完整哲学定义。",
+          "可检验方式是构造相同 current input、不同 history 的 trials。若 sample identity、previous reward 或 instruction 改变 delay activity 与 choice，系统需要 history-dependent state。统计上应控制当前 stimulus、movement preparation 与 arousal，否则“内部状态”可能只是遗漏的外部或身体变量。",
+          "decision、short-term memory、learning 与 generalization 的时间尺度不同，但都可写成 state update。decision state 在数百毫秒内累积 evidence；working memory 在数秒 delay 中保存 sample；learning 改变跨 trials 的 parameters；long-term memory 跨更长时间重现信息。共同数学语言不意味着它们由同一 brain area 或同一 cellular mechanism 实现。",
+          "学习时可用 Markov-state 反问法：若只知道 present input 无法预测下一步，加入哪一个内部变量后 prediction 改善？这个变量可能是 accumulated evidence、remembered frequency 或 task rule。好的模型需同时说明 state 怎样被写入、无输入时怎样保持、何时被读取和清除，而不是只在 delay 中画一条高 firing trace。"
+        ],
+        "keyPoints": [
+          "working definition 强调 history-dependent internal state。",
+          "相同当前输入、不同过去是关键实验对照。",
+          "共享 state-space语言不等于共享生物机制。"
+        ],
+        "derivation": {
+          "title": "用条件概率表达“当前输入不足”",
+          "setup": "比较只条件于当前刺激与同时条件于历史的 choice prediction。",
+          "steps": [
+            {
+              "title": "定义当前输入模型",
+              "explanation": "若当前输入 X_t 足够，过去 H_t 不应再改变 choice distribution。",
+              "latex": "P(Y_t\\mid X_t,H_t)=P(Y_t\\mid X_t)"
+            },
+            {
+              "title": "引入内部状态",
+              "explanation": "用状态 Z_t 压缩与任务相关的历史。",
+              "latex": "Z_t=f(H_t),\\qquad P(Y_t\\mid X_t,H_t)=P(Y_t\\mid X_t,Z_t)"
+            },
+            {
+              "title": "构造检验",
+              "explanation": "固定 X_t，比较不同 Z_t 或 history 条件下的 choices。",
+              "latex": "P(Y_t\\mid X_t,Z_t=z_1)\\ne P(Y_t\\mid X_t,Z_t=z_2)"
+            }
+          ],
+          "symbolNotes": [
+            "X_t 是当前可观测输入，H_t 是过去事件，Z_t 是内部状态。",
+            "Y_t 可为 choice、reaction time 或 neural response。"
+          ],
+          "unitsCheck": "这些是 probability，均无量纲且介于 0 与 1；条件变量本身可有不同单位。",
+          "limitCheck": "若加入完整可观测输入后 history effect 消失，就不需额外认知状态解释该效应。"
+        },
+        "workedExample": {
+          "title": "识别 history dependence",
+          "problem": "两组 trials 当前 comparison stimulus 都是 20 Hz；第一组 sample 是 10 Hz，第二组 sample 是 30 Hz。动物分别多选“comparison larger”和“comparison smaller”。",
+          "steps": [
+            "当前 comparison 相同，所以单靠当前输入会预测相同 choice distribution。",
+            "不同 sample history 改变正确关系与实际 choice。",
+            "内部状态至少需携带 sample relative to 20 Hz 的信息，才能解释差异。"
+          ],
+          "result": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。",
+          "sanityCheck": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“闭眼时仍有脑活动”本身不足以证明本课所指 cognition？",
+          "answer": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
+        },
+        "pitfalls": [
+          "把 working definition 当作 cognition 的唯一定义。",
+          "漏测眼动或身体状态后，把其效应误归因于内部记忆。"
+        ]
+      },
+      {
+        "id": "l23-m2",
+        "title": "DMS 与 Romo parametric working-memory 时间线",
+        "sourceRefs": [
+          {
+            "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "sample 消失后究竟要保存一个类别标签，还是要保存可比较的连续量？",
+        "paragraphs": [
+          "delayed match-to-sample 依次呈现 sample、delay、test，再报告 match 或 nonmatch。最小 memory 内容可以是 sample identity 或 category。实验逻辑依赖 delay 期间没有可直接读出的 sample，因此行为高于 chance 说明过去信息仍可用；但策略可能是 verbal label、familiarity 或 rule-specific code，不自动证明精确 sensory trace。",
+          "Romo vibration task 先向指尖呈现 frequency f1，延迟后呈现 f2，动物判断 f2 大于还是小于 f1。相邻 frequencies 的比较要求保存 graded magnitude，而非只存“出现过刺激”。若 delay representation 有 noise，f1 与 f2 越接近越容易混淆，可从 psychometric slope 估计 combined sensory-memory uncertainty。",
+          "按事件对齐 neural data：sample epoch 问 encoding；delay 问 maintenance；comparison epoch 问 remembered f1 与 current f2 如何合成 decision variable；choice epoch 还混入 motor preparation。某 cell 在 delay 中按 f1 排序 firing 是候选 memory signal，但要检验 trial-to-trial fluctuation 是否预测 comparison error，避免只依赖 condition means。",
+          "DMS 和 parametric memory 的关键区别在 readout demand。DMS 的 classifier 可能只需分离有限 patterns；Romo comparison 需要保留顺序和距离。任务表现差不能直接定位 maintenance failure，也可能来自 sample encoding、comparison sensation、decision rule 或 motor report，因此 perturbation 必须限制在特定 epoch 才能分解环节。"
+        ],
+        "keyPoints": [
+          "DMS 可由类别或身份记忆支持。",
+          "Romo task 要保留 f1 的可比较幅度。",
+          "epoch-specific recording 与 perturbation 用于拆分 encoding、maintenance 和 readout。"
+        ],
+        "derivation": null,
+        "workedExample": {
+          "title": "从 noisy memory 做一次比较",
+          "problem": "内部记忆值 m1=18 Hz，comparison estimate m2=22 Hz，规则是 m2-m1>0 选“第二个更大”。若 decision noise 暂忽略，求 choice variable。",
+          "steps": [
+            "计算差值 d=m2-m1=22-18=4 Hz。",
+            "d>0，因此落在“第二个更大”一侧。",
+            "若 memory error 把 m1 高估超过 22 Hz，choice 会翻转，说明错误不必来自 comparison sensation。"
+          ],
+          "result": "decision variable 为 +4 Hz，预测选择“第二个更大”。",
+          "sanityCheck": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        "selfCheck": {
+          "prompt": "为何 delay-period firing 与 f1 单调相关仍不能单独证明它是行为所用 memory？",
+          "answer": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
+        },
+        "pitfalls": [
+          "把正确率下降一概归于遗忘，不检查其他 task epochs。",
+          "把离散 DMS 的机制直接推广为连续 frequency memory。"
+        ]
+      },
+      {
+        "id": "l23-m3",
+        "title": "Persistent activity 与接近一的 recurrent mode",
+        "sourceRefs": [
+          {
+            "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "神经元自身只有几十毫秒时间常数时，recurrent feedback 怎样让 population mode 保持数秒？",
+        "paragraphs": [
+          "线性化群体动力学可写 τ dh/dt=-h+Wh+I。把活动投到 W 的 eigenvector v，若 Wv=λv，对应 mode amplitude α 满足 τ dα/dt=-(1-λ)α+β。sample input 写入 α 后撤掉 β，α 以 τeff=τ/(1-λ) 衰减；λ 接近 1 时 recurrent excitation 抵消 intrinsic leak。",
+          "λ=1 是理想 line attractor 的线性条件：无输入时该 mode 任意 amplitude 都保持。λ<1 产生 drift toward baseline，λ>1 在线性模型中增长并需 nonlinearity 饱和。真实 working memory 可容忍轻微 leak、用 sensory feedback 校正，或依赖 nonlinear discrete attractors；观察 persistent firing 并不要求连接精确等于数学上的 1。",
+          "single-neuron persistent activity 可能随时间变化，而 population projection 仍稳定；反之，条件平均单元看似平坦也可能由 trials 中不同动态相互抵消。因此应同时看 decoder over delay、population trajectories、single-trial drift 与 behavior error。短时记忆不必在每个 trial 现场改变 synaptic weights，已有 recurrent network state 就可保存。",
+          "稳定性必须检查所有 modes：一个 λ≈1 保存 memory，其余 eigenvalues 应对应 decaying transverse directions，否则 noise 会扩散到无关 coordinates。非正交 eigenvectors 还可能产生 transient amplification。仅报告最长 τeff 不足以证明可靠 memory；需评估噪声累积、input selectivity、readout 与 reset mechanism。"
+        ],
+        "keyPoints": [
+          "τeff 由 eigenvalue gap 1-λ 放大。",
+          "λ=1 是理想保持边界，不是所有记忆网络的必要条件。",
+          "memory mode 之外的 directions 也必须稳定。"
+        ],
+        "derivation": {
+          "title": "由 recurrent eigenvalue 得到有效时间常数",
+          "setup": "把 population equation 投影到一个 eigenmode，并求输入撤除后的解。",
+          "steps": [
+            {
+              "title": "写 mode equation",
+              "explanation": "沿 eigenvector 的 recurrent feedback 只乘 λ。",
+              "latex": "\\tau\\dot\\alpha=-\\alpha+\\lambda\\alpha+\\beta"
+            },
+            {
+              "title": "撤去输入",
+              "explanation": "sample 结束后令 β=0，合并 leak 与 feedback。",
+              "latex": "\\dot\\alpha=-\\frac{1-\\lambda}{\\tau}\\alpha"
+            },
+            {
+              "title": "解指数方程",
+              "explanation": "初值 α0 以 rate (1-λ)/τ 衰减。",
+              "latex": "\\alpha(t)=\\alpha_0\\exp\\!\\left[-\\frac{(1-\\lambda)t}{\\tau}\\right]"
+            },
+            {
+              "title": "读出时间常数",
+              "explanation": "把 exponent 写成 -t/τeff。",
+              "latex": "\\tau_{\\mathrm{eff}}=\\frac{\\tau}{1-\\lambda}"
+            }
+          ],
+          "symbolNotes": [
+            "τ 与 τeff 用时间单位，λ 无量纲。",
+            "α 是 mode amplitude，单位随 firing-rate coordinate 的规范化而定。"
+          ],
+          "unitsCheck": "exponent 必须无量纲；(1-λ)t/τ 符合这一要求。",
+          "limitCheck": "λ=0 时 τeff=τ；λ→1^- 时 τeff 发散；λ>1 时公式给负值，表示增长而非衰减时间常数。"
+        },
+        "workedExample": {
+          "title": "预测 delay drift",
+          "problem": "τ=20 ms、λ=0.99，sample 后 α0=10。求 τeff，并估计 1 s 后 amplitude。",
+          "steps": [
+            "τeff=20/(1-0.99)=2000 ms=2 s。",
+            "1 s 后 α=10e^{-1/2}≈6.07。",
+            "虽 λ 很接近 1，1 s delay 仍损失约 39%，所以“接近一”不等于完美 memory。"
+          ],
+          "result": "τeff=2 s，1 s 后 α≈6.07。",
+          "sanityCheck": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        },
+        "selfCheck": {
+          "prompt": "为何把 λ 从 0.99 提到 1.01 不是把 memory 再延长一点？",
+          "answer": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
+        },
+        "pitfalls": [
+          "把 τeff 公式用于 λ>1 后仍称为正衰减常数。",
+          "只看条件平均 persistent firing，不检查单 trial drift。"
+        ]
+      },
+      {
+        "id": "l23-m4",
+        "title": "Leaky drift-diffusion：证据、噪声与 first passage",
+        "sourceRefs": [
+          {
+            "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "random-dot evidence 如何变成一个有 leak、bias、noise 和 absorbing bounds 的选择过程？",
+        "paragraphs": [
+          "random-dot motion 每一瞬间提供 noisy evidence。令 a>0 支持右、a<0 支持左，可写 τa da/dt=-a+e(t)+γ(t)。e(t) 的条件均值随 signed coherence 改变，γ 是零均值 noise。-a 是 leak，使旧证据逐渐折扣；经典 perfect DDM 常省略该项，本课公式是更一般的 leaky accumulator。",
+          "initial condition a(0)=b 表示起点 bias；吸收边界 a=±B 给 first-passage choice 与 decision time。正 b 让 +B 更近，常提高该选择概率并缩短它的时间。增大 B 通常提高准确率但延长 RT；增大 drift magnitude 提高正确率并缩短 RT；增大 noise 扩宽 trajectories，影响两者且可能增加快错 trials。",
+          "reaction time 还含 nondecision time：感觉编码和 motor execution 并非 accumulator crossing。拟合时若把全部 RT 都归给 evidence accumulation，会错误估计 bound 或 drift。leak、collapsing bounds、urgency 和 across-trial variability 可产生相似 distributions，因此参数需通过完整 choice-RT likelihood 和 model comparison 约束。",
+          "模拟时用小步长 Δt 更新 a，并在首次跨界停止；不能跨界后继续平均再决定。noise scaling 需随 Δt 用平方根变化，若每步直接加固定 variance noise，改变 timestep 会改变模型。自学数值例可以先用确定性 constant evidence，再加入随机项理解 distribution。"
+        ],
+        "keyPoints": [
+          "本课 accumulator 含 leak，需与 perfect DDM 区分。",
+          "choice 与 decision time 由 first boundary crossing 联合决定。",
+          "nondecision time 与 timestep-dependent noise scaling 不能遗漏。"
+        ],
+        "derivation": {
+          "title": "常量 evidence 下的 leaky accumulator",
+          "setup": "暂时忽略 noise 和 bounds，求 constant evidence μ 下的时间过程。",
+          "steps": [
+            {
+              "title": "写确定性方程",
+              "explanation": "令 e(t)=μ、γ(t)=0。",
+              "latex": "\\tau_a\\dot a=-a+\\mu"
+            },
+            {
+              "title": "找 steady state",
+              "explanation": "令 derivative 为零，平衡值等于 constant evidence。",
+              "latex": "a_{\\infty}=\\mu"
+            },
+            {
+              "title": "平移变量",
+              "explanation": "令 z=a-μ，得到齐次衰减。",
+              "latex": "\\tau_a\\dot z=-z"
+            },
+            {
+              "title": "代回初值",
+              "explanation": "由 a(0)=b 得完整解。",
+              "latex": "a(t)=\\mu+(b-\\mu)e^{-t/\\tau_a}"
+            }
+          ],
+          "symbolNotes": [
+            "a、μ 与 b 用同一 evidence-state 单位。",
+            "τa 用秒或毫秒；B 与 a 同单位。"
+          ],
+          "unitsCheck": "da/dt 的单位为 state/time；右侧各 state 除以 τa 后一致。",
+          "limitCheck": "τa→∞ 且适当缩放输入才接近无 leak 积分；t→∞ 时 a→μ，若 |μ|<B，确定性轨迹永不触界。"
+        },
+        "workedExample": {
+          "title": "确定性 first-passage 判定",
+          "problem": "τa=1 s、b=0、μ=2、B=1。忽略 noise，求到 +B 的时间。",
+          "steps": [
+            "解为 a(t)=2(1-e^{-t})。",
+            "令 a=1，得到 1=2(1-e^{-t})，所以 e^{-t}=1/2。",
+            "取自然对数，t=ln2≈0.693 s。"
+          ],
+          "result": "decision time 约 0.693 s，choice 为正边界。",
+          "sanityCheck": "steady state 2 高于 bound 1，所以必能触界；若 μ≤1 且 b=0，确定性 leaky轨迹不会到达 +B。"
+        },
+        "selfCheck": {
+          "prompt": "为何相同 coherence 会产生不同 choices 和 RT？",
+          "answer": "每个 trial 的 noise path 不同，first-passage time 与先碰哪一条 boundary 都会随路径改变。"
+        },
+        "pitfalls": [
+          "把 leaky equation 当作无 leak 的经典 DDM。",
+          "模拟改变 Δt 时不调整 noise scale，得到 timestep artifact。"
+        ]
+      },
+      {
+        "id": "l23-m5",
+        "title": "Psychometric、chronometric 与 LIP ramping",
+        "sourceRefs": [
+          {
+            "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "行为曲线和 LIP firing 能约束 accumulator 的哪些部分，又不能证明什么？",
+        "paragraphs": [
+          "psychometric function 画 P(choice|signed coherence)。零 coherence 附近接近不确定，coherence magnitude 增大时选择朝正确方向饱和；水平偏移提示 bias，slope 反映整体 sensitivity，但同时受 sensory noise、integration 和 lapses 影响。只用 accuracy curve 常无法分别识别 drift、bound 与 noise。",
+          "chronometric function 画 E[RT|coherence]，通常弱 evidence 较慢、强 evidence 较快。应报告正确与错误 RT、distribution quantiles 和 nondecision time，而非只看均值。不同模型可共享平均曲线，却在 tail、fast errors 或 conditional accuracy 上不同，联合拟合能提供更强约束。",
+          "LIP neurons 在 motion decision 中常呈 choice-selective ramp，并在反应前接近相似 firing level，这与 accumulation-to-bound 相容。可是 condition averaging 也可把离散 step-like single trials 变成平滑 ramp，urgency 或 motor plan 也会随时间增强。ramp similarity 是 neural correlate，不等于唯一 cellular implementation。",
+          "更有力的测试把模型参数变化映到神经预测：coherence 应改变 ramp slope，prior bias 可改变起点，speed instruction 可改变 bound-like termination；trial-level neural fluctuation应预测 choice与RT。即便都成立，LIP 可能读取而非生成 decision variable，需 temporally precise perturbation 和 network-wide recording 区分角色。"
+        ],
+        "keyPoints": [
+          "psychometric 与 chronometric 应联合解释。",
+          "condition-averaged ramp 不唯一对应 single-trial ramp。",
+          "参数到神经曲线的定量预测强于形状类比。"
+        ],
+        "derivation": null,
+        "workedExample": {
+          "title": "从简化 psychometric 数据识别 bias",
+          "problem": "signed coherence 为 -10、0、+10%，选择右的概率分别为 0.15、0.65、0.93。判断是否存在右侧 bias。",
+          "steps": [
+            "无偏模型在 0 coherence 通常预测约 0.5。",
+            "观测 0.65 高于 0.5，提示起点或选择规则偏向右。",
+            "仍需 confidence interval 与 lapse model，不能用单个比例确定 bias 来源。"
+          ],
+          "result": "数据提示 right-choice bias，但不足以区分 initial-state、reward 或 motor bias。",
+          "sanityCheck": "两侧强 evidence 下概率分别接近 0 和 1，方向编码符号自洽。"
+        },
+        "selfCheck": {
+          "prompt": "为何只比较平均 LIP ramp slope 不能区分 accumulation 与平均后的 discrete steps？",
+          "answer": "两类 single-trial dynamics 经不同 onset times 或 choice times 平均后都可形成类似平滑曲线，需 single-trial model comparison。"
+        },
+        "pitfalls": [
+          "把 psychometric slope 直接等同于单一 sensory noise 参数。",
+          "以 ramp-to-threshold 图形相似性代替因果检验。"
+        ]
+      },
+      {
+        "id": "l23-m6",
+        "title": "Wong–Wang choice attractors 与 phase-plane 分界",
+        "sourceRefs": [
+          {
+            "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "双群体 nonlinear recurrent model 怎样把弱偏置放大为两个稳定选择之一？",
+        "paragraphs": [
+          "reduced Wong–Wang model 用两个 population variables 表示支持两个 choices 的 recurrent pools。self-excitation 维持已增强的 pool，cross-inhibition 压低 competitor，slow synaptic gating 提供 accumulation timescale。动力学可写 dS1/dt=G1(S1,S2)、dS2/dt=G2(S1,S2)，具体 transfer function 与 parameters 决定 nullcline shapes。",
+          "G1=0 与 G2=0 的 intersections 是 fixed points。无或弱证据时，常见结构包含低活动 undecided state、两个 choice attractors 和位于 basin boundary 的 saddle；模型参数也可产生其他拓扑，不能把示意图当作普适定理。separatrix 经过 saddle，将初态和 noise paths 分到两个 attractor basins。",
+          "signed evidence 使两个 inputs 不对称，移动 nullclines并扩大正确 choice basin。强 evidence 让 trajectory更快远离边界，通常提高正确率和降低 RT；零 evidence 时 noise 决定落入哪侧。与显式 absorbing bound DDM 不同，choice termination 可由进入 attractor neighborhood定义，非线性 recurrent feedback 本身形成稳定 outcome。",
+          "读 phase portrait 要在 nullclines 两侧代 test points 判断 arrows，再跟踪 trajectory，不能只看交点数量。实验连接应保持层级：behavioral curve可由该模型产生，population recordings可检验 competitive dynamics，perturb one pool可预测 basin shift；这些支持相容性，但参数拟合不等于证明 cortex 精确采用该 reduced equation。"
+        ],
+        "keyPoints": [
+          "nullcline intersections 是 fixed points，稳定性另需判断。",
+          "separatrix 是 choice basins 的边界。",
+          "evidence 通过改变输入和几何偏向一个 attractor。"
+        ],
+        "derivation": {
+          "title": "由局部 Jacobian 判断 fixed-point 稳定性",
+          "setup": "在任一交点附近线性化二维 nonlinear dynamics。",
+          "steps": [
+            {
+              "title": "定义平衡点",
+              "explanation": "交点 S* 同时令两个 derivatives 为零。",
+              "latex": "G_1(\\mathbf S^*)=0,\\qquad G_2(\\mathbf S^*)=0"
+            },
+            {
+              "title": "写小扰动",
+              "explanation": "令 δS=S-S*，保留一阶项。",
+              "latex": "\\dot{\\boldsymbol{\\delta S}}\\approx J(\\mathbf S^*)\\boldsymbol{\\delta S}"
+            },
+            {
+              "title": "写 Jacobian",
+              "explanation": "四个偏导数描述局部 self 与 cross feedback。",
+              "latex": "J=\\begin{bmatrix}\\partial G_1/\\partial S_1&\\partial G_1/\\partial S_2\\\\\\partial G_2/\\partial S_1&\\partial G_2/\\partial S_2\\end{bmatrix}"
+            },
+            {
+              "title": "读 eigenvalues",
+              "explanation": "两 eigenvalues 实部都负则局部稳定；一正一负则是 saddle。",
+              "latex": "\\operatorname{Re}(\\lambda_1)<0,\\operatorname{Re}(\\lambda_2)<0\\Rightarrow\\text{stable}"
+            }
+          ],
+          "symbolNotes": [
+            "S1、S2 常为无量纲 synaptic gating，Gi 单位为 gating/time。",
+            "Jacobian eigenvalues 单位为 1/time。"
+          ],
+          "unitsCheck": "偏导 Gi/∂Sj 的单位是 1/time，因此与局部指数 growth/decay rate 一致。",
+          "limitCheck": "某 eigenvalue 实部趋近 0 时恢复变慢；正 eigenvalue 出现时 fixed point失稳。"
+        },
+        "workedExample": {
+          "title": "用 Jacobian 分类两个点",
+          "problem": "点 A 的 Jacobian eigenvalues 为 -2、-0.5 s^-1；点 B 为 +1、-3 s^-1。分类。",
+          "steps": [
+            "A 的两个实部均负，所有小扰动衰减。",
+            "B 一方向增长、一方向衰减。",
+            "因此 A 是 local attractor，B 是 saddle；B 的 stable manifold 可构成 separatrix。"
+          ],
+          "result": "A 稳定，B 为 saddle。",
+          "sanityCheck": "eigenvalue 单位与给出的 s^-1 一致，正负号分别代表增长和衰减。"
+        },
+        "selfCheck": {
+          "prompt": "为什么两个 choice attractors 之间通常需要 saddle 或 basin boundary？",
+          "answer": "连续动力系统中不同吸引域必须由不流向任一吸引子的边界分隔；二维常由 saddle 的 stable manifold 构成。"
+        },
+        "pitfalls": [
+          "把 nullcline 本身当作 trajectory。",
+          "把 reduced-model attractor 与单个解剖群体一一对应。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L23-FIG-A1",
+      "lecture": 23,
+      "moduleId": "l23-m4",
+      "title": "Drift–diffusion 的 first-passage paths",
+      "alt": "两条从共同起点出发的噪声积累轨迹分别首次触及正负决策边界",
+      "caption": "每条 path 从 bias b 出发，逐步累积带噪 evidence，并在第一次碰到 +B 或 −B 时停止；终点给 choice，横坐标给 decision time。两条轨迹可在相同任务参数下因噪声走向不同边界，越过边界后不能继续平均再判定。",
+      "sourceRefs": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "accumulation time",
+      "yLabel": "decision variable a(t)",
+      "curves": [
+        {
+          "label": "+B",
+          "points": [
+            [
+              0,
+              85
+            ],
+            [
+              100,
+              85
+            ]
+          ],
+          "dashed": true
+        },
+        {
+          "label": "−B",
+          "points": [
+            [
+              0,
+              15
+            ],
+            [
+              100,
+              15
+            ]
+          ],
+          "dashed": true
+        },
+        {
+          "label": "trial → +B",
+          "points": [
+            [
+              0,
+              50
+            ],
+            [
+              10,
+              56
+            ],
+            [
+              20,
+              53
+            ],
+            [
+              30,
+              62
+            ],
+            [
+              40,
+              59
+            ],
+            [
+              50,
+              70
+            ],
+            [
+              60,
+              74
+            ],
+            [
+              70,
+              85
+            ]
+          ]
+        },
+        {
+          "label": "trial → −B",
+          "points": [
+            [
+              0,
+              50
+            ],
+            [
+              10,
+              47
+            ],
+            [
+              20,
+              52
+            ],
+            [
+              30,
+              44
+            ],
+            [
+              40,
+              40
+            ],
+            [
+              50,
+              43
+            ],
+            [
+              60,
+              35
+            ],
+            [
+              70,
+              30
+            ],
+            [
+              80,
+              22
+            ],
+            [
+              90,
+              15
+            ]
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "x": 4,
+          "y": 50,
+          "label": "start b"
+        }
+      ],
+      "lectureTitle": "短时记忆与知觉决策"
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 parametric working memory 与 leaky mode",
@@ -330,7 +894,42 @@
     "区分 working-memory content、neural correlate、persistent mode 与 synaptic memory；区分 descriptive DDM 与 biophysical attractor model。"
   ],
   "errata": [
-    "1. Page 1 的 cognition definition 明确是 working definition，非 exhaustive。 2. Page 4 的 equation 包含 leak；经典 perfect DDM 常无 −a term，本课采用更一般 leaky form。 3. Page 5 的 LIP ramps 是 neural correlates，不能仅凭相似性断言机制。"
+    {
+      "id": "L23-E01",
+      "lecture": 23,
+      "lectureTitle": "短时记忆与知觉决策",
+      "kind": "caution",
+      "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+      "sourcePage": 1,
+      "sectionId": "l23-m1",
+      "originalIssue": "Page 1 的 cognition definition 明确是 working definition，非 exhaustive。",
+      "explanation": "本课采用 working definition：cognition 使 brain state 或 behavior 不完全由 present sensory input 决定。",
+      "correction": null
+    },
+    {
+      "id": "L23-E02",
+      "lecture": 23,
+      "lectureTitle": "短时记忆与知觉决策",
+      "kind": "caution",
+      "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+      "sourcePage": 4,
+      "sectionId": "l23-m4",
+      "originalIssue": "Page 4 的 equation 包含 leak；经典 perfect DDM 常无 −a term，本课采用更一般 leaky form。",
+      "explanation": "-a 是 leak，使旧证据逐渐折扣；经典 perfect DDM 常省略该项，本课公式是更一般的 leaky accumulator。",
+      "correction": null
+    },
+    {
+      "id": "L23-E03",
+      "lecture": 23,
+      "lectureTitle": "短时记忆与知觉决策",
+      "kind": "caution",
+      "sourceFile": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+      "sourcePage": 5,
+      "sectionId": "l23-m5",
+      "originalIssue": "Page 5 的 LIP ramps 是 neural correlates，不能仅凭相似性断言机制。",
+      "explanation": "LIP neurons 在 motion decision 中常呈 choice-selective ramp，并在反应前接近相似 firing level，这与 accumulation-to-bound 相容。",
+      "correction": "Page 5 的 LIP ramps 是 neural correlates，不能仅凭相似性断言机制"
+    }
   ],
   "questions": [
     {
@@ -348,7 +947,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 23 讲：本课 cognition working definition？",
@@ -376,7 +975,7 @@
         "c": "该选项回答的是“诊断并修正下面的说法：把 cognition 定义当作完整哲学/心理学定义。”。",
         "d": "这条推理对应 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 2 页。"
       },
-      "explanation": "使 current brain state 不只由 present input 决定，并受 past/future goal 影响。"
+      "explanation": "使 current brain state 不只由 present input 决定，并受 past/future goal 影响。 本课采用 working definition：cognition 使 brain state 或 behavior 不完全由 present sensory input 决定。"
     },
     {
       "id": "L23-Q02",
@@ -393,7 +992,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 23 讲：DMS 与 parametric WM 区别？",
@@ -421,7 +1020,7 @@
         "c": "该选项回答的是“本课 cognition working definition？”。",
         "d": "该选项回答的是“诊断并修正下面的说法：把 cognition 定义当作完整哲学/心理学定义。”。"
       },
-      "explanation": "DMS 常保留 category/item；parametric WM 保留 continuous value 并参与比较。"
+      "explanation": "DMS 常保留 category/item；parametric WM 保留 continuous value 并参与比较。 DMS 和 parametric memory 的关键区别在 readout demand。"
     },
     {
       "id": "L23-Q03",
@@ -438,7 +1037,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 23 讲：Romo task delay 中需保存什么？",
@@ -466,7 +1065,7 @@
         "b": "这是“延迟匹配样本（delayed match-to-sample）”的定义。",
         "d": "该选项回答的是“Wong-Wang 中 separatrix 的作用？”。"
       },
-      "explanation": "sample vibration frequency f1。"
+      "explanation": "sample vibration frequency f1。 sample input 写入 α 后撤掉 β，α 以 τeff=τ/(1-λ) 衰减；λ 接近 1 时 recurrent excitation 抵消 intrinsic leak。"
     },
     {
       "id": "L23-Q04",
@@ -483,7 +1082,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 23 讲：persistent activity 是否需要 synaptic plasticity？",
@@ -511,7 +1110,7 @@
         "b": "这是“持续活动（persistent activity）”的定义。",
         "c": "这条推理对应 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 3 页。"
       },
-      "explanation": "不一定，可由 recurrent dynamics/slow modes 维持。"
+      "explanation": "不一定，可由 recurrent dynamics/slow modes 维持。 single-neuron persistent activity 可能随时间变化，而 population projection 仍稳定；反之，条件平均单元看似平坦也可能由 trials 中不同动态相互抵消。"
     },
     {
       "id": "L23-Q05",
@@ -528,7 +1127,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 23 讲：DDM 的 drift、noise、bound 分别影响什么？",
@@ -556,7 +1155,7 @@
         "c": "该选项回答的是“本课 cognition working definition？”。",
         "d": "这条推理对应 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 4 页。"
       },
-      "explanation": "drift evidence rate；noise variability；bound speed-accuracy criterion。"
+      "explanation": "drift evidence rate；noise variability；bound speed-accuracy criterion。 只用 accuracy curve 常无法分别识别 drift、bound 与 noise。"
     },
     {
       "id": "L23-Q06",
@@ -573,7 +1172,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 23 讲：提高 coherence 对 RT 与 accuracy 的典型影响？",
@@ -592,16 +1191,16 @@
         },
         {
           "id": "d",
-          "text": "choice/accuracy vs stimulus strength。"
+          "text": "choice/accuracy vs strength；RT vs strength。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该选项把响应变化方向颠倒了。",
         "c": "该选项回答的是“提高 bound 的典型影响？”。",
-        "d": "这是“心理测量曲线（psychometric curve）”的定义。"
+        "d": "该选项回答的是“psychometric 与 chronometric 分别画什么？”。"
       },
-      "explanation": "accuracy 上升，RT 下降。"
+      "explanation": "accuracy 上升，RT 下降。 强 evidence 让 trajectory更快远离边界，通常提高正确率和降低 RT；零 evidence 时 noise 决定落入哪侧。"
     },
     {
       "id": "L23-Q07",
@@ -618,7 +1217,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 23 讲：提高 bound 的典型影响？",
@@ -646,7 +1245,7 @@
         "b": "该选项回答的是“initial bias b 做什么？”。",
         "d": "该选项回答的是“提高 coherence 对 RT 与 accuracy 的典型影响？”。"
       },
-      "explanation": "accuracy 上升、RT 变长。"
+      "explanation": "accuracy 上升、RT 变长。 强 evidence 让 trajectory更快远离边界，通常提高正确率和降低 RT；零 evidence 时 noise 决定落入哪侧。"
     },
     {
       "id": "L23-Q08",
@@ -663,7 +1262,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 23 讲：initial bias b 做什么？",
@@ -691,7 +1290,7 @@
         "b": "这是“psychometric function”的适用条件。",
         "c": "该选项回答的是“Wong-Wang 中 separatrix 的作用？”。"
       },
-      "explanation": "把起点靠近某一 bound，偏向对应 choice。"
+      "explanation": "把起点靠近某一 bound，偏向对应 choice。 更有力的测试把模型参数变化映到神经预测：coherence 应改变 ramp slope，prior bias 可改变起点，speed instruction 可改变 bound-like termination；trial-level neural fluctuation应预测 choice与RT。"
     },
     {
       "id": "L23-Q09",
@@ -708,7 +1307,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 23 讲：psychometric 与 chronometric 分别画什么？",
@@ -736,7 +1335,7 @@
         "c": "这条推理对应 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 5 页。",
         "d": "该选项回答的是“persistent activity 是否需要 synaptic plasticity？”。"
       },
-      "explanation": "choice/accuracy vs strength；RT vs strength。"
+      "explanation": "choice/accuracy vs strength；RT vs strength。 psychometric function 画 P(choice|signed coherence)。"
     },
     {
       "id": "L23-Q10",
@@ -753,7 +1352,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 23 讲：LIP ramp 能否证明 LIP 是唯一 accumulator？",
@@ -781,7 +1380,7 @@
         "c": "这是“持续活动（persistent activity）”的定义。",
         "d": "这是“时间测量曲线（chronometric curve）”的定义。"
       },
-      "explanation": "不能，可能是 correlate/readout/feedback。"
+      "explanation": "不能，可能是 correlate/readout/feedback。 ramp similarity 是 neural correlate，不等于唯一 cellular implementation。"
     },
     {
       "id": "L23-Q11",
@@ -798,7 +1397,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 23 讲：Wong-Wang 中 separatrix 的作用？",
@@ -826,7 +1425,7 @@
         "b": "该选项回答的是“Romo task delay 中需保存什么？”。",
         "d": "该选项回答的是“initial bias b 做什么？”。"
       },
-      "explanation": "分隔两个 choice attractor basins。"
+      "explanation": "分隔两个 choice attractor basins。 separatrix 经过 saddle，将初态和 noise paths 分到两个 attractor basins。"
     },
     {
       "id": "L23-Q12",
@@ -843,7 +1442,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 23 讲：weak evidence 下 stochastic choice 如何产生？",
@@ -871,7 +1470,7 @@
         "b": "这是“漂移扩散模型（drift-diffusion model, DDM）”的定义。",
         "c": "该选项回答的是“psychometric 与 chronometric 分别画什么？”。"
       },
-      "explanation": "state 接近 unstable boundary，noise 将其推入不同 attractor。"
+      "explanation": "state 接近 unstable boundary，noise 将其推入不同 attractor。 random-dot motion 每一瞬间提供 noisy evidence。"
     },
     {
       "id": "L23-Q13",
@@ -888,7 +1487,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 23 讲：诊断并修正下面的说法：把 cognition 定义当作完整哲学/心理学定义。",
@@ -916,7 +1515,7 @@
         "c": "这是“认知（cognition）”的定义。",
         "d": "该选项回答的是“本课 cognition working definition？”。"
       },
-      "explanation": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。"
+      "explanation": "该说法省略了关键定义或 assumption。正确做法是先区分对象层级，并依据本课公式/实验设计说明成立条件；原说法不能无条件成立。 这一定义便于建模，却不是意识、语言或智能的完整哲学定义。 判断依据：本课采用 working definition：cognition 使 brain state 或 behavior 不完全由 present sensory input 决定。相同当前刺激在不同记忆、目标或信念状态下可引出不同反应；反过来，外界暂时不变时内部决策变量仍可演化。这一定义便于建模，却不是意识、语言或智能的完整哲学定义。"
     },
     {
       "id": "L23-Q14",
@@ -934,25 +1533,25 @@
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 23 讲：根据 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 1 页，哪一项概括了该页主题？",
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 23 讲：若要解释\"cognition working definition\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "persistent PFC activity、population modes、linear recurrentmemory dynamics。"
+          "text": "解释 persistent activity 的 single-cell 与 population-mode views；说明 STM 不必依赖当场 synaptic plasticity。"
         },
         {
           "id": "b",
-          "text": "cognition working definition；decision、STM/working memory、 learning/LTM/generalization。"
+          "text": "准确呈现 cognition 的课程 working definition：使脑状态不只由 present input 决定；说明其局限。"
         },
         {
           "id": "c",
-          "text": "random-dot decision、evidence accumulation、drift-diffusion model。"
+          "text": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。"
         },
         {
           "id": "d",
-          "text": "behavioral psychometric/chronometric curves、LIP neural correlates。"
+          "text": "重构 psychometric 与 chronometric predictions；解释 LIP ramping correlates 与 behavior-model variables 的关系，避免 correlation=mechanism。"
         }
       ],
       "correctChoiceId": "b",
@@ -961,27 +1560,27 @@
         "c": "该陈述解释的是“random-dot decision、evidence accumulation、drift-diffusion model”，不是题干指定的关系。",
         "d": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
       },
-      "explanation": "cognition working definition；decision、STM/working memory、 learning/LTM/generalization。"
+      "explanation": "准确呈现 cognition 的课程 working definition：使脑状态不只由 present input 决定；说明其局限。 本课采用 working definition：cognition 使 brain state 或 behavior 不完全由 present sensory input 决定。"
     },
     {
       "id": "L23-Q15",
       "lecture": 23,
-      "sectionId": "lecture-23-source-1",
+      "sectionId": "lecture-23-source-2",
       "sourceAnchors": [
         {
           "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 1,
-          "section": "lecture-23-source-1"
+          "page": 2,
+          "section": "lecture-23-source-2"
         }
       ],
       "conceptTags": [
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：若要解释\"cognition working definition\"中的机制或推导，哪条推理链成立？",
+      "stem": "第 23 讲：若要解释\"delayed match-to-sample、parametric working memory、Romo vibration task\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
@@ -993,7 +1592,7 @@
         },
         {
           "id": "c",
-          "text": "准确呈现 cognition 的课程 working definition：使脑状态不只由 present input 决定；说明其局限。"
+          "text": "比较 delayed match-to-sample 与 parametric working memory；逐步解释 Romo task 的 sample、delay、comparison、choice。"
         },
         {
           "id": "d",
@@ -1006,145 +1605,10 @@
         "b": "该陈述解释的是“random-dot decision、evidence accumulation、drift-diffusion model”，不是题干指定的关系。",
         "d": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
       },
-      "explanation": "准确呈现 cognition 的课程 working definition：使脑状态不只由 present input 决定；说明其局限。"
+      "explanation": "比较 delayed match-to-sample 与 parametric working memory；逐步解释 Romo task 的 sample、delay、comparison、choice。 delayed match-to-sample 依次呈现 sample、delay、test，再报告 match 或 nonmatch。"
     },
     {
       "id": "L23-Q16",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 2,
-          "section": "lecture-23-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 23 讲：根据 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "persistent PFC activity、population modes、linear recurrentmemory dynamics。"
-        },
-        {
-          "id": "b",
-          "text": "random-dot decision、evidence accumulation、drift-diffusion model。"
-        },
-        {
-          "id": "c",
-          "text": "behavioral psychometric/chronometric curves、LIP neural correlates。"
-        },
-        {
-          "id": "d",
-          "text": "delayed match-to-sample、parametric working memory、Romo vibration task。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。",
-        "b": "该陈述解释的是“random-dot decision、evidence accumulation、drift-diffusion model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
-      },
-      "explanation": "delayed match-to-sample、parametric working memory、Romo vibration task。"
-    },
-    {
-      "id": "L23-Q17",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 2,
-          "section": "lecture-23-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 2,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：若要解释\"delayed match-to-sample、parametric working memory、Romo vibration task\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "比较 delayed match-to-sample 与 parametric working memory；逐步解释 Romo task 的 sample、delay、comparison、choice。"
-        },
-        {
-          "id": "b",
-          "text": "解释 persistent activity 的 single-cell 与 population-mode views；说明 STM 不必依赖当场 synaptic plasticity。"
-        },
-        {
-          "id": "c",
-          "text": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。"
-        },
-        {
-          "id": "d",
-          "text": "重构 psychometric 与 chronometric predictions；解释 LIP ramping correlates 与 behavior-model variables 的关系，避免 correlation=mechanism。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。",
-        "c": "该陈述解释的是“random-dot decision、evidence accumulation、drift-diffusion model”，不是题干指定的关系。",
-        "d": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
-      },
-      "explanation": "比较 delayed match-to-sample 与 parametric working memory；逐步解释 Romo task 的 sample、delay、comparison、choice。"
-    },
-    {
-      "id": "L23-Q18",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 2,
-          "section": "lecture-23-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：阅读与\"delayed match-to-sample、parametric working memory、Romo vibration task\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-        },
-        {
-          "id": "c",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "d",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "c": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。",
-        "d": "该陈述解释的是“long integration modes、Wong-Wang nonlinear attractor model、 phase planes”，不是题干指定的关系。"
-      },
-      "explanation": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-    },
-    {
-      "id": "L23-Q19",
       "lecture": 23,
       "sectionId": "lecture-23-source-3",
       "sourceAnchors": [
@@ -1159,51 +1623,6 @@
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 23 讲：根据 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "cognition working definition；decision、STM/working memory、 learning/LTM/generalization。"
-        },
-        {
-          "id": "b",
-          "text": "delayed match-to-sample、parametric working memory、Romo vibration task。"
-        },
-        {
-          "id": "c",
-          "text": "persistent PFC activity、population modes、linear recurrentmemory dynamics。"
-        },
-        {
-          "id": "d",
-          "text": "random-dot decision、evidence accumulation、drift-diffusion model。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "b": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
-        "d": "该陈述解释的是“random-dot decision、evidence accumulation、drift-diffusion model”，不是题干指定的关系。"
-      },
-      "explanation": "persistent PFC activity、population modes、linear recurrentmemory dynamics。"
-    },
-    {
-      "id": "L23-Q20",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 3,
-          "section": "lecture-23-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 23 讲：若要解释\"persistent PFC activity、population modes、linear recurrentmemory dynamics\"中的机制或推导，哪条推理链成立？",
@@ -1231,10 +1650,10 @@
         "b": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
         "c": "该陈述解释的是“random-dot decision、evidence accumulation、drift-diffusion model”，不是题干指定的关系。"
       },
-      "explanation": "解释 persistent activity 的 single-cell 与 population-mode views；说明 STM 不必依赖当场 synaptic plasticity。"
+      "explanation": "解释 persistent activity 的 single-cell 与 population-mode views；说明 STM 不必依赖当场 synaptic plasticity。 single-neuron persistent activity 可能随时间变化，而 population projection 仍稳定；反之，条件平均单元看似平坦也可能由 trials 中不同动态相互抵消。"
     },
     {
-      "id": "L23-Q21",
+      "id": "L23-Q17",
       "lecture": 23,
       "sectionId": "lecture-23-source-4",
       "sourceAnchors": [
@@ -1242,141 +1661,6 @@
           "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
           "page": 4,
           "section": "lecture-23-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 23 讲：根据 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "random-dot decision、evidence accumulation、drift-diffusion model。"
-        },
-        {
-          "id": "b",
-          "text": "delayed match-to-sample、parametric working memory、Romo vibration task。"
-        },
-        {
-          "id": "c",
-          "text": "persistent PFC activity、population modes、linear recurrentmemory dynamics。"
-        },
-        {
-          "id": "d",
-          "text": "behavioral psychometric/chronometric curves、LIP neural correlates。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
-        "c": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。",
-        "d": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
-      },
-      "explanation": "random-dot decision、evidence accumulation、drift-diffusion model。"
-    },
-    {
-      "id": "L23-Q22",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 4,
-          "section": "lecture-23-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 2,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：若要解释\"random-dot decision、evidence accumulation、drift-diffusion model\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "准确呈现 cognition 的课程 working definition：使脑状态不只由 present input 决定；说明其局限。"
-        },
-        {
-          "id": "b",
-          "text": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。"
-        },
-        {
-          "id": "c",
-          "text": "比较 delayed match-to-sample 与 parametric working memory；逐步解释 Romo task 的 sample、delay、comparison、choice。"
-        },
-        {
-          "id": "d",
-          "text": "解释 persistent activity 的 single-cell 与 population-mode views；说明 STM 不必依赖当场 synaptic plasticity。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "c": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
-        "d": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。"
-      },
-      "explanation": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。"
-    },
-    {
-      "id": "L23-Q23",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 4,
-          "section": "lecture-23-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：阅读与\"random-dot decision、evidence accumulation、drift-diffusion model\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "c",
-          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-        },
-        {
-          "id": "d",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "b": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。",
-        "d": "该陈述解释的是“long integration modes、Wong-Wang nonlinear attractor model、 phase planes”，不是题干指定的关系。"
-      },
-      "explanation": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-    },
-    {
-      "id": "L23-Q24",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 5,
-          "section": "lecture-23-source-5"
         }
       ],
       "conceptTags": [
@@ -1384,58 +1668,13 @@
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 23 讲：根据 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "cognition working definition；decision、STM/working memory、 learning/LTM/generalization。"
-        },
-        {
-          "id": "b",
-          "text": "delayed match-to-sample、parametric working memory、Romo vibration task。"
-        },
-        {
-          "id": "c",
-          "text": "persistent PFC activity、population modes、linear recurrentmemory dynamics。"
-        },
-        {
-          "id": "d",
-          "text": "behavioral psychometric/chronometric curves、LIP neural correlates。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "b": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
-        "c": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。"
-      },
-      "explanation": "behavioral psychometric/chronometric curves、LIP neural correlates。"
-    },
-    {
-      "id": "L23-Q25",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 5,
-          "section": "lecture-23-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：若要解释\"behavioral psychometric/chronometric curves、LIP neural correlates\"中的机制或推导，哪条推理链成立？",
+      "stem": "第 23 讲：若要解释\"random-dot decision、evidence accumulation、drift-diffusion model\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "重构 psychometric 与 chronometric predictions；解释 LIP ramping correlates 与 behavior-model variables 的关系，避免 correlation=mechanism。"
+          "text": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。"
         },
         {
           "id": "b",
@@ -1456,10 +1695,55 @@
         "c": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
         "d": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。"
       },
-      "explanation": "重构 psychometric 与 chronometric predictions；解释 LIP ramping correlates 与 behavior-model variables 的关系，避免 correlation=mechanism。"
+      "explanation": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。 leak、collapsing bounds、urgency 和 across-trial variability 可产生相似 distributions，因此参数需通过完整 choice-RT likelihood 和 model comparison 约束。"
     },
     {
-      "id": "L23-Q26",
+      "id": "L23-Q18",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Short-Term Memory and Perceptual Decisions",
+        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 23 讲：阅读\"Drift-diffusion 的 first-passage paths\"图时，哪项观察正确？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "noisy evidence accumulation to bounds 的 decision model。"
+        },
+        {
+          "id": "b",
+          "text": "每条 path 从 bias b 出发，逐步累积带噪 evidence，并在第一次碰到 +B 或 −B 时停止；终点给 choice，横坐标给 decision time。"
+        },
+        {
+          "id": "c",
+          "text": "逐项解释 drift-diffusion equation 的 decision variable、drift/evidence、leak、 bounds、bias、noise、reaction time，以及 collapsing/sticky bounds 等变体。"
+        },
+        {
+          "id": "d",
+          "text": "drift evidence rate；noise variability；bound speed-accuracy criterion。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“漂移扩散模型（drift-diffusion model, DDM）”的定义。",
+        "c": "这条推理对应 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 4 页。",
+        "d": "该选项回答的是“DDM 的 drift、noise、bound 分别影响什么？”。"
+      },
+      "explanation": "每条 path 从 bias b 出发，逐步累积带噪 evidence，并在第一次碰到 +B 或 −B 时停止；终点给 choice，横坐标给 decision time。 initial condition a(0)=b 表示起点 bias；吸收边界 a=±B 给 first-passage choice 与 decision time。"
+    },
+    {
+      "id": "L23-Q19",
       "lecture": 23,
       "sectionId": "lecture-23-source-5",
       "sourceAnchors": [
@@ -1473,83 +1757,38 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 1,
-      "type": "figure",
+      "difficulty": 4,
+      "type": "assumption",
       "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：阅读与\"behavioral psychometric/chronometric curves、LIP neural correlates\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "stem": "第 23 讲：若要解释\"behavioral psychometric/chronometric curves、LIP neural correlates\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "准确呈现 cognition 的课程 working definition：使脑状态不只由 present input 决定；说明其局限。"
         },
         {
           "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+          "text": "比较 delayed match-to-sample 与 parametric working memory；逐步解释 Romo task 的 sample、delay、comparison、choice。"
         },
         {
           "id": "c",
-          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+          "text": "重构 psychometric 与 chronometric predictions；解释 LIP ramping correlates 与 behavior-model variables 的关系，避免 correlation=mechanism。"
         },
         {
           "id": "d",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "c": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
-        "d": "该陈述解释的是“long integration modes、Wong-Wang nonlinear attractor model、 phase planes”，不是题干指定的关系。"
-      },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-    },
-    {
-      "id": "L23-Q27",
-      "lecture": 23,
-      "sectionId": "lecture-23-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
-          "page": 6,
-          "section": "lecture-23-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 23 讲：根据 Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf 第 6 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "cognition working definition；decision、STM/working memory、 learning/LTM/generalization。"
-        },
-        {
-          "id": "b",
-          "text": "delayed match-to-sample、parametric working memory、Romo vibration task。"
-        },
-        {
-          "id": "c",
-          "text": "long integration modes、Wong-Wang nonlinear attractor model、 phase planes。"
-        },
-        {
-          "id": "d",
-          "text": "behavioral psychometric/chronometric curves、LIP neural correlates。"
+          "text": "解释 persistent activity 的 single-cell 与 population-mode views；说明 STM 不必依赖当场 synaptic plasticity。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
         "b": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
-        "d": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
+        "d": "该陈述解释的是“persistent PFC activity、population modes、linear recurrentmemory dynamics”，不是题干指定的关系。"
       },
-      "explanation": "long integration modes、Wong-Wang nonlinear attractor model、 phase planes。"
+      "explanation": "重构 psychometric 与 chronometric predictions；解释 LIP ramping correlates 与 behavior-model variables 的关系，避免 correlation=mechanism。 即便都成立，LIP 可能读取而非生成 decision variable，需 temporally precise perturbation 和 network-wide recording 区分角色。"
     },
     {
-      "id": "L23-Q28",
+      "id": "L23-Q20",
       "lecture": 23,
       "sectionId": "lecture-23-source-6",
       "sourceAnchors": [
@@ -1563,7 +1802,7 @@
         "Short-Term Memory and Perceptual Decisions",
         "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 23 讲：若要解释\"long integration modes、Wong-Wang nonlinear attractor model、 phase planes\"中的机制或推导，哪条推理链成立？",
@@ -1591,10 +1830,680 @@
         "b": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。",
         "c": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。"
       },
-      "explanation": "解释 Wong-Wang reduced nonlinear recurrent model、two nullclines、stable/unstable fixed points、separatrix、weak/strong evidence 与 stochastic choice。"
+      "explanation": "解释 Wong-Wang reduced nonlinear recurrent model、two nullclines、stable/unstable fixed points、separatrix、weak/strong evidence 与 stochastic choice。 reduced Wong-Wang model 用两个 population variables 表示支持两个 choices 的 recurrent pools。"
+    },
+    {
+      "id": "L23-Q21",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 1,
+          "section": "lecture-23-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Cognition 的工作定义：脱离当前输入的内部状态"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 23 讲：为什么\"闭眼时仍有脑活动\"本身不足以证明本课所指 cognition？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
+        },
+        {
+          "id": "b",
+          "text": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
+        },
+        {
+          "id": "c",
+          "text": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
+        },
+        {
+          "id": "d",
+          "text": "每个 trial 的 noise path 不同，first-passage time 与先碰哪一条 boundary 都会随路径改变。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。 学习时可用 Markov-state 反问法：若只知道 present input 无法预测下一步，加入哪一个内部变量后 prediction 改善？这个变量可能是 accumulated evidence、remembered frequency 或 task rule。好的模型需同时说明 state 怎样被写入、无输入时怎样保持、何时被读取和清除，而不是只在 delay 中画一条高 firing trace。"
+    },
+    {
+      "id": "L23-Q22",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 1,
+          "section": "lecture-23-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Cognition 的工作定义：脱离当前输入的内部状态",
+        "识别 history dependence"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：完成\"两组 trials 当前 comparison stimulus 都是 20 Hz；第一组 sample 是 10 Hz，第二组 sample 是 30 Hz。动物分别多选\"comparison larger\"和\"comparison smaller\"。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。"
+        },
+        {
+          "id": "b",
+          "text": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。"
+        },
+        {
+          "id": "c",
+          "text": "τeff=2 s，1 s 后 α≈6.07。"
+        },
+        {
+          "id": "d",
+          "text": "decision time 约 0.693 s，choice 为正边界。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。 计算路径：当前 comparison 相同，所以单靠当前输入会预测相同 choice distribution。 不同 sample history 改变正确关系与实际 choice。 内部状态至少需携带 sample relative to 20 Hz 的信息，才能解释差异。"
+    },
+    {
+      "id": "L23-Q23",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 1,
+          "section": "lecture-23-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Cognition 的工作定义：脱离当前输入的内部状态",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 23 讲：得到\"这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        {
+          "id": "b",
+          "text": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        },
+        {
+          "id": "c",
+          "text": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        {
+          "id": "d",
+          "text": "steady state 2 高于 bound 1，所以必能触界；若 μ≤1 且 b=0，确定性 leaky轨迹不会到达 +B。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。 这个检查对应题设\"两组 trials 当前 comparison stimulus 都是 20 Hz；第一组 sample 是 10 Hz，第二组 sample 是 30 Hz。动物分别多选\"comparison larger\"和\"comparison smaller\"。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L23-Q24",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 2,
+          "section": "lecture-23-source-2"
+        }
+      ],
+      "conceptTags": [
+        "DMS 与 Romo parametric working-memory 时间线"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 23 讲：为何 delay-period firing 与 f1 单调相关仍不能单独证明它是行为所用 memory？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
+        },
+        {
+          "id": "b",
+          "text": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
+        },
+        {
+          "id": "c",
+          "text": "每个 trial 的 noise path 不同，first-passage time 与先碰哪一条 boundary 都会随路径改变。"
+        },
+        {
+          "id": "d",
+          "text": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。 DMS 和 parametric memory 的关键区别在 readout demand。DMS 的 classifier 可能只需分离有限 patterns；Romo comparison 需要保留顺序和距离。任务表现差不能直接定位 maintenance failure，也可能来自 sample encoding、comparison sensation、decision rule 或 motor report，因此 perturbation 必须限制在特定 epoch 才能分解环节。"
+    },
+    {
+      "id": "L23-Q25",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 2,
+          "section": "lecture-23-source-2"
+        }
+      ],
+      "conceptTags": [
+        "DMS 与 Romo parametric working-memory 时间线",
+        "从 noisy memory 做一次比较"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：完成\"内部记忆值 m1=18 Hz，comparison estimate m2=22 Hz，规则是 m2-m1>0 选\"第二个更大\"。若 decision noise 暂忽略，求 choice variable。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。"
+        },
+        {
+          "id": "b",
+          "text": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。"
+        },
+        {
+          "id": "c",
+          "text": "τeff=2 s，1 s 后 α≈6.07。"
+        },
+        {
+          "id": "d",
+          "text": "decision time 约 0.693 s，choice 为正边界。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。 计算路径：计算差值 d=m2-m1=22-18=4 Hz。 d>0，因此落在\"第二个更大\"一侧。 若 memory error 把 m1 高估超过 22 Hz，choice 会翻转，说明错误不必来自 comparison sensation。"
+    },
+    {
+      "id": "L23-Q26",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 2,
+          "section": "lecture-23-source-2"
+        }
+      ],
+      "conceptTags": [
+        "DMS 与 Romo parametric working-memory 时间线",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 23 讲：得到\"decision variable 为 +4 Hz，预测选择\"第二个更大\"。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        {
+          "id": "b",
+          "text": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        {
+          "id": "c",
+          "text": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        },
+        {
+          "id": "d",
+          "text": "steady state 2 高于 bound 1，所以必能触界；若 μ≤1 且 b=0，确定性 leaky轨迹不会到达 +B。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "交换两个估计值应得到 -4 Hz 和相反选择。 这个检查对应题设\"内部记忆值 m1=18 Hz，comparison estimate m2=22 Hz，规则是 m2-m1>0 选\"第二个更大\"。若 decision noise 暂忽略，求 choice variable。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L23-Q27",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 3,
+          "section": "lecture-23-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Persistent activity 与接近一的 recurrent mode"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 23 讲：为何把 λ 从 0.99 提到 1.01 不是把 memory 再延长一点？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
+        },
+        {
+          "id": "b",
+          "text": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
+        },
+        {
+          "id": "c",
+          "text": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
+        },
+        {
+          "id": "d",
+          "text": "每个 trial 的 noise path 不同，first-passage time 与先碰哪一条 boundary 都会随路径改变。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。 稳定性必须检查所有 modes：一个 λ≈1 保存 memory，其余 eigenvalues 应对应 decaying transverse directions，否则 noise 会扩散到无关 coordinates。非正交 eigenvectors 还可能产生 transient amplification。仅报告最长 τeff 不足以证明可靠 memory；需评估噪声累积、input selectivity、readout 与 reset mechanism。"
+    },
+    {
+      "id": "L23-Q28",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 3,
+          "section": "lecture-23-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Persistent activity 与接近一的 recurrent mode",
+        "预测 delay drift"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：完成\"τ=20 ms、λ=0.99，sample 后 α0=10。求 τeff，并估计 1 s 后 amplitude。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。"
+        },
+        {
+          "id": "b",
+          "text": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。"
+        },
+        {
+          "id": "c",
+          "text": "decision time 约 0.693 s，choice 为正边界。"
+        },
+        {
+          "id": "d",
+          "text": "τeff=2 s，1 s 后 α≈6.07。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "τeff=2 s，1 s 后 α≈6.07。 计算路径：τeff=20/(1-0.99)=2000 ms=2 s。 1 s 后 α=10e^{-1/2}≈6.07。 虽 λ 很接近 1，1 s delay 仍损失约 39%，所以\"接近一\"不等于完美 memory。"
     },
     {
       "id": "L23-Q29",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 3,
+          "section": "lecture-23-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Persistent activity 与接近一的 recurrent mode",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 23 讲：得到\"τeff=2 s，1 s 后 α≈6.07。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        },
+        {
+          "id": "b",
+          "text": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        {
+          "id": "c",
+          "text": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        {
+          "id": "d",
+          "text": "steady state 2 高于 bound 1，所以必能触界；若 μ≤1 且 b=0，确定性 leaky轨迹不会到达 +B。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。 这个检查对应题设\"τ=20 ms、λ=0.99，sample 后 α0=10。求 τeff，并估计 1 s 后 amplitude。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L23-Q30",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Leaky drift-diffusion：证据、噪声与 first passage"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 23 讲：为何相同 coherence 会产生不同 choices 和 RT？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
+        },
+        {
+          "id": "b",
+          "text": "每个 trial 的 noise path 不同，first-passage time 与先碰哪一条 boundary 都会随路径改变。"
+        },
+        {
+          "id": "c",
+          "text": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
+        },
+        {
+          "id": "d",
+          "text": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "每个 trial 的 noise path 不同，first-passage time 与先碰哪一条 boundary 都会随路径改变。 模拟时用小步长 Δt 更新 a，并在首次跨界停止；不能跨界后继续平均再决定。noise scaling 需随 Δt 用平方根变化，若每步直接加固定 variance noise，改变 timestep 会改变模型。自学数值例可以先用确定性 constant evidence，再加入随机项理解 distribution。"
+    },
+    {
+      "id": "L23-Q31",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Leaky drift-diffusion：证据、噪声与 first passage",
+        "确定性 first-passage 判定"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：完成\"τa=1 s、b=0、μ=2、B=1。忽略 noise，求到 +B 的时间。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。"
+        },
+        {
+          "id": "b",
+          "text": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。"
+        },
+        {
+          "id": "c",
+          "text": "decision time 约 0.693 s，choice 为正边界。"
+        },
+        {
+          "id": "d",
+          "text": "τeff=2 s，1 s 后 α≈6.07。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "decision time 约 0.693 s，choice 为正边界。 计算路径：解为 a(t)=2(1-e^{-t})。 令 a=1，得到 1=2(1-e^{-t})，所以 e^{-t}=1/2。 取自然对数，t=ln2≈0.693 s。"
+    },
+    {
+      "id": "L23-Q32",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Leaky drift-diffusion：证据、噪声与 first passage",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 23 讲：得到\"decision time 约 0.693 s，choice 为正边界。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        {
+          "id": "b",
+          "text": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        {
+          "id": "c",
+          "text": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        },
+        {
+          "id": "d",
+          "text": "steady state 2 高于 bound 1，所以必能触界；若 μ≤1 且 b=0，确定性 leaky轨迹不会到达 +B。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "steady state 2 高于 bound 1，所以必能触界；若 μ≤1 且 b=0，确定性 leaky轨迹不会到达 +B。 这个检查对应题设\"τa=1 s、b=0、μ=2、B=1。忽略 noise，求到 +B 的时间。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L23-Q33",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 5,
+          "section": "lecture-23-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Psychometric、chronometric 与 LIP ramping"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 23 讲：为何只比较平均 LIP ramp slope 不能区分 accumulation 与平均后的 discrete steps？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两类 single-trial dynamics 经不同 onset times 或 choice times 平均后都可形成类似平滑曲线，需 single-trial model comparison。"
+        },
+        {
+          "id": "b",
+          "text": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
+        },
+        {
+          "id": "c",
+          "text": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
+        },
+        {
+          "id": "d",
+          "text": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "两类 single-trial dynamics 经不同 onset times 或 choice times 平均后都可形成类似平滑曲线，需 single-trial model comparison。 更有力的测试把模型参数变化映到神经预测：coherence 应改变 ramp slope，prior bias 可改变起点，speed instruction 可改变 bound-like termination；trial-level neural fluctuation应预测 choice与RT。即便都成立，LIP 可能读取而非生成 decision variable，需 temporally precise perturbation 和 network-wide recording 区分角色。"
+    },
+    {
+      "id": "L23-Q34",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 5,
+          "section": "lecture-23-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Psychometric、chronometric 与 LIP ramping",
+        "从简化 psychometric 数据识别 bias"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：完成\"signed coherence 为 -10、0、+10%，选择右的概率分别为 0.15、0.65、0.93。判断是否存在右侧 bias。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。"
+        },
+        {
+          "id": "b",
+          "text": "数据提示 right-choice bias，但不足以区分 initial-state、reward 或 motor bias。"
+        },
+        {
+          "id": "c",
+          "text": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。"
+        },
+        {
+          "id": "d",
+          "text": "τeff=2 s，1 s 后 α≈6.07。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "数据提示 right-choice bias，但不足以区分 initial-state、reward 或 motor bias。 计算路径：无偏模型在 0 coherence 通常预测约 0.5。 观测 0.65 高于 0.5，提示起点或选择规则偏向右。 仍需 confidence interval 与 lapse model，不能用单个比例确定 bias 来源。"
+    },
+    {
+      "id": "L23-Q35",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 5,
+          "section": "lecture-23-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Psychometric、chronometric 与 LIP ramping",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 23 讲：得到\"数据提示 right-choice bias，但不足以区分 initial-state、reward 或 motor bias。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        {
+          "id": "b",
+          "text": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        {
+          "id": "c",
+          "text": "两侧强 evidence 下概率分别接近 0 和 1，方向编码符号自洽。"
+        },
+        {
+          "id": "d",
+          "text": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "两侧强 evidence 下概率分别接近 0 和 1，方向编码符号自洽。 这个检查对应题设\"signed coherence 为 -10、0、+10%，选择右的概率分别为 0.15、0.65、0.93。判断是否存在右侧 bias。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L23-Q36",
       "lecture": 23,
       "sectionId": "lecture-23-source-6",
       "sourceAnchors": [
@@ -1605,41 +2514,130 @@
         }
       ],
       "conceptTags": [
-        "Short-Term Memory and Perceptual Decisions",
-        "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf"
+        "Wong–Wang choice attractors 与 phase-plane 分界"
       ],
-      "difficulty": 4,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 23 讲：阅读与\"long integration modes、Wong-Wang nonlinear attractor model、 phase planes\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 23 讲：为什么两个 choice attractors 之间通常需要 saddle 或 basin boundary？",
       "choices": [
         {
           "id": "a",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+          "text": "持续活动可能是自发波动或未测输入；需要证明它携带任务相关历史并预测后续行为。"
         },
         {
           "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "相关信号可能是旁观 readout；只有其 trial fluctuation、选择性干预或 downstream coupling 影响比较行为，才更接近功能证据。"
         },
         {
           "id": "c",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+          "text": "它跨过稳定边界；线性 mode 从缓慢衰减变成指数增长，需其他 nonlinearity 才能限制幅度。"
         },
         {
           "id": "d",
-          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
+          "text": "连续动力系统中不同吸引域必须由不流向任一吸引子的边界分隔；二维常由 saddle 的 stable manifold 构成。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "连续动力系统中不同吸引域必须由不流向任一吸引子的边界分隔；二维常由 saddle 的 stable manifold 构成。 读 phase portrait 要在 nullclines 两侧代 test points 判断 arrows，再跟踪 trajectory，不能只看交点数量。实验连接应保持层级：behavioral curve可由该模型产生，population recordings可检验 competitive dynamics，perturb one pool可预测 basin shift；这些支持相容性，但参数拟合不等于证明 cortex 精确采用该 reduced equation。"
+    },
+    {
+      "id": "L23-Q37",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 6,
+          "section": "lecture-23-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Wong–Wang choice attractors 与 phase-plane 分界",
+        "用 Jacobian 分类两个点"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：完成\"点 A 的 Jacobian eigenvalues 为 -2、-0.5 s^-1；点 B 为 +1、-3 s^-1。分类。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A 稳定，B 为 saddle。"
+        },
+        {
+          "id": "b",
+          "text": "这个设计支持 history-dependent state，但 state 的具体 neural code 仍需记录或干预确认。"
+        },
+        {
+          "id": "c",
+          "text": "decision variable 为 +4 Hz，预测选择\"第二个更大\"。"
+        },
+        {
+          "id": "d",
+          "text": "τeff=2 s，1 s 后 α≈6.07。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“cognition working definition”，不是题干指定的关系。",
-        "c": "该陈述解释的是“behavioral psychometric/chronometric curves、LIP neural correlates”，不是题干指定的关系。",
-        "d": "该陈述解释的是“delayed match-to-sample、parametric working memory、Romo vibration task”，不是题干指定的关系。"
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+      "explanation": "A 稳定，B 为 saddle。 计算路径：A 的两个实部均负，所有小扰动衰减。 B 一方向增长、一方向衰减。 因此 A 是 local attractor，B 是 saddle；B 的 stable manifold 可构成 separatrix。"
     },
     {
-      "id": "L23-Q30",
+      "id": "L23-Q38",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 6,
+          "section": "lecture-23-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Wong–Wang choice attractors 与 phase-plane 分界",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 23 讲：得到\"A 稳定，B 为 saddle。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若两组还系统改变 motor cue 或 reward，应先排除这些混杂。"
+        },
+        {
+          "id": "b",
+          "text": "eigenvalue 单位与给出的 s^-1 一致，正负号分别代表增长和衰减。"
+        },
+        {
+          "id": "c",
+          "text": "交换两个估计值应得到 -4 Hz 和相反选择。"
+        },
+        {
+          "id": "d",
+          "text": "经过一个 τeff=2 s 后应降到初值的 e^{-1}≈36.8%。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "eigenvalue 单位与给出的 s^-1 一致，正负号分别代表增长和衰减。 这个检查对应题设\"点 A 的 Jacobian eigenvalues 为 -2、-0.5 s^-1；点 B 为 +1、-3 s^-1。分类。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L23-Q39",
       "lecture": 23,
       "sectionId": "lecture-23-source-1",
       "sourceAnchors": [
@@ -1653,7 +2651,7 @@
         "认知",
         "cognition"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"本课工作定义：brain state 部分脱离 present input，由过去/未来目标塑造。\"称为什么？",
@@ -1664,27 +2662,27 @@
         },
         {
           "id": "b",
-          "text": "认知（cognition）"
+          "text": "工作记忆（working memory）"
         },
         {
           "id": "c",
-          "text": "工作记忆（working memory）"
+          "text": "认知（cognition）"
         },
         {
           "id": "d",
           "text": "延迟匹配样本（delayed match-to-sample）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“短时记忆（short-term memory）”指：短时间保留刚发生 information 的能力。",
-        "c": "“工作记忆（working memory）”指：保留并用于当前 computation 的 information。",
+        "b": "“工作记忆（working memory）”指：保留并用于当前 computation 的 information。",
         "d": "“延迟匹配样本（delayed match-to-sample）”指：sample-delay-test 的 memory task。"
       },
       "explanation": "认知（cognition）：本课工作定义：brain state 部分脱离 present input，由过去/未来目标塑造。"
     },
     {
-      "id": "L23-Q31",
+      "id": "L23-Q40",
       "lecture": 23,
       "sectionId": "lecture-23-source-2",
       "sourceAnchors": [
@@ -1713,23 +2711,23 @@
         },
         {
           "id": "c",
-          "text": "短时记忆（short-term memory）"
+          "text": "持续活动（persistent activity）"
         },
         {
           "id": "d",
-          "text": "持续活动（persistent activity）"
+          "text": "短时记忆（short-term memory）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“工作记忆（working memory）”指：保留并用于当前 computation 的 information。",
         "b": "“延迟匹配样本（delayed match-to-sample）”指：sample-delay-test 的 memory task。",
-        "d": "“持续活动（persistent activity）”指：stimulus 结束后仍保留的 neural activity。"
+        "c": "“持续活动（persistent activity）”指：stimulus 结束后仍保留的 neural activity。"
       },
-      "explanation": "短时记忆（short-term memory）：短时间保留刚发生 information 的能力。"
+      "explanation": "短时记忆（short-term memory）：短时间保留刚发生 information 的能力。 最小 memory 内容可以是 sample identity 或 category。"
     },
     {
-      "id": "L23-Q32",
+      "id": "L23-Q41",
       "lecture": 23,
       "sectionId": "lecture-23-source-1",
       "sourceAnchors": [
@@ -1743,38 +2741,38 @@
         "工作记忆",
         "working memory"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"保留并用于当前 computation 的 information。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "延迟匹配样本（delayed match-to-sample）"
+          "text": "工作记忆（working memory）"
         },
         {
           "id": "b",
-          "text": "持续活动（persistent activity）"
+          "text": "延迟匹配样本（delayed match-to-sample）"
         },
         {
           "id": "c",
-          "text": "漂移扩散模型（drift-diffusion model, DDM）"
+          "text": "持续活动（persistent activity）"
         },
         {
           "id": "d",
-          "text": "工作记忆（working memory）"
+          "text": "漂移扩散模型（drift-diffusion model, DDM）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“延迟匹配样本（delayed match-to-sample）”指：sample-delay-test 的 memory task。",
-        "b": "“持续活动（persistent activity）”指：stimulus 结束后仍保留的 neural activity。",
-        "c": "“漂移扩散模型（drift-diffusion model, DDM）”指：noisy evidence accumulation to bounds 的 decision model。"
+        "b": "“延迟匹配样本（delayed match-to-sample）”指：sample-delay-test 的 memory task。",
+        "c": "“持续活动（persistent activity）”指：stimulus 结束后仍保留的 neural activity。",
+        "d": "“漂移扩散模型（drift-diffusion model, DDM）”指：noisy evidence accumulation to bounds 的 decision model。"
       },
       "explanation": "工作记忆（working memory）：保留并用于当前 computation 的 information。"
     },
     {
-      "id": "L23-Q33",
+      "id": "L23-Q42",
       "lecture": 23,
       "sectionId": "lecture-23-source-1",
       "sourceAnchors": [
@@ -1788,18 +2786,18 @@
         "延迟匹配样本",
         "delayed match-to-sample"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"sample-delay-test 的 memory task。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "延迟匹配样本（delayed match-to-sample）"
+          "text": "持续活动（persistent activity）"
         },
         {
           "id": "b",
-          "text": "持续活动（persistent activity）"
+          "text": "延迟匹配样本（delayed match-to-sample）"
         },
         {
           "id": "c",
@@ -1810,16 +2808,16 @@
           "text": "心理测量曲线（psychometric curve）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "“持续活动（persistent activity）”指：stimulus 结束后仍保留的 neural activity。",
+        "a": "“持续活动（persistent activity）”指：stimulus 结束后仍保留的 neural activity。",
         "c": "“漂移扩散模型（drift-diffusion model, DDM）”指：noisy evidence accumulation to bounds 的 decision model。",
         "d": "“心理测量曲线（psychometric curve）”指：choice/accuracy vs stimulus strength。"
       },
-      "explanation": "延迟匹配样本（delayed match-to-sample）：sample-delay-test 的 memory task。"
+      "explanation": "延迟匹配样本（delayed match-to-sample）：sample-delay-test 的 memory task。 decision、short-term memory、learning 与 generalization 的时间尺度不同，但都可写成 state update。"
     },
     {
-      "id": "L23-Q34",
+      "id": "L23-Q43",
       "lecture": 23,
       "sectionId": "lecture-23-source-2",
       "sourceAnchors": [
@@ -1833,7 +2831,7 @@
         "持续活动",
         "persistent activity"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"stimulus 结束后仍保留的 neural activity。\"称为什么？",
@@ -1844,27 +2842,27 @@
         },
         {
           "id": "b",
-          "text": "持续活动（persistent activity）"
+          "text": "心理测量曲线（psychometric curve）"
         },
         {
           "id": "c",
-          "text": "心理测量曲线（psychometric curve）"
+          "text": "持续活动（persistent activity）"
         },
         {
           "id": "d",
           "text": "时间测量曲线（chronometric curve）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“漂移扩散模型（drift-diffusion model, DDM）”指：noisy evidence accumulation to bounds 的 decision model。",
-        "c": "“心理测量曲线（psychometric curve）”指：choice/accuracy vs stimulus strength。",
+        "b": "“心理测量曲线（psychometric curve）”指：choice/accuracy vs stimulus strength。",
         "d": "“时间测量曲线（chronometric curve）”指：reaction time vs stimulus strength。"
       },
-      "explanation": "持续活动（persistent activity）：stimulus 结束后仍保留的 neural activity。"
+      "explanation": "持续活动（persistent activity）：stimulus 结束后仍保留的 neural activity。 按事件对齐 neural data：sample epoch 问 encoding；delay 问 maintenance；comparison epoch 问 remembered f1 与 current f2 如何合成 decision variable；choice epoch 还混入 motor preparation。"
     },
     {
-      "id": "L23-Q35",
+      "id": "L23-Q44",
       "lecture": 23,
       "sectionId": "lecture-23-source-4",
       "sourceAnchors": [
@@ -1878,7 +2876,7 @@
         "漂移扩散模型",
         "drift-diffusion model, DDM"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"noisy evidence accumulation to bounds 的 decision model。\"称为什么？",
@@ -1893,23 +2891,23 @@
         },
         {
           "id": "c",
-          "text": "漂移扩散模型（drift-diffusion model, DDM）"
+          "text": "分界线（separatrix）"
         },
         {
           "id": "d",
-          "text": "分界线（separatrix）"
+          "text": "漂移扩散模型（drift-diffusion model, DDM）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“心理测量曲线（psychometric curve）”指：choice/accuracy vs stimulus strength。",
         "b": "“时间测量曲线（chronometric curve）”指：reaction time vs stimulus strength。",
-        "d": "“分界线（separatrix）”指：分隔不同 attractor basins 的 boundary。"
+        "c": "“分界线（separatrix）”指：分隔不同 attractor basins 的 boundary。"
       },
       "explanation": "漂移扩散模型（drift-diffusion model, DDM）：noisy evidence accumulation to bounds 的 decision model。"
     },
     {
-      "id": "L23-Q36",
+      "id": "L23-Q45",
       "lecture": 23,
       "sectionId": "lecture-23-source-2",
       "sourceAnchors": [
@@ -1930,31 +2928,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "时间测量曲线（chronometric curve）"
+          "text": "心理测量曲线（psychometric curve）"
         },
         {
           "id": "b",
-          "text": "分界线（separatrix）"
+          "text": "时间测量曲线（chronometric curve）"
         },
         {
           "id": "c",
-          "text": "吸引子（attractor）"
+          "text": "分界线（separatrix）"
         },
         {
           "id": "d",
-          "text": "心理测量曲线（psychometric curve）"
+          "text": "吸引子（attractor）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“时间测量曲线（chronometric curve）”指：reaction time vs stimulus strength。",
-        "b": "“分界线（separatrix）”指：分隔不同 attractor basins 的 boundary。",
-        "c": "“吸引子（attractor）”指：附近 states 随 dynamics 收敛的 state/set。"
+        "b": "“时间测量曲线（chronometric curve）”指：reaction time vs stimulus strength。",
+        "c": "“分界线（separatrix）”指：分隔不同 attractor basins 的 boundary。",
+        "d": "“吸引子（attractor）”指：附近 states 随 dynamics 收敛的 state/set。"
       },
       "explanation": "心理测量曲线（psychometric curve）：choice/accuracy vs stimulus strength。"
     },
     {
-      "id": "L23-Q37",
+      "id": "L23-Q46",
       "lecture": 23,
       "sectionId": "lecture-23-source-4",
       "sourceAnchors": [
@@ -1968,18 +2966,18 @@
         "时间测量曲线",
         "chronometric curve"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"reaction time vs stimulus strength。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "时间测量曲线（chronometric curve）"
+          "text": "分界线（separatrix）"
         },
         {
           "id": "b",
-          "text": "分界线（separatrix）"
+          "text": "时间测量曲线（chronometric curve）"
         },
         {
           "id": "c",
@@ -1990,16 +2988,16 @@
           "text": "认知（cognition）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "“分界线（separatrix）”指：分隔不同 attractor basins 的 boundary。",
+        "a": "“分界线（separatrix）”指：分隔不同 attractor basins 的 boundary。",
         "c": "“吸引子（attractor）”指：附近 states 随 dynamics 收敛的 state/set。",
         "d": "“认知（cognition）”指：本课工作定义：brain state 部分脱离 present input，由过去/未来目标塑造。"
       },
       "explanation": "时间测量曲线（chronometric curve）：reaction time vs stimulus strength。"
     },
     {
-      "id": "L23-Q38",
+      "id": "L23-Q47",
       "lecture": 23,
       "sectionId": "lecture-23-source-6",
       "sourceAnchors": [
@@ -2013,7 +3011,7 @@
         "分界线",
         "separatrix"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"分隔不同 attractor basins 的 boundary。\"称为什么？",
@@ -2024,27 +3022,27 @@
         },
         {
           "id": "b",
-          "text": "分界线（separatrix）"
+          "text": "认知（cognition）"
         },
         {
           "id": "c",
-          "text": "认知（cognition）"
+          "text": "分界线（separatrix）"
         },
         {
           "id": "d",
           "text": "短时记忆（short-term memory）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“吸引子（attractor）”指：附近 states 随 dynamics 收敛的 state/set。",
-        "c": "“认知（cognition）”指：本课工作定义：brain state 部分脱离 present input，由过去/未来目标塑造。",
+        "b": "“认知（cognition）”指：本课工作定义：brain state 部分脱离 present input，由过去/未来目标塑造。",
         "d": "“短时记忆（short-term memory）”指：短时间保留刚发生 information 的能力。"
       },
-      "explanation": "分界线（separatrix）：分隔不同 attractor basins 的 boundary。"
+      "explanation": "分界线（separatrix）：分隔不同 attractor basins 的 boundary。 separatrix 经过 saddle，将初态和 noise paths 分到两个 attractor basins。"
     },
     {
-      "id": "L23-Q39",
+      "id": "L23-Q48",
       "lecture": 23,
       "sectionId": "lecture-23-source-3",
       "sourceAnchors": [
@@ -2058,7 +3056,7 @@
         "吸引子",
         "attractor"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 23 讲：本讲把\"附近 states 随 dynamics 收敛的 state/set。\"称为什么？",
@@ -2073,23 +3071,23 @@
         },
         {
           "id": "c",
-          "text": "吸引子（attractor）"
+          "text": "工作记忆（working memory）"
         },
         {
           "id": "d",
-          "text": "工作记忆（working memory）"
+          "text": "吸引子（attractor）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“认知（cognition）”指：本课工作定义：brain state 部分脱离 present input，由过去/未来目标塑造。",
         "b": "“短时记忆（short-term memory）”指：短时间保留刚发生 information 的能力。",
-        "d": "“工作记忆（working memory）”指：保留并用于当前 computation 的 information。"
+        "c": "“工作记忆（working memory）”指：保留并用于当前 computation 的 information。"
       },
-      "explanation": "吸引子（attractor）：附近 states 随 dynamics 收敛的 state/set。"
+      "explanation": "吸引子（attractor）：附近 states 随 dynamics 收敛的 state/set。 λ=1 是理想 line attractor 的线性条件：无输入时该 mode 任意 amplitude 都保持。"
     },
     {
-      "id": "L23-Q40",
+      "id": "L23-Q49",
       "lecture": 23,
       "sectionId": "lecture-23-source-2",
       "sourceAnchors": [
@@ -2102,35 +3100,299 @@
       "conceptTags": [
         "persistent memory mode"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 23 讲：使用\"persistent memory mode\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "white/colored noise specified"
+          "text": "λ<1 close to1"
         },
         {
           "id": "b",
-          "text": "initial-condition interpretation"
+          "text": "white/colored noise specified"
         },
         {
           "id": "c",
-          "text": "first-passage rule"
+          "text": "initial-condition interpretation"
         },
         {
           "id": "d",
+          "text": "first-passage rule"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
+        "c": "这是“decision bias”的条件，不是题干公式的条件。",
+        "d": "这是“absorbing decision bounds”的条件，不是题干公式的条件。"
+      },
+      "explanation": "persistent memory mode 的适用条件：λ<1 close to1 最小 memory 内容可以是 sample identity 或 category。"
+    },
+    {
+      "id": "L23-Q50",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "leaky evidence accumulator"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：使用\"leaky evidence accumulator\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
           "text": "λ<1 close to1"
+        },
+        {
+          "id": "b",
+          "text": "white/colored noise specified"
+        },
+        {
+          "id": "c",
+          "text": "initial-condition interpretation"
+        },
+        {
+          "id": "d",
+          "text": "first-passage rule"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“persistent memory mode”的条件，不是题干公式的条件。",
+        "c": "这是“decision bias”的条件，不是题干公式的条件。",
+        "d": "这是“absorbing decision bounds”的条件，不是题干公式的条件。"
+      },
+      "explanation": "leaky evidence accumulator 的适用条件：white/colored noise specified -a 是 leak，使旧证据逐渐折扣；经典 perfect DDM 常省略该项，本课公式是更一般的 leaky accumulator。"
+    },
+    {
+      "id": "L23-Q51",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "decision bias"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：使用\"decision bias\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ<1 close to1"
+        },
+        {
+          "id": "b",
+          "text": "white/colored noise specified"
+        },
+        {
+          "id": "c",
+          "text": "initial-condition interpretation"
+        },
+        {
+          "id": "d",
+          "text": "first-passage rule"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“persistent memory mode”的条件，不是题干公式的条件。",
+        "b": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
+        "d": "这是“absorbing decision bounds”的条件，不是题干公式的条件。"
+      },
+      "explanation": "decision bias 的适用条件：initial-condition interpretation initial condition a(0)=b 表示起点 bias；吸收边界 a=±B 给 first-passage choice 与 decision time。"
+    },
+    {
+      "id": "L23-Q52",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "absorbing decision bounds"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：使用\"absorbing decision bounds\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ<1 close to1"
+        },
+        {
+          "id": "b",
+          "text": "white/colored noise specified"
+        },
+        {
+          "id": "c",
+          "text": "initial-condition interpretation"
+        },
+        {
+          "id": "d",
+          "text": "first-passage rule"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
-        "b": "这是“decision bias”的条件，不是题干公式的条件。",
-        "c": "这是“absorbing decision bounds”的条件，不是题干公式的条件。"
+        "a": "这是“persistent memory mode”的条件，不是题干公式的条件。",
+        "b": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
+        "c": "这是“decision bias”的条件，不是题干公式的条件。"
       },
-      "explanation": "persistent memory mode 的适用条件：λ<1 close to1"
+      "explanation": "absorbing decision bounds 的适用条件：first-passage rule initial condition a(0)=b 表示起点 bias；吸收边界 a=±B 给 first-passage choice 与 decision time。"
+    },
+    {
+      "id": "L23-Q53",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 2,
+          "section": "lecture-23-source-2"
+        }
+      ],
+      "conceptTags": [
+        "psychometric function"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：使用\"psychometric function\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "signed stimulus strength"
+        },
+        {
+          "id": "b",
+          "text": "λ<1 close to1"
+        },
+        {
+          "id": "c",
+          "text": "white/colored noise specified"
+        },
+        {
+          "id": "d",
+          "text": "initial-condition interpretation"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“persistent memory mode”的条件，不是题干公式的条件。",
+        "c": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
+        "d": "这是“decision bias”的条件，不是题干公式的条件。"
+      },
+      "explanation": "psychometric function 的适用条件：signed stimulus strength 若 delay representation 有 noise，f1 与 f2 越接近越容易混淆，可从 psychometric slope 估计 combined sensory-memory uncertainty。"
+    },
+    {
+      "id": "L23-Q54",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 3,
+          "section": "lecture-23-source-3"
+        }
+      ],
+      "conceptTags": [
+        "chronometric function"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：使用\"chronometric function\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ<1 close to1"
+        },
+        {
+          "id": "b",
+          "text": "includes/nonincludes nondecision time stated"
+        },
+        {
+          "id": "c",
+          "text": "white/colored noise specified"
+        },
+        {
+          "id": "d",
+          "text": "initial-condition interpretation"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“persistent memory mode”的条件，不是题干公式的条件。",
+        "c": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
+        "d": "这是“decision bias”的条件，不是题干公式的条件。"
+      },
+      "explanation": "chronometric function 的适用条件：includes/nonincludes nondecision time stated λ=1 是理想 line attractor 的线性条件：无输入时该 mode 任意 amplitude 都保持。"
+    },
+    {
+      "id": "L23-Q55",
+      "lecture": 23,
+      "sectionId": "lecture-23-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
+          "page": 4,
+          "section": "lecture-23-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Wong-Wang nullclines"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 23 讲：使用\"Wong-Wang nullclines\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "λ<1 close to1"
+        },
+        {
+          "id": "b",
+          "text": "white/colored noise specified"
+        },
+        {
+          "id": "c",
+          "text": "2D reduced dynamics"
+        },
+        {
+          "id": "d",
+          "text": "initial-condition interpretation"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“persistent memory mode”的条件，不是题干公式的条件。",
+        "b": "这是“leaky evidence accumulator”的条件，不是题干公式的条件。",
+        "d": "这是“decision bias”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Wong-Wang nullclines 的适用条件：2D reduced dynamics e(t) 的条件均值随 signed coherence 改变，γ 是零均值 noise。"
     }
   ]
 }

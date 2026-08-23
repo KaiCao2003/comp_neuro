@@ -111,6 +111,384 @@
       "stopPredict": "m³h 的生理含义是什么？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能把 LIF 方程改写成时间常数—稳态形式，解释电流阶跃开始与结束后的指数轨迹。",
+      "能由阈值条件推导 LIF 的精确发放间隔与 F–I 曲线，并分析阈值附近和强输入极限。",
+      "能读懂 Hodgkin–Huxley 膜方程中漏电、Na⁺、K⁺支路的电流方向与最大电导。",
+      "能从两状态通道的转移率推导门变量的稳态值与时间常数，解释激活、失活和不应期。",
+      "能说明面积归一化、多区室传播与细胞多样性如何扩展点神经元模型，而不混淆亚阈值衰减与动作电位再生。"
+    ],
+    "prerequisiteBridge": [
+      "先复用上一讲的电路约定：C dV/dt=I_e−G_L(V−E_L)。电容决定同一净电流下电压变化多快，漏电电导把电压拉向 E_L。把方程除以 G_L 后，C/G_L 具有时间单位，I_e/G_L 具有电压单位；这两个组合分别定义 τ_m 与输入造成的稳态偏移。若单位不成立，后续指数解和 F–I 关系都会失去物理意义。",
+      "解阈值时间需要指数与自然对数互为反函数。若 e^{−t/τ}=a 且 0<a<1，则 −t/τ=ln a，因 ln a<0，得到正时间 t=−τ ln a。对数中的量必须无单位，所以公式总会以两个电压差的比出现。临界输入附近，这个比趋近 0，对数发散，意味着第一次越阈要等待很久。",
+      "Hodgkin–Huxley 模型中的门变量可先想成大量独立门处于开放状态的比例，因此 m、h、n 位于 0 与 1 之间。若一个通道需要三个 m 门和一个 h 门同时开放，独立近似下开放比例为 m³h。指数不是任意拟合装饰，而来自多个门同时满足条件的联合概率。最大电导乘开放比例得到瞬时电导。",
+      "空间模型需要区分总量与单位面积量。总电容随膜面积 A 增大，写成 C=c_m A；总电导也写成 G=gA。将整条膜方程除以 A 后得到电流密度与单位面积参数，便于比较不同大小细胞。轴突上的亚阈值电压会因漏电衰减，而动作电位依靠相邻膜段的电压门控电导重新生成，因此可以长距离传播。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L05-D1",
+        "prompt": "C=200 pF、G_L=10 nS 时 τ_m 是多少？若 C 加倍而 G_L 不变，轨迹快慢怎样变？",
+        "answer": "τ_m=C/G_L=20 ms；C 加倍后 τ_m=40 ms，稳态不变但接近稳态更慢。",
+        "explanation": "稳态由电流与电导决定，电容只出现在时间常数中。区分稳态位置与到达速度是阅读一阶膜方程的核心。",
+        "remediationModuleId": "L05-M1"
+      },
+      {
+        "id": "L05-D2",
+        "prompt": "为何 LIF 在 I_e 刚超过 I_T 时发放率从零缓慢升起，而不是突然跳到一个很高值？",
+        "answer": "此时 V_inf 只略高于 V_T，指数轨迹靠近稳态时速度很慢，越阈时间的对数项趋向无穷，频率趋向零。",
+        "explanation": "阈值规则虽是离散事件，事件前的连续动力学仍决定等待时间。临界减速造成 F–I 曲线的非线性起点。",
+        "remediationModuleId": "L05-M2"
+      },
+      {
+        "id": "L05-D3",
+        "prompt": "门变量满足 dn/dt=α(1−n)−βn。其稳态和时间常数分别是什么？",
+        "answer": "n_inf=α/(α+β)，τ_n=1/(α+β)；方程可写 τ_n dn/dt=−n+n_inf。",
+        "explanation": "α 把关闭门推向开放，β 把开放门推向关闭；总转移率决定放松速度，两者比例决定稳态开放概率。",
+        "remediationModuleId": "L05-M3"
+      },
+      {
+        "id": "L05-D4",
+        "prompt": "n 从 0.3 增到 0.6，而 K 通道开放比例为 n⁴。开放比例增大多少倍？",
+        "answer": "(0.6/0.3)⁴=2⁴=16 倍。",
+        "explanation": "门变量本身只加倍，但多个门同时开放把变化放大为四次方，这使电压依赖电导具有陡峭非线性。",
+        "remediationModuleId": "L05-M3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L05-M1",
+        "title": "LIF 的时间常数、稳态与电流阶跃",
+        "sourceRefs": [
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 2
+          },
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "电容与漏电如何把恒定电流转成指数电压响应，阶跃撤除后为何沿同一时间常数返回静息？",
+        "paragraphs": [
+          "前两页重建从纯电容到漏电积分发放的电路。纯电容满足 C dV/dt=I_e，恒流下没有稳态；增加漏电支路后，C dV/dt=I_e−G_L(V−E_L)。当 V 高于 E_L，漏电外向电流为正并抑制继续上升；当 V 低于 E_L，支路电流反向，推动电压回升。E_L 因而是无输入时的稳定点。",
+          "定义 τ_m=C/G_L 与 V_inf=E_L+I_e/G_L，方程可写 τ_m dV/dt=−V+V_inf。恒定电流下，V(t)=V_inf+(V_0−V_inf)e^{−t/τ_m}。解包含最终目标 V_inf 与逐渐衰减的初始偏差。经过一个 τ_m，剩余偏差是原来的 36.8%；经过三个 τ_m 约剩 5%。",
+          "电流阶跃开始时，电压不能瞬间跳变，因为有限电流不能瞬间改变电容上的有限电荷。初始斜率为 [I_e−G_L(V_0−E_L)]/C。若从 V_0=E_L 开始，初始漏电为零，斜率为 I_e/C；之后 V 上升，漏电增强，净电流减小，轨迹逐渐变平。这个曲率直接反映电容充电与漏电竞争。",
+          "阶跃在 t_off 撤除后，新的输入为零，新稳态立即改回 E_L，但电压以撤除瞬间的连续值作为新初值，沿 V(t)=E_L+[V(t_off)−E_L]e^{−(t−t_off)/τ_m} 衰减。上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
+        ],
+        "keyPoints": [
+          "τ_m=C/G_L 控制速度，V_inf=E_L+I_e/G_L 控制恒流稳态。",
+          "电容电压连续，电流阶跃只会立刻改变斜率。",
+          "固定 C、G_L 时，阶跃开始和撤除后的指数具有同一时间常数。"
+        ],
+        "derivation": {
+          "title": "把漏电膜方程化成标准一阶响应",
+          "setup": "恒定 I_e 下求解 C dV/dt=I_e−G_L(V−E_L)，初值 V(0)=V_0。",
+          "steps": [
+            {
+              "title": "收集电压项",
+              "explanation": "右侧写成 −G_L V+G_L E_L+I_e=−G_L[V−(E_L+I_e/G_L)]。"
+            },
+            {
+              "title": "定义组合参数",
+              "explanation": "令 τ_m=C/G_L、V_inf=E_L+I_e/G_L，两侧除以 G_L 得 τ_m dV/dt=−(V−V_inf)。",
+              "latex": "\\tau_m\\frac{dV}{dt}=-(V-V_{\\infty})"
+            },
+            {
+              "title": "求偏差解",
+              "explanation": "设 y=V−V_inf，则 τ_m dy/dt=−y，所以 y(t)=y(0)e^{−t/τ_m}。"
+            },
+            {
+              "title": "恢复电压",
+              "explanation": "y(0)=V_0−V_inf，故 V(t)=V_inf+(V_0−V_inf)e^{−t/τ_m}。",
+              "latex": "V(t)=V_{\\infty}+(V_0-V_{\\infty})e^{-t/\\tau_m}"
+            }
+          ],
+          "symbolNotes": [
+            "V_inf 是在不执行阈值重置时的亚阈值稳态。",
+            "τ_m 由膜参数决定；I_e 改变稳态但在此线性模型中不改变 τ_m。"
+          ],
+          "unitsCheck": "C/G_L 为秒，I_e/G_L 为伏特；指数 t/τ_m 无单位，公式各项均为电压。",
+          "limitCheck": "G_L→0 时 τ_m→∞，标准形式需回到纯电容方程；I_e=0 时 V_inf=E_L。"
+        },
+        "workedExample": {
+          "title": "电流脉冲的上升与恢复",
+          "problem": "C=200 pF，G_L=10 nS，E_L=−65 mV，从静息开始注入 100 pA，持续 40 ms 后撤除。求 40 ms 时电压及再过 20 ms 的电压。",
+          "steps": [
+            "τ_m=20 ms，脉冲期间 V_inf=−65 mV+100 pA/10 nS=−55 mV。",
+            "40 ms=2τ_m，V(40)=−55+(−65+55)e⁻²=−55−10·0.1353≈−56.35 mV。",
+            "撤除后新稳态为 −65 mV，撤除瞬间偏差为 8.65 mV。",
+            "再过 20 ms=1τ_m，偏差剩 8.65e⁻¹≈3.18 mV，所以 V≈−61.82 mV。"
+          ],
+          "result": "脉冲结束时约 −56.35 mV；撤除 20 ms 后约 −61.82 mV。",
+          "sanityCheck": "上升阶段电压位于 −65 与 −55 mV 之间；恢复阶段位于 −56.35 与 −65 mV 之间。"
+        },
+        "selfCheck": {
+          "prompt": "若把 C 与 G_L 同时加倍，V_inf 与 τ_m 分别怎样改变？",
+          "answer": "τ_m=C/G_L 不变；同一总电流 I_e 下 I_e/G_L 减半，所以 V_inf 更接近 E_L。若连同输入按面积成比例加倍，稳态偏移也可保持不变。"
+        },
+        "pitfalls": [
+          "把 τ_m 与 V_inf 混成同一参数效应，未区分速度和稳态。",
+          "在电流撤除时把 V 强行重置为 E_L，破坏电容电压连续性。"
+        ]
+      },
+      {
+        "id": "L05-M2",
+        "title": "从阈值交叉推导精确 F–I 曲线",
+        "sourceRefs": [
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "恒定电流怎样通过指数越阈时间变成发放率，为什么阈值附近与强输入区间呈现不同形状？",
+        "paragraphs": [
+          "每次脉冲后将电压重置到 V_R，若输入恒定且没有其他状态变量，下一次亚阈值轨迹与上一周期相同。只有 V_inf>V_T 才能越阈。临界电流由 E_L+I_T/G_L=V_T 给出 I_T=G_L(V_T−E_L)；低于或等于它时，电压只能渐近接近阈下稳态，发放率为零。",
+          "把 V(t)=V_inf+(V_R−V_inf)e^{−t/τ_m} 设为 V_T，可得周期 Δt=τ_m ln[(V_inf−V_R)/(V_inf−V_T)]。频率 f=1/Δt。这个表达式不是直线：I_e 接近 I_T 时分母电压差趋零，Δt 发散；I_e 增大后周期缩短，曲线逐渐接近纯积分模型的线性强输入近似。",
+          "若加入绝对不应期 δ，每次发放后有一段不能积分的固定等待，总周期为 δ+Δt，因此 f=1/(δ+Δt)。输入趋于很大时 Δt→0，发放率不再无限增加，而趋向 1/δ。这提供一个清晰的可证伪极限：若模型没有不应期却声称产生有限最大速率，方程与结论不一致。",
+          "讲义还连接到常用的带偏置阈值线性近似 f≈[wI+b]_+。它可在有限工作区间概括 F–I 曲线，却不保留临界点附近的对数起始，也不自动产生 1/δ 饱和。使用近似时应标明拟合区间，并让 w、b 由精确曲线或数据确定，而不是把近似函数误当成 LIF 的精确解。"
+        ],
+        "keyPoints": [
+          "LIF 只有在 V_inf>V_T，即 I_e>I_T 时周期发放。",
+          "精确周期包含电压差比的自然对数。",
+          "不应期把强输入发放率限制为 1/δ。",
+          "阈值线性 F–I 是局部近似，不保留全部动力学。"
+        ],
+        "derivation": {
+          "title": "LIF 周期与强输入极限",
+          "setup": "恒定 I_e>I_T，每次越阈后立即重置到 V_R；先不含不应期，再加入 δ。",
+          "steps": [
+            {
+              "title": "写重置后的轨迹",
+              "explanation": "V(t)=V_inf+(V_R−V_inf)e^{−t/τ_m}，其中 V_inf=E_L+I_e/G_L。"
+            },
+            {
+              "title": "施加阈值",
+              "explanation": "令 V(Δt)=V_T，得到 e^{−Δt/τ_m}=(V_inf−V_T)/(V_inf−V_R)。"
+            },
+            {
+              "title": "解周期",
+              "explanation": "取对数得 Δt=τ_m ln[(V_inf−V_R)/(V_inf−V_T)]，频率为其倒数。",
+              "latex": "f=\\left[\\tau_m\\ln\\!\\left(\\frac{V_{\\infty}-V_R}{V_{\\infty}-V_T}\\right)\\right]^{-1}"
+            },
+            {
+              "title": "加入不应期",
+              "explanation": "固定不可发放时间与充电时间相加，f=1/(δ+Δt)。",
+              "latex": "f=\\frac{1}{\\delta+\\Delta t}"
+            },
+            {
+              "title": "检查强输入",
+              "explanation": "I_e 很大时 V_inf 很大，利用 ln(1+x)≈x 得 Δt≈C(V_T−V_R)/I_e；若 δ>0，最终 f→1/δ。"
+            }
+          ],
+          "symbolNotes": [
+            "Δt 是重置后到下一次越阈的充电时间，δ 是额外绝对不应期。",
+            "I_T 是使亚阈值稳态恰在阈值的电流，不是一次瞬时脉冲的幅度。"
+          ],
+          "unitsCheck": "电压差比无单位，对数无单位，乘 τ_m 得时间；频率单位为 s⁻¹=Hz。",
+          "limitCheck": "I_e↓I_T 时 f→0；I_e→∞ 且 δ=0 时 f 近似与 I_e 成正比；δ>0 时 f→1/δ。"
+        },
+        "workedExample": {
+          "title": "计算带不应期的 F–I 点",
+          "problem": "取 τ_m=20 ms，E_L=V_R=−65 mV，V_T=−50 mV，G_L=10 nS，δ=2 ms。对 I_e=200 pA 计算 V_inf、充电时间、总周期和频率。",
+          "steps": [
+            "V_inf=−65+200/10=−45 mV，且 I_T=150 pA，所以能够发放。",
+            "电压差比为 (−45+65)/(−45+50)=20/5=4。",
+            "充电时间 Δt=20 ln4≈27.73 ms。",
+            "总周期为 27.73+2=29.73 ms，频率为 1000/29.73≈33.64 Hz。"
+          ],
+          "result": "V_inf=−45 mV，充电 27.73 ms，总周期 29.73 ms，频率约 33.6 Hz。",
+          "sanityCheck": "加入不应期后的 33.6 Hz 应低于无不应期的约 36.1 Hz，也远低于上限 1/0.002=500 Hz。"
+        },
+        "selfCheck": {
+          "prompt": "为什么不能在 I_e<I_T 时把越阈公式算出的复数或负时间解释为一种特殊发放？",
+          "answer": "该公式的推导预设 V_inf>V_T，使对数比为大于 1 的正数；阈下稳态时轨迹从不穿过阈值，代数表达超出定义域只说明前提不成立。"
+        },
+        "pitfalls": [
+          "忘记检查 V_inf>V_T 就套用对数公式。",
+          "把充电时间与总周期混用，遗漏绝对不应期。",
+          "把阈值线性近似的截距直接解释为膜的某个单一生物参数。"
+        ]
+      },
+      {
+        "id": "L05-M3",
+        "title": "Hodgkin–Huxley 门控、面积归一化与空间传播",
+        "sourceRefs": [
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 5
+          },
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 6
+          },
+          {
+            "file": "Lecture5-Neurons2.pdf",
+            "page": 7
+          }
+        ],
+        "guidingQuestion": "可变离子电导怎样产生动作电位和不应期，点神经元方程又如何扩展到不同面积与轴突空间？",
+        "paragraphs": [
+          "Hodgkin–Huxley 膜方程写成 C dV/dt=I_e−G_L(V−E_L)−Ḡ_Na m³h(V−E_Na)−Ḡ_K n⁴(V−E_K)。Ḡ 是所有相关门都开放时的最大电导，m³h 与 n⁴ 是开放比例。每个支路仍是“电导×驱动力”，只是电导会被电压依赖的门变量动态调制。",
+          "单个门变量 n 的两状态动力学为 dn/dt=α_n(V)(1−n)−β_n(V)n。第一项是关闭比例乘开放速率，第二项是开放比例乘关闭速率。整理为 dn/dt=−(α+β)n+α，再定义 τ_n=1/(α+β)、n_inf=α/(α+β)，得到 τ_n dn/dt=−n+n_inf。固定电压下，n 指数趋向该电压对应的稳态开放比例。",
+          "动作电位上升期中，Na 激活 m 快速增大，使内向 Na 电流形成正反馈；Na 失活 h 随去极化下降，同时 K 激活 n 较慢增大，二者终止上升并复极。发放后 h 尚未恢复、n 尚偏高，使再次去极化困难，这就是不应期的动力学来源。它不同于 LIF 中人为加入的固定 δ，但可在简化模型中用 δ 近似其速率上限效应。",
+          "比较不同细胞大小时，将 C=c_mA、Ḡ_x=ḡ_xA、I=iA 代入并除以 A，得到单位面积膜方程。若只把面积加倍而保持电流密度与通道密度不变，电压动力学不变；若保持总注入电流不变，较大面积细胞获得较小电流密度，电压响应减弱。必须说明实验控制的是总电流还是电流密度。",
+          "单区室假设整个细胞电压相同；多区室模型为每段写膜方程，并用轴向电流耦合邻段。被动亚阈值扰动沿距离衰减，因为轴向电流不断从膜漏出；动作电位却能在下一段触发电压门控 Na 通道，逐段再生。不同神经元可通过通道种类、密度、形态和时间常数组合产生多样放电，但电荷守恒与门控框架仍可复用。"
+        ],
+        "keyPoints": [
+          "HH 电流仍遵循电导乘驱动力，门变量只调节瞬时电导。",
+          "τ_n=1/(α+β) 决定速度，n_inf=α/(α+β) 决定固定电压下的目标。",
+          "Na 激活、Na 失活与 K 延迟激活共同产生动作电位和不应期。",
+          "面积归一化区分总参数与密度，多区室耦合区分被动衰减和主动再生。"
+        ],
+        "derivation": {
+          "title": "由开关速率得到门变量标准形式",
+          "setup": "大量相同门各处于关闭或开放状态，n 表示开放比例；关闭到开放速率 α，开放到关闭速率 β。",
+          "steps": [
+            {
+              "title": "写流入与流出",
+              "explanation": "关闭比例是 1−n，每单位时间流入开放态 α(1−n)；开放态流出 βn。",
+              "latex": "\\frac{dn}{dt}=\\alpha(1-n)-\\beta n"
+            },
+            {
+              "title": "收集 n",
+              "explanation": "展开得 dn/dt=α−(α+β)n。"
+            },
+            {
+              "title": "求稳态",
+              "explanation": "令 dn/dt=0，得到 n_inf=α/(α+β)，它位于 0 与 1 之间。",
+              "latex": "n_{\\infty}=\\frac{\\alpha}{\\alpha+\\beta}"
+            },
+            {
+              "title": "识别时间常数",
+              "explanation": "令 τ_n=1/(α+β)，可写 τ_n dn/dt=−n+n_inf。",
+              "latex": "\\tau_n=\\frac{1}{\\alpha+\\beta}"
+            },
+            {
+              "title": "写固定电压解",
+              "explanation": "α、β 固定时，n(t)=n_inf+[n(0)−n_inf]e^{−t/τ_n}。"
+            }
+          ],
+          "symbolNotes": [
+            "α、β 是转移速率，单位为时间的倒数，并随膜电压改变。",
+            "n 是比例而非通道数；n⁴是在独立门近似下四个 n 门同时开放的概率。"
+          ],
+          "unitsCheck": "dn/dt 单位为 1/时间，α(1−n) 与 βn 同单位；τ_n 为时间，n 与 n_inf 无单位。",
+          "limitCheck": "β=0 时 n_inf=1，门最终全开；α=0 时 n_inf=0，门最终全关；α、β 同时增大同一倍数时稳态不变而响应加快。"
+        },
+        "workedExample": {
+          "title": "电压钳后门变量的开放过程",
+          "problem": "某固定电压下 α=0.3 ms⁻¹、β=0.1 ms⁻¹，初值 n(0)=0.2。求 n_inf、τ_n、5 ms 后的 n，以及 n⁴ 的变化。",
+          "steps": [
+            "n_inf=0.3/(0.3+0.1)=0.75。",
+            "τ_n=1/0.4 ms⁻¹=2.5 ms。",
+            "n(5)=0.75+(0.2−0.75)e^{−5/2.5}=0.75−0.55e⁻²≈0.6756。",
+            "初始开放比例 n⁴=0.2⁴=0.0016；5 ms 后约 0.6756⁴≈0.2084，约增大 130 倍。"
+          ],
+          "result": "n_inf=0.75，τ_n=2.5 ms，n(5 ms)≈0.676，n⁴ 从 0.0016 增至约 0.208。",
+          "sanityCheck": "n(5 ms) 应位于初值 0.2 与稳态 0.75 之间；所有门比例均在 0 与 1 之间。"
+        },
+        "selfCheck": {
+          "prompt": "若 α 与 β 同时加倍，为什么 n_inf 不变而 τ_n 减半？",
+          "answer": "稳态只取决于两速率的比例 α/(α+β)，共同倍数会约掉；时间常数取决于总速率的倒数，总转移加快一倍就使放松时间减半。"
+        },
+        "pitfalls": [
+          "把 m、h、n 当作电流或电压，忘记它们是 0 到 1 的门开放比例。",
+          "只看反转电位判断电流大小，忽略瞬时门控电导可能接近零。",
+          "比较不同面积细胞时混用总电流、总电导与单位面积密度。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L05-FIG-A1",
+      "lecture": 5,
+      "lectureTitle": "神经元 II：LIF 解析解与 Hodgkin–Huxley",
+      "moduleId": "L05-M2",
+      "title": "LIF 的阈值与不应期共同塑造 F–I 曲线",
+      "alt": "漏电积分发放模型的发放率随输入电流变化并趋向不应期上限的示意曲线",
+      "caption": "当 Iₑ≤I_T 时亚阈值稳态到不了阈值，发放率为零；越过 I_T 后，阈值交叉时间中的对数项决定曲线形状，而绝对不应期 δ 使强输入极限停在 1/δ。",
+      "sourceRefs": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 4
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "输入电流 Iₑ",
+      "yLabel": "发放率 f",
+      "curves": [
+        {
+          "label": "带不应期的精确 F–I",
+          "points": [
+            [
+              0,
+              0
+            ],
+            [
+              15,
+              0
+            ],
+            [
+              25,
+              0
+            ],
+            [
+              30,
+              9
+            ],
+            [
+              40,
+              23
+            ],
+            [
+              55,
+              39
+            ],
+            [
+              70,
+              53
+            ],
+            [
+              85,
+              64
+            ],
+            [
+              100,
+              73
+            ]
+          ]
+        },
+        {
+          "label": "不应期上限 1/δ",
+          "points": [
+            [
+              0,
+              92
+            ],
+            [
+              100,
+              92
+            ]
+          ],
+          "dashed": true
+        }
+      ],
+      "annotations": [
+        {
+          "x": 25,
+          "y": 2,
+          "label": "I_T"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 LIF step response 与 threshold current",
@@ -334,7 +712,42 @@
     "需要明确区分 membrane time constant、interspike interval 和 refractory period；明确区分 channel activation probability、conductance 与 ionic current。"
   ],
   "errata": [
-    "1. Pages 1-2 复习 Lecture 4 的内容。 2. Page 4 的 threshold-linear curve 是 approximation；exact LIF 在 threshold 附近呈 logarithmic onset。 3. Page 7 的 cable/multicompartment 内容为概念桥，未给出完整 cable equation。"
+    {
+      "id": "L05-E01",
+      "lecture": 5,
+      "lectureTitle": "神经元 II：LIF 解析解与 Hodgkin–Huxley",
+      "kind": "version",
+      "sourceFile": "Lecture5-Neurons2.pdf",
+      "sourcePage": 1,
+      "sectionId": "lecture-05-source-1",
+      "originalIssue": "Pages 1-2 复习 Lecture 4 的内容。",
+      "explanation": "这些页面是后续推导的先修回顾，应与本讲新引入的定义和结论分开标记。",
+      "correction": null
+    },
+    {
+      "id": "L05-E02",
+      "lecture": 5,
+      "lectureTitle": "神经元 II：LIF 解析解与 Hodgkin–Huxley",
+      "kind": "caution",
+      "sourceFile": "Lecture5-Neurons2.pdf",
+      "sourcePage": 4,
+      "sectionId": "L05-M2",
+      "originalIssue": "Page 4 的 threshold-linear curve 是 approximation；exact LIF 在 threshold 附近呈 logarithmic onset。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L05-E03",
+      "lecture": 5,
+      "lectureTitle": "神经元 II：LIF 解析解与 Hodgkin–Huxley",
+      "kind": "caution",
+      "sourceFile": "Lecture5-Neurons2.pdf",
+      "sourcePage": 7,
+      "sectionId": "lecture-05-source-7",
+      "originalIssue": "Page 7 的 cable/multicompartment 内容为概念桥，未给出完整 cable equation。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -352,7 +765,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 5 讲：τ_m 由哪两个被动参数决定？",
@@ -380,7 +793,7 @@
         "b": "这是“膜时间常数（membrane time constant）”的定义。",
         "d": "该选项回答的是“恒流下 V∞ 是什么？”。"
       },
-      "explanation": "τ_m=C/G_L。"
+      "explanation": "τ_m=C/G_L。 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
     },
     {
       "id": "L05-Q02",
@@ -397,7 +810,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 5 讲：恒流下 V∞ 是什么？",
@@ -425,7 +838,7 @@
         "b": "这是“阈电流（threshold current / rheobase）”的定义。",
         "c": "该选项回答的是“τ_m 由哪两个被动参数决定？”。"
       },
-      "explanation": "E_L+I/G_L。"
+      "explanation": "E_L+I/G_L。 纯电容满足 C dV/dt=I_e，恒流下没有稳态；增加漏电支路后，C dV/dt=I_e−G_L(V−E_L)。"
     },
     {
       "id": "L05-Q03",
@@ -442,7 +855,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "comparison",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：V∞=V_T 时是否在有限时间 spike？",
@@ -470,7 +883,7 @@
         "c": "这是“阈电流（threshold current / rheobase）”的定义。",
         "d": "该选项回答的是“Na inactivation 如何产生 refractory period？”。"
       },
-      "explanation": "否，只渐近接近 threshold。"
+      "explanation": "否，只渐近接近 threshold。 电流阶跃开始时，电压不能瞬间跳变，因为有限电流不能瞬间改变电容上的有限电荷。"
     },
     {
       "id": "L05-Q04",
@@ -487,7 +900,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 5 讲：写出 I_T。",
@@ -515,7 +928,7 @@
         "c": "这是“放电间隔（interspike interval, ISI）”的定义。",
         "d": "这是“膜时间常数（membrane time constant）”的定义。"
       },
-      "explanation": "I_T=G_L(V_T−E_L)。"
+      "explanation": "I_T=G_L(V_T−E_L)。 每次脉冲后将电压重置到 V_R，若输入恒定且没有其他状态变量，下一次亚阈值轨迹与上一周期相同。"
     },
     {
       "id": "L05-Q05",
@@ -532,7 +945,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 5 讲：加入 refractory δ 后高电流极限 rate 是多少？",
@@ -560,7 +973,7 @@
         "b": "这是“恒流 steady-state voltage”的适用条件。",
         "d": "这是“membrane time constant”的适用条件。"
       },
-      "explanation": "1/δ。"
+      "explanation": "1/δ。 动作电位上升期中，Na 激活 m 快速增大，使内向 Na 电流形成正反馈；Na 失活 h 随去极化下降，同时 K 激活 n 较慢增大，二者终止上升并复极。"
     },
     {
       "id": "L05-Q06",
@@ -577,7 +990,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 5 讲：为什么 exact F-I 在 threshold 附近不是直线？",
@@ -605,7 +1018,7 @@
         "b": "这条推理对应 Lecture5-Neurons2.pdf 第 1 页。",
         "c": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。"
       },
-      "explanation": "crossing time 含 log[(V∞−V_R)/(V∞−V_T)]，V∞→V_T 时发散。"
+      "explanation": "crossing time 含 log[(V∞−V_R)/(V∞−V_T)]，V∞→V_T 时发散。 Hodgkin-Huxley 膜方程写成 C dV/dt=I_e−G_L(V−E_L)−Ḡ_Na m³h(V−E_Na)−Ḡ_K n⁴(V−E_K)。"
     },
     {
       "id": "L05-Q07",
@@ -622,7 +1035,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 5 讲：m³h 的生理含义是什么？",
@@ -650,7 +1063,7 @@
         "c": "该选项回答的是“LIF 与 HH 最适合回答的不同问题是什么？”。",
         "d": "该选项回答的是“passive attenuation 与 regenerative propagation 有何不同？”。"
       },
-      "explanation": "Na activation gates 共同开放的概率因子 m³ 与 availability/inactivation h 的乘积。"
+      "explanation": "Na activation gates 共同开放的概率因子 m³ 与 availability/inactivation h 的乘积。 Hodgkin-Huxley 膜方程写成 C dV/dt=I_e−G_L(V−E_L)−Ḡ_Na m³h(V−E_Na)−Ḡ_K n⁴(V−E_K)。"
     },
     {
       "id": "L05-Q08",
@@ -667,7 +1080,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：K current 的方向由什么决定？",
@@ -695,7 +1108,7 @@
         "c": "这是“电缆方程（cable equation）”的定义。",
         "d": "该选项回答的是“为什么 exact F-I 在 threshold 附近不是直线？”。"
       },
-      "explanation": "由 conductance 和 driving force V−E_K 的符号共同决定。"
+      "explanation": "由 conductance 和 driving force V−E_K 的符号共同决定。 前两页重建从纯电容到漏电积分发放的电路。 判断依据：前两页重建从纯电容到漏电积分发放的电路。纯电容满足 C dV/dt=I_e，恒流下没有稳态；增加漏电支路后，C dV/dt=I_e−G_L(V−E_L)。当 V 高于 E_L，漏电外向电流为正并抑制继续上升；当 V 低于 E_L，支路电流反向，推动电压回升。E_L 因而是无输入时的稳定点。"
     },
     {
       "id": "L05-Q09",
@@ -712,7 +1125,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 5 讲：Na inactivation 如何产生 refractory period？",
@@ -740,7 +1153,7 @@
         "b": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。",
         "d": "该选项回答的是“m³h 的生理含义是什么？”。"
       },
-      "explanation": "spike 后 h 恢复需要时间，即使再次 depolarize 也缺少可用 Na channels。"
+      "explanation": "spike 后 h 恢复需要时间，即使再次 depolarize 也缺少可用 Na channels。 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
     },
     {
       "id": "L05-Q10",
@@ -757,7 +1170,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 5 讲：为什么按 membrane area 归一化？",
@@ -785,7 +1198,7 @@
         "b": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。",
         "c": "该选项回答的是“Na inactivation 如何产生 refractory period？”。"
       },
-      "explanation": "便于比较不同大小细胞，并让 capacitance/current/conductance 以密度表示。"
+      "explanation": "便于比较不同大小细胞，并让 capacitance/current/conductance 以密度表示。 比较不同细胞大小时，将 C=c_mA、Ḡ_x=ḡ_xA、I=iA 代入并除以 A，得到单位面积膜方程。"
     },
     {
       "id": "L05-Q11",
@@ -802,7 +1215,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 5 讲：passive attenuation 与 regenerative propagation 有何不同？",
@@ -830,7 +1243,7 @@
         "c": "该选项回答的是“为什么按 membrane area 归一化？”。",
         "d": "该选项回答的是“m³h 的生理含义是什么？”。"
       },
-      "explanation": "前者随距离衰减；后者由 voltage-gated channels 在各段重新放大 action potential。"
+      "explanation": "前者随距离衰减；后者由 voltage-gated channels 在各段重新放大 action potential。 被动亚阈值扰动沿距离衰减，因为轴向电流不断从膜漏出；动作电位却能在下一段触发电压门控 Na 通道，逐段再生。"
     },
     {
       "id": "L05-Q12",
@@ -847,7 +1260,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 5 讲：LIF 与 HH 最适合回答的不同问题是什么？",
@@ -866,64 +1279,19 @@
         },
         {
           "id": "d",
-          "text": "Na activation gates 共同开放的概率因子 m³ 与 availability/inactivation h 的乘积。"
+          "text": "因此，强调 HH 是框架而非所有神经元的单一固定模型，并讨论 cellular diversity。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。",
         "c": "该选项回答的是“为什么按 membrane area 归一化？”。",
-        "d": "该选项回答的是“m³h 的生理含义是什么？”。"
+        "d": "这条推理对应 Lecture5-Neurons2.pdf 第 7 页。"
       },
-      "explanation": "LIF 适合 spike timing/rate 与网络计算；HH 适合 waveform、离子机制和 conductance dynamics。"
+      "explanation": "LIF 适合 spike timing/rate 与网络计算；HH 适合 waveform、离子机制和 conductance dynamics。 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
     },
     {
       "id": "L05-Q13",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 1,
-          "section": "lecture-05-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "LIF time constant、 steady state、 current-step response、 threshold current。"
-        },
-        {
-          "id": "b",
-          "text": "threshold-crossing time 与 exact F-I curve；threshold-linear approximation。"
-        },
-        {
-          "id": "c",
-          "text": "capacitor integrate-and-fire 回顾。"
-        },
-        {
-          "id": "d",
-          "text": "Na/K conductances、HH equation、m/h/n gating dynamics。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LIF time constant、 steady state、 current-step response、 threshold current”，不是题干指定的关系。",
-        "b": "该陈述解释的是“threshold-crossing time 与 exact F-I curve”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。"
-      },
-      "explanation": "capacitor integrate-and-fire 回顾。"
-    },
-    {
-      "id": "L05-Q14",
       "lecture": 5,
       "sectionId": "lecture-05-source-1",
       "sourceAnchors": [
@@ -952,68 +1320,23 @@
         },
         {
           "id": "c",
-          "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
+          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
         },
         {
           "id": "d",
-          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
+          "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
         "b": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
-        "c": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
-      },
-      "explanation": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
-    },
-    {
-      "id": "L05-Q15",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 2,
-          "section": "lecture-05-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "leak current 与 LIF equation 回顾。"
-        },
-        {
-          "id": "b",
-          "text": "threshold-crossing time 与 exact F-I curve；threshold-linear approximation。"
-        },
-        {
-          "id": "c",
-          "text": "activation/inactivation curves、refractory period、saturating FI。"
-        },
-        {
-          "id": "d",
-          "text": "area normalization、cable/multicompartment models、subthreshold attenuation、AP propagation、cellular diversity。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“threshold-crossing time 与 exact F-I curve”，不是题干指定的关系。",
-        "c": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
         "d": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
       },
-      "explanation": "leak current 与 LIF equation 回顾。"
+      "explanation": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。 定义 τ_m=C/G_L 与 V_inf=E_L+I_e/G_L，方程可写 τ_m dV/dt=−V+V_inf。"
     },
     {
-      "id": "L05-Q16",
+      "id": "L05-Q14",
       "lecture": 5,
       "sectionId": "lecture-05-source-2",
       "sourceAnchors": [
@@ -1027,7 +1350,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：若要解释\"leak current 与 LIF equation 回顾\"中的机制或推导，哪条推理链成立？",
@@ -1038,97 +1361,7 @@
         },
         {
           "id": "b",
-          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、 threshold current、interspike interval 与 firing-rate formula。"
-        },
-        {
-          "id": "c",
           "text": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。"
-        },
-        {
-          "id": "d",
-          "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
-        "d": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
-      },
-      "explanation": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、 threshold current、interspike interval 与 firing-rate formula。"
-    },
-    {
-      "id": "L05-Q17",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 3,
-          "section": "lecture-05-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "capacitor integrate-and-fire 回顾。"
-        },
-        {
-          "id": "b",
-          "text": "Na/K conductances、HH equation、m/h/n gating dynamics。"
-        },
-        {
-          "id": "c",
-          "text": "LIF time constant、 steady state、 current-step response、 threshold current。"
-        },
-        {
-          "id": "d",
-          "text": "activation/inactivation curves、refractory period、saturating FI。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
-        "d": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。"
-      },
-      "explanation": "LIF time constant、 steady state、 current-step response、 threshold current。"
-    },
-    {
-      "id": "L05-Q18",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 3,
-          "section": "lecture-05-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 3,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 5 讲：若要解释\"LIF time constant、 steady state、 current-step response、 threshold current\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。"
-        },
-        {
-          "id": "b",
-          "text": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
         },
         {
           "id": "c",
@@ -1141,14 +1374,59 @@
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
-        "b": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
+        "a": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
         "c": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
       },
-      "explanation": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、 threshold current、interspike interval 与 firing-rate formula。"
+      "explanation": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、 threshold current、interspike interval 与 firing-rate formula。 定义 τ_m=C/G_L 与 V_inf=E_L+I_e/G_L，方程可写 τ_m dV/dt=−V+V_inf。"
     },
     {
-      "id": "L05-Q19",
+      "id": "L05-Q15",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 3,
+          "section": "lecture-05-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Neurons II",
+        "Lecture5-Neurons2.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 5 讲：若要解释\"LIF time constant、 steady state、 current-step response、 threshold current\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、 threshold current、interspike interval 与 firing-rate formula。"
+        },
+        {
+          "id": "b",
+          "text": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。"
+        },
+        {
+          "id": "c",
+          "text": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
+        },
+        {
+          "id": "d",
+          "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
+        "c": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
+        "d": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
+      },
+      "explanation": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、 threshold current、interspike interval 与 firing-rate formula。 定义 τ_m=C/G_L 与 V_inf=E_L+I_e/G_L，方程可写 τ_m dV/dt=−V+V_inf。"
+    },
+    {
+      "id": "L05-Q16",
       "lecture": 5,
       "sectionId": "lecture-05-source-4",
       "sourceAnchors": [
@@ -1163,51 +1441,6 @@
         "Lecture5-Neurons2.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "threshold-crossing time 与 exact F-I curve；threshold-linear approximation。"
-        },
-        {
-          "id": "b",
-          "text": "capacitor integrate-and-fire 回顾。"
-        },
-        {
-          "id": "c",
-          "text": "leak current 与 LIF equation 回顾。"
-        },
-        {
-          "id": "d",
-          "text": "Na/K conductances、HH equation、m/h/n gating dynamics。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "c": "该陈述解释的是“leak current 与 LIF equation 回顾”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。"
-      },
-      "explanation": "threshold-crossing time 与 exact F-I curve；threshold-linear approximation。"
-    },
-    {
-      "id": "L05-Q20",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 4,
-          "section": "lecture-05-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：若要解释\"threshold-crossing time 与 exact F-I curve\"中的机制或推导，哪条推理链成立？",
@@ -1235,10 +1468,10 @@
         "c": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
         "d": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
       },
-      "explanation": "解释 threshold-linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。"
+      "explanation": "解释 threshold-linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。 它可在有限工作区间概括 F-I 曲线，却不保留临界点附近的对数起始，也不自动产生 1/δ 饱和。"
     },
     {
-      "id": "L05-Q21",
+      "id": "L05-Q17",
       "lecture": 5,
       "sectionId": "lecture-05-source-4",
       "sourceAnchors": [
@@ -1252,38 +1485,38 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "第 5 讲：阅读与\"threshold-crossing time 与 exact F-I curve\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "stem": "第 5 讲：阅读\"LIF 的阈值与不应期共同塑造 F-I 曲线\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
           "text": "crossing time 含 log[(V∞−V_R)/(V∞−V_T)]，V∞→V_T 时发散。"
         },
         {
+          "id": "b",
+          "text": "LIF 适合 spike timing/rate 与网络计算；HH 适合 waveform、离子机制和 conductance dynamics。"
+        },
+        {
           "id": "c",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+          "text": "当 Iₑ≤I_T 时亚阈值稳态到不了阈值，发放率为零；越过 I_T 后，阈值交叉时间中的对数项决定曲线形状，而绝对不应期 δ 使强输入极限停在 1/δ。"
         },
         {
           "id": "d",
-          "text": "由 conductance 和 driving force V−E_K 的符号共同决定。"
+          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "b": "该选项回答的是“为什么 exact F-I 在 threshold 附近不是直线？”。",
-        "d": "该选项回答的是“K current 的方向由什么决定？”。"
+        "a": "该选项回答的是“为什么 exact F-I 在 threshold 附近不是直线？”。",
+        "b": "该选项回答的是“LIF 与 HH 最适合回答的不同问题是什么？”。",
+        "d": "这条推理对应 Lecture5-Neurons2.pdf 第 1 页。"
       },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+      "explanation": "当 Iₑ≤I_T 时亚阈值稳态到不了阈值，发放率为零；越过 I_T 后，阈值交叉时间中的对数项决定曲线形状，而绝对不应期 δ 使强输入极限停在 1/δ。 临界电流由 E_L+I_T/G_L=V_T 给出 I_T=G_L(V_T−E_L)；低于或等于它时，电压只能渐近接近阈下稳态，发放率为零。"
     },
     {
-      "id": "L05-Q22",
+      "id": "L05-Q18",
       "lecture": 5,
       "sectionId": "lecture-05-source-5",
       "sourceAnchors": [
@@ -1297,83 +1530,38 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "capacitor integrate-and-fire 回顾。"
-        },
-        {
-          "id": "b",
-          "text": "LIF time constant、 steady state、 current-step response、 threshold current。"
-        },
-        {
-          "id": "c",
-          "text": "threshold-crossing time 与 exact F-I curve；threshold-linear approximation。"
-        },
-        {
-          "id": "d",
-          "text": "Na/K conductances、HH equation、m/h/n gating dynamics。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "b": "该陈述解释的是“LIF time constant、 steady state、 current-step response、 threshold current”，不是题干指定的关系。",
-        "c": "该陈述解释的是“threshold-crossing time 与 exact F-I curve”，不是题干指定的关系。"
-      },
-      "explanation": "Na/K conductances、HH equation、m/h/n gating dynamics。"
-    },
-    {
-      "id": "L05-Q23",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 5,
-          "section": "lecture-05-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：若要解释\"Na/K conductances、HH equation、m/h/n gating dynamics\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。"
-        },
-        {
-          "id": "b",
           "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
+        },
+        {
+          "id": "d",
+          "text": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "c": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
-        "d": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
+        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
+        "b": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。",
+        "c": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。"
       },
-      "explanation": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。"
+      "explanation": "逐项解释 HH membrane equation、maximal conductances、reversal potentials、 m^3h、n^4 和 voltage-dependent alpha/beta kinetics。 Hodgkin-Huxley 膜方程写成 C dV/dt=I_e−G_L(V−E_L)−Ḡ_Na m³h(V−E_Na)−Ḡ_K n⁴(V−E_K)。"
     },
     {
-      "id": "L05-Q24",
+      "id": "L05-Q19",
       "lecture": 5,
       "sectionId": "lecture-05-source-6",
       "sourceAnchors": [
@@ -1388,172 +1576,37 @@
         "Lecture5-Neurons2.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 6 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "capacitor integrate-and-fire 回顾。"
-        },
-        {
-          "id": "b",
-          "text": "activation/inactivation curves、refractory period、saturating FI。"
-        },
-        {
-          "id": "c",
-          "text": "leak current 与 LIF equation 回顾。"
-        },
-        {
-          "id": "d",
-          "text": "LIF time constant、 steady state、 current-step response、 threshold current。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "c": "该陈述解释的是“leak current 与 LIF equation 回顾”，不是题干指定的关系。",
-        "d": "该陈述解释的是“LIF time constant、 steady state、 current-step response、 threshold current”，不是题干指定的关系。"
-      },
-      "explanation": "activation/inactivation curves、refractory period、saturating FI。"
-    },
-    {
-      "id": "L05-Q25",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 6,
-          "section": "lecture-05-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：若要解释\"activation/inactivation curves、refractory period、saturating FI\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
+          "text": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
         },
         {
           "id": "b",
-          "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
+          "text": "逐步将 LIF equation 化为 tau dV/dt=-V+V_inf，推导 exact step response、threshold current、interspike interval 与 firing-rate formula。"
         },
         {
           "id": "c",
-          "text": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
+          "text": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
         },
         {
           "id": "d",
           "text": "解释 threshold-linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。"
         }
       ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "b": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。",
-        "d": "该陈述解释的是“threshold-crossing time 与 exact F-I curve”，不是题干指定的关系。"
-      },
-      "explanation": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
-    },
-    {
-      "id": "L05-Q26",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 6,
-          "section": "lecture-05-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 1,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 5 讲：阅读与\"activation/inactivation curves、refractory period、saturating FI\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。"
-        },
-        {
-          "id": "c",
-          "text": "Na activation gates 共同开放的概率因子 m³ 与 availability/inactivation h 的乘积。"
-        },
-        {
-          "id": "d",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "b": "这条推理对应 Lecture5-Neurons2.pdf 第 6 页。",
-        "c": "该选项回答的是“m³h 的生理含义是什么？”。"
-      },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-    },
-    {
-      "id": "L05-Q27",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-7",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 7,
-          "section": "lecture-05-source-7"
-        }
-      ],
-      "conceptTags": [
-        "Neurons II",
-        "Lecture5-Neurons2.pdf"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 5 讲：根据 Lecture5-Neurons2.pdf 第 7 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "area normalization、cable/multicompartment models、subthreshold attenuation、AP propagation、cellular diversity。"
-        },
-        {
-          "id": "b",
-          "text": "capacitor integrate-and-fire 回顾。"
-        },
-        {
-          "id": "c",
-          "text": "leak current 与 LIF equation 回顾。"
-        },
-        {
-          "id": "d",
-          "text": "LIF time constant、 steady state、 current-step response、 threshold current。"
-        }
-      ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
         "b": "该陈述解释的是“capacitor integrate-and-fire 回顾”，不是题干指定的关系。",
-        "c": "该陈述解释的是“leak current 与 LIF equation 回顾”，不是题干指定的关系。",
-        "d": "该陈述解释的是“LIF time constant、 steady state、 current-step response、 threshold current”，不是题干指定的关系。"
+        "c": "该陈述解释的是“area normalization、cable/multicompartment models、subthreshold attenuation”，不是题干指定的关系。",
+        "d": "该陈述解释的是“threshold-crossing time 与 exact F-I curve”，不是题干指定的关系。"
       },
-      "explanation": "area normalization、cable/multicompartment models、subthreshold attenuation、AP propagation、cellular diversity。"
+      "explanation": "解释 activation、inactivation、recovery 和 refractory period 的因果链，不要把 gating variable 当作 channel count。 Hodgkin-Huxley 膜方程写成 C dV/dt=I_e−G_L(V−E_L)−Ḡ_Na m³h(V−E_Na)−Ḡ_K n⁴(V−E_K)。"
     },
     {
-      "id": "L05-Q28",
+      "id": "L05-Q20",
       "lecture": 5,
       "sectionId": "lecture-05-source-7",
       "sourceAnchors": [
@@ -1567,7 +1620,7 @@
         "Neurons II",
         "Lecture5-Neurons2.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 5 讲：若要解释\"area normalization、cable/multicompartment models、subthreshold attenuation\"中的机制或推导，哪条推理链成立？",
@@ -1595,10 +1648,412 @@
         "c": "该陈述解释的是“Na/K conductances、HH equation、m/h/n gating dynamics”，不是题干指定的关系。",
         "d": "该陈述解释的是“activation/inactivation curves、refractory period、saturating FI”，不是题干指定的关系。"
       },
-      "explanation": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。"
+      "explanation": "说明按 membrane area 归一化的意义；给出 cable equation/multicompartment 的概念桥，区分 passive attenuation 与 regenerative propagation。 Hodgkin-Huxley 膜方程写成 C dV/dt=I_e−G_L(V−E_L)−Ḡ_Na m³h(V−E_Na)−Ḡ_K n⁴(V−E_K)。"
+    },
+    {
+      "id": "L05-Q21",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 1,
+          "section": "lecture-05-source-1"
+        }
+      ],
+      "conceptTags": [
+        "LIF 的时间常数、稳态与电流阶跃"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 5 讲：若把 C 与 G_L 同时加倍，V_inf 与 τ_m 分别怎样改变？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该公式的推导预设 V_inf>V_T，使对数比为大于 1 的正数；阈下稳态时轨迹从不穿过阈值，代数表达超出定义域只说明前提不成立。"
+        },
+        {
+          "id": "b",
+          "text": "稳态只取决于两速率的比例 α/(α+β)，共同倍数会约掉；时间常数取决于总速率的倒数，总转移加快一倍就使放松时间减半。"
+        },
+        {
+          "id": "c",
+          "text": "τ_m=C/G_L 不变；同一总电流 I_e 下 I_e/G_L 减半，所以 V_inf 更接近 E_L。若连同输入按面积成比例加倍，稳态偏移也可保持不变。"
+        },
+        {
+          "id": "d",
+          "text": "解释 threshold-linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。"
+      },
+      "explanation": "τ_m=C/G_L 不变；同一总电流 I_e 下 I_e/G_L 减半，所以 V_inf 更接近 E_L。若连同输入按面积成比例加倍，稳态偏移也可保持不变。 阶跃在 t_off 撤除后，新的输入为零，新稳态立即改回 E_L，但电压以撤除瞬间的连续值作为新初值，沿 V(t)=E_L+[V(t_off)−E_L]e^{−(t−t_off)/τ_m} 衰减。上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
+    },
+    {
+      "id": "L05-Q22",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 1,
+          "section": "lecture-05-source-1"
+        }
+      ],
+      "conceptTags": [
+        "LIF 的时间常数、稳态与电流阶跃",
+        "电流脉冲的上升与恢复"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：完成\"C=200 pF，G_L=10 nS，E_L=−65 mV，从静息开始注入 100 pA，持续 40 ms 后撤除。求 40 ms 时电压及再过 20 ms 的电压。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "V_inf=−45 mV，充电 27.73 ms，总周期 29.73 ms，频率约 33.6 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "n_inf=0.75，τ_n=2.5 ms，n(5 ms)≈0.676，n⁴ 从 0.0016 增至约 0.208。"
+        },
+        {
+          "id": "c",
+          "text": "把 morphology 离散为相互耦合的电气 compartments。"
+        },
+        {
+          "id": "d",
+          "text": "脉冲结束时约 −56.35 mV；撤除 20 ms 后约 −61.82 mV。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这是“多室模型（multicompartment model）”的定义。"
+      },
+      "explanation": "脉冲结束时约 −56.35 mV；撤除 20 ms 后约 −61.82 mV。 计算路径：τ_m=20 ms，脉冲期间 V_inf=−65 mV+100 pA/10 nS=−55 mV。 40 ms=2τ_m，V(40)=−55+(−65+55)e⁻²=−55−10·0.1353≈−56.35 mV。 撤除后新稳态为 −65 mV，撤除瞬间偏差为 8.65 mV。 再过 20 ms=1τ_m，偏差剩 8.65e⁻¹≈3.18 mV，所以 V≈−61.82 mV。"
+    },
+    {
+      "id": "L05-Q23",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 1,
+          "section": "lecture-05-source-1"
+        }
+      ],
+      "conceptTags": [
+        "LIF 的时间常数、稳态与电流阶跃",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 5 讲：得到\"脉冲结束时约 −56.35 mV；撤除 20 ms 后约 −61.82 mV。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "上升阶段电压位于 −65 与 −55 mV 之间；恢复阶段位于 −56.35 与 −65 mV 之间。"
+        },
+        {
+          "id": "b",
+          "text": "加入不应期后的 33.6 Hz 应低于无不应期的约 36.1 Hz，也远低于上限 1/0.002=500 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "n(5 ms) 应位于初值 0.2 与稳态 0.75 之间；所有门比例均在 0 与 1 之间。"
+        },
+        {
+          "id": "d",
+          "text": "spike 后 h 恢复需要时间，即使再次 depolarize 也缺少可用 Na channels。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“Na inactivation 如何产生 refractory period？”。"
+      },
+      "explanation": "上升阶段电压位于 −65 与 −55 mV 之间；恢复阶段位于 −56.35 与 −65 mV 之间。 这个检查对应题设\"C=200 pF，G_L=10 nS，E_L=−65 mV，从静息开始注入 100 pA，持续 40 ms 后撤除。求 40 ms 时电压及再过 20 ms 的电压。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L05-Q24",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 4,
+          "section": "lecture-05-source-4"
+        }
+      ],
+      "conceptTags": [
+        "从阈值交叉推导精确 F–I 曲线"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "第 5 讲：为什么不能在 I_e<I_T 时把越阈公式算出的复数或负时间解释为一种特殊发放？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "τ_m=C/G_L 不变；同一总电流 I_e 下 I_e/G_L 减半，所以 V_inf 更接近 E_L。若连同输入按面积成比例加倍，稳态偏移也可保持不变。"
+        },
+        {
+          "id": "b",
+          "text": "该公式的推导预设 V_inf>V_T，使对数比为大于 1 的正数；阈下稳态时轨迹从不穿过阈值，代数表达超出定义域只说明前提不成立。"
+        },
+        {
+          "id": "c",
+          "text": "稳态只取决于两速率的比例 α/(α+β)，共同倍数会约掉；时间常数取决于总速率的倒数，总转移加快一倍就使放松时间减半。"
+        },
+        {
+          "id": "d",
+          "text": "解释 threshold-linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。"
+      },
+      "explanation": "该公式的推导预设 V_inf>V_T，使对数比为大于 1 的正数；阈下稳态时轨迹从不穿过阈值，代数表达超出定义域只说明前提不成立。 讲义还连接到常用的带偏置阈值线性近似 f≈[wI+b]_+。它可在有限工作区间概括 F-I 曲线，却不保留临界点附近的对数起始，也不自动产生 1/δ 饱和。使用近似时应标明拟合区间，并让 w、b 由精确曲线或数据确定，而不是把近似函数误当成 LIF 的精确解。"
+    },
+    {
+      "id": "L05-Q25",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 4,
+          "section": "lecture-05-source-4"
+        }
+      ],
+      "conceptTags": [
+        "从阈值交叉推导精确 F–I 曲线",
+        "计算带不应期的 F–I 点"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：完成\"取 τ_m=20 ms，E_L=V_R=−65 mV，V_T=−50 mV，G_L=10 nS，δ=2 ms。对 I_e=200 pA 计算 V_inf、充电时间、总周期和频率。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "脉冲结束时约 −56.35 mV；撤除 20 ms 后约 −61.82 mV。"
+        },
+        {
+          "id": "b",
+          "text": "n_inf=0.75，τ_n=2.5 ms，n(5 ms)≈0.676，n⁴ 从 0.0016 增至约 0.208。"
+        },
+        {
+          "id": "c",
+          "text": "V_inf=−45 mV，充电 27.73 ms，总周期 29.73 ms，频率约 33.6 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "spike 后 h 恢复需要时间，即使再次 depolarize 也缺少可用 Na channels。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“Na inactivation 如何产生 refractory period？”。"
+      },
+      "explanation": "V_inf=−45 mV，充电 27.73 ms，总周期 29.73 ms，频率约 33.6 Hz。 计算路径：V_inf=−65+200/10=−45 mV，且 I_T=150 pA，所以能够发放。 电压差比为 (−45+65)/(−45+50)=20/5=4。 充电时间 Δt=20 ln4≈27.73 ms。 总周期为 27.73+2=29.73 ms，频率为 1000/29.73≈33.64 Hz。"
+    },
+    {
+      "id": "L05-Q26",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 4,
+          "section": "lecture-05-source-4"
+        }
+      ],
+      "conceptTags": [
+        "从阈值交叉推导精确 F–I 曲线",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 5 讲：得到\"V_inf=−45 mV，充电 27.73 ms，总周期 29.73 ms，频率约 33.6 Hz。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "上升阶段电压位于 −65 与 −55 mV 之间；恢复阶段位于 −56.35 与 −65 mV 之间。"
+        },
+        {
+          "id": "b",
+          "text": "n(5 ms) 应位于初值 0.2 与稳态 0.75 之间；所有门比例均在 0 与 1 之间。"
+        },
+        {
+          "id": "c",
+          "text": "便于比较不同大小细胞，并让 capacitance/current/conductance 以密度表示。"
+        },
+        {
+          "id": "d",
+          "text": "加入不应期后的 33.6 Hz 应低于无不应期的约 36.1 Hz，也远低于上限 1/0.002=500 Hz。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "该选项回答的是“为什么按 membrane area 归一化？”。"
+      },
+      "explanation": "加入不应期后的 33.6 Hz 应低于无不应期的约 36.1 Hz，也远低于上限 1/0.002=500 Hz。 这个检查对应题设\"取 τ_m=20 ms，E_L=V_R=−65 mV，V_T=−50 mV，G_L=10 nS，δ=2 ms。对 I_e=200 pA 计算 V_inf、充电时间、总周期和频率。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L05-Q27",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 5,
+          "section": "lecture-05-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Hodgkin–Huxley 门控、面积归一化与空间传播"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 5 讲：若 α 与 β 同时加倍，为什么 n_inf 不变而 τ_n 减半？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "稳态只取决于两速率的比例 α/(α+β)，共同倍数会约掉；时间常数取决于总速率的倒数，总转移加快一倍就使放松时间减半。"
+        },
+        {
+          "id": "b",
+          "text": "τ_m=C/G_L 不变；同一总电流 I_e 下 I_e/G_L 减半，所以 V_inf 更接近 E_L。若连同输入按面积成比例加倍，稳态偏移也可保持不变。"
+        },
+        {
+          "id": "c",
+          "text": "该公式的推导预设 V_inf>V_T，使对数比为大于 1 的正数；阈下稳态时轨迹从不穿过阈值，代数表达超出定义域只说明前提不成立。"
+        },
+        {
+          "id": "d",
+          "text": "解释 threshold-linear approximation 为什么有 bias、在哪个电流区间近似合理，以及 refractory period 如何改变高电流极限。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture5-Neurons2.pdf 第 4 页。"
+      },
+      "explanation": "稳态只取决于两速率的比例 α/(α+β)，共同倍数会约掉；时间常数取决于总速率的倒数，总转移加快一倍就使放松时间减半。 单区室假设整个细胞电压相同；多区室模型为每段写膜方程，并用轴向电流耦合邻段。被动亚阈值扰动沿距离衰减，因为轴向电流不断从膜漏出；动作电位却能在下一段触发电压门控 Na 通道，逐段再生。不同神经元可通过通道种类、密度、形态和时间常数组合产生多样放电，但电荷守恒与门控框架仍可复用。"
+    },
+    {
+      "id": "L05-Q28",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 5,
+          "section": "lecture-05-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Hodgkin–Huxley 门控、面积归一化与空间传播",
+        "电压钳后门变量的开放过程"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：完成\"某固定电压下 α=0.3 ms⁻¹、β=0.1 ms⁻¹，初值 n(0)=0.2。求 n_inf、τ_n、5 ms 后的 n，以及 n⁴ 的变化。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "脉冲结束时约 −56.35 mV；撤除 20 ms 后约 −61.82 mV。"
+        },
+        {
+          "id": "b",
+          "text": "n_inf=0.75，τ_n=2.5 ms，n(5 ms)≈0.676，n⁴ 从 0.0016 增至约 0.208。"
+        },
+        {
+          "id": "c",
+          "text": "V_inf=−45 mV，充电 27.73 ms，总周期 29.73 ms，频率约 33.6 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "因此，强调 HH 是框架而非所有神经元的单一固定模型，并讨论 cellular diversity。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这条推理对应 Lecture5-Neurons2.pdf 第 7 页。"
+      },
+      "explanation": "n_inf=0.75，τ_n=2.5 ms，n(5 ms)≈0.676，n⁴ 从 0.0016 增至约 0.208。 计算路径：n_inf=0.3/(0.3+0.1)=0.75。 τ_n=1/0.4 ms⁻¹=2.5 ms。 n(5)=0.75+(0.2−0.75)e^{−5/2.5}=0.75−0.55e⁻²≈0.6756。 初始开放比例 n⁴=0.2⁴=0.0016；5 ms 后约 0.6756⁴≈0.2084，约增大 130 倍。"
     },
     {
       "id": "L05-Q29",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 5,
+          "section": "lecture-05-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Hodgkin–Huxley 门控、面积归一化与空间传播",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 5 讲：得到\"n_inf=0.75，τ_n=2.5 ms，n(5 ms)≈0.676，n⁴ 从 0.0016 增至约 0.208。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "上升阶段电压位于 −65 与 −55 mV 之间；恢复阶段位于 −56.35 与 −65 mV 之间。"
+        },
+        {
+          "id": "b",
+          "text": "加入不应期后的 33.6 Hz 应低于无不应期的约 36.1 Hz，也远低于上限 1/0.002=500 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "n(5 ms) 应位于初值 0.2 与稳态 0.75 之间；所有门比例均在 0 与 1 之间。"
+        },
+        {
+          "id": "d",
+          "text": "crossing time 含 log[(V∞−V_R)/(V∞−V_T)]，V∞→V_T 时发散。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“为什么 exact F-I 在 threshold 附近不是直线？”。"
+      },
+      "explanation": "n(5 ms) 应位于初值 0.2 与稳态 0.75 之间；所有门比例均在 0 与 1 之间。 这个检查对应题设\"某固定电压下 α=0.3 ms⁻¹、β=0.1 ms⁻¹，初值 n(0)=0.2。求 n_inf、τ_n、5 ms 后的 n，以及 n⁴ 的变化。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L05-Q30",
       "lecture": 5,
       "sectionId": "lecture-05-source-3",
       "sourceAnchors": [
@@ -1612,7 +2067,7 @@
         "膜时间常数",
         "membrane time constant"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"被动膜指数响应的时间尺度 C/G_L。\"称为什么？",
@@ -1627,23 +2082,23 @@
         },
         {
           "id": "c",
-          "text": "膜时间常数（membrane time constant）"
+          "text": "放电间隔（interspike interval, ISI）"
         },
         {
           "id": "d",
-          "text": "放电间隔（interspike interval, ISI）"
+          "text": "膜时间常数（membrane time constant）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“稳态电位（steady-state voltage）”指：恒定输入下导数为零的 V∞。",
         "b": "“阈电流（threshold current / rheobase）”指：无限长恒流刚好可引发 spike 的最小值。",
-        "d": "“放电间隔（interspike interval, ISI）”指：相邻 spikes 的时间间隔。"
+        "c": "“放电间隔（interspike interval, ISI）”指：相邻 spikes 的时间间隔。"
       },
-      "explanation": "膜时间常数（membrane time constant）：被动膜指数响应的时间尺度 C/G_L。"
+      "explanation": "膜时间常数（membrane time constant）：被动膜指数响应的时间尺度 C/G_L。 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
     },
     {
-      "id": "L05-Q30",
+      "id": "L05-Q31",
       "lecture": 5,
       "sectionId": "lecture-05-source-2",
       "sourceAnchors": [
@@ -1657,38 +2112,38 @@
         "稳态电位",
         "steady-state voltage"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"恒定输入下导数为零的 V∞。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "阈电流（threshold current / rheobase）"
+          "text": "稳态电位（steady-state voltage）"
         },
         {
           "id": "b",
-          "text": "放电间隔（interspike interval, ISI）"
+          "text": "阈电流（threshold current / rheobase）"
         },
         {
           "id": "c",
-          "text": "绝对不应期（absolute refractory period）"
+          "text": "放电间隔（interspike interval, ISI）"
         },
         {
           "id": "d",
-          "text": "稳态电位（steady-state voltage）"
+          "text": "绝对不应期（absolute refractory period）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“阈电流（threshold current / rheobase）”指：无限长恒流刚好可引发 spike 的最小值。",
-        "b": "“放电间隔（interspike interval, ISI）”指：相邻 spikes 的时间间隔。",
-        "c": "“绝对不应期（absolute refractory period）”指：spike 后无法再次放电的最短时间。"
+        "b": "“阈电流（threshold current / rheobase）”指：无限长恒流刚好可引发 spike 的最小值。",
+        "c": "“放电间隔（interspike interval, ISI）”指：相邻 spikes 的时间间隔。",
+        "d": "“绝对不应期（absolute refractory period）”指：spike 后无法再次放电的最短时间。"
       },
-      "explanation": "稳态电位（steady-state voltage）：恒定输入下导数为零的 V∞。"
+      "explanation": "稳态电位（steady-state voltage）：恒定输入下导数为零的 V∞。 阶跃在 t_off 撤除后，新的输入为零，新稳态立即改回 E_L，但电压以撤除瞬间的连续值作为新初值，沿 V(t)=E_L+[V(t_off)−E_L]e^{−(t−t_off)/τ_m} 衰减。"
     },
     {
-      "id": "L05-Q31",
+      "id": "L05-Q32",
       "lecture": 5,
       "sectionId": "lecture-05-source-3",
       "sourceAnchors": [
@@ -1709,73 +2164,28 @@
       "choices": [
         {
           "id": "a",
+          "text": "放电间隔（interspike interval, ISI）"
+        },
+        {
+          "id": "b",
           "text": "阈电流（threshold current / rheobase）"
         },
         {
-          "id": "b",
-          "text": "放电间隔（interspike interval, ISI）"
-        },
-        {
           "id": "c",
           "text": "绝对不应期（absolute refractory period）"
         },
         {
           "id": "d",
           "text": "最大电导（maximal conductance）"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "“放电间隔（interspike interval, ISI）”指：相邻 spikes 的时间间隔。",
-        "c": "“绝对不应期（absolute refractory period）”指：spike 后无法再次放电的最短时间。",
-        "d": "“最大电导（maximal conductance）”指：所有相关 channels 全开时的 conductance scale。"
-      },
-      "explanation": "阈电流（threshold current / rheobase）：无限长恒流刚好可引发 spike 的最小值。"
-    },
-    {
-      "id": "L05-Q32",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 3,
-          "section": "lecture-05-source-3"
-        }
-      ],
-      "conceptTags": [
-        "放电间隔",
-        "interspike interval, ISI"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 5 讲：本讲把\"相邻 spikes 的时间间隔。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "绝对不应期（absolute refractory period）"
-        },
-        {
-          "id": "b",
-          "text": "放电间隔（interspike interval, ISI）"
-        },
-        {
-          "id": "c",
-          "text": "最大电导（maximal conductance）"
-        },
-        {
-          "id": "d",
-          "text": "激活（activation）"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "“绝对不应期（absolute refractory period）”指：spike 后无法再次放电的最短时间。",
-        "c": "“最大电导（maximal conductance）”指：所有相关 channels 全开时的 conductance scale。",
-        "d": "“激活（activation）”指：去极化增加 channel opening 的 gate process。"
+        "a": "“放电间隔（interspike interval, ISI）”指：相邻 spikes 的时间间隔。",
+        "c": "“绝对不应期（absolute refractory period）”指：spike 后无法再次放电的最短时间。",
+        "d": "“最大电导（maximal conductance）”指：所有相关 channels 全开时的 conductance scale。"
       },
-      "explanation": "放电间隔（interspike interval, ISI）：相邻 spikes 的时间间隔。"
+      "explanation": "阈电流（threshold current / rheobase）：无限长恒流刚好可引发 spike 的最小值。 纯电容满足 C dV/dt=I_e，恒流下没有稳态；增加漏电支路后，C dV/dt=I_e−G_L(V−E_L)。"
     },
     {
       "id": "L05-Q33",
@@ -1789,10 +2199,55 @@
         }
       ],
       "conceptTags": [
+        "放电间隔",
+        "interspike interval, ISI"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 5 讲：本讲把\"相邻 spikes 的时间间隔。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "绝对不应期（absolute refractory period）"
+        },
+        {
+          "id": "b",
+          "text": "最大电导（maximal conductance）"
+        },
+        {
+          "id": "c",
+          "text": "放电间隔（interspike interval, ISI）"
+        },
+        {
+          "id": "d",
+          "text": "激活（activation）"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "“绝对不应期（absolute refractory period）”指：spike 后无法再次放电的最短时间。",
+        "b": "“最大电导（maximal conductance）”指：所有相关 channels 全开时的 conductance scale。",
+        "d": "“激活（activation）”指：去极化增加 channel opening 的 gate process。"
+      },
+      "explanation": "放电间隔（interspike interval, ISI）：相邻 spikes 的时间间隔。 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
+    },
+    {
+      "id": "L05-Q34",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 3,
+          "section": "lecture-05-source-3"
+        }
+      ],
+      "conceptTags": [
         "绝对不应期",
         "absolute refractory period"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"spike 后无法再次放电的最短时间。\"称为什么？",
@@ -1807,23 +2262,23 @@
         },
         {
           "id": "c",
-          "text": "绝对不应期（absolute refractory period）"
+          "text": "失活（inactivation）"
         },
         {
           "id": "d",
-          "text": "失活（inactivation）"
+          "text": "绝对不应期（absolute refractory period）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“最大电导（maximal conductance）”指：所有相关 channels 全开时的 conductance scale。",
         "b": "“激活（activation）”指：去极化增加 channel opening 的 gate process。",
-        "d": "“失活（inactivation）”指：持续去极化使 channel availability 降低的过程。"
+        "c": "“失活（inactivation）”指：持续去极化使 channel availability 降低的过程。"
       },
-      "explanation": "绝对不应期（absolute refractory period）：spike 后无法再次放电的最短时间。"
+      "explanation": "绝对不应期（absolute refractory period）：spike 后无法再次放电的最短时间。 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
     },
     {
-      "id": "L05-Q34",
+      "id": "L05-Q35",
       "lecture": 5,
       "sectionId": "lecture-05-source-2",
       "sourceAnchors": [
@@ -1837,38 +2292,38 @@
         "最大电导",
         "maximal conductance"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"所有相关 channels 全开时的 conductance scale。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "激活（activation）"
+          "text": "最大电导（maximal conductance）"
         },
         {
           "id": "b",
-          "text": "失活（inactivation）"
+          "text": "激活（activation）"
         },
         {
           "id": "c",
-          "text": "电缆方程（cable equation）"
+          "text": "失活（inactivation）"
         },
         {
           "id": "d",
-          "text": "最大电导（maximal conductance）"
+          "text": "电缆方程（cable equation）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“激活（activation）”指：去极化增加 channel opening 的 gate process。",
-        "b": "“失活（inactivation）”指：持续去极化使 channel availability 降低的过程。",
-        "c": "“电缆方程（cable equation）”指：描述 voltage 沿 neurite 空间传播与衰减的方程。"
+        "b": "“激活（activation）”指：去极化增加 channel opening 的 gate process。",
+        "c": "“失活（inactivation）”指：持续去极化使 channel availability 降低的过程。",
+        "d": "“电缆方程（cable equation）”指：描述 voltage 沿 neurite 空间传播与衰减的方程。"
       },
       "explanation": "最大电导（maximal conductance）：所有相关 channels 全开时的 conductance scale。"
     },
     {
-      "id": "L05-Q35",
+      "id": "L05-Q36",
       "lecture": 5,
       "sectionId": "lecture-05-source-5",
       "sourceAnchors": [
@@ -1882,18 +2337,18 @@
         "激活",
         "activation"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"去极化增加 channel opening 的 gate process。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "激活（activation）"
+          "text": "失活（inactivation）"
         },
         {
           "id": "b",
-          "text": "失活（inactivation）"
+          "text": "激活（activation）"
         },
         {
           "id": "c",
@@ -1904,16 +2359,16 @@
           "text": "多室模型（multicompartment model）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "“失活（inactivation）”指：持续去极化使 channel availability 降低的过程。",
+        "a": "“失活（inactivation）”指：持续去极化使 channel availability 降低的过程。",
         "c": "“电缆方程（cable equation）”指：描述 voltage 沿 neurite 空间传播与衰减的方程。",
         "d": "“多室模型（multicompartment model）”指：把 morphology 离散为相互耦合的电气 compartments。"
       },
       "explanation": "激活（activation）：去极化增加 channel opening 的 gate process。"
     },
     {
-      "id": "L05-Q36",
+      "id": "L05-Q37",
       "lecture": 5,
       "sectionId": "lecture-05-source-5",
       "sourceAnchors": [
@@ -1938,27 +2393,27 @@
         },
         {
           "id": "b",
-          "text": "失活（inactivation）"
+          "text": "多室模型（multicompartment model）"
         },
         {
           "id": "c",
-          "text": "多室模型（multicompartment model）"
+          "text": "失活（inactivation）"
         },
         {
           "id": "d",
           "text": "膜时间常数（membrane time constant）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“电缆方程（cable equation）”指：描述 voltage 沿 neurite 空间传播与衰减的方程。",
-        "c": "“多室模型（multicompartment model）”指：把 morphology 离散为相互耦合的电气 compartments。",
+        "b": "“多室模型（multicompartment model）”指：把 morphology 离散为相互耦合的电气 compartments。",
         "d": "“膜时间常数（membrane time constant）”指：被动膜指数响应的时间尺度 C/G_L。"
       },
       "explanation": "失活（inactivation）：持续去极化使 channel availability 降低的过程。"
     },
     {
-      "id": "L05-Q37",
+      "id": "L05-Q38",
       "lecture": 5,
       "sectionId": "lecture-05-source-4",
       "sourceAnchors": [
@@ -1972,7 +2427,7 @@
         "电缆方程",
         "cable equation"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"描述 voltage 沿 neurite 空间传播与衰减的方程。\"称为什么？",
@@ -1987,23 +2442,23 @@
         },
         {
           "id": "c",
-          "text": "电缆方程（cable equation）"
+          "text": "稳态电位（steady-state voltage）"
         },
         {
           "id": "d",
-          "text": "稳态电位（steady-state voltage）"
+          "text": "电缆方程（cable equation）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“多室模型（multicompartment model）”指：把 morphology 离散为相互耦合的电气 compartments。",
         "b": "“膜时间常数（membrane time constant）”指：被动膜指数响应的时间尺度 C/G_L。",
-        "d": "“稳态电位（steady-state voltage）”指：恒定输入下导数为零的 V∞。"
+        "c": "“稳态电位（steady-state voltage）”指：恒定输入下导数为零的 V∞。"
       },
-      "explanation": "电缆方程（cable equation）：描述 voltage 沿 neurite 空间传播与衰减的方程。"
+      "explanation": "电缆方程（cable equation）：描述 voltage 沿 neurite 空间传播与衰减的方程。 这提供一个清晰的可证伪极限：若模型没有不应期却声称产生有限最大速率，方程与结论不一致。"
     },
     {
-      "id": "L05-Q38",
+      "id": "L05-Q39",
       "lecture": 5,
       "sectionId": "lecture-05-source-7",
       "sourceAnchors": [
@@ -2017,79 +2472,35 @@
         "多室模型",
         "multicompartment model"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 5 讲：本讲把\"把 morphology 离散为相互耦合的电气 compartments。\"称为什么？",
       "choices": [
         {
           "id": "a",
+          "text": "多室模型（multicompartment model）"
+        },
+        {
+          "id": "b",
           "text": "膜时间常数（membrane time constant）"
         },
         {
-          "id": "b",
+          "id": "c",
           "text": "稳态电位（steady-state voltage）"
         },
         {
-          "id": "c",
+          "id": "d",
           "text": "阈电流（threshold current / rheobase）"
-        },
-        {
-          "id": "d",
-          "text": "多室模型（multicompartment model）"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "“膜时间常数（membrane time constant）”指：被动膜指数响应的时间尺度 C/G_L。",
-        "b": "“稳态电位（steady-state voltage）”指：恒定输入下导数为零的 V∞。",
-        "c": "“阈电流（threshold current / rheobase）”指：无限长恒流刚好可引发 spike 的最小值。"
-      },
-      "explanation": "多室模型（multicompartment model）：把 morphology 离散为相互耦合的电气 compartments。"
-    },
-    {
-      "id": "L05-Q39",
-      "lecture": 5,
-      "sectionId": "lecture-05-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture5-Neurons2.pdf",
-          "page": 2,
-          "section": "lecture-05-source-2"
-        }
-      ],
-      "conceptTags": [
-        "membrane time constant"
-      ],
-      "difficulty": 4,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 5 讲：使用\"membrane time constant\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "被动线性膜"
-        },
-        {
-          "id": "b",
-          "text": "I 常数"
-        },
-        {
-          "id": "c",
-          "text": "V_R 不影响稳态 crossing 条件"
-        },
-        {
-          "id": "d",
-          "text": "V∞>V_T"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
-        "c": "这是“LIF rheobase”的条件，不是题干公式的条件。",
-        "d": "这是“从 reset 到 threshold 的时间”的条件，不是题干公式的条件。"
+        "b": "“膜时间常数（membrane time constant）”指：被动膜指数响应的时间尺度 C/G_L。",
+        "c": "“稳态电位（steady-state voltage）”指：恒定输入下导数为零的 V∞。",
+        "d": "“阈电流（threshold current / rheobase）”指：无限长恒流刚好可引发 spike 的最小值。"
       },
-      "explanation": "membrane time constant 的适用条件：被动线性膜"
+      "explanation": "多室模型（multicompartment model）：把 morphology 离散为相互耦合的电气 compartments。"
     },
     {
       "id": "L05-Q40",
@@ -2103,12 +2514,276 @@
         }
       ],
       "conceptTags": [
+        "membrane time constant"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：使用\"membrane time constant\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "I 常数"
+        },
+        {
+          "id": "b",
+          "text": "被动线性膜"
+        },
+        {
+          "id": "c",
+          "text": "V_R 不影响稳态 crossing 条件"
+        },
+        {
+          "id": "d",
+          "text": "V∞>V_T"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
+        "c": "这是“LIF rheobase”的条件，不是题干公式的条件。",
+        "d": "这是“从 reset 到 threshold 的时间”的条件，不是题干公式的条件。"
+      },
+      "explanation": "membrane time constant 的适用条件：被动线性膜 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
+    },
+    {
+      "id": "L05-Q41",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 2,
+          "section": "lecture-05-source-2"
+        }
+      ],
+      "conceptTags": [
         "恒流 steady-state voltage"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 5 讲：使用\"恒流 steady-state voltage\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "被动线性膜"
+        },
+        {
+          "id": "b",
+          "text": "V_R 不影响稳态 crossing 条件"
+        },
+        {
+          "id": "c",
+          "text": "I 常数"
+        },
+        {
+          "id": "d",
+          "text": "V∞>V_T"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“membrane time constant”的条件，不是题干公式的条件。",
+        "b": "这是“LIF rheobase”的条件，不是题干公式的条件。",
+        "d": "这是“从 reset 到 threshold 的时间”的条件，不是题干公式的条件。"
+      },
+      "explanation": "恒流 steady-state voltage 的适用条件：I 常数 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
+    },
+    {
+      "id": "L05-Q42",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 1,
+          "section": "lecture-05-source-1"
+        }
+      ],
+      "conceptTags": [
+        "LIF rheobase"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：使用\"LIF rheobase\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "被动线性膜"
+        },
+        {
+          "id": "b",
+          "text": "I 常数"
+        },
+        {
+          "id": "c",
+          "text": "V∞>V_T"
+        },
+        {
+          "id": "d",
+          "text": "V_R 不影响稳态 crossing 条件"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“membrane time constant”的条件，不是题干公式的条件。",
+        "b": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
+        "c": "这是“从 reset 到 threshold 的时间”的条件，不是题干公式的条件。"
+      },
+      "explanation": "LIF rheobase 的适用条件：V_R 不影响稳态 crossing 条件 纯电容满足 C dV/dt=I_e，恒流下没有稳态；增加漏电支路后，C dV/dt=I_e−G_L(V−E_L)。"
+    },
+    {
+      "id": "L05-Q43",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 3,
+          "section": "lecture-05-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 reset 到 threshold 的时间"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：使用\"从 reset 到 threshold 的时间\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "V∞>V_T"
+        },
+        {
+          "id": "b",
+          "text": "被动线性膜"
+        },
+        {
+          "id": "c",
+          "text": "I 常数"
+        },
+        {
+          "id": "d",
+          "text": "V_R 不影响稳态 crossing 条件"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“membrane time constant”的条件，不是题干公式的条件。",
+        "c": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
+        "d": "这是“LIF rheobase”的条件，不是题干公式的条件。"
+      },
+      "explanation": "从 reset 到 threshold 的时间的适用条件：V∞>V_T 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
+    },
+    {
+      "id": "L05-Q44",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 5,
+          "section": "lecture-05-source-5"
+        }
+      ],
+      "conceptTags": [
+        "含 refractory 的 firing rate"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：使用\"含 refractory 的 firing rate\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "被动线性膜"
+        },
+        {
+          "id": "b",
+          "text": "周期性恒流响应"
+        },
+        {
+          "id": "c",
+          "text": "I 常数"
+        },
+        {
+          "id": "d",
+          "text": "V_R 不影响稳态 crossing 条件"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“membrane time constant”的条件，不是题干公式的条件。",
+        "c": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
+        "d": "这是“LIF rheobase”的条件，不是题干公式的条件。"
+      },
+      "explanation": "含 refractory 的 firing rate 的适用条件：周期性恒流响应 若只把面积加倍而保持电流密度与通道密度不变，电压动力学不变；若保持总注入电流不变，较大面积细胞获得较小电流密度，电压响应减弱。"
+    },
+    {
+      "id": "L05-Q45",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 4,
+          "section": "lecture-05-source-4"
+        }
+      ],
+      "conceptTags": [
+        "conductance-based ionic current"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：使用\"conductance-based ionic current\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "被动线性膜"
+        },
+        {
+          "id": "b",
+          "text": "I 常数"
+        },
+        {
+          "id": "c",
+          "text": "sign convention 与 driving force 明确"
+        },
+        {
+          "id": "d",
+          "text": "V_R 不影响稳态 crossing 条件"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“membrane time constant”的条件，不是题干公式的条件。",
+        "b": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
+        "d": "这是“LIF rheobase”的条件，不是题干公式的条件。"
+      },
+      "explanation": "conductance-based ionic current 的适用条件：sign convention 与 driving force 明确"
+    },
+    {
+      "id": "L05-Q46",
+      "lecture": 5,
+      "sectionId": "lecture-05-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture5-Neurons2.pdf",
+          "page": 2,
+          "section": "lecture-05-source-2"
+        }
+      ],
+      "conceptTags": [
+        "two-state gate kinetics"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 5 讲：使用\"two-state gate kinetics\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
@@ -2124,16 +2799,16 @@
         },
         {
           "id": "d",
-          "text": "V∞>V_T"
+          "text": "0≤n≤1"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "这是“membrane time constant”的条件，不是题干公式的条件。",
-        "c": "这是“LIF rheobase”的条件，不是题干公式的条件。",
-        "d": "这是“从 reset 到 threshold 的时间”的条件，不是题干公式的条件。"
+        "b": "这是“恒流 steady-state voltage”的条件，不是题干公式的条件。",
+        "c": "这是“LIF rheobase”的条件，不是题干公式的条件。"
       },
-      "explanation": "恒流 steady-state voltage 的适用条件：I 常数"
+      "explanation": "two-state gate kinetics 的适用条件：0≤n≤1 上升与下降使用相同 τ_m，因为 C 与 G_L 没变；若实验中两个阶段时间常数不同，说明至少有电压依赖电导或参数变化。"
     }
   ]
 }

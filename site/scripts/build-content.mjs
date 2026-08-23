@@ -5,6 +5,8 @@ import path from 'node:path';
 const root = process.cwd();
 const promptsDir = path.join(root, 'source/prompts');
 const extractedDir = path.join(root, 'source/extracted');
+const selfStudyDir = path.join(root, 'source/self-study');
+const figuresDir = path.join(root, 'source/figures');
 const originalsDir = path.join(root, 'public/resources/original');
 const companionsDir = path.join(root, 'public/resources/companions');
 const outputDir = path.join(root, 'content');
@@ -16,6 +18,26 @@ const formulaLatexOverrides = Object.assign({}, ...[
 ].map((file) => JSON.parse(fs.readFileSync(path.join(root, 'source', file), 'utf8'))));
 
 fs.mkdirSync(lectureOutputDir, { recursive: true });
+
+const selfStudyGuides = fs.readdirSync(selfStudyDir)
+  .filter((file) => file.endsWith('.json'))
+  .sort()
+  .flatMap((file) => JSON.parse(fs.readFileSync(path.join(selfStudyDir, file), 'utf8')));
+const selfStudyGuideByLecture = new Map();
+for (const guide of selfStudyGuides) {
+  if (selfStudyGuideByLecture.has(guide.lecture)) throw new Error(`Duplicate self-study guide for lecture ${guide.lecture}`);
+  selfStudyGuideByLecture.set(guide.lecture, guide);
+}
+
+const authoredFigures = fs.readdirSync(figuresDir)
+  .filter((file) => file.endsWith('.json'))
+  .sort()
+  .flatMap((file) => JSON.parse(fs.readFileSync(path.join(figuresDir, file), 'utf8')));
+const authoredFigureIds = new Set();
+for (const figure of authoredFigures) {
+  if (!figure.id || authoredFigureIds.has(figure.id)) throw new Error(`Duplicate or empty authored figure ID: ${figure.id || '(empty)'}`);
+  authoredFigureIds.add(figure.id);
+}
 
 const normalize = (value = '') => value
   .replace(/[‐‑‒–—]/g, '-')
@@ -35,6 +57,8 @@ const compact = (value = '') => normalize(value)
   .replace(/\bneuralnetwork\b/g, 'neural-network')
   .replace(/\bflippedclassroom\b/g, 'flipped-classroom')
   .replace(/\bsourcepage\b/g, 'source-page')
+  .replace(/\bMATLABclear\b/g, 'MATLAB clear')
+  .replace(/\bfigure,的/g, 'figure, 中的')
   .trim();
 
 const cleanDiagnostic = (value = '') => compact(value)
@@ -101,8 +125,7 @@ const cleanRiskBoundary = (value = '') => cleanTextbookParagraph(value)
   .trim();
 
 const MAX_CHOICE_LENGTH = 220;
-const BANNED_QUESTION_TEXT = /不检查单位、?\s*shape\s*或\s*conditioning|Course-specific risk boundary|适用条件\/约定：.*sanity check|undefined|本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪项推理最准确)|以下哪项属于本讲讨论的核心内容|公式表中的.+解决什么问题|该结论忽略了题干中的第|该结论在任何参数和边界条件下都无条件成立|变量名称相似就足以推出结论|这是纯粹的记号约定，不会改变模型预测|该关系在任意参数和边界条件下都保持不变/i;
-
+const BANNED_QUESTION_TEXT = /不检查单位、?\s*shape\s*或\s*conditioning|Course-specific risk boundary|适用条件\/约定：.*sanity check|undefined|本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪项推理最准确)|以下哪项属于本讲讨论的核心内容|根据原讲义.+第\s*\d+\s*页主要讨论什么|哪一项概括了该页主题|公式表中的.+解决什么问题|该结论忽略了题干中的第|该结论在任何参数和边界条件下都无条件成立|变量名称相似就足以推出结论|这是纯粹的记号约定，不会改变模型预测|该关系在任意参数和边界条件下都保持不变/i;
 const cleanChoiceText = (value = '') => cleanTextbookParagraph(value)
   .replace(/^(?:UPDATE\s+|Notes\s+|Exercise\s+)?Page\s+\d+[：:]\s*/i, '')
   .replace(/^\d+\.\s+/, '')
@@ -146,10 +169,15 @@ function areNearDuplicateChoices(left, right) {
 
 function semanticTokens(value = '') {
   const normalized = compact(value).toLowerCase();
-  const latin = normalized.match(/[a-z][a-z0-9-]{2,}/g) ?? [];
+  // Two-character tokens matter in this course: dv, dt, rf, on/off and many
+  // matrix/code symbols carry more signal than ordinary prose similarity.
+  const latin = normalized.match(/[a-z][a-z0-9-]{1,}/g) ?? [];
   const chinese = normalized.match(/[\u3400-\u9fff]{2,}/g) ?? [];
   const bigrams = chinese.flatMap((run) => Array.from({ length: Math.max(0, run.length - 1) }, (_, index) => run.slice(index, index + 2)));
-  return new Set([...latin, ...bigrams].filter((token) => !['page', 'source', '本讲', '因此', '解释', '完整', '说明'].includes(token)));
+  return new Set([...latin, ...bigrams].filter((token) => ![
+    'an', 'as', 'at', 'be', 'by', 'do', 'if', 'in', 'is', 'it', 'of', 'on', 'or', 'to',
+    'page', 'source', '本讲', '因此', '解释', '完整', '说明',
+  ].includes(token)));
 }
 
 function semanticScore(query, candidate) {
@@ -244,9 +272,66 @@ const parseErrata = (raw) => {
   return paragraphs(relevant)
     .filter((item) => !/^\d+\.\d+\s+(?:Errata \/ source cautions|Uncertainty log)\s*$/i.test(item))
     .filter((item) => !isEmptyUncertainty(item))
-    .map(cleanTextbookParagraph)
+    .flatMap((item) => splitNumberedParagraph(cleanTextbookParagraph(item)))
+    .map((item) => item.replace(/^\d+\.\s+/, '').trim())
+    .filter((item) => !/^未发现.*(?:不可辨认|手写|不确定)/.test(item))
     .filter(Boolean);
 };
+
+function structureErrata(items, sourceFiles, sourceUnits, studyGuide, lecture, lectureTitle) {
+  return items.map((originalIssue, index) => {
+    const directlyNamed = sourceFiles.find((source) => originalIssue.includes(source.file));
+    const hinted = directlyNamed
+      ?? (/solutions?/i.test(originalIssue) ? sourceFiles.find((source) => source.role === 'solution') : null)
+      ?? (/\.m\b|MATLAB.*line|\bline\s+\d+/i.test(originalIssue) ? sourceFiles.find((source) => source.role === 'code') : null)
+      ?? (/旧版|previous/i.test(originalIssue) ? sourceFiles.find((source) => source.role === 'previous') : null)
+      ?? (/UPDATE/i.test(originalIssue) ? sourceFiles.find((source) => source.role === 'primary-update') : null);
+    const pageMatch = originalIssue.match(/(?:Pages?|p\.)\s*(\d+)/i);
+    const requestedPage = pageMatch ? Number(pageMatch[1]) : null;
+    const sourceUnitsForHint = hinted ? sourceUnits.filter((unit) => unit.sourceFile === hinted.file) : sourceUnits;
+    const semanticUnit = bestSourceUnit(sourceUnitsForHint.length ? sourceUnitsForHint : sourceUnits, originalIssue, index);
+    const source = hinted ?? sourceFiles.find((candidate) => candidate.file === semanticUnit?.sourceFile) ?? sourceFiles[0];
+    const sourcePage = source.file.toLowerCase().endsWith('.pdf') ? (requestedPage ?? semanticUnit?.page ?? 1) : null;
+    const exactUnit = sourcePage ? sourceUnits.find((unit) => unit.sourceFile === source.file && unit.page === sourcePage) : null;
+    const alignedModules = studyGuide.modules.filter((module) => module.sourceRefs.some((ref) => ref.file === source.file && (sourcePage === null || ref.page === sourcePage)));
+    const rankedModule = alignedModules
+      .map((module) => ({ module, score: semanticScore(originalIssue, [module.title, ...module.paragraphs, ...(module.pitfalls ?? [])].join(' ')) }))
+      .sort((left, right) => right.score - left.score)[0];
+    const matchedModule = rankedModule?.score >= 3 ? rankedModule.module : null;
+    const candidateSupport = matchedModule ? bestSourceSentence(matchedModule.paragraphs.join(' '), originalIssue) : '';
+    const support = semanticScore(originalIssue, candidateSupport) >= 3 ? candidateSupport : '';
+    const clauses = originalIssue.split(/[；。]/).map((item) => item.trim()).filter(Boolean);
+    const correctionClause = clauses.find((item) => /应|应为|可改|不应|不能|需要|实际|正确|加入|使用/.test(item)) ?? null;
+    const kind = /UPDATE|旧版|版本|新增|复习/.test(originalIssue) ? 'version'
+      : /不可辨认|不确定|手写不清|可能/.test(originalIssue) ? 'uncertainty'
+        : /误|写成|缺|未覆盖|bug|NaN|Inf|typo/i.test(originalIssue) ? 'erratum'
+          : 'caution';
+    const fallbackExplanation = /Bernoulli variance/i.test(originalIssue)
+      ? 'Bernoulli 变量满足 E[X]=p 与 E[X²]=p，所以 Var(X)=p-p²=p(1-p)；左侧必须是方差而非均值。'
+      : /inv\(|B\\y/i.test(originalIssue)
+        ? '直接线性求解可通过矩阵分解得到 x，避免显式构造 inverse 带来的多余计算和数值误差放大。'
+        : /clear all/i.test(originalIssue)
+          ? 'clear all 不只删除 workspace variables，还会清理函数缓存；教学脚本只需清变量时用 clearvars 更精确。'
+          : /Pages?\s+\d+(?:-\d+)?\s+复习/i.test(originalIssue)
+            ? '这些页面是后续推导的先修回顾，应与本讲新引入的定义和结论分开标记。'
+            : kind === 'erratum'
+              ? '该记号或实现与后续推导所需的定义不一致，照字面使用会得到错误结果。'
+              : '该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。';
+    const explanation = support || fallbackExplanation;
+    return {
+      id: `L${String(lecture).padStart(2, '0')}-E${String(index + 1).padStart(2, '0')}`,
+      lecture,
+      lectureTitle,
+      kind,
+      sourceFile: source.file,
+      sourcePage,
+      sectionId: matchedModule?.id ?? exactUnit?.id ?? 'resources',
+      originalIssue,
+      explanation,
+      correction: correctionClause,
+    };
+  });
+}
 
 const readNumbered = (value = '') => {
   const lines = stripRunningMatter(value).split('\n');
@@ -271,9 +356,11 @@ function pageCount(file) {
   if (!file.toLowerCase().endsWith('.pdf')) return null;
   try {
     const output = execFileSync('pdfinfo', [path.join(originalsDir, file)], { encoding: 'utf8' });
-    return Number(output.match(/^Pages:\s+(\d+)/m)?.[1] ?? 0) || null;
-  } catch {
-    return null;
+    const pages = Number(output.match(/^Pages:\s+(\d+)/m)?.[1] ?? 0);
+    if (!Number.isInteger(pages) || pages < 1) throw new Error('missing Pages field');
+    return pages;
+  } catch (error) {
+    throw new Error(`Unable to read PDF page count for ${file}: ${error.message}`);
   }
 }
 
@@ -478,8 +565,10 @@ function parseSourceClaims(prompt) {
 const levelCycle = ['understand', 'apply', 'analyze', 'evaluate', 'apply'];
 const questionType = (stem) => {
   if (/MATLAB|源代码|代码|\bbug\b|\bdebug\b|inv\(|\\/.test(stem)) return 'debug';
+  // A numerical worked example can mention an axis or a curve in its result;
+  // classify by the requested operation before looking for figure vocabulary.
+  if (/^计算\s|求|多少|shapes?|数值|mean|variance|SD|概率|Fano factor|CV 是多少|如何缩放/.test(stem)) return 'calculation';
   if (/图|曲线|椭圆|axis|figure|nullcline|倾斜/.test(stem)) return 'figure';
-  if (/^计算\s|多少|shapes?|数值|mean|variance|SD|概率|Fano factor|CV 是多少|如何缩放/.test(stem)) return 'calculation';
   if (/公式|方程|推导|gradient|Fisher|Bellman|Euler|Bayes/.test(stem)) return 'equation';
   if (/区别|比较|是否|为什么/.test(stem)) return 'comparison';
   if (/假设|条件|limitation|成立/.test(stem)) return 'assumption';
@@ -621,7 +710,7 @@ function buildQuestions(lecture) {
     // Prefer substantively different units so a distractor is domain-specific
     // without becoming a second valid answer to the cue in the stem.
     .sort((a, b) => a.score - b.score);
-  const add = ({ stem, correct, distractors, explanation, type, tags, cognitiveLevel, anchor, wrongNotes = [] }) => {
+  const add = ({ stem, correct, distractors, explanation, type, tags, cognitiveLevel, difficulty, anchor, wrongNotes = [] }) => {
     if (!stem || !correct) return;
     const scopedStem = compact(stem).startsWith(`第 ${lecture.lecture} 讲`) ? compact(stem) : `第 ${lecture.lecture} 讲：${compact(stem)}`;
     if (BANNED_QUESTION_TEXT.test(scopedStem)) return;
@@ -631,18 +720,37 @@ function buildQuestions(lecture) {
     const choiceData = makeChoices(compact(correct), distractors, correctIndex, wrongNotes);
     if (!choiceData) return;
     const sourceAnchor = anchor ?? anchors[(number - 1) % anchors.length];
+    const matchedModule = lecture.studyGuide.modules.find((module) => module.sourceRefs.some((ref) => ref.file === sourceAnchor.sourceFile && ref.page === sourceAnchor.page));
+    const rawExplanation = compact(explanation || correct);
+    const supportingExplanation = matchedModule
+      ? bestSourceSentence(matchedModule.paragraphs.join(' '), `${stem} ${correct}`)
+      : bestSourceSentence(sourceAnchor.reasoning, `${stem} ${correct}`);
+    const needsSupportingExplanation = comparisonText(rawExplanation) === comparisonText(correct)
+      || comparisonText(rawExplanation).length - comparisonText(correct).length < 30;
+    let finalExplanation = needsSupportingExplanation && supportingExplanation
+      ? `${rawExplanation} ${supportingExplanation}`
+      : rawExplanation;
+    if (comparisonText(finalExplanation).length - comparisonText(correct).length < 30) {
+      const detailedSupport = matchedModule
+        ? [...matchedModule.paragraphs]
+          .sort((left, right) => semanticScore(`${stem} ${correct}`, right) - semanticScore(`${stem} ${correct}`, left))[0]
+        : sourceAnchor.reasoning;
+      finalExplanation = compact(`${finalExplanation} 判断依据：${detailedSupport}`);
+    }
+    const resolvedLevel = cognitiveLevel ?? levelCycle[(number - 1) % levelCycle.length];
+    const difficultyByLevel = { remember: 1, understand: 2, apply: 3, analyze: 4, evaluate: 5 };
     questions.push({
       id: `L${String(lecture.lecture).padStart(2, '0')}-Q${String(number).padStart(2, '0')}`,
       lecture: lecture.lecture,
       sectionId: sourceAnchor.id,
       sourceAnchors: [{ file: sourceAnchor.sourceFile, page: sourceAnchor.page, section: sourceAnchor.id }],
       conceptTags: tags?.length ? tags : [lecture.enTitle.split(/[:,]/)[0], sourceAnchor.sourceFile],
-      difficulty: ((number - 1) % 5) + 1,
+      difficulty: difficulty ?? difficultyByLevel[resolvedLevel],
       type: type ?? questionType(stem),
-      cognitiveLevel: cognitiveLevel ?? levelCycle[(number - 1) % levelCycle.length],
+      cognitiveLevel: resolvedLevel,
       stem: scopedStem,
       ...choiceData,
-      explanation: compact(explanation || correct),
+      explanation: finalExplanation,
     });
   };
 
@@ -661,21 +769,6 @@ function buildQuestions(lecture) {
 
   lecture.sourceUnits.forEach((unit) => {
     const cue = unitCue(unit);
-    const conceptAnswer = cleanChoiceText(unit.reconstruction);
-    const conceptDistractors = plausibleAnswerDistractors(cue, conceptAnswer);
-    const otherConcepts = otherUnitStatements(unit, 'reconstruction', cue);
-    const groundedConcepts = contentDistractors(cue, conceptAnswer);
-    add({
-      stem: `根据 ${unit.sourceFile} 第 ${unit.page} 页，哪一项概括了该页主题？`,
-      correct: conceptAnswer,
-      distractors: [...otherConcepts, ...conceptDistractors, ...groundedConcepts].map((item) => item.text),
-      wrongNotes: [...otherConcepts, ...conceptDistractors, ...groundedConcepts].map((item) => item.note),
-      explanation: conceptAnswer,
-      type: 'concept',
-      cognitiveLevel: 'understand',
-      anchor: unit,
-    });
-
     const reasoningAnswer = bestSourceSentence(unit.reasoning, `${cue} ${unit.reconstruction}`);
     const reasoningDistractors = plausibleAnswerDistractors(cue, reasoningAnswer);
     const otherReasoning = otherUnitStatements(unit, 'reasoning', cue);
@@ -691,12 +784,16 @@ function buildQuestions(lecture) {
       anchor: unit,
     });
 
-    const figureAnswer = /^先识别图中对象、箭头、参数和坐标系/i.test(unit.figureReading) ? '' : bestSourceSentence(unit.figureReading, cue);
+    const authoredFigure = lecture.figures.find((figure) => figure.sourceRefs.some((ref) => ref.file === unit.sourceFile && ref.page === unit.page));
+    const figureAnswer = authoredFigure ? bestSourceSentence(authoredFigure.caption, authoredFigure.title) : '';
     const figureDistractors = plausibleAnswerDistractors(cue, figureAnswer);
-    const otherFigureReadings = otherUnitStatements(unit, 'figureReading', cue);
+    const otherFigureReadings = lecture.figures
+      .filter((figure) => figure.id !== authoredFigure?.id)
+      .map((figure) => ({ text: bestSourceSentence(figure.caption, figure.title), note: `这条结论属于图“${figure.title}”。` }))
+      .filter((item) => item.text);
     const groundedFigures = contentDistractors(cue, figureAnswer);
     add({
-      stem: `阅读与“${cue}”相关的图示时，哪项观察能正确连接图中编码与结论？`,
+      stem: authoredFigure ? `阅读“${authoredFigure.title}”图时，哪项观察正确？` : '',
       correct: figureAnswer,
       distractors: [...otherFigureReadings, ...figureDistractors, ...groundedFigures].map((item) => item.text),
       wrongNotes: [...otherFigureReadings, ...figureDistractors, ...groundedFigures].map((item) => item.note),
@@ -704,6 +801,63 @@ function buildQuestions(lecture) {
       type: 'figure',
       cognitiveLevel: 'analyze',
       anchor: unit,
+    });
+  });
+
+  lecture.studyGuide.modules.forEach((module, index) => {
+    const firstRef = module.sourceRefs[0];
+    const anchor = anchors.find((unit) => unit.sourceFile === firstRef.file && unit.page === firstRef.page)
+      ?? bestSourceUnit(anchors, module.sourceRefs.map((ref) => `${ref.file} ${ref.page}`).join(' '), index);
+    const otherChecks = lecture.studyGuide.modules.filter((candidate) => candidate.id !== module.id).map((candidate) => candidate.selfCheck.answer);
+    const candidates = plausibleAnswerDistractors(module.selfCheck.prompt, module.selfCheck.answer);
+    const groundedChecks = contentDistractors(module.selfCheck.prompt, module.selfCheck.answer);
+    add({
+      stem: module.selfCheck.prompt,
+      correct: module.selfCheck.answer,
+      distractors: [...candidates.map((candidate) => candidate.text), ...otherChecks, ...groundedChecks.map((candidate) => candidate.text)],
+      wrongNotes: [...candidates.map((candidate) => candidate.note), ...otherChecks.map(() => '该答案解决的是本讲另一个教学单元的问题。'), ...groundedChecks.map((candidate) => candidate.note)],
+      explanation: `${module.selfCheck.answer} ${module.paragraphs.at(-1)}`,
+      type: questionType(module.selfCheck.prompt),
+      cognitiveLevel: 'understand',
+      difficulty: 2,
+      tags: [module.title],
+      anchor,
+    });
+
+    const otherResults = lecture.studyGuide.modules
+      .filter((candidate) => candidate.id !== module.id)
+      .map((candidate) => candidate.workedExample.result);
+    const resultCandidates = plausibleAnswerDistractors(module.workedExample.problem, module.workedExample.result);
+    const groundedResults = contentDistractors(module.workedExample.problem, module.workedExample.result);
+    add({
+      stem: `完成“${module.workedExample.problem}”中的计算或推理后，哪项结果成立？`,
+      correct: module.workedExample.result,
+      distractors: [...resultCandidates.map((candidate) => candidate.text), ...otherResults, ...groundedResults.map((candidate) => candidate.text)],
+      wrongNotes: [...resultCandidates.map((candidate) => candidate.note), ...otherResults.map(() => '该结果来自本讲另一个例题，使用了不同的条件或参数。'), ...groundedResults.map((candidate) => candidate.note)],
+      explanation: `${module.workedExample.result} 计算路径：${module.workedExample.steps.join(' ')}`,
+      type: questionType(`${module.workedExample.problem} ${module.workedExample.result}`),
+      cognitiveLevel: 'apply',
+      difficulty: 3,
+      tags: [module.title, module.workedExample.title],
+      anchor,
+    });
+
+    const otherChecksForExamples = lecture.studyGuide.modules
+      .filter((candidate) => candidate.id !== module.id)
+      .map((candidate) => candidate.workedExample.sanityCheck);
+    const checkCandidates = plausibleAnswerDistractors(module.workedExample.result, module.workedExample.sanityCheck);
+    const groundedExampleChecks = contentDistractors(module.workedExample.result, module.workedExample.sanityCheck);
+    add({
+      stem: `得到“${module.workedExample.result}”后，哪项检查最能判断这个结果是否与题设和模型边界一致？`,
+      correct: module.workedExample.sanityCheck,
+      distractors: [...checkCandidates.map((candidate) => candidate.text), ...otherChecksForExamples, ...groundedExampleChecks.map((candidate) => candidate.text)],
+      wrongNotes: [...checkCandidates.map((candidate) => candidate.note), ...otherChecksForExamples.map(() => '这项检查针对本讲另一个例题，不能检验题干中的结果。'), ...groundedExampleChecks.map((candidate) => candidate.note)],
+      explanation: `${module.workedExample.sanityCheck} 这个检查对应题设“${module.workedExample.problem}”中的单位、方向或极限条件。`,
+      type: 'assumption',
+      cognitiveLevel: 'evaluate',
+      difficulty: 5,
+      tags: [module.title, 'sanity check'],
+      anchor,
     });
   });
 
@@ -738,23 +892,8 @@ function buildQuestions(lecture) {
     });
   });
 
-  lecture.sourceUnits.forEach((unit) => {
-    if (questions.length >= 30) return;
-    const alternatives = lecture.sourceUnits.filter((candidate) => candidate.id !== unit.id).map((candidate) => candidate.reconstruction);
-    add({
-      stem: `根据原讲义，${unit.sourceFile} 第 ${unit.page} 页主要讨论什么？`,
-      correct: unit.reconstruction,
-      distractors: alternatives,
-      wrongNotes: alternatives.map(() => '该内容出现在本讲的另一页。'),
-      explanation: unit.reconstruction,
-      type: 'concept',
-      cognitiveLevel: 'remember',
-      anchor: unit,
-    });
-  });
-
   if (questions.length < 30) throw new Error(`Unable to create 30 high-quality questions for lecture ${lecture.lecture}; built ${questions.length}`);
-  return questions.slice(0, 40);
+  return questions.slice(0, 60);
 }
 
 const indexRows = parsePromptIndex();
@@ -766,6 +905,13 @@ const lectures = indexRows.map((row) => {
   const raw = fs.readFileSync(path.join(extractedDir, `lecture${number}.txt`), 'utf8');
   const sourceUnits = parseSourceUnits(raw, row.sourceNames, row.lecture);
   if (!sourceUnits.length) throw new Error(`No source units parsed for lecture ${row.lecture}`);
+  const studyGuideRecord = selfStudyGuideByLecture.get(row.lecture);
+  if (!studyGuideRecord) throw new Error(`Missing self-study guide for lecture ${row.lecture}`);
+  const { lecture: studyGuideLecture, ...studyGuide } = studyGuideRecord;
+  if (studyGuideLecture !== row.lecture) throw new Error(`Self-study guide lecture mismatch for lecture ${row.lecture}`);
+  const lectureFigures = authoredFigures
+    .filter((figure) => figure.lecture === row.lecture)
+    .map((figure) => ({ ...figure, lectureTitle: row.zhTitle }));
   const formulaSectionStart = findActualHeading(raw, 'Formula and notation sheet');
   const trapsSectionStart = findActualHeading(raw, 'Common traps, assumptions, and limitations');
   const questionsSectionStart = findActualHeading(raw, 'Cumulative Knowledge Check');
@@ -789,8 +935,12 @@ const lectures = indexRows.map((row) => {
   const companionPages = (() => {
     try {
       const output = execFileSync('pdfinfo', [path.join(companionsDir, row.companionFile)], { encoding: 'utf8' });
-      return Number(output.match(/^Pages:\s+(\d+)/m)?.[1] ?? 0);
-    } catch { return null; }
+      const pages = Number(output.match(/^Pages:\s+(\d+)/m)?.[1] ?? 0);
+      if (!Number.isInteger(pages) || pages < 1) throw new Error('missing Pages field');
+      return pages;
+    } catch (error) {
+      throw new Error(`Unable to read companion PDF page count for ${row.companionFile}: ${error.message}`);
+    }
   })();
   const derivations = paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, 'Derivations')) + 1, findActualHeading(raw, 'Cross-page synthesis / 跨页因果与数学链'))).map(cleanTextbookParagraph).filter(Boolean);
   const synthesis = paragraphs(sliceBetween(raw, 'Cross-page synthesis / 跨页因果与数学链', 'Worked examples and transfer')).map(cleanTextbookParagraph).filter(Boolean);
@@ -799,7 +949,7 @@ const lectures = indexRows.map((row) => {
     .flatMap((item) => item.startsWith('Course-specific risk boundary.') ? [cleanRiskBoundary(item)] : splitNumberedParagraph(cleanTextbookParagraph(item)))
     .filter(Boolean);
   const diagnostic = readNumbered(sliceBetween(raw, 'Five-minute prerequisite diagnostic', 'Source-aligned lesson / 按原笔记页序')).map((item) => cleanDiagnostic(item.text)).filter(Boolean);
-  const errata = parseErrata(raw);
+  const errata = structureErrata(parseErrata(raw), sourceFiles, sourceUnits, studyGuide, row.lecture, row.zhTitle);
   const specialHeading = row.lecture === 2 || row.lecture === 3 ? 'MATLAB source audit / 代码逐行审计' : (row.lecture === 19 || row.lecture === 22 ? 'Version comparison / 新旧版本审计' : null);
   const specialSection = specialHeading ? paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, specialHeading)) + 1, findActualHeading(raw, 'Derivations')))
     .filter((item) => !/^Authority\. The listing below is the actual uploaded source/i.test(item))
@@ -820,6 +970,8 @@ const lectures = indexRows.map((row) => {
     diagnostic,
     sourceClaims: parseSourceClaims(prompt),
     sourceUnits,
+    studyGuide,
+    figures: lectureFigures,
     specialSection,
     derivations,
     synthesis,
@@ -839,16 +991,27 @@ const allGlossary = lectures.flatMap((lecture) => lecture.glossary);
 const allFormulas = lectures.flatMap((lecture) => lecture.formulas);
 if (allFormulas.some((formula) => !formula.latex)) throw new Error('Every formula must have a corrected LaTeX representation.');
 const allSources = lectures.flatMap((lecture) => lecture.sourceFiles.map((source) => ({ ...source, lecture: lecture.lecture, lectureSlug: lecture.slug, lectureTitle: lecture.zhTitle })));
-const allErrata = lectures.flatMap((lecture) => lecture.errata.map((text, index) => ({ id: `L${lecture.slug}-E${index + 1}`, lecture: lecture.lecture, lectureTitle: lecture.zhTitle, text, sectionId: lecture.sourceUnits[0].id })));
-const allFigures = lectures.flatMap((lecture) => lecture.sourceUnits.filter((unit) => unit.figureReading).map((unit, index) => ({ id: `L${lecture.slug}-FIG${index + 1}`, lecture: lecture.lecture, lectureTitle: lecture.zhTitle, caption: unit.figureReading, sourceFile: unit.sourceFile, sourcePage: unit.page, sectionId: unit.id, schematic: true })));
+const allErrata = lectures.flatMap((lecture) => lecture.errata.map((item) => ({ ...item, lecture: lecture.lecture, lectureTitle: lecture.zhTitle })));
+const allFigures = lectures.flatMap((lecture) => lecture.figures);
 
 const coverage = lectures.flatMap((lecture) => lecture.sourceFiles.flatMap((source) => {
-  if (!source.pages) return [{ lecture: lecture.lecture, source: source.file, page: null, sections: lecture.specialSection.length ? [`lecture-${lecture.slug}-supplement`] : [lecture.sourceUnits[0].id], questions: [] }];
+  if (!source.pages) return [{ lecture: lecture.lecture, source: source.file, role: source.role, page: null, status: 'reference-only', sections: [], figures: [], questions: [] }];
   return Array.from({ length: source.pages }, (_, pageIndex) => {
     const page = pageIndex + 1;
-    const unit = lecture.sourceUnits.find((item) => item.sourceFile === source.file && item.page === page);
-    const sectionId = unit?.id ?? (lecture.specialSection.length ? `lecture-${lecture.slug}-supplement` : lecture.sourceUnits[Math.min(pageIndex, lecture.sourceUnits.length - 1)].id);
-    return { lecture: lecture.lecture, source: source.file, page, sections: [sectionId], questions: lecture.questions.filter((question) => question.sourceAnchors.some((anchor) => anchor.file === source.file && anchor.page === page)).map((question) => question.id) };
+    const units = lecture.sourceUnits.filter((item) => item.sourceFile === source.file && item.page === page).map((item) => item.id);
+    const modules = lecture.studyGuide.modules.filter((module) => module.sourceRefs.some((ref) => ref.file === source.file && ref.page === page)).map((module) => module.id);
+    const figureIds = lecture.figures.filter((figure) => figure.sourceRefs.some((ref) => ref.file === source.file && ref.page === page)).map((figure) => figure.id);
+    const sections = [...new Set([...units, ...modules])];
+    return {
+      lecture: lecture.lecture,
+      source: source.file,
+      role: source.role,
+      page,
+      status: sections.length ? 'covered' : 'reference-only',
+      sections,
+      figures: figureIds,
+      questions: lecture.questions.filter((question) => question.sourceAnchors.some((anchor) => anchor.file === source.file && anchor.page === page)).map((question) => question.id),
+    };
   });
 }));
 
@@ -884,7 +1047,7 @@ const searchIndex = lectures.flatMap((lecture) => [
     title: `第 ${lecture.lecture} 讲 · ${lecture.zhTitle}`,
     subtitle: lecture.enTitle,
     href: `/lectures/${lecture.slug}/`,
-    text: compact([lecture.zhTitle, lecture.enTitle, lecture.coreQuestion, ...lecture.objectives, ...lecture.sourceClaims, ...lecture.sourceUnits.flatMap((unit) => [unit.reconstruction, unit.noteMeaning, unit.reasoning]), ...lecture.derivations, ...lecture.synthesis, ...lecture.workedExamples, ...lecture.commonTraps, ...lecture.glossary.flatMap((entry) => [entry.zh, entry.en, entry.definition]), ...lecture.formulas.flatMap((formula) => [formula.name, formula.conditions]), ...lecture.questions.map((question) => question.stem), ...lecture.sourceFiles.map((source) => source.file)].join(' ')),
+    text: compact([lecture.zhTitle, lecture.enTitle, lecture.coreQuestion, ...lecture.studyGuide.objectives, ...lecture.studyGuide.prerequisiteBridge, ...lecture.studyGuide.modules.flatMap((module) => [module.title, module.guidingQuestion, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, module.selfCheck.prompt, module.selfCheck.answer, ...module.pitfalls]), ...lecture.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]), ...lecture.sourceClaims, ...lecture.sourceUnits.flatMap((unit) => [unit.reconstruction, unit.noteMeaning, unit.reasoning]), ...lecture.synthesis, ...lecture.commonTraps, ...lecture.glossary.flatMap((entry) => [entry.zh, entry.en, entry.definition]), ...lecture.formulas.flatMap((formula) => [formula.name, formula.conditions]), ...lecture.questions.map((question) => question.stem), ...lecture.sourceFiles.map((source) => source.file)].join(' ')),
   },
   ...lecture.sourceUnits.map((unit) => ({ id: unit.id, kind: 'source-page', lecture: lecture.lecture, title: `${lecture.zhTitle} · ${unit.sourceFile} p. ${unit.page}`, subtitle: unit.reconstruction, href: `/lectures/${lecture.slug}/#${unit.id}`, text: compact([unit.reconstruction, unit.noteMeaning, unit.reasoning, unit.figureReading, unit.stopPredict].join(' ')) })),
 ]);

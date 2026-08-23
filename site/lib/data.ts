@@ -34,7 +34,7 @@ import lecture24 from '@/content/lectures/24.json';
 import lecture25 from '@/content/lectures/25.json';
 import lecture26 from '@/content/lectures/26.json';
 import lecture27 from '@/content/lectures/27.json';
-import type { CourseSummary, Formula, GlossaryEntry, Lecture, Question, SearchRecord, SourceIndexEntry } from './types';
+import type { CourseSummary, Erratum, FigureIndexEntry, Formula, GlossaryEntry, Lecture, Question, SearchRecord, SourceIndexEntry } from './types';
 
 export const course = courseJson as unknown as CourseSummary[];
 export const lectures = [lecture01, lecture02, lecture03, lecture04, lecture05, lecture06, lecture07, lecture08, lecture09, lecture10, lecture11, lecture12, lecture13, lecture14, lecture15, lecture16, lecture17, lecture18, lecture19, lecture20, lecture21, lecture22, lecture23, lecture24, lecture25, lecture26, lecture27] as unknown as Lecture[];
@@ -44,6 +44,6 @@ export const glossary = glossaryJson as unknown as GlossaryEntry[];
 export const formulas = formulasJson as unknown as Formula[];
 export const searchIndex = searchIndexJson as unknown as SearchRecord[];
 export const sources = sourcesJson as unknown as SourceIndexEntry[];
-export const errata = errataJson;
-export const figures = figuresJson;
+export const errata = errataJson as unknown as Erratum[];
+export const figures = figuresJson as unknown as FigureIndexEntry[];
 export const dependencies = dependenciesJson as { from: number; to: number }[];

@@ -100,6 +100,374 @@
       "stopPredict": "deep linear network 的 input-output map 为什么仍 linear？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能从 dataset、architecture、loss 与 learning rule 四个层面定义 supervised-learning problem，并区分 classification 与 regression 的 target support。",
+      "能用 first-order Taylor expansion 说明 gradient 为何给出局部最陡上升方向，以及负 gradient step 为何降低 squared loss。",
+      "能逐步推导 linear-regression gradient、Hebbian-like/stabilization decomposition 与 normal equation，并说明 singular design matrix 的处理。",
+      "能解释 deep linear network 的 input-output mapping 虽线性，但多层 factorization 使 optimization dynamics 非线性且通常非凸。",
+      "能按 shape 推导 backprop error recurrence 与 layer weight gradient，并把 backprop 作为训练算法而非已确立的神经生物机制。"
+    ],
+    "prerequisiteBridge": [
+      "supervised dataset 由 P 个配对样本 (x_μ,y_μ) 组成。x_μ 是 N×1 feature vector；若每个 sample 放成 matrix X 的一列，则 X∈R^{N×P}。scalar regression 的 targets 可组成 y∈R^{P×1}，prediction 是 X^T w。classification 的 y 常是离散 label 或 one-hot vector，而 regression target 可连续。",
+      "gradient 是所有 partial derivatives 组成、与 parameter shape 相同的对象。对 scalar function L(w)，小改变量 Δw 引起的 first-order change 近似为 ΔL≈∇L^TΔw。dot product 等于两个向量长度乘夹角 cosine；在固定 step length 下，让 Δw 与 -∇L 同向可使这一线性近似最负。",
+      "chain rule 处理复合函数：若 y=f(z)、z=g(x)，则 dy/dx=(dy/dz)(dz/dx)。多层网络只是把这个规则重复使用，但 matrix shape 决定 transpose 与 outer product 的位置。平方函数的 derivative 为 d(e^2)/de=2e；matrix-vector product z=Wx 中，W_{ij} 只影响 z_i，且 derivative 对 x_j 成正比。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L11-D1",
+        "prompt": "一个 supervised-learning algorithm 至少要分别指定哪些对象，为什么只说“用 neural network”还不完整？",
+        "answer": "要指定 architecture/representation、loss/objective 与 optimization or learning rule，并明确 dataset 的 input-target 配对。",
+        "explanation": "architecture 决定可表示哪些 mappings，loss 决定何为错误，learning rule 决定如何改 parameters。相同 architecture 可用不同 loss 训练，同一 loss 也可用不同 optimizer。",
+        "remediationModuleId": "L11-M1"
+      },
+      {
+        "id": "L11-D2",
+        "prompt": "若 ∇L=(3,4)^T，长度限制为 0.1 的局部 step 中，哪个方向使 Taylor linear term 最小？",
+        "answer": "取 Δw=-0.1(3,4)^T/5=(-0.06,-0.08)^T。",
+        "explanation": "gradient norm 为 5。固定 step length 时，dot product 在夹角 180° 时最小，所以使用单位负 gradient；实际 gradient descent 常把长度交给 η||∇L|| 决定。",
+        "remediationModuleId": "L11-M1"
+      },
+      {
+        "id": "L11-D3",
+        "prompt": "采用 X∈R^{N×P}、w∈R^{N×1} 时，least-squares prediction、residual 与 gradient 的 shape 各是什么？",
+        "answer": "prediction X^Tw 和 residual y-X^Tw 都是 P×1。按本讲 L=||y-X^Tw||²/P 的约定，gradient 是 -(2/P)X(y-X^Tw)，shape 为 N×1；若 loss 前含 1/2，才可省去 factor 2。",
+        "explanation": "factor 2 来自平方项求导。X 左乘 residual 会把 P 个 sample 的 error 加权汇总回 N 个 features；若只讨论更新方向，可写 gradient proportional to -Xr，但若写等号就不能漏掉 2/P。",
+        "remediationModuleId": "L11-M2"
+      },
+      {
+        "id": "L11-D4",
+        "prompt": "W^1∈R^{4×3}、W^2∈R^{2×4}、x∈R^{3×1}。若 output error δ^2∈R^{2×1}，hidden error 与 ∂L/∂W^1 应是什么 shape？",
+        "answer": "δ^1=(W^2)^Tδ^2⊙φ' 是 4×1，∂L/∂W^1=δ^1x^T 是 4×3。",
+        "explanation": "weight transpose 把 output-space error 映回 hidden coordinates，outer product 再把 postsynaptic error 与 presynaptic activation 组合成每条 connection 的 gradient。",
+        "remediationModuleId": "L11-M3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L11-M1",
+        "title": "Supervised learning 的组成与 gradient descent",
+        "sourceRefs": [
+          {
+            "file": "Lecture11-MachineLearning.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture11-MachineLearning.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "如何把一个预测任务写成可优化的数学问题，并从局部 loss geometry 推出 parameter update？",
+        "paragraphs": [
+          "supervised learning 给出 input-target pairs。手写数字任务中 x 是 image、y 是离散 digit label，属于 classification；optic-flow 任务中 x 可是一对相邻 frames、y 是每个位置的连续 motion vector，属于 regression。两类任务都需要明确 train examples 如何采样，以及 test examples 是否来自相同 distribution。",
+          "architecture 描述 prediction function。多层网络可写 z^{(0)}=x，h^{(ℓ)}=W^{(ℓ-1)}z^{(ℓ-1)}，z^{(ℓ)}=φ(h^{(ℓ)})，最后 yhat=g(W^{(L)}z^{(L)})。若第 ℓ 层有 N_ℓ units，则 W^{(ℓ-1)}∈R^{N_ℓ×N_{ℓ-1}}；写 shape 能在推导前发现大多数 transpose errors。",
+          "loss 把 prediction 与 target 的差异压成 scalar。regression 常用 squared error，classification 常用 cross-entropy；loss 的选择包含 noise model 与任务偏好。optimization rule 再决定如何改变 W。把 architecture、loss 和 learning rule 混成一个词，会无法判断性能变化来自 representation、objective 还是 optimizer。",
+          "在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。first-order Taylor approximation 只在 step 足够小时可靠，所以 learning rate η 既不能大到跨过 valley，也不能小到训练停滞。负 gradient 是局部下降方向，不保证深网络一次就到 global optimum。"
+        ],
+        "keyPoints": [
+          "dataset 定义问题证据，architecture 定义 hypothesis class，loss 定义错误，optimizer 定义搜索路径。",
+          "gradient 与 parameter 同 shape，指向局部最陡上升；gradient descent 使用负号。",
+          "Taylor derivation 是局部论证，learning rate 过大时 loss 可能反而上升。"
+        ],
+        "derivation": {
+          "title": "由 Taylor expansion 推出 gradient descent，并求单样本 linear gradient",
+          "setup": "scalar prediction yhat=w^Tx，loss L(w)=1/2(y-yhat)^2，parameter step 为 Δw。",
+          "steps": [
+            {
+              "title": "写 first-order loss change",
+              "explanation": "在当前 w 附近，小 step 的 loss 变化由 gradient 与 step 的 dot product 决定，二阶及更高项在 step 很小时较小。",
+              "latex": "L(\\mathbf w+\\Delta\\mathbf w)\\approx L(\\mathbf w)+\\nabla L(\\mathbf w)^{\\mathsf T}\\Delta\\mathbf w"
+            },
+            {
+              "title": "选择局部下降方向",
+              "explanation": "令 Δw=-η∇L，linear term 变为 -η||∇L||^2≤0。η>0 控制 step size。",
+              "latex": "\\Delta\\mathbf w=-\\eta\\nabla L,\\qquad \\Delta L\\approx-\\eta\\|\\nabla L\\|_2^2"
+            },
+            {
+              "title": "对 squared error 使用 chain rule",
+              "explanation": "令 e=y-w^Tx。∂L/∂e=e，∂e/∂w=-x，所以 gradient=-ex，更新为 +ηex；正 error 会沿 x 提高 prediction。",
+              "latex": "\\nabla_{\\mathbf w}L=-(y-\\mathbf w^{\\mathsf T}\\mathbf x)\\mathbf x"
+            }
+          ],
+          "symbolNotes": [
+            "η 的单位是 parameter^2/loss，使 η∇L 与 parameter 同单位；标准化后常视为数值 hyperparameter。",
+            "对 batch loss，gradient 是 P 个 sample gradients 的平均，而不是先平均 x 和 y 再相乘。"
+          ],
+          "unitsCheck": "若 y 和 yhat 以 deg/s 表示、x 无量纲，则 gradient 含 (deg/s)^2 per weight；η 必须把更新转换回 weight 单位。",
+          "limitCheck": "当 residual e=0 或 x=0 时 gradient 为零；η 太大时被忽略的二阶项可使 loss 增加。"
+        },
+        "workedExample": {
+          "title": "一次可手算的 gradient step",
+          "problem": "x=(1,2)^T，y=5，w=(0,0)^T，L=1/2(y-w^Tx)^2，η=0.1。计算更新与新 loss。",
+          "steps": [
+            "初始 prediction 为 0，residual e=5，gradient=-ex=(-5,-10)^T。",
+            "更新 w_new=w-ηgradient=(0.5,1.0)^T。",
+            "新 prediction=0.5+2=2.5，新 loss=1/2(5-2.5)^2=3.125；初始 loss=12.5。"
+          ],
+          "result": "负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。",
+          "sanityCheck": "gradient 与 w 都是 2×1；若误去掉更新负号，w 会变成 (-0.5,-1)，prediction=-2.5，loss 增大到 28.125。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“gradient 指向最小值”这句话不准确？",
+          "answer": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+        },
+        "pitfalls": [
+          "把 classification 与 regression 仅按模型名称区分，而不检查 target support 和 loss。",
+          "把 negative gradient 的局部下降保证误写成对任意 learning rate 和任意 nonconvex network 的全局保证。"
+        ]
+      },
+      {
+        "id": "L11-M2",
+        "title": "Linear regression：gradient decomposition、normal equation 与 deep linear factorization",
+        "sourceRefs": [
+          {
+            "file": "Lecture11-MachineLearning.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture11-MachineLearning.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "为什么 linear regression 同时具有可解释的 local learning rule 和 closed-form solution，而堆叠 linear layers 后 optimization 又会变复杂？",
+        "paragraphs": [
+          "采用原稿 orientation：X∈R^{N×P} 的每一列是 sample，w∈R^{N×1}，y∈R^{P×1}，prediction=X^Tw。batch loss L=||y-X^Tw||^2/P。gradient 汇总每个 feature 与 residual 的 correlation，因此 update 中包含 Xy 这一 data-dependent Hebbian-like term。",
+          "展开 gradient 得 ∇L=(2/P)(XX^Tw-Xy)。更新 -∇L 因而包含 +(2η/P)Xy 与 -(2η/P)XX^Tw。前一项把 input-target coactivity 写入 weights，后一项随当前 weights 和 input covariance 增长，提供 stabilization。它与 biological Hebb 在形式上相似，但 target y、batch access 与 signed error 不是普通 local coactivity。",
+          "设 gradient=0 得 normal equation XX^T what=Xy；若 XX^T invertible，what=(XX^T)^{-1}Xy。若 features 冗余或 P<N，matrix 可 singular，不能硬算 inverse。pseudoinverse 选择最小 norm solution；ridge regression 则把 XX^T 改成 XX^T+λI，以少量 bias 换 numerical stability。",
+          "deep linear network 令所有 activations 为 identity，则 overall mapping M=W^{(L)}...W^{(0)} 仍线性：yhat=Mx。然而同一个 M 可由许多 layer factorizations 表示，loss 对单个 layer weights 含 products，因此 parameter landscape 与 learning dynamics 非线性。representation function 的线性不等于 optimization problem 为简单 convex regression。"
+        ],
+        "keyPoints": [
+          "least-squares update 可拆成 input-target correlation 与 weight-dependent covariance stabilization。",
+          "closed form 需要明确 X orientation 与 invertibility；singular 时用 pseudoinverse 或 regularization。",
+          "deep linear 的 function class 仍线性，但 factorized parameters 造成非凸与 scale nonuniqueness。"
+        ],
+        "derivation": {
+          "title": "Batch least-squares gradient 与 normal equation",
+          "setup": "定义 residual r=y-X^Tw∈R^{P×1}，loss L=(1/P)r^Tr；为保持原稿比例，此处不加 1/2。",
+          "steps": [
+            {
+              "title": "展开 scalar loss",
+              "explanation": "把 quadratic 展开为 y^Ty-2y^TX^Tw+w^TXX^Tw。第一项与 w 无关。",
+              "latex": "L=\\frac1P(\\mathbf y^{\\mathsf T}\\mathbf y-2\\mathbf y^{\\mathsf T}X^{\\mathsf T}\\mathbf w+\\mathbf w^{\\mathsf T}XX^{\\mathsf T}\\mathbf w)"
+            },
+            {
+              "title": "逐项求 gradient",
+              "explanation": "linear term 给 -2Xy/P；对 symmetric XX^T，quadratic term gradient 为 2XX^Tw/P。",
+              "latex": "\\nabla_{\\mathbf w}L=\\frac{2}{P}(XX^{\\mathsf T}\\mathbf w-X\\mathbf y)"
+            },
+            {
+              "title": "设 gradient 为零",
+              "explanation": "stationary point 满足 XX^T what=Xy。squared loss 为 convex quadratic；若 XX^T positive definite，该 stationary point 是唯一 minimum。",
+              "latex": "\\hat{\\mathbf w}=(XX^{\\mathsf T})^{-1}X\\mathbf y"
+            }
+          ],
+          "symbolNotes": [
+            "XX^T 是 N×N feature covariance scale matrix，Xy 是 N×1 feature-target correlation vector。",
+            "若使用 samples-as-rows convention，公式会写成 (X^TX)^{-1}X^Ty；两种写法不能混用。"
+          ],
+          "unitsCheck": "XX^Tw 与 Xy 都含 feature×target 的匹配尺度；若 features 单位差异很大，conditioning 与 learning-rate sensitivity 会恶化，通常需 standardization。",
+          "limitCheck": "当 XX^T singular 时 inverse 不存在；gradient descent 仍可找到一个 interpolating solution，但选到哪一个取决于 initialization、optimizer 与 regularization。"
+        },
+        "workedExample": {
+          "title": "两 feature、两 sample 的 closed-form fit",
+          "problem": "X=[[1,0],[0,2]]，即 columns 为 (1,0)^T 与 (0,2)^T；targets y=(3,4)^T。求 what。",
+          "steps": [
+            "XX^T=diag(1,4)，Xy=(3,8)^T。",
+            "(XX^T)^{-1}=diag(1,1/4)，所以 what=(3,2)^T。",
+            "predictions X^Twhat=(3,4)^T，与 targets 完全相同，residual 为零。"
+          ],
+          "result": "feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。",
+          "sanityCheck": "若误用 X^TX 在本例恰好仍 diagonal，可能掩盖 orientation bug；一般 non-square X 时 shape 会立即暴露错误。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 deep linear network 的 overall mapping 线性，却不能直接把所有 layer 的训练都当成普通 convex linear regression？",
+          "answer": "loss 对 product W^L...W^0 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+        },
+        "pitfalls": [
+          "不声明 samples-as-columns 或 samples-as-rows 就套 closed-form 公式，导致 transpose 与 shape 错位。",
+          "在 singular 或 ill-conditioned matrix 上直接求 inverse，忽略 pseudoinverse、ridge 和 feature scaling。"
+        ]
+      },
+      {
+        "id": "L11-M3",
+        "title": "Backpropagation：逐层 chain rule、error coordinates 与 weight gradient",
+        "sourceRefs": [
+          {
+            "file": "Lecture11-MachineLearning.pdf",
+            "page": 5
+          },
+          {
+            "file": "Lecture11-MachineLearning.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "一个 output error 如何通过 local derivatives 被重新表达为每一层 preactivation 的 sensitivity，并生成与每个 weight matrix 同 shape 的 gradient？",
+        "paragraphs": [
+          "forward pass 保存每层 preactivation h^{(ℓ)}=W^{(ℓ-1)}z^{(ℓ-1)} 与 activation z^{(ℓ)}=φ(h^{(ℓ)})。backprop 不把 target 物理地送回网络，而是计算 scalar loss 对这些 intermediate variables 的 derivatives。定义 δ^{(ℓ)}=∂L/∂h^{(ℓ)}，它与该层 units 数目相同。",
+          "从 layer ℓ+1 往回看，h^{(ℓ+1)}=W^{(ℓ)}z^{(ℓ)}。一个 hidden activation 对所有 downstream preactivations 都有影响，因此 sensitivity 先乘 (W^{(ℓ)})^T 汇总 downstream error，再逐元素乘 φ'(h^{(ℓ)})。transpose 来自坐标映射，不是约定性的装饰。",
+          "每个 weight W^{(ℓ-1)}_{ij} 把 presynaptic activation z^{(ℓ-1)}_j 贡献给 postsynaptic preactivation h^{(ℓ)}_i。于是 ∂L/∂W_{ij}=δ_i z_j，整个 matrix gradient 是 outer product δ^{(ℓ)}(z^{(ℓ-1)})^T。batch training 对这些 outer products 求平均。",
+          "nonlinear activation 的 derivative 决定 error 是否能穿过该 unit。sigmoid saturated 时 derivative 很小，可造成 vanishing gradient；large weights 可造成 exploding gradient。ReLU 在正区 derivative 为 1、负区为 0，也可能产生 inactive units。backprop 是精确 chain-rule algorithm；它与 biological three-factor rule 的 outer-product 形式可比较，但 weight transport、global target 与 update timing 都是机制差异。"
+        ],
+        "keyPoints": [
+          "δ 是 loss 对 preactivation 的 derivative，不是 firing error 的直接生物实体。",
+          "hidden error recurrence 包含 downstream weight transpose 与 local activation derivative。",
+          "weight gradient 是 postsynaptic sensitivity 与 presynaptic activation 的 outer product。"
+        ],
+        "derivation": {
+          "title": "两层网络的 backprop recurrence",
+          "setup": "令 h^1=W^0x，z^1=φ(h^1)，h^2=W^1z^1，prediction=h^2；loss 为任意 differentiable scalar。",
+          "steps": [
+            {
+              "title": "定义 output sensitivity",
+              "explanation": "先直接由 loss 求 δ^2=∂L/∂h^2。对于 squared error L=1/2||y-h^2||^2，δ^2=h^2-y。",
+              "latex": "\\boldsymbol\\delta^{(2)}=\\frac{\\partial L}{\\partial\\mathbf h^{(2)}}"
+            },
+            {
+              "title": "把 sensitivity 传到 hidden preactivation",
+              "explanation": "chain rule 先通过 linear map 得 (W^1)^Tδ^2，再通过 elementwise nonlinearity 得 hidden δ。",
+              "latex": "\\boldsymbol\\delta^{(1)}=((W^{(1)})^{\\mathsf T}\\boldsymbol\\delta^{(2)})\\odot\\phi'(\\mathbf h^{(1)})"
+            },
+            {
+              "title": "形成两个 weight gradients",
+              "explanation": "每个 matrix gradient 是该层 postsynaptic δ 与进入该层的 activation 的 outer product，因此 shape 自动匹配。",
+              "latex": "\\frac{\\partial L}{\\partial W^{(1)}}=\\boldsymbol\\delta^{(2)}(\\mathbf z^{(1)})^{\\mathsf T},\\quad \\frac{\\partial L}{\\partial W^{(0)}}=\\boldsymbol\\delta^{(1)}\\mathbf x^{\\mathsf T}"
+            }
+          ],
+          "symbolNotes": [
+            "若 W^0 是 H×N、W^1 是 O×H，则 δ^1 是 H×1、δ^2 是 O×1，两个 gradients 分别为 H×N 与 O×H。",
+            "⊙ 是 elementwise product；把它误写成 matrix multiplication 会改变 shape 和数值含义。"
+          ],
+          "unitsCheck": "δ 对 preactivation 的单位是 loss/preactivation；乘 presynaptic activation 后得到 loss/weight，与 gradient 定义一致。",
+          "limitCheck": "若某 hidden unit 的 φ'=0，它在当前 sample 上不给 upstream weights 传 gradient；这不表示该 unit 永久无用，但连续 inactive 会阻断学习。"
+        },
+        "workedExample": {
+          "title": "按 shape 手算一条 backprop 路径",
+          "problem": "取 x=(1,2)^T，W^0=[[1,0],[0,1]]，φ 为 identity，W^1=(1,-1)，target y=0，loss=1/2(yhat-y)^2。",
+          "steps": [
+            "hidden z^1=W^0x=(1,2)^T；prediction yhat=(1,-1)·(1,2)=-1。",
+            "δ^2=yhat-y=-1；δ^1=(W^1)^Tδ^2=(-1,1)^T。",
+            "∂L/∂W^1=δ^2(z^1)^T=(-1,-2)；∂L/∂W^0=δ^1x^T=[[-1,-2],[1,2]]。"
+          ],
+          "result": "两个 gradient 的 shape 分别为 1×2 与 2×2，并可由 local outer products 逐项核对。",
+          "sanityCheck": "对 W^1_1 微小增加会让 yhat 增加；当前 residual 为 -1，增加 yhat 会接近 target 0，因此 gradient 对 W^1_1 为负，negative-gradient update 确实增加该 weight。"
+        },
+        "selfCheck": {
+          "prompt": "backprop error recurrence 为什么使用 downstream weight 的 transpose？",
+          "answer": "forward map W 把 hidden coordinates 映到 downstream coordinates；chain rule 要把 downstream scalar sensitivities 汇总回每个 hidden coordinate，Jacobian 的反向乘法正是 W^Tδ，shape 也由此从 downstream dimension 回到 hidden dimension。"
+        },
+        "pitfalls": [
+          "把 δ 称为在生物神经元中实际向后传播的 error molecule，而不区分计算 derivative 与机制实现。",
+          "只记 recurrence 公式，不逐层标 h、z、δ 和 W 的 shape，容易在 transpose 或 elementwise derivative 处出错。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L11-FIG-A1",
+      "lecture": 11,
+      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "moduleId": "L11-M1",
+      "title": "负梯度沿局部斜率下降损失",
+      "alt": "归一化的一维凸损失曲线和一串逐步接近最低点的梯度下降迭代点。",
+      "caption": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 Δw=-η∇L 沿相反方向移动。图中的 marker 只表示归一化的迭代顺序，不是实验数据；它说明合适步长可逐次靠近 minimum，但 Taylor 近似不能保证过大的 learning rate 仍会下降。",
+      "sourceRefs": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 1
+        },
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 2
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "参数 w（归一化）",
+      "yLabel": "loss L(w)（归一化）",
+      "curves": [
+        {
+          "label": "凸 loss",
+          "points": [
+            [
+              5,
+              95
+            ],
+            [
+              15,
+              66
+            ],
+            [
+              25,
+              42
+            ],
+            [
+              35,
+              24
+            ],
+            [
+              45,
+              13
+            ],
+            [
+              50,
+              11
+            ],
+            [
+              55,
+              13
+            ],
+            [
+              65,
+              24
+            ],
+            [
+              75,
+              42
+            ],
+            [
+              85,
+              66
+            ],
+            [
+              95,
+              95
+            ]
+          ]
+        },
+        {
+          "label": "gradient steps",
+          "points": [
+            [
+              12,
+              74
+            ],
+            [
+              31,
+              30
+            ],
+            [
+              43,
+              15
+            ],
+            [
+              49,
+              11
+            ]
+          ],
+          "dashed": true,
+          "markers": true
+        }
+      ],
+      "annotations": [
+        {
+          "x": 50,
+          "y": 11,
+          "label": "minimum"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 Taylor expansion 到 gradient descent",
@@ -180,9 +548,9 @@
       "expression": "ŵ = (XX T )−1 Xy",
       "latex": "\\hat{\\mathbf{w}}=(XX^{\\mathsf{T}})^{-1}X\\mathbf{y}",
       "conditions": "XX^T invertible",
-      "sectionId": "lecture-11-source-3",
+      "sectionId": "lecture-11-source-5",
       "sourceFile": "Lecture11-MachineLearning.pdf",
-      "sourcePage": 3
+      "sourcePage": 5
     },
     {
       "id": "L11-F05",
@@ -320,7 +688,42 @@
     "需避免把 backprop 描述成\"误差直接传回神经元\"的生物机制；清楚标为训练算法，并讨论与 three-factor plasticity 的形式联系和机制差异。"
   ],
   "errata": [
-    "1. Page 3 的 closed form 依赖 X 的 orientation；这里采用 X∈R^{N×P}、y∈R^{P×1}。 2. Page 6 关于 2012 deep learning 与后续 ChatGPT 的旁注属于非正式历史连接，不应解释为 AlexNet authors 直接\"发明 ChatGPT\"。 3. backprop 与 three-factor plasticity 只在 outer-product/error-gating 形式上相似，biological transport/mechanism 不同。"
+    {
+      "id": "L11-E01",
+      "lecture": 11,
+      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "kind": "caution",
+      "sourceFile": "Lecture11-MachineLearning.pdf",
+      "sourcePage": 3,
+      "sectionId": "L11-M2",
+      "originalIssue": "Page 3 的 closed form 依赖 X 的 orientation；这里采用 X∈R^{N×P}、y∈R^{P×1}。",
+      "explanation": "采用原稿 orientation：X∈R^{N×P} 的每一列是 sample，w∈R^{N×1}，y∈R^{P×1}，prediction=X^Tw。",
+      "correction": null
+    },
+    {
+      "id": "L11-E02",
+      "lecture": 11,
+      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "kind": "caution",
+      "sourceFile": "Lecture11-MachineLearning.pdf",
+      "sourcePage": 6,
+      "sectionId": "lecture-11-source-6",
+      "originalIssue": "Page 6 关于 2012 deep learning 与后续 ChatGPT 的旁注属于非正式历史连接，不应解释为 AlexNet authors 直接\"发明 ChatGPT\"。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": "Page 6 关于 2012 deep learning 与后续 ChatGPT 的旁注属于非正式历史连接，不应解释为 AlexNet authors 直接\"发明 ChatGPT\""
+    },
+    {
+      "id": "L11-E03",
+      "lecture": 11,
+      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "kind": "caution",
+      "sourceFile": "Lecture11-MachineLearning.pdf",
+      "sourcePage": 4,
+      "sectionId": "L11-M2",
+      "originalIssue": "backprop 与 three-factor plasticity 只在 outer-product/error-gating 形式上相似，biological transport/mechanism 不同。",
+      "explanation": "它与 biological Hebb 在形式上相似，但 target y、batch access 与 signed error 不是普通 local coactivity。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -338,7 +741,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 11 讲：supervised algorithm 的三个设计元素？",
@@ -366,7 +769,7 @@
         "c": "该选项回答的是“XX^T singular 时怎么办？”。",
         "d": "该选项回答的是“∂L/∂W 为什么是 outer product？”。"
       },
-      "explanation": "architecture、loss function、learning/optimization rule。"
+      "explanation": "architecture、loss function、learning/optimization rule。 把 architecture、loss 和 learning rule 混成一个词，会无法判断性能变化来自 representation、objective 还是 optimizer。"
     },
     {
       "id": "L11-Q02",
@@ -383,7 +786,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：gradient 指向哪个方向？",
@@ -411,7 +814,7 @@
         "c": "这是“学习率（learning rate）”的定义。",
         "d": "这是“回归（regression）”的定义。"
       },
-      "explanation": "loss 增长最快方向。"
+      "explanation": "loss 增长最快方向。 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。"
     },
     {
       "id": "L11-Q03",
@@ -428,7 +831,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "comparison",
       "cognitiveLevel": "analyze",
       "stem": "第 11 讲：为什么更新用 −η∇L？",
@@ -456,7 +859,7 @@
         "b": "这是“least-squares gradient”的适用条件。",
         "d": "这是“监督学习（supervised learning）”的定义。"
       },
-      "explanation": "一阶 loss change 为 −η||∇L||²≤0。"
+      "explanation": "一阶 loss change 为 −η||∇L||²≤0。 batch loss L=||y-X^Tw||^2/P。 判断依据：采用原稿 orientation：X∈R^{N×P} 的每一列是 sample，w∈R^{N×1}，y∈R^{P×1}，prediction=X^Tw。batch loss L=||y-X^Tw||^2/P。gradient 汇总每个 feature 与 residual 的 correlation，因此 update 中包含 Xy 这一 data-dependent Hebbian-like term。"
     },
     {
       "id": "L11-Q04",
@@ -473,7 +876,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "equation",
       "cognitiveLevel": "evaluate",
       "stem": "第 11 讲：linear regression gradient 中 Hebbian-like term 是什么？",
@@ -501,7 +904,7 @@
         "b": "这是“学习率（learning rate）”的定义。",
         "c": "该选项回答的是“supervised algorithm 的三个设计元素？”。"
       },
-      "explanation": "Xy/P（在负 gradient update 中增强 input-target coactivity）。"
+      "explanation": "Xy/P（在负 gradient update 中增强 input-target coactivity）。 gradient 汇总每个 feature 与 residual 的 correlation，因此 update 中包含 Xy 这一 data-dependent Hebbian-like term。"
     },
     {
       "id": "L11-Q05",
@@ -518,7 +921,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：XX^T singular 时怎么办？",
@@ -546,7 +949,7 @@
         "c": "该选项回答的是“linear regression gradient 中 Hebbian-like term 是什么？”。",
         "d": "该选项回答的是“∂L/∂W 为什么是 outer product？”。"
       },
-      "explanation": "使用 pseudoinverse、ridge regularization 或移除共线 dimensions。"
+      "explanation": "使用 pseudoinverse、ridge regularization 或移除共线 dimensions。 forward pass 保存每层 preactivation h^{(ℓ)}=W^{(ℓ-1)}z^{(ℓ-1)} 与 activation z^{(ℓ)}=φ(h^{(ℓ)})。"
     },
     {
       "id": "L11-Q06",
@@ -563,7 +966,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 11 讲：deep linear network 的 input-output map 为什么仍 linear？",
@@ -591,7 +994,7 @@
         "c": "该选项回答的是“gradient 指向哪个方向？”。",
         "d": "这是“回归（regression）”的定义。"
       },
-      "explanation": "矩阵乘积仍是一个矩阵 M。"
+      "explanation": "矩阵乘积仍是一个矩阵 M。 一个 hidden activation 对所有 downstream preactivations 都有影响，因此 sensitivity 先乘 (W^{(ℓ)})^T 汇总 downstream error，再逐元素乘 φ'(h^{(ℓ)})。"
     },
     {
       "id": "L11-Q07",
@@ -608,7 +1011,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：但其 training 为什么可非凸？",
@@ -636,7 +1039,7 @@
         "b": "这是“损失函数（loss function）”的定义。",
         "d": "该选项回答的是“activation derivative 的作用？”。"
       },
-      "explanation": "M 被多层 factors 相乘参数化，loss 对单层联合参数有乘法耦合和对称性。"
+      "explanation": "M 被多层 factors 相乘参数化，loss 对单层联合参数有乘法耦合和对称性。 然而同一个 M 可由许多 layer factorizations 表示，loss 对单个 layer weights 含 products，因此 parameter landscape 与 learning dynamics 非线性。"
     },
     {
       "id": "L11-Q08",
@@ -653,7 +1056,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 11 讲：backprop 中 weight transpose 的作用？",
@@ -681,7 +1084,7 @@
         "b": "该选项回答的是“∂L/∂W 为什么是 outer product？”。",
         "c": "这是“layer weight gradient”的适用条件。"
       },
-      "explanation": "把下一层 error sensitivity 映射回当前层 units。"
+      "explanation": "把下一层 error sensitivity 映射回当前层 units。 一个 hidden activation 对所有 downstream preactivations 都有影响，因此 sensitivity 先乘 (W^{(ℓ)})^T 汇总 downstream error，再逐元素乘 φ'(h^{(ℓ)})。"
     },
     {
       "id": "L11-Q09",
@@ -698,7 +1101,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 11 讲：activation derivative 的作用？",
@@ -726,7 +1129,7 @@
         "c": "这是“局部导数（local derivative）”的定义。",
         "d": "该选项回答的是“∂L/∂W 为什么是 outer product？”。"
       },
-      "explanation": "按本层 nonlinearity 的局部 gain 调制反传 error。"
+      "explanation": "按本层 nonlinearity 的局部 gain 调制反传 error。 nonlinear activation 的 derivative 决定 error 是否能穿过该 unit。"
     },
     {
       "id": "L11-Q10",
@@ -743,7 +1146,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：∂L/∂W 为什么是 outer product？",
@@ -771,7 +1174,7 @@
         "c": "该选项回答的是“supervised algorithm 的三个设计元素？”。",
         "d": "该选项回答的是“linear regression gradient 中 Hebbian-like term 是什么？”。"
       },
-      "explanation": "每个 weight 连接 presynaptic activation 与 postsynaptic error。"
+      "explanation": "每个 weight 连接 presynaptic activation 与 postsynaptic error。 每个 weight W^{(ℓ-1)}_{ij} 把 presynaptic activation z^{(ℓ-1)}_j 贡献给 postsynaptic preactivation h^{(ℓ)}_i。"
     },
     {
       "id": "L11-Q11",
@@ -788,7 +1191,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 11 讲：backprop 是不是 biological mechanism？",
@@ -816,7 +1219,7 @@
         "b": "这是“损失函数（loss function）”的定义。",
         "d": "该选项回答的是“activation derivative 的作用？”。"
       },
-      "explanation": "它是训练算法；可与 biological rules 比较形式，但不能直接等同。"
+      "explanation": "它是训练算法；可与 biological rules 比较形式，但不能直接等同。 backprop 是精确 chain-rule algorithm；它与 biological three-factor rule 的 outer-product 形式可比较，但 weight transport、global target 与 update timing 都是机制差异。"
     },
     {
       "id": "L11-Q12",
@@ -833,7 +1236,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：learning rate 太大会发生什么？",
@@ -861,55 +1264,10 @@
         "b": "这条推理对应 Lecture11-MachineLearning.pdf 第 2 页。",
         "c": "这条推理对应 Lecture11-MachineLearning.pdf 第 4 页。"
       },
-      "explanation": "越过 valley、oscillate 或 divergence。"
+      "explanation": "越过 valley、oscillate 或 divergence。 first-order Taylor approximation 只在 step 足够小时可靠，所以 learning rate η 既不能大到跨过 valley，也不能小到训练停滞。"
     },
     {
       "id": "L11-Q13",
-      "lecture": 11,
-      "sectionId": "lecture-11-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture11-MachineLearning.pdf",
-          "page": 1,
-          "section": "lecture-11-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 11 讲：根据 Lecture11-MachineLearning.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "supervised learning、classification/regression、architecture/loss/learning rule、deep network notation。"
-        },
-        {
-          "id": "b",
-          "text": "repeated chain-rule derivation、backpropagated error。"
-        },
-        {
-          "id": "c",
-          "text": "nonlinear activation derivative 与 backprop summary。"
-        },
-        {
-          "id": "d",
-          "text": "Hebbian/stabilization decomposition；closed-form regression solution。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
-        "c": "该陈述解释的是“nonlinear activation derivative 与 backprop summary”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。"
-      },
-      "explanation": "supervised learning、classification/regression、architecture/loss/learning rule、deep network notation。"
-    },
-    {
-      "id": "L11-Q14",
       "lecture": 11,
       "sectionId": "lecture-11-source-1",
       "sourceAnchors": [
@@ -930,11 +1288,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
+          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
         },
         {
           "id": "b",
-          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
+          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
         },
         {
           "id": "c",
@@ -945,16 +1303,16 @@
           "text": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
+        "b": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
         "c": "该选项回答的是“supervised algorithm 的三个设计元素？”。",
         "d": "这条推理对应 Lecture11-MachineLearning.pdf 第 2 页。"
       },
-      "explanation": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
+      "explanation": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。 手写数字任务中 x 是 image、y 是离散 digit label，属于 classification；optic-flow 任务中 x 可是一对相邻 frames、y 是每个位置的连续 motion vector，属于 regression。"
     },
     {
-      "id": "L11-Q15",
+      "id": "L11-Q14",
       "lecture": 11,
       "sectionId": "lecture-11-source-1",
       "sourceAnchors": [
@@ -968,14 +1326,59 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "第 11 讲：阅读与\"supervised learning、classification/regression、architecture/loss/learning rule\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "stem": "第 11 讲：阅读\"负梯度沿局部斜率下降损失\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
+        },
+        {
+          "id": "b",
+          "text": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 Δw=-η∇L 沿相反方向移动。"
+        },
+        {
+          "id": "c",
+          "text": "architecture、loss function、learning/optimization rule。"
+        },
+        {
+          "id": "d",
+          "text": "M 被多层 factors 相乘参数化，loss 对单层联合参数有乘法耦合和对称性。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture11-MachineLearning.pdf 第 1 页。",
+        "c": "该选项回答的是“supervised algorithm 的三个设计元素？”。",
+        "d": "该选项回答的是“但其 training 为什么可非凸？”。"
+      },
+      "explanation": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 Δw=-η∇L 沿相反方向移动。 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。"
+    },
+    {
+      "id": "L11-Q15",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 2,
+          "section": "lecture-11-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Machine Learning",
+        "Lecture11-MachineLearning.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 11 讲：若要解释\"linear regression、squared loss、Taylor expansion、gradient descent、learning rule\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
         },
         {
           "id": "b",
@@ -983,7 +1386,7 @@
         },
         {
           "id": "c",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
         },
         {
           "id": "d",
@@ -992,149 +1395,14 @@
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
-        "b": "这条推理对应 Lecture11-MachineLearning.pdf 第 1 页。",
+        "a": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。",
         "d": "该选项回答的是“supervised algorithm 的三个设计元素？”。"
       },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+      "explanation": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。"
     },
     {
       "id": "L11-Q16",
-      "lecture": 11,
-      "sectionId": "lecture-11-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture11-MachineLearning.pdf",
-          "page": 2,
-          "section": "lecture-11-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 11 讲：根据 Lecture11-MachineLearning.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "repeated chain-rule derivation、backpropagated error。"
-        },
-        {
-          "id": "b",
-          "text": "nonlinear activation derivative 与 backprop summary。"
-        },
-        {
-          "id": "c",
-          "text": "Hebbian/stabilization decomposition；closed-form regression solution。"
-        },
-        {
-          "id": "d",
-          "text": "linear regression、squared loss、Taylor expansion、gradient descent、learning rule。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
-        "b": "该陈述解释的是“nonlinear activation derivative 与 backprop summary”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。"
-      },
-      "explanation": "linear regression、squared loss、Taylor expansion、gradient descent、learning rule。"
-    },
-    {
-      "id": "L11-Q17",
-      "lecture": 11,
-      "sectionId": "lecture-11-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture11-MachineLearning.pdf",
-          "page": 2,
-          "section": "lecture-11-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
-      ],
-      "difficulty": 2,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 11 讲：若要解释\"linear regression、squared loss、Taylor expansion、gradient descent、learning rule\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
-        },
-        {
-          "id": "b",
-          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
-        },
-        {
-          "id": "c",
-          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
-        },
-        {
-          "id": "d",
-          "text": "architecture、loss function、learning/optimization rule。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。",
-        "d": "该选项回答的是“supervised algorithm 的三个设计元素？”。"
-      },
-      "explanation": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
-    },
-    {
-      "id": "L11-Q18",
-      "lecture": 11,
-      "sectionId": "lecture-11-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture11-MachineLearning.pdf",
-          "page": 3,
-          "section": "lecture-11-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 11 讲：根据 Lecture11-MachineLearning.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "supervised learning、classification/regression、architecture/loss/learning rule、deep network notation。"
-        },
-        {
-          "id": "b",
-          "text": "Hebbian/stabilization decomposition；closed-form regression solution。"
-        },
-        {
-          "id": "c",
-          "text": "linear regression、squared loss、Taylor expansion、gradient descent、learning rule。"
-        },
-        {
-          "id": "d",
-          "text": "deep linear regression 与 backprop setup。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“supervised learning、classification/regression、architecture/loss/learning rule”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“deep linear regression 与 backprop setup”，不是题干指定的关系。"
-      },
-      "explanation": "Hebbian/stabilization decomposition；closed-form regression solution。"
-    },
-    {
-      "id": "L11-Q19",
       "lecture": 11,
       "sectionId": "lecture-11-source-3",
       "sourceAnchors": [
@@ -1163,68 +1431,23 @@
         },
         {
           "id": "c",
-          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
-        },
-        {
-          "id": "d",
           "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
-        "b": "该陈述解释的是“deep linear regression 与 backprop setup”，不是题干指定的关系。",
-        "d": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。"
-      },
-      "explanation": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
-    },
-    {
-      "id": "L11-Q20",
-      "lecture": 11,
-      "sectionId": "lecture-11-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture11-MachineLearning.pdf",
-          "page": 4,
-          "section": "lecture-11-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 11 讲：根据 Lecture11-MachineLearning.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "repeated chain-rule derivation、backpropagated error。"
-        },
-        {
-          "id": "b",
-          "text": "Hebbian/stabilization decomposition；closed-form regression solution。"
-        },
-        {
-          "id": "c",
-          "text": "nonlinear activation derivative 与 backprop summary。"
         },
         {
           "id": "d",
-          "text": "deep linear regression 与 backprop setup。"
+          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。",
-        "c": "该陈述解释的是“nonlinear activation derivative 与 backprop summary”，不是题干指定的关系。"
+        "a": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
+        "b": "该陈述解释的是“deep linear regression 与 backprop setup”，不是题干指定的关系。",
+        "c": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。"
       },
-      "explanation": "deep linear regression 与 backprop setup。"
+      "explanation": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。 然而同一个 M 可由许多 layer factorizations 表示，loss 对单个 layer weights 含 products，因此 parameter landscape 与 learning dynamics 非线性。"
     },
     {
-      "id": "L11-Q21",
+      "id": "L11-Q17",
       "lecture": 11,
       "sectionId": "lecture-11-source-4",
       "sourceAnchors": [
@@ -1238,7 +1461,7 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 11 讲：若要解释\"deep linear regression 与 backprop setup\"中的机制或推导，哪条推理链成立？",
@@ -1266,10 +1489,10 @@
         "c": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。",
         "d": "该陈述解释的是“repeated chain-rule derivation、backpropagated error”，不是题干指定的关系。"
       },
-      "explanation": "解释 deep linear network 的整体映射仍线性但 parameterization/learning dynamics 非线性。"
+      "explanation": "解释 deep linear network 的整体映射仍线性但 parameterization/learning dynamics 非线性。 deep linear network 令所有 activations 为 identity，则 overall mapping M=W^{(L)}...W^{(0)} 仍线性：yhat=Mx。"
     },
     {
-      "id": "L11-Q22",
+      "id": "L11-Q18",
       "lecture": 11,
       "sectionId": "lecture-11-source-5",
       "sourceAnchors": [
@@ -1283,55 +1506,55 @@
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 11 讲：根据 Lecture11-MachineLearning.pdf 第 5 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 11 讲：若要解释\"repeated chain-rule derivation、backpropagated error\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "supervised learning、classification/regression、architecture/loss/learning rule、deep network notation。"
+          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
         },
         {
           "id": "b",
-          "text": "repeated chain-rule derivation、backpropagated error。"
+          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
         },
         {
           "id": "c",
-          "text": "linear regression、squared loss、Taylor expansion、gradient descent、learning rule。"
+          "text": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
         },
         {
           "id": "d",
-          "text": "Hebbian/stabilization decomposition；closed-form regression solution。"
+          "text": "解释 deep linear network 的整体映射仍线性但 parameterization/learning dynamics 非线性。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“supervised learning、classification/regression、architecture/loss/learning rule”，不是题干指定的关系。",
         "c": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。"
+        "d": "该陈述解释的是“deep linear regression 与 backprop setup”，不是题干指定的关系。"
       },
-      "explanation": "repeated chain-rule derivation、backpropagated error。"
+      "explanation": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。 backprop 是精确 chain-rule algorithm；它与 biological three-factor rule 的 outer-product 形式可比较，但 weight transport、global target 与 update timing 都是机制差异。"
     },
     {
-      "id": "L11-Q23",
+      "id": "L11-Q19",
       "lecture": 11,
-      "sectionId": "lecture-11-source-5",
+      "sectionId": "lecture-11-source-6",
       "sourceAnchors": [
         {
           "file": "Lecture11-MachineLearning.pdf",
-          "page": 5,
-          "section": "lecture-11-source-5"
+          "page": 6,
+          "section": "lecture-11-source-6"
         }
       ],
       "conceptTags": [
         "Machine Learning",
         "Lecture11-MachineLearning.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
-      "stem": "第 11 讲：若要解释\"repeated chain-rule derivation、backpropagated error\"中的机制或推导，哪条推理链成立？",
+      "stem": "第 11 讲：若要解释\"nonlinear activation derivative 与 backprop summary\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
@@ -1356,80 +1579,34 @@
         "b": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
         "d": "该陈述解释的是“deep linear regression 与 backprop setup”，不是题干指定的关系。"
       },
-      "explanation": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
+      "explanation": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。 nonlinear activation 的 derivative 决定 error 是否能穿过该 unit。"
     },
     {
-      "id": "L11-Q24",
+      "id": "L11-Q20",
       "lecture": 11,
-      "sectionId": "lecture-11-source-6",
+      "sectionId": "lecture-11-source-1",
       "sourceAnchors": [
         {
           "file": "Lecture11-MachineLearning.pdf",
-          "page": 6,
-          "section": "lecture-11-source-6"
+          "page": 1,
+          "section": "lecture-11-source-1"
         }
       ],
       "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
+        "Supervised learning 的组成与 gradient descent"
       ],
-      "difficulty": 4,
-      "type": "concept",
+      "difficulty": 2,
+      "type": "equation",
       "cognitiveLevel": "understand",
-      "stem": "第 11 讲：根据 Lecture11-MachineLearning.pdf 第 6 页，哪一项概括了该页主题？",
+      "stem": "第 11 讲：为什么\"gradient 指向最小值\"这句话不准确？",
       "choices": [
         {
           "id": "a",
-          "text": "supervised learning、classification/regression、architecture/loss/learning rule、deep network notation。"
+          "text": "loss 对 product W^L...W^0 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
         },
         {
           "id": "b",
-          "text": "linear regression、squared loss、Taylor expansion、gradient descent、learning rule。"
-        },
-        {
-          "id": "c",
-          "text": "Hebbian/stabilization decomposition；closed-form regression solution。"
-        },
-        {
-          "id": "d",
-          "text": "nonlinear activation derivative 与 backprop summary。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“supervised learning、classification/regression、architecture/loss/learning rule”，不是题干指定的关系。",
-        "b": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Hebbian/stabilization decomposition”，不是题干指定的关系。"
-      },
-      "explanation": "nonlinear activation derivative 与 backprop summary。"
-    },
-    {
-      "id": "L11-Q25",
-      "lecture": 11,
-      "sectionId": "lecture-11-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture11-MachineLearning.pdf",
-          "page": 6,
-          "section": "lecture-11-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Machine Learning",
-        "Lecture11-MachineLearning.pdf"
-      ],
-      "difficulty": 5,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 11 讲：若要解释\"nonlinear activation derivative 与 backprop summary\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
-        },
-        {
-          "id": "b",
-          "text": "用 digit classification 与 optic-flow regression 解释 supervised dataset(x,y)；区分 architecture、loss、optimization/learning rule。"
+          "text": "forward map W 把 hidden coordinates 映到 downstream coordinates；chain rule 要把 downstream scalar sensitivities 汇总回每个 hidden coordinate，Jacobian 的反向乘法正是 W^Tδ，shape 也由此从 downstream dimension 回到 hidden dimension。"
         },
         {
           "id": "c",
@@ -1437,19 +1614,377 @@
         },
         {
           "id": "d",
-          "text": "解释 deep linear network 的整体映射仍线性但 parameterization/learning dynamics 非线性。"
+          "text": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这条推理对应 Lecture11-MachineLearning.pdf 第 2 页。"
+      },
+      "explanation": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。first-order Taylor approximation 只在 step 足够小时可靠，所以 learning rate η 既不能大到跨过 valley，也不能小到训练停滞。负 gradient 是局部下降方向，不保证深网络一次就到 global optimum。"
+    },
+    {
+      "id": "L11-Q21",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 1,
+          "section": "lecture-11-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Supervised learning 的组成与 gradient descent",
+        "一次可手算的 gradient step"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 11 讲：完成\"x=(1,2)^T，y=5，w=(0,0)^T，L=1/2(y-w^Tx)^2，η=0.1。计算更新与新 loss。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。"
+        },
+        {
+          "id": "b",
+          "text": "feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。"
+        },
+        {
+          "id": "c",
+          "text": "两个 gradient 的 shape 分别为 1×2 与 2×2，并可由 local outer products 逐项核对。"
+        },
+        {
+          "id": "d",
+          "text": "architecture、loss function、learning/optimization rule。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“supervised learning、classification/regression、architecture/loss/learning rule”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear regression、squared loss、Taylor expansion、gradient descent、learning rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“deep linear regression 与 backprop setup”，不是题干指定的关系。"
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“supervised algorithm 的三个设计元素？”。"
       },
-      "explanation": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
+      "explanation": "负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。 计算路径：初始 prediction 为 0，residual e=5，gradient=-ex=(-5,-10)^T。 更新 w_new=w-ηgradient=(0.5,1.0)^T。 新 prediction=0.5+2=2.5，新 loss=1/2(5-2.5)^2=3.125；初始 loss=12.5。"
+    },
+    {
+      "id": "L11-Q22",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 1,
+          "section": "lecture-11-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Supervised learning 的组成与 gradient descent",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 11 讲：得到\"负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若误用 X^TX 在本例恰好仍 diagonal，可能掩盖 orientation bug；一般 non-square X 时 shape 会立即暴露错误。"
+        },
+        {
+          "id": "b",
+          "text": "gradient 与 w 都是 2×1；若误去掉更新负号，w 会变成 (-0.5,-1)，prediction=-2.5，loss 增大到 28.125。"
+        },
+        {
+          "id": "c",
+          "text": "对 W^1_1 微小增加会让 yhat 增加；当前 residual 为 -1，增加 yhat 会接近 target 0，因此 gradient 对 W^1_1 为负，negative-gradient update 确实增加该 weight。"
+        },
+        {
+          "id": "d",
+          "text": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture11-MachineLearning.pdf 第 2 页。"
+      },
+      "explanation": "gradient 与 w 都是 2×1；若误去掉更新负号，w 会变成 (-0.5,-1)，prediction=-2.5，loss 增大到 28.125。 这个检查对应题设\"x=(1,2)^T，y=5，w=(0,0)^T，L=1/2(y-w^Tx)^2，η=0.1。计算更新与新 loss。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L11-Q23",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 3,
+          "section": "lecture-11-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Linear regression：gradient decomposition、normal equation 与 deep linear factorization"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 11 讲：为什么 deep linear network 的 overall mapping 线性，却不能直接把所有 layer 的训练都当成普通 convex linear regression？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+        },
+        {
+          "id": "b",
+          "text": "forward map W 把 hidden coordinates 映到 downstream coordinates；chain rule 要把 downstream scalar sensitivities 汇总回每个 hidden coordinate，Jacobian 的反向乘法正是 W^Tδ，shape 也由此从 downstream dimension 回到 hidden dimension。"
+        },
+        {
+          "id": "c",
+          "text": "loss 对 product W^L...W^0 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+        },
+        {
+          "id": "d",
+          "text": "因此，解释 deep linear network 的整体映射仍线性但 parameterization/learning dynamics 非线性。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture11-MachineLearning.pdf 第 1 页。"
+      },
+      "explanation": "loss 对 product W^L...W^0 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。 deep linear network 令所有 activations 为 identity，则 overall mapping M=W^{(L)}...W^{(0)} 仍线性：yhat=Mx。然而同一个 M 可由许多 layer factorizations 表示，loss 对单个 layer weights 含 products，因此 parameter landscape 与 learning dynamics 非线性。representation function 的线性不等于 optimization problem 为简单 convex regression。"
+    },
+    {
+      "id": "L11-Q24",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 3,
+          "section": "lecture-11-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Linear regression：gradient decomposition、normal equation 与 deep linear factorization",
+        "两 feature、两 sample 的 closed-form fit"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 11 讲：完成\"X=[[1,0],[0,2]]，即 columns 为 (1,0)^T 与 (0,2)^T；targets y=(3,4)^T。求 what。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。"
+        },
+        {
+          "id": "b",
+          "text": "两个 gradient 的 shape 分别为 1×2 与 2×2，并可由 local outer products 逐项核对。"
+        },
+        {
+          "id": "c",
+          "text": "因此，解释 deep linear network 的整体映射仍线性但 parameterization/learning dynamics 非线性。"
+        },
+        {
+          "id": "d",
+          "text": "feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这条推理对应 Lecture11-MachineLearning.pdf 第 1 页。"
+      },
+      "explanation": "feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。 计算路径：XX^T=diag(1,4)，Xy=(3,8)^T。 (XX^T)^{-1}=diag(1,1/4)，所以 what=(3,2)^T。 predictions X^Twhat=(3,4)^T，与 targets 完全相同，residual 为零。"
+    },
+    {
+      "id": "L11-Q25",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 3,
+          "section": "lecture-11-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Linear regression：gradient decomposition、normal equation 与 deep linear factorization",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 11 讲：得到\"feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若误用 X^TX 在本例恰好仍 diagonal，可能掩盖 orientation bug；一般 non-square X 时 shape 会立即暴露错误。"
+        },
+        {
+          "id": "b",
+          "text": "gradient 与 w 都是 2×1；若误去掉更新负号，w 会变成 (-0.5,-1)，prediction=-2.5，loss 增大到 28.125。"
+        },
+        {
+          "id": "c",
+          "text": "对 W^1_1 微小增加会让 yhat 增加；当前 residual 为 -1，增加 yhat 会接近 target 0，因此 gradient 对 W^1_1 为负，negative-gradient update 确实增加该 weight。"
+        },
+        {
+          "id": "d",
+          "text": "每个 weight 连接 presynaptic activation 与 postsynaptic error。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“∂L/∂W 为什么是 outer product？”。"
+      },
+      "explanation": "若误用 X^TX 在本例恰好仍 diagonal，可能掩盖 orientation bug；一般 non-square X 时 shape 会立即暴露错误。 这个检查对应题设\"X=[[1,0],[0,2]]，即 columns 为 (1,0)^T 与 (0,2)^T；targets y=(3,4)^T。求 what。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L11-Q26",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 5,
+          "section": "lecture-11-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Backpropagation：逐层 chain rule、error coordinates 与 weight gradient"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 11 讲：backprop error recurrence 为什么使用 downstream weight 的 transpose？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+        },
+        {
+          "id": "b",
+          "text": "forward map W 把 hidden coordinates 映到 downstream coordinates；chain rule 要把 downstream scalar sensitivities 汇总回每个 hidden coordinate，Jacobian 的反向乘法正是 W^Tδ，shape 也由此从 downstream dimension 回到 hidden dimension。"
+        },
+        {
+          "id": "c",
+          "text": "loss 对 product W^L...W^0 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+        },
+        {
+          "id": "d",
+          "text": "逐索引推导 backprop chain rule；明确 local derivative、weight transpose、error signal、activation derivative 的作用。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture11-MachineLearning.pdf 第 5 页。"
+      },
+      "explanation": "forward map W 把 hidden coordinates 映到 downstream coordinates；chain rule 要把 downstream scalar sensitivities 汇总回每个 hidden coordinate，Jacobian 的反向乘法正是 W^Tδ，shape 也由此从 downstream dimension 回到 hidden dimension。 nonlinear activation 的 derivative 决定 error 是否能穿过该 unit。sigmoid saturated 时 derivative 很小，可造成 vanishing gradient；large weights 可造成 exploding gradient。ReLU 在正区 derivative 为 1、负区为 0，也可能产生 inactive units。backprop 是精确 chain-rule algorithm；它与 biological three-factor rule 的 outer-product 形式可比较，但 weight transport、global target 与 update timing 都是机制差异。"
+    },
+    {
+      "id": "L11-Q27",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 5,
+          "section": "lecture-11-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Backpropagation：逐层 chain rule、error coordinates 与 weight gradient",
+        "按 shape 手算一条 backprop 路径"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 11 讲：完成\"取 x=(1,2)^T，W^0=[[1,0],[0,1]]，φ 为 identity，W^1=(1,-1)，target y=0，loss=1/2(yhat-y)^2。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。"
+        },
+        {
+          "id": "b",
+          "text": "feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。"
+        },
+        {
+          "id": "c",
+          "text": "两个 gradient 的 shape 分别为 1×2 与 2×2，并可由 local outer products 逐项核对。"
+        },
+        {
+          "id": "d",
+          "text": "architecture、loss function、learning/optimization rule。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“supervised algorithm 的三个设计元素？”。"
+      },
+      "explanation": "两个 gradient 的 shape 分别为 1×2 与 2×2，并可由 local outer products 逐项核对。 计算路径：hidden z^1=W^0x=(1,2)^T；prediction yhat=(1,-1)·(1,2)=-1。 δ^2=yhat-y=-1；δ^1=(W^1)^Tδ^2=(-1,1)^T。 ∂L/∂W^1=δ^2(z^1)^T=(-1,-2)；∂L/∂W^0=δ^1x^T=[[-1,-2],[1,2]]。"
+    },
+    {
+      "id": "L11-Q28",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 5,
+          "section": "lecture-11-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Backpropagation：逐层 chain rule、error coordinates 与 weight gradient",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 11 讲：得到\"两个 gradient 的 shape 分别为 1×2 与 2×2，并可由 local outer products 逐项核对。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "gradient 与 w 都是 2×1；若误去掉更新负号，w 会变成 (-0.5,-1)，prediction=-2.5，loss 增大到 28.125。"
+        },
+        {
+          "id": "b",
+          "text": "若误用 X^TX 在本例恰好仍 diagonal，可能掩盖 orientation bug；一般 non-square X 时 shape 会立即暴露错误。"
+        },
+        {
+          "id": "c",
+          "text": "从 squared-error loss 和 first-order Taylor expansion 推导 gradient descent；解释 gradient、learning rate、loss contours。"
+        },
+        {
+          "id": "d",
+          "text": "对 W^1_1 微小增加会让 yhat 增加；当前 residual 为 -1，增加 yhat 会接近 target 0，因此 gradient 对 W^1_1 为负，negative-gradient update 确实增加该 weight。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这条推理对应 Lecture11-MachineLearning.pdf 第 2 页。"
+      },
+      "explanation": "对 W^1_1 微小增加会让 yhat 增加；当前 residual 为 -1，增加 yhat 会接近 target 0，因此 gradient 对 W^1_1 为负，negative-gradient update 确实增加该 weight。 这个检查对应题设\"取 x=(1,2)^T，W^0=[[1,0],[0,1]]，φ 为 identity，W^1=(1,-1)，target y=0，loss=1/2(yhat-y)^2。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L11-Q29",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -1470,11 +2005,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "分类（classification）"
+          "text": "监督学习（supervised learning）"
         },
         {
           "id": "b",
-          "text": "监督学习（supervised learning）"
+          "text": "分类（classification）"
         },
         {
           "id": "c",
@@ -1485,16 +2020,16 @@
           "text": "架构（architecture）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“分类（classification）”指：预测离散 label。",
+        "b": "“分类（classification）”指：预测离散 label。",
         "c": "“回归（regression）”指：预测连续 target。",
         "d": "“架构（architecture）”指：模型变量如何连接与计算。"
       },
-      "explanation": "监督学习（supervised learning）：由 input-target pairs 学习预测。"
+      "explanation": "监督学习（supervised learning）：由 input-target pairs 学习预测。 supervised learning 给出 input-target pairs。"
     },
     {
-      "id": "L11-Q27",
+      "id": "L11-Q30",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -1508,7 +2043,7 @@
         "分类",
         "classification"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"预测离散 label。\"称为什么？",
@@ -1519,27 +2054,27 @@
         },
         {
           "id": "b",
-          "text": "架构（architecture）"
+          "text": "分类（classification）"
         },
         {
           "id": "c",
-          "text": "分类（classification）"
+          "text": "架构（architecture）"
         },
         {
           "id": "d",
           "text": "损失函数（loss function）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“回归（regression）”指：预测连续 target。",
-        "b": "“架构（architecture）”指：模型变量如何连接与计算。",
+        "c": "“架构（architecture）”指：模型变量如何连接与计算。",
         "d": "“损失函数（loss function）”指：量化 prediction 与 target 不一致的 objective。"
       },
-      "explanation": "分类（classification）：预测离散 label。"
+      "explanation": "分类（classification）：预测离散 label。 手写数字任务中 x 是 image、y 是离散 digit label，属于 classification；optic-flow 任务中 x 可是一对相邻 frames、y 是每个位置的连续 motion vector，属于 regression。"
     },
     {
-      "id": "L11-Q28",
+      "id": "L11-Q31",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -1553,7 +2088,7 @@
         "回归",
         "regression"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"预测连续 target。\"称为什么？",
@@ -1568,23 +2103,23 @@
         },
         {
           "id": "c",
-          "text": "梯度（gradient）"
+          "text": "回归（regression）"
         },
         {
           "id": "d",
-          "text": "回归（regression）"
+          "text": "梯度（gradient）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“架构（architecture）”指：模型变量如何连接与计算。",
         "b": "“损失函数（loss function）”指：量化 prediction 与 target 不一致的 objective。",
-        "c": "“梯度（gradient）”指：各参数偏导数组成、指向最快上升方向的向量。"
+        "d": "“梯度（gradient）”指：各参数偏导数组成、指向最快上升方向的向量。"
       },
-      "explanation": "回归（regression）：预测连续 target。"
+      "explanation": "回归（regression）：预测连续 target。 手写数字任务中 x 是 image、y 是离散 digit label，属于 classification；optic-flow 任务中 x 可是一对相邻 frames、y 是每个位置的连续 motion vector，属于 regression。"
     },
     {
-      "id": "L11-Q29",
+      "id": "L11-Q32",
       "lecture": 11,
       "sectionId": "lecture-11-source-1",
       "sourceAnchors": [
@@ -1598,38 +2133,38 @@
         "架构",
         "architecture"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"模型变量如何连接与计算。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "架构（architecture）"
-        },
-        {
-          "id": "b",
           "text": "损失函数（loss function）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "梯度（gradient）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "学习率（learning rate）"
+        },
+        {
+          "id": "d",
+          "text": "架构（architecture）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“损失函数（loss function）”指：量化 prediction 与 target 不一致的 objective。",
-        "c": "“梯度（gradient）”指：各参数偏导数组成、指向最快上升方向的向量。",
-        "d": "“学习率（learning rate）”指：每次 gradient step 的尺度。"
+        "a": "“损失函数（loss function）”指：量化 prediction 与 target 不一致的 objective。",
+        "b": "“梯度（gradient）”指：各参数偏导数组成、指向最快上升方向的向量。",
+        "c": "“学习率（learning rate）”指：每次 gradient step 的尺度。"
       },
-      "explanation": "架构（architecture）：模型变量如何连接与计算。"
+      "explanation": "架构（architecture）：模型变量如何连接与计算。 architecture 描述 prediction function。"
     },
     {
-      "id": "L11-Q30",
+      "id": "L11-Q33",
       "lecture": 11,
       "sectionId": "lecture-11-source-1",
       "sourceAnchors": [
@@ -1643,18 +2178,18 @@
         "损失函数",
         "loss function"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"量化 prediction 与 target 不一致的 objective。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "梯度（gradient）"
+          "text": "损失函数（loss function）"
         },
         {
           "id": "b",
-          "text": "损失函数（loss function）"
+          "text": "梯度（gradient）"
         },
         {
           "id": "c",
@@ -1665,16 +2200,16 @@
           "text": "正规方程（normal equation）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“梯度（gradient）”指：各参数偏导数组成、指向最快上升方向的向量。",
+        "b": "“梯度（gradient）”指：各参数偏导数组成、指向最快上升方向的向量。",
         "c": "“学习率（learning rate）”指：每次 gradient step 的尺度。",
         "d": "“正规方程（normal equation）”指：least-squares optimum 的线性方程。"
       },
       "explanation": "损失函数（loss function）：量化 prediction 与 target 不一致的 objective。"
     },
     {
-      "id": "L11-Q31",
+      "id": "L11-Q34",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -1699,27 +2234,27 @@
         },
         {
           "id": "b",
-          "text": "正规方程（normal equation）"
+          "text": "梯度（gradient）"
         },
         {
           "id": "c",
-          "text": "梯度（gradient）"
+          "text": "正规方程（normal equation）"
         },
         {
           "id": "d",
           "text": "反向传播（backpropagation）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“学习率（learning rate）”指：每次 gradient step 的尺度。",
-        "b": "“正规方程（normal equation）”指：least-squares optimum 的线性方程。",
+        "c": "“正规方程（normal equation）”指：least-squares optimum 的线性方程。",
         "d": "“反向传播（backpropagation）”指：高效计算多层 chain-rule gradients 的算法。"
       },
-      "explanation": "梯度（gradient）：各参数偏导数组成、指向最快上升方向的向量。"
+      "explanation": "梯度（gradient）：各参数偏导数组成、指向最快上升方向的向量。 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。"
     },
     {
-      "id": "L11-Q32",
+      "id": "L11-Q35",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -1733,7 +2268,7 @@
         "学习率",
         "learning rate"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"每次 gradient step 的尺度。\"称为什么？",
@@ -1748,23 +2283,23 @@
         },
         {
           "id": "c",
-          "text": "局部导数（local derivative）"
+          "text": "学习率（learning rate）"
         },
         {
           "id": "d",
-          "text": "学习率（learning rate）"
+          "text": "局部导数（local derivative）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“正规方程（normal equation）”指：least-squares optimum 的线性方程。",
         "b": "“反向传播（backpropagation）”指：高效计算多层 chain-rule gradients 的算法。",
-        "c": "“局部导数（local derivative）”指：某一计算节点输出对输入的 derivative。"
+        "d": "“局部导数（local derivative）”指：某一计算节点输出对输入的 derivative。"
       },
-      "explanation": "学习率（learning rate）：每次 gradient step 的尺度。"
+      "explanation": "学习率（learning rate）：每次 gradient step 的尺度。 first-order Taylor approximation 只在 step 足够小时可靠，所以 learning rate η 既不能大到跨过 valley，也不能小到训练停滞。"
     },
     {
-      "id": "L11-Q33",
+      "id": "L11-Q36",
       "lecture": 11,
       "sectionId": "lecture-11-source-3",
       "sourceAnchors": [
@@ -1778,38 +2313,38 @@
         "正规方程",
         "normal equation"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"least-squares optimum 的线性方程。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "正规方程（normal equation）"
-        },
-        {
-          "id": "b",
           "text": "反向传播（backpropagation）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "局部导数（local derivative）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "监督学习（supervised learning）"
+        },
+        {
+          "id": "d",
+          "text": "正规方程（normal equation）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“反向传播（backpropagation）”指：高效计算多层 chain-rule gradients 的算法。",
-        "c": "“局部导数（local derivative）”指：某一计算节点输出对输入的 derivative。",
-        "d": "“监督学习（supervised learning）”指：由 input-target pairs 学习预测。"
+        "a": "“反向传播（backpropagation）”指：高效计算多层 chain-rule gradients 的算法。",
+        "b": "“局部导数（local derivative）”指：某一计算节点输出对输入的 derivative。",
+        "c": "“监督学习（supervised learning）”指：由 input-target pairs 学习预测。"
       },
-      "explanation": "正规方程（normal equation）：least-squares optimum 的线性方程。"
+      "explanation": "正规方程（normal equation）：least-squares optimum 的线性方程。 设 gradient=0 得 normal equation XX^T what=Xy；若 XX^T invertible，what=(XX^T)^{-1}Xy。"
     },
     {
-      "id": "L11-Q34",
+      "id": "L11-Q37",
       "lecture": 11,
       "sectionId": "lecture-11-source-5",
       "sourceAnchors": [
@@ -1823,18 +2358,18 @@
         "反向传播",
         "backpropagation"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"高效计算多层 chain-rule gradients 的算法。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "局部导数（local derivative）"
+          "text": "反向传播（backpropagation）"
         },
         {
           "id": "b",
-          "text": "反向传播（backpropagation）"
+          "text": "局部导数（local derivative）"
         },
         {
           "id": "c",
@@ -1845,16 +2380,16 @@
           "text": "分类（classification）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“局部导数（local derivative）”指：某一计算节点输出对输入的 derivative。",
+        "b": "“局部导数（local derivative）”指：某一计算节点输出对输入的 derivative。",
         "c": "“监督学习（supervised learning）”指：由 input-target pairs 学习预测。",
         "d": "“分类（classification）”指：预测离散 label。"
       },
-      "explanation": "反向传播（backpropagation）：高效计算多层 chain-rule gradients 的算法。"
+      "explanation": "反向传播（backpropagation）：高效计算多层 chain-rule gradients 的算法。 backprop 是精确 chain-rule algorithm；它与 biological three-factor rule 的 outer-product 形式可比较，但 weight transport、global target 与 update timing 都是机制差异。"
     },
     {
-      "id": "L11-Q35",
+      "id": "L11-Q38",
       "lecture": 11,
       "sectionId": "lecture-11-source-5",
       "sourceAnchors": [
@@ -1868,7 +2403,7 @@
         "局部导数",
         "local derivative"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 11 讲：本讲把\"某一计算节点输出对输入的 derivative。\"称为什么？",
@@ -1879,27 +2414,27 @@
         },
         {
           "id": "b",
-          "text": "分类（classification）"
+          "text": "局部导数（local derivative）"
         },
         {
           "id": "c",
-          "text": "局部导数（local derivative）"
+          "text": "分类（classification）"
         },
         {
           "id": "d",
           "text": "回归（regression）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“监督学习（supervised learning）”指：由 input-target pairs 学习预测。",
-        "b": "“分类（classification）”指：预测离散 label。",
+        "c": "“分类（classification）”指：预测离散 label。",
         "d": "“回归（regression）”指：预测连续 target。"
       },
-      "explanation": "局部导数（local derivative）：某一计算节点输出对输入的 derivative。"
+      "explanation": "局部导数（local derivative）：某一计算节点输出对输入的 derivative。 nonlinear activation 的 derivative 决定 error 是否能穿过该 unit。"
     },
     {
-      "id": "L11-Q36",
+      "id": "L11-Q39",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -1912,7 +2447,7 @@
       "conceptTags": [
         "gradient descent"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：使用\"gradient descent\"时，哪项条件或约定不可省略？",
@@ -1927,23 +2462,23 @@
         },
         {
           "id": "c",
-          "text": "XX^T invertible"
+          "text": "η>0、局部 step"
         },
         {
           "id": "d",
-          "text": "η>0、局部 step"
+          "text": "XX^T invertible"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "这是“linear-regression loss”的条件，不是题干公式的条件。",
         "b": "这是“least-squares gradient”的条件，不是题干公式的条件。",
-        "c": "这是“closed-form solution”的条件，不是题干公式的条件。"
+        "d": "这是“closed-form solution”的条件，不是题干公式的条件。"
       },
-      "explanation": "gradient descent 的适用条件：η>0、局部 step"
+      "explanation": "gradient descent 的适用条件：η>0、局部 step 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。"
     },
     {
-      "id": "L11-Q37",
+      "id": "L11-Q40",
       "lecture": 11,
       "sectionId": "lecture-11-source-1",
       "sourceAnchors": [
@@ -1956,38 +2491,38 @@
       "conceptTags": [
         "linear-regression loss"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：使用\"linear-regression loss\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "source orientation X:N×P"
-        },
-        {
-          "id": "b",
           "text": "η>0、局部 step"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "differentiable squared loss"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "XX^T invertible"
+        },
+        {
+          "id": "d",
+          "text": "source orientation X:N×P"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "这是“gradient descent”的条件，不是题干公式的条件。",
-        "c": "这是“least-squares gradient”的条件，不是题干公式的条件。",
-        "d": "这是“closed-form solution”的条件，不是题干公式的条件。"
+        "a": "这是“gradient descent”的条件，不是题干公式的条件。",
+        "b": "这是“least-squares gradient”的条件，不是题干公式的条件。",
+        "c": "这是“closed-form solution”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear-regression loss 的适用条件：source orientation X:N×P"
+      "explanation": "linear-regression loss 的适用条件：source orientation X:N×P loss 把 prediction 与 target 的差异压成 scalar。"
     },
     {
-      "id": "L11-Q38",
+      "id": "L11-Q41",
       "lecture": 11,
       "sectionId": "lecture-11-source-2",
       "sourceAnchors": [
@@ -2007,11 +2542,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "η>0、局部 step"
+          "text": "differentiable squared loss"
         },
         {
           "id": "b",
-          "text": "differentiable squared loss"
+          "text": "η>0、局部 step"
         },
         {
           "id": "c",
@@ -2022,29 +2557,29 @@
           "text": "XX^T invertible"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“gradient descent”的条件，不是题干公式的条件。",
+        "b": "这是“gradient descent”的条件，不是题干公式的条件。",
         "c": "这是“linear-regression loss”的条件，不是题干公式的条件。",
         "d": "这是“closed-form solution”的条件，不是题干公式的条件。"
       },
-      "explanation": "least-squares gradient 的适用条件：differentiable squared loss"
+      "explanation": "least-squares gradient 的适用条件：differentiable squared loss 在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。"
     },
     {
-      "id": "L11-Q39",
+      "id": "L11-Q42",
       "lecture": 11,
-      "sectionId": "lecture-11-source-3",
+      "sectionId": "lecture-11-source-5",
       "sourceAnchors": [
         {
           "file": "Lecture11-MachineLearning.pdf",
-          "page": 3,
-          "section": "lecture-11-source-3"
+          "page": 5,
+          "section": "lecture-11-source-5"
         }
       ],
       "conceptTags": [
         "closed-form solution"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：使用\"closed-form solution\"时，哪项条件或约定不可省略？",
@@ -2055,27 +2590,27 @@
         },
         {
           "id": "b",
-          "text": "source orientation X:N×P"
+          "text": "XX^T invertible"
         },
         {
           "id": "c",
-          "text": "XX^T invertible"
+          "text": "source orientation X:N×P"
         },
         {
           "id": "d",
           "text": "differentiable squared loss"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“gradient descent”的条件，不是题干公式的条件。",
-        "b": "这是“linear-regression loss”的条件，不是题干公式的条件。",
+        "c": "这是“linear-regression loss”的条件，不是题干公式的条件。",
         "d": "这是“least-squares gradient”的条件，不是题干公式的条件。"
       },
-      "explanation": "closed-form solution 的适用条件：XX^T invertible"
+      "explanation": "closed-form solution 的适用条件：XX^T invertible transpose 来自坐标映射，不是约定性的装饰。"
     },
     {
-      "id": "L11-Q40",
+      "id": "L11-Q43",
       "lecture": 11,
       "sectionId": "lecture-11-source-5",
       "sourceAnchors": [
@@ -2088,7 +2623,7 @@
       "conceptTags": [
         "backprop error recurrence"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 11 讲：使用\"backprop error recurrence\"时，哪项条件或约定不可省略？",
@@ -2103,11 +2638,55 @@
         },
         {
           "id": "c",
+          "text": "compatible shapes"
+        },
+        {
+          "id": "d",
+          "text": "differentiable squared loss"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“gradient descent”的条件，不是题干公式的条件。",
+        "b": "这是“linear-regression loss”的条件，不是题干公式的条件。",
+        "d": "这是“least-squares gradient”的条件，不是题干公式的条件。"
+      },
+      "explanation": "backprop error recurrence 的适用条件：compatible shapes backprop 不把 target 物理地送回网络，而是计算 scalar loss 对这些 intermediate variables 的 derivatives。"
+    },
+    {
+      "id": "L11-Q44",
+      "lecture": 11,
+      "sectionId": "lecture-11-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture11-MachineLearning.pdf",
+          "page": 6,
+          "section": "lecture-11-source-6"
+        }
+      ],
+      "conceptTags": [
+        "layer weight gradient"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 11 讲：使用\"layer weight gradient\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "η>0、局部 step"
+        },
+        {
+          "id": "b",
+          "text": "source orientation X:N×P"
+        },
+        {
+          "id": "c",
           "text": "differentiable squared loss"
         },
         {
           "id": "d",
-          "text": "compatible shapes"
+          "text": "single example; batch averages later"
         }
       ],
       "correctChoiceId": "d",
@@ -2116,7 +2695,7 @@
         "b": "这是“linear-regression loss”的条件，不是题干公式的条件。",
         "c": "这是“least-squares gradient”的条件，不是题干公式的条件。"
       },
-      "explanation": "backprop error recurrence 的适用条件：compatible shapes"
+      "explanation": "layer weight gradient 的适用条件：single example; batch averages later 从 layer ℓ+1 往回看，h^{(ℓ+1)}=W^{(ℓ)}z^{(ℓ)}。"
     }
   ]
 }

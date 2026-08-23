@@ -94,6 +94,416 @@
       "stopPredict": "C=[[3,4],[6,8]] 为什么不可逆？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能先判断标量、向量、矩阵的 shape，再完成加法、内积、外积、矩阵乘法与逐元素乘法，并解释结果代表什么。",
+      "能用行列式判断给定二阶矩阵是否可逆，手算逆矩阵并验证乘积为单位矩阵。",
+      "能从概率质量或密度函数计算归一化、均值、方差、边缘与条件分布，区分“不相关”和“独立”。",
+      "能由联合概率的两种分解推导 Bayes 公式，并清楚区分先验、似然、证据与后验。"
+    ],
+    "prerequisiteBridge": [
+      "向量可以先理解为按固定顺序排成的一列数字，例如一个神经元在两个条件下的反应；矩阵则是一张保持行列含义的数字表。学习运算前先在每个对象旁写 shape：列向量 u∈R² 是 2×1，矩阵 A∈R⁴ˣ² 是 4×2。矩阵乘法的内部维度必须相等，因为左矩阵每一行要与右对象每一列做内积；外部维度决定答案的 shape。这个规则比背算式更能防错。",
+      "概率描述重复试验中结果出现的规律。离散变量用概率相加，例如 Bernoulli 变量只取 0 或 1；连续变量用密度积分，单个点的密度值可以大于 1，但区间下的面积必须在 0 与 1 之间。均值是长期平均位置，方差是到均值距离平方的平均。条件概率是在已知一件事后重新限定样本空间，并不是因果关系的同义词。",
+      "MATLAB 与数学记号不完全相同：`*` 是矩阵乘法，`.*` 是逐元素乘法，单引号对实数矩阵执行转置。软件可能允许标量与矩阵做隐式扩展，但抽象线性代数的“矩阵加法”仍要求 shape 相同。每次计算可执行三重检查：先写 shape，再估计数量级或符号，最后用独立恒等式验证，例如 B·B⁻¹ 应接近单位矩阵。概率计算也采用同一习惯：先查归一化，再查范围，最后用边缘化或补事件复算。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L02-D1",
+        "prompt": "A 是 4×2，v 是 2×1。Av 与 vA 是否都定义？若定义，shape 是什么？",
+        "answer": "Av 定义且为 4×1；vA 不定义，因为 v 的列数 1 与 A 的行数 4 不相等。",
+        "explanation": "矩阵乘法先检查内部维度。Av 的 2 与 2 匹配，保留外部的 4×1；交换顺序会改变兼容性和含义。",
+        "remediationModuleId": "L02-M1"
+      },
+      {
+        "id": "L02-D2",
+        "prompt": "矩阵 C=[[3,4],[6,8]] 为什么不可逆？请给出不依赖软件报错的理由。",
+        "answer": "第二行是第一行的 2 倍，行向量不独立；det(C)=3·8−4·6=0，因此不存在逆矩阵。",
+        "explanation": "行依赖意味着矩阵把不同输入压到同一输出，信息丢失后不能由输出唯一恢复输入。行列式为零是同一事实的代数判据。",
+        "remediationModuleId": "L02-M2"
+      },
+      {
+        "id": "L02-D3",
+        "prompt": "指数分布参数 λ=5 s⁻¹。等待时间超过 0.2 s 的概率是多少？",
+        "answer": "P(X>0.2)=exp(−λ·0.2)=exp(−1)≈0.368。",
+        "explanation": "指数分布的生存函数为 exp(−λx)。λ 与时间相乘后无单位，指数函数的输入才合法。",
+        "remediationModuleId": "L02-M3"
+      },
+      {
+        "id": "L02-D4",
+        "prompt": "“协方差为零就说明两个变量独立”在什么情况下成立，为什么一般不成立？",
+        "answer": "对联合高斯变量成立；一般分布中零协方差只排除线性共同变化，仍可能存在非线性依赖。",
+        "explanation": "例如令 X 关于零对称、Y=X²，则 Cov(X,Y)=E[X³]−E[X]E[X²]=0，但知道 X 就完全确定 Y。",
+        "remediationModuleId": "L02-M3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L02-M1",
+        "title": "先看 shape：标量、向量、矩阵与乘法",
+        "sourceRefs": [
+          {
+            "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "为什么矩阵运算的第一步不是代数字，而是写出每个对象的 shape 与行列含义？",
+        "paragraphs": [
+          "练习第一页给定 s=2，u=(0,1)ᵀ，v=(2,5)ᵀ，w=(0,1,2,5)ᵀ，以及 A、B、C 三个矩阵。这些对象不是仅供算术练习：向量可表示多个神经元的反应，矩阵可表示刺激到反应的线性映射。shape 记录输入与输出的槽位；忽略 shape 即使算出数字，也可能把神经元索引与条件索引互换。",
+          "向量加法要求长度相同，并逐分量相加。内积 uᵀv 把两个同长度向量变成标量，可衡量沿同一坐标系的重合；范数 ||w||₂ 是 wᵀw 的平方根，表示到原点的欧氏距离。外积 uvᵀ 把两个向量变成矩阵，其中第 i,j 项是 u_i v_j，因此它保留所有成对组合，不能与内积混为一谈。",
+          "矩阵向量积 Av 可以按“每一行与 v 做内积”理解。A 为 4×2、v 为 2×1，答案为 4×1；每个输出分量由两个输入加权相加。矩阵乘法 BC 则把 B 的每一行与 C 的每一列配对。它通常不交换，即 BC 与 CB 的 shape 即使相同，数值与所代表的变换顺序也可能不同。",
+          "程序实现应把抽象规则与语言行为分开。MATLAB 中 `B*C` 表示矩阵乘法，`B.*C` 表示对应元素相乘；`v'` 对实向量给出行向量。某些版本允许 s+A，通过隐式扩展把标量加到每个元素，但这是一项数组操作约定，不等于两个不同 shape 的线性代数对象具有通常的向量和。写注释时应明确自己采用哪种含义。"
+        ],
+        "keyPoints": [
+          "矩阵乘法要求内部维度相等，答案保留外部维度。",
+          "内积产生标量，外积产生矩阵，二者编码的信息不同。",
+          "软件的隐式扩展与抽象矩阵加法应在概念上分开。"
+        ],
+        "derivation": {
+          "title": "由逐项定义计算给定矩阵乘积",
+          "setup": "A=[[0,0.5],[10,1],[2,9],[2,7]]，v=(2,5)ᵀ，目标是计算 Av 并同时追踪 shape。",
+          "steps": [
+            {
+              "title": "检查兼容",
+              "explanation": "A 是 4×2，v 是 2×1，内部维度 2 相同，所以乘积存在，答案是 4×1。",
+              "latex": "(4\\times 2)(2\\times 1)=4\\times 1"
+            },
+            {
+              "title": "计算前两行",
+              "explanation": "第一行给 0·2+0.5·5=2.5；第二行给 10·2+1·5=25。",
+              "latex": "y_1=2.5,\\quad y_2=25"
+            },
+            {
+              "title": "计算后两行",
+              "explanation": "第三行给 2·2+9·5=49；第四行给 2·2+7·5=39。",
+              "latex": "y_3=49,\\quad y_4=39"
+            },
+            {
+              "title": "组合并核查",
+              "explanation": "按行顺序组成列向量 (2.5,25,49,39)ᵀ；四个输出与 A 的四行一一对应。"
+            }
+          ],
+          "symbolNotes": [
+            "A 的列对应两个输入特征，行对应四个输出通道。",
+            "转置符号 ᵀ 把列向量转成行向量，不改变分量顺序。"
+          ],
+          "unitsCheck": "若 A 的权重无单位、v 的分量单位相同，则 Av 与 v 具有相同单位；若两列代表不同物理量，权重必须分别承担换算单位。",
+          "limitCheck": "若 v=0，Av 必为零向量；若 A 的某一行全为零，相应输出必为零。"
+        },
+        "workedExample": {
+          "title": "区分内积、外积与范数",
+          "problem": "给定 u=(0,1)ᵀ、v=(2,5)ᵀ，计算 u+v、uᵀv、uvᵀ 与 ||v||₂。",
+          "steps": [
+            "逐分量相加得到 u+v=(2,6)ᵀ。",
+            "内积为 0·2+1·5=5，是一个标量。",
+            "外积为 [[0·2,0·5],[1·2,1·5]]=[[0,0],[2,5]]，shape 为 2×2。",
+            "范数为 sqrt(2²+5²)=sqrt(29)≈5.385。"
+          ],
+          "result": "和为 (2,6)ᵀ，内积 5，外积 [[0,0],[2,5]]，范数约 5.385。",
+          "sanityCheck": "范数应大于任一分量绝对值 5 且小于分量绝对值之和 7；5.385 满足。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 A v 的每个输出都能解释为一行权重与输入的加权和？",
+          "answer": "矩阵乘法的元素定义就是 y_i=Σ_j A_ij v_j；固定输出行 i 后，只沿输入索引 j 求和，因此该行列出这个输出读取各输入的权重。"
+        },
+        "pitfalls": [
+          "只看元素个数相同就相乘，未检查矩阵乘法的内部维度。",
+          "把 `*` 与 `.*` 混用，得到 shape 正确但科学含义不同的结果。"
+        ]
+      },
+      {
+        "id": "L02-M2",
+        "title": "单位矩阵、转置、逆与奇异性",
+        "sourceRefs": [
+          {
+            "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "矩阵何时能够把输出唯一地还原成输入，行列式为零为何会破坏这种还原？",
+        "paragraphs": [
+          "单位矩阵 I 在对角线上为 1、其余为 0，作用类似标量中的 1：Ix=x。转置 Aᵀ 交换行列，因此若 A 把二维输入映到四维输出，Aᵀ 的 shape 是 2×4，但它通常不是 A 的逆。逆矩阵 A⁻¹ 要满足 A⁻¹A=AA⁻¹=I，只有方阵且映射一一对应时才存在。",
+          "二阶矩阵 B=[[a,b],[c,d]] 的行列式为 ad−bc。它可以看作该线性变换对有向面积的缩放；行列式为零意味着某个二维区域被压到一条线或一个点，不同输入会产生同一输出。信息一旦压扁，就不能仅从输出判定原输入，所以逆矩阵不存在。这个几何图像与行或列线性依赖是同一件事。",
+          "给定 B=[[4,4],[8,9]]，det(B)=36−32=4，非零，所以 B⁻¹=(1/4)[[9,−4],[−8,4]]。验证比调用 `inv` 更重要：乘回 B 后对角项应为 1，非对角项应为 0。数值计算中行列式虽非零但很接近零时，逆可能对微小误差极敏感；此时应进一步考察条件数，而不是满足于“软件给出了答案”。",
+          "Hadamard 乘积 B⊙C 是同位置元素相乘，要求相同 shape；矩阵乘积 BC 则沿共享索引求和。前者可表示逐通道增益，后者表示变换复合。把二者写成同一个“乘法”会丢失模型结构。实际代码审计时，要为每个乘号写一句对象含义，并用手算第一个元素验证程序使用了预期运算。"
+        ],
+        "keyPoints": [
+          "逆矩阵表示可从输出唯一恢复输入，转置不承担这一功能。",
+          "行列式为零等价于映射压缩维度并丢失可恢复信息。",
+          "Hadamard 乘积逐元素，矩阵乘积沿共享维度求和。"
+        ],
+        "derivation": {
+          "title": "二阶逆矩阵公式与数值验证",
+          "setup": "对 B=[[4,4],[8,9]] 求逆，并通过两个方向的乘积验证。",
+          "steps": [
+            {
+              "title": "算行列式",
+              "explanation": "det(B)=4·9−4·8=4，非零，逆存在。",
+              "latex": "\\det(B)=4"
+            },
+            {
+              "title": "交换与变号",
+              "explanation": "二阶逆矩阵把主对角元素交换，把副对角元素变号，再除以行列式。",
+              "latex": "B^{-1}=\\frac{1}{4}\\begin{pmatrix}9&-4\\\\-8&4\\end{pmatrix}"
+            },
+            {
+              "title": "验第一行",
+              "explanation": "B·B⁻¹ 的第一行第一列为 (4·9+4·(−8))/4=1，第一行第二列为 (4·(−4)+4·4)/4=0。"
+            },
+            {
+              "title": "验第二行",
+              "explanation": "第二行第一列为 (8·9+9·(−8))/4=0，第二行第二列为 (8·(−4)+9·4)/4=1，得到 I。"
+            }
+          ],
+          "symbolNotes": [
+            "det(B) 是标量；B⁻¹ 与 B shape 相同。",
+            "分母 det(B) 解释了为何行列式为零时公式失效。"
+          ],
+          "unitsCheck": "若 B 把单位 X 映到单位 Y，则 B 的元素带 Y/X，B⁻¹ 带 X/Y，乘积无单位并成为 I。",
+          "limitCheck": "当第二行趋近第一行的常数倍时，det(B) 趋近零，逆矩阵元素幅度增大，微小观测误差会被放大。"
+        },
+        "workedExample": {
+          "title": "比较矩阵乘法与逐元素乘法",
+          "problem": "B=[[4,4],[8,9]]，C=[[3,4],[6,8]]。分别计算 BC 与 B⊙C。",
+          "steps": [
+            "BC 的第一行第一列为 4·3+4·6=36，第一行第二列为 4·4+4·8=48。",
+            "第二行第一列为 8·3+9·6=78，第二行第二列为 8·4+9·8=104。",
+            "逐元素乘积逐位置计算，得到 [[4·3,4·4],[8·6,9·8]]=[[12,16],[48,72]]。",
+            "两个答案都是 2×2，但前者复合线性变换，后者对对应位置加权。"
+          ],
+          "result": "BC=[[36,48],[78,104]]；B⊙C=[[12,16],[48,72]]。",
+          "sanityCheck": "BC 的每项包含两个乘积之和，而 Hadamard 的每项只包含一个同位置乘积。"
+        },
+        "selfCheck": {
+          "prompt": "C=[[3,4],[6,8]] 把哪些不同输入映到同一输出？这如何体现不可逆？",
+          "answer": "因为 C(4,−3)ᵀ=(0,0)ᵀ，所以任意 x 与 x+a(4,−3)ᵀ 都有相同输出；输出无法判定系数 a，因而不能唯一恢复输入。"
+        },
+        "pitfalls": [
+          "把 det 非零当成数值稳定的充分保证，忽略接近奇异时的误差放大。",
+          "用 `inv(B)*y` 代替更稳定的线性方程求解而不做结果验证。"
+        ]
+      },
+      {
+        "id": "L02-M3",
+        "title": "从 Bernoulli 与指数分布到联合高斯和 Bayes",
+        "sourceRefs": [
+          {
+            "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "怎样从单变量的不确定性走到两个变量的依赖关系，再用观测反推隐藏原因？",
+        "paragraphs": [
+          "Bernoulli 变量 X 只取 1 或 0，分别以 p 与 1−p 出现。均值 E[X]=p，因为 1·p+0·(1−p)=p；又因 X²=X，方差 E[X²]−E[X]²=p−p²=p(1−p)。这可表示一个时间窗是否出现脉冲或一次选择是否正确，但多个时间窗能否相加为二项分布还取决于试验是否独立且 p 相同。",
+          "指数分布 f(x)=λexp(−λx)，x≥0，可描述恒定速率 Poisson 过程的等待时间。积分得到 F(x)=1−exp(−λx)，所以生存概率是 exp(−λx)。均值和标准差均为 1/λ，中位数为 ln2/λ，众数为 0。均值大于中位数反映右侧长尾；把 λ 当成平均等待时间会造成量纲与数值同时错误。",
+          "二元高斯由均值向量与协方差矩阵完整决定；对另一个变量积分得到高斯边缘，对固定观测切片并重新归一化得到高斯条件分布。条件化不仅移动均值，也把方差缩小为由相关强度决定的剩余不确定性。下面的推导同时给出条件均值、条件方差与 Bayes 重加权，因而可以计算完整分布，而不只判断椭圆倾斜。",
+          "Bayes 公式来自同一联合概率的两种分解：P(A,B)=P(A|B)P(B)=P(B|A)P(A)。整理得 P(A|B)=P(B|A)P(A)/P(B)。在参数推断中，A 可代表参数 θ，B 代表数据 D；P(D|θ) 是似然，P(θ) 是先验，P(D) 负责归一化，P(θ|D) 是后验。似然不是参数的概率分布，除非再乘先验并完成归一化。"
+        ],
+        "keyPoints": [
+          "Bernoulli 方差 p(1−p) 在 p=0 或 1 时为零，在 p=1/2 时最大。",
+          "指数分布的速率 λ 与平均等待时间 1/λ 互为倒数。",
+          "联合高斯中零协方差推出独立，但一般分布没有这一保证。",
+          "Bayes 公式是联合概率两种分解的重排。"
+        ],
+        "derivation": {
+          "title": "从二元高斯条件化到 Bayes 重加权",
+          "setup": "设 (X₁,X₂) 联合高斯，均值为 (μ₁,μ₂)，标准差为 σ₁、σ₂，相关系数为 c，且 |c|<1。先求 X₁|X₂=x₂ 的完整分布，再把连续条件化连接到一般 Bayes 公式。",
+          "steps": [
+            {
+              "title": "写均值与协方差",
+              "explanation": "对角项是各变量方差，非对角项是相关系数乘两者标准差。",
+              "latex": "\\boldsymbol{\\mu}=\\begin{pmatrix}\\mu_1\\\\\\mu_2\\end{pmatrix},\\qquad \\mathbf C=\\begin{pmatrix}\\sigma_1^2&c\\sigma_1\\sigma_2\\\\c\\sigma_1\\sigma_2&\\sigma_2^2\\end{pmatrix}"
+            },
+            {
+              "title": "计算 determinant 与 inverse",
+              "explanation": "determinant 中的 1-c² 决定 covariance 是否退化；二元 inverse 的非对角负号会在高斯指数配方时产生条件均值修正。",
+              "latex": "\\det\\mathbf C=\\sigma_1^2\\sigma_2^2(1-c^2),\\qquad \\mathbf C^{-1}=\\frac{1}{1-c^2}\\begin{pmatrix}\\sigma_1^{-2}&-c/(\\sigma_1\\sigma_2)\\\\-c/(\\sigma_1\\sigma_2)&\\sigma_2^{-2}\\end{pmatrix}"
+            },
+            {
+              "title": "先做边缘化",
+              "explanation": "对 x₁ 的整个取值范围积分，会消掉与 x₁ 有关的维度；二元高斯的边缘仍是均值 μ₂、方差 σ₂² 的一元高斯。",
+              "latex": "p(x_2)=\\int_{-\\infty}^{\\infty}p(x_1,x_2)\\,dx_1=\\mathcal N(x_2;\\mu_2,\\sigma_2^2)"
+            },
+            {
+              "title": "取固定观测的切片",
+              "explanation": "在联合密度中把 X₂ 固定为 x₂，把只依赖 x₂ 的因子吸收到归一化常数；剩余关于 x₁ 的指数仍是二次式。",
+              "latex": "p(x_1\\mid x_2)=\\frac{p(x_1,x_2)}{p(x_2)}"
+            },
+            {
+              "title": "配方得到条件均值",
+              "explanation": "对 x₁ 的二次式配方，中心沿相关方向移动；正相关且 x₂ 低于自身均值时，条件均值也向下移动。",
+              "latex": "\\mu_{1\\mid 2}=\\mu_1+c\\frac{\\sigma_1}{\\sigma_2}(x_2-\\mu_2)"
+            },
+            {
+              "title": "读出条件方差",
+              "explanation": "配方后的二次项给出剩余方差；知道 X₂ 后，不确定性从 σ₁² 缩小为 σ₁²(1−c²)。",
+              "latex": "\\sigma_{1\\mid 2}^2=\\sigma_1^2(1-c^2)"
+            },
+            {
+              "title": "写完整条件分布",
+              "explanation": "均值和方差共同指定一维高斯，只有二者都给出才算算完条件分布。",
+              "latex": "X_1\\mid X_2=x_2\\sim\\mathcal N\\!\\left(\\mu_1+c\\frac{\\sigma_1}{\\sigma_2}(x_2-\\mu_2),\\,\\sigma_1^2(1-c^2)\\right)"
+            },
+            {
+              "title": "连接一般 Bayes 公式",
+              "explanation": "连续密度与离散概率都由同一联合量的两种分解得到条件更新；分母是对所有候选原因求和或积分得到的 evidence。",
+              "latex": "P(A\\mid B)=\\frac{P(B\\mid A)P(A)}{P(B)}"
+            }
+          ],
+          "symbolNotes": [
+            "c 是相关系数；非退化二元高斯要求 |c|<1，c=0 时两个变量独立。",
+            "μ₁|₂ 是给定具体 x₂ 后的条件均值，σ₁|₂² 是条件方差，不应只报告其中一个。",
+            "Bayes 分母 P(B) 或 p(x₂) 负责重新归一化；连续情形使用密度而不是点概率。"
+          ],
+          "unitsCheck": "c 无单位；σ₁/σ₂ 乘 (x₂−μ₂) 后具有 X₁ 的单位；条件方差与 σ₁² 同为 X₁ 单位的平方。概率与概率密度的归一化比例分别保持相应单位。",
+          "limitCheck": "c=0 时条件均值回到 μ₁、条件方差回到 σ₁²；|c|→1 时非退化模型逼近一条直线，条件方差趋零且协方差矩阵趋于奇异。"
+        },
+        "workedExample": {
+          "title": "条件高斯与低基率 Bayes 的两次归一化",
+          "problem": "A：μ₁=0、μ₂=1、σ₁=0.5、σ₂=1、c=0.7，给定 x₂=0.75，求 X₁ 的条件均值、条件方差和条件标准差。B：患病率 1%，灵敏度 0.9，假阳性率 0.05，求阳性后的患病概率。",
+          "steps": [
+            "A 的条件均值为 0+0.7·0.5·(0.75−1)=−0.0875。",
+            "A 的条件方差为 0.5²(1−0.7²)=0.25·0.51=0.1275，条件标准差约为 0.3571。",
+            "正相关且 x₂ 低于 μ₂，所以条件均值低于 μ₁；条件方差 0.1275 也小于边缘方差 0.25。",
+            "B 的真阳性联合概率为 0.9·0.01=0.009，假阳性联合概率为 0.05·0.99=0.0495。",
+            "总阳性概率为 0.009+0.0495=0.0585。",
+            "阳性后验为 0.009/0.0585≈0.1538，即约 15.4%。"
+          ],
+          "result": "A：条件分布均值 −0.0875、方差 0.1275、标准差约 0.357；B：阳性后患病概率约为 15.4%。",
+          "sanityCheck": "A 的观测方向与均值移动方向一致且条件不确定性缩小；B 的后验高于 1% 先验但远低于 90% 灵敏度。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 P(D|θ) 作为 θ 的函数时被称为似然，却不能直接当作 P(θ|D)？",
+          "answer": "似然固定已观察数据并比较参数解释数据的能力；参数后验还必须纳入参数先验并对所有候选参数归一化，两者条件方向不同。"
+        },
+        "pitfalls": [
+          "把连续密度 f(x) 当成点概率 P(X=x)，忽略概率来自区间积分。",
+          "混淆 P(A|B) 与 P(B|A)，特别是在低基率情境中忽略先验。",
+          "把零相关推广为任意分布下的独立。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L02-FIG-A1",
+      "lecture": 2,
+      "lectureTitle": "向量、矩阵与概率基础",
+      "moduleId": "L02-M3",
+      "title": "联合高斯条件化会移动均值并缩小方差",
+      "alt": "同一变量的边缘高斯密度与给定另一变量后的条件高斯密度对比图",
+      "caption": "当两个变量相关时，固定 X₂ 相当于从联合密度取一个切片；条件均值沿相关方向移动，而条件方差由 σ₁² 缩为 σ₁²(1−c²)。图中曲线是该公式的归一化示意，不是经验直方图。",
+      "sourceRefs": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 4
+        }
+      ],
+      "schematic": true,
+      "kind": "plot",
+      "xLabel": "X₁（标准化坐标）",
+      "yLabel": "相对概率密度",
+      "curves": [
+        {
+          "label": "边缘 p(X₁)",
+          "points": [
+            [
+              10,
+              5
+            ],
+            [
+              20,
+              14
+            ],
+            [
+              30,
+              36
+            ],
+            [
+              40,
+              72
+            ],
+            [
+              50,
+              100
+            ],
+            [
+              60,
+              72
+            ],
+            [
+              70,
+              36
+            ],
+            [
+              80,
+              14
+            ],
+            [
+              90,
+              5
+            ]
+          ]
+        },
+        {
+          "label": "条件 p(X₁|X₂=x₂)",
+          "points": [
+            [
+              12,
+              0
+            ],
+            [
+              20,
+              2
+            ],
+            [
+              28,
+              20
+            ],
+            [
+              35,
+              65
+            ],
+            [
+              42,
+              100
+            ],
+            [
+              49,
+              65
+            ],
+            [
+              56,
+              20
+            ],
+            [
+              64,
+              2
+            ],
+            [
+              72,
+              0
+            ]
+          ]
+        }
+      ],
+      "annotations": [
+        {
+          "x": 50,
+          "y": 86,
+          "label": "μ₁"
+        },
+        {
+          "x": 42,
+          "y": 96,
+          "label": "μ₁|₂"
+        }
+      ]
+    }
+  ],
   "specialSection": [
     "1 %% Clear workspace before starting work 2 3 clear all; 4 5 %% Problem 1 6 7 % Bullet 1 8 s = 2; 9 u = [0; 1]; 10 v = [2; 5]; 11 w = [0; 1; 2; 5]; 12 A = [0 0.5; 10 1; 2 9; 2 7]; 13 B = [4 4; 8 9]; 14 C = [3 4; 6 8]; 15 16 % Well-defined mathematical objects 17 u+v 18 B+C 19 20 % Imprecise MATLAB notation 21 s+A 22 s+A-A 23 24 % Bullet 2 25 dot(u,v) 26 27 % Bullet 3 28 norm(w) 29 sqrt(dot(w,w)) 30 31 % Bullet 5 32 A*v 33 34 % Bullet 6 35 B*C 36 37 % Bullet 7 38 eye(3) 39 40 % Bullet 8 41 A' 42 43 % Bullet 10 44 inv(B) 45 inv(C) 46 47 % BUllet 11 48 det(s) 49 det(B) 50 det(C) 51 52 % Bullet 12 53 u.*v 54 B.*C",
     "行号 作用 说明 影响 1-3 Workspace clear all 可复现课程环境，但会清函数缓存； No mathematical reset 日常更常用 clearvars; close all; clc. effect, but avoid unnecessary global reset. 8-14 Objects and s + Arelies on MATLAB scalar expansion. Separate language scalar This is valid MATLAB, but it is not \"matrix semantics from expansion addition of unequal shapes.\" abstract linear algebra. 17-22 Sums and sum(A)reduces by columns by default;u*vis Always state output products dimensionally invalid whileu*v'is an outer shape. product. 25-29 Matrix A*v,B*u,A*B,B*Aare determined by inner Predict shape before multiplication dimensions; only defined products should execution. be interpreted. 32-44 Inverse, The script demonstrates explicit inversion Do not use determinant, for B. Numerical solving should determinant alone as singularity use left division. C is singular becausedet( a stable numerical C)=0;inv(C)is not a mathematical inverse. singularity test. 47-54 Hadamard A.*Ais elementwise and distinct fromA*A. Same symbols, product different algebra."
@@ -387,7 +797,54 @@
     "MATLAB 源码中的 clear all 与 inv 按原样解释；数值计算中通常更偏好线性求解而非显式求逆。将 MATLAB 的 scalar-plus-matrix 行为与抽象线性代数严格分开。"
   ],
   "errata": [
-    "1. Solutions p.3 的 Bernoulli variance 推导最后一行左侧写成 μ，语义上应为 σ²。 2. MATLABclear all 会清除函数缓存，教学脚本通常用 clearvars 更合适。 3. inv(C)对 singular matrix 会产生警告和不可靠的 Inf/NaN/巨大数值；不应把输出解释为数学逆。 4. 数值计算中解 Bx=y 通常使用 B\\y，而不是显式 inv(B)*y。"
+    {
+      "id": "L02-E01",
+      "lecture": 2,
+      "lectureTitle": "向量、矩阵与概率基础",
+      "kind": "erratum",
+      "sourceFile": "Lecture2-FC_Solutions_NEUROSCI_366_F2025.pdf",
+      "sourcePage": 3,
+      "sectionId": "resources",
+      "originalIssue": "Solutions p.3 的 Bernoulli variance 推导最后一行左侧写成 μ，语义上应为 σ²。",
+      "explanation": "Bernoulli 变量满足 E[X]=p 与 E[X²]=p，所以 Var(X)=p-p²=p(1-p)；左侧必须是方差而非均值。",
+      "correction": "Solutions p.3 的 Bernoulli variance 推导最后一行左侧写成 μ，语义上应为 σ²"
+    },
+    {
+      "id": "L02-E02",
+      "lecture": 2,
+      "lectureTitle": "向量、矩阵与概率基础",
+      "kind": "caution",
+      "sourceFile": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+      "sourcePage": 2,
+      "sectionId": "lecture-02-source-2",
+      "originalIssue": "MATLAB clear all 会清除函数缓存，教学脚本通常用 clearvars 更合适。",
+      "explanation": "clear all 不只删除 workspace variables，还会清理函数缓存；教学脚本只需清变量时用 clearvars 更精确。",
+      "correction": null
+    },
+    {
+      "id": "L02-E03",
+      "lecture": 2,
+      "lectureTitle": "向量、矩阵与概率基础",
+      "kind": "erratum",
+      "sourceFile": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+      "sourcePage": 2,
+      "sectionId": "L02-M2",
+      "originalIssue": "inv(C)对 singular matrix 会产生警告和不可靠的 Inf/NaN/巨大数值；不应把输出解释为数学逆。",
+      "explanation": "它可以看作该线性变换对有向面积的缩放；行列式为零意味着某个二维区域被压到一条线或一个点，不同输入会产生同一输出。",
+      "correction": "不应把输出解释为数学逆"
+    },
+    {
+      "id": "L02-E04",
+      "lecture": 2,
+      "lectureTitle": "向量、矩阵与概率基础",
+      "kind": "caution",
+      "sourceFile": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+      "sourcePage": 1,
+      "sectionId": "L02-M1",
+      "originalIssue": "数值计算中解 Bx=y 通常使用 B\\y，而不是显式 inv(B)*y。",
+      "explanation": "直接线性求解可通过矩阵分解得到 x，避免显式构造 inverse 带来的多余计算和数值误差放大。",
+      "correction": "数值计算中解 Bx=y 通常使用 B\\y，而不是显式 inv(B)*y"
+    }
   ],
   "questions": [
     {
@@ -405,7 +862,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "calculation",
       "cognitiveLevel": "understand",
       "stem": "第 2 讲：A 是 4×2，v 是 2×1；Av 的 shape 是什么？",
@@ -433,7 +890,7 @@
         "b": "矩阵乘法消去内维，输出不应保留题干中的内维。",
         "c": "该选项保留了错误的外维；应先写出相乘对象的 shape 链。"
       },
-      "explanation": "4×1。"
+      "explanation": "4×1。 shape 记录输入与输出的槽位；忽略 shape 即使算出数字，也可能把神经元索引与条件索引互换。"
     },
     {
       "id": "L02-Q02",
@@ -450,7 +907,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "debug",
       "cognitiveLevel": "apply",
       "stem": "第 2 讲：为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？",
@@ -478,7 +935,7 @@
         "c": "该选项回答的是“写出 Bayes rule 并标出 evidence。”。",
         "d": "这是“outer product”的适用条件。"
       },
-      "explanation": "shape 不同所以抽象加法未定义；MATLAB 把 scalar/小数组广播到 A 的每个元素。"
+      "explanation": "shape 不同所以抽象加法未定义；MATLAB 把 scalar/小数组广播到 A 的每个元素。 Hadamard 乘积 B⊙C 是同位置元素相乘，要求相同 shape；矩阵乘积 BC 则沿共享索引求和。"
     },
     {
       "id": "L02-Q03",
@@ -495,7 +952,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "calculation",
       "cognitiveLevel": "analyze",
       "stem": "第 2 讲：计算 u^Tv，其中 u=(0,1)^T，v=(2,5)^T。",
@@ -523,7 +980,7 @@
         "c": "该选项在乘加运算中使用了错误的分量或算术结果。",
         "d": "该选项在乘加运算中使用了错误的分量或算术结果。"
       },
-      "explanation": "0×2+1×5=5。"
+      "explanation": "0×2+1×5=5。 下面的推导同时给出条件均值、条件方差与 Bayes 重加权，因而可以计算完整分布，而不只判断椭圆倾斜。"
     },
     {
       "id": "L02-Q04",
@@ -540,7 +997,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 2 讲：C=[[3,4],[6,8]] 为什么不可逆？",
@@ -568,7 +1025,7 @@
         "b": "这是“标量（scalar）”的定义。",
         "d": "该选项回答的是“Bernoulli(p) 的 variance 在什么 p 最大？”。"
       },
-      "explanation": "两行线性相关，det(C)=24−24=0。"
+      "explanation": "两行线性相关，det(C)=24−24=0。 条件化不仅移动均值，也把方差缩小为由相关强度决定的剩余不确定性。"
     },
     {
       "id": "L02-Q05",
@@ -585,7 +1042,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 2 讲：Bernoulli(p) 的 variance 在什么 p 最大？",
@@ -613,7 +1070,7 @@
         "b": "p=1 是 variance 的边界最小值，不是最大值。",
         "c": "p=1/4 的 variance 小于 p=1/2 时的 1/4。"
       },
-      "explanation": "p=1/2，此时 p(1-p)=1/4。"
+      "explanation": "p=1/2，此时 p(1-p)=1/4。 数值计算中行列式虽非零但很接近零时，逆可能对微小误差极敏感；此时应进一步考察条件数，而不是满足于\"软件给出了答案\"。"
     },
     {
       "id": "L02-Q06",
@@ -630,7 +1087,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "calculation",
       "cognitiveLevel": "understand",
       "stem": "第 2 讲：Exponential(λ) 的 mean 与 SD 分别是多少？",
@@ -658,7 +1115,7 @@
         "c": "λ 是 rate parameter；mean 与 SD 都是它的倒数。",
         "d": "该选项把 mean 与 variance 混淆了。"
       },
-      "explanation": "二者都是 1/λ。"
+      "explanation": "二者都是 1/λ。 把二者写成同一个\"乘法\"会丢失模型结构。 判断依据：Hadamard 乘积 B⊙C 是同位置元素相乘，要求相同 shape；矩阵乘积 BC 则沿共享索引求和。前者可表示逐通道增益，后者表示变换复合。把二者写成同一个\"乘法\"会丢失模型结构。实际代码审计时，要为每个乘号写一句对象含义，并用手算第一个元素验证程序使用了预期运算。"
     },
     {
       "id": "L02-Q07",
@@ -675,7 +1132,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 2 讲：为什么连续变量 P(X=x)=0 不与 density f(x)>0 矛盾？",
@@ -703,7 +1160,7 @@
         "c": "这是“条件分布（conditional distribution）”的定义。",
         "d": "这是“边缘分布（marginal distribution）”的定义。"
       },
-      "explanation": "单点区间宽度为零；概率是 density 在区间上的积分。"
+      "explanation": "单点区间宽度为零；概率是 density 在区间上的积分。 它可以看作该线性变换对有向面积的缩放；行列式为零意味着某个二维区域被压到一条线或一个点，不同输入会产生同一输出。"
     },
     {
       "id": "L02-Q08",
@@ -720,7 +1177,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
       "stem": "第 2 讲：二维 Gaussian 中 c>0 的等密度椭圆如何倾斜？",
@@ -748,7 +1205,7 @@
         "b": "这是“矩阵（matrix）”的定义。",
         "d": "该选项回答的是“为什么 inv(A)*b 通常不如 A\\b？”。"
       },
-      "explanation": "沿 x1 与 x2 同时增大/减小的正斜率方向拉长。"
+      "explanation": "沿 x1 与 x2 同时增大/减小的正斜率方向拉长。 练习第一页给定 s=2，u=(0,1)ᵀ，v=(2,5)ᵀ，w=(0,1,2,5)ᵀ，以及 A、B、C 三个矩阵。"
     },
     {
       "id": "L02-Q09",
@@ -765,7 +1222,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 2 讲：一般情况下 uncorrelated 是否推出 independent？",
@@ -793,7 +1250,7 @@
         "b": "该选项回答的是“写出 Bayes rule 并标出 evidence。”。",
         "c": "该选项回答的是“为什么连续变量 P(X=x)=0 不与 density f(x)>0 矛盾？”。"
       },
-      "explanation": "否；independent 推出 uncorrelated（矩存在），反向一般不成立。"
+      "explanation": "否；independent 推出 uncorrelated（矩存在），反向一般不成立。 练习第一页给定 s=2，u=(0,1)ᵀ，v=(2,5)ᵀ，w=(0,1,2,5)ᵀ，以及 A、B、C 三个矩阵。"
     },
     {
       "id": "L02-Q10",
@@ -810,7 +1267,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 2 讲：写出 Bayes rule 并标出 evidence。",
@@ -838,7 +1295,7 @@
         "c": "该选项回答的是“为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？”。",
         "d": "该选项回答的是“一般情况下 uncorrelated 是否推出 independent？”。"
       },
-      "explanation": "P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。"
+      "explanation": "P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。 练习第一页给定 s=2，u=(0,1)ᵀ，v=(2,5)ᵀ，w=(0,1,2,5)ᵀ，以及 A、B、C 三个矩阵。"
     },
     {
       "id": "L02-Q11",
@@ -855,7 +1312,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "debug",
       "cognitiveLevel": "understand",
       "stem": "第 2 讲：为什么 inv(A)*b 通常不如 A\\b？",
@@ -883,7 +1340,7 @@
         "c": "该选项回答的是“为什么连续变量 P(X=x)=0 不与 density f(x)>0 矛盾？”。",
         "d": "这是“后验（posterior）”的定义。"
       },
-      "explanation": "显式逆更慢、数值误差更大；线性求解器利用分解直接求解。"
+      "explanation": "显式逆更慢、数值误差更大；线性求解器利用分解直接求解。 它通常不交换，即 BC 与 CB 的 shape 即使相同，数值与所代表的变换顺序也可能不同。"
     },
     {
       "id": "L02-Q12",
@@ -900,7 +1357,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 2 讲：Hadamard product B.*C 的 (1,2) 元素是什么？",
@@ -928,55 +1385,10 @@
         "b": "该选项在乘加运算中使用了错误的分量或算术结果。",
         "d": "该选项在乘加运算中使用了错误的分量或算术结果。"
       },
-      "explanation": "4×4=16。"
+      "explanation": "4×4=16。 MATLAB 中 `B*C` 表示矩阵乘法，`B.*C` 表示对应元素相乘；`v'` 对实向量给出行向量。"
     },
     {
       "id": "L02-Q13",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 1,
-          "section": "lecture-02-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 2 讲：根据 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product；Bernoulli distribution；exponential distribution 开始。"
-        },
-        {
-          "id": "b",
-          "text": "Bayes rule。"
-        },
-        {
-          "id": "c",
-          "text": "exponential CDF/mean/median/mode/standard deviation；bivariate normal；covariance matrix；marginal、independence、conditional distribution。"
-        },
-        {
-          "id": "d",
-          "text": "scalar/vector/matrix objects；维度规则；sum、inner product、norm、outer product、matrix-vector 与 matrix-matrix multiplication。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "c": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。"
-      },
-      "explanation": "scalar/vector/matrix objects；维度规则；sum、inner product、norm、outer product、matrix-vector 与 matrix-matrix multiplication。"
-    },
-    {
-      "id": "L02-Q14",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -997,7 +1409,52 @@
       "choices": [
         {
           "id": "a",
+          "text": "本节讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
+        },
+        {
+          "id": "b",
+          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
+        },
+        {
+          "id": "c",
+          "text": "逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、 inverse、correlation coefficient；用图形解释 covariance 的符号。"
+        },
+        {
+          "id": "d",
           "text": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、 determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
+        "b": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
+        "c": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。"
+      },
+      "explanation": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、 determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。 练习第一页给定 s=2，u=(0,1)ᵀ，v=(2,5)ᵀ，w=(0,1,2,5)ᵀ，以及 A、B、C 三个矩阵。"
+    },
+    {
+      "id": "L02-Q14",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 2,
+          "section": "lecture-02-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Vectors",
+        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 2 讲：若要解释\"identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。"
         },
         {
           "id": "b",
@@ -1018,190 +1475,10 @@
         "c": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
         "d": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。"
       },
-      "explanation": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、 determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。"
+      "explanation": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。 给定 B=[[4,4],[8,9]]，det(B)=36−32=4，非零，所以 B⁻¹=(1/4)[[9,−4],[−8,4]]。 判断依据：给定 B=[[4,4],[8,9]]，det(B)=36−32=4，非零，所以 B⁻¹=(1/4)[[9,−4],[−8,4]]。验证比调用 `inv` 更重要：乘回 B 后对角项应为 1，非对角项应为 0。数值计算中行列式虽非零但很接近零时，逆可能对微小误差极敏感；此时应进一步考察条件数，而不是满足于\"软件给出了答案\"。"
     },
     {
       "id": "L02-Q15",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 1,
-          "section": "lecture-02-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 2 讲：阅读与\"scalar/vector/matrix objects\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "b",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "c",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "d",
-          "text": "逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、 inverse、correlation coefficient；用图形解释 covariance 的符号。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。"
-      },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-    },
-    {
-      "id": "L02-Q16",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 2,
-          "section": "lecture-02-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 2 讲：根据 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "exponential CDF/mean/median/mode/standard deviation；bivariate normal；covariance matrix；marginal、independence、conditional distribution。"
-        },
-        {
-          "id": "b",
-          "text": "Bayes rule。"
-        },
-        {
-          "id": "c",
-          "text": "identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product；Bernoulli distribution；exponential distribution 开始。"
-        },
-        {
-          "id": "d",
-          "text": "scalar/vector/matrix objects；维度规则；sum、inner product、norm、outer product、matrix-vector 与 matrix-matrix multiplication。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“scalar/vector/matrix objects”，不是题干指定的关系。"
-      },
-      "explanation": "identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product；Bernoulli distribution；exponential distribution 开始。"
-    },
-    {
-      "id": "L02-Q17",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 2,
-          "section": "lecture-02-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 2,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 2 讲：若要解释\"identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "本节讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
-        },
-        {
-          "id": "b",
-          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
-        },
-        {
-          "id": "c",
-          "text": "逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、 inverse、correlation coefficient；用图形解释 covariance 的符号。"
-        },
-        {
-          "id": "d",
-          "text": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "b": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。"
-      },
-      "explanation": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。"
-    },
-    {
-      "id": "L02-Q18",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 2,
-          "section": "lecture-02-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 2 讲：阅读与\"identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "c",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "d",
-          "text": "本节讨论 dot product、norm、outer product、identity、transpose、inverse、determinant、singular matrix、Hadamard product，以及 *、.*、'、inv、det、eye。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 2 页。"
-      },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-    },
-    {
-      "id": "L02-Q19",
       "lecture": 2,
       "sectionId": "lecture-02-source-3",
       "sourceAnchors": [
@@ -1216,51 +1493,6 @@
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 2 讲：根据 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "scalar/vector/matrix objects；维度规则；sum、inner product、norm、outer product、matrix-vector 与 matrix-matrix multiplication。"
-        },
-        {
-          "id": "b",
-          "text": "exponential CDF/mean/median/mode/standard deviation；bivariate normal；covariance matrix；marginal、independence、conditional distribution。"
-        },
-        {
-          "id": "c",
-          "text": "Bayes rule。"
-        },
-        {
-          "id": "d",
-          "text": "identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product；Bernoulli distribution；exponential distribution 开始。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“scalar/vector/matrix objects”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "d": "该陈述解释的是“identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product”，不是题干指定的关系。"
-      },
-      "explanation": "exponential CDF/mean/median/mode/standard deviation；bivariate normal；covariance matrix；marginal、independence、conditional distribution。"
-    },
-    {
-      "id": "L02-Q20",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 3,
-          "section": "lecture-02-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 2 讲：若要解释\"exponential CDF/mean/median/mode/standard deviation\"中的机制或推导，哪条推理链成立？",
@@ -1271,72 +1503,27 @@
         },
         {
           "id": "b",
-          "text": "逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、 inverse、correlation coefficient；用图形解释 covariance 的符号。"
+          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
         },
         {
           "id": "c",
-          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
+          "text": "逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、 inverse、correlation coefficient；用图形解释 covariance 的符号。"
         },
         {
           "id": "d",
           "text": "随后讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“scalar/vector/matrix objects”，不是题干指定的关系。",
-        "b": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。",
+        "c": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。",
         "d": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 1 页。"
       },
-      "explanation": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
+      "explanation": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。 Bernoulli 变量 X 只取 1 或 0，分别以 p 与 1−p 出现。 判断依据：Bernoulli 变量 X 只取 1 或 0，分别以 p 与 1−p 出现。均值 E[X]=p，因为 1·p+0·(1−p)=p；又因 X²=X，方差 E[X²]−E[X]²=p−p²=p(1−p)。这可表示一个时间窗是否出现脉冲或一次选择是否正确，但多个时间窗能否相加为二项分布还取决于试验是否独立且 p 相同。"
     },
     {
-      "id": "L02-Q21",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 3,
-          "section": "lecture-02-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 1,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 2 讲：阅读与\"exponential CDF/mean/median/mode/standard deviation\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "c",
-          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
-        },
-        {
-          "id": "d",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Bayes rule”，不是题干指定的关系。",
-        "b": "该陈述解释的是“scalar/vector/matrix objects”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。"
-      },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-    },
-    {
-      "id": "L02-Q22",
+      "id": "L02-Q16",
       "lecture": 2,
       "sectionId": "lecture-02-source-4",
       "sourceAnchors": [
@@ -1350,52 +1537,7 @@
         "Vectors",
         "Lecture2-FC_NEUROSCI_366_F2025.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 2 讲：根据 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Bayes rule。"
-        },
-        {
-          "id": "b",
-          "text": "scalar/vector/matrix objects；维度规则；sum、inner product、norm、outer product、matrix-vector 与 matrix-matrix multiplication。"
-        },
-        {
-          "id": "c",
-          "text": "identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product；Bernoulli distribution；exponential distribution 开始。"
-        },
-        {
-          "id": "d",
-          "text": "exponential CDF/mean/median/mode/standard deviation；bivariate normal；covariance matrix；marginal、independence、conditional distribution。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“scalar/vector/matrix objects”，不是题干指定的关系。",
-        "c": "该陈述解释的是“identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product”，不是题干指定的关系。",
-        "d": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。"
-      },
-      "explanation": "Bayes rule。"
-    },
-    {
-      "id": "L02-Q23",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 4,
-          "section": "lecture-02-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Vectors",
-        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
-      ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 2 讲：若要解释\"Bayes rule\"中的机制或推导，哪条推理链成立？",
@@ -1406,27 +1548,474 @@
         },
         {
           "id": "b",
-          "text": "本节讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
+          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
         },
         {
           "id": "c",
-          "text": "随后推导 Bernoulli mean/variance；exponential PDF、CDF、mean、median、mode、standard deviation，并给出 integration by parts 的最小支架。"
+          "text": "本节讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
         },
         {
           "id": "d",
           "text": "逐项解释 bivariate Gaussian 的 mean vector、covariance matrix、determinant、 inverse、correlation coefficient；用图形解释 covariance 的符号。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“identity、transpose、vector-as-matrix、inverse、singularity、determinant、Hadamard product”，不是题干指定的关系。",
-        "c": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
+        "b": "该陈述解释的是“exponential CDF/mean/median/mode/standard deviation”，不是题干指定的关系。",
         "d": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 3 页。"
       },
-      "explanation": "本节讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
+      "explanation": "本节讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。 下面的推导同时给出条件均值、条件方差与 Bayes 重加权，因而可以计算完整分布，而不只判断椭圆倾斜。"
+    },
+    {
+      "id": "L02-Q17",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 4,
+          "section": "lecture-02-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Vectors",
+        "Lecture2-FC_NEUROSCI_366_F2025.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 2 讲：阅读\"联合高斯条件化会移动均值并缩小方差\"图时，哪项观察正确？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "随后讨论 marginalization、independence、conditional probability、product rule 与 Bayes rule；需要区分 probability、likelihood、prior、posterior。"
+        },
+        {
+          "id": "b",
+          "text": "P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。"
+        },
+        {
+          "id": "c",
+          "text": "shape 不同所以抽象加法未定义；MATLAB 把 scalar/小数组广播到 A 的每个元素。"
+        },
+        {
+          "id": "d",
+          "text": "当两个变量相关时，固定 X₂ 相当于从联合密度取一个切片；条件均值沿相关方向移动，而条件方差由 σ₁² 缩为 σ₁²(1−c²)。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture2-FC_NEUROSCI_366_F2025.pdf 第 1 页。",
+        "b": "该选项回答的是“写出 Bayes rule 并标出 evidence。”。",
+        "c": "该选项回答的是“为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？”。"
+      },
+      "explanation": "当两个变量相关时，固定 X₂ 相当于从联合密度取一个切片；条件均值沿相关方向移动，而条件方差由 σ₁² 缩为 σ₁²(1−c²)。 二元高斯由均值向量与协方差矩阵完整决定；对另一个变量积分得到高斯边缘，对固定观测切片并重新归一化得到高斯条件分布。"
+    },
+    {
+      "id": "L02-Q18",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 1,
+          "section": "lecture-02-source-1"
+        }
+      ],
+      "conceptTags": [
+        "先看 shape：标量、向量、矩阵与乘法"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 2 讲：为什么 A v 的每个输出都能解释为一行权重与输入的加权和？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "矩阵乘法的元素定义就是 y_i=Σ_j A_ij v_j；固定输出行 i 后，只沿输入索引 j 求和，因此该行列出这个输出读取各输入的权重。"
+        },
+        {
+          "id": "b",
+          "text": "因为 C(4,−3)ᵀ=(0,0)ᵀ，所以任意 x 与 x+a(4,−3)ᵀ 都有相同输出；输出无法判定系数 a，因而不能唯一恢复输入。"
+        },
+        {
+          "id": "c",
+          "text": "似然固定已观察数据并比较参数解释数据的能力；参数后验还必须纳入参数先验并对所有候选参数归一化，两者条件方向不同。"
+        },
+        {
+          "id": "d",
+          "text": "shape 不同所以抽象加法未定义；MATLAB 把 scalar/小数组广播到 A 的每个元素。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该选项回答的是“为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？”。"
+      },
+      "explanation": "矩阵乘法的元素定义就是 y_i=Σ_j A_ij v_j；固定输出行 i 后，只沿输入索引 j 求和，因此该行列出这个输出读取各输入的权重。 程序实现应把抽象规则与语言行为分开。MATLAB 中 `B*C` 表示矩阵乘法，`B.*C` 表示对应元素相乘；`v'` 对实向量给出行向量。某些版本允许 s+A，通过隐式扩展把标量加到每个元素，但这是一项数组操作约定，不等于两个不同 shape 的线性代数对象具有通常的向量和。写注释时应明确自己采用哪种含义。"
+    },
+    {
+      "id": "L02-Q19",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 1,
+          "section": "lecture-02-source-1"
+        }
+      ],
+      "conceptTags": [
+        "先看 shape：标量、向量、矩阵与乘法",
+        "区分内积、外积与范数"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：完成\"给定 u=(0,1)ᵀ、v=(2,5)ᵀ，计算 u+v、uᵀv、uvᵀ 与 ||v||₂。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "BC=[[36,48],[78,104]]；B⊙C=[[12,16],[48,72]]。"
+        },
+        {
+          "id": "b",
+          "text": "和为 (2,6)ᵀ，内积 5，外积 [[0,0],[2,5]]，范数约 5.385。"
+        },
+        {
+          "id": "c",
+          "text": "A：条件分布均值 −0.0875、方差 0.1275、标准差约 0.357；B：阳性后患病概率约为 15.4%。"
+        },
+        {
+          "id": "d",
+          "text": "否；independent 推出 uncorrelated（矩存在），反向一般不成立。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“一般情况下 uncorrelated 是否推出 independent？”。"
+      },
+      "explanation": "和为 (2,6)ᵀ，内积 5，外积 [[0,0],[2,5]]，范数约 5.385。 计算路径：逐分量相加得到 u+v=(2,6)ᵀ。 内积为 0·2+1·5=5，是一个标量。 外积为 [[0·2,0·5],[1·2,1·5]]=[[0,0],[2,5]]，shape 为 2×2。 范数为 sqrt(2²+5²)=sqrt(29)≈5.385。"
+    },
+    {
+      "id": "L02-Q20",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 1,
+          "section": "lecture-02-source-1"
+        }
+      ],
+      "conceptTags": [
+        "先看 shape：标量、向量、矩阵与乘法",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 2 讲：得到\"和为 (2,6)ᵀ，内积 5，外积 [[0,0],[2,5]]，范数约 5.385。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "BC 的每项包含两个乘积之和，而 Hadamard 的每项只包含一个同位置乘积。"
+        },
+        {
+          "id": "b",
+          "text": "A 的观测方向与均值移动方向一致且条件不确定性缩小；B 的后验高于 1% 先验但远低于 90% 灵敏度。"
+        },
+        {
+          "id": "c",
+          "text": "范数应大于任一分量绝对值 5 且小于分量绝对值之和 7；5.385 满足。"
+        },
+        {
+          "id": "d",
+          "text": "否；independent 推出 uncorrelated（矩存在），反向一般不成立。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“一般情况下 uncorrelated 是否推出 independent？”。"
+      },
+      "explanation": "范数应大于任一分量绝对值 5 且小于分量绝对值之和 7；5.385 满足。 这个检查对应题设\"给定 u=(0,1)ᵀ、v=(2,5)ᵀ，计算 u+v、uᵀv、uvᵀ 与 ||v||₂。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L02-Q21",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 2,
+          "section": "lecture-02-source-2"
+        }
+      ],
+      "conceptTags": [
+        "单位矩阵、转置、逆与奇异性"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 2 讲：C=[[3,4],[6,8]] 把哪些不同输入映到同一输出？这如何体现不可逆？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "矩阵乘法的元素定义就是 y_i=Σ_j A_ij v_j；固定输出行 i 后，只沿输入索引 j 求和，因此该行列出这个输出读取各输入的权重。"
+        },
+        {
+          "id": "b",
+          "text": "似然固定已观察数据并比较参数解释数据的能力；参数后验还必须纳入参数先验并对所有候选参数归一化，两者条件方向不同。"
+        },
+        {
+          "id": "c",
+          "text": "shape 不同所以抽象加法未定义；MATLAB 把 scalar/小数组广播到 A 的每个元素。"
+        },
+        {
+          "id": "d",
+          "text": "因为 C(4,−3)ᵀ=(0,0)ᵀ，所以任意 x 与 x+a(4,−3)ᵀ 都有相同输出；输出无法判定系数 a，因而不能唯一恢复输入。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该选项回答的是“为什么 u+A 在抽象数学中未定义，但 MATLAB 可能给出结果？”。"
+      },
+      "explanation": "因为 C(4,−3)ᵀ=(0,0)ᵀ，所以任意 x 与 x+a(4,−3)ᵀ 都有相同输出；输出无法判定系数 a，因而不能唯一恢复输入。 Hadamard 乘积 B⊙C 是同位置元素相乘，要求相同 shape；矩阵乘积 BC 则沿共享索引求和。前者可表示逐通道增益，后者表示变换复合。把二者写成同一个\"乘法\"会丢失模型结构。实际代码审计时，要为每个乘号写一句对象含义，并用手算第一个元素验证程序使用了预期运算。"
+    },
+    {
+      "id": "L02-Q22",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 2,
+          "section": "lecture-02-source-2"
+        }
+      ],
+      "conceptTags": [
+        "单位矩阵、转置、逆与奇异性",
+        "比较矩阵乘法与逐元素乘法"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：完成\"B=[[4,4],[8,9]]，C=[[3,4],[6,8]]。分别计算 BC 与 B⊙C。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "BC=[[36,48],[78,104]]；B⊙C=[[12,16],[48,72]]。"
+        },
+        {
+          "id": "b",
+          "text": "和为 (2,6)ᵀ，内积 5，外积 [[0,0],[2,5]]，范数约 5.385。"
+        },
+        {
+          "id": "c",
+          "text": "A：条件分布均值 −0.0875、方差 0.1275、标准差约 0.357；B：阳性后患病概率约为 15.4%。"
+        },
+        {
+          "id": "d",
+          "text": "否；independent 推出 uncorrelated（矩存在），反向一般不成立。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“一般情况下 uncorrelated 是否推出 independent？”。"
+      },
+      "explanation": "BC=[[36,48],[78,104]]；B⊙C=[[12,16],[48,72]]。 计算路径：BC 的第一行第一列为 4·3+4·6=36，第一行第二列为 4·4+4·8=48。 第二行第一列为 8·3+9·6=78，第二行第二列为 8·4+9·8=104。 逐元素乘积逐位置计算，得到 [[4·3,4·4],[8·6,9·8]]=[[12,16],[48,72]]。 两个答案都是 2×2，但前者复合线性变换，后者对对应位置加权。"
+    },
+    {
+      "id": "L02-Q23",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 2,
+          "section": "lecture-02-source-2"
+        }
+      ],
+      "conceptTags": [
+        "单位矩阵、转置、逆与奇异性",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 2 讲：得到\"BC=[[36,48],[78,104]]；B⊙C=[[12,16],[48,72]]。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "范数应大于任一分量绝对值 5 且小于分量绝对值之和 7；5.385 满足。"
+        },
+        {
+          "id": "b",
+          "text": "BC 的每项包含两个乘积之和，而 Hadamard 的每项只包含一个同位置乘积。"
+        },
+        {
+          "id": "c",
+          "text": "A 的观测方向与均值移动方向一致且条件不确定性缩小；B 的后验高于 1% 先验但远低于 90% 灵敏度。"
+        },
+        {
+          "id": "d",
+          "text": "否；independent 推出 uncorrelated（矩存在），反向一般不成立。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“一般情况下 uncorrelated 是否推出 independent？”。"
+      },
+      "explanation": "BC 的每项包含两个乘积之和，而 Hadamard 的每项只包含一个同位置乘积。 这个检查对应题设\"B=[[4,4],[8,9]]，C=[[3,4],[6,8]]。分别计算 BC 与 B⊙C。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L02-Q24",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 3,
+          "section": "lecture-02-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 Bernoulli 与指数分布到联合高斯和 Bayes"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 2 讲：为什么 P(D|θ) 作为 θ 的函数时被称为似然，却不能直接当作 P(θ|D)？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "矩阵乘法的元素定义就是 y_i=Σ_j A_ij v_j；固定输出行 i 后，只沿输入索引 j 求和，因此该行列出这个输出读取各输入的权重。"
+        },
+        {
+          "id": "b",
+          "text": "因为 C(4,−3)ᵀ=(0,0)ᵀ，所以任意 x 与 x+a(4,−3)ᵀ 都有相同输出；输出无法判定系数 a，因而不能唯一恢复输入。"
+        },
+        {
+          "id": "c",
+          "text": "似然固定已观察数据并比较参数解释数据的能力；参数后验还必须纳入参数先验并对所有候选参数归一化，两者条件方向不同。"
+        },
+        {
+          "id": "d",
+          "text": "P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该选项回答的是“写出 Bayes rule 并标出 evidence。”。"
+      },
+      "explanation": "似然固定已观察数据并比较参数解释数据的能力；参数后验还必须纳入参数先验并对所有候选参数归一化，两者条件方向不同。 Bayes 公式来自同一联合概率的两种分解：P(A,B)=P(A|B)P(B)=P(B|A)P(A)。整理得 P(A|B)=P(B|A)P(A)/P(B)。在参数推断中，A 可代表参数 θ，B 代表数据 D；P(D|θ) 是似然，P(θ) 是先验，P(D) 负责归一化，P(θ|D) 是后验。似然不是参数的概率分布，除非再乘先验并完成归一化。"
+    },
+    {
+      "id": "L02-Q25",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 3,
+          "section": "lecture-02-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 Bernoulli 与指数分布到联合高斯和 Bayes",
+        "条件高斯与低基率 Bayes 的两次归一化"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：完成\"A：μ₁=0、μ₂=1、σ₁=0.5、σ₂=1、c=0.7，给定 x₂=0.75，求 X₁ 的条件均值、条件方差和条件标准差。B：患病率 1%，灵敏度 0.9，假阳性率 0.05，求阳性后的患病概率。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "和为 (2,6)ᵀ，内积 5，外积 [[0,0],[2,5]]，范数约 5.385。"
+        },
+        {
+          "id": "b",
+          "text": "BC=[[36,48],[78,104]]；B⊙C=[[12,16],[48,72]]。"
+        },
+        {
+          "id": "c",
+          "text": "P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。"
+        },
+        {
+          "id": "d",
+          "text": "A：条件分布均值 −0.0875、方差 0.1275、标准差约 0.357；B：阳性后患病概率约为 15.4%。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该选项回答的是“写出 Bayes rule 并标出 evidence。”。"
+      },
+      "explanation": "A：条件分布均值 −0.0875、方差 0.1275、标准差约 0.357；B：阳性后患病概率约为 15.4%。 计算路径：A 的条件均值为 0+0.7·0.5·(0.75−1)=−0.0875。 A 的条件方差为 0.5²(1−0.7²)=0.25·0.51=0.1275，条件标准差约为 0.3571。 正相关且 x₂ 低于 μ₂，所以条件均值低于 μ₁；条件方差 0.1275 也小于边缘方差 0.25。 B 的真阳性联合概率为 0.9·0.01=0.009，假阳性联合概率为 0.05·0.99=0.0495。 总阳性概率为 0.009+0.0495=0.0585。 阳性后验为 0.009/0.0585≈0.1538，即约 15.4%。"
+    },
+    {
+      "id": "L02-Q26",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 3,
+          "section": "lecture-02-source-3"
+        }
+      ],
+      "conceptTags": [
+        "从 Bernoulli 与指数分布到联合高斯和 Bayes",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 2 讲：得到\"A：条件分布均值 −0.0875、方差 0.1275、标准差约 0.357；B：阳性后患病概率约为 15.4%。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A 的观测方向与均值移动方向一致且条件不确定性缩小；B 的后验高于 1% 先验但远低于 90% 灵敏度。"
+        },
+        {
+          "id": "b",
+          "text": "范数应大于任一分量绝对值 5 且小于分量绝对值之和 7；5.385 满足。"
+        },
+        {
+          "id": "c",
+          "text": "BC 的每项包含两个乘积之和，而 Hadamard 的每项只包含一个同位置乘积。"
+        },
+        {
+          "id": "d",
+          "text": "P(A|B)=P(B|A)P(A)/P(B)，P(B) 是 evidence/normalizer。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“写出 Bayes rule 并标出 evidence。”。"
+      },
+      "explanation": "A 的观测方向与均值移动方向一致且条件不确定性缩小；B 的后验高于 1% 先验但远低于 90% 灵敏度。 这个检查对应题设\"A：μ₁=0、μ₂=1、σ₁=0.5、σ₂=1、c=0.7，给定 x₂=0.75，求 X₁ 的条件均值、条件方差和条件标准差。B：患病率 1%，灵敏度 0.9，假阳性率 0.05，求阳性后的患病概率。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L02-Q27",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1440,7 +2029,7 @@
         "标量",
         "scalar"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"单个数；可视为 1×1 对象但需说明语境。\"称为什么？",
@@ -1451,27 +2040,27 @@
         },
         {
           "id": "b",
-          "text": "矩阵（matrix）"
+          "text": "标量（scalar）"
         },
         {
           "id": "c",
-          "text": "标量（scalar）"
+          "text": "矩阵（matrix）"
         },
         {
           "id": "d",
           "text": "内积（inner product）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“向量（vector）”指：有序分量；本课默认列向量。",
-        "b": "“矩阵（matrix）”指：按行列组织的二维线性映射表示。",
+        "c": "“矩阵（matrix）”指：按行列组织的二维线性映射表示。",
         "d": "“内积（inner product）”指：同维向量对应分量乘积之和。"
       },
-      "explanation": "标量（scalar）：单个数；可视为 1×1 对象但需说明语境。"
+      "explanation": "标量（scalar）：单个数；可视为 1×1 对象但需说明语境。 某些版本允许 s+A，通过隐式扩展把标量加到每个元素，但这是一项数组操作约定，不等于两个不同 shape 的线性代数对象具有通常的向量和。"
     },
     {
-      "id": "L02-Q25",
+      "id": "L02-Q28",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1485,7 +2074,7 @@
         "向量",
         "vector"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"有序分量；本课默认列向量。\"称为什么？",
@@ -1500,23 +2089,23 @@
         },
         {
           "id": "c",
-          "text": "外积（outer product）"
+          "text": "向量（vector）"
         },
         {
           "id": "d",
-          "text": "向量（vector）"
+          "text": "外积（outer product）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“矩阵（matrix）”指：按行列组织的二维线性映射表示。",
         "b": "“内积（inner product）”指：同维向量对应分量乘积之和。",
-        "c": "“外积（outer product）”指：列向量与行向量相乘得到矩阵。"
+        "d": "“外积（outer product）”指：列向量与行向量相乘得到矩阵。"
       },
-      "explanation": "向量（vector）：有序分量；本课默认列向量。"
+      "explanation": "向量（vector）：有序分量；本课默认列向量。 向量加法要求长度相同，并逐分量相加。 判断依据：向量加法要求长度相同，并逐分量相加。内积 uᵀv 把两个同长度向量变成标量，可衡量沿同一坐标系的重合；范数 ||w||₂ 是 wᵀw 的平方根，表示到原点的欧氏距离。外积 uvᵀ 把两个向量变成矩阵，其中第 i,j 项是 u_i v_j，因此它保留所有成对组合，不能与内积混为一谈。"
     },
     {
-      "id": "L02-Q26",
+      "id": "L02-Q29",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1537,31 +2126,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "矩阵（matrix）"
-        },
-        {
-          "id": "b",
           "text": "内积（inner product）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "外积（outer product）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "Hadamard 乘积（Hadamard product）"
+        },
+        {
+          "id": "d",
+          "text": "矩阵（matrix）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“内积（inner product）”指：同维向量对应分量乘积之和。",
-        "c": "“外积（outer product）”指：列向量与行向量相乘得到矩阵。",
-        "d": "“Hadamard 乘积（Hadamard product）”指：同 shape 对象逐元素相乘。"
+        "a": "“内积（inner product）”指：同维向量对应分量乘积之和。",
+        "b": "“外积（outer product）”指：列向量与行向量相乘得到矩阵。",
+        "c": "“Hadamard 乘积（Hadamard product）”指：同 shape 对象逐元素相乘。"
       },
-      "explanation": "矩阵（matrix）：按行列组织的二维线性映射表示。"
+      "explanation": "矩阵（matrix）：按行列组织的二维线性映射表示。 这些对象不是仅供算术练习：向量可表示多个神经元的反应，矩阵可表示刺激到反应的线性映射。"
     },
     {
-      "id": "L02-Q27",
+      "id": "L02-Q30",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1575,18 +2164,18 @@
         "内积",
         "inner product"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"同维向量对应分量乘积之和。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "外积（outer product）"
+          "text": "内积（inner product）"
         },
         {
           "id": "b",
-          "text": "内积（inner product）"
+          "text": "外积（outer product）"
         },
         {
           "id": "c",
@@ -1597,16 +2186,16 @@
           "text": "奇异矩阵（singular matrix）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“外积（outer product）”指：列向量与行向量相乘得到矩阵。",
+        "b": "“外积（outer product）”指：列向量与行向量相乘得到矩阵。",
         "c": "“Hadamard 乘积（Hadamard product）”指：同 shape 对象逐元素相乘。",
         "d": "“奇异矩阵（singular matrix）”指：不可逆、determinant 为零的方阵。"
       },
-      "explanation": "内积（inner product）：同维向量对应分量乘积之和。"
+      "explanation": "内积（inner product）：同维向量对应分量乘积之和。 向量加法要求长度相同，并逐分量相加。 判断依据：向量加法要求长度相同，并逐分量相加。内积 uᵀv 把两个同长度向量变成标量，可衡量沿同一坐标系的重合；范数 ||w||₂ 是 wᵀw 的平方根，表示到原点的欧氏距离。外积 uvᵀ 把两个向量变成矩阵，其中第 i,j 项是 u_i v_j，因此它保留所有成对组合，不能与内积混为一谈。"
     },
     {
-      "id": "L02-Q28",
+      "id": "L02-Q31",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1620,7 +2209,7 @@
         "外积",
         "outer product"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"列向量与行向量相乘得到矩阵。\"称为什么？",
@@ -1631,27 +2220,27 @@
         },
         {
           "id": "b",
-          "text": "奇异矩阵（singular matrix）"
+          "text": "外积（outer product）"
         },
         {
           "id": "c",
-          "text": "外积（outer product）"
+          "text": "奇异矩阵（singular matrix）"
         },
         {
           "id": "d",
           "text": "概率质量函数（probability mass function, PMF）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“Hadamard 乘积（Hadamard product）”指：同 shape 对象逐元素相乘。",
-        "b": "“奇异矩阵（singular matrix）”指：不可逆、determinant 为零的方阵。",
+        "c": "“奇异矩阵（singular matrix）”指：不可逆、determinant 为零的方阵。",
         "d": "“概率质量函数（probability mass function, PMF）”指：离散随机变量各个可能结果的概率。"
       },
-      "explanation": "外积（outer product）：列向量与行向量相乘得到矩阵。"
+      "explanation": "外积（outer product）：列向量与行向量相乘得到矩阵。 MATLAB 中 `B*C` 表示矩阵乘法，`B.*C` 表示对应元素相乘；`v'` 对实向量给出行向量。"
     },
     {
-      "id": "L02-Q29",
+      "id": "L02-Q32",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1665,7 +2254,7 @@
         "Hadamard 乘积",
         "Hadamard product"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"同 shape 对象逐元素相乘。\"称为什么？",
@@ -1680,23 +2269,23 @@
         },
         {
           "id": "c",
-          "text": "概率密度函数（probability density function, PDF）"
+          "text": "Hadamard 乘积（Hadamard product）"
         },
         {
           "id": "d",
-          "text": "Hadamard 乘积（Hadamard product）"
+          "text": "概率密度函数（probability density function, PDF）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“奇异矩阵（singular matrix）”指：不可逆、determinant 为零的方阵。",
         "b": "“概率质量函数（probability mass function, PMF）”指：离散随机变量各个可能结果的概率。",
-        "c": "“概率密度函数（probability density function, PDF）”指：连续随机变量在单位区间上的概率密度。"
+        "d": "“概率密度函数（probability density function, PDF）”指：连续随机变量在单位区间上的概率密度。"
       },
-      "explanation": "Hadamard 乘积（Hadamard product）：同 shape 对象逐元素相乘。"
+      "explanation": "Hadamard 乘积（Hadamard product）：同 shape 对象逐元素相乘。 某些版本允许 s+A，通过隐式扩展把标量加到每个元素，但这是一项数组操作约定，不等于两个不同 shape 的线性代数对象具有通常的向量和。"
     },
     {
-      "id": "L02-Q30",
+      "id": "L02-Q33",
       "lecture": 2,
       "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
@@ -1710,38 +2299,38 @@
         "奇异矩阵",
         "singular matrix"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"不可逆、determinant 为零的方阵。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "奇异矩阵（singular matrix）"
-        },
-        {
-          "id": "b",
           "text": "概率质量函数（probability mass function, PMF）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "概率密度函数（probability density function, PDF）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "边缘分布（marginal distribution）"
+        },
+        {
+          "id": "d",
+          "text": "奇异矩阵（singular matrix）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“概率质量函数（probability mass function, PMF）”指：离散随机变量各个可能结果的概率。",
-        "c": "“概率密度函数（probability density function, PDF）”指：连续随机变量在单位区间上的概率密度。",
-        "d": "“边缘分布（marginal distribution）”指：对其他变量求和/积分后保留一个变量。"
+        "a": "“概率质量函数（probability mass function, PMF）”指：离散随机变量各个可能结果的概率。",
+        "b": "“概率密度函数（probability density function, PDF）”指：连续随机变量在单位区间上的概率密度。",
+        "c": "“边缘分布（marginal distribution）”指：对其他变量求和/积分后保留一个变量。"
       },
-      "explanation": "奇异矩阵（singular matrix）：不可逆、determinant 为零的方阵。"
+      "explanation": "奇异矩阵（singular matrix）：不可逆、determinant 为零的方阵。 练习第一页给定 s=2，u=(0,1)ᵀ，v=(2,5)ᵀ，w=(0,1,2,5)ᵀ，以及 A、B、C 三个矩阵。"
     },
     {
-      "id": "L02-Q31",
+      "id": "L02-Q34",
       "lecture": 2,
       "sectionId": "lecture-02-source-2",
       "sourceAnchors": [
@@ -1762,11 +2351,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "概率密度函数（probability density function, PDF）"
+          "text": "概率质量函数（probability mass function, PMF）"
         },
         {
           "id": "b",
-          "text": "概率质量函数（probability mass function, PMF）"
+          "text": "概率密度函数（probability density function, PDF）"
         },
         {
           "id": "c",
@@ -1777,16 +2366,16 @@
           "text": "条件分布（conditional distribution）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“概率密度函数（probability density function, PDF）”指：连续随机变量在单位区间上的概率密度。",
+        "b": "“概率密度函数（probability density function, PDF）”指：连续随机变量在单位区间上的概率密度。",
         "c": "“边缘分布（marginal distribution）”指：对其他变量求和/积分后保留一个变量。",
         "d": "“条件分布（conditional distribution）”指：已知另一事件/变量时的重新归一化分布。"
       },
-      "explanation": "概率质量函数（probability mass function, PMF）：离散随机变量各个可能结果的概率。"
+      "explanation": "概率质量函数（probability mass function, PMF）：离散随机变量各个可能结果的概率。 数值计算中行列式虽非零但很接近零时，逆可能对微小误差极敏感；此时应进一步考察条件数，而不是满足于\"软件给出了答案\"。"
     },
     {
-      "id": "L02-Q32",
+      "id": "L02-Q35",
       "lecture": 2,
       "sectionId": "lecture-02-source-4",
       "sourceAnchors": [
@@ -1800,7 +2389,7 @@
         "概率密度函数",
         "probability density function, PDF"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"连续随机变量在单位区间上的概率密度。\"称为什么？",
@@ -1811,27 +2400,27 @@
         },
         {
           "id": "b",
-          "text": "条件分布（conditional distribution）"
+          "text": "概率密度函数（probability density function, PDF）"
         },
         {
           "id": "c",
-          "text": "概率密度函数（probability density function, PDF）"
+          "text": "条件分布（conditional distribution）"
         },
         {
           "id": "d",
           "text": "似然（likelihood）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“边缘分布（marginal distribution）”指：对其他变量求和/积分后保留一个变量。",
-        "b": "“条件分布（conditional distribution）”指：已知另一事件/变量时的重新归一化分布。",
+        "c": "“条件分布（conditional distribution）”指：已知另一事件/变量时的重新归一化分布。",
         "d": "“似然（likelihood）”指：把观测固定后，模型参数的相对支持度函数。"
       },
-      "explanation": "概率密度函数（probability density function, PDF）：连续随机变量在单位区间上的概率密度。"
+      "explanation": "概率密度函数（probability density function, PDF）：连续随机变量在单位区间上的概率密度。 似然不是参数的概率分布，除非再乘先验并完成归一化。"
     },
     {
-      "id": "L02-Q33",
+      "id": "L02-Q36",
       "lecture": 2,
       "sectionId": "lecture-02-source-2",
       "sourceAnchors": [
@@ -1845,7 +2434,7 @@
         "边缘分布",
         "marginal distribution"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 2 讲：本讲把\"对其他变量求和/积分后保留一个变量。\"称为什么？",
@@ -1860,152 +2449,20 @@
         },
         {
           "id": "c",
-          "text": "先验（prior）"
-        },
-        {
-          "id": "d",
           "text": "边缘分布（marginal distribution）"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "“条件分布（conditional distribution）”指：已知另一事件/变量时的重新归一化分布。",
-        "b": "“似然（likelihood）”指：把观测固定后，模型参数的相对支持度函数。",
-        "c": "“先验（prior）”指：观测当前数据前对未知量的分布。"
-      },
-      "explanation": "边缘分布（marginal distribution）：对其他变量求和/积分后保留一个变量。"
-    },
-    {
-      "id": "L02-Q34",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 1,
-          "section": "lecture-02-source-1"
-        }
-      ],
-      "conceptTags": [
-        "矩阵-向量乘法的 shape 规则"
-      ],
-      "difficulty": 4,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 2 讲：使用\"矩阵-向量乘法的 shape 规则\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "内维相等"
-        },
-        {
-          "id": "b",
-          "text": "向量同维"
-        },
-        {
-          "id": "c",
-          "text": "结果 shape 为 len(u)×len(v)"
         },
         {
           "id": "d",
-          "text": "列/行 convention 一致"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "这是“inner product”的条件，不是题干公式的条件。",
-        "c": "这是“outer product”的条件，不是题干公式的条件。",
-        "d": "这是“Euclidean norm”的条件，不是题干公式的条件。"
-      },
-      "explanation": "矩阵-向量乘法的 shape 规则的适用条件：内维相等"
-    },
-    {
-      "id": "L02-Q35",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 1,
-          "section": "lecture-02-source-1"
-        }
-      ],
-      "conceptTags": [
-        "inner product"
-      ],
-      "difficulty": 5,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 2 讲：使用\"inner product\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "内维相等"
-        },
-        {
-          "id": "b",
-          "text": "向量同维"
-        },
-        {
-          "id": "c",
-          "text": "结果 shape 为 len(u)×len(v)"
-        },
-        {
-          "id": "d",
-          "text": "列/行 convention 一致"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
-        "c": "这是“outer product”的条件，不是题干公式的条件。",
-        "d": "这是“Euclidean norm”的条件，不是题干公式的条件。"
-      },
-      "explanation": "inner product 的适用条件：向量同维"
-    },
-    {
-      "id": "L02-Q36",
-      "lecture": 2,
-      "sectionId": "lecture-02-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 2,
-          "section": "lecture-02-source-2"
-        }
-      ],
-      "conceptTags": [
-        "outer product"
-      ],
-      "difficulty": 1,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 2 讲：使用\"outer product\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "内维相等"
-        },
-        {
-          "id": "b",
-          "text": "向量同维"
-        },
-        {
-          "id": "c",
-          "text": "结果 shape 为 len(u)×len(v)"
-        },
-        {
-          "id": "d",
-          "text": "列/行 convention 一致"
+          "text": "先验（prior）"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
-        "b": "这是“inner product”的条件，不是题干公式的条件。",
-        "d": "这是“Euclidean norm”的条件，不是题干公式的条件。"
+        "a": "“条件分布（conditional distribution）”指：已知另一事件/变量时的重新归一化分布。",
+        "b": "“似然（likelihood）”指：把观测固定后，模型参数的相对支持度函数。",
+        "d": "“先验（prior）”指：观测当前数据前对未知量的分布。"
       },
-      "explanation": "outer product 的适用条件：结果 shape 为 len(u)×len(v)"
+      "explanation": "边缘分布（marginal distribution）：对其他变量求和/积分后保留一个变量。 它可以看作该线性变换对有向面积的缩放；行列式为零意味着某个二维区域被压到一条线或一个点，不同输入会产生同一输出。"
     },
     {
       "id": "L02-Q37",
@@ -2019,9 +2476,141 @@
         }
       ],
       "conceptTags": [
+        "矩阵-向量乘法的 shape 规则"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：使用\"矩阵-向量乘法的 shape 规则\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "向量同维"
+        },
+        {
+          "id": "b",
+          "text": "结果 shape 为 len(u)×len(v)"
+        },
+        {
+          "id": "c",
+          "text": "列/行 convention 一致"
+        },
+        {
+          "id": "d",
+          "text": "内维相等"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“inner product”的条件，不是题干公式的条件。",
+        "b": "这是“outer product”的条件，不是题干公式的条件。",
+        "c": "这是“Euclidean norm”的条件，不是题干公式的条件。"
+      },
+      "explanation": "矩阵-向量乘法的 shape 规则的适用条件：内维相等 某些版本允许 s+A，通过隐式扩展把标量加到每个元素，但这是一项数组操作约定，不等于两个不同 shape 的线性代数对象具有通常的向量和。"
+    },
+    {
+      "id": "L02-Q38",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 1,
+          "section": "lecture-02-source-1"
+        }
+      ],
+      "conceptTags": [
+        "inner product"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：使用\"inner product\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "向量同维"
+        },
+        {
+          "id": "b",
+          "text": "内维相等"
+        },
+        {
+          "id": "c",
+          "text": "结果 shape 为 len(u)×len(v)"
+        },
+        {
+          "id": "d",
+          "text": "列/行 convention 一致"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
+        "c": "这是“outer product”的条件，不是题干公式的条件。",
+        "d": "这是“Euclidean norm”的条件，不是题干公式的条件。"
+      },
+      "explanation": "inner product 的适用条件：向量同维 某些版本允许 s+A，通过隐式扩展把标量加到每个元素，但这是一项数组操作约定，不等于两个不同 shape 的线性代数对象具有通常的向量和。"
+    },
+    {
+      "id": "L02-Q39",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 2,
+          "section": "lecture-02-source-2"
+        }
+      ],
+      "conceptTags": [
+        "outer product"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：使用\"outer product\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "内维相等"
+        },
+        {
+          "id": "b",
+          "text": "结果 shape 为 len(u)×len(v)"
+        },
+        {
+          "id": "c",
+          "text": "向量同维"
+        },
+        {
+          "id": "d",
+          "text": "列/行 convention 一致"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
+        "c": "这是“inner product”的条件，不是题干公式的条件。",
+        "d": "这是“Euclidean norm”的条件，不是题干公式的条件。"
+      },
+      "explanation": "outer product 的适用条件：结果 shape 为 len(u)×len(v) 转置 Aᵀ 交换行列，因此若 A 把二维输入映到四维输出，Aᵀ 的 shape 是 2×4，但它通常不是 A 的逆。"
+    },
+    {
+      "id": "L02-Q40",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 1,
+          "section": "lecture-02-source-1"
+        }
+      ],
+      "conceptTags": [
         "Euclidean norm"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 2 讲：使用\"Euclidean norm\"时，哪项条件或约定不可省略？",
@@ -2036,23 +2625,23 @@
         },
         {
           "id": "c",
-          "text": "结果 shape 为 len(u)×len(v)"
+          "text": "列/行 convention 一致"
         },
         {
           "id": "d",
-          "text": "列/行 convention 一致"
+          "text": "结果 shape 为 len(u)×len(v)"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
         "b": "这是“inner product”的条件，不是题干公式的条件。",
-        "c": "这是“outer product”的条件，不是题干公式的条件。"
+        "d": "这是“outer product”的条件，不是题干公式的条件。"
       },
-      "explanation": "Euclidean norm 的适用条件：列/行 convention 一致"
+      "explanation": "Euclidean norm 的适用条件：列/行 convention 一致 shape 记录输入与输出的槽位；忽略 shape 即使算出数字，也可能把神经元索引与条件索引互换。"
     },
     {
-      "id": "L02-Q38",
+      "id": "L02-Q41",
       "lecture": 2,
       "sectionId": "lecture-02-source-2",
       "sourceAnchors": [
@@ -2072,7 +2661,51 @@
       "choices": [
         {
           "id": "a",
+          "text": "内维相等"
+        },
+        {
+          "id": "b",
+          "text": "向量同维"
+        },
+        {
+          "id": "c",
+          "text": "结果 shape 为 len(u)×len(v)"
+        },
+        {
+          "id": "d",
           "text": "二阶矩存在"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
+        "b": "这是“inner product”的条件，不是题干公式的条件。",
+        "c": "这是“outer product”的条件，不是题干公式的条件。"
+      },
+      "explanation": "variance 恒等式的适用条件：二阶矩存在 二阶矩阵 B=[[a,b],[c,d]] 的行列式为 ad−bc。"
+    },
+    {
+      "id": "L02-Q42",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 2,
+          "section": "lecture-02-source-2"
+        }
+      ],
+      "conceptTags": [
+        "CDF 定义"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：使用\"CDF 定义\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "离散/连续均适用"
         },
         {
           "id": "b",
@@ -2093,10 +2726,10 @@
         "c": "这是“inner product”的条件，不是题干公式的条件。",
         "d": "这是“outer product”的条件，不是题干公式的条件。"
       },
-      "explanation": "variance 恒等式的适用条件：二阶矩存在"
+      "explanation": "CDF 定义的适用条件：离散/连续均适用 数值计算中行列式虽非零但很接近零时，逆可能对微小误差极敏感；此时应进一步考察条件数，而不是满足于\"软件给出了答案\"。"
     },
     {
-      "id": "L02-Q39",
+      "id": "L02-Q43",
       "lecture": 2,
       "sectionId": "lecture-02-source-2",
       "sourceAnchors": [
@@ -2107,12 +2740,12 @@
         }
       ],
       "conceptTags": [
-        "CDF 定义"
+        "exponential PDF"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
-      "stem": "第 2 讲：使用\"CDF 定义\"时，哪项条件或约定不可省略？",
+      "stem": "第 2 讲：使用\"exponential PDF\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
@@ -2120,7 +2753,7 @@
         },
         {
           "id": "b",
-          "text": "离散/连续均适用"
+          "text": "λ>0"
         },
         {
           "id": "c",
@@ -2137,26 +2770,26 @@
         "c": "这是“inner product”的条件，不是题干公式的条件。",
         "d": "这是“outer product”的条件，不是题干公式的条件。"
       },
-      "explanation": "CDF 定义的适用条件：离散/连续均适用"
+      "explanation": "exponential PDF 的适用条件：λ>0 数值计算中行列式虽非零但很接近零时，逆可能对微小误差极敏感；此时应进一步考察条件数，而不是满足于\"软件给出了答案\"。"
     },
     {
-      "id": "L02-Q40",
+      "id": "L02-Q44",
       "lecture": 2,
-      "sectionId": "lecture-02-source-2",
+      "sectionId": "lecture-02-source-1",
       "sourceAnchors": [
         {
           "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
-          "page": 2,
-          "section": "lecture-02-source-2"
+          "page": 1,
+          "section": "lecture-02-source-1"
         }
       ],
       "conceptTags": [
-        "exponential PDF"
+        "二维 Gaussian density"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
-      "stem": "第 2 讲：使用\"exponential PDF\"时，哪项条件或约定不可省略？",
+      "stem": "第 2 讲：使用\"二维 Gaussian density\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
@@ -2168,7 +2801,7 @@
         },
         {
           "id": "c",
-          "text": "λ>0"
+          "text": "C 对称正定"
         },
         {
           "id": "d",
@@ -2181,7 +2814,51 @@
         "b": "这是“inner product”的条件，不是题干公式的条件。",
         "d": "这是“outer product”的条件，不是题干公式的条件。"
       },
-      "explanation": "exponential PDF 的适用条件：λ>0"
+      "explanation": "二维 Gaussian density 的适用条件：C 对称正定 shape 记录输入与输出的槽位；忽略 shape 即使算出数字，也可能把神经元索引与条件索引互换。"
+    },
+    {
+      "id": "L02-Q45",
+      "lecture": 2,
+      "sectionId": "lecture-02-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
+          "page": 1,
+          "section": "lecture-02-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Bayes rule"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 2 讲：使用\"Bayes rule\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "内维相等"
+        },
+        {
+          "id": "b",
+          "text": "向量同维"
+        },
+        {
+          "id": "c",
+          "text": "结果 shape 为 len(u)×len(v)"
+        },
+        {
+          "id": "d",
+          "text": "P(B)>0"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“矩阵-向量乘法的 shape 规则”的条件，不是题干公式的条件。",
+        "b": "这是“inner product”的条件，不是题干公式的条件。",
+        "c": "这是“outer product”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Bayes rule 的适用条件：P(B)>0 shape 记录输入与输出的槽位；忽略 shape 即使算出数字，也可能把神经元索引与条件索引互换。"
     }
   ]
 }

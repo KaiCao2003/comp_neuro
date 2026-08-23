@@ -95,6 +95,520 @@
       "stopPredict": "为什么 C 与 α scale 不可辨识？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "区分单神经元方向调谐、群体低维轨迹与潜在动力学三种描述层级，并说明它们可以同时成立。",
+      "从高维神经活动到低维因子，逐项解释 GPFA 的观测模型、时间协方差、矩阵形状与不可辨识性。",
+      "用 delayed-reach 时间线解释准备态如何进入 movement-potent 与 output-null 子空间，而不把相关图形误写成因果结论。",
+      "手算线性 readout 的零空间、rank-nullity 与简单 decoder，并把结果用于 BMI 闭环和跨日对齐。",
+      "比较 UPDATE 与旧版：共同页按 UPDATE 解释并保留旧版引用，第 5 页只归于 UPDATE 新增内容。"
+    ],
+    "prerequisiteBridge": [
+      "先把一次群体记录写成向量：若同时记录 N 个神经元，某时刻的 firing rates 是 N 维向量 r。实验画出的每个点不是一个神经元，而是整个群体在某时刻的状态。PCA 或 factor model 试图用 K 个坐标描述这些点，其中 K 小于 N。低维并不表示只记录到少数神经元，而表示许多神经元的变化受少数共同变量约束。",
+      "线性映射 Cα+d 的含义可用二维影子理解：α 是 K 维 latent coordinate，C 的每一列说明一个 latent factor 在 N 个神经元上留下怎样的 activity pattern，d 是平均偏置。矩阵形状必须满足 C 为 N×K，α 为 K×1，结果为 N×1。加入 Σ 后，模型承认同一 latent state 下观测仍会有 trial noise 与未建模波动。",
+      "Gaussian process 不是“活动呈高斯形状”，而是给一个随时间变化的 latent function 指定任意两时刻的共同分布。kernel K(t,t′) 决定相隔多久的两点仍相似。平方指数核中的 τ 是平滑时间尺度；τ 越大，latent trajectory 变化越慢。理解这一点后，才能把平滑 trajectory、准备态、线性 readout 与闭环 decoder 分开讨论。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l22-d1",
+        "prompt": "若记录 100 个神经元并保留 6 个 latent factors，GPFA loading matrix C 的形状是什么？",
+        "answer": "C 是 100×6；它把 6×1 的 latent vector 映射成 100×1 的神经活动均值。",
+        "explanation": "先从输出维度向输入维度检查矩阵乘法，不能把 trials 或 time bins 混进 C 的神经元轴。",
+        "remediationModuleId": "l22-m2"
+      },
+      {
+        "id": "l22-d2",
+        "prompt": "方向调谐曲线是否证明该神经元直接编码一块肌肉的力？",
+        "answer": "不能。调谐只说明 firing rate 与 reach direction 统计相关，相关可能来自输入、共同动力学、任务协变量或 readout。",
+        "explanation": "要作 causal encoding 结论还需控制混杂变量并检验 perturbation 与 decoder generalization。",
+        "remediationModuleId": "l22-m1"
+      },
+      {
+        "id": "l22-d3",
+        "prompt": "若 U 是 2×5 且 rank(U)=2，线性 output-null space 有几维？",
+        "answer": "由 rank-nullity，维度为 5-2=3。",
+        "explanation": "零空间维度是输入维度减 rank，不是输出维度减 rank。",
+        "remediationModuleId": "l22-m4"
+      },
+      {
+        "id": "l22-d4",
+        "prompt": "GP kernel 的 τ 增大时，相邻时刻的 latent values 通常更平滑还是更跳跃？",
+        "answer": "更平滑；固定时间间隔相对于 τ 变小，kernel covariance 更接近最大值。",
+        "explanation": "把两个极限代入核：τ 很大时指数接近 1，τ 很小时非零时间间隔的协方差迅速下降。",
+        "remediationModuleId": "l22-m3"
+      },
+      {
+        "id": "l22-d5",
+        "prompt": "为什么跨日 decoder 不能只要求每天的单神经元编号完全对应？",
+        "answer": "电极漂移会改变可见单元；若稳定计算位于 latent subspace，可先对齐每日 latent coordinates 再解码。",
+        "explanation": "跨日稳定性是关于群体结构的假设，仍需用留出日数据验证，不能靠漂亮的二维图确认。",
+        "remediationModuleId": "l22-m5"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l22-m1",
+        "title": "Center-out 调谐与低维群体轨迹",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "同一组 center-out 数据为何既能画方向调谐曲线，也能被解释为低维动力系统的投影？",
+        "paragraphs": [
+          "center-out task 从中心起点向多个径向 targets 伸手，因而 direction、speed、time-from-go 等变量结构清楚。对单神经元可用 r(θ)=b+k cos(θ-θpref) 描述平均方向调谐；θpref 是 preferred direction，k 是 modulation depth。这个式子压缩了条件平均，不说明神经元“知道”角度，也不保证其他运动变量已被排除。",
+          "把同一时刻所有神经元 rates 堆成 r(t)，每个 reach condition 就形成一条 N 维 trajectory。若大量 variance 落在少数 PCs 上，表示轨迹接近低维子空间。单神经元曲线是高维 trajectory 在一个坐标轴上的影子；许多带相位差的影子可来自一个旋转或弯曲的群体轨迹，因此 tuning 与 dynamics 不是互相排斥的观察。",
+          "PCA 只按 variance 排序，不知道哪一维驱动 muscles。低 variance dimension 可能携带细小但行为关键的 output，尤其当 readout 对该方向 gain 很高。反过来，大 variance dimension 也可能属于 output-null preparation。判断“有用”需要同时查看 neural covariance 与 behavioral readout，而不能用 explained variance 单独裁决。",
+          "教学图中的二维 loops 或 clusters 是 projection；重叠可能由截断造成，分离也可能被 normalization 放大。自学时应记录时间轴、condition colors、是否 trial-averaged、PC 是否在全条件共同拟合。若每个 condition 各自拟合 PCA，轨迹间几何将失去统一坐标，不能用于比较 target-specific preparation。"
+        ],
+        "keyPoints": [
+          "方向调谐是条件平均的统计描述，不等于唯一神经编码。",
+          "单细胞 tuning 可以是低维群体 trajectory 的坐标投影。",
+          "PCA variance 与 motor potency 是不同判据。"
+        ],
+        "derivation": {
+          "title": "方向调谐作为二维运动向量的线性投影",
+          "setup": "把二维 reach direction 写成单位向量，并令神经元对两个坐标线性敏感。",
+          "steps": [
+            {
+              "title": "写方向向量",
+              "explanation": "角度 θ 的单位运动向量有水平与垂直分量。",
+              "latex": "\\mathbf u(\\theta)=\\begin{bmatrix}\\cos\\theta\\\\\\sin\\theta\\end{bmatrix}"
+            },
+            {
+              "title": "写敏感方向",
+              "explanation": "preferred direction 也写成单位向量，modulation gain 为 k。",
+              "latex": "\\mathbf q=k\\begin{bmatrix}\\cos\\theta_{\\mathrm{pref}}\\\\\\sin\\theta_{\\mathrm{pref}}\\end{bmatrix}"
+            },
+            {
+              "title": "计算点积",
+              "explanation": "用余弦差角公式得到调谐曲线。",
+              "latex": "r(\\theta)=b+\\mathbf q^{\\mathsf T}\\mathbf u(\\theta)=b+k\\cos(\\theta-\\theta_{\\mathrm{pref}})"
+            }
+          ],
+          "symbolNotes": [
+            "r 与 b 用 Hz；k 是 Hz 的调制幅度。",
+            "θ 与 θpref 必须用同一种角度单位，代入三角函数通常视为弧度。"
+          ],
+          "unitsCheck": "点积中的方向向量无量纲，乘 k 后为 Hz，与 baseline b 可相加。",
+          "limitCheck": "k=0 时所有方向均为 b；θ=θpref 时 rate 达到 b+k，θ 相反时为 b-k。"
+        },
+        "workedExample": {
+          "title": "手算四方向调谐",
+          "problem": "某神经元 b=20 Hz、k=8 Hz、θpref=0。求 θ=0、π/2、π、3π/2 的预测 rate。",
+          "steps": [
+            "代入 θ=0，cos0=1，得到 28 Hz。",
+            "代入 π/2 与 3π/2，cos 为 0，均得到 20 Hz。",
+            "代入 π，cosπ=-1，得到 12 Hz。"
+          ],
+          "result": "四个 rates 依次为 28、20、12、20 Hz。",
+          "sanityCheck": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+        },
+        "selfCheck": {
+          "prompt": "为什么一个 PC 解释 70% neural variance 仍不能保证它解释 70% behavior variance？",
+          "answer": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+        },
+        "pitfalls": [
+          "把 cosine fit 的 preferred direction 当作固定不变的因果标签。",
+          "把 trial-averaged projection 的平滑性误当成单 trial 无噪声。"
+        ]
+      },
+      {
+        "id": "l22-m2",
+        "title": "Latent space、activity space 与 GPFA 观测模型",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 2
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "GPFA 如何把少数平滑 latent functions 映入许多神经元，而每个矩阵维度具体代表什么？",
+        "paragraphs": [
+          "令 r_t 为 N 个神经元在 time bin t 的观测向量，α_t 为 K 个 latent factors。观测模型 r_t|α_t 服从均值 Cα_t+d、协方差 Σ 的多元高斯。C 的 rows 对应 neurons，columns 对应 factors；d 是每个神经元的 baseline。若使用 spike counts，Gaussian 是近似，bin width 太小或 rates 太低时 Poisson observation model 可能更合适。",
+          "latent space 中一条 K 维 trajectory 经 C 嵌入 N 维 activity space。C 的 column span 是模型允许的共享活动子空间；Σ 通常承接 neuron-specific residual。共同变化并不要求 neuron pairs 具有相同 waveform，因为 C 的正负 loading 会让同一 factor 在不同 cells 上产生不同幅度和方向。",
+          "只看条件观测均值时存在坐标重参数化：对任意可逆 K×K 矩阵 A，可令 α′=Aα、C′=CA^{-1}，于是 C′α′=Cα。但这只证明 conditional mean 不变；若要保持完整 GPFA marginal likelihood，还必须把 latent prior covariance 同步变成 A K A^T。标准 GPFA 通常要求 factors 相互独立且可有不同 temporal kernels，任意旋转一般会引入 factor 间 covariance，因此不再属于同一模型族。符号翻转、factor permutation 与配套 scale change 是常见 ambiguity；更一般的旋转等价需要 identical kernels 或允许 correlated prior 等额外条件。",
+          "GP prior 给 α 的时间结构，观测模型给 r 与 α 的空间关系。两者分工不能倒置：C 不负责平滑时间，kernel 不直接说明每个神经元的 loading。Σ 若取 diagonal，表示给定 latent 后 residual neurons 条件独立；若数据仍有强 residual correlations，K 太小、kernel 不合适或 noise model 过简都可能是原因。"
+        ],
+        "keyPoints": [
+          "C 为 N×K，连接 latent 与神经活动空间。",
+          "Σ 描述给定 latent 后的残差，不等于原始数据 covariance。",
+          "conditional observation coordinates 可重参数化；完整 GPFA 是否等价还取决于 latent prior。"
+        ],
+        "derivation": {
+          "title": "观测模型的形状与条件均值重参数化",
+          "setup": "先检查每个向量形状，再证明 latent 重参数化不改变 conditional mean；这一步不自动证明完整 GP prior 或 marginal likelihood 不变。",
+          "steps": [
+            {
+              "title": "列出形状",
+              "explanation": "N 个 neurons、K 个 factors 时，矩阵乘法输出 N 维。",
+              "latex": "C\\in\\mathbb R^{N\\times K},\\quad\\boldsymbol\\alpha_t\\in\\mathbb R^K,\\quad\\mathbf d\\in\\mathbb R^N"
+            },
+            {
+              "title": "写条件均值",
+              "explanation": "观测高斯的中心位于 activity space。",
+              "latex": "\\mathbb E[\\mathbf r_t\\mid\\boldsymbol\\alpha_t]=C\\boldsymbol\\alpha_t+\\mathbf d"
+            },
+            {
+              "title": "做可逆变换",
+              "explanation": "令新的 latent 坐标为 Aα，并相应反向改变 loading。",
+              "latex": "\\boldsymbol\\alpha_t^{\\prime}=A\\boldsymbol\\alpha_t,\\qquad C^{\\prime}=CA^{-1}"
+            },
+            {
+              "title": "验证预测不变",
+              "explanation": "相乘后 A^{-1}A 抵消，因此两套坐标给出相同 conditional mean；完整模型还要另行检查 transformed prior covariance。",
+              "latex": "C^{\\prime}\\boldsymbol\\alpha_t^{\\prime}=CA^{-1}A\\boldsymbol\\alpha_t=C\\boldsymbol\\alpha_t"
+            }
+          ],
+          "symbolNotes": [
+            "N 是 neuron 数，K 是 latent 维数，通常 K<N。",
+            "Σ 为 N×N covariance，diagonal elements 是 residual variances；latent prior covariance 若随 A 变换，一般不再保持 factor-wise diagonal structure。"
+          ],
+          "unitsCheck": "Cα 与 d 都必须使用 r 的单位；若 α 无量纲，C 的元素沿用 rate 或 count 单位。Σ 使用观测单位的平方。",
+          "limitCheck": "K=N 且 C 可逆时不再是降维；若所有 latent factors 共用相同 kernel，orthogonal rotation 可保留 prior 形式，kernels 不同时则通常不可任意旋转。"
+        },
+        "workedExample": {
+          "title": "两神经元单因子重构",
+          "problem": "C=(2,-1)^T Hz、d=(10,20)^T Hz，某时刻 α=3。求预测 rates。",
+          "steps": [
+            "第一神经元均值为 2×3+10=16 Hz。",
+            "第二神经元均值为 -1×3+20=17 Hz。",
+            "负 loading 表示 latent 增大时第二神经元低于 baseline，并不表示 firing rate 为负。"
+          ],
+          "result": "预测均值是 (16,17)^T Hz。",
+          "sanityCheck": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。"
+        },
+        "selfCheck": {
+          "prompt": "若把一个 latent factor 全部乘 2，却不改变 C，还是同一个 GPFA 模型吗？",
+          "answer": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
+        },
+        "pitfalls": [
+          "把 latent factor 当作直接测量到的神经元。",
+          "看到 diagonal Σ 就断言真实 neurons 独立；独立性只在给定 latent 的残差层成立。"
+        ]
+      },
+      {
+        "id": "l22-m3",
+        "title": "GP 时间核、参数拟合与 delayed-reach 轨迹",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "平方指数 kernel 怎样编码平滑性，delayed-reach 中又该怎样区分 target preparation、go cue 与 movement？",
+        "paragraphs": [
+          "平方指数 kernel K(t,t′)=σs² exp[-(t-t′)²/(2τ²)]+σn²δtt′ 给同一 factor 在两时刻的 covariance。σs² 控制平滑 signal variance，τ 控制 correlation 衰减时间，σn²只在相同 time bin 加入独立波动。原始第 3 页指出 α 与 loading C 存在整体 scale ambiguity，并采用 σn²+σs²=1 作为归一化约定；这个约束固定尺度，不是新的生物定律。该 kernel 也不是 GP 的唯一形式；有快速切换或振荡时，Matérn 或 periodic kernels 可能更贴近假设。",
+          "fitting 同时估计 latent trajectories、loadings、baselines、noise 与 kernel hyperparameters，通常以 marginal likelihood 或 EM 类 procedure 完成。增加 K 总会提高 in-sample flexibility，因此维数应由 cross-validation、held-out likelihood 或 reconstruction prediction 选择。只看训练 explained variance 会把 noise dimensions 当作有意义 factors。",
+          "delayed reach 要沿时间线读图：target 出现后、go cue 前是 preparatory epoch；go 后才进入 movement epoch。不同 targets 的 preparation 可走向不同 latent locations，却不产生明显运动。go cue 后 trajectories 从这些初态进入 target-specific movement paths。图形支持“initial condition influences subsequent dynamics”，但单靠轨迹不能排除共同输入持续驱动。",
+          "trial averaging 会使准备轨迹更清楚，却掩盖单 trial onset jitter 与 variability。若声称 trajectory geometry 预测 behavior，应在留出 trials 上用 pre-go latent state 预测 reaction time、direction error 或 muscle activity。仅仅在 go cue 对齐后看到分叉，可能是对齐和条件平均的结果，必须与 shuffled labels 和 alternative alignments 比较。"
+        ],
+        "keyPoints": [
+          "τ 是 temporal correlation scale，不是 trial duration。",
+          "kernel family 是建模假设，需用留出数据检验。",
+          "delayed-reach 轨迹的时间段必须由 target、go 与 movement events 分界。"
+        ],
+        "derivation": {
+          "title": "平方指数核的两个极限",
+          "setup": "固定时间差 Δt，比较 τ 远大于和远小于该差值时的 covariance。",
+          "steps": [
+            {
+              "title": "改写时间差",
+              "explanation": "令 Δt=t-t′，先看非同一 time bin，因而 Kronecker delta 为零。",
+              "latex": "K(\\Delta t)=\\sigma_s^2\\exp\\!\\left(-\\frac{\\Delta t^2}{2\\tau^2}\\right)"
+            },
+            {
+              "title": "取长时间尺度极限",
+              "explanation": "τ 远大于 |Δt| 时 exponent 接近零。",
+              "latex": "\\lim_{\\tau\\to\\infty}K(\\Delta t)=\\sigma_s^2"
+            },
+            {
+              "title": "取短时间尺度极限",
+              "explanation": "对固定非零 Δt，τ 趋近零时 exponent 趋向负无穷。",
+              "latex": "\\lim_{\\tau\\to0^+}K(\\Delta t)=0\\quad(\\Delta t\\ne0)"
+            },
+            {
+              "title": "加入同点噪声",
+              "explanation": "t=t′ 时 signal variance 与 diagonal noise variance 相加。",
+              "latex": "K(t,t)=\\sigma_s^2+\\sigma_n^2"
+            }
+          ],
+          "symbolNotes": [
+            "σs² 与 σn² 是 latent amplitude 的平方单位；源页用 σn²+σs²=1 固定该 factor 的任意整体尺度。",
+            "τ 与 t 使用同一时间单位；δtt′ 是离散 time-bin indicator。"
+          ],
+          "unitsCheck": "指数的分子和分母都是时间平方，因此无量纲；K 保留 latent variance 单位。",
+          "limitCheck": "τ→∞ 时在有限窗口内 factor 接近常量；τ→0 时跨 bin covariance 消失，平滑先验退化。"
+        },
+        "workedExample": {
+          "title": "比较两个时间间隔的相关强度",
+          "problem": "忽略 σn，令 σs²=1、τ=100 ms。计算 Δt=100 ms 与 200 ms 时的 covariance 近似值。",
+          "steps": [
+            "Δt=100 时 exponent=-1/2，K=e^{-1/2}≈0.607。",
+            "Δt=200 时 exponent=-4/2=-2，K=e^{-2}≈0.135。",
+            "第二个间隔加倍，但 covariance 下降超过四倍，来自 squared distance。"
+          ],
+          "result": "两者约为 0.607 与 0.135。",
+          "sanityCheck": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。"
+        },
+        "selfCheck": {
+          "prompt": "为何 UPDATE 第 3 页的平滑 kernel 不能证明真实 cortex trajectory 本来就平滑？",
+          "answer": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+        },
+        "pitfalls": [
+          "把 τ 当成 latent 数量 K。",
+          "把 go 后分叉直接解释成 recurrent causality，不检验持续输入模型。"
+        ]
+      },
+      {
+        "id": "l22-m4",
+        "title": "Preparatory activity、linear readout 与 output-null space",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture22-MotorCortex.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "准备期明明有强神经活动，为什么线性 readout 仍可以给零 motor output？",
+        "paragraphs": [
+          "局部线性 readout 写成 m=Ur，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。原始第 4 页把 U 的 shape 手写成 N×M，与 m=Ur 的矩阵乘法不相容；这里按 M×N 修正。若某个非零 r 满足 Ur=0，它位于 U 的 null space，并不意味着 neurons 静默。准备活动可以沿 null directions 改变 network state，而在该近似下不改变 output；go cue 后 state 转入 potent directions，readout 才非零。",
+          "rank-nullity 给 dim Null(U)=N-rank(U)。只有 U 具有 full row rank M 时，它才简化成原页写的 N-M；若 rank(U)<M，零空间会更大。当记录维数远大于 motor output 维数时，理论上可有很大的 null space。但实际 recorded r 只采样 neurons，真实 downstream mapping 也可能 nonlinear、state-dependent 或延迟，所以根据一个 fitted U 得到的 null space 是模型相对概念，不是解剖上绝对无输出的通路。",
+          "分解 r=rpotent+rnull 可用 U 的 singular value decomposition。row space directions 改变 output，orthogonal complement 属于 null space。检验准备活动是否 output-null，应在独立 trials 拟合 U，测 pre-go projections，并检查 EMG 或 kinematics；若在同一数据上挑方向再报告零输出，会产生 circular analysis。",
+          "output-null 不等于 computation-null。沿 null direction 的活动可设定 recurrent initial condition、抑制错误动作或准备多个候选。相同神经向量也可能通过未记录 downstream populations 产生效果。课程图提供的是 linear framework：它把“活动存在”和“当前输出存在”分开，而不许可把 null activity 称为生物上无功能。"
+        ],
+        "keyPoints": [
+          "Ur=0 可以有 r≠0。",
+          "null space 大小由输入维数与 rank 决定。",
+          "output-null 是相对于指定 readout U 的模型陈述。"
+        ],
+        "derivation": {
+          "title": "rank-nullity 与 potent/null 分解",
+          "setup": "对 M×N readout U，用线性代数说明非零准备态如何不产生输出。",
+          "steps": [
+            {
+              "title": "写 readout",
+              "explanation": "输出由 neural state 的线性组合给出。",
+              "latex": "\\mathbf m=U\\mathbf r,\\qquad U\\in\\mathbb R^{M\\times N}"
+            },
+            {
+              "title": "定义零空间",
+              "explanation": "所有映射为零的输入向量构成 linear subspace。",
+              "latex": "\\operatorname{Null}(U)=\\{\\mathbf r:U\\mathbf r=\\mathbf0\\}"
+            },
+            {
+              "title": "计算维数",
+              "explanation": "rank-nullity 把可见输出方向与不可见输入方向加总为 N。",
+              "latex": "\\dim\\operatorname{Null}(U)=N-\\operatorname{rank}(U)"
+            },
+            {
+              "title": "验证分解",
+              "explanation": "若 rnull 在零空间，则它不改变由 potent component 决定的输出。",
+              "latex": "U(\\mathbf r_{\\mathrm{potent}}+\\mathbf r_{\\mathrm{null}})=U\\mathbf r_{\\mathrm{potent}}"
+            }
+          ],
+          "symbolNotes": [
+            "M 是 output coordinates 数，N 是 neural coordinates 数。",
+            "rank(U) 不超过 min(M,N)；所有向量需在同一中心化约定下。"
+          ],
+          "unitsCheck": "若 r 用 Hz、m 用 command units，则 U 的单位是 command units/Hz；零向量有相应输出单位。",
+          "limitCheck": "U full column rank 且 N≤M 时 null space 只有零向量；N≫M 时 null space 至少有 N-M 维。"
+        },
+        "workedExample": {
+          "title": "手算一个 output-null vector",
+          "problem": "令 U=[1,2]，r=(2,-1)^T。求 m，并给出一个 potent vector。",
+          "steps": [
+            "m=1×2+2×(-1)=0，所以 r 是非零 null vector。",
+            "选 rpotent=(1,0)^T，则 m=1。",
+            "把两者相加得 (3,-1)^T，输出仍为 3+2×(-1)=1。"
+          ],
+          "result": "null component 改变 neural state，却没有改变原 potent output 1。",
+          "sanityCheck": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。"
+        },
+        "selfCheck": {
+          "prompt": "若换一个 downstream readout U′，原来的 output-null vector 是否一定仍为 null？",
+          "answer": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+        },
+        "pitfalls": [
+          "把 Ur=0 错写成 r=0。",
+          "在训练同一 trials 上定义和检验 null space，造成过拟合。"
+        ]
+      },
+      {
+        "id": "l22-m5",
+        "title": "闭环 BMI 与跨日 latent alignment",
+        "sourceRefs": [
+          {
+            "file": "Lecture22-MotorCortex-UPDATE.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "当记录单元逐日变化时，闭环反馈和 latent alignment 怎样使 decoder 仍可工作？",
+        "paragraphs": [
+          "BMI decoder 将 neural features 映成 cursor velocity、position 或 discrete action。open-loop calibration 中，participant 看预定 movement 或尝试动作，系统离线拟合 mapping；closed-loop 时 decoder output 立刻改变视觉反馈，participant 与 decoder 共同适应。因此闭环表现不是固定编码质量的被动读数，而是 brain、decoder 与 feedback 构成的新 dynamical system。",
+          "若第 d 天观测 r_d=C_dα+d_d+noise，不同电极采样会改变 C_d，却可能保留相似 latent dynamics。跨日方法先估 daily subspaces，再找 alignment A_d，使不同天的 α coordinates 可比较，最后在 aligned latent 上用 vhat=Bα。这里的稳定性是“存在可转移的低维关系”，不是要求每个 neuron 的 loading 不变。",
+          "alignment 也可能制造虚假稳定：若使用当天 behavior labels 旋转 latent space，随后在同一天测试 decoder，会泄漏答案。严格评估应只用 calibration data 估 A_d 和 B，再在 held-out blocks 或 future days 测试；还要与不对齐、随机对齐、直接 neuron-space decoder 比较，并报告 adaptation time 与 failure days。",
+          "UPDATE 第 5 页新增的 BMI 与 cross-day material 应单独处理，旧版没有对应页。它把前四页概念串起来：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。每一步都有假设，不能把“latent 较稳定”扩写成单神经元表征永久不变。"
+        ],
+        "keyPoints": [
+          "闭环 BMI 是 brain-decoder-feedback 联合系统。",
+          "跨日 alignment 对齐群体坐标，而非强求单元身份稳定。",
+          "future-day 留出检验可防止用 behavior labels 泄漏对齐结果。"
+        ],
+        "derivation": {
+          "title": "跨日 latent decoder 的映射链",
+          "setup": "把每一天的观测先投到日内 latent，再对齐到参考坐标并解码。",
+          "steps": [
+            {
+              "title": "写每日观测",
+              "explanation": "电极采样变化体现在 daily loading 与 baseline。",
+              "latex": "\\mathbf r_d=C_d\\boldsymbol\\alpha_d+\\mathbf d_d+\\boldsymbol\\eta_d"
+            },
+            {
+              "title": "对齐坐标",
+              "explanation": "用 A_d 将第 d 天 latent 映到 reference latent space。",
+              "latex": "\\widetilde{\\boldsymbol\\alpha}_d=A_d\\boldsymbol\\alpha_d"
+            },
+            {
+              "title": "应用共享 decoder",
+              "explanation": "行为预测在对齐坐标中使用同一 B。",
+              "latex": "\\widehat{\\mathbf v}_d=B\\widetilde{\\boldsymbol\\alpha}_d"
+            },
+            {
+              "title": "定义留出误差",
+              "explanation": "在未参与对齐和拟合的 time bins 上比较真实与预测 velocity。",
+              "latex": "E_d=\\frac{1}{T_{\\mathrm{test}}}\\sum_t\\lVert\\mathbf v_{d,t}-\\widehat{\\mathbf v}_{d,t}\\rVert_2^2"
+            }
+          ],
+          "symbolNotes": [
+            "C_d 是 neurons×latents，A_d 是 latents×latents，B 是 outputs×latents。",
+            "不同天 neuron 数可变，但对齐后的 latent dimension 必须一致。"
+          ],
+          "unitsCheck": "若 velocity 用 cm/s、latent 无量纲，B 用 cm/s；squared error 用 cm²/s²。",
+          "limitCheck": "A_d=I 表示无需旋转；若 latent subspaces 完全不重叠，线性 alignment 不应被期待恢复准确 decoder。"
+        },
+        "workedExample": {
+          "title": "二维 latent 的轴交换",
+          "problem": "第 2 天 latent 坐标相对第 1 天交换：α2=(3,1)^T，而参考顺序应为 (1,3)^T。给出 alignment 并计算 B=[2,-1] 的预测。",
+          "steps": [
+            "用 A=[[0,1],[1,0]] 交换两坐标，得到 αtilde=(1,3)^T。",
+            "应用 B，vhat=2×1-1×3=-1。",
+            "若不对齐会得到 2×3-1×1=5，说明坐标约定改变可严重破坏 decoder。"
+          ],
+          "result": "对齐后预测 -1；未对齐预测 5。",
+          "sanityCheck": "A 是 permutation matrix，A^T A=I，不改变 latent vector 长度。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 closed-loop 表现提高不能全部归因于 decoder 参数更准确？",
+          "answer": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
+        },
+        "pitfalls": [
+          "把 UPDATE 新增页误标成旧版已有内容。",
+          "先用 test-day behavior 选择 alignment，再把同一数据报告为跨日泛化。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L22-FIG-A1",
+      "lecture": 22,
+      "moduleId": "l22-m5",
+      "title": "从 population activity 到闭环 BMI",
+      "alt": "神经群体活动经过 GPFA latent inference、跨日对齐和共享 BMI decoder 产生 cursor feedback，再反馈到新的神经活动",
+      "caption": "观测活动先被 GPFA 压到 daily latent coordinates，再由 A_d 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。因而跨日稳定指低维映射可转移，不要求单个 neuron 的 loading 不变。",
+      "sourceRefs": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2
+        },
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "activity",
+          "label": "spikes / rates\nr_d(t)",
+          "x": 8,
+          "y": 65
+        },
+        {
+          "id": "latent",
+          "label": "GPFA latent\nα_d(t)",
+          "x": 36,
+          "y": 65,
+          "tone": "accent"
+        },
+        {
+          "id": "aligned",
+          "label": "cross-day\nA_d α_d",
+          "x": 64,
+          "y": 65
+        },
+        {
+          "id": "decoder",
+          "label": "BMI decoder\nB α̃_d",
+          "x": 92,
+          "y": 65,
+          "tone": "accent"
+        },
+        {
+          "id": "feedback",
+          "label": "cursor +\nfeedback",
+          "x": 92,
+          "y": 20
+        }
+      ],
+      "edges": [
+        {
+          "from": "activity",
+          "to": "latent",
+          "label": "infer"
+        },
+        {
+          "from": "latent",
+          "to": "aligned",
+          "label": "align"
+        },
+        {
+          "from": "aligned",
+          "to": "decoder",
+          "label": "decode"
+        },
+        {
+          "from": "decoder",
+          "to": "feedback",
+          "label": "action"
+        },
+        {
+          "from": "feedback",
+          "to": "activity",
+          "label": "closed loop",
+          "dashed": true
+        }
+      ],
+      "lectureTitle": "运动皮层潜在动力学与脑机接口"
+    }
+  ],
   "specialSection": [
     "逐页视觉比较显示，旧版 Pages 1-4 与 UPDATE Pages 1-4 在核心学术内容上实质重复；UPDATE 新增 Page 5：neural decoding、feedforward/closed-loop BMI 与 latent-aligned cross-day stability。 旧版未发现需要单独保留的独有公式或论点。"
   ],
@@ -154,9 +668,9 @@
       "expression": "′ 2 K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′ 2",
       "latex": "K(t,t')=\\sigma_s^2\\exp\\!\\left[-\\frac{(t-t')^2}{2\\tau^2}\\right]+\\sigma_n^2\\delta_{tt'}",
       "conditions": "stationary smooth kernel",
-      "sectionId": "lecture-22-source-2",
+      "sectionId": "lecture-22-source-4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
-      "sourcePage": 2
+      "sourcePage": 4
     },
     {
       "id": "L22-F03",
@@ -316,7 +830,42 @@
     "需要明确区分 tuning curve、principal components、latent factors、 dynamical modes 和 decoder axes；这些概念可相关但不可互换。"
   ],
   "errata": [
-    "1. UPDATE 版 Pages 1-4 与旧版对应内容一致；UPDATE 新增 Page 5 的 BMI 与 cross-day latent alignment。 2. Page 3 的 GP covariance 是一种 smooth kernel choice，不是唯一 Gaussian-process kernel。 3. Page 4 的 output-null interpretation 是 linear readout framework，真实 motor output 可更复杂。"
+    {
+      "id": "L22-E01",
+      "lecture": 22,
+      "lectureTitle": "运动皮层潜在动力学与脑机接口",
+      "kind": "version",
+      "sourceFile": "Lecture22-MotorCortex.pdf",
+      "sourcePage": 1,
+      "sectionId": "resources",
+      "originalIssue": "UPDATE 版 Pages 1-4 与旧版对应内容一致；UPDATE 新增 Page 5 的 BMI 与 cross-day latent alignment。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": "UPDATE 版 Pages 1-4 与旧版对应内容一致"
+    },
+    {
+      "id": "L22-E02",
+      "lecture": 22,
+      "lectureTitle": "运动皮层潜在动力学与脑机接口",
+      "kind": "caution",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 3,
+      "sectionId": "l22-m3",
+      "originalIssue": "Page 3 的 GP covariance 是一种 smooth kernel choice，不是唯一 Gaussian-process kernel。",
+      "explanation": "该 kernel 也不是 GP 的唯一形式；有快速切换或振荡时，Matérn 或 periodic kernels 可能更贴近假设。",
+      "correction": null
+    },
+    {
+      "id": "L22-E03",
+      "lecture": 22,
+      "lectureTitle": "运动皮层潜在动力学与脑机接口",
+      "kind": "caution",
+      "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
+      "sourcePage": 4,
+      "sectionId": "l22-m4",
+      "originalIssue": "Page 4 的 output-null interpretation 是 linear readout framework，真实 motor output 可更复杂。",
+      "explanation": "局部线性 readout 写成 m=Ur，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -334,7 +883,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 22 讲：direction tuning 与 low-dimensional dynamics 的区别？",
@@ -362,7 +911,7 @@
         "b": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 1 页。",
         "c": "这是“方向调谐（direction tuning）”的定义。"
       },
-      "explanation": "前者描述单 neuron mean vs direction；后者描述 population state 随 time 的 trajectory。"
+      "explanation": "前者描述单 neuron mean vs direction；后者描述 population state 随 time 的 trajectory。 单神经元曲线是高维 trajectory 在一个坐标轴上的影子；许多带相位差的影子可来自一个旋转或弯曲的群体轨迹，因此 tuning 与 dynamics 不是互相排斥的观察。"
     },
     {
       "id": "L22-Q02",
@@ -379,7 +928,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：GPFA 中 C 的 shape？",
@@ -407,7 +956,7 @@
         "c": "这是“GPFA observation model”的适用条件。",
         "d": "这是“GP temporal covariance”的适用条件。"
       },
-      "explanation": "N neurons × K factors。"
+      "explanation": "N neurons × K factors。 C 的 rows 对应 neurons，columns 对应 factors；d 是每个神经元的 baseline。"
     },
     {
       "id": "L22-Q03",
@@ -424,7 +973,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 22 讲：Σ 表示什么？",
@@ -452,7 +1001,7 @@
         "c": "这是“脑机接口（brain-machine interface, BMI）”的定义。",
         "d": "这是“中心向外任务（center-out reach task）”的定义。"
       },
-      "explanation": "observation/noise covariance，常近 diagonal。"
+      "explanation": "observation/noise covariance，常近 diagonal。 平方指数 kernel K(t,t′)=σs² exp[-(t-t′)²/(2τ²)]+σn²δtt′ 给同一 factor 在两时刻的 covariance。"
     },
     {
       "id": "L22-Q04",
@@ -469,7 +1018,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "calculation",
       "cognitiveLevel": "evaluate",
       "stem": "第 22 讲：GP temporal covariance 中 τ 控制什么？",
@@ -497,7 +1046,7 @@
         "b": "这是“高斯过程因子分析（Gaussian-process factor analysis, GPFA）”的定义。",
         "d": "这是“闭环控制（closed-loop control）”的定义。"
       },
-      "explanation": "latent smoothness/correlation time。"
+      "explanation": "latent smoothness/correlation time。 局部线性 readout 写成 m=Ur，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。"
     },
     {
       "id": "L22-Q05",
@@ -514,7 +1063,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：为什么 C 与 α scale 不可辨识？",
@@ -542,7 +1091,7 @@
         "b": "这是“中心向外任务（center-out reach task）”的定义。",
         "c": "该选项回答的是“Σ 表示什么？”。"
       },
-      "explanation": "C 乘 a、α 除 a 不改变 product；rotations 也可由相应变换抵消。"
+      "explanation": "C 乘 a、α 除 a 不改变 product；rotations 也可由相应变换抵消。 open-loop calibration 中，participant 看预定 movement 或尝试动作，系统离线拟合 mapping；closed-loop 时 decoder output 立刻改变视觉反馈，participant 与 decoder 共同适应。"
     },
     {
       "id": "L22-Q06",
@@ -559,7 +1108,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 22 讲：output-null 的定义？",
@@ -587,7 +1136,7 @@
         "c": "这是“GP temporal covariance”的适用条件。",
         "d": "该选项回答的是“GPFA 中 C 的 shape？”。"
       },
-      "explanation": "Ur=0 的 activity directions。"
+      "explanation": "Ur=0 的 activity directions。 准备活动可以沿 null directions 改变 network state，而在该近似下不改变 output；go cue 后 state 转入 potent directions，readout 才非零。"
     },
     {
       "id": "L22-Q07",
@@ -604,7 +1153,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：Ur=0 是否说明无 neural activity？",
@@ -632,7 +1181,7 @@
         "c": "该选项回答的是“output-null 的定义？”。",
         "d": "这是“输出零空间（output-null space）”的定义。"
       },
-      "explanation": "否，只说明对该 readout 无即时输出。"
+      "explanation": "否，只说明对该 readout 无即时输出。 局部线性 readout 写成 m=Ur，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。"
     },
     {
       "id": "L22-Q08",
@@ -649,7 +1198,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 22 讲：preparatory activity 的功能解释？",
@@ -677,7 +1226,7 @@
         "b": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 2 页。",
         "d": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 3 页。"
       },
-      "explanation": "在 null space 设置 target-specific initial condition，go cue 后快速进入 movement modes。"
+      "explanation": "在 null space 设置 target-specific initial condition，go cue 后快速进入 movement modes。 沿 null direction 的活动可设定 recurrent initial condition、抑制错误动作或准备多个候选。"
     },
     {
       "id": "L22-Q09",
@@ -694,7 +1243,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 22 讲：feedforward 与 closed-loop BMI 差异？",
@@ -722,7 +1271,7 @@
         "b": "这是“嵌入（embedding）”的定义。",
         "c": "这是“高斯过程因子分析（Gaussian-process factor analysis, GPFA）”的定义。"
       },
-      "explanation": "closed loop 有 device/sensory feedback 与在线 correction。"
+      "explanation": "closed loop 有 device/sensory feedback 与在线 correction。 它把前四页概念串起来：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。"
     },
     {
       "id": "L22-Q10",
@@ -739,7 +1288,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：为什么 direct neuron decoder 跨日退化？",
@@ -767,7 +1316,7 @@
         "c": "这是“输出零空间（output-null space）”的定义。",
         "d": "该选项回答的是“GP temporal covariance 中 τ 控制什么？”。"
       },
-      "explanation": "recorded units/loadings/tuning 漂移。"
+      "explanation": "recorded units/loadings/tuning 漂移。 但实际 recorded r 只采样 neurons，真实 downstream mapping 也可能 nonlinear、state-dependent 或延迟，所以根据一个 fitted U 得到的 null space 是模型相对概念，不是解剖上绝对无输出的通路。"
     },
     {
       "id": "L22-Q11",
@@ -784,7 +1333,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 22 讲：latent alignment 如何改善？",
@@ -812,7 +1361,7 @@
         "c": "这是“嵌入（embedding）”的定义。",
         "d": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 2 页。"
       },
-      "explanation": "把每日 population activity 映射到共享 manifold coordinates 后再 decode。"
+      "explanation": "把每日 population activity 映射到共享 manifold coordinates 后再 decode。 课程图提供的是 linear framework：它把\"活动存在\"和\"当前输出存在\"分开，而不许可把 null activity 称为生物上无功能。"
     },
     {
       "id": "L22-Q12",
@@ -829,7 +1378,7 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：low variance dimension 一定无用吗？",
@@ -857,55 +1406,10 @@
         "b": "这是“准备活动（preparatory activity）”的定义。",
         "d": "该选项回答的是“为什么 C 与 α scale 不可辨识？”。"
       },
-      "explanation": "不一定，可能包含 output/condition-specific information。"
+      "explanation": "不一定，可能包含 output/condition-specific information。 低 variance dimension 可能携带细小但行为关键的 output，尤其当 readout 对该方向 gain 很高。"
     },
     {
       "id": "L22-Q13",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 1,
-          "section": "lecture-22-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 22 讲：根据 Lecture22-MotorCortex-UPDATE.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "dynamical-mode perspective、latent factor space、neural activity embedding、GPFA observation model。"
-        },
-        {
-          "id": "b",
-          "text": "Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories。"
-        },
-        {
-          "id": "c",
-          "text": "preparatory activity、movement modes、linear readout、 output-null space。"
-        },
-        {
-          "id": "d",
-          "text": "center-out reach、direction tuning、low-dimensional variance/PCA。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "c": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。"
-      },
-      "explanation": "center-out reach、direction tuning、low-dimensional variance/PCA。"
-    },
-    {
-      "id": "L22-Q14",
       "lecture": 22,
       "sectionId": "lecture-22-source-1",
       "sourceAnchors": [
@@ -926,121 +1430,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
-        },
-        {
-          "id": "b",
           "text": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
         },
         {
-          "id": "d",
-          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "d": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。"
-      },
-      "explanation": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
-    },
-    {
-      "id": "L22-Q15",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 1,
-          "section": "lecture-22-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 22 讲：阅读与\"center-out reach、direction tuning、low-dimensional variance/PCA\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
           "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
         },
         {
           "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "d": "该陈述解释的是“neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability”，不是题干指定的关系。"
-      },
-      "explanation": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-    },
-    {
-      "id": "L22-Q16",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 2,
-          "section": "lecture-22-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 22 讲：根据 Lecture22-MotorCortex-UPDATE.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "center-out reach、direction tuning、low-dimensional variance/PCA。"
-        },
-        {
-          "id": "b",
-          "text": "Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories。"
-        },
-        {
-          "id": "c",
-          "text": "dynamical-mode perspective、latent factor space、neural activity embedding、GPFA observation model。"
-        },
-        {
-          "id": "d",
-          "text": "neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
         "b": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "d": "该陈述解释的是“neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability”，不是题干指定的关系。"
+        "c": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。"
       },
-      "explanation": "dynamical-mode perspective、latent factor space、neural activity embedding、GPFA observation model。"
+      "explanation": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。 center-out task 从中心起点向多个径向 targets 伸手，因而 direction、speed、time-from-go 等变量结构清楚。"
     },
     {
-      "id": "L22-Q17",
+      "id": "L22-Q14",
       "lecture": 22,
       "sectionId": "lecture-22-source-2",
       "sourceAnchors": [
@@ -1054,18 +1468,63 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 22 讲：若要解释\"dynamical-mode perspective、latent factor space、neural activity embedding\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
+          "text": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。"
         },
         {
           "id": "b",
+          "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
+        },
+        {
+          "id": "c",
           "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
+        },
+        {
+          "id": "d",
+          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
+        "d": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。"
+      },
+      "explanation": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。 latent space 中一条 K 维 trajectory 经 C 嵌入 N 维 activity space。"
+    },
+    {
+      "id": "L22-Q15",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
+        "Lecture22-MotorCortex-UPDATE.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 22 讲：阅读\"从 population activity 到闭环 BMI\"图时，哪项观察正确？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，区分 latent factor space 与 observed neural activity space；解释 high-dimensional embedding。"
+        },
+        {
+          "id": "b",
+          "text": "观测活动先被 GPFA 压到 daily latent coordinates，再由 A_d 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。"
         },
         {
           "id": "c",
@@ -1073,64 +1532,19 @@
         },
         {
           "id": "d",
-          "text": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。"
+          "text": "因此，逐项解释 GPFA observation modelP(r_t|alpha_t) =N(C alpha_t+d,Sigma)与 latent Gaussian-process temporal covariance。"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "c": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。"
+        "a": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 4 页。",
+        "c": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture22-MotorCortex-UPDATE.pdf 第 2 页。"
       },
-      "explanation": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。"
+      "explanation": "观测活动先被 GPFA 压到 daily latent coordinates，再由 A_d 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。 latent space 中一条 K 维 trajectory 经 C 嵌入 N 维 activity space。"
     },
     {
-      "id": "L22-Q18",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 3,
-          "section": "lecture-22-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 22 讲：根据 Lecture22-MotorCortex-UPDATE.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories。"
-        },
-        {
-          "id": "b",
-          "text": "center-out reach、direction tuning、low-dimensional variance/PCA。"
-        },
-        {
-          "id": "c",
-          "text": "preparatory activity、movement modes、linear readout、 output-null space。"
-        },
-        {
-          "id": "d",
-          "text": "neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。",
-        "d": "该陈述解释的是“neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability”，不是题干指定的关系。"
-      },
-      "explanation": "Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories。"
-    },
-    {
-      "id": "L22-Q19",
+      "id": "L22-Q16",
       "lecture": 22,
       "sectionId": "lecture-22-source-3",
       "sourceAnchors": [
@@ -1155,72 +1569,27 @@
         },
         {
           "id": "b",
-          "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
+          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
         },
         {
           "id": "c",
-          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
+          "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
         },
         {
           "id": "d",
           "text": "解释 feedforward versus closed-loop BMI、sensory feedback、latent-aligned decoders 和跨日 stability；明确这是 UPDATE 新增核心内容。"
         }
       ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。",
-        "d": "该陈述解释的是“neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability”，不是题干指定的关系。"
-      },
-      "explanation": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
-    },
-    {
-      "id": "L22-Q20",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 3,
-          "section": "lecture-22-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 22 讲：阅读与\"Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
-        },
-        {
-          "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
+        "b": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。",
         "d": "该陈述解释的是“neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability”，不是题干指定的关系。"
       },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+      "explanation": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。 fitting 同时估计 latent trajectories、loadings、baselines、noise 与 kernel hyperparameters，通常以 marginal likelihood 或 EM 类 procedure 完成。"
     },
     {
-      "id": "L22-Q21",
+      "id": "L22-Q17",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -1234,128 +1603,38 @@
         "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
         "Lecture22-MotorCortex-UPDATE.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 22 讲：根据 Lecture22-MotorCortex-UPDATE.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "center-out reach、direction tuning、low-dimensional variance/PCA。"
-        },
-        {
-          "id": "b",
-          "text": "Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories。"
-        },
-        {
-          "id": "c",
-          "text": "neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability。"
-        },
-        {
-          "id": "d",
-          "text": "preparatory activity、movement modes、linear readout、 output-null space。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "c": "该陈述解释的是“neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability”，不是题干指定的关系。"
-      },
-      "explanation": "preparatory activity、movement modes、linear readout、 output-null space。"
-    },
-    {
-      "id": "L22-Q22",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 4,
-          "section": "lecture-22-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 22 讲：若要解释\"preparatory activity、movement modes、linear readout、 output-null space\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
-        },
-        {
-          "id": "b",
           "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。"
         },
         {
-          "id": "d",
-          "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。"
-      },
-      "explanation": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
-    },
-    {
-      "id": "L22-Q23",
-      "lecture": 22,
-      "sectionId": "lecture-22-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 5,
-          "section": "lecture-22-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 22 讲：根据 Lecture22-MotorCortex-UPDATE.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "center-out reach、direction tuning、low-dimensional variance/PCA。"
-        },
-        {
-          "id": "b",
-          "text": "neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability。"
-        },
-        {
           "id": "c",
-          "text": "Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories。"
+          "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
         },
         {
           "id": "d",
-          "text": "preparatory activity、movement modes、linear readout、 output-null space。"
+          "text": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
-        "d": "该陈述解释的是“preparatory activity、movement modes、linear readout、 output-null space”，不是题干指定的关系。"
+        "b": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。"
       },
-      "explanation": "neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability。"
+      "explanation": "推导 linear readout、null space 与 output-null preparatory activity；说明 Ur= 0 不等于 r=0。 课程图提供的是 linear framework：它把\"活动存在\"和\"当前输出存在\"分开，而不许可把 null activity 称为生物上无功能。"
     },
     {
-      "id": "L22-Q24",
+      "id": "L22-Q18",
       "lecture": 22,
       "sectionId": "lecture-22-source-5",
       "sourceAnchors": [
@@ -1376,31 +1655,567 @@
       "choices": [
         {
           "id": "a",
-          "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
+          "text": "解释 feedforward versus closed-loop BMI、sensory feedback、latent-aligned decoders 和跨日 stability；明确这是 UPDATE 新增核心内容。"
         },
         {
           "id": "b",
-          "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
+          "text": "因此，从 PCA variance decomposition 引出 low-dimensional population activity，但不把 low variance dimensions 自动视为无用。"
         },
         {
           "id": "c",
-          "text": "解释 feedforward versus closed-loop BMI、sensory feedback、latent-aligned decoders 和跨日 stability；明确这是 UPDATE 新增核心内容。"
+          "text": "逐项解释 GPFA observation modelP(r_t|alpha_t)=N(C alpha_t+d,Sigma) 与 latent Gaussian-process temporal covariance。"
         },
         {
           "id": "d",
           "text": "区分 latent factor space 与 observed neural activity space； 解释 highdimensional embedding。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
+        "b": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。",
         "d": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。"
       },
-      "explanation": "解释 feedforward versus closed-loop BMI、sensory feedback、latent-aligned decoders 和跨日 stability；明确这是 UPDATE 新增核心内容。"
+      "explanation": "解释 feedforward versus closed-loop BMI、sensory feedback、latent-aligned decoders 和跨日 stability；明确这是 UPDATE 新增核心内容。 UPDATE 第 5 页新增的 BMI 与 cross-day material 应单独处理，旧版没有对应页。"
+    },
+    {
+      "id": "L22-Q19",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out 调谐与低维群体轨迹"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "understand",
+      "stem": "第 22 讲：为什么一个 PC 解释 70% neural variance 仍不能保证它解释 70% behavior variance？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
+        },
+        {
+          "id": "b",
+          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+        },
+        {
+          "id": "c",
+          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+        },
+        {
+          "id": "d",
+          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。 教学图中的二维 loops 或 clusters 是 projection；重叠可能由截断造成，分离也可能被 normalization 放大。自学时应记录时间轴、condition colors、是否 trial-averaged、PC 是否在全条件共同拟合。若每个 condition 各自拟合 PCA，轨迹间几何将失去统一坐标，不能用于比较 target-specific preparation。"
+    },
+    {
+      "id": "L22-Q20",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out 调谐与低维群体轨迹",
+        "手算四方向调谐"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 22 讲：完成\"某神经元 b=20 Hz、k=8 Hz、θpref=0。求 θ=0、π/2、π、3π/2 的预测 rate。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "预测均值是 (16,17)^T Hz。"
+        },
+        {
+          "id": "b",
+          "text": "两者约为 0.607 与 0.135。"
+        },
+        {
+          "id": "c",
+          "text": "四个 rates 依次为 28、20、12、20 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "null component 改变 neural state，却没有改变原 potent output 1。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "四个 rates 依次为 28、20、12、20 Hz。 计算路径：代入 θ=0，cos0=1，得到 28 Hz。 代入 π/2 与 3π/2，cos 为 0，均得到 20 Hz。 代入 π，cosπ=-1，得到 12 Hz。"
+    },
+    {
+      "id": "L22-Q21",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 1,
+          "section": "lecture-22-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Center-out 调谐与低维群体轨迹",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 22 讲：得到\"四个 rates 依次为 28、20、12、20 Hz。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。"
+        },
+        {
+          "id": "b",
+          "text": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。"
+        },
+        {
+          "id": "c",
+          "text": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。"
+        },
+        {
+          "id": "d",
+          "text": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。 这个检查对应题设\"某神经元 b=20 Hz、k=8 Hz、θpref=0。求 θ=0、π/2、π、3π/2 的预测 rate。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L22-Q22",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space、activity space 与 GPFA 观测模型"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 22 讲：若把一个 latent factor 全部乘 2，却不改变 C，还是同一个 GPFA 模型吗？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
+        },
+        {
+          "id": "b",
+          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+        },
+        {
+          "id": "c",
+          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+        },
+        {
+          "id": "d",
+          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。 GP prior 给 α 的时间结构，观测模型给 r 与 α 的空间关系。两者分工不能倒置：C 不负责平滑时间，kernel 不直接说明每个神经元的 loading。Σ 若取 diagonal，表示给定 latent 后 residual neurons 条件独立；若数据仍有强 residual correlations，K 太小、kernel 不合适或 noise model 过简都可能是原因。"
+    },
+    {
+      "id": "L22-Q23",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space、activity space 与 GPFA 观测模型",
+        "两神经元单因子重构"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 22 讲：完成\"C=(2,-1)^T Hz、d=(10,20)^T Hz，某时刻 α=3。求预测 rates。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "四个 rates 依次为 28、20、12、20 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "预测均值是 (16,17)^T Hz。"
+        },
+        {
+          "id": "c",
+          "text": "两者约为 0.607 与 0.135。"
+        },
+        {
+          "id": "d",
+          "text": "null component 改变 neural state，却没有改变原 potent output 1。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "预测均值是 (16,17)^T Hz。 计算路径：第一神经元均值为 2×3+10=16 Hz。 第二神经元均值为 -1×3+20=17 Hz。 负 loading 表示 latent 增大时第二神经元低于 baseline，并不表示 firing rate 为负。"
+    },
+    {
+      "id": "L22-Q24",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Latent space、activity space 与 GPFA 观测模型",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 22 讲：得到\"预测均值是 (16,17)^T Hz。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。"
+        },
+        {
+          "id": "c",
+          "text": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。"
+        },
+        {
+          "id": "d",
+          "text": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。 这个检查对应题设\"C=(2,-1)^T Hz、d=(10,20)^T Hz，某时刻 α=3。求预测 rates。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L22-Q25",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP 时间核、参数拟合与 delayed-reach 轨迹"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 22 讲：为何 UPDATE 第 3 页的平滑 kernel 不能证明真实 cortex trajectory 本来就平滑？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+        },
+        {
+          "id": "b",
+          "text": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
+        },
+        {
+          "id": "c",
+          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+        },
+        {
+          "id": "d",
+          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。 trial averaging 会使准备轨迹更清楚，却掩盖单 trial onset jitter 与 variability。若声称 trajectory geometry 预测 behavior，应在留出 trials 上用 pre-go latent state 预测 reaction time、direction error 或 muscle activity。仅仅在 go cue 对齐后看到分叉，可能是对齐和条件平均的结果，必须与 shuffled labels 和 alternative alignments 比较。"
+    },
+    {
+      "id": "L22-Q26",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP 时间核、参数拟合与 delayed-reach 轨迹",
+        "比较两个时间间隔的相关强度"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 22 讲：完成\"忽略 σn，令 σs²=1、τ=100 ms。计算 Δt=100 ms 与 200 ms 时的 covariance 近似值。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两者约为 0.607 与 0.135。"
+        },
+        {
+          "id": "b",
+          "text": "四个 rates 依次为 28、20、12、20 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "预测均值是 (16,17)^T Hz。"
+        },
+        {
+          "id": "d",
+          "text": "null component 改变 neural state，却没有改变原 potent output 1。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "两者约为 0.607 与 0.135。 计算路径：Δt=100 时 exponent=-1/2，K=e^{-1/2}≈0.607。 Δt=200 时 exponent=-4/2=-2，K=e^{-2}≈0.135。 第二个间隔加倍，但 covariance 下降超过四倍，来自 squared distance。"
+    },
+    {
+      "id": "L22-Q27",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 3,
+          "section": "lecture-22-source-3"
+        }
+      ],
+      "conceptTags": [
+        "GP 时间核、参数拟合与 delayed-reach 轨迹",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 22 讲：得到\"两者约为 0.607 与 0.135。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。"
+        },
+        {
+          "id": "c",
+          "text": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。"
+        },
+        {
+          "id": "d",
+          "text": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。 这个检查对应题设\"忽略 σn，令 σs²=1、τ=100 ms。计算 Δt=100 ms 与 200 ms 时的 covariance 近似值。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L22-Q28",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity、linear readout 与 output-null space"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 22 讲：若换一个 downstream readout U′，原来的 output-null vector 是否一定仍为 null？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+        },
+        {
+          "id": "b",
+          "text": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
+        },
+        {
+          "id": "c",
+          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+        },
+        {
+          "id": "d",
+          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。 output-null 不等于 computation-null。沿 null direction 的活动可设定 recurrent initial condition、抑制错误动作或准备多个候选。相同神经向量也可能通过未记录 downstream populations 产生效果。课程图提供的是 linear framework：它把\"活动存在\"和\"当前输出存在\"分开，而不许可把 null activity 称为生物上无功能。"
+    },
+    {
+      "id": "L22-Q29",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity、linear readout 与 output-null space",
+        "手算一个 output-null vector"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 22 讲：完成\"令 U=[1,2]，r=(2,-1)^T。求 m，并给出一个 potent vector。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "四个 rates 依次为 28、20、12、20 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "预测均值是 (16,17)^T Hz。"
+        },
+        {
+          "id": "c",
+          "text": "两者约为 0.607 与 0.135。"
+        },
+        {
+          "id": "d",
+          "text": "null component 改变 neural state，却没有改变原 potent output 1。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "null component 改变 neural state，却没有改变原 potent output 1。 计算路径：m=1×2+2×(-1)=0，所以 r 是非零 null vector。 选 rpotent=(1,0)^T，则 m=1。 把两者相加得 (3,-1)^T，输出仍为 3+2×(-1)=1。"
+    },
+    {
+      "id": "L22-Q30",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 4,
+          "section": "lecture-22-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Preparatory activity、linear readout 与 output-null space",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 22 讲：得到\"null component 改变 neural state，却没有改变原 potent output 1。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。"
+        },
+        {
+          "id": "b",
+          "text": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。"
+        },
+        {
+          "id": "d",
+          "text": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。 这个检查对应题设\"令 U=[1,2]，r=(2,-1)^T。求 m，并给出一个 potent vector。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L22-Q31",
       "lecture": 22,
       "sectionId": "lecture-22-source-5",
       "sourceAnchors": [
@@ -1411,41 +2226,130 @@
         }
       ],
       "conceptTags": [
-        "Motor Cortex Latent Dynamics and Brain–Machine Interfaces",
-        "Lecture22-MotorCortex-UPDATE.pdf"
+        "闭环 BMI 与跨日 latent alignment"
       ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 22 讲：阅读与\"neural decoding、feedforward/closed-loop BMI、latentaligned cross-day stability\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 22 讲：为什么 closed-loop 表现提高不能全部归因于 decoder 参数更准确？",
       "choices": [
         {
           "id": "a",
-          "text": "先明确横纵轴、单位、归一化与每条曲线改变的唯一参数；区分示意趋势、模型预测和真正测得的数据点。"
+          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
         },
         {
           "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
         },
         {
           "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+          "text": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
         },
         {
           "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。 UPDATE 第 5 页新增的 BMI 与 cross-day material 应单独处理，旧版没有对应页。它把前四页概念串起来：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。每一步都有假设，不能把\"latent 较稳定\"扩写成单神经元表征永久不变。"
+    },
+    {
+      "id": "L22-Q32",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "闭环 BMI 与跨日 latent alignment",
+        "二维 latent 的轴交换"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 22 讲：完成\"第 2 天 latent 坐标相对第 1 天交换：α2=(3,1)^T，而参考顺序应为 (1,3)^T。给出 alignment 并计算 B=[2,-1] 的预测。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "四个 rates 依次为 28、20、12、20 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "预测均值是 (16,17)^T Hz。"
+        },
+        {
+          "id": "c",
+          "text": "对齐后预测 -1；未对齐预测 5。"
+        },
+        {
+          "id": "d",
+          "text": "两者约为 0.607 与 0.135。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "对齐后预测 -1；未对齐预测 5。 计算路径：用 A=[[0,1],[1,0]] 交换两坐标，得到 αtilde=(1,3)^T。 应用 B，vhat=2×1-1×3=-1。 若不对齐会得到 2×3-1×1=5，说明坐标约定改变可严重破坏 decoder。"
+    },
+    {
+      "id": "L22-Q33",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 5,
+          "section": "lecture-22-source-5"
+        }
+      ],
+      "conceptTags": [
+        "闭环 BMI 与跨日 latent alignment",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 22 讲：得到\"对齐后预测 -1；未对齐预测 5。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "把 α 改为 0 时应回到 baseline (10,20)^T Hz。"
+        },
+        {
+          "id": "c",
+          "text": "Δt=0 时应为 1；随着 |Δt| 增加，kernel 单调下降。"
+        },
+        {
+          "id": "d",
+          "text": "A 是 permutation matrix，A^T A=I，不改变 latent vector 长度。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“center-out reach、direction tuning、low-dimensional variance/PCA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“dynamical-mode perspective、latent factor space、neural activity embedding”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Gaussian-process temporal covariance、parameter fitting、delayed-reach latent trajectories”，不是题干指定的关系。"
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+      "explanation": "A 是 permutation matrix，A^T A=I，不改变 latent vector 长度。 这个检查对应题设\"第 2 天 latent 坐标相对第 1 天交换：α2=(3,1)^T，而参考顺序应为 (1,3)^T。给出 alignment 并计算 B=[2,-1] 的预测。\"中的单位、方向或极限条件。"
     },
     {
-      "id": "L22-Q26",
+      "id": "L22-Q34",
       "lecture": 22,
       "sectionId": "lecture-22-source-1",
       "sourceAnchors": [
@@ -1490,7 +2394,7 @@
       "explanation": "中心向外任务（center-out reach task）：从中心到多个 radial targets 的 reaching paradigm。"
     },
     {
-      "id": "L22-Q27",
+      "id": "L22-Q35",
       "lecture": 22,
       "sectionId": "lecture-22-source-1",
       "sourceAnchors": [
@@ -1504,7 +2408,7 @@
         "方向调谐",
         "direction tuning"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"response mean 随 reach direction 变化。\"称为什么？",
@@ -1532,10 +2436,10 @@
         "c": "“嵌入（embedding）”指：从 latent coordinates 映射到 high-dimensional activity。",
         "d": "“高斯过程因子分析（Gaussian-process factor analysis, GPFA）”指：带 temporal Gaussian-process prior 的 latent factor model。"
       },
-      "explanation": "方向调谐（direction tuning）：response mean 随 reach direction 变化。"
+      "explanation": "方向调谐（direction tuning）：response mean 随 reach direction 变化。 对单神经元可用 r(θ)=b+k cos(θ-θpref) 描述平均方向调谐；θpref 是 preferred direction，k 是 modulation depth。"
     },
     {
-      "id": "L22-Q28",
+      "id": "L22-Q36",
       "lecture": 22,
       "sectionId": "lecture-22-source-5",
       "sourceAnchors": [
@@ -1549,7 +2453,7 @@
         "潜在因子",
         "latent factor"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"解释 shared population variability 的低维隐藏变量。\"称为什么？",
@@ -1580,7 +2484,7 @@
       "explanation": "潜在因子（latent factor）：解释 shared population variability 的低维隐藏变量。"
     },
     {
-      "id": "L22-Q29",
+      "id": "L22-Q37",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -1594,7 +2498,7 @@
         "嵌入",
         "embedding"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"从 latent coordinates 映射到 high-dimensional activity。\"称为什么？",
@@ -1625,7 +2529,7 @@
       "explanation": "嵌入（embedding）：从 latent coordinates 映射到 high-dimensional activity。"
     },
     {
-      "id": "L22-Q30",
+      "id": "L22-Q38",
       "lecture": 22,
       "sectionId": "lecture-22-source-2",
       "sourceAnchors": [
@@ -1639,7 +2543,7 @@
         "高斯过程因子分析",
         "Gaussian-process factor analysis, GPFA"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"带 temporal Gaussian-process prior 的 latent factor model。\"称为什么？",
@@ -1670,7 +2574,7 @@
       "explanation": "高斯过程因子分析（Gaussian-process factor analysis, GPFA）：带 temporal Gaussian-process prior 的 latent factor model。"
     },
     {
-      "id": "L22-Q31",
+      "id": "L22-Q39",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -1715,7 +2619,7 @@
       "explanation": "准备活动（preparatory activity）：movement 前 target-dependent population state。"
     },
     {
-      "id": "L22-Q32",
+      "id": "L22-Q40",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -1729,7 +2633,7 @@
         "输出零空间",
         "output-null space"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"不改变当前 readout 的 neural directions。\"称为什么？",
@@ -1757,10 +2661,10 @@
         "b": "“脑机接口（brain-machine interface, BMI）”指：由 neural activity 控制 external device 的系统。",
         "d": "“闭环控制（closed-loop control）”指：包含 sensory/device feedback 的在线控制。"
       },
-      "explanation": "输出零空间（output-null space）：不改变当前 readout 的 neural directions。"
+      "explanation": "输出零空间（output-null space）：不改变当前 readout 的 neural directions。 准备活动可以沿 null directions 改变 network state，而在该近似下不改变 output；go cue 后 state 转入 potent directions，readout 才非零。"
     },
     {
-      "id": "L22-Q33",
+      "id": "L22-Q41",
       "lecture": 22,
       "sectionId": "lecture-22-source-2",
       "sourceAnchors": [
@@ -1774,7 +2678,7 @@
         "输出有效空间",
         "output-potent space"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"会改变 muscle/device output 的 directions。\"称为什么？",
@@ -1805,7 +2709,7 @@
       "explanation": "输出有效空间（output-potent space）：会改变 muscle/device output 的 directions。"
     },
     {
-      "id": "L22-Q34",
+      "id": "L22-Q42",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -1819,7 +2723,7 @@
         "脑机接口",
         "brain-machine interface, BMI"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"由 neural activity 控制 external device 的系统。\"称为什么？",
@@ -1850,7 +2754,7 @@
       "explanation": "脑机接口（brain-machine interface, BMI）：由 neural activity 控制 external device 的系统。"
     },
     {
-      "id": "L22-Q35",
+      "id": "L22-Q43",
       "lecture": 22,
       "sectionId": "lecture-22-source-5",
       "sourceAnchors": [
@@ -1864,7 +2768,7 @@
         "闭环控制",
         "closed-loop control"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 22 讲：本讲把\"包含 sensory/device feedback 的在线控制。\"称为什么？",
@@ -1892,10 +2796,10 @@
         "c": "“方向调谐（direction tuning）”指：response mean 随 reach direction 变化。",
         "d": "“潜在因子（latent factor）”指：解释 shared population variability 的低维隐藏变量。"
       },
-      "explanation": "闭环控制（closed-loop control）：包含 sensory/device feedback 的在线控制。"
+      "explanation": "闭环控制（closed-loop control）：包含 sensory/device feedback 的在线控制。 它把前四页概念串起来：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。"
     },
     {
-      "id": "L22-Q36",
+      "id": "L22-Q44",
       "lecture": 22,
       "sectionId": "lecture-22-source-2",
       "sourceAnchors": [
@@ -1908,7 +2812,7 @@
       "conceptTags": [
         "GPFA observation model"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：使用\"GPFA observation model\"时，哪项条件或约定不可省略？",
@@ -1936,23 +2840,23 @@
         "b": "这是“linear motor readout”的条件，不是题干公式的条件。",
         "d": "这是“output-null space”的条件，不是题干公式的条件。"
       },
-      "explanation": "GPFA observation model 的适用条件：Gaussian approximation"
+      "explanation": "GPFA observation model 的适用条件：Gaussian approximation 若使用 spike counts，Gaussian 是近似，bin width 太小或 rates 太低时 Poisson observation model 可能更合适。"
     },
     {
-      "id": "L22-Q37",
+      "id": "L22-Q45",
       "lecture": 22,
-      "sectionId": "lecture-22-source-2",
+      "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
         {
           "file": "Lecture22-MotorCortex-UPDATE.pdf",
-          "page": 2,
-          "section": "lecture-22-source-2"
+          "page": 4,
+          "section": "lecture-22-source-4"
         }
       ],
       "conceptTags": [
         "GP temporal covariance"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：使用\"GP temporal covariance\"时，哪项条件或约定不可省略？",
@@ -1980,10 +2884,10 @@
         "b": "这是“linear motor readout”的条件，不是题干公式的条件。",
         "c": "这是“output-null space”的条件，不是题干公式的条件。"
       },
-      "explanation": "GP temporal covariance 的适用条件：stationary smooth kernel"
+      "explanation": "GP temporal covariance 的适用条件：stationary smooth kernel 局部线性 readout 写成 m=Ur，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。"
     },
     {
-      "id": "L22-Q38",
+      "id": "L22-Q46",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -2024,10 +2928,10 @@
         "c": "这是“GP temporal covariance”的条件，不是题干公式的条件。",
         "d": "这是“output-null space”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear motor readout 的适用条件：local approximation"
+      "explanation": "linear motor readout 的适用条件：local approximation 局部线性 readout 写成 m=Ur，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。"
     },
     {
-      "id": "L22-Q39",
+      "id": "L22-Q47",
       "lecture": 22,
       "sectionId": "lecture-22-source-4",
       "sourceAnchors": [
@@ -2040,7 +2944,7 @@
       "conceptTags": [
         "output-null space"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：使用\"output-null space\"时，哪项条件或约定不可省略？",
@@ -2068,10 +2972,10 @@
         "c": "这是“GP temporal covariance”的条件，不是题干公式的条件。",
         "d": "这是“linear motor readout”的条件，不是题干公式的条件。"
       },
-      "explanation": "output-null space 的适用条件：linear algebra"
+      "explanation": "output-null space 的适用条件：linear algebra 若某个非零 r 满足 Ur=0，它位于 U 的 null space，并不意味着 neurons 静默。"
     },
     {
-      "id": "L22-Q40",
+      "id": "L22-Q48",
       "lecture": 22,
       "sectionId": "lecture-22-source-5",
       "sourceAnchors": [
@@ -2084,7 +2988,7 @@
       "conceptTags": [
         "rank-nullity"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 22 讲：使用\"rank-nullity\"时，哪项条件或约定不可省略？",
@@ -2112,7 +3016,51 @@
         "b": "这是“GP temporal covariance”的条件，不是题干公式的条件。",
         "d": "这是“linear motor readout”的条件，不是题干公式的条件。"
       },
-      "explanation": "rank-nullity 的适用条件：U:M×N"
+      "explanation": "rank-nullity 的适用条件：U:M×N alignment 也可能制造虚假稳定：若使用当天 behavior labels 旋转 latent space，随后在同一天测试 decoder，会泄漏答案。"
+    },
+    {
+      "id": "L22-Q49",
+      "lecture": 22,
+      "sectionId": "lecture-22-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture22-MotorCortex-UPDATE.pdf",
+          "page": 2,
+          "section": "lecture-22-source-2"
+        }
+      ],
+      "conceptTags": [
+        "latent decoder"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 22 讲：使用\"latent decoder\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "Gaussian approximation"
+        },
+        {
+          "id": "b",
+          "text": "stationary smooth kernel"
+        },
+        {
+          "id": "c",
+          "text": "local approximation"
+        },
+        {
+          "id": "d",
+          "text": "aligned latent coordinates"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“GPFA observation model”的条件，不是题干公式的条件。",
+        "b": "这是“GP temporal covariance”的条件，不是题干公式的条件。",
+        "c": "这是“linear motor readout”的条件，不是题干公式的条件。"
+      },
+      "explanation": "latent decoder 的适用条件：aligned latent coordinates Σ 若取 diagonal，表示给定 latent 后 residual neurons 条件独立；若数据仍有强 residual correlations，K 太小、kernel 不合适或 noise model 过简都可能是原因。"
     }
   ]
 }

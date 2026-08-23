@@ -4,6 +4,8 @@ export const STUDY_STORAGE_KEY = 'neurosci366:study-state';
 const SESSION_PREFIX = 'neurosci366:lecture-session:';
 const EXPOSURE_PREFIX = 'neurosci366:question-exposure:';
 const SESSION_DURATION_MS = 2 * 60 * 60 * 1000;
+let memoryState: StudyState | null = null;
+const memorySessionValues = new Map<string, string>();
 
 export type QuestionHistory = {
   seenCount: number;
@@ -12,6 +14,8 @@ export type QuestionHistory = {
   attempts: number;
   lastSeenAt?: string;
   lastCorrect?: boolean;
+  lastIncorrectAt?: string;
+  needsReview?: boolean;
 };
 
 export type StudyState = {
@@ -69,6 +73,8 @@ export function normalizeStudyState(value: unknown): StudyState | null {
       attempts,
       ...(validDate(raw.lastSeenAt) ? { lastSeenAt: validDate(raw.lastSeenAt) } : {}),
       ...(typeof raw.lastCorrect === 'boolean' ? { lastCorrect: raw.lastCorrect } : {}),
+      ...(validDate(raw.lastIncorrectAt) ? { lastIncorrectAt: validDate(raw.lastIncorrectAt) } : (raw.lastCorrect === false && validDate(raw.lastSeenAt) ? { lastIncorrectAt: validDate(raw.lastSeenAt) } : {})),
+      ...((typeof raw.needsReview === 'boolean' ? raw.needsReview : raw.lastCorrect === false) ? { needsReview: true } : {}),
     };
   }
   const recentLecture = Number(value.recentLecture);
@@ -113,6 +119,9 @@ export function seededShuffle<T>(items: readonly T[], seed: string): T[] {
 
 export function applyAttempt(state: StudyState, questionId: string, correct: boolean, at = new Date().toISOString()): StudyState {
   const previous = state.questions[questionId] ?? { seenCount: 0, correctCount: 0, incorrectCount: 0, attempts: 0 };
+  const previousIncorrectAt = previous.lastIncorrectAt ? Date.parse(previous.lastIncorrectAt) : Number.NaN;
+  const currentAt = Date.parse(at);
+  const spacedCorrection = correct && previous.needsReview === true && Number.isFinite(previousIncorrectAt) && Number.isFinite(currentAt) && currentAt - previousIncorrectAt >= 6 * 60 * 60 * 1000;
   return {
     ...state,
     questions: {
@@ -124,6 +133,8 @@ export function applyAttempt(state: StudyState, questionId: string, correct: boo
         incorrectCount: previous.incorrectCount + (correct ? 0 : 1),
         lastSeenAt: at,
         lastCorrect: correct,
+        ...(correct ? (previous.lastIncorrectAt ? { lastIncorrectAt: previous.lastIncorrectAt } : {}) : { lastIncorrectAt: at }),
+        ...((correct ? previous.needsReview === true && !spacedCorrection : true) ? { needsReview: true } : {}),
       },
     },
   };
@@ -157,7 +168,9 @@ export function selectQuestionIds(
     const lastSeen = history?.lastSeenAt ? Date.parse(history.lastSeenAt) : Number.NaN;
     const ageHours = history ? (Number.isFinite(lastSeen) ? Math.max(0, (now.getTime() - lastSeen) / 3_600_000) : 0) : 10_000;
     const unseen = history ? 0 : 10_000;
-    const isDelayedMiss = Boolean(history && history.lastCorrect === false && ageHours >= 6);
+    const lastIncorrect = history?.lastIncorrectAt ? Date.parse(history.lastIncorrectAt) : Number.NaN;
+    const missAgeHours = Number.isFinite(lastIncorrect) ? Math.max(0, (now.getTime() - lastIncorrect) / 3_600_000) : 0;
+    const isDelayedMiss = Boolean(history?.needsReview && missAgeHours >= 6);
     const delayedMiss = isDelayedMiss ? 4_000 : 0;
     const age = Math.min(ageHours, 720) * 2;
     const repetition = (history?.seenCount ?? 0) * -120;
@@ -198,17 +211,41 @@ export function loadStudyState(): StudyState {
   try {
     const parsed = JSON.parse(localStorage.getItem(STUDY_STORAGE_KEY) ?? 'null');
     const normalized = normalizeStudyState(parsed);
-    if (normalized) return normalized;
+    if (normalized) {
+      memoryState = normalized;
+      return normalized;
+    }
   } catch {
-    // Invalid local data is replaced with the current schema.
+    // Storage can be blocked even when window exists; continue in memory.
   }
+  if (memoryState) return memoryState;
   const fresh = createEmptyStudyState();
-  localStorage.setItem(STUDY_STORAGE_KEY, JSON.stringify(fresh));
+  memoryState = fresh;
+  try { localStorage.setItem(STUDY_STORAGE_KEY, JSON.stringify(fresh)); } catch { /* best effort */ }
   return fresh;
 }
 
 export function saveStudyState(state: StudyState) {
-  if (typeof window !== 'undefined') localStorage.setItem(STUDY_STORAGE_KEY, JSON.stringify(state));
+  memoryState = state;
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(STUDY_STORAGE_KEY, JSON.stringify(state)); } catch { /* best effort */ }
+}
+
+function readSessionValue(key: string) {
+  if (typeof window === 'undefined') return memorySessionValues.get(key) ?? null;
+  try {
+    const value = sessionStorage.getItem(key);
+    if (value !== null) memorySessionValues.set(key, value);
+    return value ?? memorySessionValues.get(key) ?? null;
+  } catch {
+    return memorySessionValues.get(key) ?? null;
+  }
+}
+
+function writeSessionValue(key: string, value: string) {
+  memorySessionValues.set(key, value);
+  if (typeof window === 'undefined') return;
+  try { sessionStorage.setItem(key, value); } catch { /* best effort */ }
 }
 
 export function beginLectureSession(lecture: number, now = new Date()): { state: StudyState; session: LectureSession } {
@@ -216,7 +253,7 @@ export function beginLectureSession(lecture: number, now = new Date()): { state:
   const dayBucket = now.toISOString().slice(0, 10);
   const sessionKey = `${SESSION_PREFIX}${lecture}`;
   try {
-    const existing = JSON.parse(sessionStorage.getItem(sessionKey) ?? 'null') as LectureSession | null;
+    const existing = JSON.parse(readSessionValue(sessionKey) ?? 'null') as LectureSession | null;
     if (isLectureSessionReusable(existing, lecture, now)) return { state, session: existing! };
   } catch {
     // Begin a fresh stable visit when the session record cannot be read.
@@ -229,7 +266,7 @@ export function beginLectureSession(lecture: number, now = new Date()): { state:
     recentLecture: lecture,
     lectures: { ...state.lectures, [String(lecture)]: { ...previous, visitCount: visitNumber, lastVisitedAt: now.toISOString() } },
   };
-  sessionStorage.setItem(sessionKey, JSON.stringify(session));
+  writeSessionValue(sessionKey, JSON.stringify(session));
   saveStudyState(nextState);
   return { state: nextState, session };
 }
@@ -260,13 +297,19 @@ export function recordQuestionAttempt(questionId: string, correct: boolean) {
 export function recordQuestionExposure(questionId: string, exposureKey: string) {
   if (typeof window === 'undefined') return;
   const storageKey = `${EXPOSURE_PREFIX}${hashString(exposureKey)}`;
-  if (sessionStorage.getItem(storageKey)) return;
-  sessionStorage.setItem(storageKey, '1');
+  if (readSessionValue(storageKey)) return;
+  writeSessionValue(storageKey, '1');
   saveStudyState(applyExposure(loadStudyState(), questionId));
 }
 
 export function clearStudyState() {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(STUDY_STORAGE_KEY);
-  Object.keys(sessionStorage).filter((key) => key.startsWith(SESSION_PREFIX) || key.startsWith(EXPOSURE_PREFIX)).forEach((key) => sessionStorage.removeItem(key));
+  memoryState = null;
+  for (const key of memorySessionValues.keys()) if (key.startsWith(SESSION_PREFIX) || key.startsWith(EXPOSURE_PREFIX)) memorySessionValues.delete(key);
+  try { localStorage.removeItem(STUDY_STORAGE_KEY); } catch { /* best effort */ }
+  try {
+    Object.keys(sessionStorage)
+      .filter((key) => key.startsWith(SESSION_PREFIX) || key.startsWith(EXPOSURE_PREFIX))
+      .forEach((key) => sessionStorage.removeItem(key));
+  } catch { /* best effort */ }
 }

@@ -48,7 +48,7 @@ export function PracticeClient({ initialMode = 'lecture' }: { initialMode?: Mode
     if (mode === 'lecture') pool = pool.filter((question) => question.lecture === lecture);
     if (mode === 'topic') pool = topicPool;
     if (mode === 'cumulative') pool = pool.filter((question) => question.lecture >= rangeStart && question.lecture <= rangeEnd);
-    if (mode === 'difficult') pool = pool.filter((question) => state.questions[question.id]?.lastCorrect === false);
+    if (mode === 'difficult') pool = pool.filter((question) => state.questions[question.id]?.needsReview === true);
     if (mode === 'unseen') pool = pool.filter((question) => !state.questions[question.id]);
     if (difficulty) pool = pool.filter((question) => question.difficulty === difficulty);
     if (!pool.length) {
@@ -82,12 +82,12 @@ export function PracticeClient({ initialMode = 'lecture' }: { initialMode?: Mode
       {message && <p role="status">{message}</p>}
       {selected.length > 0 && (
         <div className="practice-session">
-          <p className="practice-status">已答 {completed}/{selected.length}{completed ? ` · 正确 ${correct}` : ''}</p>
+          <p className="practice-status">已答 {completed}/{selected.length}{completed ? ` · 首答正确 ${correct}` : ''}</p>
           {selected.map((question) => <QuestionBlock key={`${sessionSeed}-${question.id}`} question={question} seed={sessionSeed} showSourceLink={false} onSubmit={(isCorrect) => setAnswers((current) => ({ ...current, [question.id]: isCorrect }))} />)}
           {completed === selected.length && (
             <section className="practice-summary" aria-live="polite">
               <h2>结果</h2>
-              <p>{correct} / {selected.length}</p>
+              <p>首答正确 {correct} / {selected.length}</p>
               {missedTags.length > 0 && <><h3>需要回看的概念</h3><ul>{missedTags.map((tag) => <li key={tag}>{tag}</li>)}</ul></>}
               <h3>正文链接</h3>
               <ul>{selected.filter((question) => answers[question.id] === false).map((question) => <li key={question.id}><Link href={`/lectures/${String(question.lecture).padStart(2, '0')}/#${question.sectionId}`}>第 {question.lecture} 讲 · {question.stem}</Link></li>)}</ul>

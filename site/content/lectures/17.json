@@ -89,6 +89,402 @@
       "stopPredict": "task accuracy 高是否保证 neural predictivity 高？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能区分 simple-cell 线性选择性与 complex-cell phase invariance，并解释为什么偶对称响应会让一阶 STA 接近零。",
+      "能从 quadrature pair 的两个线性输出逐步推出 energy model 的 phase invariance，同时说清它仍保留的 amplitude 与 orientation 依赖。",
+      "能把 task-optimized model 的任务训练与 neural predictivity 评估拆成两个阶段，并构造不泄漏测试神经数据的比较。",
+      "能写出 E/I rate network 的 fixed-point equations 与 nullclines，分析 surround 输入怎样在不增加 inhibitory rate 的情况下产生 suppression。",
+      "能用局部稳定性说明 inhibition-stabilized network 的含义，避免把 ISN 简化为“抑制比较强”。"
+    ],
+    "prerequisiteBridge": [
+      "先把一个 Gabor-like filter 想成带正负条带的模板。亮条与正权重对齐、暗条与负权重对齐时，内积为正；把 grating 平移半个周期，符号会反转。simple cell 可以保留这个相位符号，而 complex cell 往往对同一 orientation 的多种 phase 都发放。若响应对 s 与 -s 相同，spike-triggered stimuli 中正负样本成对出现，普通平均会互相抵消；这不是神经元没有 stimulus selectivity，而是一阶统计选错了坐标。",
+      "模型与神经数据的比较需要分清两个拟合。第一步可在物体分类等任务上训练网络权重，决定表示 z(x)；第二步用一部分神经数据拟合从 z 到 neuron responses 的简单映射，再在未参与拟合的刺激上测预测。分类准确率回答网络能否完成任务，neural predictivity 回答其内部表示是否与观测响应有线性或指定映射关系。两个分数可能相关，但逻辑上互不保证。",
+      "E/I 动力学需要的数学只有一阶微分方程与二维直线交点。把 r_E、r_I 当作随时间变化的群体 firing rates；dr/dt=0 的点组成 nullcline，两条 nullcline 的交点是 fixed point。箭头方向由各导数正负决定。某个 fixed point 是否稳定，取决于小扰动后向量场是否把状态推回，而不取决于图上某条曲线看起来陡不陡；线性化矩阵的 eigenvalues 才给出局部判据。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l17-d1",
+        "prompt": "一个神经元对 filter projection z 和 -z 产生相同响应。用 spike-triggered stimuli 求一阶平均时，为什么可能得到接近零？",
+        "answer": "spikes 同时选择正、负两侧的大投影；若刺激分布对称，两组 trigger 的均值方向相反并互相抵消。",
+        "explanation": "零 STA 只否定单一带符号线性方向作为完整解释，不否定对 |z| 或 z² 的选择性；STC 或 energy feature 可以检测后者。",
+        "remediationModuleId": "l17-m1"
+      },
+      {
+        "id": "l17-d2",
+        "prompt": "若 L1=Acosφ、L2=Asinφ，L1²+L2² 是否依赖 phase φ？",
+        "answer": "不依赖，因为 cos²φ+sin²φ=1，所以平方和恒为 A²。",
+        "explanation": "quadrature pair 把相位变化变成二维向量旋转，平方和读取向量长度而忽略方向。",
+        "remediationModuleId": "l17-m1"
+      },
+      {
+        "id": "l17-d3",
+        "prompt": "一个分类准确率更高的网络是否必然更好预测视觉皮层 responses？",
+        "answer": "不必然；任务成绩只约束最终行为输出，内部表示仍可能与神经表征不同，必须在 held-out neural stimuli 上单独比较。",
+        "explanation": "若先看测试神经数据再挑层、挑映射或调网络，predictivity 会被选择偏差抬高；评估流程必须隔离。",
+        "remediationModuleId": "l17-m2"
+      },
+      {
+        "id": "l17-d4",
+        "prompt": "surround 出现后 excitatory rate 下降，inhibitory rate 也下降。这个结果能否仍由 recurrent inhibition 参与产生？",
+        "answer": "可以；surround 可先减少网络 excitation，继而让 inhibitory population 收到更少驱动。E 下降得更多时净效应仍是 suppression。",
+        "explanation": "观察到 I rate 下降不等于 inhibition 不重要。应比较 recurrent equations、输入改变与 fixed-point shift，而不是把 inhibitory firing 数值直接当作抑制电流。",
+        "remediationModuleId": "l17-m3"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l17-m1",
+        "title": "从 simple-cell pooling 到 complex-cell energy",
+        "sourceRefs": [
+          {
+            "file": "Lecture17-VisualNetworks.pdf",
+            "page": 1
+          },
+          {
+            "file": "Lecture17-VisualNetworks.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "怎样用两条相差四分之一周期的 filters，让神经元保留 orientation 选择性却丢掉 grating phase？",
+        "paragraphs": [
+          "第 1 页从级联模型连接 Hubel–Wiesel construction。多个 LGN-like center-surround units 若按一条倾斜轴排列，并以同号权重汇聚到一个 cortical unit，只有匹配该排列的亮暗边缘会同时驱动许多输入，于是形成 elongated simple-cell receptive field。这个构造解释 orientation selectivity 的空间几何，但它仍对亮暗位置敏感：同一 grating 平移半周期会让线性 projection 改变符号。",
+          "complex cell 的困难在于 phase invariance。若它对某方向 grating 的正、负 phase 都强响应，线性 STA 会把两类 spike-triggered stimulus 平均到接近零。第 2 页改用两个相差 90° spatial phase 的 filters，也就是 quadrature pair。输入相位改变时，两个线性输出像二维坐标一样轮流承载能量；将各自平方再相加，读出的不再是角度而是向量半径。",
+          "设匹配 orientation 与 spatial frequency 的 grating 投影到两 filters 后为 L1=Acosφ、L2=Asinφ，其中 A 取决于 contrast 与匹配程度，φ 是 stimulus phase。energy E=L1²+L2²=A² 与 φ 无关。这个不变量是有条件的：改变 orientation 或 frequency 会使两个 projection 的共同 amplitude A 下降；改变 contrast 会改变 A，从而改变 E。因此 energy model 消除的是 phase，不是所有 stimulus information。",
+          "STC 能从 spike-triggered covariance 的异常 eigen-directions 找到这两个 feature axes，因为 spikes 选择的是二维子空间中的大半径，而不是某一个带符号均值方向。模型仍是 descriptive cascade：两个 linear filters、平方 nonlinearity、求和以及可能的 output nonlinearity。它可以生成复杂细胞的若干响应特征，但不能仅凭拟合就断言生物突触严格按这四步分区实现。"
+        ],
+        "keyPoints": [
+          "simple-cell pooling 通过空间对齐产生 orientation selectivity，同时保留 phase sensitivity。",
+          "complex-cell energy model 用 quadrature pair 的平方和把 stimulus phase 变成被忽略的二维角度。",
+          "zero STA 与 strong selectivity 可以并存；此时应检查 covariance 或多 filter subspace。"
+        ],
+        "derivation": {
+          "title": "quadrature energy 为何不随 phase 改变",
+          "setup": "对固定 orientation 与 frequency 的 grating，令两个相差 90° phase 的 normalized filters 输出 L1=Acosφ 与 L2=Asinφ。",
+          "steps": [
+            {
+              "title": "写出平方和",
+              "explanation": "energy stage 对两个带符号 projection 分别平方，再把非负结果相加。",
+              "latex": "E=L_1^2+L_2^2=A^2\\cos^2\\phi+A^2\\sin^2\\phi"
+            },
+            {
+              "title": "提取共同 amplitude",
+              "explanation": "A 与当前 phase 无关，可提出括号，剩下单位圆恒等式。",
+              "latex": "E=A^2(\\cos^2\\phi+\\sin^2\\phi)"
+            },
+            {
+              "title": "使用单位圆 identity",
+              "explanation": "cosφ 与 sinφ 是单位向量的两个坐标，平方和为 1，所以 energy 只剩 A²。",
+              "latex": "E=A^2"
+            }
+          ],
+          "symbolNotes": [
+            "A 仍随 contrast、orientation mismatch、frequency mismatch 与 receptive-field overlap 改变。",
+            "exact invariance 假设两 filters 真正处于 quadrature 且 gain 匹配；生物数据中通常只是近似。"
+          ],
+          "unitsCheck": "若 linear outputs 以 spikes/s 的驱动单位表示，平方和的单位会成为驱动²；最终 output nonlinearity 可把它重新映射为 firing rate。",
+          "limitCheck": "A=0 时所有 phase 都给 E=0；若第二条 filter gain 是第一条的两倍，平方和将随 φ 改变，phase invariance 被破坏。"
+        },
+        "workedExample": {
+          "title": "三个 phases 得到相同 energy",
+          "problem": "令 A=4，分别计算 φ=0、π/4、π/2 时的 L1、L2 与 E。",
+          "steps": [
+            "φ=0：L1=4、L2=0，所以 E=16。",
+            "φ=π/4：L1=L2=4/√2，两个平方各为 8，所以 E=16。",
+            "φ=π/2：L1=0、L2=4，所以 E=16。"
+          ],
+          "result": "三个 phases 的线性 outputs 不同，但 energy 都是 16。",
+          "sanityCheck": "每一对 (L1,L2) 都落在半径 4 的圆上；平方和就是半径平方。"
+        },
+        "selfCheck": {
+          "prompt": "energy model 得到 phase invariance 后，为什么仍能保持 orientation tuning？",
+          "answer": "phase 只让匹配的 quadrature outputs 在二维平面内旋转；换 orientation 会同时降低两 filters 的 projection amplitude A，所以平方和 A² 仍随 orientation mismatch 下降。"
+        },
+        "pitfalls": [
+          "看到 complex-cell STA 接近零就判断刺激不驱动该细胞，忽略 even nonlinearity 下的正负抵消。",
+          "把 square-and-sum 说成对所有变换都 invariant；它只对所覆盖 subspace 内的 phase rotation 近似 invariant。"
+        ]
+      },
+      {
+        "id": "l17-m2",
+        "title": "任务优化模型与 neural predictivity 是两次不同检验",
+        "sourceRefs": [
+          {
+            "file": "Lecture17-VisualNetworks.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "怎样判断一个为 object classification 训练的网络，其内部 feature space 是否真的接近神经表征？",
+        "paragraphs": [
+          "第 3 页的逻辑包含两个数据域。网络先在 task dataset 上通过分类 loss 学习权重，其 feature hierarchy 是任务与架构共同产生的结果。之后冻结网络，用实验刺激计算某层 features z(x)，再用 training neural trials 拟合从 z 到 neuron response r 的受约束映射，例如 ridge-regularized linear readout。最后必须在 held-out stimuli 或 held-out trials 上报告预测相关或可解释方差。",
+          "task accuracy 高并不定义 neural similarity。同一个分类边界可由许多内部 coordinate systems 实现；有些网络可能依赖纹理，有些依赖形状，却在标签上得分接近。neural predictivity 也受映射灵活度影响：若允许一个参数远多于样本的 nonlinear mapper，几乎任何 representation 都可能贴合 training responses。因而常用简单、相同复杂度的 mapping，并对每个候选层执行相同 cross-validation。",
+          "可把 feature matrix 写成 Z∈R^{N×d}，每行对应一张刺激，每列对应一个 model feature；神经响应 R∈R^{N×m}，每列对应一个 neuron。线性 mapping B∈R^{d×m} 通过最小化 ||ZB-R||² 得到。这个 B 不改变原网络的 task representation，只负责坐标对齐。若比较不同模型，必须在相同 N、相同 neurons、相同 noise ceiling 与相同正则化选择规则下评价。",
+          "neural data 自身含 trial noise，所以即使模型捕捉了可重复 stimulus-driven signal，单次 trial 相关也不会达到 1。noise ceiling 用 split-half reliability 等方法估计数据可预测上限。报告原始 predictivity 与 ceiling-normalized score 时要同时给出不确定度。若某层比另一层高，只能说在当前 stimuli、areas、mapping family 与 measurement noise 下更匹配，不能把它扩展为整套视觉系统的机制等同。"
+        ],
+        "keyPoints": [
+          "任务训练决定 representation；神经 readout 与 held-out evaluation 检验该 representation 是否对齐生物响应。",
+          "分类成绩与 neural predictivity 回答不同问题，必须分别报告。",
+          "mapping complexity、data split 与 noise ceiling 会实质改变比较结论。"
+        ],
+        "derivation": {
+          "title": "从 least-squares objective 得到 neural readout",
+          "setup": "为简化推导，先忽略正则化。给定 model features Z 与 neural responses R，求 B 使 L(B)=||ZB-R||_F² 最小。",
+          "steps": [
+            {
+              "title": "写出矩阵 gradient",
+              "explanation": "Frobenius norm 是所有 prediction errors 的平方和，对 B 求导得到二倍的 Z^T 乘 residual。",
+              "latex": "\\nabla_B L=2Z^{\\mathsf T}(ZB-R)"
+            },
+            {
+              "title": "令 gradient 为零",
+              "explanation": "最小点满足 normal equation；这一步把每个 feature 与 residual 的相关压到零。",
+              "latex": "Z^{\\mathsf T}ZB=Z^{\\mathsf T}R"
+            },
+            {
+              "title": "在可逆条件下求解",
+              "explanation": "若 Z^TZ 可逆，左乘其 inverse 得到 closed-form readout；共线或高维时应加入 ridge 而非强行求逆。",
+              "latex": "B=(Z^{\\mathsf T}Z)^{-1}Z^{\\mathsf T}R"
+            }
+          ],
+          "symbolNotes": [
+            "N 是 stimuli 数，d 是 feature 数，m 是 neurons 数；B 的每一列是一个 neuron 的 readout weights。",
+            "B 只能用 training neural set 估计；held-out responses 若进入 layer selection 或超参数选择，就不再是独立测试。"
+          ],
+          "unitsCheck": "Z 的 feature units 取决于网络激活；B 带 neural-response-units per feature-unit，使 ZB 与 R 都以 spikes/s 或 trial counts 表示。",
+          "limitCheck": "若 Z 只有常数列，模型只能预测每个 neuron 的平均响应；若 d≥N 且不正则化，training error 可很小却可能严重 overfit。"
+        },
+        "workedExample": {
+          "title": "一维 feature 的最小二乘 readout",
+          "problem": "三张训练刺激的单一 model feature 为 z=[1,2,3]，某 neuron 的响应为 r=[2,4,5]。不加 intercept，求标量 weight b，并预测 z=4 的响应。",
+          "steps": [
+            "一维 normal equation 给 b=(z^T r)/(z^T z)。",
+            "z^T r=1×2+2×4+3×5=25，z^Tz=1+4+9=14，所以 b=25/14≈1.786。",
+            "新刺激 z=4 的预测为 4b=100/14≈7.14；是否可靠要用真实 held-out response 检验。"
+          ],
+          "result": "training data 得到 b≈1.786，held-out feature 4 对应 prediction≈7.14。",
+          "sanityCheck": "若响应恰为 r=2z，公式会给 b=2；当前第三点低于 6，所以拟合斜率略低于 2。"
+        },
+        "selfCheck": {
+          "prompt": "为什么不能在 test neural stimuli 上反复挑选“最像脑”的 network layer，再把同一批数据上的最高相关当最终成绩？",
+          "answer": "反复挑层已经利用了 test responses，最高值包含选择噪声并会偏高；应在 validation neural set 选层与正则化，只在独立 test set 做一次最终评估。"
+        },
+        "pitfalls": [
+          "把强大的 nonlinear mapping 拟合能力误当成原 representation 与神经表征相似。",
+          "忽略 neural response reliability，直接比较不同 datasets 的 raw correlation。"
+        ]
+      },
+      {
+        "id": "l17-m3",
+        "title": "E/I recurrence、nullclines 与 inhibition stabilization",
+        "sourceRefs": [
+          {
+            "file": "Lecture17-VisualNetworks.pdf",
+            "page": 4
+          },
+          {
+            "file": "Lecture17-VisualNetworks.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "surround suppression 怎样由 fixed-point shift 产生，并且为何 inhibitory population 的 firing 反而可能下降？",
+        "paragraphs": [
+          "第 4 页把 surround effect 放进 E/I recurrent rate model。一个常用形式是 τ_E dr_E/dt=-r_E+F_E(w_EE r_E-w_EI r_I+I_E)，τ_I dr_I/dt=-r_I+F_I(w_IE r_E-w_II r_I+I_I)，其中 w 的数值取正，抑制符号已写在减号中。recurrent excitation、feedback inhibition 与 external inputs 一起决定 fixed point，不能把某个 population 的 firing rate 单独等同于它对目标细胞造成的净电流。",
+          "在分段线性区域把 F 暂看成 identity，E-nullcline 可写 r_E=w_EE r_E-w_EI r_I+I_E，I-nullcline 也可改写成 r_I 关于 r_E 的直线。两线交点是 steady state。surround 若增加对 I population 的 external drive I_I，会移动 I-nullcline；在 ISN regime，新增 drive 先增强 inhibition、压低 r_E，随后减少 I population 收到的 recurrent excitation，新的交点甚至可让 r_E 与 r_I 都降低。",
+          "第 5 页的 ISN 指 excitatory subnetwork 单独看会不稳定：有效 recurrent E gain 超过 leak；完整 E/I network 因快速 inhibitory feedback 才稳定。名称不是说 inhibitory neurons 的 rate 始终上升，也不是说所有 suppression 都来自额外 I input。在某些 perturbation 下，加强对 I population 的外部驱动反而让其 steady-state rate 下降，这是网络重新平衡产生的 paradoxical response，也是比“测到 I 多不多”更针对 ISN 的检验。",
+          "读 nullcline 图应按四步：标出横纵轴及两条 zero-derivative curves；判断每条曲线哪一侧对应正导数；找交点；再看小位移后的箭头是否回到交点。仅看到两曲线相交不足以判断稳定。对 nonlinear F，可能出现多个交点，surround 还可能改变 gain 而不只是平移 input；因此线性示例用于揭示因果结构，实际 fitting 需要保留非线性与时间过程。"
+        ],
+        "keyPoints": [
+          "surround suppression 是完整 recurrent fixed point 的变化，不要求 inhibitory firing rate 增加。",
+          "nullcline 交点给 steady state，局部向量场或 Jacobian eigenvalues 决定稳定性。",
+          "ISN 的定义是 E-only subsystem 不稳定而完整 E/I loop 稳定，不是“抑制强”这个定性标签。"
+        ],
+        "derivation": {
+          "title": "线性 E/I 网络的 fixed point、surround shift 与局部稳定性",
+          "setup": "在当前 operating range 令 F_E、F_I 为 identity，两个 population 使用相同正时间常数 τ，并取 w_EE=1.2、w_EI=1、w_IE=1、w_II=0。fixed-point equations 为 0=-r_E+1.2r_E-r_I+I_E 与 0=-r_I+r_E+I_I。",
+          "steps": [
+            {
+              "title": "从 I equation 表示 r_I",
+              "explanation": "第二个 fixed-point equation 直接给 r_I=r_E+I_I，把它代回 E equation。",
+              "latex": "r_I=r_E+I_I"
+            },
+            {
+              "title": "求 r_E",
+              "explanation": "E equation 化为 0.2r_E-r_I+I_E=0；代入 r_I 后整理，得到 0.8r_E=I_E-I_I。",
+              "latex": "r_E=\\frac{I_E-I_I}{0.8}"
+            },
+            {
+              "title": "恢复 r_I 并比较条件",
+              "explanation": "先由 r_E 计算新交点，再用 r_I=r_E+I_I。改变 surround input 时，两种 rate 可同时下降。",
+              "latex": "r_I=\\frac{I_E-I_I}{0.8}+I_I"
+            },
+            {
+              "title": "用 Jacobian 验证 ISN 条件",
+              "explanation": "完整 E/I 线性化 Jacobian 是 (1/τ)[[0.2,-1],[1,-1]]，其 eigenvalues 为 (-0.4±0.8i)/τ，real parts 为负，所以交点局部稳定；切掉 inhibitory feedback 后 E-only eigenvalue 为 0.2/τ>0，单独的 E subsystem 不稳定。这两项一起而不是 nullcline 相交本身，证明该例属于 ISN。",
+              "latex": "J=\\frac{1}{\\tau}\\begin{bmatrix}0.2&-1\\\\1&-1\\end{bmatrix},\\qquad \\lambda_J=\\frac{-0.4\\pm0.8i}{\\tau}"
+            }
+          ],
+          "symbolNotes": [
+            "w_EE=1.2 大于 unit leak，表示 E-only linear subsystem 会增长；完整稳定性还取决于 I feedback 与 time constants。",
+            "identity F 只适用于 rates 为正且未饱和的局部区域；若算出负 rate，需要使用 rectification 并重新判断 active set。"
+          ],
+          "unitsCheck": "若 rates 以 spikes/s 表示，dimensionless weights 把 presynaptic rate 映射为同单位 drive；I_E、I_I 也以等效 rate drive 表示。Jacobian eigenvalues 都带 1/τ，因而单位是 reciprocal time。",
+          "limitCheck": "w_EI 或 w_IE 变为零时，稳定 E/I feedback loop 被切断；若 E gain 超过 leak，E-only mode 会 runaway，暴露 ISN 条件。"
+        },
+        "workedExample": {
+          "title": "E 与 I rates 同时下降的 surround suppression",
+          "problem": "使用推导中的网络。center-only 时 I_E=10、I_I=2；surround 时 I_E 仍为 10，但对 I population 的 drive I_I 增至 5。求两条件 fixed points。",
+          "steps": [
+            "center-only：r_E=(10-2)/0.8=10，r_I=r_E+2=12。",
+            "surround：r_E=(10-5)/0.8=6.25，r_I=r_E+5=11.25。",
+            "比较得到 E 从 10 降到 6.25，I 从 12 降到 11.25；虽然 I population 收到更大 external drive，它的 steady rate 仍略降，因为 recurrent E input 降得更多。"
+          ],
+          "result": "surround condition 的 steady-state E 与 I 都更低，不能据此排除 recurrent inhibition。",
+          "sanityCheck": "代回 surround E equation：-6.25+1.2×6.25-11.25+10=0；I equation：-11.25+6.25+5=0。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“surround 后 inhibitory neuron firing 降低”不等价于“surround suppression 不是 inhibition 造成的”？",
+          "answer": "firing rate 是网络 fixed point 的结果，抑制电流还取决于连接与 presynaptic rate；surround 可先减少 E drive，让 I 随之下降，而 I feedback 仍决定 E amplification 被限制到哪个交点。"
+        },
+        "pitfalls": [
+          "把 inhibitory population rate、目标细胞收到的 inhibitory current 与净 suppression 当成同一变量。",
+          "只凭 nullclines 有交点就宣布稳定，不检查交点附近向量场或 Jacobian eigenvalues。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L17-FIG-A1",
+      "lecture": 17,
+      "lectureTitle": "视觉网络：级联、复杂细胞与循环动力学",
+      "moduleId": "l17-m3",
+      "title": "Surround input 移动 I-nullcline 后，稳定交点的 E 与 I 可同时下降",
+      "alt": "归一化兴奋和抑制发放率相平面中，一条兴奋 nullcline 与 center 和 surround 两条抑制 nullclines 相交；surround 交点位于更低的兴奋和抑制率。",
+      "caption": "在局部线性 E/I rate model 中，nullcline 交点给 steady state。增加对 I population 的 surround drive 会把 I-nullcline 上移；与固定 E-nullcline 的新交点可同时具有更低 r_E 和 r_I，因此 surround suppression 不要求 inhibitory firing 必然增加。曲线是按课程方程归一化后的几何示意；完整稳定性仍需 Jacobian eigenvalues，而不能只凭两线相交判断。",
+      "sourceRefs": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 4
+        },
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 5
+        }
+      ],
+      "schematic": true,
+      "kind": "state-space",
+      "xLabel": "excitatory rate r_E（归一化）",
+      "yLabel": "inhibitory rate r_I（归一化）",
+      "nullclines": [
+        {
+          "label": "E-nullcline",
+          "points": [
+            [
+              0,
+              45
+            ],
+            [
+              100,
+              65
+            ]
+          ]
+        },
+        {
+          "label": "I-nullcline: center",
+          "points": [
+            [
+              0,
+              15
+            ],
+            [
+              80,
+              95
+            ]
+          ]
+        },
+        {
+          "label": "I-nullcline: surround",
+          "points": [
+            [
+              0,
+              30
+            ],
+            [
+              70,
+              100
+            ]
+          ],
+          "dashed": true
+        }
+      ],
+      "trajectories": [
+        {
+          "label": "toward center fixed point",
+          "points": [
+            [
+              70,
+              78
+            ],
+            [
+              58,
+              66
+            ],
+            [
+              47,
+              58
+            ],
+            [
+              38,
+              53
+            ]
+          ]
+        },
+        {
+          "label": "toward surround fixed point",
+          "points": [
+            [
+              48,
+              74
+            ],
+            [
+              34,
+              61
+            ],
+            [
+              24,
+              52
+            ],
+            [
+              19,
+              49
+            ]
+          ],
+          "dashed": true
+        }
+      ],
+      "fixedPoints": [
+        {
+          "x": 38,
+          "y": 53,
+          "label": "center",
+          "stable": true
+        },
+        {
+          "x": 19,
+          "y": 49,
+          "label": "surround",
+          "stable": true
+        }
+      ],
+      "annotations": [
+        {
+          "x": 27,
+          "y": 37,
+          "label": "I drive ↑"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 Hubel-Wiesel pooling 与 simple-cell selectivity",
@@ -297,7 +693,42 @@
     "需要明确\"复杂细胞 STA=0\"不等于\"没有 stimulus selectivity\"；这是理解 nonlinear system identification 的关键反例。"
   ],
   "errata": [
-    "1. Page 1 的 complex-cell null STA 是关键 nonlinear system-identification 反例。 2. Page 3 的 performance-optimized models 提供 correspondence， 不证明 biological training mechanism。 3. Page 5 明确称 ISN 名称需谨慎理解；需要保留这一边界。"
+    {
+      "id": "L17-E01",
+      "lecture": 17,
+      "lectureTitle": "视觉网络：级联、复杂细胞与循环动力学",
+      "kind": "caution",
+      "sourceFile": "Lecture17-VisualNetworks.pdf",
+      "sourcePage": 1,
+      "sectionId": "l17-m1",
+      "originalIssue": "Page 1 的 complex-cell null STA 是关键 nonlinear system-identification 反例。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L17-E02",
+      "lecture": 17,
+      "lectureTitle": "视觉网络：级联、复杂细胞与循环动力学",
+      "kind": "caution",
+      "sourceFile": "Lecture17-VisualNetworks.pdf",
+      "sourcePage": 3,
+      "sectionId": "lecture-17-source-3",
+      "originalIssue": "Page 3 的 performance-optimized models 提供 correspondence， 不证明 biological training mechanism。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L17-E03",
+      "lecture": 17,
+      "lectureTitle": "视觉网络：级联、复杂细胞与循环动力学",
+      "kind": "caution",
+      "sourceFile": "Lecture17-VisualNetworks.pdf",
+      "sourcePage": 5,
+      "sectionId": "l17-m3",
+      "originalIssue": "Page 5 明确称 ISN 名称需谨慎理解；需要保留这一边界。",
+      "explanation": "对 nonlinear F，可能出现多个交点，surround 还可能改变 gain 而不只是平移 input；因此线性示例用于揭示因果结构，实际 fitting 需要保留非线性与时间过程。",
+      "correction": "需要保留这一边界"
+    }
   ],
   "questions": [
     {
@@ -315,7 +746,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 17 讲：Hubel-Wiesel simple-cell construction 的核心？",
@@ -343,7 +774,7 @@
         "b": "该选项回答的是“energy model 需要哪两类 filters？”。",
         "d": "这是“能量模型（energy model）”的定义。"
       },
-      "explanation": "按空间排列汇聚多个 center-surround subunits，形成 oriented ON/OFF lobes。"
+      "explanation": "按空间排列汇聚多个 center-surround subunits，形成 oriented ON/OFF lobes。 多个 LGN-like center-surround units 若按一条倾斜轴排列，并以同号权重汇聚到一个 cortical unit，只有匹配该排列的亮暗边缘会同时驱动许多输入，于是形成 elongated simple-cell receptive field。"
     },
     {
       "id": "L17-Q02",
@@ -360,7 +791,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 17 讲：complex cell STA 为什么可为零？",
@@ -388,7 +819,7 @@
         "b": "该选项回答的是“STA 与 STC 分别检测哪类 moments？”。",
         "c": "该选项回答的是“surround suppression 是否要求 inhibition 增加？”。"
       },
-      "explanation": "对相反 phases 都响应，平均抵消。"
+      "explanation": "对相反 phases 都响应，平均抵消。 complex cell 的困难在于 phase invariance。"
     },
     {
       "id": "L17-Q03",
@@ -405,7 +836,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 17 讲：energy model 需要哪两类 filters？",
@@ -433,7 +864,7 @@
         "c": "这是“能量模型（energy model）”的定义。",
         "d": "这是“神经预测性（neural predictivity）”的定义。"
       },
-      "explanation": "同 orientation/frequency、phase 差 π/2 的 quadrature pair。"
+      "explanation": "同 orientation/frequency、phase 差 π/2 的 quadrature pair。 可把 feature matrix 写成 Z∈R^{N×d}，每行对应一张刺激，每列对应一个 model feature；神经响应 R∈R^{N×m}，每列对应一个 neuron。"
     },
     {
       "id": "L17-Q04",
@@ -450,7 +881,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "calculation",
       "cognitiveLevel": "evaluate",
       "stem": "第 17 讲：证明 phase invariance 的 identity？",
@@ -478,7 +909,7 @@
         "c": "这是“简单细胞（simple cell）”的定义。",
         "d": "这是“复杂细胞（complex cell）”的定义。"
       },
-      "explanation": "cos²φ+sin²φ=1。"
+      "explanation": "cos²φ+sin²φ=1。 在分段线性区域把 F 暂看成 identity，E-nullcline 可写 r_E=w_EE r_E-w_EI r_I+I_E，I-nullcline 也可改写成 r_I 关于 r_E 的直线。"
     },
     {
       "id": "L17-Q05",
@@ -495,7 +926,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 17 讲：task accuracy 高是否保证 neural predictivity 高？",
@@ -523,7 +954,7 @@
         "b": "这是“神经预测性（neural predictivity）”的定义。",
         "d": "这是“E/I nullclines”的适用条件。"
       },
-      "explanation": "不保证；二者需分别测量。"
+      "explanation": "不保证；二者需分别测量。 读 nullcline 图应按四步：标出横纵轴及两条 zero-derivative curves；判断每条曲线哪一侧对应正导数；找交点；再看小位移后的箭头是否回到交点。"
     },
     {
       "id": "L17-Q06",
@@ -540,7 +971,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 17 讲：model features 与 neural responses 常如何比较？",
@@ -568,7 +999,7 @@
         "b": "这是“能量模型（energy model）”的定义。",
         "c": "这条推理对应 Lecture17-VisualNetworks.pdf 第 3 页。"
       },
-      "explanation": "拟合简单 readout（常为 linear mapping）再 cross-validate。"
+      "explanation": "拟合简单 readout（常为 linear mapping）再 cross-validate。 之后冻结网络，用实验刺激计算某层 features z(x)，再用 training neural trials 拟合从 z 到 neuron response r 的受约束映射，例如 ridge-regularized linear readout。"
     },
     {
       "id": "L17-Q07",
@@ -585,8 +1016,8 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 2,
-      "type": "comparison",
+      "difficulty": 3,
+      "type": "calculation",
       "cognitiveLevel": "apply",
       "stem": "第 17 讲：surround suppression 是否要求 inhibition 增加？",
       "choices": [
@@ -613,7 +1044,7 @@
         "c": "这是“周围抑制（surround suppression）”的定义。",
         "d": "这是“抑制稳定网络（inhibition-stabilized network, ISN）”的定义。"
       },
-      "explanation": "不要求；excitation 可下降更多。"
+      "explanation": "不要求；excitation 可下降更多。 surround 若增加对 I population 的 external drive I_I，会移动 I-nullcline；在 ISN regime，新增 drive 先增强 inhibition、压低 r_E，随后减少 I population 收到的 recurrent excitation，新的交点甚至可让 r_E 与 r_I 都降低。"
     },
     {
       "id": "L17-Q08",
@@ -630,7 +1061,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
       "stem": "第 17 讲：nullcline intersection 表示什么？",
@@ -658,7 +1089,7 @@
         "c": "这是“motion/orientation energy model”的适用条件。",
         "d": "这是“model-to-neuron linear mapping”的适用条件。"
       },
-      "explanation": "可能的 steady state。"
+      "explanation": "可能的 steady state。 模型仍是 descriptive cascade：两个 linear filters、平方 nonlinearity、求和以及可能的 output nonlinearity。"
     },
     {
       "id": "L17-Q09",
@@ -675,7 +1106,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 17 讲：surround input 如何改变 fixed point？",
@@ -703,7 +1134,7 @@
         "b": "该选项回答的是“ISN 的 E subnetwork 特征？”。",
         "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。"
       },
-      "explanation": "移动一条或两条 nullclines，改变 intersection。"
+      "explanation": "移动一条或两条 nullclines，改变 intersection。 对 nonlinear F，可能出现多个交点，surround 还可能改变 gain 而不只是平移 input；因此线性示例用于揭示因果结构，实际 fitting 需要保留非线性与时间过程。"
     },
     {
       "id": "L17-Q10",
@@ -720,7 +1151,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 17 讲：ISN 的 E subnetwork 特征？",
@@ -748,7 +1179,7 @@
         "b": "这是“简单细胞（simple cell）”的定义。",
         "c": "该选项回答的是“STA 与 STC 分别检测哪类 moments？”。"
       },
-      "explanation": "在 operating point 单独会不稳定/放大，由 feedback I 稳定。"
+      "explanation": "在 operating point 单独会不稳定/放大，由 feedback I 稳定。 第 5 页的 ISN 指 excitatory subnetwork 单独看会不稳定：有效 recurrent E gain 超过 leak；完整 E/I network 因快速 inhibitory feedback 才稳定。"
     },
     {
       "id": "L17-Q11",
@@ -765,7 +1196,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 17 讲：steady-state I rate 下降是否排除 ISN？",
@@ -793,7 +1224,7 @@
         "c": "这是“复杂细胞（complex cell）”的定义。",
         "d": "这是“抑制稳定网络（inhibition-stabilized network, ISN）”的定义。"
       },
-      "explanation": "不排除，stabilization 是 dynamical feedback property。"
+      "explanation": "不排除，stabilization 是 dynamical feedback property。 在某些 perturbation 下，加强对 I population 的外部驱动反而让其 steady-state rate 下降，这是网络重新平衡产生的 paradoxical response，也是比\"测到 I 多不多\"更针对 ISN 的检验。"
     },
     {
       "id": "L17-Q12",
@@ -810,7 +1241,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 17 讲：STA 与 STC 分别检测哪类 moments？",
@@ -838,55 +1269,10 @@
         "c": "这是“零流线（nullcline）”的定义。",
         "d": "该选项回答的是“ISN 的 E subnetwork 特征？”。"
       },
-      "explanation": "STA 检测 conditional mean；STC 检测 covariance。"
+      "explanation": "STA 检测 conditional mean；STC 检测 covariance。 STC 能从 spike-triggered covariance 的异常 eigen-directions 找到这两个 feature axes，因为 spikes 选择的是二维子空间中的大半径，而不是某一个带符号均值方向。"
     },
     {
       "id": "L17-Q13",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 1,
-          "section": "lecture-17-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 17 讲：根据 Lecture17-VisualNetworks.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "STC features、energy model、quadrature pair、phase invariance。"
-        },
-        {
-          "id": "b",
-          "text": "performance-optimized object-classification models 与 neural predictivity。"
-        },
-        {
-          "id": "c",
-          "text": "LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA。"
-        },
-        {
-          "id": "d",
-          "text": "recurrence、surround suppression、E/I rate-network model。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
-        "b": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。",
-        "d": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。"
-      },
-      "explanation": "LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA。"
-    },
-    {
-      "id": "L17-Q14",
       "lecture": 17,
       "sectionId": "lecture-17-source-1",
       "sourceAnchors": [
@@ -915,68 +1301,23 @@
         },
         {
           "id": "c",
-          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
+          "text": "重构 Hubel-Wiesel simple-cell pooling 与 complex-cell phase invariance；说明 complex cell 为什么 linear STA 可为零。"
         },
         {
           "id": "d",
-          "text": "重构 Hubel-Wiesel simple-cell pooling 与 complex-cell phase invariance；说明 complex cell 为什么 linear STA 可为零。"
+          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。",
         "b": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。"
-      },
-      "explanation": "重构 Hubel-Wiesel simple-cell pooling 与 complex-cell phase invariance；说明 complex cell 为什么 linear STA 可为零。"
-    },
-    {
-      "id": "L17-Q15",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 2,
-          "section": "lecture-17-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 17 讲：根据 Lecture17-VisualNetworks.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "STC features、energy model、quadrature pair、phase invariance。"
-        },
-        {
-          "id": "b",
-          "text": "LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA。"
-        },
-        {
-          "id": "c",
-          "text": "performance-optimized object-classification models 与 neural predictivity。"
-        },
-        {
-          "id": "d",
-          "text": "steady-state nullclines、surround-induced shifts、inhibitionstabilized network。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。",
         "d": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。"
       },
-      "explanation": "STC features、energy model、quadrature pair、phase invariance。"
+      "explanation": "重构 Hubel-Wiesel simple-cell pooling 与 complex-cell phase invariance；说明 complex cell 为什么 linear STA 可为零。 complex cell 的困难在于 phase invariance。"
     },
     {
-      "id": "L17-Q16",
+      "id": "L17-Q14",
       "lecture": 17,
       "sectionId": "lecture-17-source-2",
       "sourceAnchors": [
@@ -990,7 +1331,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 17 讲：若要解释\"STC features、energy model、quadrature pair、phase invariance\"中的机制或推导，哪条推理链成立？",
@@ -1001,117 +1342,27 @@
         },
         {
           "id": "b",
-          "text": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
-        },
-        {
-          "id": "c",
           "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
         },
         {
-          "id": "d",
-          "text": "重构 Hubel-Wiesel simple-cell pooling 与 complex-cell phase invariance；说明 complex cell 为什么 linear STA 可为零。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。",
-        "d": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。"
-      },
-      "explanation": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
-    },
-    {
-      "id": "L17-Q17",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 2,
-          "section": "lecture-17-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
-      ],
-      "difficulty": 2,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 17 讲：阅读与\"STC features、energy model、quadrature pair、phase invariance\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
           "id": "c",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+          "text": "重构 Hubel-Wiesel simple-cell pooling 与 complex-cell phase invariance；说明 complex cell 为什么 linear STA 可为零。"
         },
         {
           "id": "d",
           "text": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 2 页。"
-      },
-      "explanation": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-    },
-    {
-      "id": "L17-Q18",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 3,
-          "section": "lecture-17-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 17 讲：根据 Lecture17-VisualNetworks.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA。"
-        },
-        {
-          "id": "b",
-          "text": "STC features、energy model、quadrature pair、phase invariance。"
-        },
-        {
-          "id": "c",
-          "text": "recurrence、surround suppression、E/I rate-network model。"
-        },
-        {
-          "id": "d",
-          "text": "performance-optimized object-classification models 与 neural predictivity。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
-        "c": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。"
+        "a": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。",
+        "b": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。",
+        "c": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。"
       },
-      "explanation": "performance-optimized object-classification models 与 neural predictivity。"
+      "explanation": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。 第 2 页改用两个相差 90° spatial phase 的 filters，也就是 quadrature pair。"
     },
     {
-      "id": "L17-Q19",
+      "id": "L17-Q15",
       "lecture": 17,
       "sectionId": "lecture-17-source-3",
       "sourceAnchors": [
@@ -1153,10 +1404,10 @@
         "c": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
         "d": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。"
       },
-      "explanation": "解释 performance-optimized deep network 的两阶段：先优化任务，再拟合/比较 biological responses；区分 task accuracy 与 neural predictivity。"
+      "explanation": "解释 performance-optimized deep network 的两阶段：先优化任务，再拟合/比较 biological responses；区分 task accuracy 与 neural predictivity。 task accuracy 高并不定义 neural similarity。"
     },
     {
-      "id": "L17-Q20",
+      "id": "L17-Q16",
       "lecture": 17,
       "sectionId": "lecture-17-source-4",
       "sourceAnchors": [
@@ -1170,52 +1421,7 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 17 讲：根据 Lecture17-VisualNetworks.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA。"
-        },
-        {
-          "id": "b",
-          "text": "recurrence、surround suppression、E/I rate-network model。"
-        },
-        {
-          "id": "c",
-          "text": "performance-optimized object-classification models 与 neural predictivity。"
-        },
-        {
-          "id": "d",
-          "text": "steady-state nullclines、surround-induced shifts、inhibitionstabilized network。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。",
-        "d": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。"
-      },
-      "explanation": "recurrence、surround suppression、E/I rate-network model。"
-    },
-    {
-      "id": "L17-Q21",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 4,
-          "section": "lecture-17-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
-      ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 17 讲：若要解释\"recurrence、surround suppression、E/I rate-network model\"中的机制或推导，哪条推理链成立？",
@@ -1226,27 +1432,27 @@
         },
         {
           "id": "b",
-          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
+          "text": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
         },
         {
           "id": "c",
-          "text": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
+          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
         },
         {
           "id": "d",
           "text": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。",
+        "c": "该陈述解释的是“steady-state nullclines、surround-induced shifts、inhibitionstabilized network”，不是题干指定的关系。",
         "d": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。"
       },
-      "explanation": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
+      "explanation": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。 surround 若增加对 I population 的 external drive I_I，会移动 I-nullcline；在 ISN regime，新增 drive 先增强 inhibition、压低 r_E，随后减少 I population 收到的 recurrent excitation，新的交点甚至可让 r_E 与 r_I 都降低。"
     },
     {
-      "id": "L17-Q22",
+      "id": "L17-Q17",
       "lecture": 17,
       "sectionId": "lecture-17-source-4",
       "sourceAnchors": [
@@ -1260,83 +1466,38 @@
         "Visual Networks",
         "Lecture17-VisualNetworks.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "第 17 讲：阅读与\"recurrence、surround suppression、E/I rate-network model\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "stem": "第 17 讲：阅读\"Surround input 移动 I-nullcline 后，稳定交点的 E 与 I 可同时下降\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
-        },
-        {
-          "id": "c",
           "text": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
         },
         {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L17-Q23",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 5,
-          "section": "lecture-17-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 17 讲：根据 Lecture17-VisualNetworks.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "steady-state nullclines、surround-induced shifts、inhibitionstabilized network。"
-        },
-        {
           "id": "b",
-          "text": "LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA。"
+          "text": "因此，写出 E/I rate equations、fixed-point conditions 与 nullclines；解释 surround input 如何移位 nullcline 并降低 E/I rates。"
         },
         {
           "id": "c",
-          "text": "STC features、energy model、quadrature pair、phase invariance。"
+          "text": "增加对 I population 的 surround drive 会把 I-nullcline 上移；与固定 E-nullcline 的新交点可同时具有更低 r_E 和 r_I，因此 surround suppression 不要求 inhibitory firing 必然增加。"
         },
         {
           "id": "d",
-          "text": "performance-optimized object-classification models 与 neural predictivity。"
+          "text": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
-        "d": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。"
+        "a": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。",
+        "b": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 2 页。"
       },
-      "explanation": "steady-state nullclines、surround-induced shifts、inhibitionstabilized network。"
+      "explanation": "增加对 I population 的 surround drive 会把 I-nullcline 上移；与固定 E-nullcline 的新交点可同时具有更低 r_E 和 r_I，因此 surround suppression 不要求 inhibitory firing 必然增加。 surround 若增加对 I population 的 external drive I_I，会移动 I-nullcline；在 ISN regime，新增 drive 先增强 inhibition、压低 r_E，随后减少 I population 收到的 recurrent excitation，新的交点甚至可让 r_E 与 r_I 都降低。"
     },
     {
-      "id": "L17-Q24",
+      "id": "L17-Q18",
       "lecture": 17,
       "sectionId": "lecture-17-source-5",
       "sourceAnchors": [
@@ -1361,72 +1522,429 @@
         },
         {
           "id": "b",
-          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
-        },
-        {
-          "id": "c",
           "text": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "解释 performance-optimized deep network 的两阶段：先优化任务，再拟合/比较 biological responses；区分 task accuracy 与 neural predictivity。"
+        },
+        {
+          "id": "d",
+          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
+        "b": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
+        "c": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。"
+      },
+      "explanation": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。 第 5 页的 ISN 指 excitatory subnetwork 单独看会不稳定：有效 recurrent E gain 超过 leak；完整 E/I network 因快速 inhibitory feedback 才稳定。"
+    },
+    {
+      "id": "L17-Q19",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 1,
+          "section": "lecture-17-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从 simple-cell pooling 到 complex-cell energy"
+      ],
+      "difficulty": 2,
+      "type": "calculation",
+      "cognitiveLevel": "understand",
+      "stem": "第 17 讲：energy model 得到 phase invariance 后，为什么仍能保持 orientation tuning？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "phase 只让匹配的 quadrature outputs 在二维平面内旋转；换 orientation 会同时降低两 filters 的 projection amplitude A，所以平方和 A² 仍随 orientation mismatch 下降。"
+        },
+        {
+          "id": "b",
+          "text": "反复挑层已经利用了 test responses，最高值包含选择噪声并会偏高；应在 validation neural set 选层与正则化，只在独立 test set 做一次最终评估。"
+        },
+        {
+          "id": "c",
+          "text": "firing rate 是网络 fixed point 的结果，抑制电流还取决于连接与 presynaptic rate；surround 可先减少 E drive，让 I 随之下降，而 I feedback 仍决定 E amplification 被限制到哪个交点。"
+        },
+        {
+          "id": "d",
+          "text": "逐步解释 energy model、 quadrature filters、 square-and-sum 与 phase invariance； 连接 STC multiple features。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 2 页。"
+      },
+      "explanation": "phase 只让匹配的 quadrature outputs 在二维平面内旋转；换 orientation 会同时降低两 filters 的 projection amplitude A，所以平方和 A² 仍随 orientation mismatch 下降。 STC 能从 spike-triggered covariance 的异常 eigen-directions 找到这两个 feature axes，因为 spikes 选择的是二维子空间中的大半径，而不是某一个带符号均值方向。模型仍是 descriptive cascade：两个 linear filters、平方 nonlinearity、求和以及可能的 output nonlinearity。它可以生成复杂细胞的若干响应特征，但不能仅凭拟合就断言生物突触严格按这四步分区实现。"
+    },
+    {
+      "id": "L17-Q20",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 1,
+          "section": "lecture-17-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从 simple-cell pooling 到 complex-cell energy",
+        "三个 phases 得到相同 energy"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：完成\"令 A=4，分别计算 φ=0、π/4、π/2 时的 L1、L2 与 E。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "training data 得到 b≈1.786，held-out feature 4 对应 prediction≈7.14。"
+        },
+        {
+          "id": "b",
+          "text": "三个 phases 的线性 outputs 不同，但 energy 都是 16。"
+        },
+        {
+          "id": "c",
+          "text": "surround condition 的 steady-state E 与 I 都更低，不能据此排除 recurrent inhibition。"
+        },
+        {
+          "id": "d",
+          "text": "model features 对 neural responses 的预测程度。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "c": "该陈述解释的是“STC features、energy model、quadrature pair、phase invariance”，不是题干指定的关系。",
-        "d": "该陈述解释的是“performance-optimized object-classification models 与 neural predictivity”，不是题干指定的关系。"
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这是“神经预测性（neural predictivity）”的定义。"
       },
-      "explanation": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
+      "explanation": "三个 phases 的线性 outputs 不同，但 energy 都是 16。 计算路径：φ=0：L1=4、L2=0，所以 E=16。 φ=π/4：L1=L2=4/√2，两个平方各为 8，所以 E=16。 φ=π/2：L1=0、L2=4，所以 E=16。"
     },
     {
-      "id": "L17-Q25",
+      "id": "L17-Q21",
       "lecture": 17,
-      "sectionId": "lecture-17-source-5",
+      "sectionId": "lecture-17-source-1",
       "sourceAnchors": [
         {
           "file": "Lecture17-VisualNetworks.pdf",
-          "page": 5,
-          "section": "lecture-17-source-5"
+          "page": 1,
+          "section": "lecture-17-source-1"
         }
       ],
       "conceptTags": [
-        "Visual Networks",
-        "Lecture17-VisualNetworks.pdf"
+        "从 simple-cell pooling 到 complex-cell energy",
+        "sanity check"
       ],
       "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 17 讲：阅读与\"steady-state nullclines、surround-induced shifts、inhibitionstabilized network\"相关的图示时，哪项观察能正确连接图中编码与结论？",
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 17 讲：得到\"三个 phases 的线性 outputs 不同，但 energy 都是 16。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
       "choices": [
         {
           "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
+          "text": "若响应恰为 r=2z，公式会给 b=2；当前第三点低于 6，所以拟合斜率略低于 2。"
         },
         {
           "id": "b",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
+          "text": "代回 surround E equation：-6.25+1.2×6.25-11.25+10=0；I equation：-11.25+6.25+5=0。"
         },
         {
           "id": "c",
-          "text": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+          "text": "每一对 (L1,L2) 都落在半径 4 的圆上；平方和就是半径平方。"
         },
         {
           "id": "d",
-          "text": "给出 inhibition-stabilized network 的定义、直觉和为何名称容易被误解。"
+          "text": "对相反 phases 都响应，平均抵消。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“LNP cascades、 Hubel-Wiesel simple-cell construction、 complexcell zero STA”，不是题干指定的关系。",
-        "b": "该陈述解释的是“recurrence、surround suppression、E/I rate-network model”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 5 页。"
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“complex cell STA 为什么可为零？”。"
       },
-      "explanation": "读图时先标出两条 nullcline/坐标轴，再判断向量场方向、交点稳定性与轨迹穿越顺序；轨迹本身不等于因果机制。"
+      "explanation": "每一对 (L1,L2) 都落在半径 4 的圆上；平方和就是半径平方。 这个检查对应题设\"令 A=4，分别计算 φ=0、π/4、π/2 时的 L1、L2 与 E。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L17-Q22",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 3,
+          "section": "lecture-17-source-3"
+        }
+      ],
+      "conceptTags": [
+        "任务优化模型与 neural predictivity 是两次不同检验"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 17 讲：为什么不能在 test neural stimuli 上反复挑选\"最像脑\"的 network layer，再把同一批数据上的最高相关当最终成绩？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "phase 只让匹配的 quadrature outputs 在二维平面内旋转；换 orientation 会同时降低两 filters 的 projection amplitude A，所以平方和 A² 仍随 orientation mismatch 下降。"
+        },
+        {
+          "id": "b",
+          "text": "firing rate 是网络 fixed point 的结果，抑制电流还取决于连接与 presynaptic rate；surround 可先减少 E drive，让 I 随之下降，而 I feedback 仍决定 E amplification 被限制到哪个交点。"
+        },
+        {
+          "id": "c",
+          "text": "解释 performance-optimized deep network 的两阶段：先优化任务，再拟合/比较 biological responses；区分 task accuracy 与 neural predictivity。"
+        },
+        {
+          "id": "d",
+          "text": "反复挑层已经利用了 test responses，最高值包含选择噪声并会偏高；应在 validation neural set 选层与正则化，只在独立 test set 做一次最终评估。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "这条推理对应 Lecture17-VisualNetworks.pdf 第 3 页。"
+      },
+      "explanation": "反复挑层已经利用了 test responses，最高值包含选择噪声并会偏高；应在 validation neural set 选层与正则化，只在独立 test set 做一次最终评估。 neural data 自身含 trial noise，所以即使模型捕捉了可重复 stimulus-driven signal，单次 trial 相关也不会达到 1。noise ceiling 用 split-half reliability 等方法估计数据可预测上限。报告原始 predictivity 与 ceiling-normalized score 时要同时给出不确定度。若某层比另一层高，只能说在当前 stimuli、areas、mapping family 与 measurement noise 下更匹配，不能把它扩展为整套视觉系统的机制等同。"
+    },
+    {
+      "id": "L17-Q23",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 3,
+          "section": "lecture-17-source-3"
+        }
+      ],
+      "conceptTags": [
+        "任务优化模型与 neural predictivity 是两次不同检验",
+        "一维 feature 的最小二乘 readout"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：完成\"三张训练刺激的单一 model feature 为 z=[1,2,3]，某 neuron 的响应为 r=[2,4,5]。不加 intercept，求标量 weight b，并预测 z=4 的响应。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "training data 得到 b≈1.786，held-out feature 4 对应 prediction≈7.14。"
+        },
+        {
+          "id": "b",
+          "text": "三个 phases 的线性 outputs 不同，但 energy 都是 16。"
+        },
+        {
+          "id": "c",
+          "text": "surround condition 的 steady-state E 与 I 都更低，不能据此排除 recurrent inhibition。"
+        },
+        {
+          "id": "d",
+          "text": "model features 对 neural responses 的预测程度。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "这是“神经预测性（neural predictivity）”的定义。"
+      },
+      "explanation": "training data 得到 b≈1.786，held-out feature 4 对应 prediction≈7.14。 计算路径：一维 normal equation 给 b=(z^T r)/(z^T z)。 z^T r=1×2+2×4+3×5=25，z^Tz=1+4+9=14，所以 b=25/14≈1.786。 新刺激 z=4 的预测为 4b=100/14≈7.14；是否可靠要用真实 held-out response 检验。"
+    },
+    {
+      "id": "L17-Q24",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 3,
+          "section": "lecture-17-source-3"
+        }
+      ],
+      "conceptTags": [
+        "任务优化模型与 neural predictivity 是两次不同检验",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 17 讲：得到\"training data 得到 b≈1.786，held-out feature 4 对应 prediction≈7.14。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "每一对 (L1,L2) 都落在半径 4 的圆上；平方和就是半径平方。"
+        },
+        {
+          "id": "b",
+          "text": "若响应恰为 r=2z，公式会给 b=2；当前第三点低于 6，所以拟合斜率略低于 2。"
+        },
+        {
+          "id": "c",
+          "text": "代回 surround E equation：-6.25+1.2×6.25-11.25+10=0；I equation：-11.25+6.25+5=0。"
+        },
+        {
+          "id": "d",
+          "text": "STA 检测 conditional mean；STC 检测 covariance。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“STA 与 STC 分别检测哪类 moments？”。"
+      },
+      "explanation": "若响应恰为 r=2z，公式会给 b=2；当前第三点低于 6，所以拟合斜率略低于 2。 这个检查对应题设\"三张训练刺激的单一 model feature 为 z=[1,2,3]，某 neuron 的响应为 r=[2,4,5]。不加 intercept，求标量 weight b，并预测 z=4 的响应。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L17-Q25",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 4,
+          "section": "lecture-17-source-4"
+        }
+      ],
+      "conceptTags": [
+        "E/I recurrence、nullclines 与 inhibition stabilization"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 17 讲：为什么\"surround 后 inhibitory neuron firing 降低\"不等价于\"surround suppression 不是 inhibition 造成的\"？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "phase 只让匹配的 quadrature outputs 在二维平面内旋转；换 orientation 会同时降低两 filters 的 projection amplitude A，所以平方和 A² 仍随 orientation mismatch 下降。"
+        },
+        {
+          "id": "b",
+          "text": "反复挑层已经利用了 test responses，最高值包含选择噪声并会偏高；应在 validation neural set 选层与正则化，只在独立 test set 做一次最终评估。"
+        },
+        {
+          "id": "c",
+          "text": "firing rate 是网络 fixed point 的结果，抑制电流还取决于连接与 presynaptic rate；surround 可先减少 E drive，让 I 随之下降，而 I feedback 仍决定 E amplification 被限制到哪个交点。"
+        },
+        {
+          "id": "d",
+          "text": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。"
+      },
+      "explanation": "firing rate 是网络 fixed point 的结果，抑制电流还取决于连接与 presynaptic rate；surround 可先减少 E drive，让 I 随之下降，而 I feedback 仍决定 E amplification 被限制到哪个交点。 读 nullcline 图应按四步：标出横纵轴及两条 zero-derivative curves；判断每条曲线哪一侧对应正导数；找交点；再看小位移后的箭头是否回到交点。仅看到两曲线相交不足以判断稳定。对 nonlinear F，可能出现多个交点，surround 还可能改变 gain 而不只是平移 input；因此线性示例用于揭示因果结构，实际 fitting 需要保留非线性与时间过程。"
     },
     {
       "id": "L17-Q26",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 4,
+          "section": "lecture-17-source-4"
+        }
+      ],
+      "conceptTags": [
+        "E/I recurrence、nullclines 与 inhibition stabilization",
+        "E 与 I rates 同时下降的 surround suppression"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：完成\"使用推导中的网络。center-only 时 I_E=10、I_I=2；surround 时 I_E 仍为 10，但对 I population 的 drive I_I 增至 5。求两条件 fixed points。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "三个 phases 的线性 outputs 不同，但 energy 都是 16。"
+        },
+        {
+          "id": "b",
+          "text": "training data 得到 b≈1.786，held-out feature 4 对应 prediction≈7.14。"
+        },
+        {
+          "id": "c",
+          "text": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
+        },
+        {
+          "id": "d",
+          "text": "surround condition 的 steady-state E 与 I 都更低，不能据此排除 recurrent inhibition。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。"
+      },
+      "explanation": "surround condition 的 steady-state E 与 I 都更低，不能据此排除 recurrent inhibition。 计算路径：center-only：r_E=(10-2)/0.8=10，r_I=r_E+2=12。 surround：r_E=(10-5)/0.8=6.25，r_I=r_E+5=11.25。 比较得到 E 从 10 降到 6.25，I 从 12 降到 11.25；虽然 I population 收到更大 external drive，它的 steady rate 仍略降，因为 recurrent E input 降得更多。"
+    },
+    {
+      "id": "L17-Q27",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 4,
+          "section": "lecture-17-source-4"
+        }
+      ],
+      "conceptTags": [
+        "E/I recurrence、nullclines 与 inhibition stabilization",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 17 讲：得到\"surround condition 的 steady-state E 与 I 都更低，不能据此排除 recurrent inhibition。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "代回 surround E equation：-6.25+1.2×6.25-11.25+10=0；I equation：-11.25+6.25+5=0。"
+        },
+        {
+          "id": "b",
+          "text": "每一对 (L1,L2) 都落在半径 4 的圆上；平方和就是半径平方。"
+        },
+        {
+          "id": "c",
+          "text": "若响应恰为 r=2z，公式会给 b=2；当前第三点低于 6，所以拟合斜率略低于 2。"
+        },
+        {
+          "id": "d",
+          "text": "分析 surround suppression 不必等于更多 inhibition：可由 excitation decrease more than inhibition 产生。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这条推理对应 Lecture17-VisualNetworks.pdf 第 4 页。"
+      },
+      "explanation": "代回 surround E equation：-6.25+1.2×6.25-11.25+10=0；I equation：-11.25+6.25+5=0。 这个检查对应题设\"使用推导中的网络。center-only 时 I_E=10、I_I=2；surround 时 I_E 仍为 10，但对 I population 的 drive I_I 增至 5。求两条件 fixed points。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L17-Q28",
       "lecture": 17,
       "sectionId": "lecture-17-source-1",
       "sourceAnchors": [
@@ -1451,27 +1969,27 @@
         },
         {
           "id": "b",
-          "text": "复杂细胞（complex cell）"
+          "text": "级联（cascade）"
         },
         {
           "id": "c",
-          "text": "正交相位对（quadrature pair）"
+          "text": "复杂细胞（complex cell）"
         },
         {
           "id": "d",
-          "text": "级联（cascade）"
+          "text": "正交相位对（quadrature pair）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“简单细胞（simple cell）”指：对 orientation 且对 spatial phase 敏感的经典 V1 类型。",
-        "b": "“复杂细胞（complex cell）”指：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。",
-        "c": "“正交相位对（quadrature pair）”指：phase 相差 90° 的匹配 filters。"
+        "c": "“复杂细胞（complex cell）”指：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。",
+        "d": "“正交相位对（quadrature pair）”指：phase 相差 90° 的匹配 filters。"
       },
-      "explanation": "级联（cascade）：多个 processing stages 依次组合。"
+      "explanation": "级联（cascade）：多个 processing stages 依次组合。 模型仍是 descriptive cascade：两个 linear filters、平方 nonlinearity、求和以及可能的 output nonlinearity。"
     },
     {
-      "id": "L17-Q27",
+      "id": "L17-Q29",
       "lecture": 17,
       "sectionId": "lecture-17-source-1",
       "sourceAnchors": [
@@ -1485,38 +2003,38 @@
         "简单细胞",
         "simple cell"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 17 讲：本讲把\"对 orientation 且对 spatial phase 敏感的经典 V1 类型。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "简单细胞（simple cell）"
-        },
-        {
-          "id": "b",
           "text": "复杂细胞（complex cell）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "正交相位对（quadrature pair）"
+        },
+        {
+          "id": "c",
+          "text": "简单细胞（simple cell）"
         },
         {
           "id": "d",
           "text": "能量模型（energy model）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“复杂细胞（complex cell）”指：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。",
-        "c": "“正交相位对（quadrature pair）”指：phase 相差 90° 的匹配 filters。",
+        "a": "“复杂细胞（complex cell）”指：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。",
+        "b": "“正交相位对（quadrature pair）”指：phase 相差 90° 的匹配 filters。",
         "d": "“能量模型（energy model）”指：quadrature outputs square-and-sum 的 nonlinear model。"
       },
       "explanation": "简单细胞（simple cell）：对 orientation 且对 spatial phase 敏感的经典 V1 类型。"
     },
     {
-      "id": "L17-Q28",
+      "id": "L17-Q30",
       "lecture": 17,
       "sectionId": "lecture-17-source-1",
       "sourceAnchors": [
@@ -1530,7 +2048,7 @@
         "复杂细胞",
         "complex cell"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 17 讲：本讲把\"对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。\"称为什么？",
@@ -1541,27 +2059,27 @@
         },
         {
           "id": "b",
-          "text": "复杂细胞（complex cell）"
-        },
-        {
-          "id": "c",
           "text": "能量模型（energy model）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "神经预测性（neural predictivity）"
+        },
+        {
+          "id": "d",
+          "text": "复杂细胞（complex cell）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“正交相位对（quadrature pair）”指：phase 相差 90° 的匹配 filters。",
-        "c": "“能量模型（energy model）”指：quadrature outputs square-and-sum 的 nonlinear model。",
-        "d": "“神经预测性（neural predictivity）”指：model features 对 neural responses 的预测程度。"
+        "b": "“能量模型（energy model）”指：quadrature outputs square-and-sum 的 nonlinear model。",
+        "c": "“神经预测性（neural predictivity）”指：model features 对 neural responses 的预测程度。"
       },
       "explanation": "复杂细胞（complex cell）：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。"
     },
     {
-      "id": "L17-Q29",
+      "id": "L17-Q31",
       "lecture": 17,
       "sectionId": "lecture-17-source-2",
       "sourceAnchors": [
@@ -1575,38 +2093,38 @@
         "正交相位对",
         "quadrature pair"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 17 讲：本讲把\"phase 相差 90° 的匹配 filters。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "能量模型（energy model）"
+          "text": "正交相位对（quadrature pair）"
         },
         {
           "id": "b",
-          "text": "神经预测性（neural predictivity）"
+          "text": "能量模型（energy model）"
         },
         {
           "id": "c",
-          "text": "正交相位对（quadrature pair）"
+          "text": "神经预测性（neural predictivity）"
         },
         {
           "id": "d",
           "text": "周围抑制（surround suppression）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“能量模型（energy model）”指：quadrature outputs square-and-sum 的 nonlinear model。",
-        "b": "“神经预测性（neural predictivity）”指：model features 对 neural responses 的预测程度。",
+        "b": "“能量模型（energy model）”指：quadrature outputs square-and-sum 的 nonlinear model。",
+        "c": "“神经预测性（neural predictivity）”指：model features 对 neural responses 的预测程度。",
         "d": "“周围抑制（surround suppression）”指：刺激 RF surround 时 center response 减少。"
       },
-      "explanation": "正交相位对（quadrature pair）：phase 相差 90° 的匹配 filters。"
+      "explanation": "正交相位对（quadrature pair）：phase 相差 90° 的匹配 filters。 第 2 页改用两个相差 90° spatial phase 的 filters，也就是 quadrature pair。"
     },
     {
-      "id": "L17-Q30",
+      "id": "L17-Q32",
       "lecture": 17,
       "sectionId": "lecture-17-source-3",
       "sourceAnchors": [
@@ -1620,7 +2138,7 @@
         "能量模型",
         "energy model"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 17 讲：本讲把\"quadrature outputs square-and-sum 的 nonlinear model。\"称为什么？",
@@ -1631,27 +2149,27 @@
         },
         {
           "id": "b",
-          "text": "周围抑制（surround suppression）"
+          "text": "能量模型（energy model）"
         },
         {
           "id": "c",
-          "text": "零流线（nullcline）"
+          "text": "周围抑制（surround suppression）"
         },
         {
           "id": "d",
-          "text": "能量模型（energy model）"
+          "text": "零流线（nullcline）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“神经预测性（neural predictivity）”指：model features 对 neural responses 的预测程度。",
-        "b": "“周围抑制（surround suppression）”指：刺激 RF surround 时 center response 减少。",
-        "c": "“零流线（nullcline）”指：某 state derivative 为零的 phase-plane curve。"
+        "c": "“周围抑制（surround suppression）”指：刺激 RF surround 时 center response 减少。",
+        "d": "“零流线（nullcline）”指：某 state derivative 为零的 phase-plane curve。"
       },
       "explanation": "能量模型（energy model）：quadrature outputs square-and-sum 的 nonlinear model。"
     },
     {
-      "id": "L17-Q31",
+      "id": "L17-Q33",
       "lecture": 17,
       "sectionId": "lecture-17-source-3",
       "sourceAnchors": [
@@ -1672,118 +2190,28 @@
       "choices": [
         {
           "id": "a",
+          "text": "周围抑制（surround suppression）"
+        },
+        {
+          "id": "b",
+          "text": "零流线（nullcline）"
+        },
+        {
+          "id": "c",
           "text": "神经预测性（neural predictivity）"
         },
         {
-          "id": "b",
-          "text": "周围抑制（surround suppression）"
-        },
-        {
-          "id": "c",
-          "text": "零流线（nullcline）"
-        },
-        {
           "id": "d",
           "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "“周围抑制（surround suppression）”指：刺激 RF surround 时 center response 减少。",
-        "c": "“零流线（nullcline）”指：某 state derivative 为零的 phase-plane curve。",
-        "d": "“抑制稳定网络（inhibition-stabilized network, ISN）”指：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。"
-      },
-      "explanation": "神经预测性（neural predictivity）：model features 对 neural responses 的预测程度。"
-    },
-    {
-      "id": "L17-Q32",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 4,
-          "section": "lecture-17-source-4"
-        }
-      ],
-      "conceptTags": [
-        "周围抑制",
-        "surround suppression"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 17 讲：本讲把\"刺激 RF surround 时 center response 减少。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "零流线（nullcline）"
-        },
-        {
-          "id": "b",
-          "text": "周围抑制（surround suppression）"
-        },
-        {
-          "id": "c",
-          "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
-        },
-        {
-          "id": "d",
-          "text": "级联（cascade）"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "“零流线（nullcline）”指：某 state derivative 为零的 phase-plane curve。",
-        "c": "“抑制稳定网络（inhibition-stabilized network, ISN）”指：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。",
-        "d": "“级联（cascade）”指：多个 processing stages 依次组合。"
-      },
-      "explanation": "周围抑制（surround suppression）：刺激 RF surround 时 center response 减少。"
-    },
-    {
-      "id": "L17-Q33",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 2,
-          "section": "lecture-17-source-2"
-        }
-      ],
-      "conceptTags": [
-        "零流线",
-        "nullcline"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 17 讲：本讲把\"某 state derivative 为零的 phase-plane curve。\"称为什么？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
-        },
-        {
-          "id": "b",
-          "text": "级联（cascade）"
-        },
-        {
-          "id": "c",
-          "text": "零流线（nullcline）"
-        },
-        {
-          "id": "d",
-          "text": "简单细胞（simple cell）"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "“抑制稳定网络（inhibition-stabilized network, ISN）”指：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。",
-        "b": "“级联（cascade）”指：多个 processing stages 依次组合。",
-        "d": "“简单细胞（simple cell）”指：对 orientation 且对 spatial phase 敏感的经典 V1 类型。"
+        "a": "“周围抑制（surround suppression）”指：刺激 RF surround 时 center response 减少。",
+        "b": "“零流线（nullcline）”指：某 state derivative 为零的 phase-plane curve。",
+        "d": "“抑制稳定网络（inhibition-stabilized network, ISN）”指：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。"
       },
-      "explanation": "零流线（nullcline）：某 state derivative 为零的 phase-plane curve。"
+      "explanation": "神经预测性（neural predictivity）：model features 对 neural responses 的预测程度。"
     },
     {
       "id": "L17-Q34",
@@ -1797,38 +2225,38 @@
         }
       ],
       "conceptTags": [
-        "抑制稳定网络",
-        "inhibition-stabilized network, ISN"
+        "周围抑制",
+        "surround suppression"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
-      "stem": "第 17 讲：本讲把\"E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。\"称为什么？",
+      "stem": "第 17 讲：本讲把\"刺激 RF surround 时 center response 减少。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "级联（cascade）"
+          "text": "零流线（nullcline）"
         },
         {
           "id": "b",
-          "text": "简单细胞（simple cell）"
+          "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
         },
         {
           "id": "c",
-          "text": "复杂细胞（complex cell）"
+          "text": "级联（cascade）"
         },
         {
           "id": "d",
-          "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
+          "text": "周围抑制（surround suppression）"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "“级联（cascade）”指：多个 processing stages 依次组合。",
-        "b": "“简单细胞（simple cell）”指：对 orientation 且对 spatial phase 敏感的经典 V1 类型。",
-        "c": "“复杂细胞（complex cell）”指：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。"
+        "a": "“零流线（nullcline）”指：某 state derivative 为零的 phase-plane curve。",
+        "b": "“抑制稳定网络（inhibition-stabilized network, ISN）”指：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。",
+        "c": "“级联（cascade）”指：多个 processing stages 依次组合。"
       },
-      "explanation": "抑制稳定网络（inhibition-stabilized network, ISN）：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。"
+      "explanation": "周围抑制（surround suppression）：刺激 RF surround 时 center response 减少。 surround 若增加对 I population 的 external drive I_I，会移动 I-nullcline；在 ISN regime，新增 drive 先增强 inhibition、压低 r_E，随后减少 I population 收到的 recurrent excitation，新的交点甚至可让 r_E 与 r_I 都降低。"
     },
     {
       "id": "L17-Q35",
@@ -1842,81 +2270,83 @@
         }
       ],
       "conceptTags": [
-        "motion/orientation energy model"
+        "零流线",
+        "nullcline"
       ],
-      "difficulty": 5,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 17 讲：使用\"motion/orientation energy model\"时，哪项条件或约定不可省略？",
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 17 讲：本讲把\"某 state derivative 为零的 phase-plane curve。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "quadrature filters"
+          "text": "零流线（nullcline）"
         },
         {
           "id": "b",
-          "text": "ideal pair"
+          "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
         },
         {
           "id": "c",
-          "text": "features z fixed"
+          "text": "级联（cascade）"
         },
         {
           "id": "d",
-          "text": "steady state"
+          "text": "简单细胞（simple cell）"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
-        "c": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。",
-        "d": "这是“E/I nullclines”的条件，不是题干公式的条件。"
+        "b": "“抑制稳定网络（inhibition-stabilized network, ISN）”指：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。",
+        "c": "“级联（cascade）”指：多个 processing stages 依次组合。",
+        "d": "“简单细胞（simple cell）”指：对 orientation 且对 spatial phase 敏感的经典 V1 类型。"
       },
-      "explanation": "motion/orientation energy model 的适用条件：quadrature filters"
+      "explanation": "零流线（nullcline）：某 state derivative 为零的 phase-plane curve。"
     },
     {
       "id": "L17-Q36",
       "lecture": 17,
-      "sectionId": "lecture-17-source-2",
+      "sectionId": "lecture-17-source-4",
       "sourceAnchors": [
         {
           "file": "Lecture17-VisualNetworks.pdf",
-          "page": 2,
-          "section": "lecture-17-source-2"
+          "page": 4,
+          "section": "lecture-17-source-4"
         }
       ],
       "conceptTags": [
-        "phase-invariance identity"
+        "抑制稳定网络",
+        "inhibition-stabilized network, ISN"
       ],
       "difficulty": 1,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 17 讲：使用\"phase-invariance identity\"时，哪项条件或约定不可省略？",
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 17 讲：本讲把\"E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "quadrature filters"
+          "text": "级联（cascade）"
         },
         {
           "id": "b",
-          "text": "ideal pair"
+          "text": "抑制稳定网络（inhibition-stabilized network, ISN）"
         },
         {
           "id": "c",
-          "text": "features z fixed"
+          "text": "简单细胞（simple cell）"
         },
         {
           "id": "d",
-          "text": "steady state"
+          "text": "复杂细胞（complex cell）"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
-        "c": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。",
-        "d": "这是“E/I nullclines”的条件，不是题干公式的条件。"
+        "a": "“级联（cascade）”指：多个 processing stages 依次组合。",
+        "c": "“简单细胞（simple cell）”指：对 orientation 且对 spatial phase 敏感的经典 V1 类型。",
+        "d": "“复杂细胞（complex cell）”指：对 orientation 选择但对 phase 更 invariant 的经典 V1 类型。"
       },
-      "explanation": "phase-invariance identity 的适用条件：ideal pair"
+      "explanation": "抑制稳定网络（inhibition-stabilized network, ISN）：E subnetwork 单独不稳定、由 feedback inhibition 稳定的网络。"
     },
     {
       "id": "L17-Q37",
@@ -1930,24 +2360,24 @@
         }
       ],
       "conceptTags": [
-        "model-to-neuron linear mapping"
+        "motion/orientation energy model"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
-      "stem": "第 17 讲：使用\"model-to-neuron linear mapping\"时，哪项条件或约定不可省略？",
+      "stem": "第 17 讲：使用\"motion/orientation energy model\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "quadrature filters"
-        },
-        {
-          "id": "b",
           "text": "ideal pair"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "features z fixed"
+        },
+        {
+          "id": "c",
+          "text": "quadrature filters"
         },
         {
           "id": "d",
@@ -1956,14 +2386,102 @@
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
+        "a": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
+        "b": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。",
+        "d": "这是“E/I nullclines”的条件，不是题干公式的条件。"
+      },
+      "explanation": "motion/orientation energy model 的适用条件：quadrature filters"
+    },
+    {
+      "id": "L17-Q38",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 2,
+          "section": "lecture-17-source-2"
+        }
+      ],
+      "conceptTags": [
+        "phase-invariance identity"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：使用\"phase-invariance identity\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "quadrature filters"
+        },
+        {
+          "id": "b",
+          "text": "features z fixed"
+        },
+        {
+          "id": "c",
+          "text": "steady state"
+        },
+        {
+          "id": "d",
+          "text": "ideal pair"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
         "a": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
-        "b": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
+        "b": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。",
+        "c": "这是“E/I nullclines”的条件，不是题干公式的条件。"
+      },
+      "explanation": "phase-invariance identity 的适用条件：ideal pair 第 2 页改用两个相差 90° spatial phase 的 filters，也就是 quadrature pair。"
+    },
+    {
+      "id": "L17-Q39",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 2,
+          "section": "lecture-17-source-2"
+        }
+      ],
+      "conceptTags": [
+        "model-to-neuron linear mapping"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：使用\"model-to-neuron linear mapping\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "features z fixed"
+        },
+        {
+          "id": "b",
+          "text": "quadrature filters"
+        },
+        {
+          "id": "c",
+          "text": "ideal pair"
+        },
+        {
+          "id": "d",
+          "text": "steady state"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
+        "c": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
         "d": "这是“E/I nullclines”的条件，不是题干公式的条件。"
       },
       "explanation": "model-to-neuron linear mapping 的适用条件：features z fixed"
     },
     {
-      "id": "L17-Q38",
+      "id": "L17-Q40",
       "lecture": 17,
       "sectionId": "lecture-17-source-4",
       "sourceAnchors": [
@@ -1987,95 +2505,7 @@
         },
         {
           "id": "b",
-          "text": "ideal pair"
-        },
-        {
-          "id": "c",
-          "text": "features z fixed"
-        },
-        {
-          "id": "d",
           "text": "steady state"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
-        "b": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
-        "c": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。"
-      },
-      "explanation": "E/I nullclines 的适用条件：steady state"
-    },
-    {
-      "id": "L17-Q39",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 4,
-          "section": "lecture-17-source-4"
-        }
-      ],
-      "conceptTags": [
-        "rate-network fixed point"
-      ],
-      "difficulty": 4,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 17 讲：使用\"rate-network fixed point\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "chosen nonlinearities"
-        },
-        {
-          "id": "b",
-          "text": "quadrature filters"
-        },
-        {
-          "id": "c",
-          "text": "ideal pair"
-        },
-        {
-          "id": "d",
-          "text": "features z fixed"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
-        "c": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
-        "d": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。"
-      },
-      "explanation": "rate-network fixed point 的适用条件：chosen nonlinearities"
-    },
-    {
-      "id": "L17-Q40",
-      "lecture": 17,
-      "sectionId": "lecture-17-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture17-VisualNetworks.pdf",
-          "page": 4,
-          "section": "lecture-17-source-4"
-        }
-      ],
-      "conceptTags": [
-        "ISN criterion intuition"
-      ],
-      "difficulty": 5,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 17 讲：使用\"ISN criterion intuition\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "quadrature filters"
-        },
-        {
-          "id": "b",
-          "text": "local effective gain matters"
         },
         {
           "id": "c",
@@ -2092,7 +2522,95 @@
         "c": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
         "d": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。"
       },
-      "explanation": "ISN criterion intuition 的适用条件：local effective gain matters"
+      "explanation": "E/I nullclines 的适用条件：steady state 两线交点是 steady state。"
+    },
+    {
+      "id": "L17-Q41",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 4,
+          "section": "lecture-17-source-4"
+        }
+      ],
+      "conceptTags": [
+        "rate-network fixed point"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：使用\"rate-network fixed point\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "quadrature filters"
+        },
+        {
+          "id": "b",
+          "text": "ideal pair"
+        },
+        {
+          "id": "c",
+          "text": "chosen nonlinearities"
+        },
+        {
+          "id": "d",
+          "text": "features z fixed"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
+        "b": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
+        "d": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。"
+      },
+      "explanation": "rate-network fixed point 的适用条件：chosen nonlinearities recurrent excitation、feedback inhibition 与 external inputs 一起决定 fixed point，不能把某个 population 的 firing rate 单独等同于它对目标细胞造成的净电流。"
+    },
+    {
+      "id": "L17-Q42",
+      "lecture": 17,
+      "sectionId": "lecture-17-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture17-VisualNetworks.pdf",
+          "page": 4,
+          "section": "lecture-17-source-4"
+        }
+      ],
+      "conceptTags": [
+        "ISN criterion intuition"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 17 讲：使用\"ISN criterion intuition\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "quadrature filters"
+        },
+        {
+          "id": "b",
+          "text": "ideal pair"
+        },
+        {
+          "id": "c",
+          "text": "features z fixed"
+        },
+        {
+          "id": "d",
+          "text": "local effective gain matters"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“motion/orientation energy model”的条件，不是题干公式的条件。",
+        "b": "这是“phase-invariance identity”的条件，不是题干公式的条件。",
+        "c": "这是“model-to-neuron linear mapping”的条件，不是题干公式的条件。"
+      },
+      "explanation": "ISN criterion intuition 的适用条件：local effective gain matters 第 5 页的 ISN 指 excitatory subnetwork 单独看会不稳定：有效 recurrent E gain 超过 leak；完整 E/I network 因快速 inhibitory feedback 才稳定。"
     }
   ]
 }

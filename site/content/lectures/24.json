@@ -100,6 +100,538 @@
       "stopPredict": "blocking 为什么发生？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "把 stimulus、action、reward 与 synaptic eligibility 组织成 three-factor learning rule，解释 naive reward-gated Hebb 为何持续过强。",
+      "推导 reward-baseline covariance update 与 matching equilibrium，逐条标明 stationary reward、choice rule 等假设。",
+      "从 squared prediction error 推导 Rescorla–Wagner，并用 blocking 说明已经被预测的 reward 为什么不再产生更新。",
+      "把 delayed reward 写成 temporal-difference error，区分 state value、action value、reward-prediction error 与 dopamine response。",
+      "阅读 early reward、cue transfer、omission 三种 dopamine 时间图，同时保留 salience 等 alternative interpretations 的证据边界。"
+    ],
+    "prerequisiteBridge": [
+      "reward learning 的最小问题不是“reward 是否让神经元兴奋”，而是 credit assignment：在许多先前 stimuli、actions 和 synapses 中，哪一个应因本次 outcome 改变。Hebbian pre×post activity 提供局部 eligibility，reward-related third factor 决定更新方向或幅度。三者相乘只是计算框架；具体 biological factor 可涉及 dopamine、receptor state 与时间延迟，并非所有任务只有一种实现。",
+      "baseline subtraction 可用生活中的“超出预期”理解。若 reward 本来就常见，每次获得它都正向加强会让 weights 没有停止点。用 R-b，其中 b 是平均或预测 reward，优于 baseline 才增强、劣于 baseline 则减弱。数学上 E[(R-b)e] 在 b=E[R] 时成为 reward 与 eligibility 的 covariance，消除了与选择无关的恒定 reward offset。",
+      "价值预测把学习写成误差修正：prediction 太低就上调，太高就下调。即时任务用 R-V，跨时间任务用 R+γVnext-V。这里 V 是未来 discounted reward 的预测，不是神经电压；δ 是有正有负的 prediction error，不等于 reward 本身。先分清这些量，才能理解 blocking、cue transfer 和 omitted reward dip。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l24-d1",
+        "prompt": "若 reward 总为 1，naive update Δw=ηRxy 且 x,y 经常为正，会发生什么？",
+        "answer": "weight 会在每次共同活动时继续增加，没有由“已经预测到 reward”产生的自然停止点。",
+        "explanation": "需要 baseline、prediction error、normalization 或其他稳定机制。",
+        "remediationModuleId": "l24-m1"
+      },
+      {
+        "id": "l24-d2",
+        "prompt": "R=0、baseline b=0.4、eligibility e=2、η=0.1 时 covariance update 是多少？",
+        "answer": "Δw=0.1×(0-0.4)×2=-0.08。",
+        "explanation": "未获 reward 相对于正 baseline 是负 outcome，会削弱本 trial eligible connection。",
+        "remediationModuleId": "l24-m2"
+      },
+      {
+        "id": "l24-d3",
+        "prompt": "matching equilibrium 下两个被选 actions 的 choice-conditioned expected rewards 通常满足什么？",
+        "answer": "它们的边际或 choice-conditioned expected reward 相等；否则选择概率仍会向回报更高的一侧移动。",
+        "explanation": "这一条件依赖相应 stochastic choice 与 learning assumptions，并非所有环境都严格成立。",
+        "remediationModuleId": "l24-m3"
+      },
+      {
+        "id": "l24-d4",
+        "prompt": "blocking 中旧 cue 已完全预测 reward，新 cue 与旧 cue 同时出现，为什么新 cue 学得少？",
+        "answer": "总 prediction 已接近 reward，prediction error 接近零，因此新 cue 虽 active 也缺乏更新信号。",
+        "explanation": "这是 error-correcting rule 区别于纯 reward-gated coactivity 的关键预测。",
+        "remediationModuleId": "l24-m4"
+      },
+      {
+        "id": "l24-d5",
+        "prompt": "cue 已学会预测 reward 后，reward 时刻 dopamine response 变小是否表示 reward 不再有价值？",
+        "answer": "不是；value 已由 cue 预测，RPE 转移到 cue，reward 时刻实际与预测相符所以 δ 接近零。",
+        "explanation": "要把 value、received reward 与 prediction error 三条时间序列分开。",
+        "remediationModuleId": "l24-m6"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l24-m1",
+        "title": "Learned choice 与 three-factor synaptic credit",
+        "sourceRefs": [
+          {
+            "file": "Lecture24-LearningFromRewards.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "一次 reward 到来时，怎样只改变先前参与该 choice 的 connections？",
+        "paragraphs": [
+          "foraging animal 从 sensory cue 选择 action 并得到 reward。学习需建立 stimulus-action-outcome relation，而非把所有近期活跃 synapses 一起加强。令 x 为 presynaptic stimulus feature，y 为 postsynaptic/action activity，xy 形成 eligibility；第三因子 M 在 outcome 后到达，update 可写 Δw=ηMxy。eligibility trace 可跨过 action 到 delayed reward 的时间差。",
+          "若 M 直接取非负 reward R，任何 rewarded coactivity 都正向增长。已掌握的 action 仍会被重复增强，frequent reward 的 common offset 也污染 credit；weights 最终受 saturation 而非正确 equilibrium 限制。未 rewarded choice 若 R=0 只是不更新，无法主动削弱错误 association。",
+          "将 M 改为 reward prediction error 或 reward-minus-baseline，unexpected good outcome增强，unexpected bad outcome减弱，expected outcome近零。dopamine 是 canonical candidate third factor，因为其 phasic responses 与 RPE 有重要对应，但不同 dopamine neurons、timescales 和 tasks 可能编码 movement、novelty 或 salience components。",
+          "实验验证要对 pre/post eligibility 与 third factor 做时序控制：在无相应 eligibility 的 synapses 上同一 dopamine pulse不应产生相同 task-specific update；推迟 pulse超过eligibility window应减弱学习。仅观察 reward、dopamine、behavior 同时变化不足以说明局部三因子乘法已经实现。"
+        ],
+        "keyPoints": [
+          "eligibility 指定候选 synapses，第三因子指定 outcome sign。",
+          "naive 非负 reward gate 缺乏误差驱动的停止与削弱。",
+          "dopamine-RPE 是有力框架，但不是所有信号的唯一解释。"
+        ],
+        "derivation": {
+          "title": "带 eligibility trace 的三因子更新",
+          "setup": "把瞬时 coactivity 先写入可衰减 trace，再在 reward 时读取。",
+          "steps": [
+            {
+              "title": "写 eligibility dynamics",
+              "explanation": "pre-post coactivity 将 e 推高，随后按 τe 衰减。",
+              "latex": "\\tau_e\\dot e=-e+x(t)y(t)"
+            },
+            {
+              "title": "定义调制信号",
+              "explanation": "第三因子取 outcome 与 baseline 或 prediction 的差。",
+              "latex": "M(t)=R(t)-b(t)"
+            },
+            {
+              "title": "写 weight change",
+              "explanation": "只有 eligibility 与非零 modulation 重叠才更新。",
+              "latex": "\\dot w=\\eta M(t)e(t)"
+            },
+            {
+              "title": "判断符号",
+              "explanation": "e>0 时，M 正增强、M 负削弱、M=0 不变。"
+            }
+          ],
+          "symbolNotes": [
+            "e 是 eligibility，单位依 x、y convention；τe 是时间。",
+            "η 吸收把 M·e 换成 weight/time 的比例单位。"
+          ],
+          "unitsCheck": "x与y若视为 rates，trace equation需以相同 normalization 处理；weight derivative 两侧单位由η配平。",
+          "limitCheck": "τe→0 时 delayed outcome 几乎不能 credit 先前 action；b=R 时 M=0，停止更新。"
+        },
+        "workedExample": {
+          "title": "延迟 reward 下的 eligibility",
+          "problem": "action 时 e0=1，之后无新 coactivity，τe=2 s；1 s 后得到 M=0.6，η=0.1。求瞬时 update 幅度 ηMe。",
+          "steps": [
+            "trace 衰减为 e=e^{-1/2}≈0.607。",
+            "乘 third factor 得 Me≈0.364。",
+            "再乘 η，update 幅度约 0.0364。"
+          ],
+          "result": "该 reward 对 connection 的 update 约 +0.0364。",
+          "sanityCheck": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        "selfCheck": {
+          "prompt": "为什么只有 dopamine pulse、没有先前 eligibility 时不应选择性加强某个 stimulus-action synapse？",
+          "answer": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        "pitfalls": [
+          "把 dopamine 等同于纯 reward 标量。",
+          "忽略 eligibility decay 后声称任意长延迟都可局部归因。"
+        ]
+      },
+      {
+        "id": "l24-m2",
+        "title": "Reward baseline、covariance rule 与稳定点",
+        "sourceRefs": [
+          {
+            "file": "Lecture24-LearningFromRewards.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "减去 baseline 怎样移除无信息 reward offset，并让好于平均与差于平均的 choices 产生相反更新？",
+        "paragraphs": [
+          "设某 choice 的 eligibility 为 e，update Δw=η(R-b)e。若 b=E[R]，取期望得 E[Δw]/η=E[Re]-E[R]E[e]=Cov(R,e)。因此只有 reward 与该 eligibility 的共同变化驱动平均学习；把所有 rewards 加同一个常数不会改变 covariance。",
+          "baseline 可为全局 running average，也可依 state 或 choice。全局 baseline 方差较低却可能在不同 states reward scales 差异大时产生偏差；state-dependent value baseline 更精确但需要学习更多参数。baseline 影响 variance 与 credit，不改变期望的条件依赖需满足它不偷看当前 action outcome 的不当信息。",
+          "两-choice stochastic learner 中，选择 A 后若 RA 高于 baseline，A preference上升；低于 baseline则下降。长期内部稳态要求两种仍被采样的 actions 具有相同 expected advantage，否则 preference继续漂移。边界 action 若概率降到零便不再更新，所以 exploration 对发现环境变化仍重要。",
+          "baseline subtraction 不保证所有 weights 有界；eligibility、choice nonlinearity、learning rate 与 reward nonstationarity 都影响稳定性。短期 baseline lag 会在 reward probability改变后产生 transient overshoot。分析数据应同时画 reward、baseline、advantage 与 choice probability，不能从一条 weight curve 倒推出唯一机制。"
+        ],
+        "keyPoints": [
+          "平均 baseline 把 expected update 变成 reward-eligibility covariance。",
+          "state-dependent baseline 可减少异质环境中的误差。",
+          "interior equilibrium要求仍被选择 actions 的 expected advantage相等。"
+        ],
+        "derivation": {
+          "title": "从 baseline update 到 covariance",
+          "setup": "对 trial distribution 取期望，使用 covariance 定义。",
+          "steps": [
+            {
+              "title": "写单 trial update",
+              "explanation": "η 为 learning rate，e 为该 synapse eligibility。",
+              "latex": "\\Delta w=\\eta(R-b)e"
+            },
+            {
+              "title": "取固定 baseline",
+              "explanation": "令 b=E[R] 并对 trials 取期望。",
+              "latex": "\\frac{\\mathbb E[\\Delta w]}{\\eta}=\\mathbb E[Re]-\\mathbb E[R]\\mathbb E[e]"
+            },
+            {
+              "title": "识别 covariance",
+              "explanation": "右侧正是两个随机变量的 covariance。",
+              "latex": "\\mathbb E[\\Delta w]=\\eta\\operatorname{Cov}(R,e)"
+            },
+            {
+              "title": "检查常量 offset",
+              "explanation": "R′=R+c 时 covariance 不变。",
+              "latex": "\\operatorname{Cov}(R+c,e)=\\operatorname{Cov}(R,e)"
+            }
+          ],
+          "symbolNotes": [
+            "R 与 b 使用同一 reward units，e 是 eligibility。",
+            "η 决定每 trial weight change scale。"
+          ],
+          "unitsCheck": "R-b 与 R 单位相同；ηe 需把它换成无量纲或指定单位的 weight change。",
+          "limitCheck": "若 e 恒定，covariance 为零；若 b不是E[R]，update还含 baseline mismatch term。"
+        },
+        "workedExample": {
+          "title": "计算四 trial covariance update",
+          "problem": "四 trials 的 R=[1,0,1,0]，e=[2,1,0,1]，b=0.5，η=0.1。求平均 update。",
+          "steps": [
+            "逐 trial (R-b)e 为 1、-0.5、0、-0.5。",
+            "四项平均为 0。",
+            "乘 η 后平均 Δw 为 0，尽管个别 trials 有正负更新。"
+          ],
+          "result": "平均 update 为 0。",
+          "sanityCheck": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        "selfCheck": {
+          "prompt": "为什么 baseline 估得太低会造成系统性正向漂移？",
+          "answer": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        },
+        "pitfalls": [
+          "把 baseline 当作从 reward 中删除学习信号。",
+          "用当前 outcome 本身作为会泄漏 action 信息的 baseline，却仍声称无偏。"
+        ]
+      },
+      {
+        "id": "l24-m3",
+        "title": "Matching law 与 fly foraging 的选择均衡",
+        "sourceRefs": [
+          {
+            "file": "Lecture24-LearningFromRewards.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "choice ratio 何时会跟随 obtained reward ratio，而这一关系依赖哪些行为与学习假设？",
+        "paragraphs": [
+          "matching law 的常见形式是 CA/CB≈RA/RB，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。它描述 allocation，而非每次选择的确定规则。若两 options 的 scheduled rewards 随未选择时间累积，少选一侧的下一次回报机会会上升，形成把选择拉回的负反馈。",
+          "在 interior equilibrium，choice-conditioned expected rewards qA=E[R|A] 与 qB=E[R|B] 相等；否则 advantage rule 会继续增加较高一侧 preference。若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 qA≈RA/CA、qB≈RB/CB。令二者相等便得到 CA/CB≈RA/RB。",
+          "推导需要双方持续被采样、reward schedule 近似 stationary、每次 choice cost 相当，并忽略 changeover delay、satiety与risk sensitivity。若 reward magnitudes 不同，应匹配所得价值而非单纯次数。undermatching、overmatching或bias可用 generalized matching log(CA/CB)=a log(RA/RB)+log b描述。",
+          "fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 Y=Σ_iW_iX_i，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
+        ],
+        "keyPoints": [
+          "matching 是长期 choice allocation 与 obtained reward allocation 的关系。",
+          "equal choice-conditioned return 是核心 equilibrium condition。",
+          "局部 learner 可产生 ratio law，而无需显式除法神经元；update 正负号必须与 choice readout 的方向约定一起解释。"
+        ],
+        "derivation": {
+          "title": "由边际回报相等推出 matching ratio",
+          "setup": "把每个 action 的经验回报率近似为 obtained rewards 除以 choices。",
+          "steps": [
+            {
+              "title": "定义条件回报",
+              "explanation": "A与B每次被选时的平均所得回报。",
+              "latex": "q_A\\approx\\frac{R_A}{C_A},\\qquad q_B\\approx\\frac{R_B}{C_B}"
+            },
+            {
+              "title": "写内部均衡",
+              "explanation": "两个仍被选择的actions expected advantages为零差。",
+              "latex": "q_A=q_B"
+            },
+            {
+              "title": "交叉相乘",
+              "explanation": "把 choice counts 移到同一侧。",
+              "latex": "R_A C_B=R_B C_A"
+            },
+            {
+              "title": "得到比例",
+              "explanation": "在分母非零时写成matching form。",
+              "latex": "\\frac{C_A}{C_B}=\\frac{R_A}{R_B}"
+            }
+          ],
+          "symbolNotes": [
+            "CA、CB、RA、RB 是同一观察窗口中的非负counts。",
+            "若 rewards有不同magnitude，应以总value替代counts。"
+          ],
+          "unitsCheck": "比值两侧都无量纲；观察窗口必须相同。",
+          "limitCheck": "RB=0 或 CB=0 时ratio form不可用，应保留交叉乘式并讨论boundary behavior。"
+        },
+        "workedExample": {
+          "title": "检查 matching",
+          "problem": "100 次 choice 中 A 选 60 次获 30 rewards，B 选 40 次获 20 rewards。检查 conditional returns 与 ratios。",
+          "steps": [
+            "qA=30/60=0.5 reward/choice。",
+            "qB=20/40=0.5 reward/choice。",
+            "choice ratio 60/40=1.5，reward ratio 30/20=1.5。"
+          ],
+          "result": "条件回报相等且两种 ratios 都为 1.5，符合 matching。",
+          "sanityCheck": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        },
+        "selfCheck": {
+          "prompt": "为什么看到 matching curve 不能断言动物显式计算 RA/RB？",
+          "answer": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        },
+        "pitfalls": [
+          "reward magnitude不同时仍只数reward次数。",
+          "忽略未探索action，硬套interior equilibrium推导。"
+        ]
+      },
+      {
+        "id": "l24-m4",
+        "title": "Rescorla–Wagner、blocking 与 temporal-difference bridge",
+        "sourceRefs": [
+          {
+            "file": "Lecture24-LearningFromRewards.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "为什么 prediction error 能让学习在已经预测到 reward 时停止，并自然产生 blocking？",
+        "paragraphs": [
+          "用 features x 线性预测 value V=w^T x，目标 reward为R。squared error L=1/2(R-V)^2 的 negative gradient 给 Δw=η(R-V)x。active cue且R高于prediction时weight上升，R低于prediction时下降；当V=R时prediction error为零，学习停止。",
+          "blocking先训练cue A→reward，使wA已能预测R。随后A与novel cue B共同呈现，total prediction V=wA+wB≈R，error接近零，wB更新很小。纯reward-gated Hebb只看B active且rewarded，会错误预测B强学习；因此blocking提供error-correction的重要行为证据。",
+          "若reward延迟，当前state的目标不只是即时R，还含next-state value。temporal-difference error δt=Rt+1+γV(st+1)-V(st)比较连续两时刻prediction。它可在reward真正到来前通过predictive cue逐步back up value，实现 reward response 向 cue 转移。",
+          "Rescorla–Wagner与TD都依feature representation。若A和B高度相似或隐藏context改变，blocking强度会不同；zero error 也可能来自attention下降。模型解释应列出alternative mechanisms，并用unblocking、reward revaluation和 trial-level learning curves 区分。"
+        ],
+        "keyPoints": [
+          "negative gradient 给 prediction-error × feature update。",
+          "blocking 来自 compound cue 的 total prediction 已等于 reward。",
+          "TD error 用 next-state value 把 delayed reward 往前传播。"
+        ],
+        "derivation": {
+          "title": "从 squared error 推导 Rescorla–Wagner",
+          "setup": "对一个线性 value predictor 求每个weight的negative gradient。",
+          "steps": [
+            {
+              "title": "写预测",
+              "explanation": "features与weights点积得到current value。",
+              "latex": "V=\\mathbf w^{\\mathsf T}\\mathbf x"
+            },
+            {
+              "title": "写loss",
+              "explanation": "用半平方误差便于求导。",
+              "latex": "L=\\frac12(R-V)^2"
+            },
+            {
+              "title": "对weight求导",
+              "explanation": "链式法则给负prediction error乘feature。",
+              "latex": "\\frac{\\partial L}{\\partial w_i}=-(R-V)x_i"
+            },
+            {
+              "title": "做gradient descent",
+              "explanation": "沿负gradient更新。",
+              "latex": "\\Delta w_i=\\eta(R-V)x_i"
+            }
+          ],
+          "symbolNotes": [
+            "R与V同为value units，xi可为binary或连续feature。",
+            "η的单位使Δwi与wi一致。"
+          ],
+          "unitsCheck": "w^T x必须与R可相减；loss用value平方单位。",
+          "limitCheck": "V=R时update为零；x_i=0时该cue weight不因本trial改变。"
+        },
+        "workedExample": {
+          "title": "数值演示 blocking",
+          "problem": "reward R=1。A-alone训练后wA=0.9，novel B 的wB=0；compound trial xA=xB=1、η=0.2。求两weights update。",
+          "steps": [
+            "total V=0.9+0=0.9。",
+            "error R-V=0.1。",
+            "A与B均active，所以各更新0.2×0.1=0.02；B只获很小增量。"
+          ],
+          "result": "wA变0.92，wB变0.02，显示强但非完全blocking。",
+          "sanityCheck": "若wA恰为1，error为0，两weights都不变。"
+        },
+        "selfCheck": {
+          "prompt": "reward保持不变但把旧cue A 的预测移除，B为什么会重新学到？",
+          "answer": "total prediction下降，正prediction error恢复；B active时便获得更新，这就是unblocking逻辑。"
+        },
+        "pitfalls": [
+          "只用B与reward共现解释blocking。",
+          "把attention alternative排除在外却没有相应实验。"
+        ]
+      },
+      {
+        "id": "l24-m5",
+        "title": "Temporal features、state-action value 与选择",
+        "sourceRefs": [
+          {
+            "file": "Lecture24-LearningFromRewards.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "同一物理 cue 在不同时间和action下为何需要不同features与Q values？",
+        "paragraphs": [
+          "delayed task中，一个持续cue可展开为 time-specific features x1,x2,…，使learner知道“cue后第几个时间段”。TD updates从reward-near features开始，逐trial向更早features传播。若只有一个不随时间变化的feature，模型难以表达reward在何时到来，也难预测omission time的negative error。",
+          "state value V(s)平均某policy下从state出发的future return；action value Q(s,a)还指定first action。choice需比较同state的多个Q values，可用greedy、softmax或其他stochastic rule。V高不告诉你哪个action好，Q把credit分配到action channel。",
+          "greedy选择argmax_a Q利用当前知识，却可能永远不尝试初始低估action；temperature或ε exploration提供采样。生物选择还受effort、uncertainty和habit影响，因此把某neural signal与Q相关不能直接证明精确max operation。",
+          "features决定generalization：共享feature会把一个state-action的learning传到相似situations，提高sample efficiency，也可能造成错误transfer。检验Q-like signal应同时操纵state、action和future reward，确认它不是即时reward、movement vigor或statevalue单独造成。"
+        ],
+        "keyPoints": [
+          "temporal features 表示 cue 后不同时间位置。",
+          "Q 比 V 多一个明确的 action 条件。",
+          "feature sharing 带来泛化与误泛化的权衡。"
+        ],
+        "derivation": null,
+        "workedExample": {
+          "title": "从两个Q值作softmax choice",
+          "problem": "某state中QA=2、QB=1，inverse temperature β=ln3。求 P(A)=exp(βQA)/[exp(βQA)+exp(βQB)]。",
+          "steps": [
+            "提取共同因子exp(βQB)，P(A)=exp(β)/(exp(β)+1)。",
+            "β=ln3，所以exp(β)=3。",
+            "P(A)=3/(3+1)=0.75，B为0.25。"
+          ],
+          "result": "A的选择概率为0.75。",
+          "sanityCheck": "两概率和为1；若QA=QB则应各0.5。"
+        },
+        "selfCheck": {
+          "prompt": "为什么state value相同不能推出两个actions同样好？",
+          "answer": "V是policy加权平均；一个action的Q可高、另一个低，却在特定policy下给同一总体V。"
+        },
+        "pitfalls": [
+          "把Q(s,a)与即时reward混为一谈。",
+          "忽略feature representation对learning transfer的决定作用。"
+        ]
+      },
+      {
+        "id": "l24-m6",
+        "title": "Dopamine RPE 时间图与 action-selection 边界",
+        "sourceRefs": [
+          {
+            "file": "Lecture24-LearningFromRewards.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "early reward、predictive cue 与 omitted reward 三种情况怎样由同一个 TD error解释？",
+        "paragraphs": [
+          "learning前reward unexpected：reward时Rt+1为正，而先前V低，δ产生positive transient。cue-reward pairing后，cue后的state value上升；cue onset带来positive ΔV，δ转移到cue。reward按预测到来时Rt+1与value drop相抵，reward时δ接近零。",
+          "若predicted reward在预期时刻omitted，Rt+1=0且next value坍塌，δ在该时刻为负，形成dip。dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。三幅时间图共同约束“prediction error”而非单纯reward response。",
+          "value、RPE和action signal须分开：value可在cue后持续，δ突出变化或surprise，action-selection比较Q。dopamine neurons群体有异质性，运动与salience也影响responses。课程图支持canonical RPE pattern，但任何单cell response都应结合task events、expected value与movement controls解释。",
+          "连接plasticity时，dopamine-like δ作为third factor作用于仍有eligibility的synapses；连接choice时，learnedQ改变policy。这两个环节不同：dopamine perturbation可同时影响learning与performance。只在training后测choice不能定位它改变的是update还是momentary vigor。"
+        ],
+        "keyPoints": [
+          "RPE由实际reward与连续 value prediction 共同决定。",
+          "cue transfer与omission dip需要temporal state representation。",
+          "dopamine perturbation对learning和performance的效应必须分开。"
+        ],
+        "derivation": {
+          "title": "三种事件的TD error符号",
+          "setup": "用 δ=R+γV_next-V_current 逐项比较。",
+          "steps": [
+            {
+              "title": "unexpected reward",
+              "explanation": "reward出现前current value近零，R为正。",
+              "latex": "\\delta_t=R_{t+1}+\\gamma V(s_{t+1})-V(s_t)>0"
+            },
+            {
+              "title": "predictive cue onset",
+              "explanation": "cue让next-state value高于cue前value，即使即时R为零也可正。",
+              "latex": "\\delta_t=\\gamma V(s_{t+1})-V(s_t)>0"
+            },
+            {
+              "title": "expected reward",
+              "explanation": "训练后current prediction与实际reward加continuation相符。",
+              "latex": "R_{t+1}+\\gamma V(s_{t+1})\\approx V(s_t)\\Rightarrow\\delta_t\\approx0"
+            },
+            {
+              "title": "omitted reward",
+              "explanation": "R为零且预期value在deadline后消失。",
+              "latex": "\\delta_t=0+\\gamma V(s_{t+1})-V(s_t)<0"
+            }
+          ],
+          "symbolNotes": [
+            "δ、R、V使用同一discounted value单位。",
+            "γ无量纲且通常0≤γ≤1。"
+          ],
+          "unitsCheck": "R与γV可相加，δ保留value单位。",
+          "limitCheck": "γ=0时只学习immediate reward；完美预测时所有非transition surprises的δ趋近零。"
+        },
+        "workedExample": {
+          "title": "计算一次omission error",
+          "problem": "reward deadline前Vcurrent=0.8，deadline后Vnext=0，R=0，γ=0.95。求δ。",
+          "steps": [
+            "代入δ=0+0.95×0-0.8。",
+            "得到δ=-0.8。",
+            "负号表示outcome差于prediction，而不是得到负的物理reward。"
+          ],
+          "result": "δ=-0.8 value units。",
+          "sanityCheck": "若reward如期提供R=0.8且next value为0，则δ=0，符合已经预测。"
+        },
+        "selfCheck": {
+          "prompt": "为什么omission dip比“reward时无burst”更强地支持prediction error？",
+          "answer": "它是低于baseline的负信号，发生在预期reward时刻，纯非负reward detector无法自然产生该定时负响应。"
+        },
+        "pitfalls": [
+          "把cue response写成cue本身有物理reward。",
+          "忽略movement与salience controls后把所有dopamine变化都命名为RPE。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L24-FIG-A1",
+      "lecture": 24,
+      "moduleId": "l24-m6",
+      "title": "TD error 从 reward 转移到 predictive cue",
+      "alt": "三条时间线比较学习前、学习后和奖励省略时 cue 与 reward deadline 附近的 dopamine prediction error",
+      "caption": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 δ；学会 cue–reward 关系后，正 δ 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 δ。这个符号组合支持 prediction error，而不是单纯 reward response。",
+      "sourceRefs": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 6
+        }
+      ],
+      "schematic": true,
+      "kind": "timeline",
+      "lanes": [
+        "学习前 δ",
+        "学习后 δ",
+        "省略奖励 δ"
+      ],
+      "events": [
+        {
+          "x": 20,
+          "lane": 0,
+          "label": "cue: δ≈0"
+        },
+        {
+          "x": 75,
+          "lane": 0,
+          "label": "reward: +δ",
+          "tone": "accent"
+        },
+        {
+          "x": 20,
+          "lane": 1,
+          "label": "cue: +δ",
+          "tone": "accent"
+        },
+        {
+          "x": 75,
+          "lane": 1,
+          "label": "reward: δ≈0"
+        },
+        {
+          "x": 20,
+          "lane": 2,
+          "label": "cue: +δ",
+          "tone": "accent"
+        },
+        {
+          "x": 75,
+          "lane": 2,
+          "label": "omission: −δ",
+          "tone": "accent"
+        }
+      ],
+      "links": [
+        {
+          "from": 2,
+          "to": 3,
+          "label": "predicted"
+        },
+        {
+          "from": 4,
+          "to": 5,
+          "label": "deadline",
+          "dashed": true
+        }
+      ],
+      "lectureTitle": "从奖励中学习"
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 reward-baseline three-factor rule",
@@ -200,9 +732,9 @@
       "expression": "δ = R + γVnext − V",
       "latex": "\\delta=R+\\gamma V_{\\mathrm{next}}-V",
       "conditions": "Markov/state representation implicit",
-      "sectionId": "lecture-24-source-4",
+      "sectionId": "lecture-24-source-6",
       "sourceFile": "Lecture24-LearningFromRewards.pdf",
-      "sourcePage": 4
+      "sourcePage": 6
     },
     {
       "id": "L24-F07",
@@ -329,7 +861,42 @@
     "Lecture 24 是 biological/reward-learning bridge，Lecture 25 才系统化 MDP/RL。不要提前让 Bellman/Q-learning 淹没本课的 plasticity 与 dopamine 逻辑。"
   ],
   "errata": [
-    "1. Page 1 将 dopamine 称 canonical candidate third factor；该机制并非唯一解释。 2. Page 3 的 matching derivation 依 choice-conditioned activity 与 reward-schedule assumptions。 3. Page 6 的 dopamine signals 与 RPE resemblance 是 influential interpretation，不排除混合编码。"
+    {
+      "id": "L24-E01",
+      "lecture": 24,
+      "lectureTitle": "从奖励中学习",
+      "kind": "caution",
+      "sourceFile": "Lecture24-LearningFromRewards.pdf",
+      "sourcePage": 1,
+      "sectionId": "l24-m1",
+      "originalIssue": "Page 1 将 dopamine 称 canonical candidate third factor；该机制并非唯一解释。",
+      "explanation": "dopamine 是 canonical candidate third factor，因为其 phasic responses 与 RPE 有重要对应，但不同 dopamine neurons、timescales 和 tasks 可能编码 movement、novelty 或 salience components。",
+      "correction": null
+    },
+    {
+      "id": "L24-E02",
+      "lecture": 24,
+      "lectureTitle": "从奖励中学习",
+      "kind": "caution",
+      "sourceFile": "Lecture24-LearningFromRewards.pdf",
+      "sourcePage": 3,
+      "sectionId": "l24-m3",
+      "originalIssue": "Page 3 的 matching derivation 依 choice-conditioned activity 与 reward-schedule assumptions。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L24-E03",
+      "lecture": 24,
+      "lectureTitle": "从奖励中学习",
+      "kind": "erratum",
+      "sourceFile": "Lecture24-LearningFromRewards.pdf",
+      "sourcePage": 6,
+      "sectionId": "l24-m6",
+      "originalIssue": "Page 6 的 dopamine signals 与 RPE resemblance 是 influential interpretation，不排除混合编码。",
+      "explanation": "该记号或实现与后续推导所需的定义不一致，照字面使用会得到错误结果。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -347,7 +914,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 24 讲：naive reward-Hebb 为什么 over-strengthen？",
@@ -375,7 +942,7 @@
         "c": "这是“Rescorla-Wagner update”的适用条件。",
         "d": "这是“state-action value”的适用条件。"
       },
-      "explanation": "reward mean 为正时平均 update 持续为正。"
+      "explanation": "reward mean 为正时平均 update 持续为正。 foraging animal 从 sensory cue 选择 action 并得到 reward。"
     },
     {
       "id": "L24-Q02",
@@ -392,7 +959,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：减 reward baseline 后 expected update 变什么？",
@@ -420,7 +987,7 @@
         "b": "该选项回答的是“matching 的 marginal-return condition？”。",
         "d": "这是“奖励基线（reward baseline）”的定义。"
       },
-      "explanation": "eligibility 与 reward 的 covariance。"
+      "explanation": "eligibility 与 reward 的 covariance。 因此只有 reward 与该 eligibility 的共同变化驱动平均学习；把所有 rewards 加同一个常数不会改变 covariance。"
     },
     {
       "id": "L24-Q03",
@@ -437,7 +1004,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 24 讲：matching 的 marginal-return condition？",
@@ -465,7 +1032,7 @@
         "b": "该选项回答的是“matching law 的 ratio？”。",
         "c": "这是“奖励学习（reward learning）”的定义。"
       },
-      "explanation": "两个 chosen options 的 expected reward rate 相等。"
+      "explanation": "两个 chosen options 的 expected reward rate 相等。 若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 qA≈RA/CA、qB≈RB/CB。"
     },
     {
       "id": "L24-Q04",
@@ -482,7 +1049,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 24 讲：matching law 的 ratio？",
@@ -510,7 +1077,7 @@
         "c": "该选项回答的是“matching 的 marginal-return condition？”。",
         "d": "这是“奖励学习（reward learning）”的定义。"
       },
-      "explanation": "choice ratio≈reward ratio（在特定 assumptions 下）。"
+      "explanation": "choice ratio≈reward ratio（在特定 assumptions 下）。 baseline subtraction 不保证所有 weights 有界；eligibility、choice nonlinearity、learning rate 与 reward nonstationarity 都影响稳定性。"
     },
     {
       "id": "L24-Q05",
@@ -527,7 +1094,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：Rescorla-Wagner error？",
@@ -555,7 +1122,7 @@
         "c": "该选项回答的是“blocking 为什么发生？”。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "R−V。"
+      "explanation": "R−V。 squared error L=1/2(R-V)^2 的 negative gradient 给 Δw=η(R-V)x。"
     },
     {
       "id": "L24-Q06",
@@ -572,7 +1139,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 24 讲：blocking 为什么发生？",
@@ -600,7 +1167,7 @@
         "b": "这是“价值（value）”的定义。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。"
+      "explanation": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。 三幅时间图共同约束\"prediction error\"而非单纯reward response。"
     },
     {
       "id": "L24-Q07",
@@ -617,7 +1184,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：discounted return 中 γ→0 表示什么？",
@@ -645,24 +1212,24 @@
         "b": "这是“价值（value）”的定义。",
         "c": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 6 页。"
       },
-      "explanation": "几乎只重视 immediate reward。"
+      "explanation": "几乎只重视 immediate reward。 learning前reward unexpected：reward时Rt+1为正，而先前V低，δ产生positive transient。"
     },
     {
       "id": "L24-Q08",
       "lecture": 24,
-      "sectionId": "lecture-24-source-4",
+      "sectionId": "lecture-24-source-6",
       "sourceAnchors": [
         {
           "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 4,
-          "section": "lecture-24-source-4"
+          "page": 6,
+          "section": "lecture-24-source-6"
         }
       ],
       "conceptTags": [
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "equation",
       "cognitiveLevel": "analyze",
       "stem": "第 24 讲：TD error 公式？",
@@ -690,7 +1257,7 @@
         "c": "该选项回答的是“blocking 为什么发生？”。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "δ=R_{t+1}+γV_{t+1}−V_t。"
+      "explanation": "δ=R_{t+1}+γV_{t+1}−V_t。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
     },
     {
       "id": "L24-Q09",
@@ -707,7 +1274,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 24 讲：cue learning 后 dopamine transient 为什么转移？",
@@ -735,7 +1302,7 @@
         "c": "这是“价值（value）”的定义。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "cue 变成 earliest predictor，RPE 在 cue 时 positive，expected reward 时为零。"
+      "explanation": "cue 变成 earliest predictor，RPE 在 cue 时 positive，expected reward 时为零。 foraging animal 从 sensory cue 选择 action 并得到 reward。"
     },
     {
       "id": "L24-Q10",
@@ -752,7 +1319,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：omission 时 negative dip 出现在哪里？",
@@ -780,7 +1347,7 @@
         "b": "该选项回答的是“blocking 为什么发生？”。",
         "d": "该选项回答的是“discounted return 中 γ→0 表示什么？”。"
       },
-      "explanation": "预期 reward 应出现但未出现的时刻。"
+      "explanation": "预期 reward 应出现但未出现的时刻。 eligibility trace 可跨过 action 到 delayed reward 的时间差。"
     },
     {
       "id": "L24-Q11",
@@ -797,7 +1364,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 24 讲：Q 与 V 区别？",
@@ -825,7 +1392,7 @@
         "b": "这是“阻断（blocking）”的定义。",
         "c": "这是“奖励预测误差（reward-prediction error, RPE）”的定义。"
       },
-      "explanation": "Q 条件化 action；V 只条件化 state/policy。"
+      "explanation": "Q 条件化 action；V 只条件化 state/policy。 若reward延迟，当前state的目标不只是即时R，还含next-state value。"
     },
     {
       "id": "L24-Q12",
@@ -842,7 +1409,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：third factor 可以是什么？",
@@ -870,55 +1437,10 @@
         "c": "该选项回答的是“cue learning 后 dopamine transient 为什么转移？”。",
         "d": "这是“匹配律（matching law）”的定义。"
       },
-      "explanation": "reward、RPE、error、contextual neuromodulator 等 gating signal。"
+      "explanation": "reward、RPE、error、contextual neuromodulator 等 gating signal。 dopamine 是 canonical candidate third factor，因为其 phasic responses 与 RPE 有重要对应，但不同 dopamine neurons、timescales 和 tasks 可能编码 movement、novelty 或 salience components。"
     },
     {
       "id": "L24-Q13",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 1,
-          "section": "lecture-24-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 24 讲：根据 Lecture24-LearningFromRewards.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "matching law、fly foraging neural model。"
-        },
-        {
-          "id": "b",
-          "text": "learned decisions、stimulus-reward association、three-factor plasticity、dopamine。"
-        },
-        {
-          "id": "c",
-          "text": "value prediction、Rescorla-Wagner、blocking、temporal difference/discounting。"
-        },
-        {
-          "id": "d",
-          "text": "temporally extended features、state-action value/Q。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
-        "c": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
-        "d": "该陈述解释的是“temporally extended features、state-action value/Q”，不是题干指定的关系。"
-      },
-      "explanation": "learned decisions、stimulus-reward association、three-factor plasticity、dopamine。"
-    },
-    {
-      "id": "L24-Q14",
       "lecture": 24,
       "sectionId": "lecture-24-source-1",
       "sourceAnchors": [
@@ -943,72 +1465,27 @@
         },
         {
           "id": "b",
-          "text": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
+          "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
         },
         {
           "id": "c",
-          "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
+          "text": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
         },
         {
           "id": "d",
           "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
-        "b": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
+        "c": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
         "d": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。"
       },
-      "explanation": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
+      "explanation": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。 dopamine 是 canonical candidate third factor，因为其 phasic responses 与 RPE 有重要对应，但不同 dopamine neurons、timescales 和 tasks 可能编码 movement、novelty 或 salience components。"
     },
     {
-      "id": "L24-Q15",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 1,
-          "section": "lecture-24-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 5,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 24 讲：阅读与\"learned decisions、stimulus-reward association、three-factor plasticity、dopamine\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "c",
-          "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
-        },
-        {
-          "id": "d",
-          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
-        "b": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 1 页。"
-      },
-      "explanation": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-    },
-    {
-      "id": "L24-Q16",
+      "id": "L24-Q14",
       "lecture": 24,
       "sectionId": "lecture-24-source-2",
       "sourceAnchors": [
@@ -1022,52 +1499,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 24 讲：根据 Lecture24-LearningFromRewards.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation。"
-        },
-        {
-          "id": "b",
-          "text": "value prediction、Rescorla-Wagner、blocking、temporal difference/discounting。"
-        },
-        {
-          "id": "c",
-          "text": "temporally extended features、state-action value/Q。"
-        },
-        {
-          "id": "d",
-          "text": "dopamine reward-prediction error patterns、value/Q signals、 action selection。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
-        "c": "该陈述解释的是“temporally extended features、state-action value/Q”，不是题干指定的关系。",
-        "d": "该陈述解释的是“dopamine reward-prediction error patterns、value/Q signals、 action selection”，不是题干指定的关系。"
-      },
-      "explanation": "covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation。"
-    },
-    {
-      "id": "L24-Q17",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 2,
-          "section": "lecture-24-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 24 讲：若要解释\"covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation\"中的机制或推导，哪条推理链成立？",
@@ -1078,72 +1510,27 @@
         },
         {
           "id": "b",
-          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
+          "text": "解释 temporal features/state representation、Q value 与 greedy action selection。"
         },
         {
           "id": "c",
-          "text": "解释 temporal features/state representation、Q value 与 greedy action selection。"
+          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
         },
         {
           "id": "d",
           "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
         }
       ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
-        "c": "该陈述解释的是“dopamine reward-prediction error patterns、value/Q signals、 action selection”，不是题干指定的关系。",
-        "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
-      },
-      "explanation": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
-    },
-    {
-      "id": "L24-Q18",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 2,
-          "section": "lecture-24-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 3,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 24 讲：阅读与\"covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "按时间线区分 stimulus/task、recording/manipulation、measured quantity 与 inferred model variable；结果相关性不能直接替代机制检验。"
-        },
-        {
-          "id": "b",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
-        }
-      ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。",
-        "b": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 2 页。"
+        "a": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
+        "b": "该陈述解释的是“dopamine reward-prediction error patterns、value/Q signals、 action selection”，不是题干指定的关系。",
+        "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
       },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
+      "explanation": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。 baseline subtraction 不保证所有 weights 有界；eligibility、choice nonlinearity、learning rate 与 reward nonstationarity 都影响稳定性。"
     },
     {
-      "id": "L24-Q19",
+      "id": "L24-Q15",
       "lecture": 24,
       "sectionId": "lecture-24-source-3",
       "sourceAnchors": [
@@ -1158,66 +1545,66 @@
         "Lecture24-LearningFromRewards.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 24 讲：根据 Lecture24-LearningFromRewards.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "learned decisions、stimulus-reward association、three-factor plasticity、dopamine。"
-        },
-        {
-          "id": "b",
-          "text": "value prediction、Rescorla-Wagner、blocking、temporal difference/discounting。"
-        },
-        {
-          "id": "c",
-          "text": "temporally extended features、state-action value/Q。"
-        },
-        {
-          "id": "d",
-          "text": "matching law、fly foraging neural model。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。",
-        "b": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
-        "c": "该陈述解释的是“temporally extended features、state-action value/Q”，不是题干指定的关系。"
-      },
-      "explanation": "matching law、fly foraging neural model。"
-    },
-    {
-      "id": "L24-Q20",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 3,
-          "section": "lecture-24-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 24 讲：若要解释\"matching law、fly foraging neural model\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
-        },
-        {
-          "id": "b",
           "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "解释 temporal features/state representation、Q value 与 greedy action selection。"
+        },
+        {
+          "id": "c",
+          "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
+        },
+        {
+          "id": "d",
+          "text": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
+        "b": "该陈述解释的是“dopamine reward-prediction error patterns、value/Q signals、 action selection”，不是题干指定的关系。",
+        "c": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
+      },
+      "explanation": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。 fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。"
+    },
+    {
+      "id": "L24-Q16",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 4,
+          "section": "lecture-24-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Learning from Rewards",
+        "Lecture24-LearningFromRewards.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 24 讲：若要解释\"value prediction、Rescorla-Wagner、blocking、temporal difference/discounting\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
+        },
+        {
+          "id": "b",
+          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
+        },
+        {
+          "id": "c",
+          "text": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
         },
         {
           "id": "d",
@@ -1226,149 +1613,14 @@
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“value prediction、Rescorla-Wagner、blocking、temporal difference/discounting”，不是题干指定的关系。",
-        "c": "该陈述解释的是“dopamine reward-prediction error patterns、value/Q signals、 action selection”，不是题干指定的关系。",
-        "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
-      },
-      "explanation": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
-    },
-    {
-      "id": "L24-Q21",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 4,
-          "section": "lecture-24-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 24 讲：根据 Lecture24-LearningFromRewards.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "learned decisions、stimulus-reward association、three-factor plasticity、dopamine。"
-        },
-        {
-          "id": "b",
-          "text": "value prediction、Rescorla-Wagner、blocking、temporal difference/discounting。"
-        },
-        {
-          "id": "c",
-          "text": "covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation。"
-        },
-        {
-          "id": "d",
-          "text": "matching law、fly foraging neural model。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。",
-        "c": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
-        "d": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。"
-      },
-      "explanation": "value prediction、Rescorla-Wagner、blocking、temporal difference/discounting。"
-    },
-    {
-      "id": "L24-Q22",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 4,
-          "section": "lecture-24-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 2,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 24 讲：若要解释\"value prediction、Rescorla-Wagner、blocking、temporal difference/discounting\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
-        },
-        {
-          "id": "b",
-          "text": "重构 fly mushroom-body model、stochastic choice 与 baseline reward estimate； 解释 matching 的行为与神经实现层次。"
-        },
-        {
-          "id": "c",
-          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
-        },
-        {
-          "id": "d",
-          "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
-        "b": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
-        "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
-      },
-      "explanation": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
-    },
-    {
-      "id": "L24-Q23",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 5,
-          "section": "lecture-24-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 24 讲：根据 Lecture24-LearningFromRewards.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "learned decisions、stimulus-reward association、three-factor plasticity、dopamine。"
-        },
-        {
-          "id": "b",
-          "text": "covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation。"
-        },
-        {
-          "id": "c",
-          "text": "matching law、fly foraging neural model。"
-        },
-        {
-          "id": "d",
-          "text": "temporally extended features、state-action value/Q。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。",
         "b": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。"
+        "c": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
+        "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
       },
-      "explanation": "temporally extended features、state-action value/Q。"
+      "explanation": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。 若A和B高度相似或隐藏context改变，blocking强度会不同；zero error 也可能来自attention下降。"
     },
     {
-      "id": "L24-Q24",
+      "id": "L24-Q17",
       "lecture": 24,
       "sectionId": "lecture-24-source-5",
       "sourceAnchors": [
@@ -1389,11 +1641,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
+          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
         },
         {
           "id": "b",
-          "text": "逐步推导 matching condition：choice-conditioned expected rewards 相等如何导出 choice ratio≈reward ratio；说明 assumptions。"
+          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
         },
         {
           "id": "c",
@@ -1404,61 +1656,16 @@
           "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
         }
       ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
-        "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
-      },
-      "explanation": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
-    },
-    {
-      "id": "L24-Q25",
-      "lecture": 24,
-      "sectionId": "lecture-24-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture24-LearningFromRewards.pdf",
-          "page": 6,
-          "section": "lecture-24-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Learning from Rewards",
-        "Lecture24-LearningFromRewards.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 24 讲：根据 Lecture24-LearningFromRewards.pdf 第 6 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation。"
-        },
-        {
-          "id": "b",
-          "text": "dopamine reward-prediction error patterns、value/Q signals、 action selection。"
-        },
-        {
-          "id": "c",
-          "text": "matching law、fly foraging neural model。"
-        },
-        {
-          "id": "d",
-          "text": "learned decisions、stimulus-reward association、three-factor plasticity、dopamine。"
-        }
-      ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“covariance-based reward plasticity、reward-baseline subtraction、matching condition derivation”，不是题干指定的关系。",
         "c": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
         "d": "该陈述解释的是“learned decisions、stimulus-reward association、three-factor plasticity、dopamine”，不是题干指定的关系。"
       },
-      "explanation": "dopamine reward-prediction error patterns、value/Q signals、 action selection。"
+      "explanation": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。 features决定generalization：共享feature会把一个state-action的learning传到相似situations，提高sample efficiency，也可能造成错误transfer。"
     },
     {
-      "id": "L24-Q26",
+      "id": "L24-Q18",
       "lecture": 24,
       "sectionId": "lecture-24-source-6",
       "sourceAnchors": [
@@ -1472,7 +1679,7 @@
         "Learning from Rewards",
         "Lecture24-LearningFromRewards.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 24 讲：若要解释\"dopamine reward-prediction error patterns、value/Q signals、 action selection\"中的机制或推导，哪条推理链成立？",
@@ -1500,10 +1707,859 @@
         "b": "该陈述解释的是“matching law、fly foraging neural model”，不是题干指定的关系。",
         "d": "该陈述解释的是“temporally extended features、state-action value/Q”，不是题干指定的关系。"
       },
-      "explanation": "解释 temporal features/state representation、Q value 与 greedy action selection。"
+      "explanation": "解释 temporal features/state representation、Q value 与 greedy action selection。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
+    },
+    {
+      "id": "L24-Q19",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 6,
+          "section": "lecture-24-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Learning from Rewards",
+        "Lecture24-LearningFromRewards.pdf"
+      ],
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 24 讲：阅读\"TD error 从 reward 转移到 predictive cue\"图时，哪项观察正确？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因此，解释 temporal features/state representation、Q value 与 greedy action selection。"
+        },
+        {
+          "id": "b",
+          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
+        },
+        {
+          "id": "c",
+          "text": "重绘 dopamine RPE 的 early reward、cue transfer、omitted reward 三种模式，并区分 RPE、value 和 salience alternative。"
+        },
+        {
+          "id": "d",
+          "text": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 δ；学会 cue-reward 关系后，正 δ 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 δ。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 4 页。",
+        "b": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 4 页。",
+        "c": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 1 页。"
+      },
+      "explanation": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 δ；学会 cue-reward 关系后，正 δ 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 δ。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
+    },
+    {
+      "id": "L24-Q20",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 1,
+          "section": "lecture-24-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Learned choice 与 three-factor synaptic credit"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 24 讲：为什么只有 dopamine pulse、没有先前 eligibility 时不应选择性加强某个 stimulus-action synapse？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        {
+          "id": "b",
+          "text": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        },
+        {
+          "id": "c",
+          "text": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        },
+        {
+          "id": "d",
+          "text": "total prediction下降，正prediction error恢复；B active时便获得更新，这就是unblocking逻辑。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。 实验验证要对 pre/post eligibility 与 third factor 做时序控制：在无相应 eligibility 的 synapses 上同一 dopamine pulse不应产生相同 task-specific update；推迟 pulse超过eligibility window应减弱学习。仅观察 reward、dopamine、behavior 同时变化不足以说明局部三因子乘法已经实现。"
+    },
+    {
+      "id": "L24-Q21",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 1,
+          "section": "lecture-24-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Learned choice 与 three-factor synaptic credit",
+        "延迟 reward 下的 eligibility"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：完成\"action 时 e0=1，之后无新 coactivity，τe=2 s；1 s 后得到 M=0.6，η=0.1。求瞬时 update 幅度 ηMe。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "平均 update 为 0。"
+        },
+        {
+          "id": "b",
+          "text": "该 reward 对 connection 的 update 约 +0.0364。"
+        },
+        {
+          "id": "c",
+          "text": "条件回报相等且两种 ratios 都为 1.5，符合 matching。"
+        },
+        {
+          "id": "d",
+          "text": "wA变0.92，wB变0.02，显示强但非完全blocking。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "该 reward 对 connection 的 update 约 +0.0364。 计算路径：trace 衰减为 e=e^{-1/2}≈0.607。 乘 third factor 得 Me≈0.364。 再乘 η，update 幅度约 0.0364。"
+    },
+    {
+      "id": "L24-Q22",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 1,
+          "section": "lecture-24-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Learned choice 与 three-factor synaptic credit",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 24 讲：得到\"该 reward 对 connection 的 update 约 +0.0364。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        {
+          "id": "b",
+          "text": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        },
+        {
+          "id": "c",
+          "text": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        {
+          "id": "d",
+          "text": "若wA恰为1，error为0，两weights都不变。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。 这个检查对应题设\"action 时 e0=1，之后无新 coactivity，τe=2 s；1 s 后得到 M=0.6，η=0.1。求瞬时 update 幅度 ηMe。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L24-Q23",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 2,
+          "section": "lecture-24-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reward baseline、covariance rule 与稳定点"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 24 讲：为什么 baseline 估得太低会造成系统性正向漂移？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        {
+          "id": "b",
+          "text": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        },
+        {
+          "id": "c",
+          "text": "total prediction下降，正prediction error恢复；B active时便获得更新，这就是unblocking逻辑。"
+        },
+        {
+          "id": "d",
+          "text": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。 baseline subtraction 不保证所有 weights 有界；eligibility、choice nonlinearity、learning rate 与 reward nonstationarity 都影响稳定性。短期 baseline lag 会在 reward probability改变后产生 transient overshoot。分析数据应同时画 reward、baseline、advantage 与 choice probability，不能从一条 weight curve 倒推出唯一机制。"
+    },
+    {
+      "id": "L24-Q24",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 2,
+          "section": "lecture-24-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reward baseline、covariance rule 与稳定点",
+        "计算四 trial covariance update"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：完成\"四 trials 的 R=[1,0,1,0]，e=[2,1,0,1]，b=0.5，η=0.1。求平均 update。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "平均 update 为 0。"
+        },
+        {
+          "id": "b",
+          "text": "该 reward 对 connection 的 update 约 +0.0364。"
+        },
+        {
+          "id": "c",
+          "text": "条件回报相等且两种 ratios 都为 1.5，符合 matching。"
+        },
+        {
+          "id": "d",
+          "text": "wA变0.92，wB变0.02，显示强但非完全blocking。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "平均 update 为 0。 计算路径：逐 trial (R-b)e 为 1、-0.5、0、-0.5。 四项平均为 0。 乘 η 后平均 Δw 为 0，尽管个别 trials 有正负更新。"
+    },
+    {
+      "id": "L24-Q25",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 2,
+          "section": "lecture-24-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Reward baseline、covariance rule 与稳定点",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 24 讲：得到\"平均 update 为 0。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        {
+          "id": "b",
+          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        {
+          "id": "c",
+          "text": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        },
+        {
+          "id": "d",
+          "text": "若wA恰为1，error为0，两weights都不变。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。 这个检查对应题设\"四 trials 的 R=[1,0,1,0]，e=[2,1,0,1]，b=0.5，η=0.1。求平均 update。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L24-Q26",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 3,
+          "section": "lecture-24-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Matching law 与 fly foraging 的选择均衡"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 24 讲：为什么看到 matching curve 不能断言动物显式计算 RA/RB？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        {
+          "id": "b",
+          "text": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        },
+        {
+          "id": "c",
+          "text": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        },
+        {
+          "id": "d",
+          "text": "total prediction下降，正prediction error恢复；B active时便获得更新，这就是unblocking逻辑。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。 fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 Y=Σ_iW_iX_i，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
     },
     {
       "id": "L24-Q27",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 3,
+          "section": "lecture-24-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Matching law 与 fly foraging 的选择均衡",
+        "检查 matching"
+      ],
+      "difficulty": 3,
+      "type": "assumption",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：完成\"100 次 choice 中 A 选 60 次获 30 rewards，B 选 40 次获 20 rewards。检查 conditional returns 与 ratios。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该 reward 对 connection 的 update 约 +0.0364。"
+        },
+        {
+          "id": "b",
+          "text": "平均 update 为 0。"
+        },
+        {
+          "id": "c",
+          "text": "wA变0.92，wB变0.02，显示强但非完全blocking。"
+        },
+        {
+          "id": "d",
+          "text": "条件回报相等且两种 ratios 都为 1.5，符合 matching。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "条件回报相等且两种 ratios 都为 1.5，符合 matching。 计算路径：qA=30/60=0.5 reward/choice。 qB=20/40=0.5 reward/choice。 choice ratio 60/40=1.5，reward ratio 30/20=1.5。"
+    },
+    {
+      "id": "L24-Q28",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 3,
+          "section": "lecture-24-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Matching law 与 fly foraging 的选择均衡",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 24 讲：得到\"条件回报相等且两种 ratios 都为 1.5，符合 matching。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        },
+        {
+          "id": "b",
+          "text": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        {
+          "id": "c",
+          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        {
+          "id": "d",
+          "text": "若wA恰为1，error为0，两weights都不变。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。 这个检查对应题设\"100 次 choice 中 A 选 60 次获 30 rewards，B 选 40 次获 20 rewards。检查 conditional returns 与 ratios。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L24-Q29",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 4,
+          "section": "lecture-24-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Rescorla–Wagner、blocking 与 temporal-difference bridge"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 24 讲：reward保持不变但把旧cue A 的预测移除，B为什么会重新学到？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        {
+          "id": "b",
+          "text": "total prediction下降，正prediction error恢复；B active时便获得更新，这就是unblocking逻辑。"
+        },
+        {
+          "id": "c",
+          "text": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        },
+        {
+          "id": "d",
+          "text": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "total prediction下降，正prediction error恢复；B active时便获得更新，这就是unblocking逻辑。 Rescorla-Wagner与TD都依feature representation。若A和B高度相似或隐藏context改变，blocking强度会不同；zero error 也可能来自attention下降。模型解释应列出alternative mechanisms，并用unblocking、reward revaluation和 trial-level learning curves 区分。"
+    },
+    {
+      "id": "L24-Q30",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 4,
+          "section": "lecture-24-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Rescorla–Wagner、blocking 与 temporal-difference bridge",
+        "数值演示 blocking"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：完成\"reward R=1。A-alone训练后wA=0.9，novel B 的wB=0；compound trial xA=xB=1、η=0.2。求两weights update。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该 reward 对 connection 的 update 约 +0.0364。"
+        },
+        {
+          "id": "b",
+          "text": "平均 update 为 0。"
+        },
+        {
+          "id": "c",
+          "text": "wA变0.92，wB变0.02，显示强但非完全blocking。"
+        },
+        {
+          "id": "d",
+          "text": "条件回报相等且两种 ratios 都为 1.5，符合 matching。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "wA变0.92，wB变0.02，显示强但非完全blocking。 计算路径：total V=0.9+0=0.9。 error R-V=0.1。 A与B均active，所以各更新0.2×0.1=0.02；B只获很小增量。"
+    },
+    {
+      "id": "L24-Q31",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 4,
+          "section": "lecture-24-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Rescorla–Wagner、blocking 与 temporal-difference bridge",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 24 讲：得到\"wA变0.92，wB变0.02，显示强但非完全blocking。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        {
+          "id": "b",
+          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        {
+          "id": "c",
+          "text": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        },
+        {
+          "id": "d",
+          "text": "若wA恰为1，error为0，两weights都不变。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若wA恰为1，error为0，两weights都不变。 这个检查对应题设\"reward R=1。A-alone训练后wA=0.9，novel B 的wB=0；compound trial xA=xB=1、η=0.2。求两weights update。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L24-Q32",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 5,
+          "section": "lecture-24-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Temporal features、state-action value 与选择"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 24 讲：为什么state value相同不能推出两个actions同样好？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "V是policy加权平均；一个action的Q可高、另一个低，却在特定policy下给同一总体V。"
+        },
+        {
+          "id": "b",
+          "text": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        {
+          "id": "c",
+          "text": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        },
+        {
+          "id": "d",
+          "text": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "V是policy加权平均；一个action的Q可高、另一个低，却在特定policy下给同一总体V。 features决定generalization：共享feature会把一个state-action的learning传到相似situations，提高sample efficiency，也可能造成错误transfer。检验Q-like signal应同时操纵state、action和future reward，确认它不是即时reward、movement vigor或statevalue单独造成。"
+    },
+    {
+      "id": "L24-Q33",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 5,
+          "section": "lecture-24-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Temporal features、state-action value 与选择",
+        "从两个Q值作softmax choice"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：完成\"某state中QA=2、QB=1，inverse temperature β=ln3。求 P(A)=exp(βQA)/[exp(βQA)+exp(βQB)]。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该 reward 对 connection 的 update 约 +0.0364。"
+        },
+        {
+          "id": "b",
+          "text": "A的选择概率为0.75。"
+        },
+        {
+          "id": "c",
+          "text": "平均 update 为 0。"
+        },
+        {
+          "id": "d",
+          "text": "条件回报相等且两种 ratios 都为 1.5，符合 matching。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "A的选择概率为0.75。 计算路径：提取共同因子exp(βQB)，P(A)=exp(β)/(exp(β)+1)。 β=ln3，所以exp(β)=3。 P(A)=3/(3+1)=0.75，B为0.25。"
+    },
+    {
+      "id": "L24-Q34",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 5,
+          "section": "lecture-24-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Temporal features、state-action value 与选择",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 24 讲：得到\"A的选择概率为0.75。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        {
+          "id": "b",
+          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        {
+          "id": "c",
+          "text": "两概率和为1；若QA=QB则应各0.5。"
+        },
+        {
+          "id": "d",
+          "text": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "两概率和为1；若QA=QB则应各0.5。 这个检查对应题设\"某state中QA=2、QB=1，inverse temperature β=ln3。求 P(A)=exp(βQA)/[exp(βQA)+exp(βQB)]。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L24-Q35",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 6,
+          "section": "lecture-24-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Dopamine RPE 时间图与 action-selection 边界"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 24 讲：为什么omission dip比\"reward时无burst\"更强地支持prediction error？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "第三因子广播 outcome，但局部 eligibility 才标出参与过该 action 的 synapse；缺少它就没有正确 credit 地址。"
+        },
+        {
+          "id": "b",
+          "text": "R-b 的平均变为正；只要 eligibility 平均也为正，就会出现与真正 reward-eligibility covariance 无关的 offset update。"
+        },
+        {
+          "id": "c",
+          "text": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。"
+        },
+        {
+          "id": "d",
+          "text": "它是低于baseline的负信号，发生在预期reward时刻，纯非负reward detector无法自然产生该定时负响应。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "它是低于baseline的负信号，发生在预期reward时刻，纯非负reward detector无法自然产生该定时负响应。 连接plasticity时，dopamine-like δ作为third factor作用于仍有eligibility的synapses；连接choice时，learnedQ改变policy。这两个环节不同：dopamine perturbation可同时影响learning与performance。只在training后测choice不能定位它改变的是update还是momentary vigor。"
+    },
+    {
+      "id": "L24-Q36",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 6,
+          "section": "lecture-24-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Dopamine RPE 时间图与 action-selection 边界",
+        "计算一次omission error"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：完成\"reward deadline前Vcurrent=0.8，deadline后Vnext=0，R=0，γ=0.95。求δ。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "δ=-0.8 value units。"
+        },
+        {
+          "id": "b",
+          "text": "该 reward 对 connection 的 update 约 +0.0364。"
+        },
+        {
+          "id": "c",
+          "text": "平均 update 为 0。"
+        },
+        {
+          "id": "d",
+          "text": "条件回报相等且两种 ratios 都为 1.5，符合 matching。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "δ=-0.8 value units。 计算路径：代入δ=0+0.95×0-0.8。 得到δ=-0.8。 负号表示outcome差于prediction，而不是得到负的物理reward。"
+    },
+    {
+      "id": "L24-Q37",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 6,
+          "section": "lecture-24-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Dopamine RPE 时间图与 action-selection 边界",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 24 讲：得到\"δ=-0.8 value units。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
+        },
+        {
+          "id": "b",
+          "text": "若reward如期提供R=0.8且next value为0，则δ=0，符合已经预测。"
+        },
+        {
+          "id": "c",
+          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+        },
+        {
+          "id": "d",
+          "text": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若reward如期提供R=0.8且next value为0，则δ=0，符合已经预测。 这个检查对应题设\"reward deadline前Vcurrent=0.8，deadline后Vnext=0，R=0，γ=0.95。求δ。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L24-Q38",
       "lecture": 24,
       "sectionId": "lecture-24-source-1",
       "sourceAnchors": [
@@ -1517,7 +2573,7 @@
         "奖励学习",
         "reward learning"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"由 outcomes 调整 stimulus/action associations。\"称为什么？",
@@ -1532,23 +2588,23 @@
         },
         {
           "id": "c",
-          "text": "匹配律（matching law）"
+          "text": "奖励学习（reward learning）"
         },
         {
           "id": "d",
-          "text": "奖励学习（reward learning）"
+          "text": "匹配律（matching law）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“资格迹（eligibility trace）”指：标记近期 pre/post/action activity 可被后续 reward 修改的变量。",
         "b": "“奖励基线（reward baseline）”指：expected reward，用于计算 above/below-expectation signal。",
-        "c": "“匹配律（matching law）”指：choice proportion 近匹配 obtained reward proportion。"
+        "d": "“匹配律（matching law）”指：choice proportion 近匹配 obtained reward proportion。"
       },
       "explanation": "奖励学习（reward learning）：由 outcomes 调整 stimulus/action associations。"
     },
     {
-      "id": "L24-Q28",
+      "id": "L24-Q39",
       "lecture": 24,
       "sectionId": "lecture-24-source-1",
       "sourceAnchors": [
@@ -1562,38 +2618,38 @@
         "资格迹",
         "eligibility trace"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"标记近期 pre/post/action activity 可被后续 reward 修改的变量。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "资格迹（eligibility trace）"
-        },
-        {
-          "id": "b",
           "text": "奖励基线（reward baseline）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "匹配律（matching law）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "价值（value）"
+        },
+        {
+          "id": "d",
+          "text": "资格迹（eligibility trace）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“奖励基线（reward baseline）”指：expected reward，用于计算 above/below-expectation signal。",
-        "c": "“匹配律（matching law）”指：choice proportion 近匹配 obtained reward proportion。",
-        "d": "“价值（value）”指：从当前 state/cue 预期的 discounted future reward。"
+        "a": "“奖励基线（reward baseline）”指：expected reward，用于计算 above/below-expectation signal。",
+        "b": "“匹配律（matching law）”指：choice proportion 近匹配 obtained reward proportion。",
+        "c": "“价值（value）”指：从当前 state/cue 预期的 discounted future reward。"
       },
       "explanation": "资格迹（eligibility trace）：标记近期 pre/post/action activity 可被后续 reward 修改的变量。"
     },
     {
-      "id": "L24-Q29",
+      "id": "L24-Q40",
       "lecture": 24,
       "sectionId": "lecture-24-source-2",
       "sourceAnchors": [
@@ -1607,18 +2663,18 @@
         "奖励基线",
         "reward baseline"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"expected reward，用于计算 above/below-expectation signal。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "匹配律（matching law）"
+          "text": "奖励基线（reward baseline）"
         },
         {
           "id": "b",
-          "text": "奖励基线（reward baseline）"
+          "text": "匹配律（matching law）"
         },
         {
           "id": "c",
@@ -1629,16 +2685,16 @@
           "text": "Rescorla-Wagner 规则（Rescorla-Wagner rule）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“匹配律（matching law）”指：choice proportion 近匹配 obtained reward proportion。",
+        "b": "“匹配律（matching law）”指：choice proportion 近匹配 obtained reward proportion。",
         "c": "“价值（value）”指：从当前 state/cue 预期的 discounted future reward。",
         "d": "“Rescorla-Wagner 规则（Rescorla-Wagner rule）”指：用 reward prediction error 更新 cue value 的规则。"
       },
       "explanation": "奖励基线（reward baseline）：expected reward，用于计算 above/below-expectation signal。"
     },
     {
-      "id": "L24-Q30",
+      "id": "L24-Q41",
       "lecture": 24,
       "sectionId": "lecture-24-source-2",
       "sourceAnchors": [
@@ -1652,7 +2708,7 @@
         "匹配律",
         "matching law"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"choice proportion 近匹配 obtained reward proportion。\"称为什么？",
@@ -1663,27 +2719,27 @@
         },
         {
           "id": "b",
-          "text": "Rescorla-Wagner 规则（Rescorla-Wagner rule）"
+          "text": "匹配律（matching law）"
         },
         {
           "id": "c",
-          "text": "匹配律（matching law）"
+          "text": "Rescorla-Wagner 规则（Rescorla-Wagner rule）"
         },
         {
           "id": "d",
           "text": "阻断（blocking）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“价值（value）”指：从当前 state/cue 预期的 discounted future reward。",
-        "b": "“Rescorla-Wagner 规则（Rescorla-Wagner rule）”指：用 reward prediction error 更新 cue value 的规则。",
+        "c": "“Rescorla-Wagner 规则（Rescorla-Wagner rule）”指：用 reward prediction error 更新 cue value 的规则。",
         "d": "“阻断（blocking）”指：已有 predictor 使新 cue 因零 error 而不学习。"
       },
       "explanation": "匹配律（matching law）：choice proportion 近匹配 obtained reward proportion。"
     },
     {
-      "id": "L24-Q31",
+      "id": "L24-Q42",
       "lecture": 24,
       "sectionId": "lecture-24-source-1",
       "sourceAnchors": [
@@ -1712,23 +2768,23 @@
         },
         {
           "id": "c",
-          "text": "时间差分误差（temporal-difference error, TD error）"
+          "text": "价值（value）"
         },
         {
           "id": "d",
-          "text": "价值（value）"
+          "text": "时间差分误差（temporal-difference error, TD error）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“Rescorla-Wagner 规则（Rescorla-Wagner rule）”指：用 reward prediction error 更新 cue value 的规则。",
         "b": "“阻断（blocking）”指：已有 predictor 使新 cue 因零 error 而不学习。",
-        "c": "“时间差分误差（temporal-difference error, TD error）”指：reward 加 discounted next value 再减 current value。"
+        "d": "“时间差分误差（temporal-difference error, TD error）”指：reward 加 discounted next value 再减 current value。"
       },
       "explanation": "价值（value）：从当前 state/cue 预期的 discounted future reward。"
     },
     {
-      "id": "L24-Q32",
+      "id": "L24-Q43",
       "lecture": 24,
       "sectionId": "lecture-24-source-4",
       "sourceAnchors": [
@@ -1742,38 +2798,38 @@
         "Rescorla-Wagner 规则",
         "Rescorla-Wagner rule"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"用 reward prediction error 更新 cue value 的规则。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "Rescorla-Wagner 规则（Rescorla-Wagner rule）"
-        },
-        {
-          "id": "b",
           "text": "阻断（blocking）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "时间差分误差（temporal-difference error, TD error）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "奖励预测误差（reward-prediction error, RPE）"
+        },
+        {
+          "id": "d",
+          "text": "Rescorla-Wagner 规则（Rescorla-Wagner rule）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“阻断（blocking）”指：已有 predictor 使新 cue 因零 error 而不学习。",
-        "c": "“时间差分误差（temporal-difference error, TD error）”指：reward 加 discounted next value 再减 current value。",
-        "d": "“奖励预测误差（reward-prediction error, RPE）”指：实际或更新 target 与 predicted value 的差。"
+        "a": "“阻断（blocking）”指：已有 predictor 使新 cue 因零 error 而不学习。",
+        "b": "“时间差分误差（temporal-difference error, TD error）”指：reward 加 discounted next value 再减 current value。",
+        "c": "“奖励预测误差（reward-prediction error, RPE）”指：实际或更新 target 与 predicted value 的差。"
       },
       "explanation": "Rescorla-Wagner 规则（Rescorla-Wagner rule）：用 reward prediction error 更新 cue value 的规则。"
     },
     {
-      "id": "L24-Q33",
+      "id": "L24-Q44",
       "lecture": 24,
       "sectionId": "lecture-24-source-4",
       "sourceAnchors": [
@@ -1787,18 +2843,18 @@
         "阻断",
         "blocking"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"已有 predictor 使新 cue 因零 error 而不学习。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "时间差分误差（temporal-difference error, TD error）"
+          "text": "阻断（blocking）"
         },
         {
           "id": "b",
-          "text": "阻断（blocking）"
+          "text": "时间差分误差（temporal-difference error, TD error）"
         },
         {
           "id": "c",
@@ -1809,16 +2865,16 @@
           "text": "Q值（Q value）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“时间差分误差（temporal-difference error, TD error）”指：reward 加 discounted next value 再减 current value。",
+        "b": "“时间差分误差（temporal-difference error, TD error）”指：reward 加 discounted next value 再减 current value。",
         "c": "“奖励预测误差（reward-prediction error, RPE）”指：实际或更新 target 与 predicted value 的差。",
         "d": "“Q值（Q value）”指：state-action conditioned expected return。"
       },
-      "explanation": "阻断（blocking）：已有 predictor 使新 cue 因零 error 而不学习。"
+      "explanation": "阻断（blocking）：已有 predictor 使新 cue 因零 error 而不学习。 active cue且R高于prediction时weight上升，R低于prediction时下降；当V=R时prediction error为零，学习停止。"
     },
     {
-      "id": "L24-Q34",
+      "id": "L24-Q45",
       "lecture": 24,
       "sectionId": "lecture-24-source-6",
       "sourceAnchors": [
@@ -1832,7 +2888,7 @@
         "时间差分误差",
         "temporal-difference error, TD error"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"reward 加 discounted next value 再减 current value。\"称为什么？",
@@ -1843,27 +2899,27 @@
         },
         {
           "id": "b",
-          "text": "Q值（Q value）"
+          "text": "时间差分误差（temporal-difference error, TD error）"
         },
         {
           "id": "c",
-          "text": "时间差分误差（temporal-difference error, TD error）"
+          "text": "Q值（Q value）"
         },
         {
           "id": "d",
           "text": "奖励学习（reward learning）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“奖励预测误差（reward-prediction error, RPE）”指：实际或更新 target 与 predicted value 的差。",
-        "b": "“Q值（Q value）”指：state-action conditioned expected return。",
+        "c": "“Q值（Q value）”指：state-action conditioned expected return。",
         "d": "“奖励学习（reward learning）”指：由 outcomes 调整 stimulus/action associations。"
       },
       "explanation": "时间差分误差（temporal-difference error, TD error）：reward 加 discounted next value 再减 current value。"
     },
     {
-      "id": "L24-Q35",
+      "id": "L24-Q46",
       "lecture": 24,
       "sectionId": "lecture-24-source-6",
       "sourceAnchors": [
@@ -1877,7 +2933,7 @@
         "奖励预测误差",
         "reward-prediction error, RPE"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 24 讲：本讲把\"实际或更新 target 与 predicted value 的差。\"称为什么？",
@@ -1892,23 +2948,23 @@
         },
         {
           "id": "c",
-          "text": "资格迹（eligibility trace）"
+          "text": "奖励预测误差（reward-prediction error, RPE）"
         },
         {
           "id": "d",
-          "text": "奖励预测误差（reward-prediction error, RPE）"
+          "text": "资格迹（eligibility trace）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“Q值（Q value）”指：state-action conditioned expected return。",
         "b": "“奖励学习（reward learning）”指：由 outcomes 调整 stimulus/action associations。",
-        "c": "“资格迹（eligibility trace）”指：标记近期 pre/post/action activity 可被后续 reward 修改的变量。"
+        "d": "“资格迹（eligibility trace）”指：标记近期 pre/post/action activity 可被后续 reward 修改的变量。"
       },
-      "explanation": "奖励预测误差（reward-prediction error, RPE）：实际或更新 target 与 predicted value 的差。"
+      "explanation": "奖励预测误差（reward-prediction error, RPE）：实际或更新 target 与 predicted value 的差。 若predicted reward在预期时刻omitted，Rt+1=0且next value坍塌，δ在该时刻为负，形成dip。"
     },
     {
-      "id": "L24-Q36",
+      "id": "L24-Q47",
       "lecture": 24,
       "sectionId": "lecture-24-source-5",
       "sourceAnchors": [
@@ -1929,31 +2985,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "Q值（Q value）"
-        },
-        {
-          "id": "b",
           "text": "奖励学习（reward learning）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "资格迹（eligibility trace）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "奖励基线（reward baseline）"
+        },
+        {
+          "id": "d",
+          "text": "Q值（Q value）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“奖励学习（reward learning）”指：由 outcomes 调整 stimulus/action associations。",
-        "c": "“资格迹（eligibility trace）”指：标记近期 pre/post/action activity 可被后续 reward 修改的变量。",
-        "d": "“奖励基线（reward baseline）”指：expected reward，用于计算 above/below-expectation signal。"
+        "a": "“奖励学习（reward learning）”指：由 outcomes 调整 stimulus/action associations。",
+        "b": "“资格迹（eligibility trace）”指：标记近期 pre/post/action activity 可被后续 reward 修改的变量。",
+        "c": "“奖励基线（reward baseline）”指：expected reward，用于计算 above/below-expectation signal。"
       },
       "explanation": "Q值（Q value）：state-action conditioned expected return。"
     },
     {
-      "id": "L24-Q37",
+      "id": "L24-Q48",
       "lecture": 24,
       "sectionId": "lecture-24-source-2",
       "sourceAnchors": [
@@ -1966,18 +3022,18 @@
       "conceptTags": [
         "reward-baseline three-factor update"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：使用\"reward-baseline three-factor update\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "stationary average"
+          "text": "eligibility e defined"
         },
         {
           "id": "b",
-          "text": "eligibility e defined"
+          "text": "stationary average"
         },
         {
           "id": "c",
@@ -1988,16 +3044,16 @@
           "text": "features x"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“covariance learning”的条件，不是题干公式的条件。",
+        "b": "这是“covariance learning”的条件，不是题干公式的条件。",
         "c": "这是“matching law”的条件，不是题干公式的条件。",
         "d": "这是“linear value predictor”的条件，不是题干公式的条件。"
       },
       "explanation": "reward-baseline three-factor update 的适用条件：eligibility e defined"
     },
     {
-      "id": "L24-Q38",
+      "id": "L24-Q49",
       "lecture": 24,
       "sectionId": "lecture-24-source-1",
       "sourceAnchors": [
@@ -2021,27 +3077,27 @@
         },
         {
           "id": "b",
-          "text": "specific foraging assumptions"
+          "text": "stationary average"
         },
         {
           "id": "c",
-          "text": "stationary average"
+          "text": "specific foraging assumptions"
         },
         {
           "id": "d",
           "text": "features x"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“reward-baseline three-factor update”的条件，不是题干公式的条件。",
-        "b": "这是“matching law”的条件，不是题干公式的条件。",
+        "c": "这是“matching law”的条件，不是题干公式的条件。",
         "d": "这是“linear value predictor”的条件，不是题干公式的条件。"
       },
-      "explanation": "covariance learning 的适用条件：stationary average"
+      "explanation": "covariance learning 的适用条件：stationary average foraging animal 从 sensory cue 选择 action 并得到 reward。"
     },
     {
-      "id": "L24-Q39",
+      "id": "L24-Q50",
       "lecture": 24,
       "sectionId": "lecture-24-source-3",
       "sourceAnchors": [
@@ -2054,7 +3110,7 @@
       "conceptTags": [
         "matching law"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：使用\"matching law\"时，哪项条件或约定不可省略？",
@@ -2069,23 +3125,23 @@
         },
         {
           "id": "c",
-          "text": "features x"
+          "text": "specific foraging assumptions"
         },
         {
           "id": "d",
-          "text": "specific foraging assumptions"
+          "text": "features x"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "这是“reward-baseline three-factor update”的条件，不是题干公式的条件。",
         "b": "这是“covariance learning”的条件，不是题干公式的条件。",
-        "c": "这是“linear value predictor”的条件，不是题干公式的条件。"
+        "d": "这是“linear value predictor”的条件，不是题干公式的条件。"
       },
-      "explanation": "matching law 的适用条件：specific foraging assumptions"
+      "explanation": "matching law 的适用条件：specific foraging assumptions matching law 的常见形式是 CA/CB≈RA/RB，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。"
     },
     {
-      "id": "L24-Q40",
+      "id": "L24-Q51",
       "lecture": 24,
       "sectionId": "lecture-24-source-4",
       "sourceAnchors": [
@@ -2098,14 +3154,58 @@
       "conceptTags": [
         "linear value predictor"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 24 讲：使用\"linear value predictor\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
+          "text": "eligibility e defined"
+        },
+        {
+          "id": "b",
+          "text": "stationary average"
+        },
+        {
+          "id": "c",
+          "text": "specific foraging assumptions"
+        },
+        {
+          "id": "d",
           "text": "features x"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“reward-baseline three-factor update”的条件，不是题干公式的条件。",
+        "b": "这是“covariance learning”的条件，不是题干公式的条件。",
+        "c": "这是“matching law”的条件，不是题干公式的条件。"
+      },
+      "explanation": "linear value predictor 的适用条件：features x 用 features x 线性预测 value V=w^T x，目标 reward为R。"
+    },
+    {
+      "id": "L24-Q52",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 2,
+          "section": "lecture-24-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Rescorla-Wagner update"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：使用\"Rescorla-Wagner update\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "immediate/represented reward"
         },
         {
           "id": "b",
@@ -2126,7 +3226,95 @@
         "c": "这是“covariance learning”的条件，不是题干公式的条件。",
         "d": "这是“matching law”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear value predictor 的适用条件：features x"
+      "explanation": "Rescorla-Wagner update 的适用条件：immediate/represented reward 设某 choice 的 eligibility 为 e，update Δw=η(R-b)e。"
+    },
+    {
+      "id": "L24-Q53",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 6,
+          "section": "lecture-24-source-6"
+        }
+      ],
+      "conceptTags": [
+        "TD/RPE"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：使用\"TD/RPE\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "eligibility e defined"
+        },
+        {
+          "id": "b",
+          "text": "Markov/state representation implicit"
+        },
+        {
+          "id": "c",
+          "text": "stationary average"
+        },
+        {
+          "id": "d",
+          "text": "specific foraging assumptions"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“reward-baseline three-factor update”的条件，不是题干公式的条件。",
+        "c": "这是“covariance learning”的条件，不是题干公式的条件。",
+        "d": "这是“matching law”的条件，不是题干公式的条件。"
+      },
+      "explanation": "TD/RPE 的适用条件：Markov/state representation implicit dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
+    },
+    {
+      "id": "L24-Q54",
+      "lecture": 24,
+      "sectionId": "lecture-24-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture24-LearningFromRewards.pdf",
+          "page": 5,
+          "section": "lecture-24-source-5"
+        }
+      ],
+      "conceptTags": [
+        "state-action value"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 24 讲：使用\"state-action value\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "eligibility e defined"
+        },
+        {
+          "id": "b",
+          "text": "stationary average"
+        },
+        {
+          "id": "c",
+          "text": "policy/future behavior specified"
+        },
+        {
+          "id": "d",
+          "text": "specific foraging assumptions"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这是“reward-baseline three-factor update”的条件，不是题干公式的条件。",
+        "b": "这是“covariance learning”的条件，不是题干公式的条件。",
+        "d": "这是“matching law”的条件，不是题干公式的条件。"
+      },
+      "explanation": "state-action value 的适用条件：policy/future behavior specified state value V(s)平均某policy下从state出发的future return；action value Q(s,a)还指定first action。"
     }
   ]
 }

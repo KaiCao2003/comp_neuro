@@ -89,6 +89,510 @@
       "stopPredict": "pattern completion 的益处？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "区分memory anatomical dependence与psychological character随时间的变化，谨慎解释patient E.P.与recent/remote evidence。",
+      "逐项定义Teacher、Student、Notebook及其信息流，把environment generation、one-shot storage、replay与slow cortical learning分层。",
+      "解释pattern separation、completion与student↔notebook Hebbian links怎样支持快速写入和partial-cue replay。",
+      "在linear teacher/student model中手算memory error与population generalization error，识别noise overfitting。",
+      "用predictability/SNR推理Go-CLS的停止条件和lesion predictions，不把formal model输出写成已证实生物事实。"
+    ],
+    "prerequisiteBridge": [
+      "systems consolidation问的是记忆对brain systems的依赖怎样随时间改变，不只是synapse几小时内是否变强。recent episodic recall常更依赖hippocampus，remote knowledge可能更多由distributed neocortical connections支持；但不同theories对remote episodic detail的hippocampal依赖有争议。病人单案例、lesion extent与task differences都限制过度概括。",
+      "Teacher–Student–Notebook是formal abstraction。Teacher是产生experience的environment distribution，不是一个脑区；Student是慢速学习规律的neocortex；Notebook是快速存单个episodes并可partial-cue recall的hippocampal system。offline replay把notebook samples再次呈给student，让slow learner从有限经历提取可重复structure。",
+      "training error衡量对stored examples的复现，generalization error衡量新experience上的prediction。若每个observed target含可预测signal与不可预测noise，持续训练会降低training error，却可能开始记noise，使test error回升。optimal stopping选择generalization最低点；Go-CLS据predictability决定转移多少，而不是假定所有episodic detail最终完整移交cortex。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l27-d1",
+        "prompt": "patient E.P.一类remote-memory结果能否单独证明所有remote episodic memories都不需hippocampus？",
+        "answer": "不能；单案例、lesion范围、memory年龄与semanticization等因素限制普遍结论。",
+        "explanation": "应将其视为重要evidence而非穷尽性定律。",
+        "remediationModuleId": "l27-m1"
+      },
+      {
+        "id": "l27-d2",
+        "prompt": "Teacher–Student–Notebook中Teacher代表海马吗？",
+        "answer": "不代表；Teacher是产生输入和目标的environment/generative process，Notebook才对应快速hippocampal memory abstraction。",
+        "explanation": "这个计算框架按信息角色命名：Teacher 提供训练世界，Student 学习可泛化规律，Notebook 保存样本特异信息；不能把名称直接当成脑区标签。",
+        "remediationModuleId": "l27-m2"
+      },
+      {
+        "id": "l27-d3",
+        "prompt": "pattern separation和completion是否矛盾？",
+        "answer": "不矛盾；encoding把相似episodes映为可区分codes，retrieval再由partial cue恢复对应完整code。",
+        "explanation": "两者作用在记忆流程的不同阶段：分离减少相似事件的存储干扰，补全则在既有吸引子中用不完整线索找回正确事件。",
+        "remediationModuleId": "l27-m3"
+      },
+      {
+        "id": "l27-d4",
+        "prompt": "training error继续下降而test error上升说明什么？",
+        "answer": "student开始拟合sample-specific noise，发生overfitting，应考虑停止或正则化。",
+        "explanation": "训练误差只衡量已见样本；测试误差反向上升说明新增拟合没有提取可迁移规律，而是在记忆训练集的偶然偏差。",
+        "remediationModuleId": "l27-m4"
+      },
+      {
+        "id": "l27-d5",
+        "prompt": "低predictability episode在Go-CLS中为何可能长期依赖hippocampus？",
+        "answer": "其细节难从跨episode规律预测，强行转移会提高generalization error，notebook保留更合算。",
+        "explanation": "当 student 无法由共享结构重建 episode 的独特细节时，把它压入慢系统会造成系统误差；保留 notebook trace 能维持精确回忆。",
+        "remediationModuleId": "l27-m5"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l27-m1",
+        "title": "Recent/remote memory、E.P. 与systems consolidation证据",
+        "sourceRefs": [
+          {
+            "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "memory随时间改变的是存储位置、检索依赖、内容质量，还是三者的某种组合？",
+        "paragraphs": [
+          "standard systems consolidation描述recent memory初期依赖hippocampal indexing，随replay与reactivation，neocortical connections逐步能支持retrieval。时间梯度amnesia、hippocampal lesion与remote knowledge是证据来源。它不等于memory物理文件从一个位置搬到另一个位置，而是network dependence重组。",
+          "patient E.P.等案例展示严重medial temporal damage后new episodic learning受损，并对recent与remote memories产生不同影响。这类案例有巨大理论价值，也受single-case、lesion spread、测试材料、premorbid exposure和semantic support限制；不能从一条autobiographical score外推所有记忆类型。",
+          "memory psychological character也可能变化：rich episodic detail逐渐semanticize，gist保留而context丢失。remote performance较好可能因为反复retrieval与schema support，不必意味着原始episode完整转存。评估应分别量化accuracy、vividness、spatiotemporal detail和confidence。",
+          "hippocampal replay在rest/sleep中出现compressed sequences，cortical patterns可共同reactivate，支持信息交换hypothesis。关联并不证明replay是唯一 consolidation cause；选择性sequence disruption与subsequent remote-memory testing能提供更强causal evidence，同时需控制sleep architecture。"
+        ],
+        "keyPoints": [
+          "systems consolidation是跨systems依赖重组。",
+          "E.P.是重要案例证据但不能被无限外推。",
+          "anatomical dependence与memory quality需分别测量。"
+        ],
+        "derivation": {
+          "title": "把时间梯度证据写成竞争预测",
+          "setup": "比较standard account与永久hippocampal-dependence的简化预测，不把结果预设为结论。",
+          "steps": [
+            {
+              "title": "定义依赖函数",
+              "explanation": "H(t)表示memory age为t时hippocampal perturbation造成的retrieval deficit。"
+            },
+            {
+              "title": "standard prediction",
+              "explanation": "若cortical support逐步增强，平均H随age下降。",
+              "latex": "\\frac{dH(t)}{dt}<0"
+            },
+            {
+              "title": "permanent-dependence prediction",
+              "explanation": "若rich episodic retrieval始终需hippocampus，detail-specific H可保持大于零。",
+              "latex": "\\lim_{t\\to\\infty}H_{\\mathrm{detail}}(t)>0"
+            },
+            {
+              "title": "设计分层测量",
+              "explanation": "同一memory分别测gist与episodic detail，避免总分掩盖两种趋势。"
+            }
+          ],
+          "symbolNotes": [
+            "t是memory age，H是causal deficit measure。",
+            "导数符号是理论趋势，不指定具体时间常数。"
+          ],
+          "unitsCheck": "若H用performance difference，通常为无量纲比例；dH/dt为每时间单位变化。",
+          "limitCheck": "t=0附近encoding disruption与retrieval disruption可能混合，应采用post-encoding perturbation设计。"
+        },
+        "workedExample": {
+          "title": "拆分remote memory得分",
+          "problem": "某patient remote event的gist正确率90%，episodic detail正确率30%；control分别95%与80%。计算两项deficit。",
+          "steps": [
+            "gist deficit=95%-90%=5 percentage points。",
+            "detail deficit=80%-30%=50 points。",
+            "总称“remote memory 70%”会掩盖两类依赖的巨大差异。"
+          ],
+          "result": "gist接近保留而detail显著受损，支持分层报告。",
+          "sanityCheck": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。"
+        },
+        "selfCheck": {
+          "prompt": "为什么remote memory可答对事实不等于原episode完整保存？",
+          "answer": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。"
+        },
+        "pitfalls": [
+          "把单患者pattern当作普遍定律。",
+          "把replay correlation写成唯一causal mechanism。"
+        ]
+      },
+      {
+        "id": "l27-m2",
+        "title": "Teacher–Student–Notebook：三种角色与replay通道",
+        "sourceRefs": [
+          {
+            "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "为什么一个快记系统和一个慢学系统能同时减少catastrophic interference并提取规律？",
+        "paragraphs": [
+          "沿用原始第 2–3 页符号，Teacher 从 z∼P(z|θ_T) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 ŷ=f_S(x;θ_S)。Notebook 为每个 z^(μ) 建立稀疏 code ξ^(μ)，快速保存成对的 {z^(μ),ξ^(μ)}。这里 z 始终表示 Student activity，ξ 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。",
+          "只用slow Student，rare experience可能在学会前消失；只用fast Notebook，可精准回忆episodes却难抽取population规律，容量和interference也受限。互补timescales让online experience先写Notebook，随后interleaved replay把old与new samples混合给Student，减轻new learning覆盖旧structure。",
+          "replay是consolidation channel：Notebook pattern completion产生approximate experience，Student对replayed targets更新。若replay distribution偏向salient或recent events，Student学到的是weighted environment而非原始frequency。selection rule因此直接影响generalization与bias。",
+          "formal model与empirical mapping要分层。Teacher不对应“教师脑区”，Notebook不必保存raw sensory pixels，Student也不等于全neocortex。检验框架应提出role-specific predictions：快速hippocampal lesion影响one-shot recall，slow cortical learning影响跨episode regularities，replay disruption影响later transfer。"
+        ],
+        "keyPoints": [
+          "Teacher是environment distribution。",
+          "Notebook快存episode，Student慢学规律。",
+          "replay selection决定Student实际训练distribution。"
+        ],
+        "derivation": {
+          "title": "互补学习的信息流与原页符号",
+          "setup": "用四步 formal chain 表示 experience、storage、replay 与 Student update，并固定 z=Student activity、ξ=Notebook activity。",
+          "steps": [
+            {
+              "title": "environment sample",
+              "explanation": "Teacher 从 generative distribution 产生完整 Student activity pattern z；x 与 y 可视为该 pattern 中用于具体关系学习的输入和输出。",
+              "latex": "\\mathbf z_\\mu\\sim p_T(\\mathbf z\\mid\\boldsymbol\\theta_T)"
+            },
+            {
+              "title": "one-shot write",
+              "explanation": "Notebook 为 Student pattern zμ 生成并快速保存稀疏 activity code ξμ。",
+              "latex": "\\boldsymbol\\xi_\\mu=f_N(\\mathbf z_\\mu)"
+            },
+            {
+              "title": "partial-cue replay",
+              "explanation": "partial cue 先补全 ξμ，再由 Notebook→Student links 重建 Student pattern z tilde。",
+              "latex": "\\widetilde{\\mathbf z}_\\mu=g_N(\\boldsymbol\\xi_\\mu)"
+            },
+            {
+              "title": "slow student update",
+              "explanation": "从 replayed z tilde 取出 x tilde 与 target y，Student 以小 learning rate 降低 prediction error。",
+              "latex": "\\mathbf w_S\\leftarrow\\mathbf w_S-\\eta_S\\nabla_{\\mathbf w_S}L(y_\\mu,f_S(\\widetilde{\\mathbf x}_\\mu;\\mathbf w_S))"
+            }
+          ],
+          "symbolNotes": [
+            "ηS 是 slow learning rate，μ 索引 episode。",
+            "z 是 N-dimensional Student activity，ξ 是 M-dimensional sparse Notebook activity；x 与 y 是用于具体 Student prediction 的变量。"
+          ],
+          "unitsCheck": "loss与gradient units依model定义，ηS使parameter update与wS一致。",
+          "limitCheck": "ηS=0时无cortical transfer；replay reconstruction完全错误时Student会学入bias。"
+        },
+        "workedExample": {
+          "title": "比较interleaved与blocked replay",
+          "problem": "Student已学old pattern A，新experience B到来。每次gradient step把当前target error减半。若只重放B两次，A无更新；若A、B各一次，哪个更能保留A？",
+          "steps": [
+            "blocked B两次只修正B，A面对shared weights的干扰没有rehearsal。",
+            "interleaved schedule包含一次A，可把被B step扰动的A error拉回。",
+            "具体数值依feature overlap，但机制上旧sample rehearsal约束catastrophic forgetting。"
+          ],
+          "result": "A、B交错更有机会保留旧performance。",
+          "sanityCheck": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。"
+        },
+        "selfCheck": {
+          "prompt": "为什么Notebook replay不必逐像素复制原experience？",
+          "answer": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。"
+        },
+        "pitfalls": [
+          "把Teacher误认成某个脑区。",
+          "忽略replay selection bias对Student目标的改变。"
+        ]
+      },
+      {
+        "id": "l27-m3",
+        "title": "Autoassociative Notebook：separation、completion 与双向连接",
+        "sourceRefs": [
+          {
+            "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "相似episodes怎样在写入时分开，又在只有partial cue时恢复完整training signal？",
+        "paragraphs": [
+          "pattern separation 把相似 Student patterns z^(μ) 映成低-overlap Notebook codes ξ^(μ)，减少新 episode 覆盖旧 episode。原页的教学近似把 ξ^(μ) 视为与 z^(μ) 独立的 sparse random code；真实系统还必须保留足够 addressability，使 partial cue 能指向正确 code。dentate gyrus 等结构常被连接到这一功能，但 formal model 先描述 input-output transformation。",
+          "pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor ξ^(μ)。完成后的 ξ^(μ) 再通过 Notebook→Student weights V 重建 Student activity z tilde；反向 Student→Notebook seeding 在图中由 U 表示，但原页没有给 U 的具体 learning rule，因此不能直接把 V 转置后冒充来源公式。",
+          "separation 与 completion 作用在不同阶段：encoding 扩大 episodes 间距离，retrieval 在单一 basin 内缩小 cue 与 stored pattern 的距离。过强 separation 会让 partial cue 无法 generalize 到正确 address，过强 completion 会把 ambiguous cue 强制归入错误 episode。两者需在 capacity、specificity 与 robustness 间平衡。",
+          "Notebook 不必永远独立保存每个 sensory detail；它可索引 distributed cortical components。lesion prediction 依模型版本：破坏 Notebook 会特别损害 recent one-shot 与 unpredictable details，而已经由 Student 学到的 shared structure 较保留。不能从 pattern-completion 术语直接推出特定临床时间梯度。"
+        ],
+        "keyPoints": [
+          "separation降低episode code overlap。",
+          "completion由partial cue恢复stored code。",
+          "Notebook 内 J 完成 pattern completion，V 按原页稀疏中心化 rule 把 ξ replay 回 Student；U 负责反向 seeding，但源页未指定其 update。"
+        ],
+        "derivation": {
+          "title": "按原页稀疏中心化 Hebbian rule 重建 Student activity",
+          "setup": "设 z_iμ 是第 μ 个 N-dimensional Student pattern，ξ_jμ 是对应的 M-dimensional sparse Notebook code，P(ξ_jμ=1)=a。以下精确保留原始第 3 页的 V rule。",
+          "steps": [
+            {
+              "title": "写完整 Notebook→Student matrix",
+              "explanation": "Notebook activity 先减去 sparse mean a，再与目标 Student activity z 相乘；M a(1-a) 固定 field scale。",
+              "latex": "V_{ij}=\\frac{1}{Ma(1-a)}\\sum_{\\mu=1}^{P}z_{i\\mu}(\\xi_{j\\mu}-a)"
+            },
+            {
+              "title": "写单次 experience 的 Hebbian increment",
+              "explanation": "每个 episode 对 V 的贡献就是完整求和式中的一项。",
+              "latex": "\\Delta V_{ij}^{(\\mu)}=\\frac{1}{Ma(1-a)}z_{i\\mu}(\\xi_{j\\mu}-a)"
+            },
+            {
+              "title": "先在 Notebook 内完成 pattern",
+              "explanation": "partial cue 经 U seed 后，由 autoassociative J dynamics 收敛到 stored ξ^(μ)；这一步先于 cortical replay。",
+              "latex": "\\boldsymbol\\xi_{\\mathrm{partial}}\\xrightarrow{\\,J\\,}\\boldsymbol\\xi^{(\\mu)}"
+            },
+            {
+              "title": "用 V replay Student pattern",
+              "explanation": "completed Notebook code 经过 V 产生 recalled Student activity z tilde，理想情况下接近原 z。",
+              "latex": "\\widetilde z_{i\\mu}=\\sum_{j=1}^{M}V_{ij}\\xi_{j\\mu}\\approx z_{i\\mu}"
+            }
+          ],
+          "symbolNotes": [
+            "V 是 N×M：rows 对应 Student units i，columns 对应 Notebook units j；P 是 stored episode 数。",
+            "z 是 Student activity，ξ 是 sparse Notebook activity，a 是 ξ 的 mean activity；不能与前一版中把 z 改称 Notebook code 的符号混用。"
+          ],
+          "unitsCheck": "若 ξ 无量纲，V 继承 z 的 activity units；(N×M)(M×1) 返回 N×1 Student activity。",
+          "limitCheck": "若 ξ codes 相互独立且 sparse，cross-talk 较小；若 codes 相同，两个 episodes 无法由 Notebook address 区分。"
+        },
+        "workedExample": {
+          "title": "比较code overlap",
+          "problem": "三个 binary Notebook active sets：ξ1={1,2,3,4}，ξ2={3,4,5,6}，separation 后 ξ2′={5,6,7,8}。计算与 ξ1 共享的 active units 数。",
+          "steps": [
+            "原 ξ1 与 ξ2 共享 {3,4}，数量 2。",
+            "ξ1 与 ξ2′ 没有共享 unit，数量 0。",
+            "separation 降低 overlap，但还需测试 partial cue 是否能指向正确 code。"
+          ],
+          "result": "shared count从2降到0。",
+          "sanityCheck": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。"
+        },
+        "selfCheck": {
+          "prompt": "为什么pattern separation越强不一定越好？",
+          "answer": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。"
+        },
+        "pitfalls": [
+          "把 separation 与 completion 说成同一瞬间的相反操作。",
+          "用未中心化的对称 outer product 替换原页 V rule，或只测 code overlap、不测 partial-cue retrieval。"
+        ]
+      },
+      {
+        "id": "l27-m4",
+        "title": "Linear Teacher/Student：memory error 与generalization error",
+        "sourceRefs": [
+          {
+            "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "为什么准确复现Notebook samples可能降低training error，却损害对新experiences的预测？",
+        "paragraphs": [
+          "linear Teacher 产生 y=wT^T x+ε，其中 ε 是不可由 x 预测的 episode noise；Student 对新 input 预测 ŷ=wS^T x。原始第 4 页的 memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：e_m²=(1/P)Σ_μ(y_μ-wS^T x tilde_μ)²，并注明 x tilde_μ≈x_μ 是理想 recall 极限。generalization error e_g² 则对 Teacher distribution 中全新的 (x,y) 取 expectation。",
+          "early learning让wS接近wT，signal error下降，所以training与test errors都下降。继续拟合有限sample中的ε会让wS偏离population-optimal direction；training error继续下降，test error可能回升。这是overfitting，不代表memory本身变差，而是复现sample detail与预测新example的目标冲突。",
+          "Notebook可保留sample-specific ε，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。standard CLS若无限均匀replay每个noisy target，有限Student可能最终记入noise。regularization、early stopping或predictability-weighted replay可保护generalization。",
+          "实验上 training memory 与 generalization 需用不同stimuli测量。用同一episodes既训练又测试只得到memory error，不能声称schema learning。还应报告P、input dimension、noise variance与learning time，因为overfitting发生位置由这些量决定。"
+        ],
+        "keyPoints": [
+          "memory error 在 stored samples 的 Notebook-recalled inputs x tilde 上计算。",
+          "generalization error在new Teacher samples上计算。",
+          "unpredictable ε可由Notebook记住，却不应被Student当作规律。"
+        ],
+        "derivation": {
+          "title": "memory error 与 generalization error 的分界",
+          "setup": "先保留原页的 Notebook-recalled input x tilde，再假设 fresh x 与 ε 独立、E[ε]=0，分解 population generalization error。",
+          "steps": [
+            {
+              "title": "写 stored-memory error",
+              "explanation": "每个 stored target yμ 由 Student 对 Notebook recalled input x tilde μ 的 prediction 来检验。",
+              "latex": "e_m^2=\\frac1P\\sum_{\\mu=1}^{P}(y_\\mu-\\mathbf w_S^{\\mathsf T}\\widetilde{\\mathbf x}_\\mu)^2"
+            },
+            {
+              "title": "写prediction difference",
+              "explanation": "将y与ŷ相减。",
+              "latex": "y-\\widehat y=(\\mathbf w_T-\\mathbf w_S)^{\\mathsf T}\\mathbf x+\\epsilon"
+            },
+            {
+              "title": "平方取期望",
+              "explanation": "展开square得到signal、cross与noise三项。"
+            },
+            {
+              "title": "消去cross term",
+              "explanation": "独立且zero-mean noise使cross expectation为零。",
+              "latex": "\\mathbb E[\\epsilon(\\mathbf w_T-\\mathbf w_S)^{\\mathsf T}\\mathbf x]=0"
+            },
+            {
+              "title": "得到分解",
+              "explanation": "剩余weight mismatch与irreducible noise。",
+              "latex": "e_g^2=\\mathbb E[((\\mathbf w_T-\\mathbf w_S)^{\\mathsf T}\\mathbf x)^2]+\\mathbb E[\\epsilon^2]"
+            }
+          ],
+          "symbolNotes": [
+            "wT、wS 是 feature weights；ε 与 y 同单位；x tilde 表示 Notebook recalled input。",
+            "e_m² 与 e_g² 都使用 target units squared，但前者在 stored recalls 上算，后者在 fresh Teacher samples 上算。"
+          ],
+          "unitsCheck": "两项都是y²单位；cross term能否消失取决于independence与zero mean。",
+          "limitCheck": "wS=wT时generalization error仍有irreducible noise E[ε²]，不会降到零。"
+        },
+        "workedExample": {
+          "title": "手算training与test差异",
+          "problem": "一维 Teacher wT=2、Student wS=3。对 fresh x=1，noise variance=1，求 expected generalization squared error；另有 stored sample 的 ε=1、y=3，Notebook 恰好 recall x tilde=1。",
+          "steps": [
+            "weight mismatch为2-3=-1，在x=1时平方1。",
+            "加irreducible noise variance1，expected test error为2。",
+            "stored sample 上 Student 接收 x tilde=1，故 ŷ=3、y=3，memory error 为 0。"
+          ],
+          "result": "memory error 可为 0，而 expected generalization error 为 2。",
+          "sanityCheck": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+        },
+        "selfCheck": {
+          "prompt": "为什么generalization error最低也可能大于零？",
+          "answer": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+        },
+        "pitfalls": [
+          "用 training error 下降证明 generalization 改善，或计算 memory error 时漏掉 recalled x tilde。",
+          "忘记irreducible noise lower bound。"
+        ]
+      },
+      {
+        "id": "l27-m5",
+        "title": "Go-CLS：predictability、停止巩固与lesion predictions",
+        "sourceRefs": [
+          {
+            "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "何时继续replay能提取signal，何时却开始把不可预测episode noise写进Student？",
+        "paragraphs": [
+          "Go-CLS 把 consolidation 目标设为 generalization，而非把 Notebook 内容全部复制。原始第 5 页定义 signal-to-noise style quantity λ=E[(wT^T x)²]/E[ε²]。只有在 predictable signal 与 noise 都已中心化时，才可把它简写成 variance ratio。λ 高时跨 episodes 规律强，Student 从 replay 受益较久；λ 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。",
+          "formal stopping time t*=argmin_t eg²(t)。实际系统不知道population eg，可用validation-like signals、uncertainty、replay agreement或learning-curve curvature作proxy。模型核心是存在停止或gating，而非脑必须显式计算argmin。不同features可有不同predictability，因此consolidation可能按component而非整episode统一停止。",
+          "lesion predictions随memory content分化：高predictability structure逐步进入Student，remote retrieval较能耐受Notebook lesion；unpredictable episodic detail 长期由Notebook支持，即使remote也可能受损。recent memories两种component都尚未充分transfer，因此整体更脆弱。这比单一age cutoff给更细预测。",
+          "Go-CLS是formal model与prediction，不是已完成的empirical定论。检验可操纵training-set regularity与noise，匹配age和exposure，再测hippocampal disruption对gist和detail的影响。若只比较自然recent/remote memories，rehearsal、emotion和schema差异会与predictability混杂。"
+        ],
+        "keyPoints": [
+          "Go-CLS以generalization minimum决定transfer extent。",
+          "predictability高低可让同一episode的不同components有不同依赖。",
+          "model lesion prediction需用regularity/noise操纵检验。"
+        ],
+        "derivation": {
+          "title": "SNR 与optimal stopping的formal chain",
+          "setup": "把Student随replay time的generalization curve作为目标。",
+          "steps": [
+            {
+              "title": "定义predictability",
+              "explanation": "按原页使用 predictable component 与 noise 的 second-moment ratio；若二者 zero mean，它等于 variance ratio。",
+              "latex": "\\lambda=\\frac{\\mathbb E[(\\mathbf w_T^{\\mathsf T}\\mathbf x)^2]}{\\mathbb E[\\epsilon^2]}"
+            },
+            {
+              "title": "定义learning curve",
+              "explanation": "eg²(t)在early signal learning时下降，noise fitting占优后可能上升。",
+              "latex": "e_g^2(t)=\\mathbb E[(y-\\widehat y_t)^2]"
+            },
+            {
+              "title": "选择停止点",
+              "explanation": "取generalization error达到最小的replay time。",
+              "latex": "t^*=\\operatorname*{arg\\,min}_t e_g^2(t)"
+            },
+            {
+              "title": "形成component prediction",
+              "explanation": "高λ component倾向较晚停止，低λ component倾向较早停止或不转移。"
+            }
+          ],
+          "symbolNotes": [
+            "λ无量纲；t可为replay次数或物理时间。",
+            "eg²是population/test error，不是stored-sample error。"
+          ],
+          "unitsCheck": "second-moment ratio 无量纲；argmin 返回与 t 相同的单位。",
+          "limitCheck": "noise second moment→0 时 λ 增大且 overfit pressure 减弱；signal second moment→0 时 transfer 不能改善 new-sample prediction。"
+        },
+        "workedExample": {
+          "title": "比较两类memory component",
+          "problem": "假设 signal 与 noise 都是 zero mean。component A 的 signal variance=9、noise variance=1；B 的 signal variance=1、noise variance=4。计算 λ 并预测相对 stopping。",
+          "steps": [
+            "λA=9/1=9。",
+            "λB=1/4=0.25。",
+            "A高度predictable，允许更长Student training；B noise-dominant，应更早停止并保留Notebook dependence。"
+          ],
+          "result": "λA=9、λB=0.25，预测A比B更充分consolidate。",
+          "sanityCheck": "ratio越高表示可重复structure相对noise越强。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“停止巩固”不等于删除Notebook memory？",
+          "answer": "停止的是继续向 Student 拟合该 component；Notebook 仍可保留并支持 episodic-detail retrieval。"
+        },
+        "pitfalls": [
+          "把t*写成固定年龄阈值，不考虑predictability。",
+          "把Go-CLS lesion curve作为既定临床事实而非待检验prediction。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L27-FIG-A1",
+      "lecture": 27,
+      "moduleId": "l27-m3",
+      "title": "Teacher–Student–Notebook 的离线 replay 通道",
+      "alt": "Teacher 在线训练 Student，Student activity 与稀疏 Notebook code 成对存储，Notebook completion 后通过 V 重建 Student pattern 并离线回放",
+      "caption": "在线阶段 Teacher 产生训练经历，Student pattern z^(μ) 与 Notebook code ξ^(μ) 成对存储；检索时 Notebook 先把 partial cue 完成，再用 V 计算 z̃_i=Σ_jV_ijξ_j。虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。",
+      "sourceRefs": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 2
+        },
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 3
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "teacher",
+          "label": "Teacher\nexamples",
+          "x": 8,
+          "y": 70
+        },
+        {
+          "id": "student",
+          "label": "Student\nz^(μ)",
+          "x": 35,
+          "y": 70,
+          "tone": "accent"
+        },
+        {
+          "id": "notebook",
+          "label": "Notebook code\nξ^(μ)",
+          "x": 64,
+          "y": 70
+        },
+        {
+          "id": "complete",
+          "label": "completed code\nξ̂",
+          "x": 92,
+          "y": 70
+        },
+        {
+          "id": "replay",
+          "label": "replay target\nz̃ = Vξ̂",
+          "x": 64,
+          "y": 22,
+          "tone": "accent"
+        }
+      ],
+      "edges": [
+        {
+          "from": "teacher",
+          "to": "student",
+          "label": "online"
+        },
+        {
+          "from": "student",
+          "to": "notebook",
+          "label": "paired store"
+        },
+        {
+          "from": "notebook",
+          "to": "complete",
+          "label": "autoassociate"
+        },
+        {
+          "from": "complete",
+          "to": "replay",
+          "label": "read V"
+        },
+        {
+          "from": "replay",
+          "to": "student",
+          "label": "offline update",
+          "dashed": true
+        }
+      ],
+      "lectureTitle": "系统巩固与泛化"
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 empirical observations 与 standard consolidation",
@@ -341,7 +845,42 @@
     "需要明确区分 empirical observations、standard theory、TeacherStudent-Notebook formal model 和 Go-CLS predictions；需避免把模型预测写成已证实事实。"
   ],
   "errata": [
-    "1. Page 1 的 E.P. evidence 应作为 influential case evidence，不夸大单案例普遍性。 2. Pages 2-5 的 Teacher-Student-Notebook/Go-CLS 是 formal model 与 predictions，需与 empirical observations 分层。 3. Page 5 的 predictability ratio 是 signal-to-noise style quantity；具体 normalization 依模型 convention。"
+    {
+      "id": "L27-E01",
+      "lecture": 27,
+      "lectureTitle": "系统巩固与泛化",
+      "kind": "erratum",
+      "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+      "sourcePage": 1,
+      "sectionId": "l27-m1",
+      "originalIssue": "Page 1 的 E.P. evidence 应作为 influential case evidence，不夸大单案例普遍性。",
+      "explanation": "该记号或实现与后续推导所需的定义不一致，照字面使用会得到错误结果。",
+      "correction": "Page 1 的 E.P. evidence 应作为 influential case evidence，不夸大单案例普遍性"
+    },
+    {
+      "id": "L27-E02",
+      "lecture": 27,
+      "lectureTitle": "系统巩固与泛化",
+      "kind": "caution",
+      "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+      "sourcePage": 2,
+      "sectionId": "l27-m2",
+      "originalIssue": "Pages 2-5 的 Teacher-Student-Notebook/Go-CLS 是 formal model 与 predictions，需与 empirical observations 分层。",
+      "explanation": "formal model与empirical mapping要分层。",
+      "correction": null
+    },
+    {
+      "id": "L27-E03",
+      "lecture": 27,
+      "lectureTitle": "系统巩固与泛化",
+      "kind": "caution",
+      "sourceFile": "Lecture27-SystemsConsolidation-Generalization.pdf",
+      "sourcePage": 5,
+      "sectionId": "l27-m5",
+      "originalIssue": "Page 5 的 predictability ratio 是 signal-to-noise style quantity；具体 normalization 依模型 convention。",
+      "explanation": "原始第 5 页定义 signal-to-noise style quantity λ=E[(wT^T x)²]/E[ε²]。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -359,7 +898,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 27 讲：systems consolidation 改变哪两个方面？",
@@ -387,7 +926,7 @@
         "c": "这是“Go-CLS（generalization-optimized complementary learning systems, Go-CLS）”的定义。",
         "d": "该选项回答的是“Go-CLS 的 stopping criterion？”。"
       },
-      "explanation": "memory 的 anatomical dependence/locus 与 psychological quality/detail。"
+      "explanation": "memory 的 anatomical dependence/locus 与 psychological quality/detail。 standard systems consolidation描述recent memory初期依赖hippocampal indexing，随replay与reactivation，neocortical connections逐步能支持retrieval。"
     },
     {
       "id": "L27-Q02",
@@ -404,7 +943,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：standard account 中 hippocampal replay 的作用？",
@@ -432,7 +971,7 @@
         "c": "这是“互补学习系统（complementary learning systems, CLS）”的定义。",
         "d": "该选项回答的是“pattern completion 的益处？”。"
       },
-      "explanation": "重新激活 neocortical patterns、驱动 slow cortical learning 的候选机制。"
+      "explanation": "重新激活 neocortical patterns、驱动 slow cortical learning 的候选机制。 检验框架应提出role-specific predictions：快速hippocampal lesion影响one-shot recall，slow cortical learning影响跨episode regularities，replay disruption影响later transfer。"
     },
     {
       "id": "L27-Q03",
@@ -449,7 +988,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 27 讲：Teacher、Student、Notebook 分别代表什么？",
@@ -477,7 +1016,7 @@
         "b": "这条推理对应 Lecture27-SystemsConsolidation-Generalization.pdf 第 4 页。",
         "d": "这条推理对应 Lecture27-SystemsConsolidation-Generalization.pdf 第 2 页。"
       },
-      "explanation": "environment generative model、neocortical predictor、hippocampal one-shot associative memory。"
+      "explanation": "environment generative model、neocortical predictor、hippocampal one-shot associative memory。 lesion prediction 依模型版本：破坏 Notebook 会特别损害 recent one-shot 与 unpredictable details，而已经由 Student 学到的 shared structure 较保留。"
     },
     {
       "id": "L27-Q04",
@@ -494,7 +1033,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 27 讲：pattern separation 的计算益处？",
@@ -522,7 +1061,7 @@
         "b": "这是“语义记忆（semantic memory）”的定义。",
         "c": "这是“模式补全（pattern completion）”的定义。"
       },
-      "explanation": "减少相似 episodes 的 interference。"
+      "explanation": "减少相似 episodes 的 interference。 Notebook可保留sample-specific ε，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。"
     },
     {
       "id": "L27-Q05",
@@ -539,7 +1078,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：pattern completion 的益处？",
@@ -567,7 +1106,7 @@
         "c": "这是“模式分离（pattern separation）”的定义。",
         "d": "该选项回答的是“低 predictability detail 的 prediction？”。"
       },
-      "explanation": "partial cue 恢复完整 episode/replay seed。"
+      "explanation": "partial cue 恢复完整 episode/replay seed。 λ 高时跨 episodes 规律强，Student 从 replay 受益较久；λ 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。"
     },
     {
       "id": "L27-Q06",
@@ -584,7 +1123,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 27 讲：memory error 与 generalization error 区别？",
@@ -612,7 +1151,7 @@
         "c": "这是“泛化误差（generalization error）”的定义。",
         "d": "这是“记忆误差（memory error）”的定义。"
       },
-      "explanation": "前者在 stored samples；后者在新 samples/distribution。"
+      "explanation": "前者在 stored samples；后者在新 samples/distribution。 pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor ξ^(μ)。"
     },
     {
       "id": "L27-Q07",
@@ -629,7 +1168,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：为何 standard unlimited transfer 可过拟合？",
@@ -657,7 +1196,7 @@
         "b": "这是“过拟合（overfitting）”的定义。",
         "d": "这条推理对应 Lecture27-SystemsConsolidation-Generalization.pdf 第 5 页。"
       },
-      "explanation": "student 开始学习 notebook 中不可预测 episode noise。"
+      "explanation": "student 开始学习 notebook 中不可预测 episode noise。 这里 z 始终表示 Student activity，ξ 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。"
     },
     {
       "id": "L27-Q08",
@@ -674,7 +1213,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 27 讲：Go-CLS 的 stopping criterion？",
@@ -702,7 +1241,7 @@
         "b": "这是“教师-学生-笔记本（Teacher-Student-Notebook）”的定义。",
         "c": "该选项回答的是“standard account 中 hippocampal replay 的作用？”。"
       },
-      "explanation": "在 generalization error minimum/由 predictability 控制的时点停止或减弱 transfer。"
+      "explanation": "在 generalization error minimum/由 predictability 控制的时点停止或减弱 transfer。 λ 高时跨 episodes 规律强，Student 从 replay 受益较久；λ 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。"
     },
     {
       "id": "L27-Q09",
@@ -719,7 +1258,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 27 讲：高 predictability memory component 的 lesion prediction？",
@@ -747,7 +1286,7 @@
         "c": "这是“模式分离（pattern separation）”的定义。",
         "d": "该选项回答的是“为什么模型 prediction 不能写成事实？”。"
       },
-      "explanation": "随时间更 cortical/less hippocampus-dependent。"
+      "explanation": "随时间更 cortical/less hippocampus-dependent。 lesion predictions随memory content分化：高predictability structure逐步进入Student，remote retrieval较能耐受Notebook lesion；unpredictable episodic detail 长期由Notebook支持，即使remote也可能受损。"
     },
     {
       "id": "L27-Q10",
@@ -764,7 +1303,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：低 predictability detail 的 prediction？",
@@ -792,7 +1331,7 @@
         "c": "这是“记忆误差（memory error）”的定义。",
         "d": "这是“Go-CLS（generalization-optimized complementary learning systems, Go-CLS）”的定义。"
       },
-      "explanation": "即使 remote 仍较 hippocampus-dependent。"
+      "explanation": "即使 remote 仍较 hippocampus-dependent。 lesion predictions随memory content分化：高predictability structure逐步进入Student，remote retrieval较能耐受Notebook lesion；unpredictable episodic detail 长期由Notebook支持，即使remote也可能受损。"
     },
     {
       "id": "L27-Q11",
@@ -809,7 +1348,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 27 讲：λ_s 大表示什么？",
@@ -837,7 +1376,7 @@
         "b": "该选项回答的是“standard account 中 hippocampal replay 的作用？”。",
         "d": "这是“系统巩固（systems consolidation）”的定义。"
       },
-      "explanation": "signal variance 相对 unpredictable noise 大，可泛化 structure 强。"
+      "explanation": "signal variance 相对 unpredictable noise 大，可泛化 structure 强。 只有在 predictable signal 与 noise 都已中心化时，才可把它简写成 variance ratio。"
     },
     {
       "id": "L27-Q12",
@@ -854,7 +1393,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：为什么模型 prediction 不能写成事实？",
@@ -882,55 +1421,10 @@
         "b": "这是“泛化误差（generalization error）”的定义。",
         "c": "这是“Go-CLS（generalization-optimized complementary learning systems, Go-CLS）”的定义。"
       },
-      "explanation": "需独立 behavioral/neural/lesion experiments 验证，且存在替代理论。"
+      "explanation": "需独立 behavioral/neural/lesion experiments 验证，且存在替代理论。 模型核心是存在停止或gating，而非脑必须显式计算argmin。"
     },
     {
       "id": "L27-Q13",
-      "lecture": 27,
-      "sectionId": "lecture-27-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 1,
-          "section": "lecture-27-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Systems Consolidation and Generalization",
-        "Lecture27-SystemsConsolidation-Generalization.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 27 讲：根据 Lecture27-SystemsConsolidation-Generalization.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "memory locus/quality over time、patient E.P.、standard systems consolidation、hippocampal replay、episodic/semantic。"
-        },
-        {
-          "id": "b",
-          "text": "Teacher-Student-Notebook framework、generative teacher、 neocortical student、hippocampal one-shot notebook。"
-        },
-        {
-          "id": "c",
-          "text": "autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions。"
-        },
-        {
-          "id": "d",
-          "text": "overfitting unpredictable components、stopping consolidation、 Go-CLS、predictability/SNR、lesion predictions。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。",
-        "c": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。",
-        "d": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。"
-      },
-      "explanation": "memory locus/quality over time、patient E.P.、standard systems consolidation、hippocampal replay、episodic/semantic。"
-    },
-    {
-      "id": "L27-Q14",
       "lecture": 27,
       "sectionId": "lecture-27-source-1",
       "sourceAnchors": [
@@ -951,11 +1445,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
+          "text": "解释 hippocampal replay、compressed trajectories 与 neocortical reactivation 之间的 hypothesized link。"
         },
         {
           "id": "b",
-          "text": "解释 hippocampal replay、compressed trajectories 与 neocortical reactivation 之间的 hypothesized link。"
+          "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
         },
         {
           "id": "c",
@@ -966,13 +1460,58 @@
           "text": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。",
+        "b": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。",
         "c": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。",
         "d": "该陈述解释的是“linear teacher/student model、memory error、generalization error”，不是题干指定的关系。"
       },
-      "explanation": "解释 hippocampal replay、compressed trajectories 与 neocortical reactivation 之间的 hypothesized link。"
+      "explanation": "解释 hippocampal replay、compressed trajectories 与 neocortical reactivation 之间的 hypothesized link。 standard systems consolidation描述recent memory初期依赖hippocampal indexing，随replay与reactivation，neocortical connections逐步能支持retrieval。"
+    },
+    {
+      "id": "L27-Q14",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 2,
+          "section": "lecture-27-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Systems Consolidation and Generalization",
+        "Lecture27-SystemsConsolidation-Generalization.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 27 讲：若要解释\"Teacher-Student-Notebook framework、generative teacher、 neocortical student\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "讲解 generalization-optimized CLS (Go-CLS)、predictability/SNR-controlled transfer、lesion predictions，以及为什么 unpredictable episodic details remain hippocampusdependent。"
+        },
+        {
+          "id": "b",
+          "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
+        },
+        {
+          "id": "c",
+          "text": "因此，解释 memories 的 anatomical locus 与 psychological character 随时间改变；准确呈现 patient E.P. 与 recent/remote amnesia evidence，不夸大单案例。"
+        },
+        {
+          "id": "d",
+          "text": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
+        "c": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
+        "d": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。"
+      },
+      "explanation": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。 Teacher不对应\"教师脑区\"，Notebook不必保存raw sensory pixels，Student也不等于全neocortex。"
     },
     {
       "id": "L27-Q15",
@@ -989,84 +1528,39 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 27 讲：根据 Lecture27-SystemsConsolidation-Generalization.pdf 第 2 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 27 讲：阅读\"Teacher-Student-Notebook 的离线 replay 通道\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "memory locus/quality over time、patient E.P.、standard systems consolidation、hippocampal replay、episodic/semantic。"
+          "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
         },
         {
           "id": "b",
-          "text": "autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions。"
+          "text": "environment generative model、neocortical predictor、hippocampal one-shot associative memory。"
         },
         {
           "id": "c",
-          "text": "Teacher-Student-Notebook framework、generative teacher、 neocortical student、hippocampal one-shot notebook。"
+          "text": "虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。"
         },
         {
           "id": "d",
-          "text": "overfitting unpredictable components、stopping consolidation、 Go-CLS、predictability/SNR、lesion predictions。"
+          "text": "重新激活 neocortical patterns、驱动 slow cortical learning 的候选机制。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
-        "b": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。",
-        "d": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。"
+        "a": "这条推理对应 Lecture27-SystemsConsolidation-Generalization.pdf 第 2 页。",
+        "b": "该选项回答的是“Teacher、Student、Notebook 分别代表什么？”。",
+        "d": "该选项回答的是“standard account 中 hippocampal replay 的作用？”。"
       },
-      "explanation": "Teacher-Student-Notebook framework、generative teacher、 neocortical student、hippocampal one-shot notebook。"
+      "explanation": "虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。 沿用原始第 2-3 页符号，Teacher 从 z∼P(z|θ_T) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 ŷ=f_S(x;θ_S)。"
     },
     {
       "id": "L27-Q16",
       "lecture": 27,
-      "sectionId": "lecture-27-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 2,
-          "section": "lecture-27-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Systems Consolidation and Generalization",
-        "Lecture27-SystemsConsolidation-Generalization.pdf"
-      ],
-      "difficulty": 1,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 27 讲：若要解释\"Teacher-Student-Notebook framework、generative teacher、 neocortical student\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "讲解 generalization-optimized CLS (Go-CLS)、predictability/SNR-controlled transfer、lesion predictions，以及为什么 unpredictable episodic details remain hippocampusdependent。"
-        },
-        {
-          "id": "b",
-          "text": "因此，解释 memories 的 anatomical locus 与 psychological character 随时间改变；准确呈现 patient E.P. 与 recent/remote amnesia evidence，不夸大单案例。"
-        },
-        {
-          "id": "c",
-          "text": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。"
-        },
-        {
-          "id": "d",
-          "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
-        "b": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。"
-      },
-      "explanation": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
-    },
-    {
-      "id": "L27-Q17",
-      "lecture": 27,
       "sectionId": "lecture-27-source-3",
       "sourceAnchors": [
         {
@@ -1079,52 +1573,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 27 讲：根据 Lecture27-SystemsConsolidation-Generalization.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions。"
-        },
-        {
-          "id": "b",
-          "text": "memory locus/quality over time、patient E.P.、standard systems consolidation、hippocampal replay、episodic/semantic。"
-        },
-        {
-          "id": "c",
-          "text": "linear teacher/student model、memory error、generalization error、standard complementary learning systems。"
-        },
-        {
-          "id": "d",
-          "text": "overfitting unpredictable components、stopping consolidation、 Go-CLS、predictability/SNR、lesion predictions。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“linear teacher/student model、memory error、generalization error”，不是题干指定的关系。",
-        "d": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。"
-      },
-      "explanation": "autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions。"
-    },
-    {
-      "id": "L27-Q18",
-      "lecture": 27,
-      "sectionId": "lecture-27-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 3,
-          "section": "lecture-27-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Systems Consolidation and Generalization",
-        "Lecture27-SystemsConsolidation-Generalization.pdf"
-      ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 27 讲：若要解释\"autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions\"中的机制或推导，哪条推理链成立？",
@@ -1135,27 +1584,27 @@
         },
         {
           "id": "b",
-          "text": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。"
-        },
-        {
-          "id": "c",
           "text": "讲解 generalization-optimized CLS (Go-CLS)、predictability/SNR-controlled transfer、lesion predictions，以及为什么 unpredictable episodic details remain hippocampusdependent。"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
+        },
+        {
+          "id": "d",
+          "text": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
-        "c": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。"
+        "b": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。"
       },
-      "explanation": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。"
+      "explanation": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。 pattern separation 把相似 Student patterns z^(μ) 映成低-overlap Notebook codes ξ^(μ)，减少新 episode 覆盖旧 episode。"
     },
     {
-      "id": "L27-Q19",
+      "id": "L27-Q17",
       "lecture": 27,
       "sectionId": "lecture-27-source-4",
       "sourceAnchors": [
@@ -1170,127 +1619,37 @@
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 27 讲：根据 Lecture27-SystemsConsolidation-Generalization.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions。"
-        },
-        {
-          "id": "b",
-          "text": "overfitting unpredictable components、stopping consolidation、 Go-CLS、predictability/SNR、lesion predictions。"
-        },
-        {
-          "id": "c",
-          "text": "linear teacher/student model、memory error、generalization error、standard complementary learning systems。"
-        },
-        {
-          "id": "d",
-          "text": "memory locus/quality over time、patient E.P.、standard systems consolidation、hippocampal replay、episodic/semantic。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。",
-        "b": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
-        "d": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。"
-      },
-      "explanation": "linear teacher/student model、memory error、generalization error、standard complementary learning systems。"
-    },
-    {
-      "id": "L27-Q20",
-      "lecture": 27,
-      "sectionId": "lecture-27-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 4,
-          "section": "lecture-27-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Systems Consolidation and Generalization",
-        "Lecture27-SystemsConsolidation-Generalization.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 27 讲：若要解释\"linear teacher/student model、memory error、generalization error\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
+          "text": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。"
+        },
+        {
+          "id": "b",
           "text": "因此，解释 memories 的 anatomical locus 与 psychological character 随时间改变；准确呈现 patient E.P. 与 recent/remote amnesia evidence，不夸大单案例。"
         },
         {
-          "id": "b",
+          "id": "c",
           "text": "讲解 generalization-optimized CLS (Go-CLS)、predictability/SNR-controlled transfer、lesion predictions，以及为什么 unpredictable episodic details remain hippocampusdependent。"
         },
         {
-          "id": "c",
+          "id": "d",
           "text": "逐项重构 Teacher-Student-Notebook：teacher/environment generative model、 student/neocortex predictive learner、notebook/hippocampus one-shot autoassociative memory。"
-        },
-        {
-          "id": "d",
-          "text": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
-        "b": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。"
-      },
-      "explanation": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。"
-    },
-    {
-      "id": "L27-Q21",
-      "lecture": 27,
-      "sectionId": "lecture-27-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 5,
-          "section": "lecture-27-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Systems Consolidation and Generalization",
-        "Lecture27-SystemsConsolidation-Generalization.pdf"
-      ],
-      "difficulty": 1,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 27 讲：根据 Lecture27-SystemsConsolidation-Generalization.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "overfitting unpredictable components、stopping consolidation、 Go-CLS、predictability/SNR、lesion predictions。"
-        },
-        {
-          "id": "b",
-          "text": "Teacher-Student-Notebook framework、generative teacher、 neocortical student、hippocampal one-shot notebook。"
-        },
-        {
-          "id": "c",
-          "text": "autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions。"
-        },
-        {
-          "id": "d",
-          "text": "linear teacher/student model、memory error、generalization error、standard complementary learning systems。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。",
-        "c": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。",
-        "d": "该陈述解释的是“linear teacher/student model、memory error、generalization error”，不是题干指定的关系。"
+        "b": "该陈述解释的是“memory locus/quality over time、patient E.P.、standard systems consolidation”，不是题干指定的关系。",
+        "c": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。"
       },
-      "explanation": "overfitting unpredictable components、stopping consolidation、 Go-CLS、predictability/SNR、lesion predictions。"
+      "explanation": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。 原始第 4 页的 memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：e_m²=(1/P)Σ_μ(y_μ-wS^T x tilde_μ)²，并注明 x tilde_μ≈x_μ 是理想 recall 极限。"
     },
     {
-      "id": "L27-Q22",
+      "id": "L27-Q18",
       "lecture": 27,
       "sectionId": "lecture-27-source-5",
       "sourceAnchors": [
@@ -1304,7 +1663,7 @@
         "Systems Consolidation and Generalization",
         "Lecture27-SystemsConsolidation-Generalization.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 27 讲：若要解释\"overfitting unpredictable components、stopping consolidation、 Go-CLS\"中的机制或推导，哪条推理链成立？",
@@ -1332,10 +1691,680 @@
         "c": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。",
         "d": "该陈述解释的是“autoassociative notebook、pattern separation/completion、student-notebook Hebbian interactions”，不是题干指定的关系。"
       },
-      "explanation": "讲解 generalization-optimized CLS (Go-CLS)、predictability/SNR-controlled transfer、lesion predictions，以及为什么 unpredictable episodic details remain hippocampusdependent。"
+      "explanation": "讲解 generalization-optimized CLS (Go-CLS)、predictability/SNR-controlled transfer、lesion predictions，以及为什么 unpredictable episodic details remain hippocampusdependent。 lesion predictions随memory content分化：高predictability structure逐步进入Student，remote retrieval较能耐受Notebook lesion；unpredictable episodic detail 长期由Notebook支持，即使remote也可能受损。"
+    },
+    {
+      "id": "L27-Q19",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 1,
+          "section": "lecture-27-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Recent/remote memory、E.P. 与systems consolidation证据"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 27 讲：为什么remote memory可答对事实不等于原episode完整保存？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。"
+        },
+        {
+          "id": "b",
+          "text": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。"
+        },
+        {
+          "id": "c",
+          "text": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。"
+        },
+        {
+          "id": "d",
+          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。 hippocampal replay在rest/sleep中出现compressed sequences，cortical patterns可共同reactivate，支持信息交换hypothesis。关联并不证明replay是唯一 consolidation cause；选择性sequence disruption与subsequent remote-memory testing能提供更强causal evidence，同时需控制sleep architecture。"
+    },
+    {
+      "id": "L27-Q20",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 1,
+          "section": "lecture-27-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Recent/remote memory、E.P. 与systems consolidation证据",
+        "拆分remote memory得分"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 27 讲：完成\"某patient remote event的gist正确率90%，episodic detail正确率30%；control分别95%与80%。计算两项deficit。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "A、B交错更有机会保留旧performance。"
+        },
+        {
+          "id": "b",
+          "text": "shared count从2降到0。"
+        },
+        {
+          "id": "c",
+          "text": "memory error 可为 0，而 expected generalization error 为 2。"
+        },
+        {
+          "id": "d",
+          "text": "gist接近保留而detail显著受损，支持分层报告。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "gist接近保留而detail显著受损，支持分层报告。 计算路径：gist deficit=95%-90%=5 percentage points。 detail deficit=80%-30%=50 points。 总称\"remote memory 70%\"会掩盖两类依赖的巨大差异。"
+    },
+    {
+      "id": "L27-Q21",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 1,
+          "section": "lecture-27-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Recent/remote memory、E.P. 与systems consolidation证据",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 27 讲：得到\"gist接近保留而detail显著受损，支持分层报告。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。"
+        },
+        {
+          "id": "b",
+          "text": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。"
+        },
+        {
+          "id": "c",
+          "text": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。"
+        },
+        {
+          "id": "d",
+          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。 这个检查对应题设\"某patient remote event的gist正确率90%，episodic detail正确率30%；control分别95%与80%。计算两项deficit。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L27-Q22",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 2,
+          "section": "lecture-27-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Teacher–Student–Notebook：三种角色与replay通道"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 27 讲：为什么Notebook replay不必逐像素复制原experience？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。"
+        },
+        {
+          "id": "b",
+          "text": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。"
+        },
+        {
+          "id": "c",
+          "text": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。"
+        },
+        {
+          "id": "d",
+          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。 formal model与empirical mapping要分层。Teacher不对应\"教师脑区\"，Notebook不必保存raw sensory pixels，Student也不等于全neocortex。检验框架应提出role-specific predictions：快速hippocampal lesion影响one-shot recall，slow cortical learning影响跨episode regularities，replay disruption影响later transfer。"
     },
     {
       "id": "L27-Q23",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 2,
+          "section": "lecture-27-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Teacher–Student–Notebook：三种角色与replay通道",
+        "比较interleaved与blocked replay"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 27 讲：完成\"Student已学old pattern A，新experience B到来。每次gradient step把当前target error减半。若只重放B两次，A无更新；若A、B各一次，哪个更能保留A？\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "gist接近保留而detail显著受损，支持分层报告。"
+        },
+        {
+          "id": "b",
+          "text": "shared count从2降到0。"
+        },
+        {
+          "id": "c",
+          "text": "A、B交错更有机会保留旧performance。"
+        },
+        {
+          "id": "d",
+          "text": "memory error 可为 0，而 expected generalization error 为 2。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "A、B交错更有机会保留旧performance。 计算路径：blocked B两次只修正B，A面对shared weights的干扰没有rehearsal。 interleaved schedule包含一次A，可把被B step扰动的A error拉回。 具体数值依feature overlap，但机制上旧sample rehearsal约束catastrophic forgetting。"
+    },
+    {
+      "id": "L27-Q24",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 2,
+          "section": "lecture-27-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Teacher–Student–Notebook：三种角色与replay通道",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 27 讲：得到\"A、B交错更有机会保留旧performance。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。"
+        },
+        {
+          "id": "b",
+          "text": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。"
+        },
+        {
+          "id": "c",
+          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+        },
+        {
+          "id": "d",
+          "text": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。 这个检查对应题设\"Student已学old pattern A，新experience B到来。每次gradient step把当前target error减半。若只重放B两次，A无更新；若A、B各一次，哪个更能保留A？\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L27-Q25",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 3,
+          "section": "lecture-27-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Autoassociative Notebook：separation、completion 与双向连接"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 27 讲：为什么pattern separation越强不一定越好？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。"
+        },
+        {
+          "id": "b",
+          "text": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。"
+        },
+        {
+          "id": "c",
+          "text": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。"
+        },
+        {
+          "id": "d",
+          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。 Notebook 不必永远独立保存每个 sensory detail；它可索引 distributed cortical components。lesion prediction 依模型版本：破坏 Notebook 会特别损害 recent one-shot 与 unpredictable details，而已经由 Student 学到的 shared structure 较保留。不能从 pattern-completion 术语直接推出特定临床时间梯度。"
+    },
+    {
+      "id": "L27-Q26",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 3,
+          "section": "lecture-27-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Autoassociative Notebook：separation、completion 与双向连接",
+        "比较code overlap"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 27 讲：完成\"三个 binary Notebook active sets：ξ1={1,2,3,4}，ξ2={3,4,5,6}，separation 后 ξ2′={5,6,7,8}。计算与 ξ1 共享的 active units 数。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "gist接近保留而detail显著受损，支持分层报告。"
+        },
+        {
+          "id": "b",
+          "text": "shared count从2降到0。"
+        },
+        {
+          "id": "c",
+          "text": "A、B交错更有机会保留旧performance。"
+        },
+        {
+          "id": "d",
+          "text": "memory error 可为 0，而 expected generalization error 为 2。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "shared count从2降到0。 计算路径：原 ξ1 与 ξ2 共享 {3,4}，数量 2。 ξ1 与 ξ2′ 没有共享 unit，数量 0。 separation 降低 overlap，但还需测试 partial cue 是否能指向正确 code。"
+    },
+    {
+      "id": "L27-Q27",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 3,
+          "section": "lecture-27-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Autoassociative Notebook：separation、completion 与双向连接",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 27 讲：得到\"shared count从2降到0。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。"
+        },
+        {
+          "id": "b",
+          "text": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。"
+        },
+        {
+          "id": "c",
+          "text": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。"
+        },
+        {
+          "id": "d",
+          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。 这个检查对应题设\"三个 binary Notebook active sets：ξ1={1,2,3,4}，ξ2={3,4,5,6}，separation 后 ξ2′={5,6,7,8}。计算与 ξ1 共享的 active units 数。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L27-Q28",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 4,
+          "section": "lecture-27-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Linear Teacher/Student：memory error 与generalization error"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 27 讲：为什么generalization error最低也可能大于零？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。"
+        },
+        {
+          "id": "b",
+          "text": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。"
+        },
+        {
+          "id": "c",
+          "text": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。"
+        },
+        {
+          "id": "d",
+          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。 实验上 training memory 与 generalization 需用不同stimuli测量。用同一episodes既训练又测试只得到memory error，不能声称schema learning。还应报告P、input dimension、noise variance与learning time，因为overfitting发生位置由这些量决定。"
+    },
+    {
+      "id": "L27-Q29",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 4,
+          "section": "lecture-27-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Linear Teacher/Student：memory error 与generalization error",
+        "手算training与test差异"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 27 讲：完成\"一维 Teacher wT=2、Student wS=3。对 fresh x=1，noise variance=1，求 expected generalization squared error；另有 stored sample 的 ε=1、y=3，Notebook 恰好 recall x tilde=1。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "memory error 可为 0，而 expected generalization error 为 2。"
+        },
+        {
+          "id": "b",
+          "text": "gist接近保留而detail显著受损，支持分层报告。"
+        },
+        {
+          "id": "c",
+          "text": "A、B交错更有机会保留旧performance。"
+        },
+        {
+          "id": "d",
+          "text": "shared count从2降到0。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "memory error 可为 0，而 expected generalization error 为 2。 计算路径：weight mismatch为2-3=-1，在x=1时平方1。 加irreducible noise variance1，expected test error为2。 stored sample 上 Student 接收 x tilde=1，故 ŷ=3、y=3，memory error 为 0。"
+    },
+    {
+      "id": "L27-Q30",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 4,
+          "section": "lecture-27-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Linear Teacher/Student：memory error 与generalization error",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 27 讲：得到\"memory error 可为 0，而 expected generalization error 为 2。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。"
+        },
+        {
+          "id": "b",
+          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+        },
+        {
+          "id": "c",
+          "text": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。"
+        },
+        {
+          "id": "d",
+          "text": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。 这个检查对应题设\"一维 Teacher wT=2、Student wS=3。对 fresh x=1，noise variance=1，求 expected generalization squared error；另有 stored sample 的 ε=1、y=3，Notebook 恰好 recall x tilde=1。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L27-Q31",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 5,
+          "section": "lecture-27-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Go-CLS：predictability、停止巩固与lesion predictions"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 27 讲：为什么\"停止巩固\"不等于删除Notebook memory？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "事实可由semantic knowledge、rehearsal或schema重建；需单独测时空与感知细节。"
+        },
+        {
+          "id": "b",
+          "text": "只要重建Student学习所需的task-relevant statistics或targets，就能充当训练sample；具体保真度是模型假设。"
+        },
+        {
+          "id": "c",
+          "text": "停止的是继续向 Student 拟合该 component；Notebook 仍可保留并支持 episodic-detail retrieval。"
+        },
+        {
+          "id": "d",
+          "text": "若相似partial cues被映得毫无连续性，retrieval address会脆弱；还会耗费有限code space。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "停止的是继续向 Student 拟合该 component；Notebook 仍可保留并支持 episodic-detail retrieval。 Go-CLS是formal model与prediction，不是已完成的empirical定论。检验可操纵training-set regularity与noise，匹配age和exposure，再测hippocampal disruption对gist和detail的影响。若只比较自然recent/remote memories，rehearsal、emotion和schema差异会与predictability混杂。"
+    },
+    {
+      "id": "L27-Q32",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 5,
+          "section": "lecture-27-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Go-CLS：predictability、停止巩固与lesion predictions",
+        "比较两类memory component"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 27 讲：完成\"假设 signal 与 noise 都是 zero mean。component A 的 signal variance=9、noise variance=1；B 的 signal variance=1、noise variance=4。计算 λ 并预测相对 stopping。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "gist接近保留而detail显著受损，支持分层报告。"
+        },
+        {
+          "id": "b",
+          "text": "A、B交错更有机会保留旧performance。"
+        },
+        {
+          "id": "c",
+          "text": "shared count从2降到0。"
+        },
+        {
+          "id": "d",
+          "text": "λA=9、λB=0.25，预测A比B更充分consolidate。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "λA=9、λB=0.25，预测A比B更充分consolidate。 计算路径：λA=9/1=9。 λB=1/4=0.25。 A高度predictable，允许更长Student training；B noise-dominant，应更早停止并保留Notebook dependence。"
+    },
+    {
+      "id": "L27-Q33",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 5,
+          "section": "lecture-27-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Go-CLS：predictability、停止巩固与lesion predictions",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 27 讲：得到\"λA=9、λB=0.25，预测A比B更充分consolidate。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "ratio越高表示可重复structure相对noise越强。"
+        },
+        {
+          "id": "b",
+          "text": "两项均与各自control比较，不能直接把30%与90%当同一difficulty。"
+        },
+        {
+          "id": "c",
+          "text": "若A与B完全用独立weights，两种schedule对A相同，说明interference是前提。"
+        },
+        {
+          "id": "d",
+          "text": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "ratio越高表示可重复structure相对noise越强。 这个检查对应题设\"假设 signal 与 noise 都是 zero mean。component A 的 signal variance=9、noise variance=1；B 的 signal variance=1、noise variance=4。计算 λ 并预测相对 stopping。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L27-Q34",
       "lecture": 27,
       "sectionId": "lecture-27-source-1",
       "sourceAnchors": [
@@ -1349,7 +2378,7 @@
         "系统巩固",
         "systems consolidation"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"memory dependence/representation 在 brain systems 间随时间变化。\"称为什么？",
@@ -1360,27 +2389,27 @@
         },
         {
           "id": "b",
-          "text": "语义记忆（semantic memory）"
+          "text": "系统巩固（systems consolidation）"
         },
         {
           "id": "c",
-          "text": "系统巩固（systems consolidation）"
+          "text": "语义记忆（semantic memory）"
         },
         {
           "id": "d",
           "text": "重放（replay）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“情景记忆（episodic memory）”指：特定事件、时间、地点与细节的 memory。",
-        "b": "“语义记忆（semantic memory）”指：较抽象、generalized knowledge。",
+        "c": "“语义记忆（semantic memory）”指：较抽象、generalized knowledge。",
         "d": "“重放（replay）”指：休息/睡眠中对 experience-related neural sequences 的再激活。"
       },
       "explanation": "系统巩固（systems consolidation）：memory dependence/representation 在 brain systems 间随时间变化。"
     },
     {
-      "id": "L27-Q24",
+      "id": "L27-Q35",
       "lecture": 27,
       "sectionId": "lecture-27-source-1",
       "sourceAnchors": [
@@ -1394,7 +2423,7 @@
         "情景记忆",
         "episodic memory"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"特定事件、时间、地点与细节的 memory。\"称为什么？",
@@ -1409,23 +2438,23 @@
         },
         {
           "id": "c",
-          "text": "互补学习系统（complementary learning systems, CLS）"
+          "text": "情景记忆（episodic memory）"
         },
         {
           "id": "d",
-          "text": "情景记忆（episodic memory）"
+          "text": "互补学习系统（complementary learning systems, CLS）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“语义记忆（semantic memory）”指：较抽象、generalized knowledge。",
         "b": "“重放（replay）”指：休息/睡眠中对 experience-related neural sequences 的再激活。",
-        "c": "“互补学习系统（complementary learning systems, CLS）”指：fast hippocampal learning 与 slow cortical learning 组成的框架。"
+        "d": "“互补学习系统（complementary learning systems, CLS）”指：fast hippocampal learning 与 slow cortical learning 组成的框架。"
       },
-      "explanation": "情景记忆（episodic memory）：特定事件、时间、地点与细节的 memory。"
+      "explanation": "情景记忆（episodic memory）：特定事件、时间、地点与细节的 memory。 memory psychological character也可能变化：rich episodic detail逐渐semanticize，gist保留而context丢失。"
     },
     {
-      "id": "L27-Q25",
+      "id": "L27-Q36",
       "lecture": 27,
       "sectionId": "lecture-27-source-1",
       "sourceAnchors": [
@@ -1439,38 +2468,38 @@
         "语义记忆",
         "semantic memory"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"较抽象、generalized knowledge。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "语义记忆（semantic memory）"
-        },
-        {
-          "id": "b",
           "text": "重放（replay）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "互补学习系统（complementary learning systems, CLS）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "教师-学生-笔记本（Teacher-Student-Notebook）"
+        },
+        {
+          "id": "d",
+          "text": "语义记忆（semantic memory）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“重放（replay）”指：休息/睡眠中对 experience-related neural sequences 的再激活。",
-        "c": "“互补学习系统（complementary learning systems, CLS）”指：fast hippocampal learning 与 slow cortical learning 组成的框架。",
-        "d": "“教师-学生-笔记本（Teacher-Student-Notebook）”指：generative source、slow predictor 与 one-shot associative memory 的形式角色。"
+        "a": "“重放（replay）”指：休息/睡眠中对 experience-related neural sequences 的再激活。",
+        "b": "“互补学习系统（complementary learning systems, CLS）”指：fast hippocampal learning 与 slow cortical learning 组成的框架。",
+        "c": "“教师-学生-笔记本（Teacher-Student-Notebook）”指：generative source、slow predictor 与 one-shot associative memory 的形式角色。"
       },
-      "explanation": "语义记忆（semantic memory）：较抽象、generalized knowledge。"
+      "explanation": "语义记忆（semantic memory）：较抽象、generalized knowledge。 这类案例有巨大理论价值，也受single-case、lesion spread、测试材料、premorbid exposure和semantic support限制；不能从一条autobiographical score外推所有记忆类型。"
     },
     {
-      "id": "L27-Q26",
+      "id": "L27-Q37",
       "lecture": 27,
       "sectionId": "lecture-27-source-1",
       "sourceAnchors": [
@@ -1491,11 +2520,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "互补学习系统（complementary learning systems, CLS）"
+          "text": "重放（replay）"
         },
         {
           "id": "b",
-          "text": "重放（replay）"
+          "text": "互补学习系统（complementary learning systems, CLS）"
         },
         {
           "id": "c",
@@ -1506,16 +2535,16 @@
           "text": "模式分离（pattern separation）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“互补学习系统（complementary learning systems, CLS）”指：fast hippocampal learning 与 slow cortical learning 组成的框架。",
+        "b": "“互补学习系统（complementary learning systems, CLS）”指：fast hippocampal learning 与 slow cortical learning 组成的框架。",
         "c": "“教师-学生-笔记本（Teacher-Student-Notebook）”指：generative source、slow predictor 与 one-shot associative memory 的形式角色。",
         "d": "“模式分离（pattern separation）”指：把相似 experiences 映射为较不同 memory codes。"
       },
       "explanation": "重放（replay）：休息/睡眠中对 experience-related neural sequences 的再激活。"
     },
     {
-      "id": "L27-Q27",
+      "id": "L27-Q38",
       "lecture": 27,
       "sectionId": "lecture-27-source-4",
       "sourceAnchors": [
@@ -1529,7 +2558,7 @@
         "互补学习系统",
         "complementary learning systems, CLS"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"fast hippocampal learning 与 slow cortical learning 组成的框架。\"称为什么？",
@@ -1540,27 +2569,27 @@
         },
         {
           "id": "b",
-          "text": "模式分离（pattern separation）"
+          "text": "互补学习系统（complementary learning systems, CLS）"
         },
         {
           "id": "c",
-          "text": "互补学习系统（complementary learning systems, CLS）"
+          "text": "模式分离（pattern separation）"
         },
         {
           "id": "d",
           "text": "模式补全（pattern completion）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“教师-学生-笔记本（Teacher-Student-Notebook）”指：generative source、slow predictor 与 one-shot associative memory 的形式角色。",
-        "b": "“模式分离（pattern separation）”指：把相似 experiences 映射为较不同 memory codes。",
+        "c": "“模式分离（pattern separation）”指：把相似 experiences 映射为较不同 memory codes。",
         "d": "“模式补全（pattern completion）”指：由 partial cue 恢复 stored episode。"
       },
       "explanation": "互补学习系统（complementary learning systems, CLS）：fast hippocampal learning 与 slow cortical learning 组成的框架。"
     },
     {
-      "id": "L27-Q28",
+      "id": "L27-Q39",
       "lecture": 27,
       "sectionId": "lecture-27-source-4",
       "sourceAnchors": [
@@ -1574,7 +2603,7 @@
         "教师-学生-笔记本",
         "Teacher-Student-Notebook"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"generative source、slow predictor 与 one-shot associative memory 的形式角色。\"称为什么？",
@@ -1589,23 +2618,23 @@
         },
         {
           "id": "c",
-          "text": "记忆误差（memory error）"
+          "text": "教师-学生-笔记本（Teacher-Student-Notebook）"
         },
         {
           "id": "d",
-          "text": "教师-学生-笔记本（Teacher-Student-Notebook）"
+          "text": "记忆误差（memory error）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“模式分离（pattern separation）”指：把相似 experiences 映射为较不同 memory codes。",
         "b": "“模式补全（pattern completion）”指：由 partial cue 恢复 stored episode。",
-        "c": "“记忆误差（memory error）”指：在 stored examples 上的 reconstruction/prediction error。"
+        "d": "“记忆误差（memory error）”指：在 stored examples 上的 reconstruction/prediction error。"
       },
       "explanation": "教师-学生-笔记本（Teacher-Student-Notebook）：generative source、slow predictor 与 one-shot associative memory 的形式角色。"
     },
     {
-      "id": "L27-Q29",
+      "id": "L27-Q40",
       "lecture": 27,
       "sectionId": "lecture-27-source-2",
       "sourceAnchors": [
@@ -1619,38 +2648,38 @@
         "模式分离",
         "pattern separation"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"把相似 experiences 映射为较不同 memory codes。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "模式分离（pattern separation）"
-        },
-        {
-          "id": "b",
           "text": "模式补全（pattern completion）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "记忆误差（memory error）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "泛化误差（generalization error）"
+        },
+        {
+          "id": "d",
+          "text": "模式分离（pattern separation）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“模式补全（pattern completion）”指：由 partial cue 恢复 stored episode。",
-        "c": "“记忆误差（memory error）”指：在 stored examples 上的 reconstruction/prediction error。",
-        "d": "“泛化误差（generalization error）”指：对新 samples 的 expected prediction error。"
+        "a": "“模式补全（pattern completion）”指：由 partial cue 恢复 stored episode。",
+        "b": "“记忆误差（memory error）”指：在 stored examples 上的 reconstruction/prediction error。",
+        "c": "“泛化误差（generalization error）”指：对新 samples 的 expected prediction error。"
       },
       "explanation": "模式分离（pattern separation）：把相似 experiences 映射为较不同 memory codes。"
     },
     {
-      "id": "L27-Q30",
+      "id": "L27-Q41",
       "lecture": 27,
       "sectionId": "lecture-27-source-2",
       "sourceAnchors": [
@@ -1664,18 +2693,18 @@
         "模式补全",
         "pattern completion"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"由 partial cue 恢复 stored episode。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "记忆误差（memory error）"
+          "text": "模式补全（pattern completion）"
         },
         {
           "id": "b",
-          "text": "模式补全（pattern completion）"
+          "text": "记忆误差（memory error）"
         },
         {
           "id": "c",
@@ -1686,16 +2715,16 @@
           "text": "过拟合（overfitting）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“记忆误差（memory error）”指：在 stored examples 上的 reconstruction/prediction error。",
+        "b": "“记忆误差（memory error）”指：在 stored examples 上的 reconstruction/prediction error。",
         "c": "“泛化误差（generalization error）”指：对新 samples 的 expected prediction error。",
         "d": "“过拟合（overfitting）”指：拟合 sample-specific noise 导致新数据表现变差。"
       },
-      "explanation": "模式补全（pattern completion）：由 partial cue 恢复 stored episode。"
+      "explanation": "模式补全（pattern completion）：由 partial cue 恢复 stored episode。 replay是consolidation channel：Notebook pattern completion产生approximate experience，Student对replayed targets更新。"
     },
     {
-      "id": "L27-Q31",
+      "id": "L27-Q42",
       "lecture": 27,
       "sectionId": "lecture-27-source-3",
       "sourceAnchors": [
@@ -1720,27 +2749,27 @@
         },
         {
           "id": "b",
-          "text": "过拟合（overfitting）"
+          "text": "记忆误差（memory error）"
         },
         {
           "id": "c",
-          "text": "记忆误差（memory error）"
+          "text": "过拟合（overfitting）"
         },
         {
           "id": "d",
           "text": "Go-CLS（generalization-optimized complementary learning systems, Go-CLS）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“泛化误差（generalization error）”指：对新 samples 的 expected prediction error。",
-        "b": "“过拟合（overfitting）”指：拟合 sample-specific noise 导致新数据表现变差。",
+        "c": "“过拟合（overfitting）”指：拟合 sample-specific noise 导致新数据表现变差。",
         "d": "“Go-CLS（generalization-optimized complementary learning systems, Go-CLS）”指：以 generalization 与 predictability 控制 consolidation 的模型。"
       },
       "explanation": "记忆误差（memory error）：在 stored examples 上的 reconstruction/prediction error。"
     },
     {
-      "id": "L27-Q32",
+      "id": "L27-Q43",
       "lecture": 27,
       "sectionId": "lecture-27-source-3",
       "sourceAnchors": [
@@ -1754,7 +2783,7 @@
         "泛化误差",
         "generalization error"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 27 讲：本讲把\"对新 samples 的 expected prediction error。\"称为什么？",
@@ -1769,23 +2798,23 @@
         },
         {
           "id": "c",
-          "text": "系统巩固（systems consolidation）"
+          "text": "泛化误差（generalization error）"
         },
         {
           "id": "d",
-          "text": "泛化误差（generalization error）"
+          "text": "系统巩固（systems consolidation）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“过拟合（overfitting）”指：拟合 sample-specific noise 导致新数据表现变差。",
         "b": "“Go-CLS（generalization-optimized complementary learning systems, Go-CLS）”指：以 generalization 与 predictability 控制 consolidation 的模型。",
-        "c": "“系统巩固（systems consolidation）”指：memory dependence/representation 在 brain systems 间随时间变化。"
+        "d": "“系统巩固（systems consolidation）”指：memory dependence/representation 在 brain systems 间随时间变化。"
       },
       "explanation": "泛化误差（generalization error）：对新 samples 的 expected prediction error。"
     },
     {
-      "id": "L27-Q33",
+      "id": "L27-Q44",
       "lecture": 27,
       "sectionId": "lecture-27-source-4",
       "sourceAnchors": [
@@ -1805,31 +2834,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "signal+unpredictable noise"
-        },
-        {
-          "id": "b",
           "text": "linear model"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "stored patterns"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "new experiences"
+        },
+        {
+          "id": "d",
+          "text": "signal+unpredictable noise"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "这是“student predictor”的条件，不是题干公式的条件。",
-        "c": "这是“memory/training error”的条件，不是题干公式的条件。",
-        "d": "这是“population generalization error”的条件，不是题干公式的条件。"
+        "a": "这是“student predictor”的条件，不是题干公式的条件。",
+        "b": "这是“memory/training error”的条件，不是题干公式的条件。",
+        "c": "这是“population generalization error”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear teacher 的适用条件：signal+unpredictable noise"
+      "explanation": "linear teacher 的适用条件：signal+unpredictable noise linear Teacher 产生 y=wT^T x+ε，其中 ε 是不可由 x 预测的 episode noise；Student 对新 input 预测 ŷ=wS^T x。"
     },
     {
-      "id": "L27-Q34",
+      "id": "L27-Q45",
       "lecture": 27,
       "sectionId": "lecture-27-source-4",
       "sourceAnchors": [
@@ -1842,18 +2871,18 @@
       "conceptTags": [
         "student predictor"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：使用\"student predictor\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "signal+unpredictable noise"
+          "text": "linear model"
         },
         {
           "id": "b",
-          "text": "linear model"
+          "text": "signal+unpredictable noise"
         },
         {
           "id": "c",
@@ -1864,16 +2893,16 @@
           "text": "new experiences"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“linear teacher”的条件，不是题干公式的条件。",
+        "b": "这是“linear teacher”的条件，不是题干公式的条件。",
         "c": "这是“memory/training error”的条件，不是题干公式的条件。",
         "d": "这是“population generalization error”的条件，不是题干公式的条件。"
       },
-      "explanation": "student predictor 的适用条件：linear model"
+      "explanation": "student predictor 的适用条件：linear model linear Teacher 产生 y=wT^T x+ε，其中 ε 是不可由 x 预测的 episode noise；Student 对新 input 预测 ŷ=wS^T x。"
     },
     {
-      "id": "L27-Q35",
+      "id": "L27-Q46",
       "lecture": 27,
       "sectionId": "lecture-27-source-3",
       "sourceAnchors": [
@@ -1886,7 +2915,7 @@
       "conceptTags": [
         "memory/training error"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：使用\"memory/training error\"时，哪项条件或约定不可省略？",
@@ -1897,27 +2926,27 @@
         },
         {
           "id": "b",
-          "text": "linear model"
+          "text": "stored patterns"
         },
         {
           "id": "c",
-          "text": "stored patterns"
+          "text": "linear model"
         },
         {
           "id": "d",
           "text": "new experiences"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“linear teacher”的条件，不是题干公式的条件。",
-        "b": "这是“student predictor”的条件，不是题干公式的条件。",
+        "c": "这是“student predictor”的条件，不是题干公式的条件。",
         "d": "这是“population generalization error”的条件，不是题干公式的条件。"
       },
-      "explanation": "memory/training error 的适用条件：stored patterns"
+      "explanation": "memory/training error 的适用条件：stored patterns pattern separation 把相似 Student patterns z^(μ) 映成低-overlap Notebook codes ξ^(μ)，减少新 episode 覆盖旧 episode。"
     },
     {
-      "id": "L27-Q36",
+      "id": "L27-Q47",
       "lecture": 27,
       "sectionId": "lecture-27-source-4",
       "sourceAnchors": [
@@ -1930,7 +2959,7 @@
       "conceptTags": [
         "population generalization error"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：使用\"population generalization error\"时，哪项条件或约定不可省略？",
@@ -1945,23 +2974,23 @@
         },
         {
           "id": "c",
-          "text": "stored patterns"
+          "text": "new experiences"
         },
         {
           "id": "d",
-          "text": "new experiences"
+          "text": "stored patterns"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "这是“linear teacher”的条件，不是题干公式的条件。",
         "b": "这是“student predictor”的条件，不是题干公式的条件。",
-        "c": "这是“memory/training error”的条件，不是题干公式的条件。"
+        "d": "这是“memory/training error”的条件，不是题干公式的条件。"
       },
       "explanation": "population generalization error 的适用条件：new experiences"
     },
     {
-      "id": "L27-Q37",
+      "id": "L27-Q48",
       "lecture": 27,
       "sectionId": "lecture-27-source-5",
       "sourceAnchors": [
@@ -1974,14 +3003,58 @@
       "conceptTags": [
         "predictability/SNR"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 27 讲：使用\"predictability/SNR\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
+          "text": "signal+unpredictable noise"
+        },
+        {
+          "id": "b",
+          "text": "linear model"
+        },
+        {
+          "id": "c",
+          "text": "stored patterns"
+        },
+        {
+          "id": "d",
           "text": "finite variances"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“linear teacher”的条件，不是题干公式的条件。",
+        "b": "这是“student predictor”的条件，不是题干公式的条件。",
+        "c": "这是“memory/training error”的条件，不是题干公式的条件。"
+      },
+      "explanation": "predictability/SNR 的适用条件：finite variances 不同features可有不同predictability，因此consolidation可能按component而非整episode统一停止。"
+    },
+    {
+      "id": "L27-Q49",
+      "lecture": 27,
+      "sectionId": "lecture-27-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
+          "page": 4,
+          "section": "lecture-27-source-4"
+        }
+      ],
+      "conceptTags": [
+        "optimal stopping"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 27 讲：使用\"optimal stopping\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "learning curve measurable"
         },
         {
           "id": "b",
@@ -2002,26 +3075,26 @@
         "c": "这是“student predictor”的条件，不是题干公式的条件。",
         "d": "这是“memory/training error”的条件，不是题干公式的条件。"
       },
-      "explanation": "predictability/SNR 的适用条件：finite variances"
+      "explanation": "optimal stopping 的适用条件：learning curve measurable early learning让wS接近wT，signal error下降，所以training与test errors都下降。"
     },
     {
-      "id": "L27-Q38",
+      "id": "L27-Q50",
       "lecture": 27,
-      "sectionId": "lecture-27-source-4",
+      "sectionId": "lecture-27-source-2",
       "sourceAnchors": [
         {
           "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 4,
-          "section": "lecture-27-source-4"
+          "page": 2,
+          "section": "lecture-27-source-2"
         }
       ],
       "conceptTags": [
-        "optimal stopping"
+        "consolidation channel"
       ],
       "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
-      "stem": "第 27 讲：使用\"optimal stopping\"时，哪项条件或约定不可省略？",
+      "stem": "第 27 讲：使用\"consolidation channel\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
@@ -2029,7 +3102,7 @@
         },
         {
           "id": "b",
-          "text": "learning curve measurable"
+          "text": "formal model hypothesis"
         },
         {
           "id": "c",
@@ -2046,51 +3119,7 @@
         "c": "这是“student predictor”的条件，不是题干公式的条件。",
         "d": "这是“memory/training error”的条件，不是题干公式的条件。"
       },
-      "explanation": "optimal stopping 的适用条件：learning curve measurable"
-    },
-    {
-      "id": "L27-Q39",
-      "lecture": 27,
-      "sectionId": "lecture-27-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
-          "page": 2,
-          "section": "lecture-27-source-2"
-        }
-      ],
-      "conceptTags": [
-        "consolidation channel"
-      ],
-      "difficulty": 4,
-      "type": "equation",
-      "cognitiveLevel": "apply",
-      "stem": "第 27 讲：使用\"consolidation channel\"时，哪项条件或约定不可省略？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "signal+unpredictable noise"
-        },
-        {
-          "id": "b",
-          "text": "linear model"
-        },
-        {
-          "id": "c",
-          "text": "formal model hypothesis"
-        },
-        {
-          "id": "d",
-          "text": "stored patterns"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "这是“linear teacher”的条件，不是题干公式的条件。",
-        "b": "这是“student predictor”的条件，不是题干公式的条件。",
-        "d": "这是“memory/training error”的条件，不是题干公式的条件。"
-      },
-      "explanation": "consolidation channel 的适用条件：formal model hypothesis"
+      "explanation": "consolidation channel 的适用条件：formal model hypothesis replay是consolidation channel：Notebook pattern completion产生approximate experience，Student对replayed targets更新。"
     }
   ]
 }

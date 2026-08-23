@@ -78,6 +78,314 @@
       "stopPredict": "为什么模型必须报告 assumptions？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "能用问题、数据、模型、推断四个环节说明计算神经科学在做什么，而不是把它等同于写程序或套用机器学习算法。",
+      "能区分描述性、机制性与规范性模型，并为同一个神经科学问题选择合适的模型层级。",
+      "能从一个最小输入—输出模型写出可检验预测、残差和参数估计目标，并说明每个量如何由实验获得。",
+      "能把课程所需的数学、编程与神经科学背景组织成可执行的学习循环，知道何时计算、何时画图、何时回到生物假设。"
+    ],
+    "prerequisiteBridge": [
+      "这里所说的“计算”不只是计算机执行指令，也包括大脑把感觉输入变成估计、决策和动作的过程。可先把任何系统想成一个带输入和输出的黑箱：视觉刺激是输入，神经元放电或行为选择是输出。课程的任务是逐步打开黑箱，提出内部变量和相互作用，再让这些假设接受数据检验。只要能读坐标轴、理解函数把一个数映射成另一个数，就已经有进入第一讲所需的数学起点。",
+      "模型是对问题有目的的删减，不是现实的微缩复制。地图省略树木却能帮助导航；同理，阈值线性模型省略离子通道，却能检验“刺激增强是否提高放电率”。判断模型是否好，先问它服务什么问题，再问被省略的因素会不会改变该问题的答案。这样的判断比记住模型名称更重要，也能防止把复杂度误当成真实性。",
+      "后续会频繁使用参数、概率与优化。参数是模型中待定的数字，例如刺激增益 w 和基线 b；概率用于表达重复试验中的不确定性；优化是在候选参数中寻找最能解释数据的一组。高中阶段的代数、函数图像和平均数足以开始，遇到导数与矩阵时再补相应工具。学习时可固定执行“先口述假设—再写符号—算一个数值例—画预测—查残差”的闭环。若图像与预期冲突，先逐项核对坐标轴、单位、参数和数据切分，再决定是否修改科学假设。"
+    ],
+    "diagnostic": [
+      {
+        "id": "L01-D1",
+        "prompt": "研究者记录不同声音强度 s 下的放电率 r。请指出输入、输出，并给出一个最小可检验假设。",
+        "answer": "输入是声音强度 s，输出是放电率 r；可检验假设可写成 r=max(0,ws+b)，其中 w 表示强度增益，b 表示基线偏置。",
+        "explanation": "能指出变量还不够；可检验假设必须把变量关系写清，并允许数据使它失败。例如若放电率随强度出现饱和，阈值线性关系就会留下系统性残差。",
+        "remediationModuleId": "L01-M2"
+      },
+      {
+        "id": "L01-D2",
+        "prompt": "“模型越复杂越接近真相，所以一定越好。”这句话错在哪里？",
+        "answer": "模型优劣取决于问题、数据量和可检验性；多余自由度可能只是在记住噪声，并不提高对新数据的预测。",
+        "explanation": "复杂模型能拟合更多形状，但也更难解释、估计和证伪。应比较训练外预测、参数不确定性以及被省略机制是否与当前问题有关。",
+        "remediationModuleId": "L01-M1"
+      },
+      {
+        "id": "L01-D3",
+        "prompt": "同一刺激重复十次得到十个不同反应，这是否直接否定确定性输入—输出模型？",
+        "answer": "不会直接否定；确定性模型可描述条件平均反应，试次差异则由观测噪声或概率模型另行描述。",
+        "explanation": "必须先说明模型预测的是单次反应还是平均反应。把平均趋势与波动分开后，才能判断偏差来自均值模型还是噪声模型。",
+        "remediationModuleId": "L01-M2"
+      },
+      {
+        "id": "L01-D4",
+        "prompt": "若模型在所有大刺激上都低估放电率，残差呈什么结构？下一步应做什么？",
+        "answer": "残差在大刺激区间持续为正，说明误差不是随机散布；应检查增益、非线性形状或缺失变量，而非只报告总体均方误差。",
+        "explanation": "残差随输入有规律变化就是模型诊断信号。画残差对刺激的图，通常比单一分数更能指出模型在哪个区间失效。",
+        "remediationModuleId": "L01-M2"
+      }
+    ],
+    "modules": [
+      {
+        "id": "L01-M1",
+        "title": "从跨学科背景到可回答的问题",
+        "sourceRefs": [
+          {
+            "file": "Lecture1-Course-Introduction.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "计算神经科学为什么需要神经科学、物理、数学与工程同时参与，而不是由其中一个学科包办？",
+        "paragraphs": [
+          "第一页通过授课者横跨神经生物学、物理与应用数学的背景，提示了本领域的基本工作方式：实验给出神经系统的对象与约束，数学把口头假设压缩成可推演关系，计算把推演扩展到无法手算的规模，工程则逼迫模型产生可操作的输出。四者不是并列标签，而是一条从现象到解释再到检验的链。",
+          "面对“动物怎样判断运动方向”这一问题，神经科学先确定应记录哪一区域、用什么刺激与行为指标；数学定义刺激方向 s、神经反应 n 和选择 y；模型提出 P(n|s) 或 P(y|n)；程序计算参数并比较预测。若只会编程但没有问题定义，代码不会自动产生科学解释；若只有生物描述而没有量化关系，也难以区分互相竞争的机制。",
+          "跨学科合作最常见的断裂发生在词语层级。例如“编码”可能指平均放电率随刺激变化，也可能指完整条件分布携带的信息。修复方法是把名词改写为可观察量与操作：给定刺激 s，重复试验获得反应 n；问 n 的分布是否随 s 改变，以及观察 n 后能以多小误差估计 s。操作化之后，争论才有可计算的落点。",
+          "学习这一领域可以沿三种解释层级前进。描述性模型概括数据规律，例如调谐曲线；机制性模型提出产生规律的部件，例如离子通道或网络连接；规范性模型问某个任务的最佳策略，例如最大化似然的解码。三者可针对同一现象给出不同答案，选择哪一层取决于问题，而不是由公式长短决定。"
+        ],
+        "keyPoints": [
+          "跨学科价值来自一条可检验的工作链，而不是背景名词的堆叠。",
+          "科学问题应改写成输入、输出、重复条件和可比较预测。",
+          "描述性、机制性、规范性模型回答不同层级的问题。"
+        ],
+        "derivation": {
+          "title": "把口头问题形式化为可检验链条",
+          "setup": "考虑运动刺激 s、神经反应 n 与行为选择 y。目标是区分刺激如何影响神经活动，以及神经活动如何影响行为。",
+          "steps": [
+            {
+              "title": "定义观测",
+              "explanation": "在每次试验固定刺激 s，记录神经反应 n 和行为 y；重复试验得到条件样本，而不是只保留一次观察。",
+              "latex": "(s_k,n_k,y_k),\\quad k=1,\\ldots,K"
+            },
+            {
+              "title": "拆分关系",
+              "explanation": "一般链式法则先写 P(n,y|s)=P(y|n,s,φ)P(n|s,θ)。只有额外假设刺激对行为的影响完全由已记录反应 n 中介，即 y 与 s 在给定 n 后条件独立，才可把第一项简化为 P(y|n,φ)。这个 Markov 假设需要检验，不能当成概率恒等式。",
+              "latex": "P(n,y\\mid s)=P(y\\mid n,s,\\phi)P(n\\mid s,\\theta)\\xrightarrow{\\;y\\perp s\\mid n\\;}P(y\\mid n,\\phi)P(n\\mid s,\\theta)"
+            },
+            {
+              "title": "形成预测",
+              "explanation": "先在一部分数据估计 θ 与 φ，再对未参与估计的新试验计算反应或选择概率，并与实际频率比较。",
+              "latex": "\\hat y=\\operatorname*{arg\\,max}_y P(y\\mid n,\\hat\\phi)"
+            },
+            {
+              "title": "定位失败",
+              "explanation": "若神经反应预测正确而行为预测失败，问题更可能在读出关系；若反应本身预测失败，应修改编码假设或刺激变量。"
+            }
+          ],
+          "symbolNotes": [
+            "s 是实验控制的刺激，n 是可为计数或向量的神经反应，y 是行为结果。",
+            "θ 与 φ 是两段模型的参数，帽号表示由训练数据估计的数值。",
+            "y⊥s|n 是条件独立假设：知道 n 后，s 不再为 y 提供额外预测信息；记录不完整时它常会失效。"
+          ],
+          "unitsCheck": "概率无单位且位于 0 与 1 之间；若 n 是计数，它本身无单位，但计数窗口必须以秒或毫秒明确标注。",
+          "limitCheck": "若 n 与 s 完全无关，P(n|s) 对所有 s 相同，神经反应不能支持区分刺激；若加入 s 后 P(y|n,s) 仍明显改变，则简化的 s→n→y Markov chain 不成立，需加入遗漏 neural state 或 direct stimulus pathway。"
+        },
+        "workedExample": {
+          "title": "把一个感知问题拆成两次检验",
+          "problem": "左右运动各做 50 次。某神经元在右运动下平均 12 个脉冲、左运动下平均 5 个；用阈值 n≥9 预测“右”，右刺激有 38 次过阈，左刺激有 7 次过阈。计算该规则的正确率并解释它检验哪一段。",
+          "steps": [
+            "右刺激预测正确 38 次；其余 12 次被误判为左。",
+            "左刺激低于阈值的次数是 50−7=43，因此左刺激预测正确 43 次。",
+            "总正确数为 38+43=81，总试验数为 100，正确率为 81%。",
+            "均值差支持刺激影响反应；81% 正确率检验反应能否被一个具体读出规则转成刺激判断。"
+          ],
+          "result": "该阈值读出的正确率是 0.81；它不能单独证明大脑采用同一阈值，但提供了可比较的解码基线。",
+          "sanityCheck": "正确率应介于 0 与 1；若把左右标签全部互换，正确率会变成 19%，两者相加为 100%。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“某脑区在任务中激活”还不是一个机制性解释？",
+          "answer": "因为它只描述活动与任务共同出现，没有说明哪些变量、连接或动力学产生该活动，也没有给出干预后应怎样改变的定量预测。"
+        },
+        "pitfalls": [
+          "把“使用计算机”当成计算神经科学的充分定义，忽略模型与科学问题。",
+          "看到相关活动就宣称因果机制，未提出可被干预或新数据检验的预测。"
+        ]
+      },
+      {
+        "id": "L01-M2",
+        "title": "四类核心问题与模型—数据闭环",
+        "sourceRefs": [
+          {
+            "file": "Lecture1-Course-Introduction.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "怎样把感觉提取、身体控制、记忆与智能这些大问题缩成一次可计算、可证伪的研究？",
+        "paragraphs": [
+          "第二页把研究对象归纳为从感觉中提取信息、控制身体、形成记忆以及产生智能行为。每个主题都太大，必须加入对象、时间尺度和观测量。例如“视觉如何工作”可缩成“在 200 毫秒随机点运动刺激中，MT 神经元的脉冲计数如何随相干度改变”。缩小问题不会削弱意义，反而把理论与实验连接起来。",
+          "模型—数据闭环包含五个可反复执行的动作：定义变量，写出关系，估计参数，生成未见数据的预测，检查误差结构。以 r(s)=max(0,ws+b) 为例，s 是刺激强度，r 是平均放电率，w 控制斜率，b 决定没有刺激时的外推截距。参数必须能由数据约束，预测必须指向尚未参与拟合的观察。",
+          "误差不是模型之外的麻烦，而是决定下一步的证据。对每个刺激 s_i，定义残差 e_i=r_i−r_hat_i。若残差在零附近无规律散布，当前均值关系至少没有暴露系统偏差；若大刺激持续为正，模型可能缺少向上弯曲或第二个输入；若残差幅度随均值增大，则还需要改变噪声模型。不同形状指向不同修订。",
+          "计算机模拟、数据分析、机器学习和数学建模在闭环中承担不同角色。模拟从已给模型生成结果；数据分析压缩并展示观察；机器学习可寻找高维预测关系；数学建模强调假设与结果之间的推演。一次研究可以同时使用四者，但必须说明每一步的输入、输出和评价标准，才能避免高预测分数掩盖错误解释。"
+        ],
+        "keyPoints": [
+          "大问题要用对象、时间窗口、操纵量和观测量缩成可执行问题。",
+          "参数估计之后必须对未参与拟合的数据做预测。",
+          "残差的结构决定应修改均值关系、噪声模型还是变量集合。"
+        ],
+        "derivation": {
+          "title": "阈值线性模型的最小预测与诊断",
+          "setup": "给定刺激 s 与观测平均放电率 r，用 r_hat=max(0,ws+b) 表示神经元在阈值以下不放电、阈值以上线性增加。",
+          "steps": [
+            {
+              "title": "找阈值",
+              "explanation": "当 w>0 时，线性部分在 ws+b=0 处穿过零，因此刺激阈值是 s0=−b/w。",
+              "latex": "s_0=-\\frac{b}{w}"
+            },
+            {
+              "title": "分段预测",
+              "explanation": "若 s≤s0，模型给出 r_hat=0；若 s>s0，模型给出 r_hat=ws+b。分段写法使阈值含义可直接检查。",
+              "latex": "\\hat r(s)=0\\ (s\\le s_0),\\quad \\hat r(s)=ws+b\\ (s>s_0)"
+            },
+            {
+              "title": "计算残差",
+              "explanation": "每个数据点计算 e_i=r_i−r_hat_i。正残差表示模型低估，负残差表示模型高估。",
+              "latex": "e_i=r_i-\\hat r_i"
+            },
+            {
+              "title": "比较候选模型",
+              "explanation": "若加入饱和项后训练误差降低，还要在留出的刺激或试次上比较误差，防止新增参数只吸收训练噪声。"
+            }
+          ],
+          "symbolNotes": [
+            "w 的单位是放电率单位除以刺激单位；b 与 r 都用 Hz 表示。",
+            "max(0,z) 表示 z 为负时取 0、为正时取 z，并不是取数据集中的最大反应。"
+          ],
+          "unitsCheck": "ws 必须与 b 同为 Hz，才能相加；残差 r−r_hat 也为 Hz。",
+          "limitCheck": "当 w=0 时，反应不随刺激改变；当 b≥0 且 w>0 时，非负刺激范围内可能没有可见阈值。"
+        },
+        "workedExample": {
+          "title": "手算阈值、预测与残差",
+          "problem": "模型参数 w=4 Hz/单位、b=−8 Hz。刺激 s 为 1、3、5 时，观测平均放电率分别为 1、5、15 Hz。计算阈值、预测和残差。",
+          "steps": [
+            "阈值 s0=−b/w=8/4=2，因此 s=1 在阈值下，s=3 与 5 在阈值上。",
+            "预测分别为 max(0,4−8)=0、max(0,12−8)=4、max(0,20−8)=12 Hz。",
+            "残差 r−r_hat 分别为 1−0=1、5−4=1、15−12=3 Hz。",
+            "残差随刺激增大而变大，提示真实增益可能高于 4，或关系在高刺激处向上弯曲。"
+          ],
+          "result": "阈值为 2；预测为 0、4、12 Hz；残差为 1、1、3 Hz。",
+          "sanityCheck": "所有预测均非负，且阈值上的线性预测从零开始；单位在每一步保持为 Hz。"
+        },
+        "selfCheck": {
+          "prompt": "训练集拟合很好但新刺激预测很差，最直接说明了什么？",
+          "answer": "说明模型或估计过程没有抓住可推广关系，可能自由度过多、训练覆盖不足，或新刺激改变了先前未建模的变量。"
+        },
+        "pitfalls": [
+          "只报告相关系数或训练误差，不画预测与残差随刺激的变化。",
+          "把机器学习预测准确自动解释为发现了神经机制。"
+        ]
+      },
+      {
+        "id": "L01-M3",
+        "title": "课程地图、工具选择与可持续自学",
+        "sourceRefs": [
+          {
+            "file": "Lecture1-Course-Introduction.pdf",
+            "page": 3
+          },
+          {
+            "file": "Lecture1-Course-Introduction.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "怎样让数学和编程真正服务于理解，而不是变成与神经科学分离的两门附加课？",
+        "paragraphs": [
+          "第三页的课程安排与第四页的数学、编程说明共同给出一条学习路线：先建立模型语言，再学习单神经元动力学，随后转向神经编码、群体与网络。每一段都复用前一段工具。向量会成为群体反应，微分方程会成为膜电位和突触电流，概率会成为脉冲计数与解码，不应把基础章节当成考完即可丢弃的孤立单元。",
+          "编程语言可以是 MATLAB 或 Python，关键不是语法偏好，而是能完成相同的科学动作：创建带单位的变量，按公式计算，画图检查，改变参数，保存可复现实验。第一次实现模型时，先用一个能手算的小例验证代码。例如三点数据的预测必须与纸笔结果一致，再扩大网格或试次数。小例是防止符号、索引与单位错误的护栏。",
+          "翻转式学习要求课前接触材料，但“看过”不能作为完成标准。较可靠的标准是能在无提示时完成四件事：用自己的话回答指导问题，重建一条推导，算完一个带数字的例题，指出模型至少一个失效条件。若某一步中断，就回到对应段落修复，而不是从头重复播放全部内容。",
+          "建立个人学习记录时，可为每个模型保留一张结构卡：科学问题、变量与单位、方程、参数含义、初始条件、输出、可检验预测、已知局限。下一讲遇到新模型时做差分比较，例如纯积分发放与漏电积分发放只相差一个漏电项，却导致稳态和阈值电流出现。还应记下能够区分两个模型的实验操纵。持续比较比孤立背诵更容易形成可迁移理解。"
+        ],
+        "keyPoints": [
+          "基础工具会在单神经元、编码和网络三个层级反复出现。",
+          "先以手算小例校验代码，再扩大规模并改变参数。",
+          "学习完成应以重建、计算、解释和指出边界为标准。"
+        ],
+        "derivation": null,
+        "workedExample": {
+          "title": "设计一次二十分钟模型学习循环",
+          "problem": "你要学习模型 r=max(0,3s−6)，手边只有纸笔和任一编程环境。给出可验证的短流程，并用 s=0、1、2、4 完成计算。",
+          "steps": [
+            "先口述：刺激低于阈值时反应为零，高于阈值后每增加一个刺激单位，反应增加 3 Hz。",
+            "纸笔计算线性部分 3s−6 为 −6、−3、0、6，经过非负截断后得到 0、0、0、6 Hz。",
+            "在程序中只写这四个输入并打印结果，确认与手算四个数完全一致。",
+            "再画 s 从 0 到 5 的曲线，标出阈值 s=2，并写下模型没有表达饱和与试次波动这两个边界。"
+          ],
+          "result": "得到可复核预测 [0,0,0,6] Hz，同时完成口述、手算、代码、图像与局限检查。",
+          "sanityCheck": "s=2 时线性部分恰为零；s 每增加 1，阈值以上的反应应增加 3 Hz。"
+        },
+        "selfCheck": {
+          "prompt": "为什么在运行大规模模拟前先做一个可手算的小例？",
+          "answer": "小例提供独立预期，可快速发现索引、符号、单位和边界条件错误；大图看起来平滑并不能证明实现与方程一致。"
+        },
+        "pitfalls": [
+          "把能运行当成代码正确，未用独立数值或极限情况校验。",
+          "按页面顺序重复阅读，却不尝试重建推导、例题和失效条件。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L01-FIG-A1",
+      "lecture": 1,
+      "lectureTitle": "课程导论",
+      "moduleId": "L01-M2",
+      "title": "模型—数据闭环",
+      "alt": "科学问题、实验数据、参数模型与未见数据预测组成的闭环流程图",
+      "caption": "拟合参数只是闭环的中段：模型必须先对未参与拟合的数据给出预测，再由残差是否随刺激呈系统结构来决定保留、修订或替换假设。",
+      "sourceRefs": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 2
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "question",
+          "label": "科学问题\n可证伪假设",
+          "x": 20,
+          "y": 75,
+          "tone": "accent"
+        },
+        {
+          "id": "data",
+          "label": "实验操纵\n重复观测",
+          "x": 80,
+          "y": 75
+        },
+        {
+          "id": "model",
+          "label": "模型关系\n参数估计",
+          "x": 80,
+          "y": 25
+        },
+        {
+          "id": "prediction",
+          "label": "未见数据预测\n残差结构",
+          "x": 20,
+          "y": 25,
+          "tone": "accent"
+        }
+      ],
+      "edges": [
+        {
+          "from": "question",
+          "to": "data",
+          "label": "定义变量"
+        },
+        {
+          "from": "data",
+          "to": "model",
+          "label": "约束参数"
+        },
+        {
+          "from": "model",
+          "to": "prediction",
+          "label": "外推检验"
+        },
+        {
+          "from": "prediction",
+          "to": "question",
+          "label": "修订假设"
+        }
+      ]
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 最小神经元输入-输出模型：从语言到方程",
@@ -113,9 +421,9 @@
       "expression": "r(s) = [ws + b]+",
       "latex": "r(s)=[ws+b]_+",
       "conditions": "静态、一维刺激；rate 非负",
-      "sectionId": "lecture-01-source-1",
+      "sectionId": "lecture-01-source-3",
       "sourceFile": "Lecture1-Course-Introduction.pdf",
-      "sourcePage": 1
+      "sourcePage": 3
     },
     {
       "id": "L01-F02",
@@ -273,7 +581,18 @@
     "本讲只建立后续 26 讲所需的概念与依赖关系，不展开为通用计算神经科学综述。"
   ],
   "errata": [
-    "1. Page 3 的日期、office hour、working-group 等属于 2025 年课程行政档案，不应被解释为永久课程要求。 2. 未发现影响核心学术内容的不可辨认手写。"
+    {
+      "id": "L01-E01",
+      "lecture": 1,
+      "lectureTitle": "课程导论",
+      "kind": "caution",
+      "sourceFile": "Lecture1-Course-Introduction.pdf",
+      "sourcePage": 3,
+      "sectionId": "L01-M3",
+      "originalIssue": "Page 3 的日期、office hour、working-group 等属于 2025 年课程行政档案，不应被解释为永久课程要求。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": "Page 3 的日期、office hour、working-group 等属于 2025 年课程行政档案，不应被解释为永久课程要求"
+    }
   ],
   "questions": [
     {
@@ -291,7 +610,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "debug",
       "cognitiveLevel": "understand",
       "stem": "第 1 讲：为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？",
@@ -319,7 +638,7 @@
         "b": "这条推理对应 Lecture1-Course-Introduction.pdf 第 3 页。",
         "d": "该选项回答的是“举例说明 machine learning 与 nervous-system modeling 的交集但非同义。”。"
       },
-      "explanation": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
+      "explanation": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。 面对\"动物怎样判断运动方向\"这一问题，神经科学先确定应记录哪一区域、用什么刺激与行为指标；数学定义刺激方向 s、神经反应 n 和选择 y；模型提出 P(n|s) 或 P(y|n)；程序计算参数并比较预测。"
     },
     {
       "id": "L01-Q02",
@@ -336,7 +655,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：data analysis、simulation 与 inference 的箭头方向分别是什么？",
@@ -364,7 +683,7 @@
         "b": "这条推理对应 Lecture1-Course-Introduction.pdf 第 4 页。",
         "c": "这是“机器学习（machine learning）”的定义。"
       },
-      "explanation": "analysis 对已观测数据求统计量；simulation 从模型生成数据；inference 从数据估计未知参数/状态。"
+      "explanation": "analysis 对已观测数据求统计量；simulation 从模型生成数据；inference 从数据估计未知参数/状态。 模型-数据闭环包含五个可反复执行的动作：定义变量，写出关系，估计参数，生成未见数据的预测，检查误差结构。"
     },
     {
       "id": "L01-Q03",
@@ -381,7 +700,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
       "stem": "第 1 讲：在 r(s)=[ws+b]+ 中，b 增大通常如何影响阈值？",
@@ -409,7 +728,7 @@
         "c": "该选项回答的是“为什么模型必须报告 assumptions？”。",
         "d": "这条推理对应 Lecture1-Course-Introduction.pdf 第 1 页。"
       },
-      "explanation": "使 ws+b 更容易为正，等效降低输入阈值；具体阈值为 -b/w（w>0）。"
+      "explanation": "使 ws+b 更容易为正，等效降低输入阈值；具体阈值为 -b/w（w>0）。 持续比较比孤立背诵更容易形成可迁移理解。 判断依据：建立个人学习记录时，可为每个模型保留一张结构卡：科学问题、变量与单位、方程、参数含义、初始条件、输出、可检验预测、已知局限。下一讲遇到新模型时做差分比较，例如纯积分发放与漏电积分发放只相差一个漏电项，却导致稳态和阈值电流出现。还应记下能够区分两个模型的实验操纵。持续比较比孤立背诵更容易形成可迁移理解。"
     },
     {
       "id": "L01-Q04",
@@ -426,7 +745,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 1 讲：为什么模型必须报告 assumptions？",
@@ -454,7 +773,7 @@
         "c": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。",
         "d": "这是“计算神经科学（computational neuroscience）”的定义。"
       },
-      "explanation": "同一公式只在假设成立时具有相应解释；假设决定可推广范围和失败方式。"
+      "explanation": "同一公式只在假设成立时具有相应解释；假设决定可推广范围和失败方式。 第三页的课程安排与第四页的数学、编程说明共同给出一条学习路线：先建立模型语言，再学习单神经元动力学，随后转向神经编码、群体与网络。"
     },
     {
       "id": "L01-Q05",
@@ -471,7 +790,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：举例说明 machine learning 与 nervous-system modeling 的交集但非同义。",
@@ -499,7 +818,7 @@
         "b": "这是“机器学习（machine learning）”的定义。",
         "d": "这条推理对应 Lecture1-Course-Introduction.pdf 第 3 页。"
       },
-      "explanation": "可用神经网络预测 spikes，这是 ML；若权重/单元被解释为生物机制并检验，则也是 modeling。许多 ML 模型只追求预测，不主张生物机制。"
+      "explanation": "可用神经网络预测 spikes，这是 ML；若权重/单元被解释为生物机制并检验，则也是 modeling。许多 ML 模型只追求预测，不主张生物机制。 第一页通过授课者横跨神经生物学、物理与应用数学的背景，提示了本领域的基本工作方式：实验给出神经系统的对象与约束，数学把口头假设压缩成可推演关系，计算把推演扩展到无法手算的规模，工程则逼迫模型产生可操作的输出。"
     },
     {
       "id": "L01-Q06",
@@ -516,7 +835,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 1 讲：把\"记忆\"改写成一个可计算问题，至少给出输入、状态、输出。",
@@ -544,7 +863,7 @@
         "b": "这条推理对应 Lecture1-Course-Introduction.pdf 第 1 页。",
         "c": "该选项回答的是“data analysis、simulation 与 inference 的箭头方向分别是什么？”。"
       },
-      "explanation": "例如输入为 sample stimulus，隐藏状态 m(t) 在 delay 中演化，输出为 comparison choice；检验 m(t) 是否保留 sample 信息。"
+      "explanation": "例如输入为 sample stimulus，隐藏状态 m(t) 在 delay 中演化，输出为 comparison choice；检验 m(t) 是否保留 sample 信息。 建立个人学习记录时，可为每个模型保留一张结构卡：科学问题、变量与单位、方程、参数含义、初始条件、输出、可检验预测、已知局限。"
     },
     {
       "id": "L01-Q07",
@@ -561,7 +880,7 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：为什么 held-out prediction 比训练集拟合更能检验模型？",
@@ -589,55 +908,10 @@
         "c": "这是“计算神经科学（computational neuroscience）”的定义。",
         "d": "这是“预测（prediction）”的定义。"
       },
-      "explanation": "它测试模型是否捕捉可泛化结构，而不是只记住观测噪声。"
+      "explanation": "它测试模型是否捕捉可泛化结构，而不是只记住观测噪声。 模型-数据闭环包含五个可反复执行的动作：定义变量，写出关系，估计参数，生成未见数据的预测，检查误差结构。"
     },
     {
       "id": "L01-Q08",
-      "lecture": 1,
-      "sectionId": "lecture-01-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture1-Course-Introduction.pdf",
-          "page": 1,
-          "section": "lecture-01-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Course Introduction",
-        "Lecture1-Course-Introduction.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 1 讲：根据 Lecture1-Course-Introduction.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "什么是 computational neuroscience；computers、data analysis、 machine learning、modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。"
-        },
-        {
-          "id": "b",
-          "text": "课堂与教师介绍；课程的跨学科定位。"
-        },
-        {
-          "id": "c",
-          "text": "syllabus / course logistics。把它作为 2025 课程档案简洁记录，不要把行政事项扩写成学术内容。"
-        },
-        {
-          "id": "d",
-          "text": "mathematics、programming、MATLAB/Python 的作用；flipped-classroom logic 与学习方法。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“什么是 computational neuroscience”，不是题干指定的关系。",
-        "c": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。",
-        "d": "该陈述解释的是“mathematics、programming、MATLAB/Python 的作用”，不是题干指定的关系。"
-      },
-      "explanation": "课堂与教师介绍；课程的跨学科定位。"
-    },
-    {
-      "id": "L01-Q09",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -662,24 +936,69 @@
         },
         {
           "id": "b",
-          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+          "text": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。"
         },
         {
           "id": "c",
-          "text": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。"
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
         },
         {
           "id": "d",
           "text": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“什么是 computational neuroscience”，不是题干指定的关系。",
-        "b": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。",
+        "c": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。",
         "d": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。"
       },
-      "explanation": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。"
+      "explanation": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。 若只会编程但没有问题定义，代码不会自动产生科学解释；若只有生物描述而没有量化关系，也难以区分互相竞争的机制。"
+    },
+    {
+      "id": "L01-Q09",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 2,
+          "section": "lecture-01-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Course Introduction",
+        "Lecture1-Course-Introduction.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 1 讲：若要解释\"什么是 computational neuroscience\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+        },
+        {
+          "id": "b",
+          "text": "从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。"
+        },
+        {
+          "id": "c",
+          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
+        },
+        {
+          "id": "d",
+          "text": "例如输入为 sample stimulus，隐藏状态 m(t) 在 delay 中演化，输出为 comparison choice；检验 m(t) 是否保留 sample 信息。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。",
+        "b": "这是“机器学习（machine learning）”的定义。",
+        "d": "该选项回答的是“把\"记忆\"改写成一个可计算问题，至少给出输入、状态、输出。”。"
+      },
+      "explanation": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。 模型-数据闭环包含五个可反复执行的动作：定义变量，写出关系，估计参数，生成未见数据的预测，检查误差结构。"
     },
     {
       "id": "L01-Q10",
@@ -696,84 +1015,39 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 1 讲：根据 Lecture1-Course-Introduction.pdf 第 2 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 1 讲：阅读\"模型-数据闭环\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "课堂与教师介绍；课程的跨学科定位。"
+          "text": "从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。"
         },
         {
           "id": "b",
-          "text": "syllabus / course logistics。把它作为 2025 课程档案简洁记录，不要把行政事项扩写成学术内容。"
+          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
         },
         {
           "id": "c",
-          "text": "mathematics、programming、MATLAB/Python 的作用；flipped-classroom logic 与学习方法。"
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
         },
         {
           "id": "d",
-          "text": "什么是 computational neuroscience；computers、data analysis、 machine learning、modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。"
+          "text": "拟合参数只是闭环的中段：模型必须先对未参与拟合的数据给出预测，再由残差是否随刺激呈系统结构来决定保留、修订或替换假设。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
-        "b": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。",
-        "c": "该陈述解释的是“mathematics、programming、MATLAB/Python 的作用”，不是题干指定的关系。"
+        "a": "这是“机器学习（machine learning）”的定义。",
+        "b": "这条推理对应 Lecture1-Course-Introduction.pdf 第 1 页。",
+        "c": "这条推理对应 Lecture1-Course-Introduction.pdf 第 3 页。"
       },
-      "explanation": "什么是 computational neuroscience；computers、data analysis、 machine learning、modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。"
+      "explanation": "拟合参数只是闭环的中段：模型必须先对未参与拟合的数据给出预测，再由残差是否随刺激呈系统结构来决定保留、修订或替换假设。 参数必须能由数据约束，预测必须指向尚未参与拟合的观察。 判断依据：模型-数据闭环包含五个可反复执行的动作：定义变量，写出关系，估计参数，生成未见数据的预测，检查误差结构。以 r(s)=max(0,ws+b) 为例，s 是刺激强度，r 是平均放电率，w 控制斜率，b 决定没有刺激时的外推截距。参数必须能由数据约束，预测必须指向尚未参与拟合的观察。"
     },
     {
       "id": "L01-Q11",
       "lecture": 1,
-      "sectionId": "lecture-01-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture1-Course-Introduction.pdf",
-          "page": 2,
-          "section": "lecture-01-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Course Introduction",
-        "Lecture1-Course-Introduction.pdf"
-      ],
-      "difficulty": 1,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 1 讲：若要解释\"什么是 computational neuroscience\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
-        },
-        {
-          "id": "b",
-          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
-        },
-        {
-          "id": "c",
-          "text": "从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。"
-        },
-        {
-          "id": "d",
-          "text": "例如输入为 sample stimulus，隐藏状态 m(t) 在 delay 中演化，输出为 comparison choice；检验 m(t) 是否保留 sample 信息。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。",
-        "c": "这是“机器学习（machine learning）”的定义。",
-        "d": "该选项回答的是“把\"记忆\"改写成一个可计算问题，至少给出输入、状态、输出。”。"
-      },
-      "explanation": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
-    },
-    {
-      "id": "L01-Q12",
-      "lecture": 1,
       "sectionId": "lecture-01-source-3",
       "sourceAnchors": [
         {
@@ -786,83 +1060,38 @@
         "Course Introduction",
         "Lecture1-Course-Introduction.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 1 讲：根据 Lecture1-Course-Introduction.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "课堂与教师介绍；课程的跨学科定位。"
-        },
-        {
-          "id": "b",
-          "text": "syllabus / course logistics。把它作为 2025 课程档案简洁记录，不要把行政事项扩写成学术内容。"
-        },
-        {
-          "id": "c",
-          "text": "什么是 computational neuroscience；computers、data analysis、 machine learning、modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。"
-        },
-        {
-          "id": "d",
-          "text": "mathematics、programming、MATLAB/Python 的作用；flipped-classroom logic 与学习方法。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
-        "c": "该陈述解释的是“什么是 computational neuroscience”，不是题干指定的关系。",
-        "d": "该陈述解释的是“mathematics、programming、MATLAB/Python 的作用”，不是题干指定的关系。"
-      },
-      "explanation": "syllabus / course logistics。把它作为 2025 课程档案简洁记录，不要把行政事项扩写成学术内容。"
-    },
-    {
-      "id": "L01-Q13",
-      "lecture": 1,
-      "sectionId": "lecture-01-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture1-Course-Introduction.pdf",
-          "page": 3,
-          "section": "lecture-01-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Course Introduction",
-        "Lecture1-Course-Introduction.pdf"
-      ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 1 讲：若要解释\"syllabus / course logistics\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
+          "text": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。"
         },
         {
           "id": "b",
-          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
         },
         {
           "id": "c",
-          "text": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。"
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
         },
         {
           "id": "d",
           "text": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
-        "b": "该陈述解释的是“mathematics、programming、MATLAB/Python 的作用”，不是题干指定的关系。",
+        "b": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
+        "c": "该陈述解释的是“mathematics、programming、MATLAB/Python 的作用”，不是题干指定的关系。",
         "d": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。"
       },
-      "explanation": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。"
+      "explanation": "因此，围绕四个课程级问题建立全课路线图：感觉信息提取、身体控制、记忆存取、智能系统的形成。 第三页的课程安排与第四页的数学、编程说明共同给出一条学习路线：先建立模型语言，再学习单神经元动力学，随后转向神经编码、群体与网络。"
     },
     {
-      "id": "L01-Q14",
+      "id": "L01-Q12",
       "lecture": 1,
       "sectionId": "lecture-01-source-4",
       "sourceAnchors": [
@@ -877,62 +1106,17 @@
         "Lecture1-Course-Introduction.pdf"
       ],
       "difficulty": 4,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 1 讲：根据 Lecture1-Course-Introduction.pdf 第 4 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "课堂与教师介绍；课程的跨学科定位。"
-        },
-        {
-          "id": "b",
-          "text": "什么是 computational neuroscience；computers、data analysis、 machine learning、modeling、simulation；核心脑计算问题；engineering 与 medicine 的相关性。"
-        },
-        {
-          "id": "c",
-          "text": "syllabus / course logistics。把它作为 2025 课程档案简洁记录，不要把行政事项扩写成学术内容。"
-        },
-        {
-          "id": "d",
-          "text": "mathematics、programming、MATLAB/Python 的作用；flipped-classroom logic 与学习方法。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
-        "b": "该陈述解释的是“什么是 computational neuroscience”，不是题干指定的关系。",
-        "c": "该陈述解释的是“syllabus / course logistics”，不是题干指定的关系。"
-      },
-      "explanation": "mathematics、programming、MATLAB/Python 的作用；flipped-classroom logic 与学习方法。"
-    },
-    {
-      "id": "L01-Q15",
-      "lecture": 1,
-      "sectionId": "lecture-01-source-4",
-      "sourceAnchors": [
-        {
-          "file": "Lecture1-Course-Introduction.pdf",
-          "page": 4,
-          "section": "lecture-01-source-4"
-        }
-      ],
-      "conceptTags": [
-        "Course Introduction",
-        "Lecture1-Course-Introduction.pdf"
-      ],
-      "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 1 讲：若要解释\"mathematics、programming、MATLAB/Python 的作用\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
         },
         {
           "id": "b",
-          "text": "严格区分 computational neuroscience、data science、machine learning、neural-network engineering 与 nervous-system modeling；解释它们的交集和非同义关系。"
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
         },
         {
           "id": "c",
@@ -943,16 +1127,418 @@
           "text": "因此，神经电生理、receptive-field mapping 与 head-direction coding 可作为这些概念的应用实例。"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
+        "a": "该陈述解释的是“课堂与教师介绍”，不是题干指定的关系。",
         "c": "该选项回答的是“举例说明 machine learning 与 nervous-system modeling 的交集但非同义。”。",
         "d": "这条推理对应 Lecture1-Course-Introduction.pdf 第 4 页。"
       },
-      "explanation": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+      "explanation": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。 编程语言可以是 MATLAB 或 Python，关键不是语法偏好，而是能完成相同的科学动作：创建带单位的变量，按公式计算，画图检查，改变参数，保存可复现实验。"
+    },
+    {
+      "id": "L01-Q13",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 1,
+          "section": "lecture-01-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从跨学科背景到可回答的问题"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 1 讲：为什么\"某脑区在任务中激活\"还不是一个机制性解释？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "说明模型或估计过程没有抓住可推广关系，可能自由度过多、训练覆盖不足，或新刺激改变了先前未建模的变量。"
+        },
+        {
+          "id": "b",
+          "text": "小例提供独立预期，可快速发现索引、符号、单位和边界条件错误；大图看起来平滑并不能证明实现与方程一致。"
+        },
+        {
+          "id": "c",
+          "text": "因为它只描述活动与任务共同出现，没有说明哪些变量、连接或动力学产生该活动，也没有给出干预后应怎样改变的定量预测。"
+        },
+        {
+          "id": "d",
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture1-Course-Introduction.pdf 第 3 页。"
+      },
+      "explanation": "因为它只描述活动与任务共同出现，没有说明哪些变量、连接或动力学产生该活动，也没有给出干预后应怎样改变的定量预测。 学习这一领域可以沿三种解释层级前进。描述性模型概括数据规律，例如调谐曲线；机制性模型提出产生规律的部件，例如离子通道或网络连接；规范性模型问某个任务的最佳策略，例如最大化似然的解码。三者可针对同一现象给出不同答案，选择哪一层取决于问题，而不是由公式长短决定。"
+    },
+    {
+      "id": "L01-Q14",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 1,
+          "section": "lecture-01-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从跨学科背景到可回答的问题",
+        "把一个感知问题拆成两次检验"
+      ],
+      "difficulty": 3,
+      "type": "comparison",
+      "cognitiveLevel": "apply",
+      "stem": "第 1 讲：完成\"左右运动各做 50 次。某神经元在右运动下平均 12 个脉冲、左运动下平均 5 个；用阈值 n≥9 预测\"右\"，右刺激有 38 次过阈，左刺激有 7 次过阈。计算该规则的正确率并解释它检验哪一段。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "阈值为 2；预测为 0、4、12 Hz；残差为 1、1、3 Hz。"
+        },
+        {
+          "id": "b",
+          "text": "得到可复核预测 [0,0,0,6] Hz，同时完成口述、手算、代码、图像与局限检查。"
+        },
+        {
+          "id": "c",
+          "text": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
+        },
+        {
+          "id": "d",
+          "text": "该阈值读出的正确率是 0.81；它不能单独证明大脑采用同一阈值，但提供了可比较的解码基线。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。"
+      },
+      "explanation": "该阈值读出的正确率是 0.81；它不能单独证明大脑采用同一阈值，但提供了可比较的解码基线。 计算路径：右刺激预测正确 38 次；其余 12 次被误判为左。 左刺激低于阈值的次数是 50−7=43，因此左刺激预测正确 43 次。 总正确数为 38+43=81，总试验数为 100，正确率为 81%。 均值差支持刺激影响反应；81% 正确率检验反应能否被一个具体读出规则转成刺激判断。"
+    },
+    {
+      "id": "L01-Q15",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 1,
+          "section": "lecture-01-source-1"
+        }
+      ],
+      "conceptTags": [
+        "从跨学科背景到可回答的问题",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 1 讲：得到\"该阈值读出的正确率是 0.81；它不能单独证明大脑采用同一阈值，但提供了可比较的解码基线。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "正确率应介于 0 与 1；若把左右标签全部互换，正确率会变成 19%，两者相加为 100%。"
+        },
+        {
+          "id": "b",
+          "text": "所有预测均非负，且阈值上的线性预测从零开始；单位在每一步保持为 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "s=2 时线性部分恰为零；s 每增加 1，阈值以上的反应应增加 3 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "使 ws+b 更容易为正，等效降低输入阈值；具体阈值为 -b/w（w>0）。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“在 r(s)=[ws+b]+ 中，b 增大通常如何影响阈值？”。"
+      },
+      "explanation": "正确率应介于 0 与 1；若把左右标签全部互换，正确率会变成 19%，两者相加为 100%。 这个检查对应题设\"左右运动各做 50 次。某神经元在右运动下平均 12 个脉冲、左运动下平均 5 个；用阈值 n≥9 预测\"右\"，右刺激有 38 次过阈，左刺激有 7 次过阈。计算该规则的正确率并解释它检验哪一段。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L01-Q16",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 2,
+          "section": "lecture-01-source-2"
+        }
+      ],
+      "conceptTags": [
+        "四类核心问题与模型—数据闭环"
+      ],
+      "difficulty": 2,
+      "type": "concept",
+      "cognitiveLevel": "understand",
+      "stem": "第 1 讲：训练集拟合很好但新刺激预测很差，最直接说明了什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "因为它只描述活动与任务共同出现，没有说明哪些变量、连接或动力学产生该活动，也没有给出干预后应怎样改变的定量预测。"
+        },
+        {
+          "id": "b",
+          "text": "说明模型或估计过程没有抓住可推广关系，可能自由度过多、训练覆盖不足，或新刺激改变了先前未建模的变量。"
+        },
+        {
+          "id": "c",
+          "text": "小例提供独立预期，可快速发现索引、符号、单位和边界条件错误；大图看起来平滑并不能证明实现与方程一致。"
+        },
+        {
+          "id": "d",
+          "text": "从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这是“机器学习（machine learning）”的定义。"
+      },
+      "explanation": "说明模型或估计过程没有抓住可推广关系，可能自由度过多、训练覆盖不足，或新刺激改变了先前未建模的变量。 计算机模拟、数据分析、机器学习和数学建模在闭环中承担不同角色。模拟从已给模型生成结果；数据分析压缩并展示观察；机器学习可寻找高维预测关系；数学建模强调假设与结果之间的推演。一次研究可以同时使用四者，但必须说明每一步的输入、输出和评价标准，才能避免高预测分数掩盖错误解释。"
+    },
+    {
+      "id": "L01-Q17",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 2,
+          "section": "lecture-01-source-2"
+        }
+      ],
+      "conceptTags": [
+        "四类核心问题与模型—数据闭环",
+        "手算阈值、预测与残差"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 1 讲：完成\"模型参数 w=4 Hz/单位、b=−8 Hz。刺激 s 为 1、3、5 时，观测平均放电率分别为 1、5、15 Hz。计算阈值、预测和残差。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该阈值读出的正确率是 0.81；它不能单独证明大脑采用同一阈值，但提供了可比较的解码基线。"
+        },
+        {
+          "id": "b",
+          "text": "得到可复核预测 [0,0,0,6] Hz，同时完成口述、手算、代码、图像与局限检查。"
+        },
+        {
+          "id": "c",
+          "text": "阈值为 2；预测为 0、4、12 Hz；残差为 1、1、3 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。"
+      },
+      "explanation": "阈值为 2；预测为 0、4、12 Hz；残差为 1、1、3 Hz。 计算路径：阈值 s0=−b/w=8/4=2，因此 s=1 在阈值下，s=3 与 5 在阈值上。 预测分别为 max(0,4−8)=0、max(0,12−8)=4、max(0,20−8)=12 Hz。 残差 r−r_hat 分别为 1−0=1、5−4=1、15−12=3 Hz。 残差随刺激增大而变大，提示真实增益可能高于 4，或关系在高刺激处向上弯曲。"
+    },
+    {
+      "id": "L01-Q18",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 2,
+          "section": "lecture-01-source-2"
+        }
+      ],
+      "conceptTags": [
+        "四类核心问题与模型—数据闭环",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 1 讲：得到\"阈值为 2；预测为 0、4、12 Hz；残差为 1、1、3 Hz。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "正确率应介于 0 与 1；若把左右标签全部互换，正确率会变成 19%，两者相加为 100%。"
+        },
+        {
+          "id": "b",
+          "text": "s=2 时线性部分恰为零；s 每增加 1，阈值以上的反应应增加 3 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "使 ws+b 更容易为正，等效降低输入阈值；具体阈值为 -b/w（w>0）。"
+        },
+        {
+          "id": "d",
+          "text": "所有预测均非负，且阈值上的线性预测从零开始；单位在每一步保持为 Hz。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "该选项回答的是“在 r(s)=[ws+b]+ 中，b 增大通常如何影响阈值？”。"
+      },
+      "explanation": "所有预测均非负，且阈值上的线性预测从零开始；单位在每一步保持为 Hz。 这个检查对应题设\"模型参数 w=4 Hz/单位、b=−8 Hz。刺激 s 为 1、3、5 时，观测平均放电率分别为 1、5、15 Hz。计算阈值、预测和残差。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L01-Q19",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 3,
+          "section": "lecture-01-source-3"
+        }
+      ],
+      "conceptTags": [
+        "课程地图、工具选择与可持续自学"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 1 讲：为什么在运行大规模模拟前先做一个可手算的小例？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "小例提供独立预期，可快速发现索引、符号、单位和边界条件错误；大图看起来平滑并不能证明实现与方程一致。"
+        },
+        {
+          "id": "b",
+          "text": "因为它只描述活动与任务共同出现，没有说明哪些变量、连接或动力学产生该活动，也没有给出干预后应怎样改变的定量预测。"
+        },
+        {
+          "id": "c",
+          "text": "说明模型或估计过程没有抓住可推广关系，可能自由度过多、训练覆盖不足，或新刺激改变了先前未建模的变量。"
+        },
+        {
+          "id": "d",
+          "text": "解释为什么数学用于精确定义假设、推导预测和检验可证伪性，为什么 programming 用于 simulation 与 data analysis。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "这条推理对应 Lecture1-Course-Introduction.pdf 第 3 页。"
+      },
+      "explanation": "小例提供独立预期，可快速发现索引、符号、单位和边界条件错误；大图看起来平滑并不能证明实现与方程一致。 建立个人学习记录时，可为每个模型保留一张结构卡：科学问题、变量与单位、方程、参数含义、初始条件、输出、可检验预测、已知局限。下一讲遇到新模型时做差分比较，例如纯积分发放与漏电积分发放只相差一个漏电项，却导致稳态和阈值电流出现。还应记下能够区分两个模型的实验操纵。持续比较比孤立背诵更容易形成可迁移理解。"
+    },
+    {
+      "id": "L01-Q20",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 3,
+          "section": "lecture-01-source-3"
+        }
+      ],
+      "conceptTags": [
+        "课程地图、工具选择与可持续自学",
+        "设计一次二十分钟模型学习循环"
+      ],
+      "difficulty": 3,
+      "type": "debug",
+      "cognitiveLevel": "apply",
+      "stem": "第 1 讲：完成\"你要学习模型 r=max(0,3s−6)，手边只有纸笔和任一编程环境。给出可验证的短流程，并用 s=0、1、2、4 完成计算。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "该阈值读出的正确率是 0.81；它不能单独证明大脑采用同一阈值，但提供了可比较的解码基线。"
+        },
+        {
+          "id": "b",
+          "text": "得到可复核预测 [0,0,0,6] Hz，同时完成口述、手算、代码、图像与局限检查。"
+        },
+        {
+          "id": "c",
+          "text": "阈值为 2；预测为 0、4、12 Hz；残差为 1、1、3 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。"
+      },
+      "explanation": "得到可复核预测 [0,0,0,6] Hz，同时完成口述、手算、代码、图像与局限检查。 计算路径：先口述：刺激低于阈值时反应为零，高于阈值后每增加一个刺激单位，反应增加 3 Hz。 纸笔计算线性部分 3s−6 为 −6、−3、0、6，经过非负截断后得到 0、0、0、6 Hz。 在程序中只写这四个输入并打印结果，确认与手算四个数完全一致。 再画 s 从 0 到 5 的曲线，标出阈值 s=2，并写下模型没有表达饱和与试次波动这两个边界。"
+    },
+    {
+      "id": "L01-Q21",
+      "lecture": 1,
+      "sectionId": "lecture-01-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture1-Course-Introduction.pdf",
+          "page": 3,
+          "section": "lecture-01-source-3"
+        }
+      ],
+      "conceptTags": [
+        "课程地图、工具选择与可持续自学",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 1 讲：得到\"得到可复核预测 [0,0,0,6] Hz，同时完成口述、手算、代码、图像与局限检查。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "正确率应介于 0 与 1；若把左右标签全部互换，正确率会变成 19%，两者相加为 100%。"
+        },
+        {
+          "id": "b",
+          "text": "所有预测均非负，且阈值上的线性预测从零开始；单位在每一步保持为 Hz。"
+        },
+        {
+          "id": "c",
+          "text": "s=2 时线性部分恰为零；s 每增加 1，阈值以上的反应应增加 3 Hz。"
+        },
+        {
+          "id": "d",
+          "text": "因为软件只是工具；还需有明确神经科学问题、变量、模型/统计假设、可计算预测与检验。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "该选项回答的是“为什么\"使用 MATLAB 分析 spikes\"不自动等于 computational neuroscience？”。"
+      },
+      "explanation": "s=2 时线性部分恰为零；s 每增加 1，阈值以上的反应应增加 3 Hz。 这个检查对应题设\"你要学习模型 r=max(0,3s−6)，手边只有纸笔和任一编程环境。给出可验证的短流程，并用 s=0、1、2、4 完成计算。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L01-Q22",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -977,27 +1563,27 @@
         },
         {
           "id": "b",
-          "text": "计算神经科学（computational neuroscience）"
-        },
-        {
-          "id": "c",
           "text": "模拟（simulation）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "推断（inference）"
+        },
+        {
+          "id": "d",
+          "text": "计算神经科学（computational neuroscience）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“模型（model）”指：对变量、关系和假设的明确简化表示。",
-        "c": "“模拟（simulation）”指：按照模型规则生成状态轨迹或合成数据。",
-        "d": "“推断（inference）”指：由数据约束未知状态、参数或模型。"
+        "b": "“模拟（simulation）”指：按照模型规则生成状态轨迹或合成数据。",
+        "c": "“推断（inference）”指：由数据约束未知状态、参数或模型。"
       },
-      "explanation": "计算神经科学（computational neuroscience）：用定量模型、算法与数据分析研究神经系统中的计算。"
+      "explanation": "计算神经科学（computational neuroscience）：用定量模型、算法与数据分析研究神经系统中的计算。 面对\"动物怎样判断运动方向\"这一问题，神经科学先确定应记录哪一区域、用什么刺激与行为指标；数学定义刺激方向 s、神经反应 n 和选择 y；模型提出 P(n|s) 或 P(y|n)；程序计算参数并比较预测。"
     },
     {
-      "id": "L01-Q17",
+      "id": "L01-Q23",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -1011,38 +1597,38 @@
         "模型",
         "model"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"对变量、关系和假设的明确简化表示。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "模拟（simulation）"
+          "text": "模型（model）"
         },
         {
           "id": "b",
-          "text": "推断（inference）"
+          "text": "模拟（simulation）"
         },
         {
           "id": "c",
-          "text": "模型（model）"
+          "text": "推断（inference）"
         },
         {
           "id": "d",
           "text": "预测（prediction）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“模拟（simulation）”指：按照模型规则生成状态轨迹或合成数据。",
-        "b": "“推断（inference）”指：由数据约束未知状态、参数或模型。",
+        "b": "“模拟（simulation）”指：按照模型规则生成状态轨迹或合成数据。",
+        "c": "“推断（inference）”指：由数据约束未知状态、参数或模型。",
         "d": "“预测（prediction）”指：在给定条件下模型对尚未使用数据的定量输出。"
       },
-      "explanation": "模型（model）：对变量、关系和假设的明确简化表示。"
+      "explanation": "模型（model）：对变量、关系和假设的明确简化表示。 第一页通过授课者横跨神经生物学、物理与应用数学的背景，提示了本领域的基本工作方式：实验给出神经系统的对象与约束，数学把口头假设压缩成可推演关系，计算把推演扩展到无法手算的规模，工程则逼迫模型产生可操作的输出。"
     },
     {
-      "id": "L01-Q18",
+      "id": "L01-Q24",
       "lecture": 1,
       "sectionId": "lecture-01-source-3",
       "sourceAnchors": [
@@ -1056,7 +1642,7 @@
         "模拟",
         "simulation"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"按照模型规则生成状态轨迹或合成数据。\"称为什么？",
@@ -1067,27 +1653,27 @@
         },
         {
           "id": "b",
-          "text": "预测（prediction）"
+          "text": "模拟（simulation）"
         },
         {
           "id": "c",
-          "text": "可证伪性（falsifiability）"
+          "text": "预测（prediction）"
         },
         {
           "id": "d",
-          "text": "模拟（simulation）"
+          "text": "可证伪性（falsifiability）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“推断（inference）”指：由数据约束未知状态、参数或模型。",
-        "b": "“预测（prediction）”指：在给定条件下模型对尚未使用数据的定量输出。",
-        "c": "“可证伪性（falsifiability）”指：存在观测结果能够与模型预测冲突。"
+        "c": "“预测（prediction）”指：在给定条件下模型对尚未使用数据的定量输出。",
+        "d": "“可证伪性（falsifiability）”指：存在观测结果能够与模型预测冲突。"
       },
-      "explanation": "模拟（simulation）：按照模型规则生成状态轨迹或合成数据。"
+      "explanation": "模拟（simulation）：按照模型规则生成状态轨迹或合成数据。 第三页的课程安排与第四页的数学、编程说明共同给出一条学习路线：先建立模型语言，再学习单神经元动力学，随后转向神经编码、群体与网络。"
     },
     {
-      "id": "L01-Q19",
+      "id": "L01-Q25",
       "lecture": 1,
       "sectionId": "lecture-01-source-2",
       "sourceAnchors": [
@@ -1101,38 +1687,38 @@
         "推断",
         "inference"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"由数据约束未知状态、参数或模型。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "推断（inference）"
-        },
-        {
-          "id": "b",
           "text": "预测（prediction）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "可证伪性（falsifiability）"
+        },
+        {
+          "id": "c",
+          "text": "推断（inference）"
         },
         {
           "id": "d",
           "text": "机器学习（machine learning）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“预测（prediction）”指：在给定条件下模型对尚未使用数据的定量输出。",
-        "c": "“可证伪性（falsifiability）”指：存在观测结果能够与模型预测冲突。",
+        "a": "“预测（prediction）”指：在给定条件下模型对尚未使用数据的定量输出。",
+        "b": "“可证伪性（falsifiability）”指：存在观测结果能够与模型预测冲突。",
         "d": "“机器学习（machine learning）”指：从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。"
       },
-      "explanation": "推断（inference）：由数据约束未知状态、参数或模型。"
+      "explanation": "推断（inference）：由数据约束未知状态、参数或模型。 参数必须能由数据约束，预测必须指向尚未参与拟合的观察。"
     },
     {
-      "id": "L01-Q20",
+      "id": "L01-Q26",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -1146,7 +1732,7 @@
         "预测",
         "prediction"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"在给定条件下模型对尚未使用数据的定量输出。\"称为什么？",
@@ -1157,27 +1743,27 @@
         },
         {
           "id": "b",
-          "text": "预测（prediction）"
-        },
-        {
-          "id": "c",
           "text": "机器学习（machine learning）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "数据科学（data science）"
+        },
+        {
+          "id": "d",
+          "text": "预测（prediction）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“可证伪性（falsifiability）”指：存在观测结果能够与模型预测冲突。",
-        "c": "“机器学习（machine learning）”指：从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。",
-        "d": "“数据科学（data science）”指：数据整理、统计、计算与解释的广义实践。"
+        "b": "“机器学习（machine learning）”指：从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。",
+        "c": "“数据科学（data science）”指：数据整理、统计、计算与解释的广义实践。"
       },
-      "explanation": "预测（prediction）：在给定条件下模型对尚未使用数据的定量输出。"
+      "explanation": "预测（prediction）：在给定条件下模型对尚未使用数据的定量输出。 第一页通过授课者横跨神经生物学、物理与应用数学的背景，提示了本领域的基本工作方式：实验给出神经系统的对象与约束，数学把口头假设压缩成可推演关系，计算把推演扩展到无法手算的规模，工程则逼迫模型产生可操作的输出。"
     },
     {
-      "id": "L01-Q21",
+      "id": "L01-Q27",
       "lecture": 1,
       "sectionId": "lecture-01-source-2",
       "sourceAnchors": [
@@ -1198,31 +1784,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "机器学习（machine learning）"
+          "text": "可证伪性（falsifiability）"
         },
         {
           "id": "b",
-          "text": "数据科学（data science）"
+          "text": "机器学习（machine learning）"
         },
         {
           "id": "c",
-          "text": "可证伪性（falsifiability）"
+          "text": "数据科学（data science）"
         },
         {
           "id": "d",
           "text": "机制模型（mechanistic model）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“机器学习（machine learning）”指：从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。",
-        "b": "“数据科学（data science）”指：数据整理、统计、计算与解释的广义实践。",
+        "b": "“机器学习（machine learning）”指：从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。",
+        "c": "“数据科学（data science）”指：数据整理、统计、计算与解释的广义实践。",
         "d": "“机制模型（mechanistic model）”指：变量及相互作用被解释为候选生物过程的模型。"
       },
-      "explanation": "可证伪性（falsifiability）：存在观测结果能够与模型预测冲突。"
+      "explanation": "可证伪性（falsifiability）：存在观测结果能够与模型预测冲突。 模拟从已给模型生成结果；数据分析压缩并展示观察；机器学习可寻找高维预测关系；数学建模强调假设与结果之间的推演。"
     },
     {
-      "id": "L01-Q22",
+      "id": "L01-Q28",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -1236,7 +1822,7 @@
         "机器学习",
         "machine learning"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。\"称为什么？",
@@ -1247,27 +1833,27 @@
         },
         {
           "id": "b",
-          "text": "机制模型（mechanistic model）"
+          "text": "机器学习（machine learning）"
         },
         {
           "id": "c",
-          "text": "参数（parameter）"
+          "text": "机制模型（mechanistic model）"
         },
         {
           "id": "d",
-          "text": "机器学习（machine learning）"
+          "text": "参数（parameter）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“数据科学（data science）”指：数据整理、统计、计算与解释的广义实践。",
-        "b": "“机制模型（mechanistic model）”指：变量及相互作用被解释为候选生物过程的模型。",
-        "c": "“参数（parameter）”指：在一次模型运行中固定、但可由数据估计的量。"
+        "c": "“机制模型（mechanistic model）”指：变量及相互作用被解释为候选生物过程的模型。",
+        "d": "“参数（parameter）”指：在一次模型运行中固定、但可由数据估计的量。"
       },
       "explanation": "机器学习（machine learning）：从数据优化预测函数的一组方法；与 computational neuroscience 有交集但不等同。"
     },
     {
-      "id": "L01-Q23",
+      "id": "L01-Q29",
       "lecture": 1,
       "sectionId": "lecture-01-source-2",
       "sourceAnchors": [
@@ -1281,38 +1867,38 @@
         "数据科学",
         "data science"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"数据整理、统计、计算与解释的广义实践。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "数据科学（data science）"
-        },
-        {
-          "id": "b",
           "text": "机制模型（mechanistic model）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "参数（parameter）"
+        },
+        {
+          "id": "c",
+          "text": "数据科学（data science）"
         },
         {
           "id": "d",
           "text": "计算神经科学（computational neuroscience）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "“机制模型（mechanistic model）”指：变量及相互作用被解释为候选生物过程的模型。",
-        "c": "“参数（parameter）”指：在一次模型运行中固定、但可由数据估计的量。",
+        "a": "“机制模型（mechanistic model）”指：变量及相互作用被解释为候选生物过程的模型。",
+        "b": "“参数（parameter）”指：在一次模型运行中固定、但可由数据估计的量。",
         "d": "“计算神经科学（computational neuroscience）”指：用定量模型、算法与数据分析研究神经系统中的计算。"
       },
-      "explanation": "数据科学（data science）：数据整理、统计、计算与解释的广义实践。"
+      "explanation": "数据科学（data science）：数据整理、统计、计算与解释的广义实践。 计算机模拟、数据分析、机器学习和数学建模在闭环中承担不同角色。"
     },
     {
-      "id": "L01-Q24",
+      "id": "L01-Q30",
       "lecture": 1,
       "sectionId": "lecture-01-source-4",
       "sourceAnchors": [
@@ -1326,7 +1912,7 @@
         "机制模型",
         "mechanistic model"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"变量及相互作用被解释为候选生物过程的模型。\"称为什么？",
@@ -1337,27 +1923,27 @@
         },
         {
           "id": "b",
-          "text": "机制模型（mechanistic model）"
-        },
-        {
-          "id": "c",
           "text": "计算神经科学（computational neuroscience）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "模型（model）"
+        },
+        {
+          "id": "d",
+          "text": "机制模型（mechanistic model）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "“参数（parameter）”指：在一次模型运行中固定、但可由数据估计的量。",
-        "c": "“计算神经科学（computational neuroscience）”指：用定量模型、算法与数据分析研究神经系统中的计算。",
-        "d": "“模型（model）”指：对变量、关系和假设的明确简化表示。"
+        "b": "“计算神经科学（computational neuroscience）”指：用定量模型、算法与数据分析研究神经系统中的计算。",
+        "c": "“模型（model）”指：对变量、关系和假设的明确简化表示。"
       },
-      "explanation": "机制模型（mechanistic model）：变量及相互作用被解释为候选生物过程的模型。"
+      "explanation": "机制模型（mechanistic model）：变量及相互作用被解释为候选生物过程的模型。 建立个人学习记录时，可为每个模型保留一张结构卡：科学问题、变量与单位、方程、参数含义、初始条件、输出、可检验预测、已知局限。"
     },
     {
-      "id": "L01-Q25",
+      "id": "L01-Q31",
       "lecture": 1,
       "sectionId": "lecture-01-source-3",
       "sourceAnchors": [
@@ -1371,51 +1957,51 @@
         "参数",
         "parameter"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 1 讲：本讲把\"在一次模型运行中固定、但可由数据估计的量。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "计算神经科学（computational neuroscience）"
+          "text": "参数（parameter）"
         },
         {
           "id": "b",
-          "text": "模型（model）"
+          "text": "计算神经科学（computational neuroscience）"
         },
         {
           "id": "c",
-          "text": "参数（parameter）"
+          "text": "模型（model）"
         },
         {
           "id": "d",
           "text": "模拟（simulation）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“计算神经科学（computational neuroscience）”指：用定量模型、算法与数据分析研究神经系统中的计算。",
-        "b": "“模型（model）”指：对变量、关系和假设的明确简化表示。",
+        "b": "“计算神经科学（computational neuroscience）”指：用定量模型、算法与数据分析研究神经系统中的计算。",
+        "c": "“模型（model）”指：对变量、关系和假设的明确简化表示。",
         "d": "“模拟（simulation）”指：按照模型规则生成状态轨迹或合成数据。"
       },
-      "explanation": "参数（parameter）：在一次模型运行中固定、但可由数据估计的量。"
+      "explanation": "参数（parameter）：在一次模型运行中固定、但可由数据估计的量。 第一次实现模型时，先用一个能手算的小例验证代码。"
     },
     {
-      "id": "L01-Q26",
+      "id": "L01-Q32",
       "lecture": 1,
-      "sectionId": "lecture-01-source-1",
+      "sectionId": "lecture-01-source-3",
       "sourceAnchors": [
         {
           "file": "Lecture1-Course-Introduction.pdf",
-          "page": 1,
-          "section": "lecture-01-source-1"
+          "page": 3,
+          "section": "lecture-01-source-3"
         }
       ],
       "conceptTags": [
         "最小 threshold-linear 输入-输出模型"
       ],
-      "difficulty": 1,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：使用\"最小 threshold-linear 输入-输出模型\"时，哪项条件或约定不可省略？",
@@ -1426,27 +2012,27 @@
         },
         {
           "id": "b",
-          "text": "模型类与数据独立性假设成立"
+          "text": "静态、一维刺激；rate 非负"
         },
         {
           "id": "c",
-          "text": "新输入与训练分布关系需说明"
+          "text": "模型类与数据独立性假设成立"
         },
         {
           "id": "d",
-          "text": "静态、一维刺激；rate 非负"
+          "text": "新输入与训练分布关系需说明"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
-        "b": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。",
-        "c": "这是“已拟合模型对新输入的预测”的条件，不是题干公式的条件。"
+        "c": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。",
+        "d": "这是“已拟合模型对新输入的预测”的条件，不是题干公式的条件。"
       },
-      "explanation": "最小 threshold-linear 输入-输出模型的适用条件：静态、一维刺激；rate 非负"
+      "explanation": "最小 threshold-linear 输入-输出模型的适用条件：静态、一维刺激；rate 非负 较可靠的标准是能在无提示时完成四件事：用自己的话回答指导问题，重建一条推导，算完一个带数字的例题，指出模型至少一个失效条件。"
     },
     {
-      "id": "L01-Q27",
+      "id": "L01-Q33",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -1459,38 +2045,38 @@
       "conceptTags": [
         "生成模型：给定输入和参数时数据的分布"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：使用\"生成模型：给定输入和参数时数据的分布\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "conditioning 与随机变量定义明确"
-        },
-        {
-          "id": "b",
           "text": "静态、一维刺激；rate 非负"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "模型类与数据独立性假设成立"
+        },
+        {
+          "id": "c",
+          "text": "conditioning 与随机变量定义明确"
         },
         {
           "id": "d",
           "text": "新输入与训练分布关系需说明"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "b": "这是“最小 threshold-linear 输入-输出模型”的条件，不是题干公式的条件。",
-        "c": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。",
+        "a": "这是“最小 threshold-linear 输入-输出模型”的条件，不是题干公式的条件。",
+        "b": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。",
         "d": "这是“已拟合模型对新输入的预测”的条件，不是题干公式的条件。"
       },
-      "explanation": "生成模型：给定输入和参数时数据的分布的适用条件：conditioning 与随机变量定义明确"
+      "explanation": "生成模型：给定输入和参数时数据的分布的适用条件：conditioning 与随机变量定义明确 面对\"动物怎样判断运动方向\"这一问题，神经科学先确定应记录哪一区域、用什么刺激与行为指标；数学定义刺激方向 s、神经反应 n 和选择 y；模型提出 P(n|s) 或 P(y|n)；程序计算参数并比较预测。"
     },
     {
-      "id": "L01-Q28",
+      "id": "L01-Q34",
       "lecture": 1,
       "sectionId": "lecture-01-source-3",
       "sourceAnchors": [
@@ -1514,27 +2100,27 @@
         },
         {
           "id": "b",
-          "text": "模型类与数据独立性假设成立"
-        },
-        {
-          "id": "c",
           "text": "conditioning 与随机变量定义明确"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "新输入与训练分布关系需说明"
+        },
+        {
+          "id": "d",
+          "text": "模型类与数据独立性假设成立"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
         "a": "这是“最小 threshold-linear 输入-输出模型”的条件，不是题干公式的条件。",
-        "c": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
-        "d": "这是“已拟合模型对新输入的预测”的条件，不是题干公式的条件。"
+        "b": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
+        "c": "这是“已拟合模型对新输入的预测”的条件，不是题干公式的条件。"
       },
-      "explanation": "maximum-likelihood 参数估计的适用条件：模型类与数据独立性假设成立"
+      "explanation": "maximum-likelihood 参数估计的适用条件：模型类与数据独立性假设成立 建立个人学习记录时，可为每个模型保留一张结构卡：科学问题、变量与单位、方程、参数含义、初始条件、输出、可检验预测、已知局限。"
     },
     {
-      "id": "L01-Q29",
+      "id": "L01-Q35",
       "lecture": 1,
       "sectionId": "lecture-01-source-1",
       "sourceAnchors": [
@@ -1547,38 +2133,38 @@
       "conceptTags": [
         "已拟合模型对新输入的预测"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：使用\"已拟合模型对新输入的预测\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "静态、一维刺激；rate 非负"
+          "text": "新输入与训练分布关系需说明"
         },
         {
           "id": "b",
-          "text": "conditioning 与随机变量定义明确"
+          "text": "静态、一维刺激；rate 非负"
         },
         {
           "id": "c",
-          "text": "新输入与训练分布关系需说明"
+          "text": "conditioning 与随机变量定义明确"
         },
         {
           "id": "d",
           "text": "模型类与数据独立性假设成立"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“最小 threshold-linear 输入-输出模型”的条件，不是题干公式的条件。",
-        "b": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
+        "b": "这是“最小 threshold-linear 输入-输出模型”的条件，不是题干公式的条件。",
+        "c": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
         "d": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。"
       },
-      "explanation": "已拟合模型对新输入的预测的适用条件：新输入与训练分布关系需说明"
+      "explanation": "已拟合模型对新输入的预测的适用条件：新输入与训练分布关系需说明 第一页通过授课者横跨神经生物学、物理与应用数学的背景，提示了本领域的基本工作方式：实验给出神经系统的对象与约束，数学把口头假设压缩成可推演关系，计算把推演扩展到无法手算的规模，工程则逼迫模型产生可操作的输出。"
     },
     {
-      "id": "L01-Q30",
+      "id": "L01-Q36",
       "lecture": 1,
       "sectionId": "lecture-01-source-4",
       "sourceAnchors": [
@@ -1591,7 +2177,7 @@
       "conceptTags": [
         "观测与预测的残差"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 1 讲：使用\"观测与预测的残差\"时，哪项条件或约定不可省略？",
@@ -1602,24 +2188,24 @@
         },
         {
           "id": "b",
-          "text": "conditioning 与随机变量定义明确"
+          "text": "单位必须与 y 相同"
         },
         {
           "id": "c",
-          "text": "模型类与数据独立性假设成立"
+          "text": "conditioning 与随机变量定义明确"
         },
         {
           "id": "d",
-          "text": "单位必须与 y 相同"
+          "text": "模型类与数据独立性假设成立"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这是“最小 threshold-linear 输入-输出模型”的条件，不是题干公式的条件。",
-        "b": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
-        "c": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。"
+        "c": "这是“生成模型：给定输入和参数时数据的分布”的条件，不是题干公式的条件。",
+        "d": "这是“maximum-likelihood 参数估计”的条件，不是题干公式的条件。"
       },
-      "explanation": "观测与预测的残差的适用条件：单位必须与 y 相同"
+      "explanation": "观测与预测的残差的适用条件：单位必须与 y 相同 例如三点数据的预测必须与纸笔结果一致，再扩大网格或试次数。"
     }
   ]
 }

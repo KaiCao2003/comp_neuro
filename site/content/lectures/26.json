@@ -100,6 +100,588 @@
       "stopPredict": "−ξ 为什么也 attractor？"
     }
   ],
+  "studyGuide": {
+    "objectives": [
+      "从 Hebbian cell assembly 到 binary Hopfield abstraction，区分 biological hypothesis、state variable、encoding rule 与 retrieval dynamics。",
+      "手动执行 asynchronous sign updates，计算 overlap，并说明 symmetric weights 与 zero diagonal 对energy descent的作用。",
+      "推导单神经元翻转的energy change以及P=1 stored pattern的local field，识别aligned、antialigned与spurious attractors。",
+      "将多pattern local field分为signal和crosstalk，估计variance、error probability与loading α=P/N。",
+      "说明αc≈0.138只属于经典dense unbiased random Hopfield assumptions，并比较sparse stochastic与global inhibition变体。"
+    ],
+    "prerequisiteBridge": [
+      "Hopfield network把每个neuron简化为S_i∈{-1,+1}。一个memory pattern ξ^(μ)也是N个正负号组成的向量；encoding用outer products把patterns写入symmetric weights。retrieval从partial/noisy cue开始，每次选择一个neuron，用其weighted input的sign更新，直到没有unit改变。这个过程是abstract associative memory，不等同于真实spike timing。",
+      "energy可理解为网络state的标量地形：在对称weights、asynchronous update下，每次真正翻转都不增加E，因此trajectory最终落到local minimum。local minimum对应fixed point，但不保证是想存的memory；反pattern、odd mixtures与spin-glass states也可成为minima。pattern completion就是初态落在目标memory的basin中。",
+      "存多个random patterns时，检索目标pattern的local field含目标signal和其余patterns的crosstalk。目标signal随N归一化后约为1，许多独立干扰项的总variance约为P/N=α。α增大时error更可能，超过经典临界附近retrieval相消。中央极限定理给Gaussian近似，但0.138常数还需更完整self-consistent analysis。"
+    ],
+    "diagnostic": [
+      {
+        "id": "l26-d1",
+        "prompt": "asynchronous update与synchronous update的区别是什么？",
+        "answer": "前者每次只更新一个neuron并立即使用新state；后者同时更新全部neurons。",
+        "explanation": "经典energy non-increase证明依赖asynchronous single-unit update。",
+        "remediationModuleId": "l26-m2"
+      },
+      {
+        "id": "l26-d2",
+        "prompt": "W symmetric、Wii=0时，一个unit按local field sign翻转，energy怎样变化？",
+        "answer": "ΔE=-ΔSi hi，若更新与hi同号则ΔE≤0。",
+        "explanation": "只有该unit相关pair terms改变，对称性让两半合并。",
+        "remediationModuleId": "l26-m3"
+      },
+      {
+        "id": "l26-d3",
+        "prompt": "为什么P=1时-ξ也常是attractor？",
+        "answer": "weights由ξiξj构成，对整体符号翻转不变；local field在-ξ上也与当前state同号。",
+        "explanation": "经典无bias模型具有全局sign symmetry。",
+        "remediationModuleId": "l26-m3"
+      },
+      {
+        "id": "l26-d4",
+        "prompt": "N=1000、P=100时loading α是多少？",
+        "answer": "α=P/N=0.1，低于经典0.138附近，但有限N仍有errors。",
+        "explanation": "临界值不是每个instance的硬保证，且只适用指定random dense assumptions。",
+        "remediationModuleId": "l26-m5"
+      },
+      {
+        "id": "l26-d5",
+        "prompt": "odd mixture为何叫spurious memory？",
+        "answer": "它由多个stored patterns的component-wise majority形成，可能稳定却不是训练集中任何单一pattern。",
+        "explanation": "energy minima不仅包含intended memories。",
+        "remediationModuleId": "l26-m4"
+      }
+    ],
+    "modules": [
+      {
+        "id": "l26-m1",
+        "title": "Explicit memory、Hebbian assembly 与pattern completion",
+        "sourceRefs": [
+          {
+            "file": "Lecture26-Memory-HopfieldModel.pdf",
+            "page": 1
+          }
+        ],
+        "guidingQuestion": "怎样从共同活动的cell assembly提出可检验的encoding—cue—retrieval链？",
+        "paragraphs": [
+          "Hebbian assembly hypothesis认为共同参与一个experience的cells形成增强互连。encoding改变connections，partial cue重新激活一部分members，recurrent excitation招回缺失members，得到pattern completion。engram一词指与memory存储和表达有因果关系的cellular ensemble，不能只凭activation correlation命名。",
+          "Hopfield abstraction把assembly变为binary patternξ，令Wij=(1/N)Σμξi^(μ)ξj^(μ)、Wii=0。same-sign pairs得到正weight，opposite-sign pairs得到负weight。真实synapses受Dale law、稀疏连接与spiking约束，经典dense matrix首先展示computational principle。",
+          "retrieval cue S(0)与目标pattern有positive overlap m=(1/N)ΣiξiS_i。m=1完全匹配，m=0平均无关，m=-1为整体反pattern。若cue位于目标basin，asynchronous dynamics逐步纠错；basin size决定可容忍corruption，而不只fixed point是否存在。",
+          "因果engram实验需分别测试sufficiency与necessity：人工激活tagged ensemble能否触发 memory-like behavior，抑制它是否选择性损害retrieval。即便成立，Hopfield的 binary units 与 Hebbian weights 仍是model mapping，不应从behavior直接推断exact W。"
+        ],
+        "keyPoints": [
+          "cell assembly提供pattern completion假说。",
+          "Hopfield outer-product rule是抽象encoding。",
+          "overlap与basin分别量化cue相似和retrieval robustness。"
+        ],
+        "derivation": {
+          "title": "overlap 对cue corruption的响应",
+          "setup": "设目标pattern中有fraction f的bits被翻转。",
+          "steps": [
+            {
+              "title": "写一致bits贡献",
+              "explanation": "比例1-f的bits满足ξiS_i=+1。"
+            },
+            {
+              "title": "写翻转bits贡献",
+              "explanation": "比例f的bits满足ξiS_i=-1。"
+            },
+            {
+              "title": "求平均",
+              "explanation": "把两类贡献按比例相加。",
+              "latex": "m=(1-f)(+1)+f(-1)=1-2f"
+            }
+          ],
+          "symbolNotes": [
+            "m无量纲并位于[-1,1]。",
+            "f是翻转比例，位于[0,1]。"
+          ],
+          "unitsCheck": "两项都是dimensionless fraction，overlap无量纲。",
+          "limitCheck": "f=0时m=1；f=0.5时m=0；f=1时m=-1。"
+        },
+        "workedExample": {
+          "title": "计算noisy cue overlap",
+          "problem": "一个100-bit pattern中有20 bits被翻转。求与原pattern的overlap。",
+          "steps": [
+            "80 bits各贡献+1，总和80。",
+            "20 bits各贡献-1，总和-20。",
+            "总和60除以N=100，m=0.6。"
+          ],
+          "result": "overlap为0.6。",
+          "sanityCheck": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        "selfCheck": {
+          "prompt": "为何m>0不能保证retrieval成功？",
+          "answer": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+        },
+        "pitfalls": [
+          "把activation-tagged cells自动称为causal engram。",
+          "把positive overlap当作成功的充分条件。"
+        ]
+      },
+      {
+        "id": "l26-m2",
+        "title": "Binary asynchronous dynamics 与stored random patterns",
+        "sourceRefs": [
+          {
+            "file": "Lecture26-Memory-HopfieldModel.pdf",
+            "page": 2
+          }
+        ],
+        "guidingQuestion": "一次只更新一个unit时，怎样严格执行算法并判断何时收敛？",
+        "paragraphs": [
+          "每步选i，计算local field h_i=Σ_jWijS_j，然后置S_i←sgn(h_i)。Wii=0避免self-state直接投票；h_i=0时tie rule必须事先说明，可保持原值或固定sign。update order可随机或sequential，不同order可能落到不同basin，但每步使用最新state。",
+          "一轮sweep通常指平均更新N次，并不等于收敛。停止条件是完整检查中没有unit会改变，或energy和state达到固定点。finite deterministic asynchronous system在严格energy descent下不能无限访问新states，但zero-field ties若随意翻转可产生degeneracy。",
+          "stored patterns常取independent unbiased random±1，便于计算容量。这不是自然记忆的统计模型：真实patterns相关且sparse。相关patterns会增大structured crosstalk，也可能支持category structure；因此random assumption是baseline而非事实。",
+          "synchronous update同时用old state计算所有new states，可能出现two-cycle，经典single-flip energy proof不直接适用。编程或手算时应明确是否原地更新；把asynchronous伪装成vectorized simultaneous multiply会改变动力学结论。"
+        ],
+        "keyPoints": [
+          "asynchronous update立即写回一个unit。",
+          "收敛需检查fixed state，不是固定sweeps。",
+          "random unbiased patterns是分析假设。"
+        ],
+        "derivation": {
+          "title": "一次三unit asynchronous update",
+          "setup": "用明确矩阵和state展示local field与原地写回。",
+          "steps": [
+            {
+              "title": "定义weights与state",
+              "explanation": "令W12=W21=1、W23=W32=1、其他为0，初态S=(1,-1,1)。"
+            },
+            {
+              "title": "更新unit 2",
+              "explanation": "h2=S1+S3=2，所以S2从-1变+1。",
+              "latex": "S_2\\leftarrow\\operatorname{sgn}(2)=+1"
+            },
+            {
+              "title": "更新unit 1",
+              "explanation": "使用已经改变的S2，h1=S2=1，S1保持+1。"
+            },
+            {
+              "title": "更新unit 3",
+              "explanation": "h3=S2=1，S3保持+1，得到fixed state。"
+            }
+          ],
+          "symbolNotes": [
+            "S_i为±1，W在此例无量纲。",
+            "local field单位等于weight×state的单位。"
+          ],
+          "unitsCheck": "若weights无量纲，h也无量纲，sign operation合法。",
+          "limitCheck": "若第一步没有立即写回S2，后续fields会不同，显示update convention的重要性。"
+        },
+        "workedExample": {
+          "title": "手算一次update",
+          "problem": "h_i=-0.7，当前S_i=+1，采用sgn(0)=保持。更新后state与flip indicator是什么？",
+          "steps": [
+            "h_i负，所以sgn(h_i)=-1。",
+            "S_i从+1改为-1。",
+            "ΔS_i=-1-(+1)=-2，发生flip。"
+          ],
+          "result": "new S_i=-1，ΔS_i=-2。",
+          "sanityCheck": "new state与negative local field同号。"
+        },
+        "selfCheck": {
+          "prompt": "为什么“每个neuron都更新过一次”不保证fixed point？",
+          "answer": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+        },
+        "pitfalls": [
+          "用旧state一次性更新全部units却称asynchronous。",
+          "忽略h=0的tie convention。"
+        ]
+      },
+      {
+        "id": "l26-m3",
+        "title": "Energy descent 与P=1 stored attractor",
+        "sourceRefs": [
+          {
+            "file": "Lecture26-Memory-HopfieldModel.pdf",
+            "page": 3
+          }
+        ],
+        "guidingQuestion": "对称weight为何让single-unit update下降energy，而stored pattern为何与其反pattern都稳定？",
+        "paragraphs": [
+          "energy E=-(1/2)Σ_iΣ_{j≠i}WijS_iS_j。1/2避免对称pair重复计数。只翻转unit i时，其他pair不变；利用Wij=Wji，energy change化为ΔE=-ΔS_i h_i。若new S_i与h_i同号，翻转时ΔE<0，不翻时为0。",
+          "P=1且Wij=ξiξj/N。将S=ξ代入h_i=(ξ_i/N)Σ_{j≠i}ξ_j²=((N-1)/N)ξ_i，因此sign(h_i)=ξ_i，pattern是fixed point。将S=-ξ代入则h_i=-((N-1)/N)ξ_i，与S_i=-ξ_i同号，所以antipattern也稳定。",
+          "energy non-increase保证达到某local minimum，不保证global minimum或target memory。noisy cue可能越过basin boundary落入spurious state。symmetric W是proof的核心；asymmetric plasticity 或delays可产生cycles、chaos或sequence dynamics，不能继续用同一Lyapunov function宣称收敛。",
+          "Wii=0移除self-coupling并让P=1 field少一个term；N大时(N-1)/N接近1，但小N例题不能直接写成1。严格保留这一项可训练学生区分finite-size calculation与large-N approximation。"
+        ],
+        "keyPoints": [
+          "symmetric asynchronous dynamics使energy不增加。",
+          "P=1时ξ与-ξ都因global sign symmetry稳定。",
+          "energy descent不保证检索到desired memory。"
+        ],
+        "derivation": {
+          "title": "single-unit flip的energy change",
+          "setup": "只让S_i从old变new，其余states固定。",
+          "steps": [
+            {
+              "title": "提取相关项",
+              "explanation": "对称pair合并后，与i有关的energy为-S_iΣ_{j≠i}WijS_j。",
+              "latex": "E_i=-S_i h_i"
+            },
+            {
+              "title": "计算差",
+              "explanation": "new与old energy相减。",
+              "latex": "\\Delta E=-(S_i^{\\mathrm{new}}-S_i^{\\mathrm{old}})h_i=-\\Delta S_i h_i"
+            },
+            {
+              "title": "按sign更新",
+              "explanation": "若发生flip，new state与h_i同号，ΔS_i h_i>0。",
+              "latex": "\\Delta E<0"
+            },
+            {
+              "title": "不翻转情形",
+              "explanation": "若old已与field同号，ΔS_i=0。",
+              "latex": "\\Delta E=0"
+            }
+          ],
+          "symbolNotes": [
+            "E单位为weight，S无量纲，h单位为weight。",
+            "对称性与更新时其他states固定是推导前提。"
+          ],
+          "unitsCheck": "ΔS无量纲，乘h得到energy单位。",
+          "limitCheck": "h_i=0时ΔE=0；tie flip可能在等能states间移动。"
+        },
+        "workedExample": {
+          "title": "P=1有限N field",
+          "problem": "N=5，pattern ξ=(1,-1,1,-1,1)，network处于ξ。求unit1的local field。",
+          "steps": [
+            "Wij=ξ1ξj/5。",
+            "h1=Σ_{j≠1}(ξ1ξj/5)ξj=(ξ1/5)Σ_{j≠1}ξj²。",
+            "四项ξj²=1，所以h1=4/5=0.8，与ξ1同号。"
+          ],
+          "result": "h1=0.8，unit1保持+1。",
+          "sanityCheck": "通式(N-1)ξ1/N=4/5一致。"
+        },
+        "selfCheck": {
+          "prompt": "若W不对称，为什么ΔE推导失效？",
+          "answer": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+        },
+        "pitfalls": [
+          "漏掉energy的1/2后又重复计数。",
+          "把局部minimum自动称为stored pattern。"
+        ]
+      },
+      {
+        "id": "l26-m4",
+        "title": "Spurious mixtures 与signal-plus-crosstalk分解",
+        "sourceRefs": [
+          {
+            "file": "Lecture26-Memory-HopfieldModel.pdf",
+            "page": 4
+          }
+        ],
+        "guidingQuestion": "存多个patterns时，local field怎样同时包含目标signal和其他memory interference？",
+        "paragraphs": [
+          "检索pattern1时设S≈ξ^(1)。代Hebbian W后，h_i的μ=1项与ξ_i^(1)对齐，是signal；μ>1项包含random overlaps，是crosstalk。即使每个干扰pattern与目标平均正交，有限N的overlap不为零，许多小项相加可翻转某些bits。",
+          "odd mixture可写S_i=sgn(ξ_i^(1)+ξ_i^(2)+ξ_i^(3))。三pattern逐component投票不会tie，并可能在Hebbian field下self-consistent。它不是输入训练集中的任何一个pattern，却可成为fixed point，减少usable basins并导致错误组合式recall。",
+          "two-pattern mixture有component ties，稳定性更依tie rule和bias；odd mixtures在dense unbiased model中更典型。pattern correlations会产生structured mixtures，不应把所有false memories归于 independent Gaussian noise。识别spurious state可比较与每个 stored-pattern overlap，而非只看energy低。",
+          "basin边界随P增加收缩。一个cue可与目标overlap最高却仍流向mixture，因为energy landscape由所有patterns共同塑造。实验类比“memory blending”只能作为hypothesis；真实memory distortion还受semantic inference、encoding overlap与systems consolidation影响。"
+        ],
+        "keyPoints": [
+          "local field可拆成target-aligned signal和multi-memory crosstalk。",
+          "odd component-wise majority可形成spurious attractor。",
+          "最低energy或最高初始overlap都不保证目标retrieval。"
+        ],
+        "derivation": {
+          "title": "local field的signal与crosstalk",
+          "setup": "将Hebbian sum展开，并指定当前state为目标pattern1。",
+          "steps": [
+            {
+              "title": "代入weights",
+              "explanation": "把P个outer products放入local field。",
+              "latex": "h_i=\\frac1N\\sum_{\\mu=1}^{P}\\xi_i^{(\\mu)}\\sum_{j\\ne i}\\xi_j^{(\\mu)}S_j"
+            },
+            {
+              "title": "指定retrieval state",
+              "explanation": "令S_j=ξ_j^(1)。"
+            },
+            {
+              "title": "分离μ=1",
+              "explanation": "目标项约等于ξ_i^(1)。",
+              "latex": "h_i=\\frac{N-1}{N}\\xi_i^{(1)}+\\frac1N\\sum_{\\mu=2}^{P}\\xi_i^{(\\mu)}\\sum_{j\\ne i}\\xi_j^{(\\mu)}\\xi_j^{(1)}"
+            },
+            {
+              "title": "命名剩余项",
+              "explanation": "第二项由其他patterns的finite overlaps构成crosstalk。"
+            }
+          ],
+          "symbolNotes": [
+            "μ索引memory，i、j索引neurons。",
+            "patterns与states为±1，h单位随W。"
+          ],
+          "unitsCheck": "1/N normalization使signal保持order one，而非随N增长。",
+          "limitCheck": "P=1时crosstalk sum为空；N→∞且P固定时random crosstalk趋弱。"
+        },
+        "workedExample": {
+          "title": "三pattern majority bit",
+          "problem": "某unit三个patterns的bits为(+1,+1,-1)。求odd-mixture bit；若为(+1,-1,-1)又如何？",
+          "steps": [
+            "第一组sum=+1，sign为+1。",
+            "第二组sum=-1，sign为-1。",
+            "三个±1相加不可能为0，所以无需tie rule。"
+          ],
+          "result": "两种mixture bits分别为+1与-1。",
+          "sanityCheck": "结果总是等于三者中的majority sign。"
+        },
+        "selfCheck": {
+          "prompt": "为什么mixture energy低仍不能把它算作正确memory？",
+          "answer": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+        },
+        "pitfalls": [
+          "把crosstalk mean近零误写成每个instance都为零。",
+          "用spurious attractor直接解释所有人类false memory。"
+        ]
+      },
+      {
+        "id": "l26-m5",
+        "title": "Gaussian crosstalk、loading 与经典capacity",
+        "sourceRefs": [
+          {
+            "file": "Lecture26-Memory-HopfieldModel.pdf",
+            "page": 5
+          }
+        ],
+        "guidingQuestion": "为何random interference的scale由α=P/N控制，而0.138不是任意associative memory的通用常数？",
+        "paragraphs": [
+          "对unbiased independent patterns，单个非目标overlapΣ_jξ_j^(μ)ξ_j^(1)均值0、variance约N。乘1/N后每pattern对field贡献variance约1/N；P-1个近独立项相加给crosstalk variance约(P-1)/N≈α。中央极限定理据此把noise近似Gaussian。",
+          "目标bit稳定要求ξ_i^(1)h_i>0，即unit-aligned signal 1加noise仍为正。若noise≈N(0,α)，single-step error近似Φ(-1/√α)，随α上升。units errors又反馈到fields，完整self-consistency使经典dense model retrieval临界αc约0.138，而不是简单single-step tail直接给出。",
+          "P可随N线性增长，但“capacity=Pmax”依retrieval criterion、acceptable error与basin size。0.138适用于symmetric、dense、unbiased、independent random±1 patterns、Hebbian weights与经典dynamics。sparse coding、correlated patterns、alternative rules或 finite N 都会改数值。",
+          "spin-glass regime仍有很多stable states但与任何 stored pattern 的 overlap 很小，network收敛却不retrieval。只检查energy convergence会误判memory成功；应同时测target overlap、bit error、basin volume与 trial-to-trial outcome。"
+        ],
+        "keyPoints": [
+          "crosstalk variance约为loading α。",
+          "Gaussian tail给error tendency，完整critical value需self-consistency。",
+          "convergence与retrieval是不同评价。"
+        ],
+        "derivation": {
+          "title": "crosstalk variance的数量级",
+          "setup": "假设patterns independent、unbiased，并忽略有限index correlations。",
+          "steps": [
+            {
+              "title": "单pattern overlap",
+              "explanation": "N个独立±1 products求和，均值0、variance N。",
+              "latex": "\\operatorname{Var}\\!\\left(\\sum_j\\xi_j^{(\\mu)}\\xi_j^{(1)}\\right)\\approx N"
+            },
+            {
+              "title": "包含1/N",
+              "explanation": "单pattern field contribution variance除以N²。",
+              "latex": "\\operatorname{Var}(z_{\\mu})\\approx\\frac1N"
+            },
+            {
+              "title": "累加P-1项",
+              "explanation": "独立variances相加。",
+              "latex": "\\operatorname{Var}\\!\\left(\\sum_{\\mu=2}^{P}z_{\\mu}\\right)\\approx\\frac{P-1}{N}"
+            },
+            {
+              "title": "定义loading",
+              "explanation": "大N时用α=P/N表示。",
+              "latex": "\\sigma_{\\mathrm{cross}}^2\\approx\\alpha=\\frac PN"
+            }
+          ],
+          "symbolNotes": [
+            "α无量纲，P与N是counts。",
+            "zμ表示一个non-target pattern对aligned field的贡献。"
+          ],
+          "unitsCheck": "variance为dimensionless field平方，因classic weights与states无量纲。",
+          "limitCheck": "P固定且N→∞时α→0；P与N同比增长时noise保持order one。"
+        },
+        "workedExample": {
+          "title": "粗略Gaussian bit error",
+          "problem": "α=0.25，取signal=1、noise standard deviation√α=0.5。error需noise<-1，相当于标准正态Z<-2。",
+          "steps": [
+            "标准化threshold为-1/0.5=-2。",
+            "查标准正态tail Φ(-2)≈0.0228。",
+            "这是single-step independent-noise近似，不是最终capacity判据。"
+          ],
+          "result": "粗略bit error约2.28%。",
+          "sanityCheck": "α增大时threshold绝对值减小，left-tail probability应增大。"
+        },
+        "selfCheck": {
+          "prompt": "为什么α=0.1低于0.138仍不能保证每个cue成功？",
+          "answer": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+        },
+        "pitfalls": [
+          "把0.138当作所有脑memory的容量比例。",
+          "用Gaussian单步tail冒充完整临界推导。"
+        ]
+      },
+      {
+        "id": "l26-m6",
+        "title": "Sparse stochastic associative memory 与global inhibition",
+        "sourceRefs": [
+          {
+            "file": "Lecture26-Memory-HopfieldModel.pdf",
+            "page": 6
+          }
+        ],
+        "guidingQuestion": "把±1 dense code改为sparse {0,1} activity后，threshold、inhibition与capacity分析为什么必须重写？",
+        "paragraphs": [
+          "真实ensembles常只有fraction a的units active。用ξ_i∈{0,1}且P(active)=a时，pattern mean不为零；Hebbian rule需中心化ξ_i-a，避免所有units共享巨大positive bias。retrieval output可用probabilistic logistic rule而非hard sign，引入temperature控制stochasticity。",
+          "原始第 6 页把 global inhibition 直接写进每条 weight：在 centered Hebbian term 后减去 γ/(aN)。代入 local field 后，这一 uniform negative term 变成 -(γ/(aN))Σ_jS_j，因此当前 active population 越大，所有 units 承受的抑制越强。它与 stochastic threshold u 共同限制总 activity 接近 aN，但不等同于某一个 inhibitory neuron；若改写成 adaptive threshold，必须明确给出与 population activity 的对应关系。",
+          "sparse code减少patterns间active overlap，可提高每synapse携带的信息或某些capacity metrics；“near-optimal”必须说明按patterns/neuron、bits/synapse还是retrieval error衡量。不能直接把dense αc=0.138与sparse模型一个数字比较而不统一activity和metric。",
+          "temperature T→0时probabilistic update接近deterministic threshold，T大时state更随机并可能逃出shallow minima。stochasticity可帮助sampling，却也损害stable recall。验证alternative model应画false positive/negative rates、overlap distribution和capacity随a、T、inhibition变化，而非只报最大P。"
+        ],
+        "keyPoints": [
+          "sparse patterns需mean subtraction或threshold control。",
+          "global inhibition稳定population activity。",
+          "capacity比较必须统一information与error metric。"
+        ],
+        "derivation": {
+          "title": "稀疏 Hebbian covariance rule 与原页 global inhibition",
+          "setup": "用 active probability a 中心化每个 pattern bit，并完整保留原始第 6 页的 uniform inhibitory weight term。",
+          "steps": [
+            {
+              "title": "定义中心化bit",
+              "explanation": "active bit高于mean，inactive bit低于mean。",
+              "latex": "\\widetilde\\xi_i^{(\\mu)}=\\xi_i^{(\\mu)}-a"
+            },
+            {
+              "title": "写完整 weight rule",
+              "explanation": "第一项用 centered products 消除 common mean，第二项是原页显式给出的 global inhibition。",
+              "latex": "W_{ij}=\\frac{1}{Na(1-a)}\\sum_{\\mu=1}^{P}(\\xi_i^{(\\mu)}-a)(\\xi_j^{(\\mu)}-a)-\\frac{\\gamma}{aN}"
+            },
+            {
+              "title": "展开 global field",
+              "explanation": "uniform inhibitory weight 对所有 active presynaptic units 求和，形成随 population activity 增长的负反馈。",
+              "latex": "h_i=\\sum_jW_{ij}S_j=h_i^{\\mathrm{Hebb}}-\\frac{\\gamma}{aN}\\sum_jS_j"
+            },
+            {
+              "title": "加入 stochastic update",
+              "explanation": "原页用 threshold u 与 effective temperature T 把 field 转为下一时刻 active probability。",
+              "latex": "P(S_i(t+1)=1)=\\frac{1}{1+\\exp[-(h_i-u)/T]}"
+            }
+          ],
+          "symbolNotes": [
+            "a 是 target sparsity，γ 是 global-inhibition strength，T 为 effective temperature。",
+            "ξ 与 S 为 0 或 1；u、h 与 T 使用相容的 field units。"
+          ],
+          "unitsCheck": "normalization a(1-a) 无量纲；global term 与 Hebbian term 必须同为 weight units，logistic argument (h-u)/T 必须无量纲。",
+          "limitCheck": "a=0或1时variance为零且公式不可用；T→0时logistic趋向hard threshold。"
+        },
+        "workedExample": {
+          "title": "中心化sparse bits",
+          "problem": "sparsity a=0.1。一个active bit与一个inactive bit的centered values分别是多少？它们乘积呢？",
+          "steps": [
+            "active:1-a=0.9。",
+            "inactive:0-a=-0.1。",
+            "乘积0.9×(-0.1)=-0.09，表示不同activity的pair贡献负association。"
+          ],
+          "result": "centered values为0.9与-0.1，乘积-0.09。",
+          "sanityCheck": "平均centered value为0.1×0.9+0.9×(-0.1)=0。"
+        },
+        "selfCheck": {
+          "prompt": "为什么不中心化的0/1 Hebb容易产生全局positive bias？",
+          "answer": "只有共同active产生正项、inactive不产生抵消，许多patterns会让多数weights向正，推动过度activity。"
+        },
+        "pitfalls": [
+          "把dense sign rule原样用于sparse 0/1 code。",
+          "声称sparse capacity更高却不说明比较单位。"
+        ]
+      }
+    ]
+  },
+  "figures": [
+    {
+      "id": "L26-FIG-A1",
+      "lecture": 26,
+      "moduleId": "l26-m4",
+      "title": "Hopfield basins：下降不等于正确回忆",
+      "alt": "接近目标的 cue 经异步更新下降到 stored pattern，而 ambiguous cue 虽然同样降低 energy 却下降到 spurious minimum",
+      "caption": "在 symmetric weights、zero diagonal 与 asynchronous updates 的条件下，两条路径都让 E 不增加；但 cue 所在 basin 决定终点。接近目标的 cue 可完成到 ξ^(μ)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。",
+      "sourceRefs": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 3
+        },
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 4
+        }
+      ],
+      "schematic": true,
+      "kind": "flow",
+      "nodes": [
+        {
+          "id": "target-cue",
+          "label": "cue near\npattern μ",
+          "x": 8,
+          "y": 72
+        },
+        {
+          "id": "target-update",
+          "label": "asynchronous\nsign update",
+          "x": 37,
+          "y": 72
+        },
+        {
+          "id": "target-energy",
+          "label": "E(t+1) ≤ E(t)",
+          "x": 66,
+          "y": 72,
+          "tone": "accent"
+        },
+        {
+          "id": "stored",
+          "label": "stored pattern\nξ^(μ)",
+          "x": 94,
+          "y": 72
+        },
+        {
+          "id": "ambiguous-cue",
+          "label": "ambiguous\ncue",
+          "x": 8,
+          "y": 25
+        },
+        {
+          "id": "spurious-update",
+          "label": "asynchronous\nsign update",
+          "x": 37,
+          "y": 25
+        },
+        {
+          "id": "spurious-energy",
+          "label": "E(t+1) ≤ E(t)",
+          "x": 66,
+          "y": 25,
+          "tone": "accent"
+        },
+        {
+          "id": "spurious",
+          "label": "spurious\nminimum",
+          "x": 94,
+          "y": 25
+        }
+      ],
+      "edges": [
+        {
+          "from": "target-cue",
+          "to": "target-update"
+        },
+        {
+          "from": "target-update",
+          "to": "target-energy"
+        },
+        {
+          "from": "target-energy",
+          "to": "stored",
+          "label": "target basin"
+        },
+        {
+          "from": "ambiguous-cue",
+          "to": "spurious-update"
+        },
+        {
+          "from": "spurious-update",
+          "to": "spurious-energy"
+        },
+        {
+          "from": "spurious-energy",
+          "to": "spurious",
+          "label": "mixture basin"
+        }
+      ],
+      "lectureTitle": "Hopfield 联想记忆模型"
+    }
+  ],
   "specialSection": [],
   "derivations": [
     "5.1 binary asynchronous update 与 energy descent",
@@ -351,7 +933,42 @@
     "需要明确\"memory capacity 0.138N\"只属于经典 dense randompattern Hopfield model 的稳定-retrieval criterion，不是大脑记忆容量结论。"
   ],
   "errata": [
-    "1. Page 2 的 Nobel 旁注是历史背景，不影响模型定义。 2. Page 5 的 α_c≈0.138 仅属于 classic dense unbiased random-pattern Hopfield retrieval criterion。 3. Page 6 的 sparse stochastic model 是 alternative family，capacity comparison 依 activity sparsity 与 information metric。"
+    {
+      "id": "L26-E01",
+      "lecture": 26,
+      "lectureTitle": "Hopfield 联想记忆模型",
+      "kind": "caution",
+      "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+      "sourcePage": 2,
+      "sectionId": "lecture-26-source-2",
+      "originalIssue": "Page 2 的 Nobel 旁注是历史背景，不影响模型定义。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
+      "correction": null
+    },
+    {
+      "id": "L26-E02",
+      "lecture": 26,
+      "lectureTitle": "Hopfield 联想记忆模型",
+      "kind": "caution",
+      "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+      "sourcePage": 5,
+      "sectionId": "l26-m5",
+      "originalIssue": "Page 5 的 α_c≈0.138 仅属于 classic dense unbiased random-pattern Hopfield retrieval criterion。",
+      "explanation": "units errors又反馈到fields，完整self-consistency使经典dense model retrieval临界αc约0.138，而不是简单single-step tail直接给出。",
+      "correction": null
+    },
+    {
+      "id": "L26-E03",
+      "lecture": 26,
+      "lectureTitle": "Hopfield 联想记忆模型",
+      "kind": "erratum",
+      "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
+      "sourcePage": 6,
+      "sectionId": "l26-m6",
+      "originalIssue": "Page 6 的 sparse stochastic model 是 alternative family，capacity comparison 依 activity sparsity 与 information metric。",
+      "explanation": "不能直接把dense αc=0.138与sparse模型一个数字比较而不统一activity和metric。",
+      "correction": null
+    }
   ],
   "questions": [
     {
@@ -369,7 +986,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 26 讲：asynchronous update 是什么？",
@@ -397,7 +1014,7 @@
         "b": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 2 页。",
         "c": "该选项回答的是“α_c≈0.138 的适用范围？”。"
       },
-      "explanation": "随机/依序选择一个 neuron，用 local field 更新，再继续。"
+      "explanation": "随机/依序选择一个 neuron，用 local field 更新，再继续。 若cue位于目标basin，asynchronous dynamics逐步纠错；basin size决定可容忍corruption，而不只fixed point是否存在。"
     },
     {
       "id": "L26-Q02",
@@ -414,7 +1031,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "assumption",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：energy descent 需要哪些 weight 条件？",
@@ -442,7 +1059,7 @@
         "c": "这是“loading ratio”的适用条件。",
         "d": "该选项回答的是“overlap m=1、0、−1 分别表示？”。"
       },
-      "explanation": "W symmetric，通常 Wii=0。"
+      "explanation": "W symmetric，通常 Wii=0。 finite deterministic asynchronous system在严格energy descent下不能无限访问新states，但zero-field ties若随意翻转可产生degeneracy。"
     },
     {
       "id": "L26-Q03",
@@ -459,7 +1076,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "comparison",
       "cognitiveLevel": "analyze",
       "stem": "第 26 讲：为什么 ΔE≤0？",
@@ -487,7 +1104,7 @@
         "c": "这是“温度（temperature）”的定义。",
         "d": "该选项回答的是“asynchronous update 是什么？”。"
       },
-      "explanation": "new state 与 local field 对齐，使 −ΔS_i h_i≤0。"
+      "explanation": "new state 与 local field 对齐，使 −ΔS_i h_i≤0。 乘1/N后每pattern对field贡献variance约1/N；P-1个近独立项相加给crosstalk variance约(P-1)/N≈α。"
     },
     {
       "id": "L26-Q04",
@@ -504,7 +1121,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "concept",
       "cognitiveLevel": "evaluate",
       "stem": "第 26 讲：Hebbian W_ij 存了什么？",
@@ -532,7 +1149,7 @@
         "b": "这是“串扰（crosstalk）”的定义。",
         "d": "该选项回答的是“odd mixture state 是什么？”。"
       },
-      "explanation": "所有 patterns 中 bits i、j 同号/异号的 summed correlation。"
+      "explanation": "所有 patterns 中 bits i、j 同号/异号的 summed correlation。 一个cue可与目标overlap最高却仍流向mixture，因为energy landscape由所有patterns共同塑造。"
     },
     {
       "id": "L26-Q05",
@@ -549,7 +1166,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：P=1 时 ξ 为什么 fixed point？",
@@ -577,7 +1194,7 @@
         "b": "这是“classic capacity threshold”的适用条件。",
         "c": "这是“模式补全（pattern completion）”的定义。"
       },
-      "explanation": "local field=(N−1)ξ_i/N，与 ξ_i 同号。"
+      "explanation": "local field=(N−1)ξ_i/N，与 ξ_i 同号。 乘1/N后每pattern对field贡献variance约1/N；P-1个近独立项相加给crosstalk variance约(P-1)/N≈α。"
     },
     {
       "id": "L26-Q06",
@@ -594,7 +1211,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "第 26 讲：−ξ 为什么也 attractor？",
@@ -622,7 +1239,7 @@
         "c": "这是“吸引子盆地（basin of attraction）”的定义。",
         "d": "这是“温度（temperature）”的定义。"
       },
-      "explanation": "global sign flip 不改变 pair products/energy。"
+      "explanation": "global sign flip 不改变 pair products/energy。 retrieval output可用probabilistic logistic rule而非hard sign，引入temperature控制stochasticity。"
     },
     {
       "id": "L26-Q07",
@@ -639,7 +1256,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：overlap m=1、0、−1 分别表示？",
@@ -667,7 +1284,7 @@
         "c": "该选项回答的是“energy descent 需要哪些 weight 条件？”。",
         "d": "这是“retrieval field decomposition”的适用条件。"
       },
-      "explanation": "完全同 pattern、平均无关、完全反号。"
+      "explanation": "完全同 pattern、平均无关、完全反号。 m=1完全匹配，m=0平均无关，m=-1为整体反pattern。 判断依据：retrieval cue S(0)与目标pattern有positive overlap m=(1/N)ΣiξiS_i。m=1完全匹配，m=0平均无关，m=-1为整体反pattern。若cue位于目标basin，asynchronous dynamics逐步纠错；basin size决定可容忍corruption，而不只fixed point是否存在。"
     },
     {
       "id": "L26-Q08",
@@ -684,7 +1301,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 3,
+      "difficulty": 4,
       "type": "calculation",
       "cognitiveLevel": "analyze",
       "stem": "第 26 讲：crosstalk mean/variance 近似？",
@@ -712,7 +1329,7 @@
         "b": "该选项回答的是“overlap m=1、0、−1 分别表示？”。",
         "d": "该选项回答的是“energy descent 需要哪些 weight 条件？”。"
       },
-      "explanation": "mean 0，variance≈P/N=α。"
+      "explanation": "mean 0，variance≈P/N=α。 乘1/N后每pattern对field贡献variance约1/N；P-1个近独立项相加给crosstalk variance约(P-1)/N≈α。"
     },
     {
       "id": "L26-Q09",
@@ -729,7 +1346,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 4,
+      "difficulty": 5,
       "type": "comparison",
       "cognitiveLevel": "evaluate",
       "stem": "第 26 讲：capacity 为什么 ∝N？",
@@ -757,7 +1374,7 @@
         "b": "这是“重叠（overlap）”的定义。",
         "c": "该选项回答的是“Hebbian W_ij 存了什么？”。"
       },
-      "explanation": "signal O(1)，crosstalk variance P/N；保持 finite 需 P=O(N)。"
+      "explanation": "signal O(1)，crosstalk variance P/N；保持 finite 需 P=O(N)。 energy E=-(1/2)Σ_iΣ_{j≠i}WijS_iS_j。 判断依据：energy E=-(1/2)Σ_iΣ_{j≠i}WijS_iS_j。1/2避免对称pair重复计数。只翻转unit i时，其他pair不变；利用Wij=Wji，energy change化为ΔE=-ΔS_i h_i。若new S_i与h_i同号，翻转时ΔE<0，不翻时为0。"
     },
     {
       "id": "L26-Q10",
@@ -774,7 +1391,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：odd mixture state 是什么？",
@@ -802,7 +1419,7 @@
         "c": "这是“重叠（overlap）”的定义。",
         "d": "这是“伪吸引子（spurious attractor）”的定义。"
       },
-      "explanation": "若干 memories 带符号求和后取 sign 的 spurious attractor。"
+      "explanation": "若干 memories 带符号求和后取 sign 的 spurious attractor。 Hebbian assembly hypothesis认为共同参与一个experience的cells形成增强互连。"
     },
     {
       "id": "L26-Q11",
@@ -819,7 +1436,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "第 26 讲：α_c≈0.138 的适用范围？",
@@ -847,7 +1464,7 @@
         "c": "这是“重叠（overlap）”的定义。",
         "d": "该选项回答的是“capacity 为什么 ∝N？”。"
       },
-      "explanation": "经典 dense random unbiased asynchronous Hopfield large-N model。"
+      "explanation": "经典 dense random unbiased asynchronous Hopfield large-N model。 stored patterns常取independent unbiased random±1，便于计算容量。"
     },
     {
       "id": "L26-Q12",
@@ -864,7 +1481,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "comparison",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：sparse model 为什么可能更高效？",
@@ -892,55 +1509,10 @@
         "b": "该选项回答的是“α_c≈0.138 的适用范围？”。",
         "d": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 2 页。"
       },
-      "explanation": "低 activity 与 global inhibition 减少 interference，并按 information per synapse 优化。"
+      "explanation": "低 activity 与 global inhibition 减少 interference，并按 information per synapse 优化。 sparse code减少patterns间active overlap，可提高每synapse携带的信息或某些capacity metrics；\"near-optimal\"必须说明按patterns/neuron、bits/synapse还是retrieval error衡量。"
     },
     {
       "id": "L26-Q13",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-1",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 1,
-          "section": "lecture-26-source-1"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 26 讲：根据 Lecture26-Memory-HopfieldModel.pdf 第 1 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Hopfield binary network、asynchronous update、stored random patterns。"
-        },
-        {
-          "id": "b",
-          "text": "Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition。"
-        },
-        {
-          "id": "c",
-          "text": "sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity。"
-        },
-        {
-          "id": "d",
-          "text": "explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition”，不是题干指定的关系。",
-        "c": "该陈述解释的是“sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity”，不是题干指定的关系。"
-      },
-      "explanation": "explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram。"
-    },
-    {
-      "id": "L26-Q14",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -961,7 +1533,52 @@
       "choices": [
         {
           "id": "a",
+          "text": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。"
+        },
+        {
+          "id": "b",
+          "text": "比较 sparse{0,1}stochastic model、global inhibition、temperature 与 information capacity。"
+        },
+        {
+          "id": "c",
+          "text": "从 Hebbian weight rule 推导 P=1 时 stored pattern 为 attractor，并分析 aligned/anti-aligned/spurious states。"
+        },
+        {
+          "id": "d",
           "text": "从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该陈述解释的是“Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition”，不是题干指定的关系。",
+        "b": "该陈述解释的是“sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity”，不是题干指定的关系。",
+        "c": "该陈述解释的是“odd-mixture states、memory capacity、signal-plus-interference decomposition”，不是题干指定的关系。"
+      },
+      "explanation": "从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。 encoding改变connections，partial cue重新激活一部分members，recurrent excitation招回缺失members，得到pattern completion。"
+    },
+    {
+      "id": "L26-Q14",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 2,
+          "section": "lecture-26-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Hopfield Associative Memory",
+        "Lecture26-Memory-HopfieldModel.pdf"
+      ],
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 26 讲：若要解释\"Hopfield binary network、asynchronous update、stored random patterns\"中的机制或推导，哪条推理链成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。"
         },
         {
           "id": "b",
@@ -982,190 +1599,10 @@
         "c": "该陈述解释的是“sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity”，不是题干指定的关系。",
         "d": "该陈述解释的是“odd-mixture states、memory capacity、signal-plus-interference decomposition”，不是题干指定的关系。"
       },
-      "explanation": "从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。"
+      "explanation": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。 stored patterns常取independent unbiased random±1，便于计算容量。"
     },
     {
       "id": "L26-Q15",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 2,
-          "section": "lecture-26-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 26 讲：根据 Lecture26-Memory-HopfieldModel.pdf 第 2 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram。"
-        },
-        {
-          "id": "b",
-          "text": "Hopfield binary network、asynchronous update、stored random patterns。"
-        },
-        {
-          "id": "c",
-          "text": "Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spurious attractors。"
-        },
-        {
-          "id": "d",
-          "text": "odd-mixture states、memory capacity、signal-plus-interference decomposition。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。",
-        "d": "该陈述解释的是“odd-mixture states、memory capacity、signal-plus-interference decomposition”，不是题干指定的关系。"
-      },
-      "explanation": "Hopfield binary network、asynchronous update、stored random patterns。"
-    },
-    {
-      "id": "L26-Q16",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 2,
-          "section": "lecture-26-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 1,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 26 讲：若要解释\"Hopfield binary network、asynchronous update、stored random patterns\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。"
-        },
-        {
-          "id": "b",
-          "text": "比较 sparse{0,1}stochastic model、global inhibition、temperature 与 information capacity。"
-        },
-        {
-          "id": "c",
-          "text": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。"
-        },
-        {
-          "id": "d",
-          "text": "从 Hebbian weight rule 推导 P=1 时 stored pattern 为 attractor，并分析 aligned/anti-aligned/spurious states。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition”，不是题干指定的关系。",
-        "b": "该陈述解释的是“sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity”，不是题干指定的关系。",
-        "d": "该陈述解释的是“odd-mixture states、memory capacity、signal-plus-interference decomposition”，不是题干指定的关系。"
-      },
-      "explanation": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。"
-    },
-    {
-      "id": "L26-Q17",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-2",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 2,
-          "section": "lecture-26-source-2"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 2,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 26 讲：阅读与\"Hopfield binary network、asynchronous update、stored random patterns\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "c",
-          "text": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。"
-        },
-        {
-          "id": "d",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition”，不是题干指定的关系。",
-        "c": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 2 页。"
-      },
-      "explanation": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-    },
-    {
-      "id": "L26-Q18",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-3",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 3,
-          "section": "lecture-26-source-3"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 3,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 26 讲：根据 Lecture26-Memory-HopfieldModel.pdf 第 3 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spurious attractors。"
-        },
-        {
-          "id": "b",
-          "text": "Hopfield binary network、asynchronous update、stored random patterns。"
-        },
-        {
-          "id": "c",
-          "text": "odd-mixture states、memory capacity、signal-plus-interference decomposition。"
-        },
-        {
-          "id": "d",
-          "text": "Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "c": "该陈述解释的是“odd-mixture states、memory capacity、signal-plus-interference decomposition”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition”，不是题干指定的关系。"
-      },
-      "explanation": "Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spurious attractors。"
-    },
-    {
-      "id": "L26-Q19",
       "lecture": 26,
       "sectionId": "lecture-26-source-3",
       "sourceAnchors": [
@@ -1207,55 +1644,55 @@
         "c": "该陈述解释的是“sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity”，不是题干指定的关系。",
         "d": "该陈述解释的是“odd-mixture states、memory capacity、signal-plus-interference decomposition”，不是题干指定的关系。"
       },
-      "explanation": "解释 Ising energy，证明 symmetric weights/asynchronous updates 使 energy non-increasing；说明 synchronous update 的差异。"
+      "explanation": "解释 Ising energy，证明 symmetric weights/asynchronous updates 使 energy non-increasing；说明 synchronous update 的差异。 energy E=-(1/2)Σ_iΣ_{j≠i}WijS_iS_j。 判断依据：energy non-increase保证达到某local minimum，不保证global minimum或target memory。noisy cue可能越过basin boundary落入spurious state。symmetric W是proof的核心；asymmetric plasticity 或delays可产生cycles、chaos或sequence dynamics，不能继续用同一Lyapunov function宣称收敛。"
     },
     {
-      "id": "L26-Q20",
+      "id": "L26-Q16",
       "lecture": 26,
-      "sectionId": "lecture-26-source-4",
+      "sectionId": "lecture-26-source-3",
       "sourceAnchors": [
         {
           "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 4,
-          "section": "lecture-26-source-4"
+          "page": 3,
+          "section": "lecture-26-source-3"
         }
       ],
       "conceptTags": [
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 26 讲：根据 Lecture26-Memory-HopfieldModel.pdf 第 4 页，哪一项概括了该页主题？",
+      "difficulty": 4,
+      "type": "figure",
+      "cognitiveLevel": "analyze",
+      "stem": "第 26 讲：阅读\"Hopfield basins：下降不等于正确回忆\"图时，哪项观察正确？",
       "choices": [
         {
           "id": "a",
-          "text": "Hopfield binary network、asynchronous update、stored random patterns。"
+          "text": "解释 Ising energy，证明 symmetric weights/asynchronous updates 使 energy non-increasing；说明 synchronous update 的差异。"
         },
         {
           "id": "b",
-          "text": "Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spurious attractors。"
+          "text": "从 Hebbian weight rule 推导 P=1 时 stored pattern 为 attractor，并分析 aligned/anti-aligned/spurious states。"
         },
         {
           "id": "c",
-          "text": "odd-mixture states、memory capacity、signal-plus-interference decomposition。"
+          "text": "接近目标的 cue 可完成到 ξ^(μ)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。"
         },
         {
           "id": "d",
-          "text": "Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition。"
+          "text": "从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition”，不是题干指定的关系。"
+        "a": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 3 页。",
+        "b": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 4 页。",
+        "d": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 1 页。"
       },
-      "explanation": "odd-mixture states、memory capacity、signal-plus-interference decomposition。"
+      "explanation": "接近目标的 cue 可完成到 ξ^(μ)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。 energy non-increase保证达到某local minimum，不保证global minimum或target memory。"
     },
     {
-      "id": "L26-Q21",
+      "id": "L26-Q17",
       "lecture": 26,
       "sectionId": "lecture-26-source-4",
       "sourceAnchors": [
@@ -1269,7 +1706,7 @@
         "Hopfield Associative Memory",
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 1,
+      "difficulty": 4,
       "type": "assumption",
       "cognitiveLevel": "analyze",
       "stem": "第 26 讲：若要解释\"odd-mixture states、memory capacity、signal-plus-interference decomposition\"中的机制或推导，哪条推理链成立？",
@@ -1297,100 +1734,10 @@
         "b": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
         "c": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。"
       },
-      "explanation": "从 Hebbian weight rule 推导 P=1 时 stored pattern 为 attractor，并分析 aligned/anti-aligned/spurious states。"
+      "explanation": "从 Hebbian weight rule 推导 P=1 时 stored pattern 为 attractor，并分析 aligned/anti-aligned/spurious states。 三pattern逐component投票不会tie，并可能在Hebbian field下self-consistent。"
     },
     {
-      "id": "L26-Q22",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 5,
-          "section": "lecture-26-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 26 讲：根据 Lecture26-Memory-HopfieldModel.pdf 第 5 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition。"
-        },
-        {
-          "id": "b",
-          "text": "explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram。"
-        },
-        {
-          "id": "c",
-          "text": "Hopfield binary network、asynchronous update、stored random patterns。"
-        },
-        {
-          "id": "d",
-          "text": "Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spurious attractors。"
-        }
-      ],
-      "correctChoiceId": "a",
-      "wrongChoiceExplanations": {
-        "b": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。"
-      },
-      "explanation": "Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition。"
-    },
-    {
-      "id": "L26-Q23",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-5",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 5,
-          "section": "lecture-26-source-5"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 3,
-      "type": "assumption",
-      "cognitiveLevel": "analyze",
-      "stem": "第 26 讲：若要解释\"Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition\"中的机制或推导，哪条推理链成立？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。"
-        },
-        {
-          "id": "b",
-          "text": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。"
-        },
-        {
-          "id": "c",
-          "text": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。"
-        },
-        {
-          "id": "d",
-          "text": "解释 Ising energy，证明 symmetric weights/asynchronous updates 使 energy non-increasing；说明 synchronous update 的差异。"
-        }
-      ],
-      "correctChoiceId": "b",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "d": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。"
-      },
-      "explanation": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。"
-    },
-    {
-      "id": "L26-Q24",
+      "id": "L26-Q18",
       "lecture": 26,
       "sectionId": "lecture-26-source-5",
       "sourceAnchors": [
@@ -1405,103 +1752,13 @@
         "Lecture26-Memory-HopfieldModel.pdf"
       ],
       "difficulty": 4,
-      "type": "figure",
-      "cognitiveLevel": "analyze",
-      "stem": "第 26 讲：阅读与\"Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition\"相关的图示时，哪项观察能正确连接图中编码与结论？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。"
-        },
-        {
-          "id": "b",
-          "text": "逐条追踪箭头方向、兴奋/抑制符号、状态变量与外部输入；结构图说明允许的依赖关系，不自动证明生物实现。"
-        },
-        {
-          "id": "c",
-          "text": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-        },
-        {
-          "id": "d",
-          "text": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。"
-        }
-      ],
-      "correctChoiceId": "c",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "d": "这条推理对应 Lecture26-Memory-HopfieldModel.pdf 第 5 页。"
-      },
-      "explanation": "把图与矩阵 shape 对齐：轴代表变量或 mode，椭圆方向对应 eigenvectors，轴长/曲率对应 eigenvalues；不要把统计轴自动解释为因果通路。"
-    },
-    {
-      "id": "L26-Q25",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 6,
-          "section": "lecture-26-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 5,
-      "type": "concept",
-      "cognitiveLevel": "understand",
-      "stem": "第 26 讲：根据 Lecture26-Memory-HopfieldModel.pdf 第 6 页，哪一项概括了该页主题？",
-      "choices": [
-        {
-          "id": "a",
-          "text": "explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram。"
-        },
-        {
-          "id": "b",
-          "text": "Hopfield binary network、asynchronous update、stored random patterns。"
-        },
-        {
-          "id": "c",
-          "text": "Ising energy、symmetric Hebbian weights、P=1 retrieval derivation、basins/spurious attractors。"
-        },
-        {
-          "id": "d",
-          "text": "sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity。"
-        }
-      ],
-      "correctChoiceId": "d",
-      "wrongChoiceExplanations": {
-        "a": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
-        "b": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
-        "c": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。"
-      },
-      "explanation": "sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity。"
-    },
-    {
-      "id": "L26-Q26",
-      "lecture": 26,
-      "sectionId": "lecture-26-source-6",
-      "sourceAnchors": [
-        {
-          "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 6,
-          "section": "lecture-26-source-6"
-        }
-      ],
-      "conceptTags": [
-        "Hopfield Associative Memory",
-        "Lecture26-Memory-HopfieldModel.pdf"
-      ],
-      "difficulty": 1,
       "type": "assumption",
       "cognitiveLevel": "analyze",
-      "stem": "第 26 讲：若要解释\"sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity\"中的机制或推导，哪条推理链成立？",
+      "stem": "第 26 讲：若要解释\"Gaussian approximation、error probability、P∝N、critical alpha≈0.138、spin-glass transition\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "比较 sparse{0,1}stochastic model、global inhibition、temperature 与 information capacity。"
+          "text": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。"
         },
         {
           "id": "b",
@@ -1522,55 +1779,55 @@
         "c": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
         "d": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。"
       },
-      "explanation": "比较 sparse{0,1}stochastic model、global inhibition、temperature 与 information capacity。"
+      "explanation": "解释 capacity proportional to N、loading alpha=P/N、criticalalpha_c≈0.138 和 spin-glass transition；说明该常数依赖经典模型假设。 P可随N线性增长，但\"capacity=Pmax\"依retrieval criterion、acceptable error与basin size。"
     },
     {
-      "id": "L26-Q27",
+      "id": "L26-Q19",
       "lecture": 26,
-      "sectionId": "lecture-26-source-1",
+      "sectionId": "lecture-26-source-6",
       "sourceAnchors": [
         {
           "file": "Lecture26-Memory-HopfieldModel.pdf",
-          "page": 1,
-          "section": "lecture-26-source-1"
+          "page": 6,
+          "section": "lecture-26-source-6"
         }
       ],
       "conceptTags": [
-        "联想记忆",
-        "associative memory"
+        "Hopfield Associative Memory",
+        "Lecture26-Memory-HopfieldModel.pdf"
       ],
-      "difficulty": 2,
-      "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 26 讲：本讲把\"由 partial/noisy cue 恢复 stored pattern。\"称为什么？",
+      "difficulty": 4,
+      "type": "assumption",
+      "cognitiveLevel": "analyze",
+      "stem": "第 26 讲：若要解释\"sparse/stochastic associative-memory alternative、global inhibition、near-optimal capacity\"中的机制或推导，哪条推理链成立？",
       "choices": [
         {
           "id": "a",
-          "text": "细胞集合（cell assembly）"
+          "text": "从 Hebbian cell assembly 解释 encoding、partial cue、retrieval、pattern completion 和 attractor basin；区分 biological hypothesis 与 abstract binary model。"
         },
         {
           "id": "b",
-          "text": "联想记忆（associative memory）"
+          "text": "比较 sparse{0,1}stochastic model、global inhibition、temperature 与 information capacity。"
         },
         {
           "id": "c",
-          "text": "吸引子盆地（basin of attraction）"
+          "text": "精确定义 binary states、random patterns、asynchronous single-neuron update 和 convergence procedure。"
         },
         {
           "id": "d",
-          "text": "模式补全（pattern completion）"
+          "text": "解释 Ising energy，证明 symmetric weights/asynchronous updates 使 energy non-increasing；说明 synchronous update 的差异。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "“细胞集合（cell assembly）”指：共同活动并因 Hebbian connections 形成的 neuron group。",
-        "c": "“吸引子盆地（basin of attraction）”指：收敛到同一 attractor 的 initial states 集合。",
-        "d": "“模式补全（pattern completion）”指：由 incomplete cue 重建完整 memory。"
+        "a": "该陈述解释的是“explicit memory、Hebbian assemblies、encoding/retrieval、pattern completion、engram”，不是题干指定的关系。",
+        "c": "该陈述解释的是“Hopfield binary network、asynchronous update、stored random patterns”，不是题干指定的关系。",
+        "d": "该陈述解释的是“Ising energy、symmetric Hebbian weights、P=1 retrieval derivation”，不是题干指定的关系。"
       },
-      "explanation": "联想记忆（associative memory）：由 partial/noisy cue 恢复 stored pattern。"
+      "explanation": "比较 sparse{0,1}stochastic model、global inhibition、temperature 与 information capacity。 验证alternative model应画false positive/negative rates、overlap distribution和capacity随a、T、inhibition变化，而非只报最大P。"
     },
     {
-      "id": "L26-Q28",
+      "id": "L26-Q20",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -1581,38 +1838,395 @@
         }
       ],
       "conceptTags": [
-        "细胞集合",
-        "cell assembly"
+        "Explicit memory、Hebbian assembly 与pattern completion"
       ],
-      "difficulty": 3,
+      "difficulty": 2,
       "type": "concept",
-      "cognitiveLevel": "remember",
-      "stem": "第 26 讲：本讲把\"共同活动并因 Hebbian connections 形成的 neuron group。\"称为什么？",
+      "cognitiveLevel": "understand",
+      "stem": "第 26 讲：为何m>0不能保证retrieval成功？",
       "choices": [
         {
           "id": "a",
-          "text": "吸引子盆地（basin of attraction）"
+          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
         },
         {
           "id": "b",
-          "text": "模式补全（pattern completion）"
+          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
         },
         {
           "id": "c",
-          "text": "细胞集合（cell assembly）"
+          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
         },
         {
           "id": "d",
-          "text": "异步更新（asynchronous update）"
+          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "“吸引子盆地（basin of attraction）”指：收敛到同一 attractor 的 initial states 集合。",
-        "b": "“模式补全（pattern completion）”指：由 incomplete cue 重建完整 memory。",
-        "d": "“异步更新（asynchronous update）”指：每步只更新一个 unit。"
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "细胞集合（cell assembly）：共同活动并因 Hebbian connections 形成的 neuron group。"
+      "explanation": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。 因果engram实验需分别测试sufficiency与necessity：人工激活tagged ensemble能否触发 memory-like behavior，抑制它是否选择性损害retrieval。即便成立，Hopfield的 binary units 与 Hebbian weights 仍是model mapping，不应从behavior直接推断exact W。"
+    },
+    {
+      "id": "L26-Q21",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 1,
+          "section": "lecture-26-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Explicit memory、Hebbian assembly 与pattern completion",
+        "计算noisy cue overlap"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：完成\"一个100-bit pattern中有20 bits被翻转。求与原pattern的overlap。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "new S_i=-1，ΔS_i=-2。"
+        },
+        {
+          "id": "b",
+          "text": "h1=0.8，unit1保持+1。"
+        },
+        {
+          "id": "c",
+          "text": "两种mixture bits分别为+1与-1。"
+        },
+        {
+          "id": "d",
+          "text": "overlap为0.6。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "overlap为0.6。 计算路径：80 bits各贡献+1，总和80。 20 bits各贡献-1，总和-20。 总和60除以N=100，m=0.6。"
+    },
+    {
+      "id": "L26-Q22",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 1,
+          "section": "lecture-26-source-1"
+        }
+      ],
+      "conceptTags": [
+        "Explicit memory、Hebbian assembly 与pattern completion",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 26 讲：得到\"overlap为0.6。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        {
+          "id": "b",
+          "text": "new state与negative local field同号。"
+        },
+        {
+          "id": "c",
+          "text": "通式(N-1)ξ1/N=4/5一致。"
+        },
+        {
+          "id": "d",
+          "text": "结果总是等于三者中的majority sign。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "也可用1-2f=1-0.4=0.6核对。 这个检查对应题设\"一个100-bit pattern中有20 bits被翻转。求与原pattern的overlap。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L26-Q23",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 2,
+          "section": "lecture-26-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Binary asynchronous dynamics 与stored random patterns"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 26 讲：为什么\"每个neuron都更新过一次\"不保证fixed point？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+        },
+        {
+          "id": "b",
+          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+        },
+        {
+          "id": "c",
+          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+        },
+        {
+          "id": "d",
+          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。 synchronous update同时用old state计算所有new states，可能出现two-cycle，经典single-flip energy proof不直接适用。编程或手算时应明确是否原地更新；把asynchronous伪装成vectorized simultaneous multiply会改变动力学结论。"
+    },
+    {
+      "id": "L26-Q24",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 2,
+          "section": "lecture-26-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Binary asynchronous dynamics 与stored random patterns",
+        "手算一次update"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：完成\"h_i=-0.7，当前S_i=+1，采用sgn(0)=保持。更新后state与flip indicator是什么？\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "overlap为0.6。"
+        },
+        {
+          "id": "b",
+          "text": "h1=0.8，unit1保持+1。"
+        },
+        {
+          "id": "c",
+          "text": "new S_i=-1，ΔS_i=-2。"
+        },
+        {
+          "id": "d",
+          "text": "两种mixture bits分别为+1与-1。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "new S_i=-1，ΔS_i=-2。 计算路径：h_i负，所以sgn(h_i)=-1。 S_i从+1改为-1。 ΔS_i=-1-(+1)=-2，发生flip。"
+    },
+    {
+      "id": "L26-Q25",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 2,
+          "section": "lecture-26-source-2"
+        }
+      ],
+      "conceptTags": [
+        "Binary asynchronous dynamics 与stored random patterns",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 26 讲：得到\"new S_i=-1，ΔS_i=-2。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        {
+          "id": "b",
+          "text": "通式(N-1)ξ1/N=4/5一致。"
+        },
+        {
+          "id": "c",
+          "text": "结果总是等于三者中的majority sign。"
+        },
+        {
+          "id": "d",
+          "text": "new state与negative local field同号。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "new state与negative local field同号。 这个检查对应题设\"h_i=-0.7，当前S_i=+1，采用sgn(0)=保持。更新后state与flip indicator是什么？\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L26-Q26",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 3,
+          "section": "lecture-26-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Energy descent 与P=1 stored attractor"
+      ],
+      "difficulty": 2,
+      "type": "equation",
+      "cognitiveLevel": "understand",
+      "stem": "第 26 讲：若W不对称，为什么ΔE推导失效？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+        },
+        {
+          "id": "b",
+          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+        },
+        {
+          "id": "c",
+          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+        },
+        {
+          "id": "d",
+          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。 Wii=0移除self-coupling并让P=1 field少一个term；N大时(N-1)/N接近1，但小N例题不能直接写成1。严格保留这一项可训练学生区分finite-size calculation与large-N approximation。"
+    },
+    {
+      "id": "L26-Q27",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 3,
+          "section": "lecture-26-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Energy descent 与P=1 stored attractor",
+        "P=1有限N field"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：完成\"N=5，pattern ξ=(1,-1,1,-1,1)，network处于ξ。求unit1的local field。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "overlap为0.6。"
+        },
+        {
+          "id": "b",
+          "text": "h1=0.8，unit1保持+1。"
+        },
+        {
+          "id": "c",
+          "text": "new S_i=-1，ΔS_i=-2。"
+        },
+        {
+          "id": "d",
+          "text": "两种mixture bits分别为+1与-1。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "h1=0.8，unit1保持+1。 计算路径：Wij=ξ1ξj/5。 h1=Σ_{j≠1}(ξ1ξj/5)ξj=(ξ1/5)Σ_{j≠1}ξj²。 四项ξj²=1，所以h1=4/5=0.8，与ξ1同号。"
+    },
+    {
+      "id": "L26-Q28",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 3,
+          "section": "lecture-26-source-3"
+        }
+      ],
+      "conceptTags": [
+        "Energy descent 与P=1 stored attractor",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 26 讲：得到\"h1=0.8，unit1保持+1。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        {
+          "id": "b",
+          "text": "new state与negative local field同号。"
+        },
+        {
+          "id": "c",
+          "text": "通式(N-1)ξ1/N=4/5一致。"
+        },
+        {
+          "id": "d",
+          "text": "结果总是等于三者中的majority sign。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "通式(N-1)ξ1/N=4/5一致。 这个检查对应题设\"N=5，pattern ξ=(1,-1,1,-1,1)，network处于ξ。求unit1的local field。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L26-Q29",
@@ -1626,10 +2240,502 @@
         }
       ],
       "conceptTags": [
+        "Spurious mixtures 与signal-plus-crosstalk分解"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 26 讲：为什么mixture energy低仍不能把它算作正确memory？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+        },
+        {
+          "id": "b",
+          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+        },
+        {
+          "id": "c",
+          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+        },
+        {
+          "id": "d",
+          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。 basin边界随P增加收缩。一个cue可与目标overlap最高却仍流向mixture，因为energy landscape由所有patterns共同塑造。实验类比\"memory blending\"只能作为hypothesis；真实memory distortion还受semantic inference、encoding overlap与systems consolidation影响。"
+    },
+    {
+      "id": "L26-Q30",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 4,
+          "section": "lecture-26-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Spurious mixtures 与signal-plus-crosstalk分解",
+        "三pattern majority bit"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：完成\"某unit三个patterns的bits为(+1,+1,-1)。求odd-mixture bit；若为(+1,-1,-1)又如何？\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "两种mixture bits分别为+1与-1。"
+        },
+        {
+          "id": "b",
+          "text": "overlap为0.6。"
+        },
+        {
+          "id": "c",
+          "text": "new S_i=-1，ΔS_i=-2。"
+        },
+        {
+          "id": "d",
+          "text": "h1=0.8，unit1保持+1。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "两种mixture bits分别为+1与-1。 计算路径：第一组sum=+1，sign为+1。 第二组sum=-1，sign为-1。 三个±1相加不可能为0，所以无需tie rule。"
+    },
+    {
+      "id": "L26-Q31",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 4,
+          "section": "lecture-26-source-4"
+        }
+      ],
+      "conceptTags": [
+        "Spurious mixtures 与signal-plus-crosstalk分解",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 26 讲：得到\"两种mixture bits分别为+1与-1。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        {
+          "id": "b",
+          "text": "结果总是等于三者中的majority sign。"
+        },
+        {
+          "id": "c",
+          "text": "new state与negative local field同号。"
+        },
+        {
+          "id": "d",
+          "text": "通式(N-1)ξ1/N=4/5一致。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "结果总是等于三者中的majority sign。 这个检查对应题设\"某unit三个patterns的bits为(+1,+1,-1)。求odd-mixture bit；若为(+1,-1,-1)又如何？\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L26-Q32",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 5,
+          "section": "lecture-26-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Gaussian crosstalk、loading 与经典capacity"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 26 讲：为什么α=0.1低于0.138仍不能保证每个cue成功？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+        },
+        {
+          "id": "b",
+          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+        },
+        {
+          "id": "c",
+          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+        },
+        {
+          "id": "d",
+          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "b": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。 spin-glass regime仍有很多stable states但与任何 stored pattern 的 overlap 很小，network收敛却不retrieval。只检查energy convergence会误判memory成功；应同时测target overlap、bit error、basin volume与 trial-to-trial outcome。"
+    },
+    {
+      "id": "L26-Q33",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 5,
+          "section": "lecture-26-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Gaussian crosstalk、loading 与经典capacity",
+        "粗略Gaussian bit error"
+      ],
+      "difficulty": 3,
+      "type": "concept",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：完成\"α=0.25，取signal=1、noise standard deviation√α=0.5。error需noise<-1，相当于标准正态Z<-2。\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "overlap为0.6。"
+        },
+        {
+          "id": "b",
+          "text": "new S_i=-1，ΔS_i=-2。"
+        },
+        {
+          "id": "c",
+          "text": "h1=0.8，unit1保持+1。"
+        },
+        {
+          "id": "d",
+          "text": "粗略bit error约2.28%。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "粗略bit error约2.28%。 计算路径：标准化threshold为-1/0.5=-2。 查标准正态tail Φ(-2)≈0.0228。 这是single-step independent-noise近似，不是最终capacity判据。"
+    },
+    {
+      "id": "L26-Q34",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 5,
+          "section": "lecture-26-source-5"
+        }
+      ],
+      "conceptTags": [
+        "Gaussian crosstalk、loading 与经典capacity",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 26 讲：得到\"粗略bit error约2.28%。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "α增大时threshold绝对值减小，left-tail probability应增大。"
+        },
+        {
+          "id": "b",
+          "text": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        {
+          "id": "c",
+          "text": "new state与negative local field同号。"
+        },
+        {
+          "id": "d",
+          "text": "通式(N-1)ξ1/N=4/5一致。"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "α增大时threshold绝对值减小，left-tail probability应增大。 这个检查对应题设\"α=0.25，取signal=1、noise standard deviation√α=0.5。error需noise<-1，相当于标准正态Z<-2。\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L26-Q35",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 6,
+          "section": "lecture-26-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Sparse stochastic associative memory 与global inhibition"
+      ],
+      "difficulty": 2,
+      "type": "comparison",
+      "cognitiveLevel": "understand",
+      "stem": "第 26 讲：为什么不中心化的0/1 Hebb容易产生全局positive bias？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+        },
+        {
+          "id": "b",
+          "text": "只有共同active产生正项、inactive不产生抵消，许多patterns会让多数weights向正，推动过度activity。"
+        },
+        {
+          "id": "c",
+          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+        },
+        {
+          "id": "d",
+          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "该答案解决的是本讲另一个教学单元的问题。",
+        "c": "该答案解决的是本讲另一个教学单元的问题。",
+        "d": "该答案解决的是本讲另一个教学单元的问题。"
+      },
+      "explanation": "只有共同active产生正项、inactive不产生抵消，许多patterns会让多数weights向正，推动过度activity。 temperature T→0时probabilistic update接近deterministic threshold，T大时state更随机并可能逃出shallow minima。stochasticity可帮助sampling，却也损害stable recall。验证alternative model应画false positive/negative rates、overlap distribution和capacity随a、T、inhibition变化，而非只报最大P。"
+    },
+    {
+      "id": "L26-Q36",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 6,
+          "section": "lecture-26-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Sparse stochastic associative memory 与global inhibition",
+        "中心化sparse bits"
+      ],
+      "difficulty": 3,
+      "type": "calculation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：完成\"sparsity a=0.1。一个active bit与一个inactive bit的centered values分别是多少？它们乘积呢？\"中的计算或推理后，哪项结果成立？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "overlap为0.6。"
+        },
+        {
+          "id": "b",
+          "text": "new S_i=-1，ΔS_i=-2。"
+        },
+        {
+          "id": "c",
+          "text": "centered values为0.9与-0.1，乘积-0.09。"
+        },
+        {
+          "id": "d",
+          "text": "h1=0.8，unit1保持+1。"
+        }
+      ],
+      "correctChoiceId": "c",
+      "wrongChoiceExplanations": {
+        "a": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
+        "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
+      },
+      "explanation": "centered values为0.9与-0.1，乘积-0.09。 计算路径：active:1-a=0.9。 inactive:0-a=-0.1。 乘积0.9×(-0.1)=-0.09，表示不同activity的pair贡献负association。"
+    },
+    {
+      "id": "L26-Q37",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-6",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 6,
+          "section": "lecture-26-source-6"
+        }
+      ],
+      "conceptTags": [
+        "Sparse stochastic associative memory 与global inhibition",
+        "sanity check"
+      ],
+      "difficulty": 5,
+      "type": "assumption",
+      "cognitiveLevel": "evaluate",
+      "stem": "第 26 讲：得到\"centered values为0.9与-0.1，乘积-0.09。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "也可用1-2f=1-0.4=0.6核对。"
+        },
+        {
+          "id": "b",
+          "text": "new state与negative local field同号。"
+        },
+        {
+          "id": "c",
+          "text": "通式(N-1)ξ1/N=4/5一致。"
+        },
+        {
+          "id": "d",
+          "text": "平均centered value为0.1×0.9+0.9×(-0.1)=0。"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
+        "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
+      },
+      "explanation": "平均centered value为0.1×0.9+0.9×(-0.1)=0。 这个检查对应题设\"sparsity a=0.1。一个active bit与一个inactive bit的centered values分别是多少？它们乘积呢？\"中的单位、方向或极限条件。"
+    },
+    {
+      "id": "L26-Q38",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 1,
+          "section": "lecture-26-source-1"
+        }
+      ],
+      "conceptTags": [
+        "联想记忆",
+        "associative memory"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 26 讲：本讲把\"由 partial/noisy cue 恢复 stored pattern。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "联想记忆（associative memory）"
+        },
+        {
+          "id": "b",
+          "text": "细胞集合（cell assembly）"
+        },
+        {
+          "id": "c",
+          "text": "吸引子盆地（basin of attraction）"
+        },
+        {
+          "id": "d",
+          "text": "模式补全（pattern completion）"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "“细胞集合（cell assembly）”指：共同活动并因 Hebbian connections 形成的 neuron group。",
+        "c": "“吸引子盆地（basin of attraction）”指：收敛到同一 attractor 的 initial states 集合。",
+        "d": "“模式补全（pattern completion）”指：由 incomplete cue 重建完整 memory。"
+      },
+      "explanation": "联想记忆（associative memory）：由 partial/noisy cue 恢复 stored pattern。"
+    },
+    {
+      "id": "L26-Q39",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-1",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 1,
+          "section": "lecture-26-source-1"
+        }
+      ],
+      "conceptTags": [
+        "细胞集合",
+        "cell assembly"
+      ],
+      "difficulty": 1,
+      "type": "concept",
+      "cognitiveLevel": "remember",
+      "stem": "第 26 讲：本讲把\"共同活动并因 Hebbian connections 形成的 neuron group。\"称为什么？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "吸引子盆地（basin of attraction）"
+        },
+        {
+          "id": "b",
+          "text": "细胞集合（cell assembly）"
+        },
+        {
+          "id": "c",
+          "text": "模式补全（pattern completion）"
+        },
+        {
+          "id": "d",
+          "text": "异步更新（asynchronous update）"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "“吸引子盆地（basin of attraction）”指：收敛到同一 attractor 的 initial states 集合。",
+        "c": "“模式补全（pattern completion）”指：由 incomplete cue 重建完整 memory。",
+        "d": "“异步更新（asynchronous update）”指：每步只更新一个 unit。"
+      },
+      "explanation": "细胞集合（cell assembly）：共同活动并因 Hebbian connections 形成的 neuron group。"
+    },
+    {
+      "id": "L26-Q40",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-4",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 4,
+          "section": "lecture-26-source-4"
+        }
+      ],
+      "conceptTags": [
         "吸引子盆地",
         "basin of attraction"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 26 讲：本讲把\"收敛到同一 attractor 的 initial states 集合。\"称为什么？",
@@ -1644,23 +2750,23 @@
         },
         {
           "id": "c",
-          "text": "Ising 能量（Ising energy）"
+          "text": "吸引子盆地（basin of attraction）"
         },
         {
           "id": "d",
-          "text": "吸引子盆地（basin of attraction）"
+          "text": "Ising 能量（Ising energy）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“模式补全（pattern completion）”指：由 incomplete cue 重建完整 memory。",
         "b": "“异步更新（asynchronous update）”指：每步只更新一个 unit。",
-        "c": "“Ising 能量（Ising energy）”指：symmetric binary network 的 Lyapunov function。"
+        "d": "“Ising 能量（Ising energy）”指：symmetric binary network 的 Lyapunov function。"
       },
       "explanation": "吸引子盆地（basin of attraction）：收敛到同一 attractor 的 initial states 集合。"
     },
     {
-      "id": "L26-Q30",
+      "id": "L26-Q41",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -1674,38 +2780,38 @@
         "模式补全",
         "pattern completion"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 26 讲：本讲把\"由 incomplete cue 重建完整 memory。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "模式补全（pattern completion）"
-        },
-        {
-          "id": "b",
           "text": "异步更新（asynchronous update）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "Ising 能量（Ising energy）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "重叠（overlap）"
+        },
+        {
+          "id": "d",
+          "text": "模式补全（pattern completion）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“异步更新（asynchronous update）”指：每步只更新一个 unit。",
-        "c": "“Ising 能量（Ising energy）”指：symmetric binary network 的 Lyapunov function。",
-        "d": "“重叠（overlap）”指：current state 与 stored pattern 的 normalized dot product。"
+        "a": "“异步更新（asynchronous update）”指：每步只更新一个 unit。",
+        "b": "“Ising 能量（Ising energy）”指：symmetric binary network 的 Lyapunov function。",
+        "c": "“重叠（overlap）”指：current state 与 stored pattern 的 normalized dot product。"
       },
-      "explanation": "模式补全（pattern completion）：由 incomplete cue 重建完整 memory。"
+      "explanation": "模式补全（pattern completion）：由 incomplete cue 重建完整 memory。 encoding改变connections，partial cue重新激活一部分members，recurrent excitation招回缺失members，得到pattern completion。"
     },
     {
-      "id": "L26-Q31",
+      "id": "L26-Q42",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -1726,11 +2832,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "Ising 能量（Ising energy）"
+          "text": "异步更新（asynchronous update）"
         },
         {
           "id": "b",
-          "text": "异步更新（asynchronous update）"
+          "text": "Ising 能量（Ising energy）"
         },
         {
           "id": "c",
@@ -1741,16 +2847,16 @@
           "text": "串扰（crosstalk）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“Ising 能量（Ising energy）”指：symmetric binary network 的 Lyapunov function。",
+        "b": "“Ising 能量（Ising energy）”指：symmetric binary network 的 Lyapunov function。",
         "c": "“重叠（overlap）”指：current state 与 stored pattern 的 normalized dot product。",
         "d": "“串扰（crosstalk）”指：其他 stored patterns 对目标 retrieval 的 interference。"
       },
-      "explanation": "异步更新（asynchronous update）：每步只更新一个 unit。"
+      "explanation": "异步更新（asynchronous update）：每步只更新一个 unit。 若cue位于目标basin，asynchronous dynamics逐步纠错；basin size决定可容忍corruption，而不只fixed point是否存在。"
     },
     {
-      "id": "L26-Q32",
+      "id": "L26-Q43",
       "lecture": 26,
       "sectionId": "lecture-26-source-3",
       "sourceAnchors": [
@@ -1764,7 +2870,7 @@
         "Ising 能量",
         "Ising energy"
       ],
-      "difficulty": 2,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 26 讲：本讲把\"symmetric binary network 的 Lyapunov function。\"称为什么？",
@@ -1775,27 +2881,27 @@
         },
         {
           "id": "b",
-          "text": "串扰（crosstalk）"
+          "text": "Ising 能量（Ising energy）"
         },
         {
           "id": "c",
-          "text": "Ising 能量（Ising energy）"
+          "text": "串扰（crosstalk）"
         },
         {
           "id": "d",
           "text": "伪吸引子（spurious attractor）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“重叠（overlap）”指：current state 与 stored pattern 的 normalized dot product。",
-        "b": "“串扰（crosstalk）”指：其他 stored patterns 对目标 retrieval 的 interference。",
+        "c": "“串扰（crosstalk）”指：其他 stored patterns 对目标 retrieval 的 interference。",
         "d": "“伪吸引子（spurious attractor）”指：不对应单一 stored pattern 的 stable state。"
       },
       "explanation": "Ising 能量（Ising energy）：symmetric binary network 的 Lyapunov function。"
     },
     {
-      "id": "L26-Q33",
+      "id": "L26-Q44",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -1809,7 +2915,7 @@
         "重叠",
         "overlap"
       ],
-      "difficulty": 3,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 26 讲：本讲把\"current state 与 stored pattern 的 normalized dot product。\"称为什么？",
@@ -1824,23 +2930,23 @@
         },
         {
           "id": "c",
-          "text": "自旋玻璃（spin glass）"
+          "text": "重叠（overlap）"
         },
         {
           "id": "d",
-          "text": "重叠（overlap）"
+          "text": "自旋玻璃（spin glass）"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "“串扰（crosstalk）”指：其他 stored patterns 对目标 retrieval 的 interference。",
         "b": "“伪吸引子（spurious attractor）”指：不对应单一 stored pattern 的 stable state。",
-        "c": "“自旋玻璃（spin glass）”指：大量无序 metastable states 主导的 regime。"
+        "d": "“自旋玻璃（spin glass）”指：大量无序 metastable states 主导的 regime。"
       },
       "explanation": "重叠（overlap）：current state 与 stored pattern 的 normalized dot product。"
     },
     {
-      "id": "L26-Q34",
+      "id": "L26-Q45",
       "lecture": 26,
       "sectionId": "lecture-26-source-2",
       "sourceAnchors": [
@@ -1854,38 +2960,38 @@
         "串扰",
         "crosstalk"
       ],
-      "difficulty": 4,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 26 讲：本讲把\"其他 stored patterns 对目标 retrieval 的 interference。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "串扰（crosstalk）"
-        },
-        {
-          "id": "b",
           "text": "伪吸引子（spurious attractor）"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "自旋玻璃（spin glass）"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "温度（temperature）"
+        },
+        {
+          "id": "d",
+          "text": "串扰（crosstalk）"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "“伪吸引子（spurious attractor）”指：不对应单一 stored pattern 的 stable state。",
-        "c": "“自旋玻璃（spin glass）”指：大量无序 metastable states 主导的 regime。",
-        "d": "“温度（temperature）”指：stochastic update noise 的 scale parameter。"
+        "a": "“伪吸引子（spurious attractor）”指：不对应单一 stored pattern 的 stable state。",
+        "b": "“自旋玻璃（spin glass）”指：大量无序 metastable states 主导的 regime。",
+        "c": "“温度（temperature）”指：stochastic update noise 的 scale parameter。"
       },
       "explanation": "串扰（crosstalk）：其他 stored patterns 对目标 retrieval 的 interference。"
     },
     {
-      "id": "L26-Q35",
+      "id": "L26-Q46",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -1899,18 +3005,18 @@
         "伪吸引子",
         "spurious attractor"
       ],
-      "difficulty": 5,
+      "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
       "stem": "第 26 讲：本讲把\"不对应单一 stored pattern 的 stable state。\"称为什么？",
       "choices": [
         {
           "id": "a",
-          "text": "自旋玻璃（spin glass）"
+          "text": "伪吸引子（spurious attractor）"
         },
         {
           "id": "b",
-          "text": "伪吸引子（spurious attractor）"
+          "text": "自旋玻璃（spin glass）"
         },
         {
           "id": "c",
@@ -1921,16 +3027,16 @@
           "text": "联想记忆（associative memory）"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "“自旋玻璃（spin glass）”指：大量无序 metastable states 主导的 regime。",
+        "b": "“自旋玻璃（spin glass）”指：大量无序 metastable states 主导的 regime。",
         "c": "“温度（temperature）”指：stochastic update noise 的 scale parameter。",
         "d": "“联想记忆（associative memory）”指：由 partial/noisy cue 恢复 stored pattern。"
       },
       "explanation": "伪吸引子（spurious attractor）：不对应单一 stored pattern 的 stable state。"
     },
     {
-      "id": "L26-Q36",
+      "id": "L26-Q47",
       "lecture": 26,
       "sectionId": "lecture-26-source-4",
       "sourceAnchors": [
@@ -1955,27 +3061,27 @@
         },
         {
           "id": "b",
-          "text": "联想记忆（associative memory）"
+          "text": "自旋玻璃（spin glass）"
         },
         {
           "id": "c",
-          "text": "自旋玻璃（spin glass）"
+          "text": "联想记忆（associative memory）"
         },
         {
           "id": "d",
           "text": "细胞集合（cell assembly）"
         }
       ],
-      "correctChoiceId": "c",
+      "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“温度（temperature）”指：stochastic update noise 的 scale parameter。",
-        "b": "“联想记忆（associative memory）”指：由 partial/noisy cue 恢复 stored pattern。",
+        "c": "“联想记忆（associative memory）”指：由 partial/noisy cue 恢复 stored pattern。",
         "d": "“细胞集合（cell assembly）”指：共同活动并因 Hebbian connections 形成的 neuron group。"
       },
-      "explanation": "自旋玻璃（spin glass）：大量无序 metastable states 主导的 regime。"
+      "explanation": "自旋玻璃（spin glass）：大量无序 metastable states 主导的 regime。 检索pattern1时设S≈ξ^(1)。"
     },
     {
-      "id": "L26-Q37",
+      "id": "L26-Q48",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -1988,7 +3094,7 @@
       "conceptTags": [
         "binary neuron state"
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：使用\"binary neuron state\"时，哪项条件或约定不可省略？",
@@ -2003,23 +3109,23 @@
         },
         {
           "id": "c",
-          "text": "Wii=0"
+          "text": "classic dense model"
         },
         {
           "id": "d",
-          "text": "classic dense model"
+          "text": "Wii=0"
         }
       ],
-      "correctChoiceId": "d",
+      "correctChoiceId": "c",
       "wrongChoiceExplanations": {
         "a": "这是“asynchronous update”的条件，不是题干公式的条件。",
         "b": "这是“Hopfield energy”的条件，不是题干公式的条件。",
-        "c": "这是“Hebbian storage rule”的条件，不是题干公式的条件。"
+        "d": "这是“Hebbian storage rule”的条件，不是题干公式的条件。"
       },
-      "explanation": "binary neuron state 的适用条件：classic dense model"
+      "explanation": "binary neuron state 的适用条件：classic dense model 即便成立，Hopfield的 binary units 与 Hebbian weights 仍是model mapping，不应从behavior直接推断exact W。"
     },
     {
-      "id": "L26-Q38",
+      "id": "L26-Q49",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -2039,31 +3145,31 @@
       "choices": [
         {
           "id": "a",
-          "text": "one neuron at a time"
-        },
-        {
-          "id": "b",
           "text": "classic dense model"
         },
         {
-          "id": "c",
+          "id": "b",
           "text": "symmetric W"
         },
         {
-          "id": "d",
+          "id": "c",
           "text": "Wii=0"
+        },
+        {
+          "id": "d",
+          "text": "one neuron at a time"
         }
       ],
-      "correctChoiceId": "a",
+      "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "b": "这是“binary neuron state”的条件，不是题干公式的条件。",
-        "c": "这是“Hopfield energy”的条件，不是题干公式的条件。",
-        "d": "这是“Hebbian storage rule”的条件，不是题干公式的条件。"
+        "a": "这是“binary neuron state”的条件，不是题干公式的条件。",
+        "b": "这是“Hopfield energy”的条件，不是题干公式的条件。",
+        "c": "这是“Hebbian storage rule”的条件，不是题干公式的条件。"
       },
-      "explanation": "asynchronous update 的适用条件：one neuron at a time"
+      "explanation": "asynchronous update 的适用条件：one neuron at a time 若cue位于目标basin，asynchronous dynamics逐步纠错；basin size决定可容忍corruption，而不只fixed point是否存在。"
     },
     {
-      "id": "L26-Q39",
+      "id": "L26-Q50",
       "lecture": 26,
       "sectionId": "lecture-26-source-2",
       "sourceAnchors": [
@@ -2076,18 +3182,18 @@
       "conceptTags": [
         "Hopfield energy"
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：使用\"Hopfield energy\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
-          "text": "classic dense model"
+          "text": "symmetric W"
         },
         {
           "id": "b",
-          "text": "symmetric W"
+          "text": "classic dense model"
         },
         {
           "id": "c",
@@ -2098,16 +3204,16 @@
           "text": "Wii=0"
         }
       ],
-      "correctChoiceId": "b",
+      "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "a": "这是“binary neuron state”的条件，不是题干公式的条件。",
+        "b": "这是“binary neuron state”的条件，不是题干公式的条件。",
         "c": "这是“asynchronous update”的条件，不是题干公式的条件。",
         "d": "这是“Hebbian storage rule”的条件，不是题干公式的条件。"
       },
-      "explanation": "Hopfield energy 的适用条件：symmetric W"
+      "explanation": "Hopfield energy 的适用条件：symmetric W 停止条件是完整检查中没有unit会改变，或energy和state达到固定点。"
     },
     {
-      "id": "L26-Q40",
+      "id": "L26-Q51",
       "lecture": 26,
       "sectionId": "lecture-26-source-1",
       "sourceAnchors": [
@@ -2120,10 +3226,54 @@
       "conceptTags": [
         "Hebbian storage rule"
       ],
-      "difficulty": 5,
+      "difficulty": 3,
       "type": "equation",
       "cognitiveLevel": "apply",
       "stem": "第 26 讲：使用\"Hebbian storage rule\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "classic dense model"
+        },
+        {
+          "id": "b",
+          "text": "Wii=0"
+        },
+        {
+          "id": "c",
+          "text": "one neuron at a time"
+        },
+        {
+          "id": "d",
+          "text": "symmetric W"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“binary neuron state”的条件，不是题干公式的条件。",
+        "c": "这是“asynchronous update”的条件，不是题干公式的条件。",
+        "d": "这是“Hopfield energy”的条件，不是题干公式的条件。"
+      },
+      "explanation": "Hebbian storage rule 的适用条件：Wii=0 Hebbian assembly hypothesis认为共同参与一个experience的cells形成增强互连。"
+    },
+    {
+      "id": "L26-Q52",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 2,
+          "section": "lecture-26-source-2"
+        }
+      ],
+      "conceptTags": [
+        "pattern overlap"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：使用\"pattern overlap\"时，哪项条件或约定不可省略？",
       "choices": [
         {
           "id": "a",
@@ -2135,7 +3285,7 @@
         },
         {
           "id": "c",
-          "text": "Wii=0"
+          "text": "±1 patterns"
         },
         {
           "id": "d",
@@ -2148,7 +3298,139 @@
         "b": "这是“asynchronous update”的条件，不是题干公式的条件。",
         "d": "这是“Hopfield energy”的条件，不是题干公式的条件。"
       },
-      "explanation": "Hebbian storage rule 的适用条件：Wii=0"
+      "explanation": "pattern overlap 的适用条件：±1 patterns stored patterns常取independent unbiased random±1，便于计算容量。"
+    },
+    {
+      "id": "L26-Q53",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-3",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 3,
+          "section": "lecture-26-source-3"
+        }
+      ],
+      "conceptTags": [
+        "retrieval field decomposition"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：使用\"retrieval field decomposition\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "classic dense model"
+        },
+        {
+          "id": "b",
+          "text": "one neuron at a time"
+        },
+        {
+          "id": "c",
+          "text": "symmetric W"
+        },
+        {
+          "id": "d",
+          "text": "random-pattern analysis"
+        }
+      ],
+      "correctChoiceId": "d",
+      "wrongChoiceExplanations": {
+        "a": "这是“binary neuron state”的条件，不是题干公式的条件。",
+        "b": "这是“asynchronous update”的条件，不是题干公式的条件。",
+        "c": "这是“Hopfield energy”的条件，不是题干公式的条件。"
+      },
+      "explanation": "retrieval field decomposition 的适用条件：random-pattern analysis"
+    },
+    {
+      "id": "L26-Q54",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-5",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 5,
+          "section": "lecture-26-source-5"
+        }
+      ],
+      "conceptTags": [
+        "loading ratio"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：使用\"loading ratio\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "P memories, N neurons"
+        },
+        {
+          "id": "b",
+          "text": "classic dense model"
+        },
+        {
+          "id": "c",
+          "text": "one neuron at a time"
+        },
+        {
+          "id": "d",
+          "text": "symmetric W"
+        }
+      ],
+      "correctChoiceId": "a",
+      "wrongChoiceExplanations": {
+        "b": "这是“binary neuron state”的条件，不是题干公式的条件。",
+        "c": "这是“asynchronous update”的条件，不是题干公式的条件。",
+        "d": "这是“Hopfield energy”的条件，不是题干公式的条件。"
+      },
+      "explanation": "loading ratio 的适用条件：P memories, N neurons 对unbiased independent patterns，单个非目标overlapΣ_jξ_j^(μ)ξ_j^(1)均值0、variance约N。"
+    },
+    {
+      "id": "L26-Q55",
+      "lecture": 26,
+      "sectionId": "lecture-26-source-2",
+      "sourceAnchors": [
+        {
+          "file": "Lecture26-Memory-HopfieldModel.pdf",
+          "page": 2,
+          "section": "lecture-26-source-2"
+        }
+      ],
+      "conceptTags": [
+        "classic capacity threshold"
+      ],
+      "difficulty": 3,
+      "type": "equation",
+      "cognitiveLevel": "apply",
+      "stem": "第 26 讲：使用\"classic capacity threshold\"时，哪项条件或约定不可省略？",
+      "choices": [
+        {
+          "id": "a",
+          "text": "classic dense model"
+        },
+        {
+          "id": "b",
+          "text": "dense unbiased random Hopfield"
+        },
+        {
+          "id": "c",
+          "text": "one neuron at a time"
+        },
+        {
+          "id": "d",
+          "text": "symmetric W"
+        }
+      ],
+      "correctChoiceId": "b",
+      "wrongChoiceExplanations": {
+        "a": "这是“binary neuron state”的条件，不是题干公式的条件。",
+        "c": "这是“asynchronous update”的条件，不是题干公式的条件。",
+        "d": "这是“Hopfield energy”的条件，不是题干公式的条件。"
+      },
+      "explanation": "classic capacity threshold 的适用条件：dense unbiased random Hopfield stored patterns常取independent unbiased random±1，便于计算容量。"
     }
   ]
 }
