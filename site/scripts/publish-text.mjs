@@ -14,11 +14,11 @@ const contextualReplacement = (match, replacement) => /^[A-Z]/.test(match)
 export function removeSourceFraming(value = '') {
   const sourceText = String(value);
   const chineseContext = /[\u3400-\u9fff]/.test(sourceText);
-  const sectionPhrase = chineseContext ? '这一段讲解' : 'this section';
+  const sectionPhrase = chineseContext ? '这里' : 'here';
   const previousPhrase = chineseContext ? '前面的讨论' : 'the preceding discussion';
   const nextPhrase = chineseContext ? '接下来的内容' : 'the next step';
-  const lessonPhrase = chineseContext ? '本讲' : 'this lesson';
-  const lessonPossessive = chineseContext ? '本讲的' : "this lesson's";
+  const lessonPhrase = chineseContext ? '这里' : 'the model';
+  const lessonPossessive = chineseContext ? '这里的' : 'the stated';
   const codeLocation = chineseContext ? '示例代码中的对应位置' : 'the corresponding line in the example code';
   const materialPhrase = chineseContext ? '相关材料' : 'the lesson material';
 
@@ -27,7 +27,7 @@ export function removeSourceFraming(value = '') {
     .replace(/,?\s*explicitly identifying this as major new UPDATE material\.?/gi, '.')
     .replace(new RegExp(`UPDATE\\s*第\\s*${chinesePageRange}\\s*页`, 'gi'), '更新版本')
     .replace(new RegExp(`(?:旧版|先前版本)\\s*第\\s*${chinesePageRange}\\s*页`, 'g'), '旧版')
-    .replace(new RegExp(`(?:课程原稿|原始讲义|原始|原讲义|讲义原稿|原稿|讲义|原笔记|笔记)?\\s*第\\s*${chinesePageRange}\\s*页`, 'g'), '这一段讲解')
+    .replace(new RegExp(`(?:课程原稿|原始讲义|原始|原讲义|讲义原稿|原稿|讲义|原笔记|笔记)?\\s*第\\s*${chinesePageRange}\\s*页`, 'g'), sectionPhrase)
     .replace(/(?:上一页|前一页)/g, '前面的讨论')
     .replace(/(?:下一页|后一页)/g, '接下来')
     .replace(/(?:本页|这一页)/g, '这里')
@@ -57,6 +57,53 @@ export function removeSourceFraming(value = '') {
     .replace(/\b(?:the\s+)?source\s+page\b/gi, (match) => contextualReplacement(match, lessonPhrase))
     .replace(/\b(?:the\s+)?(?:source|original|course|updated|earlier|previous)\s+(?:notes?|handout)(?:'s|')?\b/gi, (match) => contextualReplacement(match, lessonPhrase))
     .replace(/\bsource formula\b/gi, chineseContext ? '所述公式' : 'stated formula')
+    .replace(/\bHere\s+(uses|defines|reviews|places|begins|groups|introduces|interprets|describes|approximates|embeds|distinguishes|gives|notes|labels|links|turns)\b/g, (_match, verb) => ({
+      uses: 'Use',
+      defines: 'Define',
+      reviews: 'Recall',
+      places: 'Place',
+      begins: 'Begin',
+      groups: 'Group',
+      introduces: 'Introduce',
+      interprets: 'Interpret',
+      describes: 'Describe',
+      approximates: 'Approximate',
+      embeds: 'Embed',
+      distinguishes: 'Distinguish',
+      gives: 'This gives',
+      notes: 'Notice',
+      labels: 'The displayed relation labels',
+      links: 'This links',
+      turns: 'This turns',
+    })[verb])
+    .replace(/\bHere\s+distinguish\b/g, 'Distinguish')
+    .replace(/\bHere\s+therefore\b/gi, 'Therefore,')
+    .replace(/\bHere\s+instead\b/gi, 'Instead,')
+    .replace(/\bHere\s+also\b/gi, 'This also')
+    .replace(/\bon here\b/gi, 'here')
+    .replace(/\b(?:a|an)\s+the model\b/gi, 'the model')
+    .replace(/\bThe model\s+(place|use|retain|preserve|write)\b/g, (_match, verb) => ({
+      place: 'Place',
+      use: 'Use',
+      retain: 'Retain',
+      preserve: 'Preserve',
+      write: 'Write',
+    })[verb])
+    .replace(/\b(?:on|in) this lesson\b/gi, 'here')
+    .replace(/这里通过/g, '通过')
+    .replace(/这里给定/g, '先给定')
+    .replace(/这里回顾/g, '先回顾')
+    .replace(/这里先/g, '先')
+    .replace(/这里改用/g, '接着改用')
+    .replace(/这里把/g, '接着把')
+    .replace(/这里从/g, '先从')
+    .replace(/这里用/g, '先用')
+    .replace(/这里使用/g, '使用')
+    .replace(/这里采用/g, '采用')
+    .replace(/这里指出/g, '注意')
+    .replace(/这里定义/g, '定义')
+    .replace(/这里因此/g, '因此')
+    .replace(/这里还/g, '还')
     .replace(/\s+([,.;:!?])/g, '$1')
     .replace(/\s{2,}/g, ' ')
     .trim();

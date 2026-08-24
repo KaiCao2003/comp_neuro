@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type MouseEvent } from 'react';
-import { counterpartHref, localeNames, preferredLocale, type Locale, ui } from '@/lib/i18n';
+import { counterpartHref, localeNames, shouldShowLanguageNotice, type Locale, ui } from '@/lib/i18n';
 
 function useLocationSuffix(pathname: string) {
   const [suffix, setSuffix] = useState('');
@@ -64,7 +64,7 @@ export function LanguageNotice({ locale }: { locale: Locale }) {
     const languages = navigator.languages.length ? navigator.languages : [navigator.language];
     // Browser language is available only after hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVisible(preferredLocale(languages) === (locale === 'zh' ? 'en' : 'zh'));
+    setVisible(shouldShowLanguageNotice(locale, languages));
   }, [locale]);
 
   if (!visible) return null;

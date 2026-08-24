@@ -3,16 +3,18 @@ import { alignPublishedSections, removeSourceFraming, sanitizePublishedValue } f
 
 describe('published lesson voice', () => {
   it('turns Chinese page-concordance prose into continuous teaching prose', () => {
-    expect(removeSourceFraming('原稿第 6 页给出的感受野说明方向选择性。')).toBe('这一段讲解给出的感受野说明方向选择性。');
-    expect(removeSourceFraming('第 3 页的卷积定理把关系转到频域。')).toBe('这一段讲解的卷积定理把关系转到频域。');
-    expect(removeSourceFraming('曲线总结第 3–4 页的机制。')).toBe('曲线总结这一段讲解的机制。');
+    expect(removeSourceFraming('原稿第 6 页给出的感受野说明方向选择性。')).toBe('这里给出的感受野说明方向选择性。');
+    expect(removeSourceFraming('第 3 页的卷积定理把关系转到频域。')).toBe('这里的卷积定理把关系转到频域。');
+    expect(removeSourceFraming('曲线总结第 3–4 页的机制。')).toBe('曲线总结这里的机制。');
     expect(removeSourceFraming('下一页再检查极限情况。')).toBe('接下来再检查极限情况。');
+    expect(removeSourceFraming('第 3 页用一个例子说明卷积。')).toBe('先用一个例子说明卷积。');
   });
 
   it('turns English page-concordance prose into continuous teaching prose', () => {
-    expect(removeSourceFraming('The first exercise page defines a vector.')).toBe('This section defines a vector.');
+    expect(removeSourceFraming('The first exercise page defines a vector.')).toBe('Define a vector.');
     expect(removeSourceFraming('The convolution theorem on page 3 converts the equation.')).toBe('The convolution theorem converts the equation.');
-    expect(removeSourceFraming("The source page's rule uses centered activity.")).toBe("This lesson's rule uses centered activity.");
+    expect(removeSourceFraming("The source page's rule uses centered activity.")).toBe('The stated rule uses centered activity.');
+    expect(removeSourceFraming('The first page uses an exponential example.')).toBe('Use an exponential example.');
   });
 
   it('preserves file paths, links, and source code while cleaning prose', () => {
@@ -26,7 +28,7 @@ describe('published lesson voice', () => {
     expect(published.file).toBe('Notes Page 3.pdf');
     expect(published.href).toContain('/resources/original/');
     expect(published.companionHref).toBe('/resources/companions/Lecture02_Companion.pdf');
-    expect(published.paragraph).toBe('This section gives the result.');
+    expect(published.paragraph).toBe('This gives the result.');
     expect(published.codeSources[0].text).toContain('% Page 3');
   });
 

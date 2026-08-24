@@ -47,6 +47,11 @@ export function preferredLocale(languages: readonly string[]): Locale | null {
   return null;
 }
 
+export function shouldShowLanguageNotice(locale: Locale, languages: readonly string[]) {
+  const preferred = preferredLocale(languages);
+  return preferred !== null && preferred !== locale;
+}
+
 function splitHref(href: string) {
   const match = href.match(/^([^?#]*)([?#].*)?$/);
   return { path: match?.[1] || '/', suffix: match?.[2] || '' };

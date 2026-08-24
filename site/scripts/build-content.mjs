@@ -219,15 +219,6 @@ function bestSourceUnit(sourceUnits, text, fallbackIndex = 0) {
   return ranked[0].score > 0 ? ranked[0].unit : sourceUnits[fallbackIndex % sourceUnits.length];
 }
 
-function unitCue(unit) {
-  const fromReconstruction = cleanChoiceText(unit.reconstruction).split(/[：:。；;]/)[0].trim();
-  const fromMeaning = cleanChoiceText(unit.noteMeaning).split(/[：:。；;]/)[0].trim();
-  // The reconstruction is tied directly to the source page. Some companion
-  // margin labels summarize cross-page links and are too broad for a stem.
-  const cue = fromReconstruction.length >= 6 ? fromReconstruction : fromMeaning;
-  return cue.length <= 88 ? cue : cue.split(/[、，,]/).slice(0, 3).join('、');
-}
-
 function sourceSentences(value = '') {
   return cleanChoiceText(value)
     .replace(/Pages?\s+\d+(?:-\d+)?[^。]*[。；]/gi, '')
@@ -706,34 +697,9 @@ function plausibleAnswerDistractors(stem, answer) {
 function buildQuestions(lecture) {
   const questions = [];
   const anchors = lecture.sourceUnits;
-  const distractorPool = [
-    ...lecture.qaPairs.map((pair) => ({ text: pair.answer, note: `该选项回答的是“${pair.stem}”。` })),
-    ...lecture.sourceUnits.flatMap((unit) => sourceSentences(unit.reasoning).map((text) => ({ text, note: `这条推理解释的是“${unitCue(unit)}”，不是当前题目指定的关系。` }))),
-    ...lecture.glossary.map((entry) => ({ text: entry.definition, note: `这是“${entry.zh}（${entry.en}）”的定义。` })),
-    ...lecture.formulas.map((formula) => ({ text: formula.conditions, note: `这是“${formula.name}”的适用条件。` })),
-  ].map((candidate) => ({ ...candidate, text: cleanChoiceText(candidate.text) })).filter((candidate) => candidate.text);
-  const contentDistractors = (stem, correct) => distractorPool
-    .filter((candidate) => !areNearDuplicateChoices(candidate.text, correct))
-    .map((candidate) => ({
-      ...candidate,
-      score: semanticScore(stem, candidate.text) * 20 - Math.abs(candidate.text.length - compact(correct).length),
-    }))
-    .sort((a, b) => b.score - a.score)
-    .filter((candidate, index, candidates) => candidates.findIndex((other) => comparisonText(other.text) === comparisonText(candidate.text)) === index);
-  const otherUnitStatements = (currentUnit, field, context) => lecture.sourceUnits
-    .filter((unit) => unit.id !== currentUnit.id)
-    .map((unit) => ({
-      text: field === 'reconstruction' ? cleanChoiceText(unit.reconstruction) : bestSourceSentence(unit[field], `${unitCue(unit)} ${context}`),
-      note: `该陈述解释的是“${unitCue(unit)}”，不是题干指定的关系。`,
-      score: semanticScore(context, unit[field]),
-    }))
-    .filter((item) => item.text)
-    // Prefer substantively different units so a distractor is domain-specific
-    // without becoming a second valid answer to the cue in the stem.
-    .sort((a, b) => a.score - b.score);
-  const add = ({ stem, correct, distractors, explanation, type, tags, cognitiveLevel, difficulty, anchor, wrongNotes = [] }) => {
+  const add = ({ stem, correct, distractors, explanation, type, tags, cognitiveLevel, difficulty, anchor, sectionId, wrongNotes = [] }) => {
     if (!stem || !correct) return;
-    const scopedStem = compact(stem).startsWith(`第 ${lecture.lecture} 讲`) ? compact(stem) : `第 ${lecture.lecture} 讲：${compact(stem)}`;
+    const scopedStem = compact(stem);
     if (BANNED_QUESTION_TEXT.test(scopedStem)) return;
     if (questions.some((question) => question.stem === scopedStem)) return;
     const number = questions.length + 1;
@@ -748,23 +714,26 @@ function buildQuestions(lecture) {
       : bestSourceSentence(sourceAnchor.reasoning, `${stem} ${correct}`);
     const needsSupportingExplanation = comparisonText(rawExplanation) === comparisonText(correct)
       || comparisonText(rawExplanation).length - comparisonText(correct).length < 30;
-    let finalExplanation = needsSupportingExplanation && supportingExplanation
+    const supportAlreadyPresent = supportingExplanation
+      && comparisonText(rawExplanation).includes(comparisonText(supportingExplanation));
+    let finalExplanation = needsSupportingExplanation && supportingExplanation && !supportAlreadyPresent
       ? `${rawExplanation} ${supportingExplanation}`
       : rawExplanation;
     if (comparisonText(finalExplanation).length - comparisonText(correct).length < 30) {
       const detailedSupport = matchedModule
         ? [...matchedModule.paragraphs]
-          .sort((left, right) => semanticScore(`${stem} ${correct}`, right) - semanticScore(`${stem} ${correct}`, left))[0]
+          .sort((left, right) => semanticScore(`${stem} ${correct}`, right) - semanticScore(`${stem} ${correct}`, left))
+          .find((paragraph) => !comparisonText(finalExplanation).includes(comparisonText(paragraph)))
         : sourceAnchor.reasoning;
-      finalExplanation = compact(`${finalExplanation} 判断依据：${detailedSupport}`);
+      if (detailedSupport) finalExplanation = compact(`${finalExplanation} ${detailedSupport}`);
     }
     const resolvedLevel = cognitiveLevel ?? levelCycle[(number - 1) % levelCycle.length];
     const difficultyByLevel = { remember: 1, understand: 2, apply: 3, analyze: 4, evaluate: 5 };
     questions.push({
       id: `L${String(lecture.lecture).padStart(2, '0')}-Q${String(number).padStart(2, '0')}`,
       lecture: lecture.lecture,
-      sectionId: sourceAnchor.id,
-      sourceAnchors: [{ file: sourceAnchor.sourceFile, page: sourceAnchor.page, section: sourceAnchor.id }],
+      sectionId: sectionId ?? sourceAnchor.id,
+      sourceAnchors: [{ file: sourceAnchor.sourceFile, page: sourceAnchor.page, section: sectionId ?? sourceAnchor.id }],
       conceptTags: tags?.length ? tags : [lecture.enTitle.split(/[:,]/)[0], sourceAnchor.sourceFile],
       difficulty: difficulty ?? difficultyByLevel[resolvedLevel],
       type: type ?? questionType(stem),
@@ -775,146 +744,78 @@ function buildQuestions(lecture) {
     });
   };
 
-  lecture.qaPairs.forEach((pair, index) => {
-    const candidates = plausibleAnswerDistractors(pair.stem, pair.answer);
-    const grounded = contentDistractors(pair.stem, pair.answer);
-    add({
-      stem: pair.stem,
-      correct: pair.answer,
-      distractors: [...candidates, ...grounded].map((item) => item.text),
-      wrongNotes: [...candidates, ...grounded].map((item) => item.note),
-      explanation: pair.answer,
-      anchor: bestSourceUnit(anchors, `${pair.stem} ${pair.answer}`, index),
-    });
-  });
-
-  lecture.sourceUnits.forEach((unit) => {
-    const cue = unitCue(unit);
-    const reasoningAnswer = bestSourceSentence(unit.reasoning, `${cue} ${unit.reconstruction}`);
-    const reasoningDistractors = plausibleAnswerDistractors(cue, reasoningAnswer);
-    const otherReasoning = otherUnitStatements(unit, 'reasoning', cue);
-    const groundedReasoning = contentDistractors(cue, reasoningAnswer);
-    add({
-      stem: `若要解释“${cue}”中的机制或推导，哪条推理链成立？`,
-      correct: reasoningAnswer,
-      distractors: [...otherReasoning, ...reasoningDistractors, ...groundedReasoning].map((item) => item.text),
-      wrongNotes: [...otherReasoning, ...reasoningDistractors, ...groundedReasoning].map((item) => item.note),
-      explanation: reasoningAnswer,
-      type: 'assumption',
-      cognitiveLevel: 'analyze',
-      anchor: unit,
-    });
-
-    const authoredFigure = lecture.figures.find((figure) => figure.sourceRefs.some((ref) => ref.file === unit.sourceFile && ref.page === unit.page));
-    const figureAnswer = authoredFigure ? bestSourceSentence(authoredFigure.caption, authoredFigure.title) : '';
-    const figureDistractors = plausibleAnswerDistractors(cue, figureAnswer);
-    const otherFigureReadings = lecture.figures
-      .filter((figure) => figure.id !== authoredFigure?.id)
-      .map((figure) => ({ text: bestSourceSentence(figure.caption, figure.title), note: `这条结论属于图“${figure.title}”。` }))
-      .filter((item) => item.text);
-    const groundedFigures = contentDistractors(cue, figureAnswer);
-    add({
-      stem: authoredFigure ? `阅读“${authoredFigure.title}”图时，哪项观察正确？` : '',
-      correct: figureAnswer,
-      distractors: [...otherFigureReadings, ...figureDistractors, ...groundedFigures].map((item) => item.text),
-      wrongNotes: [...otherFigureReadings, ...figureDistractors, ...groundedFigures].map((item) => item.note),
-      explanation: figureAnswer,
-      type: 'figure',
-      cognitiveLevel: 'analyze',
-      anchor: unit,
-    });
-  });
-
   lecture.studyGuide.modules.forEach((module, index) => {
     const firstRef = module.sourceRefs[0];
     const anchor = anchors.find((unit) => unit.sourceFile === firstRef.file && unit.page === firstRef.page)
       ?? bestSourceUnit(anchors, module.sourceRefs.map((ref) => `${ref.file} ${ref.page}`).join(' '), index);
-    const otherChecks = lecture.studyGuide.modules.filter((candidate) => candidate.id !== module.id).map((candidate) => candidate.selfCheck.answer);
     const candidates = plausibleAnswerDistractors(module.selfCheck.prompt, module.selfCheck.answer);
-    const groundedChecks = contentDistractors(module.selfCheck.prompt, module.selfCheck.answer);
+    const otherChecks = lecture.studyGuide.modules
+      .filter((candidate) => candidate.id !== module.id)
+      .map((candidate) => ({
+        text: candidate.selfCheck.answer,
+        note: `该结论使用“${candidate.title}”中的另一组变量与条件，不能由题干推出。`,
+      }))
+      .sort((left, right) => right.text.length - left.text.length);
+    const pitfalls = module.pitfalls.map((pitfall) => ({
+      text: pitfall,
+      note: `错误在于：${pitfall}`,
+    }));
+    const lectureTraps = lecture.commonTraps.map((trap) => ({
+      text: trap,
+      note: `错误在于：${trap}`,
+    }));
+    const distractors = [...candidates, ...otherChecks, ...pitfalls, ...lectureTraps];
+    const previousCount = questions.length;
     add({
       stem: module.selfCheck.prompt,
       correct: module.selfCheck.answer,
-      distractors: [...candidates.map((candidate) => candidate.text), ...otherChecks, ...groundedChecks.map((candidate) => candidate.text)],
-      wrongNotes: [...candidates.map((candidate) => candidate.note), ...otherChecks.map(() => '该答案解决的是本讲另一个教学单元的问题。'), ...groundedChecks.map((candidate) => candidate.note)],
-      explanation: `${module.selfCheck.answer} ${module.paragraphs.at(-1)}`,
+      distractors: distractors.map((candidate) => candidate.text),
+      wrongNotes: distractors.map((candidate) => candidate.note),
+      explanation: `${module.selfCheck.answer} ${bestSourceSentence(module.paragraphs.join(' '), `${module.selfCheck.prompt} ${module.selfCheck.answer}`)}`,
       type: questionType(module.selfCheck.prompt),
       cognitiveLevel: 'understand',
       difficulty: 2,
       tags: [module.title],
       anchor,
+      sectionId: module.id,
     });
+    if (questions.length !== previousCount + 1) throw new Error(`Unable to create the module question for ${module.id}`);
+  });
 
-    const otherResults = lecture.studyGuide.modules
-      .filter((candidate) => candidate.id !== module.id)
-      .map((candidate) => candidate.workedExample.result);
-    const resultCandidates = plausibleAnswerDistractors(module.workedExample.problem, module.workedExample.result);
-    const groundedResults = contentDistractors(module.workedExample.problem, module.workedExample.result);
+  lecture.figures.forEach((figure, index) => {
+    const figureModule = lecture.studyGuide.modules.find((module) => module.id === figure.moduleId);
+    const firstRef = figure.sourceRefs.find((ref) => figureModule?.sourceRefs.some((moduleRef) => moduleRef.file === ref.file && moduleRef.page === ref.page))
+      ?? figure.sourceRefs[0];
+    const anchor = anchors.find((unit) => unit.sourceFile === firstRef.file && unit.page === firstRef.page)
+      ?? bestSourceUnit(anchors, `${figure.title} ${figure.caption}`, index);
+    const figureAnswer = bestSourceSentence(figure.caption, figure.title);
+    const candidates = [
+      ...plausibleAnswerDistractors(figure.title, figureAnswer),
+      ...lecture.studyGuide.modules
+        .filter((module) => module.id !== figure.moduleId)
+        .map((module) => ({ text: module.selfCheck.answer, note: `图中没有“${module.title}”所需的变量与条件。` }))
+        .sort((left, right) => right.text.length - left.text.length),
+      ...(figureModule?.pitfalls ?? []).map((pitfall) => ({ text: pitfall, note: `图中的标注与关系不支持这种读法：${pitfall}` })),
+      ...lecture.commonTraps.map((trap) => ({ text: trap, note: `图中的标注与关系不支持这种读法：${trap}` })),
+    ];
+    const previousCount = questions.length;
     add({
-      stem: `完成“${module.workedExample.problem}”中的计算或推理后，哪项结果成立？`,
-      correct: module.workedExample.result,
-      distractors: [...resultCandidates.map((candidate) => candidate.text), ...otherResults, ...groundedResults.map((candidate) => candidate.text)],
-      wrongNotes: [...resultCandidates.map((candidate) => candidate.note), ...otherResults.map(() => '该结果来自本讲另一个例题，使用了不同的条件或参数。'), ...groundedResults.map((candidate) => candidate.note)],
-      explanation: `${module.workedExample.result} 计算路径：${module.workedExample.steps.join(' ')}`,
-      type: questionType(`${module.workedExample.problem} ${module.workedExample.result}`),
-      cognitiveLevel: 'apply',
-      difficulty: 3,
-      tags: [module.title, module.workedExample.title],
+      stem: `观察“${figure.title}”时，哪项解释符合图中的标注与关系？`,
+      correct: figureAnswer,
+      distractors: candidates.map((candidate) => candidate.text),
+      wrongNotes: candidates.map((candidate) => candidate.note),
+      explanation: figure.caption,
+      type: 'figure',
+      cognitiveLevel: 'analyze',
+      difficulty: 4,
+      tags: [figure.title],
       anchor,
+      sectionId: figure.moduleId,
     });
-
-    const otherChecksForExamples = lecture.studyGuide.modules
-      .filter((candidate) => candidate.id !== module.id)
-      .map((candidate) => candidate.workedExample.sanityCheck);
-    const checkCandidates = plausibleAnswerDistractors(module.workedExample.result, module.workedExample.sanityCheck);
-    const groundedExampleChecks = contentDistractors(module.workedExample.result, module.workedExample.sanityCheck);
-    add({
-      stem: `得到“${module.workedExample.result}”后，哪项检查最能判断这个结果是否与题设和模型边界一致？`,
-      correct: module.workedExample.sanityCheck,
-      distractors: [...checkCandidates.map((candidate) => candidate.text), ...otherChecksForExamples, ...groundedExampleChecks.map((candidate) => candidate.text)],
-      wrongNotes: [...checkCandidates.map((candidate) => candidate.note), ...otherChecksForExamples.map(() => '这项检查针对本讲另一个例题，不能检验题干中的结果。'), ...groundedExampleChecks.map((candidate) => candidate.note)],
-      explanation: `${module.workedExample.sanityCheck} 这个检查对应题设“${module.workedExample.problem}”中的单位、方向或极限条件。`,
-      type: 'assumption',
-      cognitiveLevel: 'evaluate',
-      difficulty: 5,
-      tags: [module.title, 'sanity check'],
-      anchor,
-    });
+    if (questions.length !== previousCount + 1) throw new Error(`Unable to create the figure question for ${figure.id}`);
   });
 
-  lecture.glossary.slice(0, 10).forEach((entry, index) => {
-    const others = lecture.glossary.filter((other) => other.id !== entry.id).slice(index % Math.max(lecture.glossary.length - 1, 1)).concat(lecture.glossary).filter((other) => other.id !== entry.id).slice(0, 3);
-    add({
-      stem: `本讲把“${entry.definition}”称为什么？`,
-      correct: `${entry.zh}（${entry.en}）`,
-      distractors: others.map((other) => `${other.zh}（${other.en}）`),
-      wrongNotes: others.map((other) => `“${other.zh}（${other.en}）”指：${other.definition}`),
-      explanation: `${entry.zh}（${entry.en}）：${entry.definition}`,
-      type: 'concept',
-      cognitiveLevel: 'remember',
-      tags: [entry.zh, entry.en],
-      anchor: bestSourceUnit(anchors, `${entry.zh} ${entry.en} ${entry.definition}`, index),
-    });
-  });
-
-  lecture.formulas.forEach((formula, index) => {
-    if (!formula.conditions) return;
-    const others = lecture.formulas.filter((other) => other.id !== formula.id).slice(0, 3);
-    add({
-      stem: `使用“${formula.name}”时，哪项条件或约定不可省略？`,
-      correct: formula.conditions,
-      distractors: others.map((other) => other.conditions || other.name),
-      wrongNotes: others.map((other) => `这是“${other.name}”的条件，不是题干公式的条件。`),
-      explanation: `${formula.name} 的适用条件：${formula.conditions}`,
-      type: 'equation',
-      cognitiveLevel: 'apply',
-      tags: [formula.name],
-      anchor: anchors.find((unit) => unit.id === formula.sectionId) ?? bestSourceUnit(anchors, `${formula.name} ${formula.conditions}`, index),
-    });
-  });
-
-  if (questions.length < 30) throw new Error(`Unable to create 30 high-quality questions for lecture ${lecture.lecture}; built ${questions.length}`);
-  return questions.slice(0, 60);
+  return questions;
 }
 
 const indexRows = parsePromptIndex();

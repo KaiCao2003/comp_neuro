@@ -380,14 +380,14 @@ describe('scientific inline text', () => {
     const lecture = JSON.parse(fs.readFileSync(path.join(root, 'content/lectures/03.json'), 'utf8'));
     const englishLecture = JSON.parse(fs.readFileSync(path.join(root, 'content/en/lectures/03.json'), 'utf8'));
     const studyModule = lecture.studyGuide.modules.find((item: { paragraphs: string[] }) => item.paragraphs.includes(regressionParagraph));
-    const question = englishLecture.questions.find((item: { explanation: string }) => parseExplicitScientificText(item.explanation).some((segment) => segment.kind === 'math' && segment.value === 'x(t) = I + (x_{0} - I)e^{-t/\\tau }'));
+    const question = englishLecture.questions.find((item: { sectionId: string; type: string }) => item.sectionId === 'L03-M2' && item.type !== 'figure');
 
     expect(studyModule).toBeTruthy();
     expect(question).toBeTruthy();
     const moduleHtml = renderToStaticMarkup(<StudyModule module={studyModule} locale="zh" />);
     const questionHtml = renderToStaticMarkup(<QuestionBlock question={question} seed="scientific-text-regression" locale="en" />);
     expect(moduleHtml).toContain('data-math-source="y=Ae^{-t/\\tau }"');
-    expect(questionHtml).toContain('data-math-source="x(t) = I + (x_{0} - I)e^{-t/\\tau }"');
+    expect(questionHtml).toContain('data-math-source="x_{n+1}=x_{n}+(\\Delta t/\\tau )(-x_{n}+I)"');
     expect(moduleHtml + questionHtml).not.toContain('katex-error');
   });
 
@@ -428,7 +428,7 @@ describe('scientific inline text', () => {
       'y(0)=x_{0}-I',
       'A=x_{0}-I',
       'x(t)=I+(x_{0}-I)e^{-t/\\tau }',
-      '\\ln([K]_{\\mathrm{out}}/[K]_{\\mathrm{in}})',
+      'E_{\\mathrm{ion}}=V_{\\mathrm{in}}-V_{\\mathrm{out}}=(RT/zF)\\ln(c_{\\mathrm{out}}/c_{\\mathrm{in}})',
       '(-1\\pm 4i)/0.2=-5\\pm 20i s^{-1}',
       'V_{\\pi }(s)=E_{\\pi }[G_{t}|s_{t}=s]',
       'Q=W_{\\mathrm{E}}\\sum_{j=1}^{N_{\\mathrm{E}}}K_{j}-W_{\\mathrm{I}}\\sum_{j=1}^{N_{\\mathrm{I}}}K_{j}',

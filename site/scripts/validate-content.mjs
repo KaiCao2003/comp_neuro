@@ -17,12 +17,13 @@ const dependencies = read('dependencies.json');
 const sources = read('sources.json');
 
 const MAX_CHOICE_LENGTH = 220;
-const BANNED_STEM = /本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪项推理最准确)|以下哪项属于本讲讨论的核心内容|根据原讲义.+第\s*\d+\s*页主要讨论什么|哪一项概括了该页主题|公式表中的.+解决什么问题/i;
+const BANNED_STEM = /第\s*\d+\s*讲[：:]|本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪项推理最准确)|以下哪项属于本讲讨论的核心内容|根据原讲义.+第\s*\d+\s*页主要讨论什么|哪一项概括了该页主题|公式表中的.+解决什么问题|完成[“"].+哪项结果成立|得到[“"].+哪项检查|若要解释[“"].+哪条推理链|本讲把[“"]|使用[“"].+哪项条件或约定/i;
+const BANNED_QUESTION_SCAFFOLD = /该选项回答的是|该答案解决的是本讲另一个|该结果来自本讲另一个|这项检查针对本讲另一个|这个检查对应题设|不是题干公式的条件|这是[“"].+[”"]的适用条件/i;
 const BANNED_CHOICE = /不检查单位、?\s*shape\s*或\s*conditioning|Course-specific risk boundary|适用条件\/约定：.*sanity check|undefined|该结论忽略了题干中的第|该结论在任何参数和边界条件下都无条件成立|变量名称相似就足以推出结论|这是纯粹的记号约定，不会改变模型预测|该关系在任意参数和边界条件下都保持不变|(?:^|\s)1\.\s+.+\s+2\.\s+.+\s+3\.\s+/i;
-const BANNED_GUIDE_TEXT = /先识别图中对象、箭头、参数和坐标系|后面的正式推导会|本页的中心对象是|Figure note:|Course-specific risk boundary|完整讲|完整推导|适用条件\/约定：.*sanity check|显然|容易得到|经过一些代数/i;
+const BANNED_GUIDE_TEXT = /先识别图中对象、箭头、参数和坐标系|后面的正式推导会|本页的中心对象是|这一段讲解|自学时|自学数值例|掌握这一数值直觉|Figure note:|Course-specific risk boundary|完整讲|完整推导|适用条件\/约定：.*sanity check|显然|容易得到|经过一些代数/i;
 const BANNED_GUIDE_LATEX = /(?:^|[^\\A-Za-z])(?:mu|phi|theta|tau|lambda|sigma|sum|prod|ln|log|exp|sqrt|argmax|argmin|max|min|diag)(?=[_({=+\-*/\s]|$)|_(?:inf|star|new|hat|out|in|ion|tot|sp|post|pre)(?=[^A-Za-z]|$)|\.\.\.|<=|>=/;
 const BANNED_FIGURE_TEXT = /先识别图中对象|先明确横纵轴|逐条追踪箭头|把图与矩阵 shape 对齐|读图时先标出/i;
-const SOURCE_FRAMING = /(?:原稿|原始讲义|原讲义|原笔记|课程原稿|旧版|更新版)|(?:第\s*(?:\d+|[一二三四五六七八九十两]+)\s*页)|页码|本页|上一页|下一页|原页|\bUPDATE\b/;
+const SOURCE_FRAMING = /(?:原稿|讲义|源页|原始讲义|原讲义|原笔记|课程原稿|旧版|更新版)|(?:第\s*(?:\d+|[一二三四五六七八九十两]+)\s*页)|页码|本页|上一页|下一页|原页|\bUPDATE\b/;
 const studyModuleIds = new Set();
 const studyParagraphs = new Map();
 const scientificFigureIds = new Set();
@@ -225,7 +226,9 @@ for (const lecture of course) {
     if (item.sectionId !== 'resources' && !lectureModuleIds.has(item.sectionId) && !content.sourceUnits.some((unit) => unit.id === item.sectionId)) fail(`${item.id} points to an unknown textbook section.`);
   }
   if (!content.glossary.length || !content.formulas.length) fail(`Lecture ${lecture.lecture} glossary/formula data is empty.`);
-  if (content.questions.length < 30) fail(`Lecture ${lecture.lecture} has ${content.questions.length} questions.`);
+  const expectedQuestionCount = guide.modules.length + content.figures.length;
+  if (content.questions.length !== expectedQuestionCount) fail(`Lecture ${lecture.lecture} should have one question per module plus one per figure; found ${content.questions.length}/${expectedQuestionCount}.`);
+  for (const learningModule of guide.modules) if (!content.questions.some((question) => question.sectionId === learningModule.id)) fail(`${learningModule.id} has no four-choice question.`);
   const rememberShare = content.questions.filter((question) => question.cognitiveLevel === 'remember').length / content.questions.length;
   if (rememberShare >= 0.4) fail(`Lecture ${lecture.lecture} recall share is ${(rememberShare * 100).toFixed(1)}%.`);
   const positions = [0, 0, 0, 0];
@@ -247,6 +250,7 @@ for (const lecture of course) {
     if (normalizedExplanation === normalizedCorrect) fail(`${question.id} explanation merely repeats the correct choice.`);
     if (normalizedExplanation.length - normalizedCorrect.length < 30) fail(`${question.id} explanation adds fewer than 30 characters of reasoning beyond the correct choice.`);
     if (BANNED_STEM.test(question.stem)) fail(`${question.id} contains a document-structure or formula-table meta stem.`);
+    if (BANNED_QUESTION_SCAFFOLD.test([question.stem, question.explanation, ...Object.values(question.wrongChoiceExplanations ?? {})].join(' '))) fail(`${question.id} contains retired generated-question scaffolding.`);
     if (!question.sourceAnchors?.length) fail(`${question.id} has no source anchor.`);
     const correctIndex = choiceIds.indexOf(question.correctChoiceId);
     positions[correctIndex] += 1;
@@ -274,7 +278,7 @@ for (const lecture of course) {
     }
   }
   if (Math.max(...positions) - Math.min(...positions) > 2) fail(`Lecture ${lecture.lecture} has biased authored answer positions: ${positions.join(',')}.`);
-  if (difficulty.some((count) => count < 3)) fail(`Lecture ${lecture.lecture} has poor difficulty distribution: ${difficulty.join(',')}.`);
+  if (difficulty.filter((count) => count > 0).length < 2 || !content.questions.some((question) => question.difficulty >= 3)) fail(`Lecture ${lecture.lecture} lacks a higher-order difficulty level: ${difficulty.join(',')}.`);
 
   for (const formula of content.formulas) {
     if (!lectureModuleIds.has(formula.sectionId)) fail(`${formula.id} points to missing public lesson section.`);
@@ -291,7 +295,12 @@ for (const [paragraph, owners] of studyParagraphs) {
   if (owners.length > 1) fail(`Self-study paragraph is duplicated across modules ${owners.join(', ')}: ${paragraph.slice(0, 80)}...`);
 }
 
-if (questions.length < 810) fail(`Expected at least 810 questions; found ${questions.length}.`);
+const uniqueLongestCorrectCount = questions.filter((question) => {
+  const correctLength = question.choices.find((choice) => choice.id === question.correctChoiceId).text.length;
+  return question.choices.every((choice) => choice.id === question.correctChoiceId || choice.text.length < correctLength);
+}).length;
+if (uniqueLongestCorrectCount > questions.length * 0.35) fail(`Correct choices leak through length in ${uniqueLongestCorrectCount}/${questions.length} Chinese questions.`);
+if (questions.length !== studyModuleIds.size + figures.length) fail(`Expected one question per teaching module plus one per figure; found ${questions.length} for ${studyModuleIds.size} modules and ${figures.length} figures.`);
 if (figures.length < 27 || figures.length !== scientificFigureIds.size) fail(`Expected at least 27 unique authored figures; found ${figures.length}.`);
 if (errata.length !== erratumIds.size) fail(`Global and per-lecture errata counts disagree: ${errata.length} vs ${erratumIds.size}.`);
 if (questions.length !== questionIds.size) fail('Global and per-lecture question counts disagree.');

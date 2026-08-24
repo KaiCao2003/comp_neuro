@@ -19,7 +19,7 @@ export function PracticeClient({ locale, course, questions, initialMode = 'lectu
   const [difficulty, setDifficulty] = useState(0);
   const [rangeStart, setRangeStart] = useState(firstLecture);
   const [rangeEnd, setRangeEnd] = useState(27);
-  const [count, setCount] = useState(10);
+  const [count, setCount] = useState(5);
   const [sessionSeed, setSessionSeed] = useState('practice');
   const [selected, setSelected] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
@@ -77,7 +77,7 @@ export function PracticeClient({ locale, course, questions, initialMode = 'lectu
         {mode === 'topic' && <label>{locale === 'zh' ? '主题' : 'Topic'}<select value={topic} onChange={(event) => setTopic(event.target.value)}>{practiceTopics.map((item) => <option value={item.value} key={item.value}>{item.labels[locale]}</option>)}</select></label>}
         {mode === 'cumulative' && <><label>{locale === 'zh' ? '起始讲' : 'From lecture'}<input type="number" min={firstLecture} max="27" value={rangeStart} onChange={(event) => setRangeStart(Number(event.target.value))} /></label><label>{locale === 'zh' ? '结束讲' : 'To lecture'}<input type="number" min={firstLecture} max="27" value={rangeEnd} onChange={(event) => setRangeEnd(Number(event.target.value))} /></label></>}
         <label>{locale === 'zh' ? '难度' : 'Difficulty'}<select value={difficulty} onChange={(event) => setDifficulty(Number(event.target.value))}><option value="0">{locale === 'zh' ? '全部' : 'All'}</option>{[1, 2, 3, 4, 5].map((value) => <option value={value} key={value}>{value}</option>)}</select></label>
-        <label>{locale === 'zh' ? '题数' : 'Questions'}<select value={count} onChange={(event) => setCount(Number(event.target.value))}><option value="10">10</option><option value="15">15</option><option value="25">25</option></select></label>
+        <label>{locale === 'zh' ? '题数' : 'Questions'}<select value={count} onChange={(event) => setCount(Number(event.target.value))}><option value="5">5</option><option value="10">10</option><option value="15">15</option></select></label>
         <button type="button" onClick={start}>{locale === 'zh' ? '开始练习' : 'Start practice'}</button>
       </div>
       {message && <p role="status">{message}</p>}

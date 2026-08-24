@@ -11,7 +11,7 @@
     "prerequisiteBridge": [
       "先把向量看成“若干个带顺序的数”。两个神经元在某一时刻的 firing-rate deviations 可以写成 \\(h=(h_{1},h_{2})^\\mathrm{T}\\)；矩阵 W 规定每个神经元怎样接收另一个神经元的反馈。若 \\(Wv=\\lambda v\\)，那么沿 v 方向的活动经过一次 recurrent mapping 只会被乘上 \\(\\lambda\\)，因此 v 是网络特别自然的变化方向。这里需要的矩阵知识只包括二乘二行列式、联立一次方程、向量长度和点积。",
       "动力学方程 \\(\\tau  dh/dt=-h+Wh+I\\) 同时含 intrinsic leak、recurrent feedback 与 external input。将 h 写在 W 的 eigenvector basis 中后，耦合方程分成互不混合的一维方程。对 \\(\\tau  d\\alpha /dt=-(1-\\lambda )\\alpha +\\beta\\)，输入撤掉后的解是指数衰减；有效时间常数 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda )\\)。\\(\\lambda\\) 越接近 1，衰减越慢；\\(\\lambda =1\\) 时该线性 mode 保持已积累的状态。",
-      "PCA 解决的是另一个问题：给定很多时刻或 trials 的 population vectors，找一个单位方向 v，使中心化数据投影 \\(v^\\mathrm{T}(h-\\bar{h})\\) 的 variance 最大。它使用数据的 covariance C，而不是直接使用 W。学习时应先问矩阵来自模型还是来自数据，再看它的 eigenvectors；这一步能避免把 dynamical mode、principal component 和 causal circuit direction 混成一个概念。"
+      "PCA 解决的是另一个问题：给定很多时刻或 trials 的 population vectors，找一个单位方向 v，使中心化数据投影 \\(v^\\mathrm{T}(h-\\bar{h})\\) 的 variance 最大。它使用数据的 covariance C，而不是直接使用 W。判断 eigenvectors 的含义前，先问矩阵来自模型还是来自数据；这一步能避免把 dynamical mode、principal component 和 causal circuit direction 混成一个概念。"
     ],
     "diagnostic": [
       {
@@ -66,7 +66,7 @@
         ],
         "guidingQuestion": "为什么把 h1、h2 换成“共同变化”和“相反变化”后，原本耦合的网络会分开？",
         "paragraphs": [
-          "原页给出 \\(W=[[0,w_{0}],[w_{0},0]]\\)，并把两个 rate variables 写入 \\(\\tau  dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) 与 \\(\\tau  dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\)。对角线为零表示此教学例中不设 self-coupling，两个 off-diagonal 元素相同表示 reciprocal coupling 对称。这个对称性提示我们尝试 \\(h_{1}=h_{2}\\) 与 \\(h_{1}=-h_{2}\\) 两类 pattern，因为交换两个 neurons 后它们分别保持不变或只改变符号。",
+          "考虑 \\(W=[[0,w_{0}],[w_{0},0]]\\)，并把两个 rate variables 写入 \\(\\tau  dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) 与 \\(\\tau  dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\)。对角线为零表示此教学例中不设 self-coupling，两个 off-diagonal 元素相同表示 reciprocal coupling 对称。这个对称性提示我们尝试 \\(h_{1}=h_{2}\\) 与 \\(h_{1}=-h_{2}\\) 两类 pattern，因为交换两个 neurons 后它们分别保持不变或只改变符号。",
           "求 eigenvalue 时令 \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}=0\\)，因此 \\(\\lambda _{+}=w_{0}\\)、\\(\\lambda _{-}=-w_{0}\\)。把 \\(\\lambda _{+}\\) 代回第一行得到 \\(h_{2}=h_{1}\\)，所以 common eigenvector 可取 \\((1,1)^\\mathrm{T}\\)；把 \\(\\lambda _{-}\\) 代回得到 \\(h_{2}=-h_{1}\\)，所以 difference eigenvector 可取 \\((1,-1)^\\mathrm{T}\\)。除以 \\(\\sqrt 2\\) 后两向量长度为一、点积为零，组成 orthonormal basis V。规范化并不改变方向，却使坐标值可以直接用 dot product 计算。",
           "新的 coordinates 是 \\(\\alpha =V^\\mathrm{T} h\\)，即 \\(\\alpha _{+}=(h_{1}+h_{2})/\\sqrt 2\\)、\\(\\alpha _{-}=(h_{1}-h_{2})/\\sqrt 2\\)。相同操作作用于 input 得 \\(\\beta _{+}=(I_{1}+I_{2})/\\sqrt 2\\)、\\(\\beta _{-}=(I_{1}-I_{2})/\\sqrt 2\\)。将 \\(h=V\\alpha\\) 代回原方程并左乘 \\(V^\\mathrm{T}\\)，得到 \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}+\\beta _{+}\\) 与 \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}+\\beta _{-}\\)。现在每个方程只含自己的 coordinate，说明 basis change 真正完成了 decoupling。",
           "这两个 modes 都是 population patterns，而不是分别属于 neuron 1 与 neuron 2。common mode 增加时两个 neurons 同向变化；difference mode 增加时一个升、一个降。若网络不对称，eigenvectors 往往不再正交，\\(V^{-1}\\) 也不等于 \\(V^\\mathrm{T}\\)；此时仍可做 mode decomposition，但坐标变换和几何解释必须使用一般 inverse，不能照搬本页的正交公式。"
@@ -144,10 +144,10 @@
         ],
         "guidingQuestion": "同一个 w0 为什么会让 common mode 变慢，却让 difference mode 变快？",
         "paragraphs": [
-          "mode 方程的齐次部分分别是 \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) 与 \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\)。和标准形式 \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) 比较，得到 \\(\\tau _{+}=\\tau /(1-w_{0})\\)、\\(\\tau _{-}=\\tau /(1+w_{0})\\)。原始第 1 页把该式手写成 \\(1/(1\\mp w_{0})\\)；只有在预先把 \\(\\tau\\) 归一化为 1 时才成立，否则会丢失时间单位。因此量纲完整的写法是 \\(\\tau /(1\\mp w_{0})\\)。正 coupling 对共同变化提供 positive feedback，抵消一部分 intrinsic leak；对相反变化却提供 restoring feedback，因为 neuron 1 上升会推动 neuron 2 上升，从而削弱两者之差。",
+          "mode 方程的齐次部分分别是 \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) 与 \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\)。和标准形式 \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) 比较，得到 \\(\\tau _{+}=\\tau /(1-w_{0})\\)、\\(\\tau _{-}=\\tau /(1+w_{0})\\)。若把该式写成 \\(1/(1\\mp w_{0})\\)，只有在预先把 \\(\\tau\\) 归一化为 1 时才成立，否则会丢失时间单位。因此量纲完整的写法是 \\(\\tau /(1\\mp w_{0})\\)。正 coupling 对共同变化提供 positive feedback，抵消一部分 intrinsic leak；对相反变化却提供 restoring feedback，因为 neuron 1 上升会推动 neuron 2 上升，从而削弱两者之差。",
           "当 \\(|w_{0}|<1\\) 时，1-w0 与 1+w0 都为正，两 modes 都会在撤掉 input 后指数衰减。w0 接近 1 时 \\(\\tau _{+}\\) 很长，common coordinate 成为 leaky integrator；\\(w_{0}=1\\) 时 common 方程失去 leak，持续输入被积分，输入撤掉后已积累的 \\(\\alpha _{+}\\) 保持。w0 接近 -1 时同样逻辑转到 difference mode。等号边界是 perfect integrator，不应笼统写进普通 leaky regime。",
           "若 \\(|w_{0}|>1\\)，至少一个 coefficient 变为负。例如 \\(w_{0}=1.2\\) 时 common 方程为 \\(\\tau  d\\alpha _{+}/dt=+0.2\\alpha _{+}\\)，微小扰动会指数增长。数学上的不稳定不等于 firing rate 真能无限上升；真实 neuron 的 saturation、threshold 与 inhibition 会改变高振幅行为，但线性分析仍指出固定点附近存在离开的方向。",
-          "原页的 activity-space sketches 可这样读：在 h1-h2 平面中，common axis 是斜率 +1 的线，difference axis 是斜率 -1 的线。若 \\(\\tau _{-}\\) 远小于 \\(\\tau _{+}\\)，任意初始点先快速消掉 difference component，轨迹靠近 common axis，再沿该轴慢慢移动。图上的轴是 eigenvector directions；轨迹的快慢来自 eigenvalues 与 \\(\\tau\\)，而不是由线条长短决定。"
+          "activity-space sketches 可这样读：在 h1-h2 平面中，common axis 是斜率 +1 的线，difference axis 是斜率 -1 的线。若 \\(\\tau _{-}\\) 远小于 \\(\\tau _{+}\\)，任意初始点先快速消掉 difference component，轨迹靠近 common axis，再沿该轴慢慢移动。图上的轴是 eigenvector directions；轨迹的快慢来自 eigenvalues 与 \\(\\tau\\)，而不是由线条长短决定。"
         ],
         "keyPoints": [
           "\\(\\tau _{+}=\\tau /(1-w_{0})\\)，\\(\\tau _{-}=\\tau /(1+w_{0})\\)，两个符号不能合并成同一分母。",
@@ -573,7 +573,7 @@
         ],
         "guidingQuestion": "阻断突触后节律是否保留，能怎样缩小机制范围，又为什么不能单独完成证明？",
         "paragraphs": [
-          "原页先区分两种来源。cell-intrinsic pacemaker 即使失去周期性 synaptic input，靠自身 voltage-gated currents 仍能产生 rhythm；follower 本身不振荡，只跟随 pacemaker 的 synaptic drive。第二种来源是 network-generated rhythm：单个细胞可保持 tonic 或 silent，但 reciprocal inhibition 使两个细胞交替 active，形成 half-center oscillator。respiration 与 walking muscle alternation 是课程中的功能例子。",
+          "先区分两种来源。cell-intrinsic pacemaker 即使失去周期性 synaptic input，靠自身 voltage-gated currents 仍能产生 rhythm；follower 本身不振荡，只跟随 pacemaker 的 synaptic drive。第二种来源是 network-generated rhythm：单个细胞可保持 tonic 或 silent，但 reciprocal inhibition 使两个细胞交替 active，形成 half-center oscillator。respiration 与 walking muscle alternation 是对应的功能例子。",
           "synaptic block 是干预逻辑而非标签游戏。若 neuron 1 的节律在 block 后保留而 neuron 2 变成 tonic 或 silent，结果符合“1 是 pacemaker、2 是 follower”。若两者自然状态交替而 block 后都失去节律，则符合 network-generated candidate。关键 observation 是同一细胞在自然与 block 条件下的 time series，不是仅比较不同动物的平均 frequency。",
           "该试验不能排除所有替代解释。阻断药可能改变 intrinsic conductances，block 可能不完全，electrical coupling 可能保留，sensory feedback 也可能在 intact preparation 中参与。较强设计应同时记录 membrane potential、验证 synaptic current 消失、使用 washout 或不同阻断方法，并检查 single-cell current injection 能否重新诱发 rhythm。结果应写成“支持某候选机制”，而非“证明唯一机制”。",
           "CPG 指在缺少相同周期的外部指令时，central neural circuit 仍能组织 patterned motor output。这个定义不要求真实行为完全独立于 sensory feedback；感觉输入可以重置 phase、调节 speed 或稳定 gait。把所有 rhythmic neural activity 都称为 CPG 会混淆 oscillator、sensory entrainment 与 downstream follower response。"
@@ -643,10 +643,10 @@
         ],
         "guidingQuestion": "为什么 imaginary eigenvalue component 产生往返变化，而 intrinsic leak 又让这种变化衰减？",
         "paragraphs": [
-          "原页的 \\(W=[[0,-w_{0}],[w_{0},0]]\\) 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。完整 rate equation 仍是 \\(\\tau  dh/dt=-h+Wh+I\\)，所以决定 continuous-time stability 的不是 W 单独的 ±iw0，而是 \\(A=(-I+W)/\\tau\\) 的 eigenvalues \\((-1\\pm iw0)/\\tau\\)。real part 固定为 \\(-1/\\tau\\)，说明无输入时 envelope 必定衰减。",
+          "令 \\(W=[[0,-w_{0}],[w_{0},0]]\\)，把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。完整 rate equation 仍是 \\(\\tau  dh/dt=-h+Wh+I\\)，所以决定 continuous-time stability 的不是 W 单独的 ±iw0，而是 \\(A=(-I+W)/\\tau\\) 的 eigenvalues \\((-1\\pm iw0)/\\tau\\)。real part 固定为 \\(-1/\\tau\\)，说明无输入时 envelope 必定衰减。",
           "characteristic polynomial \\(\\det(W-\\lambda I)=\\lambda ^{2}+w_{0}^{2}=0\\) 给 λ_W=±i|w0|。沿 complex mode 的解含 \\(e^{(-1\\pm iw0)t/\\tau }=e^{-t/\\tau }[\\cos(|w_{0}|t/\\tau )\\pm i \\sin(|w_{0}|t/\\tau )]\\)。把 conjugate pair 合并可得到真实 h1、h2 的 sine-cosine trajectory。角频率 \\(\\omega =|w_{0}|/\\tau  \\mathrm{rad}/s\\)，普通频率 \\(f=\\omega /(2\\pi )\\)。",
           "phase-plane 中轨迹绕 fixed point 旋转，同时 radius 按 \\(e^{-t/\\tau }\\) 缩小，形成 inward spiral。若 full real part 为正，radius 会放大成 outward spiral；若恰为零，线性系统出现 neutrally stable closed orbits，却没有 amplitude selection，noise 会让 radius 漂移。稳定 autonomous limit cycle 通常需要 nonlinearity 让小 amplitude 增长而大 amplitude 收缩。",
-          "因此“有 complex eigenvalues”与“有 sustained CPG rhythm”不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。原页选择随后转向 Morris-Lecar，正是为了引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
+          "因此“有 complex eigenvalues”与“有 sustained CPG rhythm”不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。这正是接着讨论 Morris-Lecar 的原因：它引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
         ],
         "keyPoints": [
           "full system eigenvalues 是 \\((-1\\pm iw0)/\\tau\\)，而不是只看 W 的 ±iw0。",
@@ -803,7 +803,7 @@
         ],
         "derivation": {
           "title": "四阶段 trajectory 的符号链",
-          "setup": "沿原页标注的 cycle 顺序，使用 \\(dV/dt\\) 与 \\(dN/dt\\) 的 signs 说明每段发生什么。",
+          "setup": "沿标注的 cycle 顺序，使用 \\(dV/dt\\) 与 \\(dN/dt\\) 的 signs 说明每段发生什么。",
           "steps": [
             {
               "title": "lower branch 慢行",
@@ -860,7 +860,7 @@
         ],
         "guidingQuestion": "观察到两个 cells 交替 firing 时，怎样判断 phase transition 是 active cell 放手还是 inhibited cell 逃脱？",
         "paragraphs": [
-          "原页用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。free neuron 使用 \\(F(V,N)=0\\) 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。两套 geometry 的切换让“谁先跨门槛”成为可检查的机制判据。",
+          "用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。free neuron 使用 \\(F(V,N)=0\\) 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。两套 geometry 的切换让“谁先跨门槛”成为可检查的机制判据。",
           "release mechanism 中，active cell 在 upper branch 上随着 N 增加而逐渐失去维持 high V 的能力。它先向 low branch 跳并跌破 VT，synapse 关闭，于是 partner 被释放并跳到自己的 high state。换相原因是发放者 intrinsic adaptation；如果固定 active cell 的 recovery variable，phase switch 应被延迟或阻断。",
           "escape mechanism 中，inhibited cell 在 low state 内 N 逐渐恢复，最终即使 inhibition 仍开着，也跨过受抑 nullcline 的 fold 或 separatrix，跳到 high state。它的上升随后抑制原 active cell。换相原因是被抑制者的 intrinsic recovery；改变 inhibited cell 的 recovery speed 会显著改变 phase duration。",
           "真实 circuits 可处于 mixed regime：active cell 接近 release 时，partner 也接近 escape，noise 或 sensory input 决定谁先发生。实验上应在 phase transition 前追踪 both cells 的 voltage 与 recovery proxy，并用短 pulse 分别推 active cell向下或 inhibited cell向上。仅从 alternating spike raster 看不出 causal ordering。"
@@ -931,7 +931,7 @@
         ],
         "guidingQuestion": "去掉 ion-channel细节后，最少需要哪些 rate-level variables 才能保留 half-center 的几何机制？",
         "paragraphs": [
-          "第 6 页只给出 extension 方向：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a，仍可构造相似 nullcline geometry。一个最小 pair 可写 \\(\\tau _{h} dh_{i}/dt=-h_{i}+F(I_{i}-w h_{j}-a_{i})\\)，\\(\\tau a da_{i}/dt=-a_{i}+b h_{i}\\)。F 是 threshold-saturating nonlinearity，\\(w>0\\) 表示 reciprocal inhibition，b 控制 activity如何积累adaptation。",
+          "相同 geometry 可扩展到 firing-rate model：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a。一个最小 pair 可写 \\(\\tau _{h} dh_{i}/dt=-h_{i}+F(I_{i}-w h_{j}-a_{i})\\)，\\(\\tau a da_{i}/dt=-a_{i}+b h_{i}\\)。F 是 threshold-saturating nonlinearity，\\(w>0\\) 表示 reciprocal inhibition，b 控制 activity 如何积累 adaptation。",
           "在某 cell active 时，\\(h_{i}\\)高使 \\(a_{i}\\)缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。partner受到的 inhibition随之减弱并开始上升，随后抑制原 cell。这个过程对应 release-like switching。若 inhibited cell 的 \\(a_{j}\\)在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。",
           "rate model 保留的是状态依赖 feedback、slow recovery 与 threshold geometry，不保留具体 Ca/K currents、spike waveform 或 reversal potentials。它适合研究population rhythm、phase relationship与parameter effects，却不能凭一个 rate variable判断某种ionic mechanism。模型层级降低后，参数含义也改变：\\(\\tau _{h}\\)是rate response time，不是 membrane capacitance直接给出的时间常数。",
           "验证该模型应画 \\(h_{i}-a_{i}\\) nullclines、模拟 both rates、改变 w、b、\\(\\tau a\\)，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
@@ -1051,7 +1051,7 @@
         "guidingQuestion": "一个短暂saccade command如何变成在command消失后仍维持的eye position code？",
         "paragraphs": [
           "眼球转动需要phasic motor drive产生velocity，也需要tonic drive抵抗orbital restoring forces并保持新position。课程将brainstem与cerebellar distributed network抽象成neural integrator：输入是eye velocity command \\(v(t)\\)，输出state近似\\(x(t)=x(0)+\\int v(t')dt'\\)。理想情况下，当v回到零，x保持最近值；若network有leak，position会缓慢drift回center。",
-          "原页回路含left与right hemisphere的excitatory populations EL、ER及inhibitory populations IL、IR。左右position tuning curves方向相反：向右位置时一侧population firing提高，另一侧降低。互相excitation可延长memory mode，crossed inhibition可把左右push-pull pattern组织成一个signed coordinate。图是functional architecture，不能从箭头 alone读出每条真实synapse的strength。",
+          "回路含 left 与 right hemisphere 的 excitatory populations EL、ER 及 inhibitory populations IL、IR。左右 position tuning curves 方向相反：向右位置时一侧 population firing 提高，另一侧降低。互相 excitation 可延长 memory mode，crossed inhibition 可把左右 push-pull pattern 组织成一个 signed coordinate。图表示 functional architecture，不能只从箭头读出每条真实 synapse 的 strength。",
           "linear tuning使eye position可由population rates的weighted difference读取。若right-preferring neuron写成\\(hR\\approx b+kx\\)，left-preferring写成\\(hL\\approx b-kx\\)，则\\(hR-hL\\approx 2kx\\)，而common baseline \\(hR+hL\\approx 2b\\)。积分器可把signed position放在difference-like mode，同时common mode保持稳定。真实neurons有threshold、saturation与heterogeneity，所以linear relation只在工作范围内成立。",
           "实验上可用velocity pulse后firing是否持续、persistent level是否随pulse integral分级、network perturbation后drift time constant如何改变来检验integrator。若只看到position tuning correlation，仍不能区分sensory eye-position feedback与recurrent memory；需要在darkness、feedback perturbation或circuit intervention下比较。"
         ],
@@ -1198,7 +1198,7 @@
         ],
         "guidingQuestion": "包含nonlinear F-I与synaptic transfer的模型，怎样在固定这些functions后变成对weights线性的fit？",
         "paragraphs": [
-          "原页借Goldman、Marder等工作强调：不同parameter settings可以产生相近voltage或behavioral dynamics，动物个体间variability并不必然破坏function。oculomotor integrator近似linear的position tuning，使研究者能在多个eye positions测得rates，再询问哪些synaptic weight sets可重现这些states。这里的variability是模型或个体parameter差异，不等于recording noise。",
+          "Goldman、Marder 等工作表明：不同 parameter settings 可以产生相近 voltage 或 behavioral dynamics，动物个体间 variability 并不必然破坏 function。oculomotor integrator 近似 linear 的 position tuning，使研究者能在多个 eye positions 测得 rates，再询问哪些 synaptic weight sets 可重现这些 states。这里的 variability 是模型或个体 parameter 差异，不等于 recording noise。",
           "对postsynaptic neuron i，在position \\(p\\mu\\)测得target rate \\(h_{i}(p\\mu )\\)。通过measured F-I inverse把它换成所需net current \\(Y_{i}\\mu =F_{i}^{-1}(h_{i}(p\\mu ))\\)。对每个presynaptic neuron j，把它的rate先送入固定synaptic nonlinearity \\(S_{E}\\)或\\(S_{I}\\)，得到feature \\(X_{j}\\mu\\)。再加一行constant 1表示bias current。于是复杂biophysics被预计算进Y与X。",
           "在nonlinear functions固定后，prediction是\\(\\hat{Y}_{i\\mu }=\\sum _j W_{ij} X_{j}\\mu\\)，对unknown weights Wij与bias线性。每个output neuron i可独立fit一行weights。若M个sample positions作为columns，X shape为D×M，Y为N×M，W为N×D；matrix equation \\(\\hat{Y}=WX\\)的shape严格一致。这个orientation需明确，因为把samples放rows会得到转置版本formula。",
           "重参数化的边界很重要。若F-I inverse估计有误、synaptic threshold 也要共同fit、features高度相关或noise heteroscedastic，simple OLS不再给可靠uncertainty。不同nonlinear assumptions可能产生不同weight ensembles却同样fit rates。因此“fit变linear”是conditional computational convenience，不是说原生circuit没有nonlinearity。"
@@ -1347,7 +1347,7 @@
         "guidingQuestion": "为什么很多single weights可以变化很大，而少数parameter combinations却被data严格限制？",
         "paragraphs": [
           "Hessian是symmetric positive-semidefinite，因此\\(H=VDV^\\mathrm{T}\\)，columns \\(v_{k}\\)是orthonormal parameter directions，D含\\(\\lambda _{k}\\ge 0\\)。令\\(z=V^\\mathrm{T}(w-\\hat{w})\\)，quadratic loss增加量\\(\\Delta L=1/2\\sum \\lambda _{k} z_{k}^{2}\\)。若\\(\\lambda _{k}\\)大，同样parameter displacement会产生大loss，方向stiff；若\\(\\lambda _{k}\\)小，可沿该combination走较远而仍位于adequate-fit contour内，方向sloppy。",
-          "原页具体fit约有4个stiff与46个sloppy dimensions。这个数是该model、data与parameterization的结果，不是oculomotor circuits的普适常数。error contour在两个direction例子中呈长椭圆：短轴对应large \\(\\lambda\\)，长轴对应small \\(\\lambda\\)。轴方向通常是多个weights的mixture，因此“某个parameter sloppy”往往表述不准确。",
+          "一个具体 fit 约有 4 个 stiff 与 46 个 sloppy dimensions。这个数是该 model、data 与 parameterization 的结果，不是 oculomotor circuits 的普适常数。error contour 在两个 direction 例子中呈长椭圆：短轴对应 large \\(\\lambda\\)，长轴对应 small \\(\\lambda\\)。轴方向通常是多个 weights 的 mixture，因此“某个 parameter sloppy”往往表述不准确。",
           "sloppiness可来自true functional compensation，也可来自experiment未激发某些modes、measurement noise大、features 共线或parameter scaling不当。它不表示相关biology无关；一个 sloppy direction 可能在当前eye-position dataset中不影响fit，却在perturbation、development或另一behavior中很重要。区分biological degeneracy与data insufficiency需要新conditions。",
           "报告单一best-fit W会隐藏这些事实。更好的做法是取所有loss低于预定threshold的adequate models，比较它们共同的predictions与分歧最大的experiments。若所有models都预测某perturbation outcome，该prediction robust；若沿sloppy valley预测分叉，实验正好可用来收窄ensemble。parameter-space sloppiness与Lecture19的neural-state low dimensionality属于不同spaces。"
         ],
@@ -1479,7 +1479,7 @@
           "center-out task 从中心起点向多个径向 targets 伸手，因而 direction、speed、time-from-go 等变量结构清楚。对单神经元可用 \\(r(\\theta )=b+k \\cos(\\theta -\\theta _{\\mathrm{pref}})\\) 描述平均方向调谐；\\(\\theta _{\\mathrm{pref}}\\) 是 preferred direction，k 是 modulation depth。这个式子压缩了条件平均，不说明神经元“知道”角度，也不保证其他运动变量已被排除。",
           "把同一时刻所有神经元 rates 堆成 \\(r(t)\\)，每个 reach condition 就形成一条 N 维 trajectory。若大量 variance 落在少数 PCs 上，表示轨迹接近低维子空间。单神经元曲线是高维 trajectory 在一个坐标轴上的影子；许多带相位差的影子可来自一个旋转或弯曲的群体轨迹，因此 tuning 与 dynamics 不是互相排斥的观察。",
           "PCA 只按 variance 排序，不知道哪一维驱动 muscles。低 variance dimension 可能携带细小但行为关键的 output，尤其当 readout 对该方向 gain 很高。反过来，大 variance dimension 也可能属于 output-null preparation。判断“有用”需要同时查看 neural covariance 与 behavioral readout，而不能用 explained variance 单独裁决。",
-          "教学图中的二维 loops 或 clusters 是 projection；重叠可能由截断造成，分离也可能被 normalization 放大。自学时应记录时间轴、condition colors、是否 trial-averaged、PC 是否在全条件共同拟合。若每个 condition 各自拟合 PCA，轨迹间几何将失去统一坐标，不能用于比较 target-specific preparation。"
+          "教学图中的二维 loops 或 clusters 是 projection；重叠可能由截断造成，分离也可能被 normalization 放大。比较这类轨迹时，要记录时间轴、condition colors、是否 trial-averaged、PC 是否在全条件共同拟合。若每个 condition 各自拟合 PCA，轨迹间几何将失去统一坐标，不能用于比较 target-specific preparation。"
         ],
         "keyPoints": [
           "方向调谐是条件平均的统计描述，不等于唯一神经编码。",
@@ -1625,7 +1625,7 @@
         ],
         "guidingQuestion": "平方指数 kernel 怎样编码平滑性，delayed-reach 中又该怎样区分 target preparation、go cue 与 movement？",
         "paragraphs": [
-          "平方指数 kernel \\(K(t,t')=\\sigma s^{2}\\) \\(\\exp[-(t-t')^{2}/(2\\tau ^{2})]+\\sigma n^{2}\\delta tt'\\) 给同一 factor 在两时刻的 covariance。\\(\\sigma s^{2}\\) 控制平滑 signal variance，\\(\\tau\\) 控制 correlation 衰减时间，\\(\\sigma n^{2}\\)只在相同 time bin 加入独立波动。原始第 3 页指出 \\(\\alpha\\) 与 loading C 存在整体 scale ambiguity，并采用 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 作为归一化约定；这个约束固定尺度，不是新的生物定律。该 kernel 也不是 GP 的唯一形式；有快速切换或振荡时，Matérn 或 periodic kernels 可能更贴近假设。",
+          "平方指数 kernel \\(K(t,t')=\\sigma s^{2}\\) \\(\\exp[-(t-t')^{2}/(2\\tau ^{2})]+\\sigma n^{2}\\delta tt'\\) 给同一 factor 在两时刻的 covariance。\\(\\sigma s^{2}\\) 控制平滑 signal variance，\\(\\tau\\) 控制 correlation 衰减时间，\\(\\sigma n^{2}\\) 只在相同 time bin 加入独立波动。由于 \\(\\alpha\\) 与 loading C 存在整体 scale ambiguity，采用 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 作为归一化约定；这个约束固定尺度，不是新的生物定律。该 kernel 也不是 GP 的唯一形式；有快速切换或振荡时，Matérn 或 periodic kernels 可能更贴近假设。",
           "fitting 同时估计 latent trajectories、loadings、baselines、noise 与 kernel hyperparameters，通常以 marginal likelihood 或 EM 类 procedure 完成。增加 K 总会提高 in-sample flexibility，因此维数应由 cross-validation、held-out likelihood 或 reconstruction prediction 选择。只看训练 explained variance 会把 noise dimensions 当作有意义 factors。",
           "delayed reach 要沿时间线读图：target 出现后、go cue 前是 preparatory epoch；go 后才进入 movement epoch。不同 targets 的 preparation 可走向不同 latent locations，却不产生明显运动。go cue 后 trajectories 从这些初态进入 target-specific movement paths。图形支持“initial condition influences subsequent dynamics”，但单靠轨迹不能排除共同输入持续驱动。",
           "trial averaging 会使准备轨迹更清楚，却掩盖单 trial onset jitter 与 variability。若声称 trajectory geometry 预测 behavior，应在留出 trials 上用 pre-go latent state 预测 reaction time、direction error 或 muscle activity。仅仅在 go cue 对齐后看到分叉，可能是对齐和条件平均的结果，必须与 shuffled labels 和 alternative alignments 比较。"
@@ -1661,7 +1661,7 @@
             }
           ],
           "symbolNotes": [
-            "\\(\\sigma s^{2}\\) 与 \\(\\sigma n^{2}\\) 是 latent amplitude 的平方单位；源页用 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 固定该 factor 的任意整体尺度。",
+            "\\(\\sigma s^{2}\\) 与 \\(\\sigma n^{2}\\) 是 latent amplitude 的平方单位；约束 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 固定该 factor 的任意整体尺度。",
             "\\(\\tau\\) 与 t 使用同一时间单位；\\(\\delta tt'\\) 是离散 time-bin indicator。"
           ],
           "unitsCheck": "指数的分子和分母都是时间平方，因此无量纲；K 保留 latent variance 单位。",
@@ -1702,8 +1702,8 @@
         ],
         "guidingQuestion": "准备期明明有强神经活动，为什么线性 readout 仍可以给零 motor output？",
         "paragraphs": [
-          "局部线性 readout 写成 \\(m=Ur\\)，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。原始第 4 页把 U 的 shape 手写成 N×M，与 \\(m=Ur\\) 的矩阵乘法不相容；这里按 M×N 修正。若某个非零 r 满足 \\(Ur=0\\)，它位于 U 的 null space，并不意味着 neurons 静默。准备活动可以沿 null directions 改变 network state，而在该近似下不改变 output；go cue 后 state 转入 potent directions，readout 才非零。",
-          "rank-nullity 给 dim Null\\((U)=N-\\operatorname{rank}(U)\\)。只有 U 具有 full row \\(\\operatorname{rank} M\\) 时，它才简化成原页写的 N-M；若 \\(\\operatorname{rank}(U)<M\\)，零空间会更大。当记录维数远大于 motor output 维数时，理论上可有很大的 null space。但实际 recorded r 只采样 neurons，真实 downstream mapping 也可能 nonlinear、state-dependent 或延迟，所以根据一个 fitted U 得到的 null space 是模型相对概念，不是解剖上绝对无输出的通路。",
+          "局部线性 readout 写成 \\(m=Ur\\)，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。把 U 写成 N×M 会与 \\(m=Ur\\) 的矩阵乘法不相容，所以直接采用 M×N。若某个非零 r 满足 \\(Ur=0\\)，它位于 U 的 null space，并不意味着 neurons 静默。准备活动可以沿 null directions 改变 network state，而在该近似下不改变 output；go cue 后 state 转入 potent directions，readout 才非零。",
+          "rank-nullity 给 dim Null\\((U)=N-\\operatorname{rank}(U)\\)。只有 U 具有 full row \\(\\operatorname{rank} M\\) 时，它才简化成 N-M；若 \\(\\operatorname{rank}(U)<M\\)，零空间会更大。当记录维数远大于 motor output 维数时，理论上可有很大的 null space。但实际 recorded r 只采样 neurons，真实 downstream mapping 也可能 nonlinear、state-dependent 或延迟，所以根据一个 fitted U 得到的 null space 是模型相对概念，不是解剖上绝对无输出的通路。",
           "分解 r=rpotent+rnull 可用 U 的 singular value decomposition。row space directions 改变 output，orthogonal complement 属于 null space。检验准备活动是否 output-null，应在独立 trials 拟合 U，测 pre-go projections，并检查 EMG 或 kinematics；若在同一数据上挑方向再报告零输出，会产生 circular analysis。",
           "output-null 不等于 computation-null。沿 null direction 的活动可设定 recurrent initial condition、抑制错误动作或准备多个候选。相同神经向量也可能通过未记录 downstream populations 产生效果。课程图提供的是 linear framework：它把“活动存在”和“当前输出存在”分开，而不许可把 null activity 称为生物上无功能。"
         ],
@@ -1905,7 +1905,7 @@
           "本课采用 working definition：cognition 使 brain state 或 behavior 不完全由 present sensory input 决定。相同当前刺激在不同记忆、目标或信念状态下可引出不同反应；反过来，外界暂时不变时内部决策变量仍可演化。这一定义便于建模，却不是意识、语言或智能的完整哲学定义。",
           "可检验方式是构造相同 current input、不同 history 的 trials。若 sample identity、previous reward 或 instruction 改变 delay activity 与 choice，系统需要 history-dependent state。统计上应控制当前 stimulus、movement preparation 与 arousal，否则“内部状态”可能只是遗漏的外部或身体变量。",
           "decision、short-term memory、learning 与 generalization 的时间尺度不同，但都可写成 state update。decision state 在数百毫秒内累积 evidence；working memory 在数秒 delay 中保存 sample；learning 改变跨 trials 的 parameters；long-term memory 跨更长时间重现信息。共同数学语言不意味着它们由同一 brain area 或同一 cellular mechanism 实现。",
-          "学习时可用 Markov-state 反问法：若只知道 present input 无法预测下一步，加入哪一个内部变量后 prediction 改善？这个变量可能是 accumulated evidence、remembered frequency 或 task rule。好的模型需同时说明 state 怎样被写入、无输入时怎样保持、何时被读取和清除，而不是只在 delay 中画一条高 firing trace。"
+          "可以用 Markov-state 反问法判断缺少的状态：若只知道 present input 无法预测下一步，加入哪一个内部变量后 prediction 改善？这个变量可能是 accumulated evidence、remembered frequency 或 task rule。好的模型需同时说明 state 怎样被写入、无输入时怎样保持、何时被读取和清除，而不是只在 delay 中画一条高 firing trace。"
         ],
         "keyPoints": [
           "working definition 强调 history-dependent internal state。",
@@ -2088,7 +2088,7 @@
           "random-dot motion 每一瞬间提供 noisy evidence。令 \\(a>0\\) 支持右、\\(a<0\\) 支持左，可写 \\(\\tau a da/dt=-a+e(t)+\\gamma (t)\\)。\\(e(t)\\) 的条件均值随 signed coherence 改变，\\(\\gamma\\) 是零均值 noise。-a 是 leak，使旧证据逐渐折扣；经典 perfect DDM 常省略该项，本课公式是更一般的 leaky accumulator。",
           "initial condition \\(a(0)=b\\) 表示起点 bias；吸收边界 \\(a=\\pm B\\) 给 first-passage choice 与 decision time。正 b 让 +B 更近，常提高该选择概率并缩短它的时间。增大 B 通常提高准确率但延长 RT；增大 drift magnitude 提高正确率并缩短 RT；增大 noise 扩宽 trajectories，影响两者且可能增加快错 trials。",
           "reaction time 还含 nondecision time：感觉编码和 motor execution 并非 accumulator crossing。拟合时若把全部 RT 都归给 evidence accumulation，会错误估计 bound 或 drift。leak、collapsing bounds、urgency 和 across-trial variability 可产生相似 distributions，因此参数需通过完整 choice-RT likelihood 和 model comparison 约束。",
-          "模拟时用小步长 \\(\\Delta t\\) 更新 a，并在首次跨界停止；不能跨界后继续平均再决定。noise scaling 需随 \\(\\Delta t\\) 用平方根变化，若每步直接加固定 variance noise，改变 timestep 会改变模型。自学数值例可以先用确定性 constant evidence，再加入随机项理解 distribution。"
+          "模拟时用小步长 \\(\\Delta t\\) 更新 a，并在首次跨界停止；不能跨界后继续平均再决定。noise scaling 需随 \\(\\Delta t\\) 用平方根变化，若每步直接加固定 variance noise，改变 timestep 会改变模型。数值模拟可以先用确定性 constant evidence，再加入随机项观察 distribution 怎样形成。"
         ],
         "keyPoints": [
           "本课 accumulator 含 leak，需与 perfect DDM 区分。",
@@ -2475,7 +2475,7 @@
           "matching law 的常见形式是 \\(CA/CB\\approx RA/RB\\)，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。它描述 allocation，而非每次选择的确定规则。若两 options 的 scheduled rewards 随未选择时间累积，少选一侧的下一次回报机会会上升，形成把选择拉回的负反馈。",
           "在 interior equilibrium，choice-conditioned expected rewards \\(qA=E[R|A]\\) 与 \\(qB=E[R|B]\\) 相等；否则 advantage rule 会继续增加较高一侧 preference。若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 \\(qA\\approx RA/CA\\)、\\(qB\\approx RB/CB\\)。令二者相等便得到 \\(CA/CB\\approx RA/RB\\)。",
           "推导需要双方持续被采样、reward schedule 近似 stationary、每次 choice cost 相当，并忽略 changeover delay、satiety与risk sensitivity。若 reward magnitudes 不同，应匹配所得价值而非单纯次数。undermatching、overmatching或bias可用 generalized matching \\(\\log(CA/CB)=a \\log(RA/RB)+\\log b\\)描述。",
-          "fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 \\(Y=\\sum _iW_{i}X_{i}\\)，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
+          "fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。令 \\(Y=\\sum _iW_{i}X_{i}\\)，并让 approach probability 随 Y 增大而下降，则 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
         ],
         "keyPoints": [
           "matching 是长期 choice allocation 与 obtained reward allocation 的关系。",
@@ -3597,7 +3597,7 @@
         "guidingQuestion": "把±1 dense code改为sparse \\({0,1}\\) activity后，threshold、inhibition与capacity分析为什么必须重写？",
         "paragraphs": [
           "真实ensembles常只有fraction a的units active。用\\(\\xi _{i}\\in {0,1}\\)且\\(P(active)=a\\)时，pattern mean不为零；Hebbian rule需中心化\\(\\xi _{i}-a\\)，避免所有units共享巨大positive bias。retrieval output可用probabilistic logistic rule而非hard sign，引入temperature控制stochasticity。",
-          "原始第 6 页把 global inhibition 直接写进每条 weight：在 centered Hebbian term 后减去 \\(\\gamma /(aN)\\)。代入 local field 后，这一 uniform negative term 变成 \\(-(\\gamma /(aN))\\sum _jS_{j}\\)，因此当前 active population 越大，所有 units 承受的抑制越强。它与 stochastic threshold u 共同限制总 activity 接近 aN，但不等同于某一个 inhibitory neuron；若改写成 adaptive threshold，必须明确给出与 population activity 的对应关系。",
+          "把 global inhibition 直接写进每条 weight：在 centered Hebbian term 后减去 \\(\\gamma /(aN)\\)。代入 local field 后，这一 uniform negative term 变成 \\(-(\\gamma /(aN))\\sum _jS_{j}\\)，因此当前 active population 越大，所有 units 承受的抑制越强。它与 stochastic threshold u 共同限制总 activity 接近 aN，但不等同于某一个 inhibitory neuron；若改写成 adaptive threshold，必须明确给出与 population activity 的对应关系。",
           "sparse code减少patterns间active overlap，可提高每synapse携带的信息或某些capacity metrics；“near-optimal”必须说明按patterns/neuron、bits/synapse还是retrieval error衡量。不能直接把dense \\(\\alpha c=0.138\\)与sparse模型一个数字比较而不统一activity和metric。",
           "temperature \\(T\\to 0\\)时probabilistic update接近deterministic threshold，T大时state更随机并可能逃出shallow minima。stochasticity可帮助sampling，却也损害stable recall。验证alternative model应画false positive/negative rates、overlap distribution和capacity随a、T、inhibition变化，而非只报最大P。"
         ],
@@ -3607,8 +3607,8 @@
           "capacity比较必须统一information与error metric。"
         ],
         "derivation": {
-          "title": "稀疏 Hebbian covariance rule 与原页 global inhibition",
-          "setup": "用 active probability a 中心化每个 pattern bit，并完整保留原始第 6 页的 uniform inhibitory weight term。",
+          "title": "稀疏 Hebbian covariance rule 与 global inhibition",
+          "setup": "用 active probability a 中心化每个 pattern bit，并完整保留 uniform inhibitory weight term。",
           "steps": [
             {
               "title": "定义中心化bit",
@@ -3617,7 +3617,7 @@
             },
             {
               "title": "写完整 weight rule",
-              "explanation": "第一项用 centered products 消除 common mean，第二项是原页显式给出的 global inhibition。",
+              "explanation": "第一项用 centered products 消除 common mean，第二项提供 global inhibition。",
               "latex": "W_{ij}=\\frac{1}{Na(1-a)}\\sum_{\\mu=1}^{P}(\\xi_i^{(\\mu)}-a)(\\xi_j^{(\\mu)}-a)-\\frac{\\gamma}{aN}"
             },
             {
@@ -3627,7 +3627,7 @@
             },
             {
               "title": "加入 stochastic update",
-              "explanation": "原页用 threshold u 与 effective temperature T 把 field 转为下一时刻 active probability。",
+              "explanation": "用 threshold u 与 effective temperature T 把 field 转为下一时刻 active probability。",
               "latex": "P(S_i(t+1)=1)=\\frac{1}{1+\\exp[-(h_i-u)/T]}"
             }
           ],
@@ -3794,7 +3794,7 @@
         ],
         "guidingQuestion": "为什么一个快记系统和一个慢学系统能同时减少catastrophic interference并提取规律？",
         "paragraphs": [
-          "沿用原始第 2–3 页符号，Teacher 从 \\(z\\sim P(z|\\theta _{T})\\) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 \\(\\hat{y}=f_{S}(x;\\theta _{S})\\)。Notebook 为每个 \\(z^{\\mu }\\) 建立稀疏 code \\(\\xi ^{\\mu }\\)，快速保存成对的 \\({z^{\\mu },\\xi ^{\\mu }}\\)。这里 z 始终表示 Student activity，\\(\\xi\\) 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。",
+          "Teacher 从 \\(z\\sim P(z|\\theta _{T})\\) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 \\(\\hat{y}=f_{S}(x;\\theta _{S})\\)。Notebook 为每个 \\(z^{\\mu }\\) 建立稀疏 code \\(\\xi ^{\\mu }\\)，快速保存成对的 \\({z^{\\mu },\\xi ^{\\mu }}\\)。这里 z 始终表示 Student activity，\\(\\xi\\) 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。",
           "只用slow Student，rare experience可能在学会前消失；只用fast Notebook，可精准回忆episodes却难抽取population规律，容量和interference也受限。互补timescales让online experience先写Notebook，随后interleaved replay把old与new samples混合给Student，减轻new learning覆盖旧structure。",
           "replay是consolidation channel：Notebook pattern completion产生approximate experience，Student对replayed targets更新。若replay distribution偏向salient或recent events，Student学到的是weighted environment而非原始frequency。selection rule因此直接影响generalization与bias。",
           "formal model与empirical mapping要分层。Teacher不对应“教师脑区”，Notebook不必保存raw sensory pixels，Student也不等于全neocortex。检验框架应提出role-specific predictions：快速hippocampal lesion影响one-shot recall，slow cortical learning影响跨episode regularities，replay disruption影响later transfer。"
@@ -3805,7 +3805,7 @@
           "replay selection决定Student实际训练distribution。"
         ],
         "derivation": {
-          "title": "互补学习的信息流与原页符号",
+          "title": "互补学习的信息流",
           "setup": "用四步 formal chain 表示 experience、storage、replay 与 Student update，并固定 z=Student activity、ξ=Notebook activity。",
           "steps": [
             {
@@ -3867,19 +3867,19 @@
         ],
         "guidingQuestion": "相似episodes怎样在写入时分开，又在只有partial cue时恢复完整training signal？",
         "paragraphs": [
-          "pattern separation 把相似 Student patterns \\(z^{\\mu }\\) 映成低-overlap Notebook codes \\(\\xi ^{\\mu }\\)，减少新 episode 覆盖旧 episode。原页的教学近似把 \\(\\xi ^{\\mu }\\) 视为与 \\(z^{\\mu }\\) 独立的 sparse random code；真实系统还必须保留足够 addressability，使 partial cue 能指向正确 code。dentate gyrus 等结构常被连接到这一功能，但 formal model 先描述 input-output transformation。",
-          "pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor \\(\\xi ^{\\mu }\\)。完成后的 \\(\\xi ^{\\mu }\\) 再通过 Notebook→Student weights V 重建 Student activity z tilde；反向 Student→Notebook seeding 在图中由 U 表示，但原页没有给 U 的具体 learning rule，因此不能直接把 V 转置后冒充来源公式。",
+          "pattern separation 把相似 Student patterns \\(z^{\\mu }\\) 映成低-overlap Notebook codes \\(\\xi ^{\\mu }\\)，减少新 episode 覆盖旧 episode。这里把 \\(\\xi ^{\\mu }\\) 近似为与 \\(z^{\\mu }\\) 独立的 sparse random code；真实系统还必须保留足够 addressability，使 partial cue 能指向正确 code。dentate gyrus 等结构常被连接到这一功能，但 formal model 先描述 input-output transformation。",
+          "pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor \\(\\xi ^{\\mu }\\)。完成后的 \\(\\xi ^{\\mu }\\) 再通过 Notebook→Student weights V 重建 Student activity z tilde；反向 Student→Notebook seeding 在图中由 U 表示，但没有给出 U 的具体 learning rule，因此不能直接把 V 转置后当作对应规则。",
           "separation 与 completion 作用在不同阶段：encoding 扩大 episodes 间距离，retrieval 在单一 basin 内缩小 cue 与 stored pattern 的距离。过强 separation 会让 partial cue 无法 generalize 到正确 address，过强 completion 会把 ambiguous cue 强制归入错误 episode。两者需在 capacity、specificity 与 robustness 间平衡。",
           "Notebook 不必永远独立保存每个 sensory detail；它可索引 distributed cortical components。lesion prediction 依模型版本：破坏 Notebook 会特别损害 recent one-shot 与 unpredictable details，而已经由 Student 学到的 shared structure 较保留。不能从 pattern-completion 术语直接推出特定临床时间梯度。"
         ],
         "keyPoints": [
           "separation降低episode code overlap。",
           "completion由partial cue恢复stored code。",
-          "Notebook 内 J 完成 pattern completion，V 按原页稀疏中心化 rule 把 \\(\\xi\\) replay 回 Student；U 负责反向 seeding，但源页未指定其 update。"
+          "Notebook 内 J 完成 pattern completion，V 按稀疏中心化 rule 把 \\(\\xi\\) replay 回 Student；U 负责反向 seeding，但没有指定其 update。"
         ],
         "derivation": {
-          "title": "按原页稀疏中心化 Hebbian rule 重建 Student activity",
-          "setup": "设 \\(z_{i\\mu }\\) 是第 \\(\\mu\\) 个 N-dimensional Student pattern，\\(\\xi _{j}\\mu\\) 是对应的 M-dimensional sparse Notebook code，\\(P(\\xi _{j}\\mu =1)=a\\)。以下精确保留原始第 3 页的 V rule。",
+          "title": "按稀疏中心化 Hebbian rule 重建 Student activity",
+          "setup": "设 \\(z_{i\\mu }\\) 是第 \\(\\mu\\) 个 N-dimensional Student pattern，\\(\\xi _{j}\\mu\\) 是对应的 M-dimensional sparse Notebook code，\\(P(\\xi _{j}\\mu =1)=a\\)。精确使用下面的 V rule。",
           "steps": [
             {
               "title": "写完整 Notebook→Student matrix",
@@ -3926,7 +3926,7 @@
         },
         "pitfalls": [
           "把 separation 与 completion 说成同一瞬间的相反操作。",
-          "用未中心化的对称 outer product 替换原页 V rule，或只测 code overlap、不测 partial-cue retrieval。"
+          "用未中心化的对称 outer product 替换中心化 V rule，或只测 code overlap、不测 partial-cue retrieval。"
         ]
       },
       {
@@ -3940,7 +3940,7 @@
         ],
         "guidingQuestion": "为什么准确复现Notebook samples可能降低training error，却损害对新experiences的预测？",
         "paragraphs": [
-          "linear Teacher 产生 \\(y=w_{\\mathrm{T}}^\\mathrm{T} x+\\epsilon\\)，其中 \\(\\epsilon\\) 是不可由 x 预测的 episode noise；Student 对新 input 预测 \\(\\hat{y}=w_{\\mathrm{S}}^\\mathrm{T} x\\)。原始第 4 页的 memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：\\(e_{m}^{2}=(1/P)\\sum _\\mu (y_\\mu -w_{\\mathrm{S}}^\\mathrm{T} \\widetilde{x}_{\\mu })^{2}\\)，并注明 \\(\\widetilde{x}_{\\mu }\\approx x_\\mu\\) 是理想 recall 极限。generalization error \\(e_{g}^{2}\\) 则对 Teacher distribution 中全新的 (x,y) 取 expectation。",
+          "linear Teacher 产生 \\(y=w_{\\mathrm{T}}^\\mathrm{T} x+\\epsilon\\)，其中 \\(\\epsilon\\) 是不可由 x 预测的 episode noise；Student 对新 input 预测 \\(\\hat{y}=w_{\\mathrm{S}}^\\mathrm{T} x\\)。memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：\\(e_{m}^{2}=(1/P)\\sum _\\mu (y_\\mu -w_{\\mathrm{S}}^\\mathrm{T} \\widetilde{x}_{\\mu })^{2}\\)，并把 \\(\\widetilde{x}_{\\mu }\\approx x_\\mu\\) 作为理想 recall 极限。generalization error \\(e_{g}^{2}\\) 则对 Teacher distribution 中全新的 (x,y) 取 expectation。",
           "early learning让wS接近wT，signal error下降，所以training与test errors都下降。继续拟合有限sample中的\\(\\epsilon\\)会让wS偏离population-optimal direction；training error继续下降，test error可能回升。这是overfitting，不代表memory本身变差，而是复现sample detail与预测新example的目标冲突。",
           "Notebook可保留sample-specific \\(\\epsilon\\)，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。standard CLS若无限均匀replay每个noisy target，有限Student可能最终记入noise。regularization、early stopping或predictability-weighted replay可保护generalization。",
           "实验上 training memory 与 generalization 需用不同stimuli测量。用同一episodes既训练又测试只得到memory error，不能声称schema learning。还应报告P、input dimension、noise variance与learning time，因为overfitting发生位置由这些量决定。"
@@ -3952,7 +3952,7 @@
         ],
         "derivation": {
           "title": "memory error 与 generalization error 的分界",
-          "setup": "先保留原页的 Notebook-recalled input x tilde，再假设 fresh x 与 \\(\\epsilon\\) 独立、\\(E[\\epsilon ]=0\\)，分解 population generalization error。",
+          "setup": "先保留 Notebook-recalled input x tilde，再假设 fresh x 与 \\(\\epsilon\\) 独立、\\(E[\\epsilon ]=0\\)，分解 population generalization error。",
           "steps": [
             {
               "title": "写 stored-memory error",
@@ -4017,7 +4017,7 @@
         ],
         "guidingQuestion": "何时继续replay能提取signal，何时却开始把不可预测episode noise写进Student？",
         "paragraphs": [
-          "Go-CLS 把 consolidation 目标设为 generalization，而非把 Notebook 内容全部复制。原始第 5 页定义 signal-to-noise style quantity \\(\\lambda =E[(w_{\\mathrm{T}}^\\mathrm{T} x)^{2}]/E[\\epsilon ^{2}]\\)。只有在 predictable signal 与 noise 都已中心化时，才可把它简写成 variance ratio。\\(\\lambda\\) 高时跨 episodes 规律强，Student 从 replay 受益较久；\\(\\lambda\\) 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。",
+          "Go-CLS 把 consolidation 目标设为 generalization，而非把 Notebook 内容全部复制。定义 signal-to-noise style quantity \\(\\lambda =E[(w_{\\mathrm{T}}^\\mathrm{T} x)^{2}]/E[\\epsilon ^{2}]\\)。只有在 predictable signal 与 noise 都已中心化时，才可把它简写成 variance ratio。\\(\\lambda\\) 高时跨 episodes 规律强，Student 从 replay 受益较久；\\(\\lambda\\) 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。",
           "formal stopping time \\(t*=\\operatorname{argmin}_{t} eg^{2}(t)\\)。实际系统不知道population eg，可用validation-like signals、uncertainty、replay agreement或learning-curve curvature作proxy。模型核心是存在停止或gating，而非脑必须显式计算argmin。不同features可有不同predictability，因此consolidation可能按component而非整episode统一停止。",
           "lesion predictions随memory content分化：高predictability structure逐步进入Student，remote retrieval较能耐受Notebook lesion；unpredictable episodic detail 长期由Notebook支持，即使remote也可能受损。recent memories两种component都尚未充分transfer，因此整体更脆弱。这比单一age cutoff给更细预测。",
           "Go-CLS是formal model与prediction，不是已完成的empirical定论。检验可操纵training-set regularity与noise，匹配age和exposure，再测hippocampal disruption对gist和detail的影响。若只比较自然recent/remote memories，rehearsal、emotion和schema差异会与predictability混杂。"
@@ -4033,7 +4033,7 @@
           "steps": [
             {
               "title": "定义predictability",
-              "explanation": "按原页使用 predictable component 与 noise 的 second-moment ratio；若二者 zero mean，它等于 variance ratio。",
+              "explanation": "使用 predictable component 与 noise 的 second-moment ratio；若二者 zero mean，它等于 variance ratio。",
               "latex": "\\lambda=\\frac{\\mathbb E[(\\mathbf w_T^{\\mathsf T}\\mathbf x)^2]}{\\mathbb E[\\epsilon^2]}"
             },
             {

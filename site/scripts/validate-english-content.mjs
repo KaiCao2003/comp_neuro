@@ -101,10 +101,12 @@ const figureStructure = (figure) => JSON.parse(JSON.stringify(figure), (key, val
   return value;
 });
 const normalizedStem = (value) => String(value).toLocaleLowerCase('en-US').replace(/[“”'’]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
-const sourceFraming = /\b(?:pages?\s+(?:\d+(?:st|nd|rd|th)?|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)|(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+(?:notes?\s+|exercise\s+|source\s+)?page|source\s+page|(?:original|course|updated|earlier|previous|lecture)\s+(?:notes?|handout|page))\b|\.pdf\b/i;
+const sourceFraming = /\b(?:pages?\s+(?:\d+(?:st|nd|rd|th)?|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)|(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+(?:notes?\s+|exercise\s+|source\s+)?page|source\s+page|(?:original|course|updated|earlier|previous|lecture)\s+(?:notes?|handout|page)|notes(?:'s|')?|handout(?:'s|')?|this\s+lesson|page's|on\s+here)\b|\.pdf\b/i;
+const presentationScaffold = /\bThis section\b|\bself-study\b/i;
+const questionScaffold = /Which statement gives the (?:core conclusion|important constraint)|The module's worked example|When applying .+ to a new (?:experiment|dataset)|Which units check correctly constrains|This is a listed (?:pitfall|failure mode|reading error)|This is the meaning used in this lecture|Worked example\s*[—-]|What is the best response to the guiding question|Under which conditions should .+ be used|What does .+ mean in this lecture/i;
 
 if (englishCourse.length !== 27) fail(`Expected 27 English lectures; found ${englishCourse.length}.`);
-if (englishQuestions.length < 810) fail(`Expected at least 810 English questions; found ${englishQuestions.length}.`);
+if (englishQuestions.length < 100) fail(`Expected at least one English question per teaching module; found ${englishQuestions.length}.`);
 if (new Set(englishQuestions.map((question) => question.id)).size !== englishQuestions.length) fail('English question IDs are not unique.');
 const answerPositionCounts = Object.fromEntries(['a', 'b', 'c', 'd'].map((id) => [id, englishQuestions.filter((question) => question.correctChoiceId === id).length]));
 if (Object.values(answerPositionCounts).some((count) => count < englishQuestions.length * 0.2)) fail(`English correct-answer positions are not balanced: ${JSON.stringify(answerPositionCounts)}.`);
@@ -152,6 +154,7 @@ for (const summary of englishCourse) {
   const guideText = guideValues.join(' ');
   if (guideText.length < 4000) fail(`Lecture ${slug} English guide is too short (${guideText.length} characters).`);
   if (han.test(guideText)) fail(`Lecture ${slug} English guide still contains Chinese prose.`);
+  if (presentationScaffold.test(guideText)) fail(`Lecture ${slug} still contains presentation or self-study scaffolding.`);
   validateTranslationText(`Lecture ${slug} English guide`, guideValues);
   const publishedEnglishValues = [
     en.dependencyMap,
@@ -200,16 +203,15 @@ for (const summary of englishCourse) {
     if (!figure.title || !figure.alt || !figure.caption || han.test(JSON.stringify(figure))) fail(`${figure.id} is not fully translated.`);
     validateTranslationText(figure.id, figureDisplayText(figure));
   }
-  if (en.questions.length < 30) fail(`Lecture ${slug} has only ${en.questions.length} English questions.`);
-  if (en.questions.length > 60) fail(`Lecture ${slug} has ${en.questions.length} English questions; cap each lecture at 60.`);
+  const expectedQuestionCount = en.studyGuide.modules.length + en.figures.length;
+  if (en.questions.length !== expectedQuestionCount) fail(`Lecture ${slug} should have one English question per module plus one per figure; found ${en.questions.length}/${expectedQuestionCount}.`);
+  for (const studyModule of en.studyGuide.modules) if (!en.questions.some((question) => question.sectionId === studyModule.id)) fail(`${studyModule.id} has no English four-choice question.`);
   const normalizedStems = en.questions.map((question) => normalizedStem(question.stem));
   if (new Set(normalizedStems).size !== normalizedStems.length) fail(`Lecture ${slug} contains duplicate normalized question stems.`);
   const lectureAnswerPositions = Object.fromEntries(['a', 'b', 'c', 'd'].map((id) => [id, en.questions.filter((question) => question.correctChoiceId === id).length]));
   if (Math.max(...Object.values(lectureAnswerPositions)) - Math.min(...Object.values(lectureAnswerPositions)) > 2) fail(`Lecture ${slug} has biased answer positions: ${JSON.stringify(lectureAnswerPositions)}.`);
   const lectureDifficulties = new Set(en.questions.map((question) => question.difficulty));
-  if ([1, 2, 3, 4, 5].some((difficulty) => !lectureDifficulties.has(difficulty))) fail(`Lecture ${slug} does not cover every difficulty level.`);
-  const lectureQuestionTypes = new Set(en.questions.map((question) => question.type));
-  if (lectureQuestionTypes.size < 6) fail(`Lecture ${slug} has only ${lectureQuestionTypes.size} question types.`);
+  if (lectureDifficulties.size < 2 || ![...lectureDifficulties].some((difficulty) => difficulty >= 3)) fail(`Lecture ${slug} lacks a higher-order difficulty level.`);
   const recallShare = en.questions.filter((question) => question.cognitiveLevel === 'remember').length / en.questions.length;
   if (recallShare >= 0.4) fail(`Lecture ${slug} has too many recall questions (${(recallShare * 100).toFixed(1)}%).`);
   const lectureKeyPoints = new Set(en.studyGuide.modules.flatMap((studyModule) => studyModule.keyPoints).map((value) => value.replace(/\s+/g, ' ').trim()));
@@ -217,6 +219,7 @@ for (const summary of englishCourse) {
     const questionValues = [question.stem, question.explanation, ...question.choices.map((choice) => choice.text), ...question.conceptTags, ...Object.values(question.wrongChoiceExplanations)];
     const questionText = questionValues.join(' ');
     if (!question.stem || han.test(questionText)) fail(`${question.id} is not fully translated.`);
+    if (questionScaffold.test(questionText)) fail(`${question.id} contains retired generated-question scaffolding.`);
     validateTranslationText(question.id, questionValues);
     if (question.choices.length !== 4 || new Set(question.choices.map((choice) => choice.text)).size !== 4) fail(`${question.id} needs four unique choices.`);
     if (question.choices.some((choice) => /…\s*$/.test(choice.text))) fail(`${question.id} has an ellipsis-truncated choice.`);

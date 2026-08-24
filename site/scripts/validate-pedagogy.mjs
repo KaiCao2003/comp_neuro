@@ -36,7 +36,7 @@ for (const edition of editions) {
 
     requireGate((lecture.studyGuide?.objectives ?? []).length >= 3, `${prefix}: fewer than three measurable objectives`);
     requireGate(modules.length >= 3, `${prefix}: fewer than three teaching modules`);
-    requireGate((lecture.questions ?? []).length >= 30, `${prefix}: fewer than 30 questions`);
+    requireGate((lecture.questions ?? []).length === modules.length + (lecture.figures ?? []).length, `${prefix}: expected one question per module plus one per figure`);
     requireGate(!('coreQuestion' in lecture) && !('diagnostic' in lecture) && !('diagnostic' in (lecture.studyGuide ?? {})), `${prefix}: open-ended lecture prompts remain published`);
 
     for (const studyModule of modules) {
@@ -73,6 +73,7 @@ for (const edition of editions) {
       requireGate(question.choices?.some((choice) => choice.id === question.correctChoiceId), `${prefix}:${question.id}: correct choice is missing`);
       if (['apply', 'analyze', 'evaluate'].includes(question.cognitiveLevel)) highOrderCount += 1;
     }
+    for (const studyModule of modules) requireGate((lecture.questions ?? []).some((question) => question.sectionId === studyModule.id), `${prefix}:${studyModule.id}: no four-choice question`);
     requireGate((lecture.questions ?? []).some((question) => ['apply', 'analyze', 'evaluate'].includes(question.cognitiveLevel)), `${prefix}: no higher-order assessment item`);
     requireGate((lecture.questions ?? []).some((question) => question.type !== 'concept'), `${prefix}: assessment contains only concept-recognition questions`);
   }
@@ -89,4 +90,4 @@ if (failures.length) {
 for (const summary of summaries) {
   console.log(`${summary.edition}: ${summary.lectures} lectures, ${summary.modules} teaching modules, ${summary.sourcePages} source pages, ${summary.questions} multiple-choice questions (${summary.highOrderQuestions} higher-order).`);
 }
-console.log('Pedagogy validation passed: every source page has explanatory teaching, a worked example, failure analysis, traceable sources, and four-choice assessment items.');
+console.log('Pedagogy validation passed: every teaching module has a standalone explanation, a worked example, failure analysis, and a four-choice check.');

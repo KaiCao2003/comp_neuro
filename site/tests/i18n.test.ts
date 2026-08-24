@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { counterpartHref, localeFromPathname, localizedHref, preferredLocale } from '../lib/i18n';
+import { counterpartHref, localeFromPathname, localizedHref, preferredLocale, shouldShowLanguageNotice } from '../lib/i18n';
 
 describe('locale paths', () => {
   it('adds or removes only the English prefix', () => {
@@ -25,5 +25,13 @@ describe('locale paths', () => {
     expect(preferredLocale(['en-US', 'zh-CN'])).toBe('en');
     expect(preferredLocale(['zh-Hant-TW', 'en'])).toBe('zh');
     expect(preferredLocale(['fr-FR'])).toBeNull();
+  });
+
+  it('shows one counterpart banner only when the browser prefers the other language', () => {
+    expect(shouldShowLanguageNotice('zh', ['en-US'])).toBe(true);
+    expect(shouldShowLanguageNotice('en', ['zh-CN'])).toBe(true);
+    expect(shouldShowLanguageNotice('zh', ['zh-CN', 'en-US'])).toBe(false);
+    expect(shouldShowLanguageNotice('en', ['en-US', 'zh-CN'])).toBe(false);
+    expect(shouldShowLanguageNotice('zh', ['fr-FR'])).toBe(false);
   });
 });
