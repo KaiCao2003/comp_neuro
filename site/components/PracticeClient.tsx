@@ -13,10 +13,11 @@ type Mode = 'lecture' | 'topic' | 'cumulative' | 'difficult' | 'unseen';
 
 export function PracticeClient({ locale, course, questions, initialMode = 'lecture' }: { locale: Locale; course: CourseSummary[]; questions: Question[]; initialMode?: Mode }) {
   const [mode, setMode] = useState<Mode>(initialMode);
-  const [lecture, setLecture] = useState(1);
+  const firstLecture = course[0]?.lecture ?? 2;
+  const [lecture, setLecture] = useState(firstLecture);
   const [topic, setTopic] = useState<string>(practiceTopics[0].value);
   const [difficulty, setDifficulty] = useState(0);
-  const [rangeStart, setRangeStart] = useState(1);
+  const [rangeStart, setRangeStart] = useState(firstLecture);
   const [rangeEnd, setRangeEnd] = useState(27);
   const [count, setCount] = useState(10);
   const [sessionSeed, setSessionSeed] = useState('practice');
@@ -28,8 +29,8 @@ export function PracticeClient({ locale, course, questions, initialMode = 'lectu
     const value = Number(new URLSearchParams(location.search).get('lecture'));
     // URL-derived controls are synchronized after the statically rendered shell hydrates.
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (value >= 1 && value <= 27) { setLecture(value); setMode('lecture'); }
-  }, []);
+    if (course.some((item) => item.lecture === value)) { setLecture(value); setMode('lecture'); }
+  }, [course]);
 
   const completed = Object.keys(answers).length;
   const correct = Object.values(answers).filter(Boolean).length;
@@ -74,7 +75,7 @@ export function PracticeClient({ locale, course, questions, initialMode = 'lectu
         </select></label>
         {mode === 'lecture' && <label>{locale === 'zh' ? '讲次' : 'Lecture'}<select value={lecture} onChange={(event) => setLecture(Number(event.target.value))}>{course.map((item) => <option value={item.lecture} key={item.lecture}>{item.lecture} · {locale === 'zh' ? item.zhTitle : item.enTitle}</option>)}</select></label>}
         {mode === 'topic' && <label>{locale === 'zh' ? '主题' : 'Topic'}<select value={topic} onChange={(event) => setTopic(event.target.value)}>{practiceTopics.map((item) => <option value={item.value} key={item.value}>{item.labels[locale]}</option>)}</select></label>}
-        {mode === 'cumulative' && <><label>{locale === 'zh' ? '起始讲' : 'From lecture'}<input type="number" min="1" max="27" value={rangeStart} onChange={(event) => setRangeStart(Number(event.target.value))} /></label><label>{locale === 'zh' ? '结束讲' : 'To lecture'}<input type="number" min="1" max="27" value={rangeEnd} onChange={(event) => setRangeEnd(Number(event.target.value))} /></label></>}
+        {mode === 'cumulative' && <><label>{locale === 'zh' ? '起始讲' : 'From lecture'}<input type="number" min={firstLecture} max="27" value={rangeStart} onChange={(event) => setRangeStart(Number(event.target.value))} /></label><label>{locale === 'zh' ? '结束讲' : 'To lecture'}<input type="number" min={firstLecture} max="27" value={rangeEnd} onChange={(event) => setRangeEnd(Number(event.target.value))} /></label></>}
         <label>{locale === 'zh' ? '难度' : 'Difficulty'}<select value={difficulty} onChange={(event) => setDifficulty(Number(event.target.value))}><option value="0">{locale === 'zh' ? '全部' : 'All'}</option>{[1, 2, 3, 4, 5].map((value) => <option value={value} key={value}>{value}</option>)}</select></label>
         <label>{locale === 'zh' ? '题数' : 'Questions'}<select value={count} onChange={(event) => setCount(Number(event.target.value))}><option value="10">10</option><option value="15">15</option><option value="25">25</option></select></label>
         <button type="button" onClick={start}>{locale === 'zh' ? '开始练习' : 'Start practice'}</button>

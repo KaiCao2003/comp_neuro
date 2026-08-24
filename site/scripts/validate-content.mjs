@@ -22,6 +22,7 @@ const BANNED_CHOICE = /不检查单位、?\s*shape\s*或\s*conditioning|Course-s
 const BANNED_GUIDE_TEXT = /先识别图中对象、箭头、参数和坐标系|后面的正式推导会|本页的中心对象是|Figure note:|Course-specific risk boundary|完整讲|完整推导|适用条件\/约定：.*sanity check|显然|容易得到|经过一些代数/i;
 const BANNED_GUIDE_LATEX = /(?:^|[^\\A-Za-z])(?:mu|phi|theta|tau|lambda|sigma|sum|prod|ln|log|exp|sqrt|argmax|argmin|max|min|diag)(?=[_({=+\-*/\s]|$)|_(?:inf|star|new|hat|out|in|ion|tot|sp|post|pre)(?=[^A-Za-z]|$)|\.\.\.|<=|>=/;
 const BANNED_FIGURE_TEXT = /先识别图中对象|先明确横纵轴|逐条追踪箭头|把图与矩阵 shape 对齐|读图时先标出/i;
+const SOURCE_FRAMING = /(?:原稿|原始讲义|原讲义|原笔记|课程原稿|旧版|更新版)|(?:第\s*(?:\d+|[一二三四五六七八九十两]+)\s*页)|页码|本页|上一页|下一页|原页|\bUPDATE\b/;
 const studyModuleIds = new Set();
 const studyParagraphs = new Map();
 const scientificFigureIds = new Set();
@@ -87,21 +88,20 @@ for (const lecture of course) {
   const lecturePath = path.join(root, 'content/lectures', `${lecture.slug}.json`);
   if (!fs.existsSync(lecturePath)) fail(`Missing lecture content: ${lecture.slug}.json`);
   const content = JSON.parse(fs.readFileSync(lecturePath, 'utf8'));
-  if (!content.zhTitle || !content.enTitle || !content.coreQuestion) fail(`Lecture ${lecture.lecture} metadata is incomplete.`);
+  if (!content.zhTitle || !content.enTitle) fail(`Lecture ${lecture.lecture} metadata is incomplete.`);
+  if ('coreQuestion' in content || 'diagnostic' in content) fail(`Lecture ${lecture.lecture} still publishes open-ended lecture prompts.`);
   if (!content.sourceUnits.length) fail(`Lecture ${lecture.lecture} has no source units.`);
   const guide = content.studyGuide;
   if (!guide || !Array.isArray(guide.modules)) fail(`Lecture ${lecture.lecture} has no structured self-study guide.`);
   if (!Array.isArray(guide.objectives) || guide.objectives.length < 4) fail(`Lecture ${lecture.lecture} needs at least four concrete self-study objectives.`);
   if (!Array.isArray(guide.prerequisiteBridge) || guide.prerequisiteBridge.length < 3 || guide.prerequisiteBridge.join('').length < 500) fail(`Lecture ${lecture.lecture} prerequisite bridge is too short.`);
-  if (!Array.isArray(guide.diagnostic) || guide.diagnostic.length < 4) fail(`Lecture ${lecture.lecture} needs at least four diagnostic items.`);
+  if ('diagnostic' in guide) fail(`Lecture ${lecture.lecture} still publishes diagnostic prompts.`);
   if (guide.modules.length < 3) fail(`Lecture ${lecture.lecture} needs at least three self-study modules.`);
   const guideText = [
     ...guide.objectives,
     ...guide.prerequisiteBridge,
-    ...guide.diagnostic.flatMap((item) => [item.prompt, item.answer, item.explanation]),
     ...guide.modules.flatMap((module) => [
       module.title,
-      module.guidingQuestion,
       ...module.paragraphs,
       ...module.keyPoints,
       module.derivation?.setup ?? '',
@@ -113,13 +113,23 @@ for (const lecture of course) {
       ...(module.workedExample?.steps ?? []),
       module.workedExample?.result ?? '',
       module.workedExample?.sanityCheck ?? '',
-      module.selfCheck?.prompt ?? '',
-      module.selfCheck?.answer ?? '',
       ...(module.pitfalls ?? []),
     ]),
   ].join('');
   if (guideText.length < 4500) fail(`Lecture ${lecture.lecture} self-study guide is only ${guideText.length} characters; minimum is 4500.`);
   if (BANNED_GUIDE_TEXT.test(guideText)) fail(`Lecture ${lecture.lecture} self-study guide contains generic or skipped-step boilerplate.`);
+  const publishedNarrative = [
+    content.dependencyMap ?? '',
+    guideText,
+    ...(content.specialSection ?? []),
+    ...(content.synthesis ?? []),
+    ...(content.commonTraps ?? []),
+    ...content.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]),
+    ...content.formulas.flatMap((formula) => [formula.name, formula.conditions]),
+    ...content.glossary.map((entry) => entry.definition),
+    ...content.questions.flatMap((question) => [question.stem, question.explanation, ...question.choices.map((choice) => choice.text), ...Object.values(question.wrongChoiceExplanations)]),
+  ].join(' ');
+  if (SOURCE_FRAMING.test(publishedNarrative) || /\.pdf\b/i.test(publishedNarrative)) fail(`Lecture ${lecture.lecture} still exposes source-page framing in published prose.`);
 
   const referencedSourcePages = new Set();
   const lectureModuleIds = new Set(guide.modules.map((learningModule) => learningModule.id));
@@ -127,7 +137,8 @@ for (const lecture of course) {
   for (const learningModule of guide.modules) {
     if (!learningModule.id || studyModuleIds.has(learningModule.id)) fail(`Duplicate or empty study module ID: ${learningModule.id || '(empty)'}.`);
     studyModuleIds.add(learningModule.id);
-    if (!learningModule.title || !learningModule.guidingQuestion) fail(`${learningModule.id} lacks a title or guiding question.`);
+    if (!learningModule.title) fail(`${learningModule.id} lacks a title.`);
+    if ('guidingQuestion' in learningModule || 'selfCheck' in learningModule) fail(`${learningModule.id} still publishes open-ended prompts.`);
     if (!Array.isArray(learningModule.paragraphs) || learningModule.paragraphs.length < 4 || learningModule.paragraphs.join('').length < 550) fail(`${learningModule.id} needs at least four substantive explanatory paragraphs totaling 550 characters.`);
     if (!Array.isArray(learningModule.keyPoints) || learningModule.keyPoints.length < 3) fail(`${learningModule.id} needs at least three retrieval targets.`);
     if (!Array.isArray(learningModule.sourceRefs) || !learningModule.sourceRefs.length) fail(`${learningModule.id} has no source references.`);
@@ -153,7 +164,6 @@ for (const lecture of course) {
       }
     }
     if (!learningModule.workedExample?.title || !learningModule.workedExample.problem || learningModule.workedExample.steps?.length < 3 || !learningModule.workedExample.result || !learningModule.workedExample.sanityCheck) fail(`${learningModule.id} needs a complete worked example with at least three steps.`);
-    if (!learningModule.selfCheck?.prompt || !learningModule.selfCheck.answer || learningModule.selfCheck.answer.length < 35) fail(`${learningModule.id} needs a substantive self-check answer.`);
     if (!Array.isArray(learningModule.pitfalls) || learningModule.pitfalls.length < 2) fail(`${learningModule.id} needs at least two specific pitfalls.`);
     for (const paragraph of learningModule.paragraphs) {
       const normalized = comparisonText(paragraph);
@@ -166,9 +176,6 @@ for (const lecture of course) {
   if (derivationCount < Math.min(2, guide.modules.length)) fail(`Lecture ${lecture.lecture} needs at least two step-by-step derivations or formal reasoning chains.`);
   for (const unit of content.sourceUnits) {
     if (!referencedSourcePages.has(`${unit.sourceFile}::${unit.page}`)) fail(`Lecture ${lecture.lecture} self-study guide does not cover ${unit.sourceFile} p. ${unit.page}.`);
-  }
-  for (const item of guide.diagnostic) {
-    if (!item.id || !item.prompt || !item.answer || !item.explanation || !lectureModuleIds.has(item.remediationModuleId)) fail(`Lecture ${lecture.lecture} has an incomplete diagnostic item ${item.id || '(empty)'}.`);
   }
   if (!Array.isArray(content.figures) || content.figures.length < 1) fail(`Lecture ${lecture.lecture} needs at least one authored scientific figure.`);
   for (const figure of content.figures) {
@@ -261,17 +268,19 @@ for (const lecture of course) {
       const source = content.sourceFiles.find((file) => file.file === anchor.file);
       if (!source) fail(`${question.id} points to unknown source ${anchor.file}.`);
       if (!Number.isInteger(anchor.page) || anchor.page < 1 || (source.pages && anchor.page > source.pages)) fail(`${question.id} has invalid source page ${anchor.page}.`);
-      if (!content.sourceUnits.some((unit) => unit.id === anchor.section)) fail(`${question.id} points to unknown section ${anchor.section}.`);
+      const publicModule = guide.modules.find((studyModule) => studyModule.id === anchor.section);
+      if (!publicModule) fail(`${question.id} points to unknown public lesson section ${anchor.section}.`);
+      if (!publicModule.sourceRefs.some((ref) => ref.file === anchor.file && ref.page === anchor.page)) fail(`${question.id} is not aligned with public lesson section ${anchor.section}.`);
     }
   }
   if (Math.max(...positions) - Math.min(...positions) > 2) fail(`Lecture ${lecture.lecture} has biased authored answer positions: ${positions.join(',')}.`);
   if (difficulty.some((count) => count < 3)) fail(`Lecture ${lecture.lecture} has poor difficulty distribution: ${difficulty.join(',')}.`);
 
   for (const formula of content.formulas) {
-    if (!content.sourceUnits.some((unit) => unit.id === formula.sectionId)) fail(`${formula.id} points to missing section.`);
+    if (!lectureModuleIds.has(formula.sectionId)) fail(`${formula.id} points to missing public lesson section.`);
     if (!formula.latex) fail(`${formula.id} has no corrected LaTeX representation.`);
   }
-  for (const entry of content.glossary) if (!content.sourceUnits.some((unit) => unit.id === entry.sectionId)) fail(`${entry.id} points to missing section.`);
+  for (const entry of content.glossary) if (!lectureModuleIds.has(entry.sectionId)) fail(`${entry.id} points to missing public lesson section.`);
   for (const source of content.sourceFiles) {
     if (!fs.existsSync(path.join(root, 'public/resources/original', source.file))) fail(`Missing published source file: ${source.file}`);
   }

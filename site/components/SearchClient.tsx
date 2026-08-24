@@ -25,7 +25,7 @@ export function SearchClient({ locale, searchIndex }: { locale: Locale; searchIn
 
   return (
     <div>
-      <label className="search-label" htmlFor="course-search">{locale === 'zh' ? '搜索标题、正文、术语、公式、题目和来源文件' : 'Search titles, lessons, terms, formulas, questions, and source files'}</label>
+      <label className="search-label" htmlFor="course-search">{locale === 'zh' ? '搜索标题、正文、术语、公式和题目' : 'Search titles, lessons, terms, formulas, and questions'}</label>
       <input id="course-search" className="search-input" type="search" value={query} onChange={(event) => setQuery(event.target.value)} autoComplete="off" />
       {query && <p className="result-count">{locale === 'zh' ? `${results.length} 条结果` : `${results.length} results`}</p>}
       <ol className="search-results">

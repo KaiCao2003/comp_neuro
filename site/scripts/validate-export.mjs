@@ -80,8 +80,18 @@ if (failures.length) {
 
 const chineseLecturePages = htmlFiles.filter((file) => /out\/lectures\/\d{2}\/index\.html$/.test(file));
 const englishLecturePages = htmlFiles.filter((file) => /out\/en\/lectures\/\d{2}\/index\.html$/.test(file));
-if (chineseLecturePages.length !== 27) throw new Error(`Expected 27 exported Chinese lecture pages; found ${chineseLecturePages.length}.`);
-if (englishLecturePages.length !== 27) throw new Error(`Expected 27 exported English lecture pages; found ${englishLecturePages.length}.`);
+if (chineseLecturePages.length !== 26) throw new Error(`Expected 26 exported Chinese lecture pages; found ${chineseLecturePages.length}.`);
+if (englishLecturePages.length !== 26) throw new Error(`Expected 26 exported English lecture pages; found ${englishLecturePages.length}.`);
+if (chineseLecturePages.some((file) => /\/01\/index\.html$/.test(file)) || englishLecturePages.some((file) => /\/01\/index\.html$/.test(file))) throw new Error('Lecture 1 must not be publicly exported.');
+const retiredRoutes = /\/(?:sources|errata|settings|about|course-map)\/index\.html$/;
+if (htmlFiles.some((file) => retiredRoutes.test(file))) throw new Error('A retired auxiliary page is still publicly exported.');
+if (fs.existsSync(path.join(output, 'resources', 'original'))) throw new Error('Original notes must not be copied into the public export.');
+if (!fs.existsSync(path.join(output, 'resources', 'companions'))) throw new Error('Companion PDFs are missing from the public export.');
+for (const file of [...chineseLecturePages, ...englishLecturePages]) {
+  const html = fs.readFileSync(file, 'utf8');
+  if (/<a\b[^>]*\bhref="[^"]*\/resources\/original\//i.test(html)) failures.push(`${path.relative(root, file)} still links to original notes.`);
+  if (!html.includes('/resources/companions/')) failures.push(`${path.relative(root, file)} has no companion PDF link.`);
+}
 
 for (const htmlFile of htmlFiles) {
   const route = routeFor(htmlFile);
@@ -121,5 +131,5 @@ for (const htmlFile of htmlFiles) {
 if (failures.length) {
   throw new Error(`Static export language validation failed with ${failures.length} issue(s):\n${failures.slice(0, 30).join('\n')}`);
 }
-if (htmlFiles.length < 78) throw new Error(`Static export is unexpectedly small: ${htmlFiles.length} HTML pages.`);
+if (htmlFiles.length < 69) throw new Error(`Static export is unexpectedly small: ${htmlFiles.length} HTML pages.`);
 console.log(`Static export validated: ${htmlFiles.length} pages and ${checkedTargets.size} unique internal references.`);

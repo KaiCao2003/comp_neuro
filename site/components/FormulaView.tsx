@@ -1,7 +1,6 @@
 import katex from 'katex';
 import Link from 'next/link';
 import { localizedHref, type Locale } from '@/lib/i18n';
-import { assetPath } from '@/lib/site';
 import type { Formula } from '@/lib/types';
 import { ScientificText } from './ScientificText';
 
@@ -16,7 +15,7 @@ export function FormulaView({ formula, locale = 'zh', compact = false, linkToLec
         <code className="formula-plain">{formula.expression}</code>
       )}
       {formula.conditions && <p className="formula-condition">{locale === 'zh' ? '条件：' : 'Conditions: '}<ScientificText text={formula.conditions} /></p>}
-      <p className="formula-source"><a href={`${assetPath(`/resources/original/${encodeURIComponent(formula.sourceFile)}`)}#page=${formula.sourcePage}`} target="_blank" rel="noreferrer">{formula.sourceFile}{locale === 'zh' ? `，第 ${formula.sourcePage} 页` : `, p. ${formula.sourcePage}`}</a> · <Link href={sectionHref}>{locale === 'zh' ? '正文与推导' : 'Lesson and derivation'}</Link></p>
+      {linkToLecture && <p className="formula-source"><Link href={sectionHref}>{locale === 'zh' ? '正文与推导' : 'Lesson and derivation'}</Link></p>}
     </div>
   );
 }

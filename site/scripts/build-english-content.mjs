@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { alignPublishedSections, sanitizePublishedValue } from './publish-text.mjs';
 
 const root = process.cwd();
 const localeDir = path.join(root, 'source/locales/en');
@@ -342,6 +343,7 @@ function buildQuestions(lecture) {
 }
 
 const englishLectures = [];
+const publishedEnglishLectures = [];
 for (let lectureNumber = 1; lectureNumber <= 27; lectureNumber += 1) {
   const slug = String(lectureNumber).padStart(2, '0');
   const source = readJson(path.join(contentDir, 'lectures', `${slug}.json`));
@@ -361,7 +363,7 @@ for (let lectureNumber = 1; lectureNumber <= 27; lectureNumber += 1) {
       modules: guide.modules,
     },
     figures: (figuresByLecture.get(lectureNumber) ?? []).map((figure) => ({ ...figure, lectureTitle: source.enTitle })),
-    specialSection: extra.specialSection,
+    specialSection: [19, 22].includes(lectureNumber) ? [] : extra.specialSection,
     synthesis: extra.synthesis,
     commonTraps: extra.commonTraps,
     formulas: extra.formulas,
@@ -372,7 +374,25 @@ for (let lectureNumber = 1; lectureNumber <= 27; lectureNumber += 1) {
   lecture.objectives = guide.objectives;
   lecture.questions = buildQuestions(lecture);
   englishLectures.push(lecture);
-  writeJson(path.join(lectureOutputDir, `${slug}.json`), lecture);
+  const publishedLecture = structuredClone(lecture);
+  delete publishedLecture.coreQuestion;
+  delete publishedLecture.diagnostic;
+  publishedLecture.sourceUnits = publishedLecture.sourceUnits.map((unit) => {
+    delete unit.stopPredict;
+    return unit;
+  });
+  publishedLecture.studyGuide = {
+    objectives: lecture.studyGuide.objectives,
+    prerequisiteBridge: lecture.studyGuide.prerequisiteBridge,
+    modules: structuredClone(lecture.studyGuide.modules).map((studyModule) => {
+      delete studyModule.guidingQuestion;
+      delete studyModule.selfCheck;
+      return studyModule;
+    }),
+  };
+  const publicLecture = sanitizePublishedValue(alignPublishedSections(publishedLecture));
+  publishedEnglishLectures.push(publicLecture);
+  writeJson(path.join(lectureOutputDir, `${slug}.json`), publicLecture);
 }
 
 const course = englishLectures.map((lecture) => ({
@@ -380,7 +400,6 @@ const course = englishLectures.map((lecture) => ({
   slug: lecture.slug,
   zhTitle: lecture.zhTitle,
   enTitle: lecture.enTitle,
-  coreQuestion: lecture.coreQuestion,
   sourceCount: lecture.sourceFiles.length,
   sourcePageCount: lecture.sourceFiles.reduce((sum, source) => sum + (source.pages ?? 0), 0),
   companionFile: lecture.companionFile,
@@ -389,22 +408,22 @@ const course = englishLectures.map((lecture) => ({
   glossaryCount: lecture.glossary.length,
   formulaCount: lecture.formulas.length,
 }));
-const questions = englishLectures.flatMap((lecture) => lecture.questions);
-const glossary = englishLectures.flatMap((lecture) => lecture.glossary);
-const formulas = englishLectures.flatMap((lecture) => lecture.formulas);
-const errata = englishLectures.flatMap((lecture) => lecture.errata);
-const allFigures = englishLectures.flatMap((lecture) => lecture.figures);
-const searchIndex = englishLectures.flatMap((lecture) => {
+const publicEnglishLectures = publishedEnglishLectures;
+const questions = publicEnglishLectures.flatMap((lecture) => lecture.questions);
+const glossary = publicEnglishLectures.flatMap((lecture) => lecture.glossary);
+const formulas = publicEnglishLectures.flatMap((lecture) => lecture.formulas);
+const errata = publicEnglishLectures.flatMap((lecture) => lecture.errata);
+const allFigures = publicEnglishLectures.flatMap((lecture) => lecture.figures);
+const searchIndex = publicEnglishLectures.flatMap((lecture) => {
   const lectureRecord = {
     id: `en-lecture-${lecture.slug}`,
     kind: 'lecture',
     lecture: lecture.lecture,
     title: `Lecture ${lecture.lecture}: ${lecture.enTitle}`,
-    subtitle: lecture.coreQuestion,
+    subtitle: lecture.enTitle,
     href: `/en/lectures/${lecture.slug}/`,
     text: [
       lecture.enTitle,
-      lecture.coreQuestion,
       lecture.dependencyMap,
       ...lecture.studyGuide.objectives,
       ...lecture.synthesis,
@@ -414,16 +433,7 @@ const searchIndex = englishLectures.flatMap((lecture) => {
       ...lecture.questions.flatMap((question) => [question.stem, question.explanation]),
     ].join(' '),
   };
-  const moduleRecords = lecture.studyGuide.modules.map((module) => ({
-    id: `en-${module.id}`,
-    kind: 'source-page',
-    lecture: lecture.lecture,
-    title: module.title,
-    subtitle: `Lecture ${lecture.lecture} · ${module.sourceRefs.map((ref) => `${ref.file}, p. ${ref.page}`).join(' · ')}`,
-    href: `/en/lectures/${lecture.slug}/#${module.id}`,
-    text: [module.guidingQuestion, ...module.paragraphs, ...module.keyPoints, module.workedExample.problem, module.workedExample.result, module.selfCheck.prompt, module.selfCheck.answer, ...module.pitfalls].join(' '),
-  }));
-  return [lectureRecord, ...moduleRecords];
+  return [lectureRecord];
 });
 
 writeJson(path.join(outputDir, 'course.json'), course);

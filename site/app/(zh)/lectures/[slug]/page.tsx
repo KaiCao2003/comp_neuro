@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const lecture = lectureBySlug.get(slug);
   if (!lecture) return {};
-  return pageMetadata('zh', `第 ${lecture.lecture} 讲 · ${lecture.zhTitle}`, lecture.coreQuestion, `/lectures/${slug}/`);
+  return pageMetadata('zh', `第 ${lecture.lecture} 讲 · ${lecture.zhTitle}`, `NEUROSCI 366 · ${lecture.zhTitle}`, `/lectures/${slug}/`);
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {

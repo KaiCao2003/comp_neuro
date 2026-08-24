@@ -6,7 +6,7 @@
       "利用 mode time constant 判断稳定、泄漏积分、完美积分与不稳定增长，并把 mode 坐标重新解释成神经活动空间中的轨迹。",
       "从中心化数据的投影方差推导 PCA，完成 top-K 投影、重构、方差解释率和维度截断的数值计算。",
       "严格区分 recurrent weight matrix 的动力学模态与 covariance matrix 的主成分，并说明二者何时可能接近、何时没有理由一致。",
-      "比较 UPDATE 与旧版讲义：保留共同内容，以 UPDATE 新增的第 6 页补足 eigenvalue cliff 与累计方差曲线。"
+      "用 eigenvalue cliff、累计解释方差与 held-out performance 比较三种维度选择标准。"
     ],
     "prerequisiteBridge": [
       "先把向量看成“若干个带顺序的数”。两个神经元在某一时刻的 firing-rate deviations 可以写成 \\(h=(h_{1},h_{2})^\\mathrm{T}\\)；矩阵 W 规定每个神经元怎样接收另一个神经元的反馈。若 \\(Wv=\\lambda v\\)，那么沿 v 方向的活动经过一次 recurrent mapping 只会被乘上 \\(\\lambda\\)，因此 v 是网络特别自然的变化方向。这里需要的矩阵知识只包括二乘二行列式、联立一次方程、向量长度和点积。",
@@ -443,7 +443,7 @@
       },
       {
         "id": "l19-m6",
-        "title": "新增页：eigenvalue cliff、累计方差与维度选择",
+        "title": "用 eigenvalue cliff 与累计方差选择维度",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -452,10 +452,10 @@
         ],
         "guidingQuestion": "怎样从 eigenvalue spectrum 选择 K，同时避免把一个方便的 cutoff 当成自然常数？",
         "paragraphs": [
-          "UPDATE 第 6 页是旧版没有的核心增补。scree plot 将排序后的 \\(\\lambda _{k}\\) 对 component index k 作图；若前几个 eigenvalues 大、随后突然进入平缓尾部，转折常称 eigenvalue cliff 或 elbow。直觉是 cliff 前的 directions 捕获较强 coordinated variation，cliff 后每个 direction 只增加少量 variance。但真实 spectra 常连续下降，elbow 位置可能依读图者而异。",
-          "累计方差解释率 \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) 单调增加，从 \\(F(0)=0\\) 到 \\(F(N)=1\\)。原始第 6 页底部的手写式漏掉总方差分母，求和项还写成 \\(\\lambda _{i}\\)；按累计定义应为分子 \\(\\sum _{j=1}^K\\lambda _{j}\\) 再除以 \\(\\sum _{j=1}^N\\lambda _{j}\\)，本模块以下均使用这个修正式。设定 80%、90% 或 95% threshold 可得到可重复的规则，却不保证它对具体 scientific question 最优。高 measurement noise 会抬高尾部，condition means 会制造大 PCs，trial averaging 也会改变 spectrum；所以报告 K 时应同时报告 preprocessing 与 criterion。",
+          "scree plot 将排序后的 \\(\\lambda _{k}\\) 对 component index k 作图；若前几个 eigenvalues 大、随后突然进入平缓尾部，转折常称 eigenvalue cliff 或 elbow。直觉是 cliff 前的 directions 捕获较强 coordinated variation，cliff 后每个 direction 只增加少量 variance。但真实 spectra 常连续下降，elbow 位置可能依读图者而异。",
+          "累计方差解释率 \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) 单调增加，从 \\(F(0)=0\\) 到 \\(F(N)=1\\)。累计方差的分子必须是 \\(\\sum _{j=1}^K\\lambda _{j}\\)，并除以总方差 \\(\\sum _{j=1}^N\\lambda _{j}\\)；若只写 \\(\\lambda _{i}\\) 或漏掉分母，表达式就不再是累计解释率。设定 80%、90% 或 95% threshold 可得到可重复的规则，却不保证它对具体 scientific question 最优。高 measurement noise 会抬高尾部，condition means 会制造大 PCs，trial averaging 也会改变 spectrum；所以报告 K 时应同时报告 preprocessing 与 criterion。",
           "更稳妥的维度选择应结合 held-out data。可以在训练 trials 上拟合 PCs，在测试 trials 上比较 reconstruction error；也可以比较 behavioral decoding、likelihood 或 downstream model performance 随 K 的变化。若增加某个低-variance component 显著改善 held-out behavior prediction，它虽在 scree plot 尾部，仍可能值得保留。PCA dimension 是 data-and-purpose dependent quantity。",
-          "最后要把三种“维度”分开：W 的 slow dynamical modes 数量来自模型稳定性；PCA dimension 来自 observed covariance spectrum；task dimension 来自 behaviorally relevant variables。它们可在设计良好的实验中互相约束，却没有一般恒等关系。旧版 Pages 1-5 与 UPDATE 前五页实质一致，因此本模块只引用新增 Page 6，不虚构旧版对应页。"
+          "最后要把三种“维度”分开：W 的 slow dynamical modes 数量来自模型稳定性；PCA dimension 来自 observed covariance spectrum；task dimension 来自 behaviorally relevant variables。它们可在设计良好的实验中互相约束，却没有一般恒等关系。"
         ],
         "keyPoints": [
           "scree elbow 是启发式，通常没有唯一位置。",
@@ -1416,7 +1416,7 @@
       "从高维神经活动到低维因子，逐项解释 GPFA 的观测模型、时间协方差、矩阵形状与不可辨识性。",
       "用 delayed-reach 时间线解释准备态如何进入 movement-potent 与 output-null 子空间，而不把相关图形误写成因果结论。",
       "手算线性 readout 的零空间、rank-nullity 与简单 decoder，并把结果用于 BMI 闭环和跨日对齐。",
-      "比较 UPDATE 与旧版：共同页按 UPDATE 解释并保留旧版引用，第 5 页只归于 UPDATE 新增内容。"
+      "把 PCA/GPFA、linear readout、closed-loop feedback 与跨日 alignment 串成一个可检验的 BMI 分析流程。"
     ],
     "prerequisiteBridge": [
       "先把一次群体记录写成向量：若同时记录 N 个神经元，某时刻的 firing rates 是 N 维向量 r。实验画出的每个点不是一个神经元，而是整个群体在某时刻的状态。PCA 或 factor model 试图用 K 个坐标描述这些点，其中 K 小于 N。低维并不表示只记录到少数神经元，而表示许多神经元的变化受少数共同变量约束。",
@@ -1679,7 +1679,7 @@
           "sanityCheck": "\\(\\Delta t=0\\) 时应为 1；随着 \\(|\\Delta t|\\) 增加，kernel 单调下降。"
         },
         "selfCheck": {
-          "prompt": "为何 UPDATE 第 3 页的平滑 kernel 不能证明真实 cortex trajectory 本来就平滑？",
+          "prompt": "为何平滑 kernel 不能证明真实 cortex trajectory 本来就平滑？",
           "answer": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
         },
         "pitfalls": [
@@ -1778,7 +1778,7 @@
           "BMI decoder 将 neural features 映成 cursor velocity、position 或 discrete action。open-loop calibration 中，participant 看预定 movement 或尝试动作，系统离线拟合 mapping；closed-loop 时 decoder output 立刻改变视觉反馈，participant 与 decoder 共同适应。因此闭环表现不是固定编码质量的被动读数，而是 brain、decoder 与 feedback 构成的新 dynamical system。",
           "若第 d 天观测 \\(r_{d}=C_{d}\\alpha +d_{d}+\\mathrm{noise}\\)，不同电极采样会改变 \\(C_{d}\\)，却可能保留相似 latent dynamics。跨日方法先估 daily subspaces，再找 alignment \\(A_{d}\\)，使不同天的 \\(\\alpha\\) coordinates 可比较，最后在 aligned latent 上用 \\(\\hat{v}=B\\alpha\\)。这里的稳定性是“存在可转移的低维关系”，不是要求每个 neuron 的 loading 不变。",
           "alignment 也可能制造虚假稳定：若使用当天 behavior labels 旋转 latent space，随后在同一天测试 decoder，会泄漏答案。严格评估应只用 calibration data 估 \\(A_{d}\\) 和 B，再在 held-out blocks 或 future days 测试；还要与不对齐、随机对齐、直接 neuron-space decoder 比较，并报告 adaptation time 与 failure days。",
-          "UPDATE 第 5 页新增的 BMI 与 cross-day material 应单独处理，旧版没有对应页。它把前四页概念串起来：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。每一步都有假设，不能把“latent 较稳定”扩写成单神经元表征永久不变。"
+          "这些概念可以串成一条闭环：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。每一步都有假设，不能把“latent 较稳定”扩写成单神经元表征永久不变。"
         ],
         "keyPoints": [
           "闭环 BMI 是 brain-decoder-feedback 联合系统。",
@@ -1833,7 +1833,7 @@
           "answer": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
         },
         "pitfalls": [
-          "把 UPDATE 新增页误标成旧版已有内容。",
+          "把 aligned latent stability 误解为单神经元 identity 永久稳定。",
           "先用 test-day behavior 选择 alignment，再把同一数据报告为跨日泛化。"
         ]
       }

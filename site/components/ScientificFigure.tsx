@@ -1,4 +1,3 @@
-import { assetPath } from '@/lib/site';
 import type { Locale } from '@/lib/i18n';
 import { parseScientificText, scientificTextPlainText } from '@/lib/scientific-text';
 import type { FigureCurve, FigureIndexEntry } from '@/lib/types';
@@ -146,7 +145,7 @@ export function ScientificFigure({ figure, locale = 'zh', compact = false }: { f
           {figure.kind === 'state-space' && <StateSpaceGraphic figure={figure} />}
         </svg>
       </div>
-      <figcaption><strong><ScientificText text={`${figure.title}${locale === 'zh' ? '。' : '.'}`} /></strong> <ScientificText text={figure.caption} /> <span className="figure-source">{locale === 'zh' ? '来源：' : 'Sources: '}{figure.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index ? (locale === 'zh' ? '；' : '; ') : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`}>{ref.file}{locale === 'zh' ? `，第 ${ref.page} 页` : `, p. ${ref.page}`}</a></span>)}. {locale === 'zh' ? '示意图。' : 'Schematic.'}</span></figcaption>
+      <figcaption><strong><ScientificText text={`${figure.title}${locale === 'zh' ? '。' : '.'}`} /></strong> <ScientificText text={figure.caption} /></figcaption>
     </figure>
   );
 }

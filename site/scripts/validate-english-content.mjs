@@ -101,6 +101,7 @@ const figureStructure = (figure) => JSON.parse(JSON.stringify(figure), (key, val
   return value;
 });
 const normalizedStem = (value) => String(value).toLocaleLowerCase('en-US').replace(/[“”'’]/g, '').replace(/[^\p{L}\p{N}]+/gu, ' ').trim();
+const sourceFraming = /\b(?:pages?\s+(?:\d+(?:st|nd|rd|th)?|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)|(?:first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\s+(?:notes?\s+|exercise\s+|source\s+)?page|source\s+page|(?:original|course|updated|earlier|previous|lecture)\s+(?:notes?|handout|page))\b|\.pdf\b/i;
 
 if (englishCourse.length !== 27) fail(`Expected 27 English lectures; found ${englishCourse.length}.`);
 if (englishQuestions.length < 810) fail(`Expected at least 810 English questions; found ${englishQuestions.length}.`);
@@ -112,9 +113,9 @@ for (const summary of englishCourse) {
   const slug = String(summary.lecture).padStart(2, '0');
   const en = read(`en/lectures/${slug}.json`);
   const zh = read(`lectures/${slug}.json`);
-  if (!en.enTitle || !en.coreQuestion || han.test(en.coreQuestion)) fail(`Lecture ${slug} has no English title/core question.`);
+  if (!en.enTitle) fail(`Lecture ${slug} has no English title.`);
+  if ('coreQuestion' in en || 'diagnostic' in en || 'diagnostic' in en.studyGuide) fail(`Lecture ${slug} still publishes open-ended lecture prompts.`);
   if (en.studyGuide.modules.length !== zh.studyGuide.modules.length) fail(`Lecture ${slug} module count differs across languages.`);
-  if (!same(en.studyGuide.diagnostic.map((item) => [item.id, item.remediationModuleId]), zh.studyGuide.diagnostic.map((item) => [item.id, item.remediationModuleId]))) fail(`Lecture ${slug} diagnostic routing differs across languages.`);
   if (!same(en.studyGuide.modules.map((studyModule) => [studyModule.id, studyModule.sourceRefs, (studyModule.derivation?.steps ?? []).map((step) => step.latex ?? null)]), zh.studyGuide.modules.map((studyModule) => [studyModule.id, studyModule.sourceRefs, (studyModule.derivation?.steps ?? []).map((step) => step.latex ?? null)]))) fail(`Lecture ${slug} module IDs, source refs, or LaTeX differ across languages.`);
   if (!same(en.sourceUnits.map((unit) => [unit.id, unit.order, unit.sourceFile, unit.page]), zh.sourceUnits.map((unit) => [unit.id, unit.order, unit.sourceFile, unit.page]))) fail(`Lecture ${slug} source-unit structure differs across languages.`);
   if (!same(en.formulas.map((formula) => withoutKeys(formula, ['name', 'conditions'])), zh.formulas.map((formula) => withoutKeys(formula, ['name', 'conditions'])))) fail(`Lecture ${slug} protected formula fields differ across languages.`);
@@ -122,7 +123,6 @@ for (const summary of englishCourse) {
   if (!same(en.figures.map(figureStructure), zh.figures.map(figureStructure))) fail(`Lecture ${slug} protected figure geometry differs across languages.`);
   if (!same(en.errata.map((item) => withoutKeys(item, ['lectureTitle', 'originalIssue', 'explanation', 'correction'])), zh.errata.map((item) => withoutKeys(item, ['lectureTitle', 'originalIssue', 'explanation', 'correction'])))) fail(`Lecture ${slug} protected errata fields differ across languages.`);
   validateScientificTokenParity(`Lecture ${slug}`, {
-    coreQuestion: en.coreQuestion,
     dependencyMap: en.dependencyMap,
     studyGuide: en.studyGuide,
     sourceUnits: en.sourceUnits,
@@ -132,9 +132,7 @@ for (const summary of englishCourse) {
     commonTraps: en.commonTraps,
     formulas: en.formulas,
     glossary: en.glossary,
-    errata: en.errata,
   }, {
-    coreQuestion: zh.coreQuestion,
     dependencyMap: zh.dependencyMap,
     studyGuide: zh.studyGuide,
     sourceUnits: zh.sourceUnits,
@@ -144,23 +142,20 @@ for (const summary of englishCourse) {
     commonTraps: zh.commonTraps,
     formulas: zh.formulas,
     glossary: zh.glossary,
-    errata: zh.errata,
   });
 
   const guideValues = [
     ...en.studyGuide.objectives,
     ...en.studyGuide.prerequisiteBridge,
-    ...en.studyGuide.diagnostic.flatMap((item) => [item.prompt, item.answer, item.explanation]),
-    ...en.studyGuide.modules.flatMap((module) => [module.title, module.guidingQuestion, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), ...(module.derivation?.symbolNotes ?? []), module.derivation?.unitsCheck ?? '', module.derivation?.limitCheck ?? '', module.workedExample.title, module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, module.workedExample.sanityCheck, module.selfCheck.prompt, module.selfCheck.answer, ...module.pitfalls]),
+    ...en.studyGuide.modules.flatMap((module) => [module.title, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), ...(module.derivation?.symbolNotes ?? []), module.derivation?.unitsCheck ?? '', module.derivation?.limitCheck ?? '', module.workedExample.title, module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, module.workedExample.sanityCheck, ...module.pitfalls]),
   ];
   const guideText = guideValues.join(' ');
   if (guideText.length < 4000) fail(`Lecture ${slug} English guide is too short (${guideText.length} characters).`);
   if (han.test(guideText)) fail(`Lecture ${slug} English guide still contains Chinese prose.`);
   validateTranslationText(`Lecture ${slug} English guide`, guideValues);
   const publishedEnglishValues = [
-    en.coreQuestion,
     en.dependencyMap,
-    ...en.sourceUnits.flatMap((unit) => [unit.reconstruction, unit.noteMeaning, unit.reasoning, unit.figureReading, unit.stopPredict]),
+    ...en.sourceUnits.flatMap((unit) => [unit.reconstruction, unit.noteMeaning, unit.reasoning, unit.figureReading]),
     ...en.specialSection,
     ...en.synthesis,
     ...en.commonTraps,
@@ -171,12 +166,25 @@ for (const summary of englishCourse) {
   const publishedEnglishText = publishedEnglishValues.join(' ');
   if (han.test(publishedEnglishText)) fail(`Lecture ${slug} English overlay still contains Chinese prose.`);
   validateTranslationText(`Lecture ${slug} English overlay`, publishedEnglishValues);
-  if (en.studyGuide.objectives.length < 4 || en.studyGuide.prerequisiteBridge.length < 3 || en.studyGuide.diagnostic.length < 4 || en.studyGuide.modules.length < 3) fail(`Lecture ${slug} English guide is incomplete.`);
+  const publicNarrative = [
+    guideText,
+    en.dependencyMap,
+    ...en.specialSection,
+    ...en.synthesis,
+    ...en.commonTraps,
+    ...en.formulas.flatMap((formula) => [formula.name, formula.conditions]),
+    ...en.glossary.map((entry) => entry.definition),
+    ...en.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]),
+    ...en.questions.flatMap((question) => [question.stem, question.explanation, ...question.choices.map((choice) => choice.text), ...Object.values(question.wrongChoiceExplanations)]),
+  ].join(' ');
+  if (sourceFraming.test(publicNarrative) || /\bUPDATE\b/.test(publicNarrative)) fail(`Lecture ${slug} still exposes source-page framing in published English prose.`);
+  if (en.studyGuide.objectives.length < 4 || en.studyGuide.prerequisiteBridge.length < 3 || en.studyGuide.modules.length < 3) fail(`Lecture ${slug} English guide is incomplete.`);
   for (const objective of en.studyGuide.objectives) if (/^(?:it can|can\b|able to\b)/i.test(objective)) fail(`Lecture ${slug} has a nonparallel English learning objective: ${objective}`);
 
   const moduleIds = new Set(en.studyGuide.modules.map((module) => module.id));
   const unitIds = new Set(en.sourceUnits.map((unit) => unit.id));
   for (const studyModule of en.studyGuide.modules) {
+    if ('guidingQuestion' in studyModule || 'selfCheck' in studyModule) fail(`${studyModule.id} still publishes open-ended prompts.`);
     if (studyModule.paragraphs.length < 4 || studyModule.keyPoints.length < 3 || studyModule.workedExample.steps.length < 3 || studyModule.pitfalls.length < 2) fail(`${studyModule.id} is structurally incomplete in English.`);
     for (const step of studyModule.derivation?.steps ?? []) if (step.latex) {
       try { katex.renderToString(step.latex, { throwOnError: true, strict: 'error' }); }

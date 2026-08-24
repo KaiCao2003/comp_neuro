@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { localizedHref, type Locale } from '@/lib/i18n';
-import { assetPath } from '@/lib/site';
 import { recordQuestionAttempt, recordQuestionExposure, seededShuffle } from '@/lib/study-state';
 import type { Question } from '@/lib/types';
 import { ScientificText } from './ScientificText';
@@ -39,9 +38,7 @@ export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = 
     return () => observer.disconnect();
   }, [question.id, seed]);
 
-  const sourceAnchor = question.sourceAnchors[0];
   const sectionHref = showSourceLink ? `#${question.sectionId}` : localizedHref(locale, `/lectures/${String(question.lecture).padStart(2, '0')}/#${question.sectionId}`);
-  const sourceHref = sourceAnchor ? `${assetPath(`/resources/original/${encodeURIComponent(sourceAnchor.file)}`)}#page=${sourceAnchor.page}` : null;
 
   function submit() {
     if (!selected || submitted) return;
@@ -91,7 +88,7 @@ export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = 
               ))}
             </ul>
           </details>
-          <p className="question-source"><Link href={sectionHref}>{locale === 'zh' ? '正文' : 'Lesson'}</Link>{sourceHref && sourceAnchor && <> · <a href={sourceHref} target="_blank" rel="noreferrer">{locale === 'zh' ? `原始讲义第 ${sourceAnchor.page} 页` : `Original notes, p. ${sourceAnchor.page}`}</a></>}</p>
+          <p className="question-source"><Link href={sectionHref}>{locale === 'zh' ? '相关讲解' : 'Related lesson'}</Link></p>
         </div>
       )}
       <div className="print-answer-key">

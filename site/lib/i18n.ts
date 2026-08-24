@@ -16,7 +16,6 @@ export const ui = {
     practice: '练习',
     glossary: '术语',
     formulas: '公式',
-    sources: '来源',
     languageSwitch: 'View this page in English',
     languageNoticeLabel: '语言版本',
     languageNotice: 'English version available.',
@@ -31,14 +30,22 @@ export const ui = {
     practice: 'Practice',
     glossary: 'Glossary',
     formulas: 'Formulas',
-    sources: 'Sources',
     languageSwitch: '查看本页中文版',
     languageNoticeLabel: 'Language version',
-    languageNotice: '中文版已上线。',
+    languageNotice: '中文版可用。',
     languageNoticeAction: '查看本页中文版',
     dismissLanguageNotice: 'Dismiss language notice',
   },
 } as const;
+
+export function preferredLocale(languages: readonly string[]): Locale | null {
+  for (const language of languages) {
+    const normalized = language.toLocaleLowerCase();
+    if (normalized === 'zh' || normalized.startsWith('zh-')) return 'zh';
+    if (normalized === 'en' || normalized.startsWith('en-')) return 'en';
+  }
+  return null;
+}
 
 function splitHref(href: string) {
   const match = href.match(/^([^?#]*)([?#].*)?$/);

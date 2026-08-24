@@ -74,13 +74,16 @@ describe('course content', () => {
     }
   });
 
-  it('gives every source page a substantial, structured self-study path', () => {
+  it('gives every source page substantial, structured teaching content', () => {
     const moduleIds = new Set<string>();
     for (const lecture of course) {
       const content = read(`lectures/${lecture.slug}.json`);
       const references = new Set<string>();
       const guideText = JSON.stringify(content.studyGuide);
-      expect(guideText.length).toBeGreaterThanOrEqual(4500);
+      expect(guideText.length).toBeGreaterThanOrEqual(3500);
+      expect(content).not.toHaveProperty('coreQuestion');
+      expect(content).not.toHaveProperty('diagnostic');
+      expect(content.studyGuide).not.toHaveProperty('diagnostic');
       expect(guideText).not.toMatch(/先识别图中对象、箭头、参数和坐标系|后面的正式推导会|本页的中心对象是|显然|容易得到|经过一些代数/);
       for (const learningModule of content.studyGuide.modules) {
         expect(moduleIds.has(learningModule.id), learningModule.id).toBe(false);
@@ -88,7 +91,8 @@ describe('course content', () => {
         expect(learningModule.paragraphs.length, learningModule.id).toBeGreaterThanOrEqual(4);
         expect(learningModule.paragraphs.join('').length, learningModule.id).toBeGreaterThanOrEqual(550);
         expect(learningModule.workedExample.steps.length, learningModule.id).toBeGreaterThanOrEqual(3);
-        expect(learningModule.selfCheck.answer.length, learningModule.id).toBeGreaterThanOrEqual(35);
+        expect(learningModule).not.toHaveProperty('guidingQuestion');
+        expect(learningModule).not.toHaveProperty('selfCheck');
         for (const ref of learningModule.sourceRefs) references.add(`${ref.file}::${ref.page}`);
         for (const step of learningModule.derivation?.steps ?? []) {
           if (step.latex) {
@@ -114,7 +118,9 @@ describe('course content', () => {
         expect(source).toBeTruthy();
         expect(anchor.page).toBeGreaterThanOrEqual(1);
         expect(anchor.page).toBeLessThanOrEqual(source.pages);
-        expect(lecture.sourceUnits.some((unit: { id: string }) => unit.id === anchor.section)).toBe(true);
+        const publicModule = lecture.studyGuide.modules.find((studyModule: { id: string }) => studyModule.id === anchor.section);
+        expect(publicModule).toBeTruthy();
+        expect(publicModule.sourceRefs.some((ref: { file: string; page: number }) => ref.file === anchor.file && ref.page === anchor.page)).toBe(true);
       }
     }
   });

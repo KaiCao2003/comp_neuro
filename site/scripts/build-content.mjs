@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { alignPublishedSections, sanitizePublishedValue } from './publish-text.mjs';
 
 const root = process.cwd();
 const promptsDir = path.join(root, 'source/prompts');
@@ -117,7 +118,7 @@ const cleanRiskBoundary = (value = '') => cleanTextbookParagraph(value)
   .replace(/使用用户熟悉的 Neuropixels\/HD-cell 数据作为 transfer example，但保留 MT 原例。/, 'Neuropixels/HD-cell 数据可作为迁移例，MT 保留为原例。')
   .replace(/可用 sparse-noise RF mapping 作为个性化 transfer。/, 'sparse-noise RF mapping 可作为迁移例。')
   .replace(/^这是全课程最容易因 scaling 跳步而失真的一课。/, '本讲的 scaling 推导容易因跳步失真。')
-  .replace(/^以 UPDATE 为主并明确记录它新增 Page 6。/, 'UPDATE 是主版本，且新增 Page 6。')
+  .replace(/^以 UPDATE 为主并明确记录它新增 Page 6。/, '')
   .replace(/^明确/g, '需要明确')
   .replace(/^始终/g, '需要')
   .replace(/^清楚/g, '需要')
@@ -707,7 +708,7 @@ function buildQuestions(lecture) {
   const anchors = lecture.sourceUnits;
   const distractorPool = [
     ...lecture.qaPairs.map((pair) => ({ text: pair.answer, note: `该选项回答的是“${pair.stem}”。` })),
-    ...lecture.sourceUnits.flatMap((unit) => sourceSentences(unit.reasoning).map((text) => ({ text, note: `这条推理对应 ${unit.sourceFile} 第 ${unit.page} 页。` }))),
+    ...lecture.sourceUnits.flatMap((unit) => sourceSentences(unit.reasoning).map((text) => ({ text, note: `这条推理解释的是“${unitCue(unit)}”，不是当前题目指定的关系。` }))),
     ...lecture.glossary.map((entry) => ({ text: entry.definition, note: `这是“${entry.zh}（${entry.en}）”的定义。` })),
     ...lecture.formulas.map((formula) => ({ text: formula.conditions, note: `这是“${formula.name}”的适用条件。` })),
   ].map((candidate) => ({ ...candidate, text: cleanChoiceText(candidate.text) })).filter((candidate) => candidate.text);
@@ -970,7 +971,7 @@ const lectures = indexRows.map((row) => {
     .filter(Boolean);
   const diagnostic = readNumbered(sliceBetween(raw, 'Five-minute prerequisite diagnostic', 'Source-aligned lesson / 按原笔记页序')).map((item) => cleanDiagnostic(item.text)).filter(Boolean);
   const errata = structureErrata(parseErrata(raw), sourceFiles, sourceUnits, studyGuide, row.lecture, row.zhTitle);
-  const specialHeading = row.lecture === 2 || row.lecture === 3 ? 'MATLAB source audit / 代码逐行审计' : (row.lecture === 19 || row.lecture === 22 ? 'Version comparison / 新旧版本审计' : null);
+  const specialHeading = row.lecture === 2 || row.lecture === 3 ? 'MATLAB source audit / 代码逐行审计' : null;
   const specialSection = specialHeading ? paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, specialHeading)) + 1, findActualHeading(raw, 'Derivations')))
     .filter((item) => !/^Authority\. The listing below is the actual uploaded source/i.test(item))
     .map(cleanTextbookParagraph)
@@ -1011,8 +1012,6 @@ const allGlossary = lectures.flatMap((lecture) => lecture.glossary);
 const allFormulas = lectures.flatMap((lecture) => lecture.formulas);
 if (allFormulas.some((formula) => !formula.latex)) throw new Error('Every formula must have a corrected LaTeX representation.');
 const allSources = lectures.flatMap((lecture) => lecture.sourceFiles.map((source) => ({ ...source, lecture: lecture.lecture, lectureSlug: lecture.slug, lectureTitle: lecture.zhTitle })));
-const allErrata = lectures.flatMap((lecture) => lecture.errata.map((item) => ({ ...item, lecture: lecture.lecture, lectureTitle: lecture.zhTitle })));
-const allFigures = lectures.flatMap((lecture) => lecture.figures);
 
 const coverage = lectures.flatMap((lecture) => lecture.sourceFiles.flatMap((source) => {
   if (!source.pages) return [{ lecture: lecture.lecture, source: source.file, role: source.role, page: null, status: 'reference-only', sections: [], figures: [], questions: [] }];
@@ -1049,7 +1048,6 @@ const course = lectures.map((lecture) => ({
   slug: lecture.slug,
   zhTitle: lecture.zhTitle,
   enTitle: lecture.enTitle,
-  coreQuestion: lecture.coreQuestion,
   sourceCount: lecture.sourceFiles.length,
   sourcePageCount: lecture.sourceFiles.reduce((sum, file) => sum + (file.pages ?? 0), 0),
   companionFile: lecture.companionFile,
@@ -1059,34 +1057,55 @@ const course = lectures.map((lecture) => ({
   formulaCount: lecture.formulas.length,
 }));
 
-const searchIndex = lectures.flatMap((lecture) => [
-  {
-    id: `lecture-${lecture.slug}`,
-    kind: 'lecture',
-    lecture: lecture.lecture,
-    title: `第 ${lecture.lecture} 讲 · ${lecture.zhTitle}`,
-    subtitle: lecture.enTitle,
-    href: `/lectures/${lecture.slug}/`,
-    text: compact([lecture.zhTitle, lecture.enTitle, lecture.coreQuestion, ...lecture.studyGuide.objectives, ...lecture.studyGuide.prerequisiteBridge, ...lecture.studyGuide.modules.flatMap((module) => [module.title, module.guidingQuestion, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, module.selfCheck.prompt, module.selfCheck.answer, ...module.pitfalls]), ...lecture.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]), ...lecture.sourceClaims, ...lecture.sourceUnits.flatMap((unit) => [unit.reconstruction, unit.noteMeaning, unit.reasoning]), ...lecture.synthesis, ...lecture.commonTraps, ...lecture.glossary.flatMap((entry) => [entry.zh, entry.en, entry.definition]), ...lecture.formulas.flatMap((formula) => [formula.name, formula.conditions]), ...lecture.questions.map((question) => question.stem), ...lecture.sourceFiles.map((source) => source.file)].join(' ')),
-  },
-  ...lecture.sourceUnits.map((unit) => ({ id: unit.id, kind: 'source-page', lecture: lecture.lecture, title: `${lecture.zhTitle} · ${unit.sourceFile} p. ${unit.page}`, subtitle: unit.reconstruction, href: `/lectures/${lecture.slug}/#${unit.id}`, text: compact([unit.reconstruction, unit.noteMeaning, unit.reasoning, unit.figureReading, unit.stopPredict].join(' ')) })),
-]);
+function withoutOpenPrompts(lecture) {
+  const publishedLecture = structuredClone(lecture);
+  delete publishedLecture.coreQuestion;
+  delete publishedLecture.diagnostic;
+  publishedLecture.sourceUnits = publishedLecture.sourceUnits.map((unit) => {
+    delete unit.stopPredict;
+    return unit;
+  });
+  publishedLecture.studyGuide = {
+    objectives: lecture.studyGuide.objectives,
+    prerequisiteBridge: lecture.studyGuide.prerequisiteBridge,
+    modules: structuredClone(lecture.studyGuide.modules).map((studyModule) => {
+      delete studyModule.guidingQuestion;
+      delete studyModule.selfCheck;
+      return studyModule;
+    }),
+  };
+  return publishedLecture;
+}
 
-for (const lecture of lectures) {
-  const publishedLecture = { ...lecture };
+const publishedLectures = lectures.map((lecture) => {
+  const publishedLecture = sanitizePublishedValue(alignPublishedSections(withoutOpenPrompts(lecture)));
   delete publishedLecture.sourceClaims;
   delete publishedLecture.qaPairs;
-  fs.writeFileSync(path.join(lectureOutputDir, `${lecture.slug}.json`), `${JSON.stringify(publishedLecture, null, 2)}\n`);
+  return publishedLecture;
+});
+
+const searchIndex = publishedLectures.map((lecture) => ({
+  id: `lecture-${lecture.slug}`,
+  kind: 'lecture',
+  lecture: lecture.lecture,
+  title: `第 ${lecture.lecture} 讲 · ${lecture.zhTitle}`,
+  subtitle: lecture.enTitle,
+  href: `/lectures/${lecture.slug}/`,
+  text: compact([lecture.zhTitle, lecture.enTitle, ...lecture.studyGuide.prerequisiteBridge, ...lecture.studyGuide.modules.flatMap((module) => [module.title, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, ...module.pitfalls]), ...lecture.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]), ...lecture.synthesis, ...lecture.commonTraps, ...lecture.glossary.flatMap((entry) => [entry.zh, entry.en, entry.definition]), ...lecture.formulas.flatMap((formula) => [formula.name, formula.conditions]), ...lecture.questions.map((question) => question.stem)].join(' ')),
+}));
+
+for (const publishedLecture of publishedLectures) {
+  fs.writeFileSync(path.join(lectureOutputDir, `${publishedLecture.slug}.json`), `${JSON.stringify(publishedLecture, null, 2)}\n`);
 }
 
 const write = (name, value) => fs.writeFileSync(path.join(outputDir, name), `${JSON.stringify(value, null, 2)}\n`);
 write('course.json', course);
-write('questions.json', allQuestions);
-write('glossary.json', allGlossary);
-write('formulas.json', allFormulas);
+write('questions.json', publishedLectures.flatMap((lecture) => lecture.questions));
+write('glossary.json', publishedLectures.flatMap((lecture) => lecture.glossary));
+write('formulas.json', publishedLectures.flatMap((lecture) => lecture.formulas));
 write('sources.json', allSources);
-write('errata.json', allErrata);
-write('figures.json', allFigures);
+write('errata.json', publishedLectures.flatMap((lecture) => lecture.errata));
+write('figures.json', publishedLectures.flatMap((lecture) => lecture.figures));
 write('coverage.json', coverage);
 write('dependencies.json', crossEdges);
 write('search-index.json', searchIndex);

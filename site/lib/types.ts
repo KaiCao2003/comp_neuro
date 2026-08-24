@@ -7,12 +7,6 @@ export type SourceFile = {
   href: string;
 };
 
-export type SourceIndexEntry = SourceFile & {
-  lecture: number;
-  lectureSlug: string;
-  lectureTitle: string;
-};
-
 export type FigureIndexEntry = {
   id: string;
   lecture: number;
@@ -70,7 +64,6 @@ export type SourceUnit = {
   noteMeaning: string;
   reasoning: string;
   figureReading: string;
-  stopPredict: string;
 };
 
 export type StudySourceRef = {
@@ -105,28 +98,16 @@ export type StudyModule = {
   id: string;
   title: string;
   sourceRefs: StudySourceRef[];
-  guidingQuestion: string;
   paragraphs: string[];
   keyPoints: string[];
   derivation: StudyDerivation | null;
   workedExample: StudyWorkedExample;
-  selfCheck: {
-    prompt: string;
-    answer: string;
-  };
   pitfalls: string[];
 };
 
 export type StudyGuide = {
   objectives: string[];
   prerequisiteBridge: string[];
-  diagnostic: {
-    id: string;
-    prompt: string;
-    answer: string;
-    explanation: string;
-    remediationModuleId: string;
-  }[];
   modules: StudyModule[];
 };
 
@@ -194,8 +175,6 @@ export type Lecture = {
   codeSources: { file: string; text: string }[];
   objectives: string[];
   dependencyMap: string;
-  coreQuestion: string;
-  diagnostic: string[];
   sourceUnits: SourceUnit[];
   studyGuide: StudyGuide;
   figures: FigureIndexEntry[];
@@ -215,7 +194,6 @@ export type CourseSummary = {
   slug: string;
   zhTitle: string;
   enTitle: string;
-  coreQuestion: string;
   sourceCount: number;
   sourcePageCount: number;
   companionFile: string;

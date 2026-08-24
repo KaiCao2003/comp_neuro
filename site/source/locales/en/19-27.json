@@ -6,7 +6,7 @@
       "Use each mode's time constant to classify stable decay, leaky integration, perfect integration, and unstable growth, then reinterpret the mode coordinates as trajectories in neural activity space.",
       "Derive PCA by maximizing the projection variance of centered data, and work through numerical examples of top-K projection, reconstruction, variance explained, and dimensional truncation.",
       "Distinguish rigorously between dynamical modes of a recurrent weight matrix and principal components of a covariance matrix, including when they may align and when no such alignment should be expected.",
-      "Compare the updated and earlier notes: retain their shared material, then use the new page 6 to add the eigenvalue cliff and cumulative-variance curve."
+      "Compare eigenvalue-cliff, cumulative-variance, and held-out-performance criteria for choosing dimensionality."
     ],
     "prerequisiteBridge": [
       "Begin by viewing a vector as an ordered list of numbers. At one moment, the firing-rate deviations of two neurons can be written \\(h=(h_{1},h_{2})^\\mathrm{T}\\); matrix W specifies the feedback each neuron receives from the other. If \\(Wv=\\lambda v\\), one recurrent mapping simply multiplies activity along v by \\(\\lambda\\), making v a natural direction for describing the network. The only matrix skills required are a two-by-two determinant, simultaneous linear equations, vector length, and dot products.",
@@ -443,7 +443,7 @@
       },
       {
         "id": "l19-m6",
-        "title": "New page: eigenvalue cliff, cumulative variance, and dimensionality selection",
+        "title": "Choosing dimensionality with the eigenvalue cliff and cumulative variance",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -452,10 +452,10 @@
         ],
         "guidingQuestion": "How should K be selected from the eigenvalue spectrum without treating a convenient cutoff as a natural constant?",
         "paragraphs": [
-          "Update page 6 is a substantive addition absent from the earlier notes. A scree plot graphs sorted \\(\\lambda _{k}\\) against component index k. If the first few eigenvalues are large and the curve then enters a flat tail, the transition is called an eigenvalue cliff or elbow. Directions before the cliff capture stronger coordinated variation; each direction after it contributes little additional variance. Real spectra often decline continuously, however, so different readers may place the elbow differently.",
-          "Cumulative variance explained \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) increases monotonically from \\(F(0)=0\\) to \\(F(N)=1\\). The handwritten expression at the bottom of page 6 omits the total-variance denominator and writes the summand as \\(\\lambda _{i}\\). The cumulative definition requires numerator \\(\\sum _{j=1}^K\\lambda _{j}\\) divided by \\(\\sum _{j=1}^N\\lambda _{j}\\), which is used throughout this module. Thresholds of 80%, 90%, or 95% give reproducible rules but need not be optimal for a particular scientific question. Measurement noise can raise the tail, condition means can create large PCs, and trial averaging can change the spectrum. Report preprocessing and the selection criterion together with K.",
+          "A scree plot graphs sorted \\(\\lambda _{k}\\) against component index k. If the first few eigenvalues are large and the curve then enters a flat tail, the transition is called an eigenvalue cliff or elbow. Directions before the cliff capture stronger coordinated variation; each direction after it contributes little additional variance. Real spectra often decline continuously, however, so different readers may place the elbow differently.",
+          "Cumulative variance explained \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) increases monotonically from \\(F(0)=0\\) to \\(F(N)=1\\). Its numerator must be \\(\\sum _{j=1}^K\\lambda _{j}\\) and its denominator the total variance \\(\\sum _{j=1}^N\\lambda _{j}\\); writing only \\(\\lambda _{i}\\) or omitting the denominator no longer represents cumulative explained variance. Thresholds of 80%, 90%, or 95% give reproducible rules but need not be optimal for a particular scientific question. Measurement noise can raise the tail, condition means can create large PCs, and trial averaging can change the spectrum. Report preprocessing and the selection criterion together with K.",
           "A stronger dimensionality choice uses held-out data. Fit PCs on training trials and compare reconstruction error on test trials, or evaluate behavioral decoding, likelihood, or downstream model performance as K changes. A low-variance component may still deserve retention if it materially improves held-out behavior prediction. PCA dimensionality depends on both the data and the purpose of the analysis.",
-          "Finally separate three meanings of dimension. The number of slow dynamical modes of W follows from model stability; PCA dimension follows from the observed covariance spectrum; task dimension follows from behaviorally relevant variables. Carefully designed experiments can relate them, but no general identity equates them. Pages 1-5 of the earlier notes and the first five update pages are substantively the same, so this module cites only the newly added page 6 rather than inventing a counterpart in the earlier version."
+          "Finally separate three meanings of dimension. The number of slow dynamical modes of W follows from model stability; PCA dimension follows from the observed covariance spectrum; task dimension follows from behaviorally relevant variables. Carefully designed experiments can relate them, but no general identity equates them."
         ],
         "keyPoints": [
           "A scree-plot elbow is a heuristic and usually has no unique location.",
@@ -1416,7 +1416,7 @@
       "Explain each component of GPFA from high-dimensional neural activity to low-dimensional factors, including the observation model, temporal covariance, matrix shapes, and non-identifiability.",
       "Use a delayed-reach timeline to explain how preparatory states enter movement-potent and output-null subspaces without misrepresenting graphical correlations as causal conclusions.",
       "Compute the null space and rank–nullity of a linear readout by hand, construct a simple decoder, and apply the results to closed-loop BMI and cross-day alignment.",
-      "Compare the UPDATE and earlier edition: interpret their shared pages using the UPDATE while retaining citations to the old edition, and attribute Page 5 only to the new UPDATE material."
+      "Connect PCA/GPFA, linear readout, closed-loop feedback, and cross-day alignment into a testable BMI analysis pipeline."
     ],
     "prerequisiteBridge": [
       "Represent one population recording as a vector. If N neurons are recorded simultaneously, their firing rates at one moment form an N-dimensional vector r. Each plotted point is not a neuron; it is the state of the entire population at that moment. PCA or a factor model describes those points with K coordinates, where K is smaller than N. Low dimensionality does not mean that only a few neurons were recorded; it means that the variation of many neurons is constrained by a few shared variables.",
@@ -1679,7 +1679,7 @@
           "sanityCheck": "At \\(\\Delta t=0\\) the value should be 1; the kernel decreases monotonically as \\(|\\Delta t|\\) grows."
         },
         "selfCheck": {
-          "prompt": "Why does the smooth kernel on Page 3 of the UPDATE not prove that the true cortical trajectory is intrinsically smooth?",
+          "prompt": "Why does a smooth kernel not prove that the true cortical trajectory is intrinsically smooth?",
           "answer": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
         },
         "pitfalls": [
@@ -1778,7 +1778,7 @@
           "A BMI decoder maps neural features to cursor velocity, position, or a discrete action. During open-loop calibration, the participant observes prescribed movement or attempts an action while the system fits a mapping offline. In closed loop, decoder output immediately changes visual feedback, so participant and decoder coadapt. Closed-loop performance is therefore not a passive measure of a fixed encoding; the brain, decoder, and feedback form a new dynamical system.",
           "Suppose the observation on day d is \\(r_{d}=C_{d}\\alpha +d_{d}+\\mathrm{noise}\\). Different electrode samples change \\(C_{d}\\) while similar latent dynamics may persist. A cross-day method first estimates daily subspaces and then finds \\(A_{d}\\) to make their \\(\\alpha\\) coordinates comparable; it finally applies \\(\\hat{v}=B\\alpha\\) in the aligned latent space. Stability here means that a transferable low-dimensional relationship exists, not that each neuron's loading is constant.",
           "Alignment can manufacture false stability. If behavior labels from the current day rotate latent space and the decoder is then tested on that same day, the answer has leaked into the analysis. A strict evaluation uses calibration data alone to estimate \\(A_{d}\\) and B, tests on held-out blocks or future days, compares no alignment, random alignment, and a direct neuron-space decoder, and reports adaptation time and failure days.",
-          "The BMI and cross-day material newly added on Page 5 of the UPDATE has no corresponding page in the earlier edition. It connects the first four pages: PCA/GPFA supplies a shared subspace, a linear readout supplies the behavioral map, closed-loop feedback changes the data distribution, and alignment handles coordinate drift. Every step has assumptions; 'stable latent structure' must not be expanded into permanent invariance of single-neuron representations."
+          "These concepts form one closed loop: PCA/GPFA supplies a shared subspace, a linear readout supplies the behavioral map, closed-loop feedback changes the data distribution, and alignment handles coordinate drift. Every step has assumptions; 'stable latent structure' must not be expanded into permanent invariance of single-neuron representations."
         ],
         "keyPoints": [
           "A closed-loop BMI is a joint brain–decoder–feedback system.",
@@ -1833,7 +1833,7 @@
           "answer": "The participant changes neural strategy in response to feedback, and the decoder may update online. Performance comes from joint adaptation, so one side must be frozen or otherwise controlled to separate the causes."
         },
         "pitfalls": [
-          "Mislabeling the newly added UPDATE page as content already present in the older edition.",
+          "Treating aligned latent stability as permanent stability of individual-neuron identity.",
           "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
         ]
       }
