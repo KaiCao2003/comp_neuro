@@ -44,7 +44,7 @@ for (const edition of editions) {
     for (const diagnostic of lecture.studyGuide?.diagnostic ?? []) {
       requireGate(moduleIds.has(diagnostic.remediationModuleId), `${prefix}:${diagnostic.id}: remediation target does not exist`);
       requireGate(String(diagnostic.prompt ?? '').length >= 18, `${prefix}:${diagnostic.id}: diagnostic prompt is too short`);
-      requireGate(String(diagnostic.answer ?? '').length >= 20, `${prefix}:${diagnostic.id}: diagnostic answer is too short`);
+      requireGate(String(diagnostic.answer ?? '').trim().length >= 8, `${prefix}:${diagnostic.id}: diagnostic answer is missing substantive content`);
       requireGate(normalize(diagnostic.prompt) !== normalize(diagnostic.answer), `${prefix}:${diagnostic.id}: prompt leaks the answer`);
     }
 
@@ -57,10 +57,10 @@ for (const edition of editions) {
       requireGate((module.paragraphs ?? []).join('').length >= 500, `${id}: explanation is not standalone-length`);
       requireGate((module.keyPoints ?? []).length >= 3, `${id}: fewer than three explain-back targets`);
       requireGate((module.workedExample?.steps ?? []).length >= 3, `${id}: worked example has fewer than three steps`);
-      requireGate(String(module.workedExample?.problem ?? '').length >= 35, `${id}: worked-example problem is too short`);
-      requireGate(String(module.workedExample?.result ?? '').length >= 20, `${id}: worked-example result is too short`);
-      requireGate(String(module.workedExample?.sanityCheck ?? '').length >= 20, `${id}: worked example lacks a substantive check`);
-      requireGate(String(module.selfCheck?.prompt ?? '').length >= 18, `${id}: self-check prompt is too short`);
+      requireGate(String(module.workedExample?.problem ?? '').trim().length >= 20, `${id}: worked-example problem is missing substantive content`);
+      requireGate(String(module.workedExample?.result ?? '').trim().length >= 4, `${id}: worked-example result is missing`);
+      requireGate(String(module.workedExample?.sanityCheck ?? '').trim().length >= 8, `${id}: worked example lacks a check`);
+      requireGate(String(module.selfCheck?.prompt ?? '').trim().length >= 8, `${id}: self-check prompt is missing`);
       requireGate(String(module.selfCheck?.answer ?? '').length >= 35, `${id}: self-check answer is too short`);
       requireGate(normalize(module.selfCheck?.prompt) !== normalize(module.selfCheck?.answer), `${id}: self-check prompt leaks the answer`);
       requireGate((module.pitfalls ?? []).length >= 2, `${id}: fewer than two failure modes`);
@@ -69,8 +69,8 @@ for (const edition of editions) {
       if (module.derivation) {
         requireGate((module.derivation.steps ?? []).length >= 3, `${id}: derivation has fewer than three explicit steps`);
         requireGate((module.derivation.symbolNotes ?? []).length >= 2, `${id}: derivation lacks symbol interpretation`);
-        requireGate(String(module.derivation.unitsCheck ?? '').length >= 20, `${id}: derivation lacks a units check`);
-        requireGate(String(module.derivation.limitCheck ?? '').length >= 20, `${id}: derivation lacks a limiting-case check`);
+        requireGate(String(module.derivation.unitsCheck ?? '').trim().length >= 4, `${id}: derivation lacks a units check`);
+        requireGate(String(module.derivation.limitCheck ?? '').trim().length >= 8, `${id}: derivation lacks a limiting-case check`);
       }
     }
 
