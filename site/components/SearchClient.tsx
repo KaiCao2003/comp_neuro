@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import type { Locale } from '@/lib/i18n';
 import type { SearchRecord } from '@/lib/types';
+import { ScientificText } from './ScientificText';
 
 function normalize(value: string) {
   return value.normalize('NFKC').toLocaleLowerCase().trim();
@@ -30,8 +31,8 @@ export function SearchClient({ locale, searchIndex }: { locale: Locale; searchIn
       <ol className="search-results">
         {results.map(({ record }) => (
           <li key={record.id}>
-            <Link href={record.href}>{record.title}</Link>
-            <p>{record.subtitle}</p>
+            <Link href={record.href}><ScientificText text={record.title} /></Link>
+            <p><ScientificText text={record.subtitle} /></p>
           </li>
         ))}
       </ol>

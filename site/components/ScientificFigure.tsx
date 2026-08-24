@@ -1,6 +1,8 @@
 import { assetPath } from '@/lib/site';
 import type { Locale } from '@/lib/i18n';
+import { parseScientificText, scientificTextPlainText } from '@/lib/scientific-text';
 import type { FigureCurve, FigureIndexEntry } from '@/lib/types';
+import { ScientificText } from './ScientificText';
 
 const WIDTH = 760;
 const HEIGHT = 400;
@@ -13,10 +15,24 @@ const mapX = (value: number) => LEFT + (Math.max(0, Math.min(100, value)) / 100)
 const mapY = (value: number) => BOTTOM - (Math.max(0, Math.min(100, value)) / 100) * (BOTTOM - TOP);
 const curvePath = (curve: FigureCurve) => curve.points.map(([x, y], index) => `${index ? 'L' : 'M'} ${mapX(x)} ${mapY(y)}`).join(' ');
 
-function SvgLabel({ x, y, text, className }: { x: number; y: number; text: string; className?: string }) {
+type SvgLabelAnchor = 'start' | 'middle' | 'end';
+
+function SvgLabel({ x, y, text, className, anchor = 'middle', width = 180 }: { x: number; y: number; text: string; className?: string; anchor?: SvgLabelAnchor; width?: number }) {
   const lines = text.split('\n');
+  const hasFormula = parseScientificText(text).some((segment) => segment.kind === 'math');
+  if (hasFormula) {
+    const height = Math.max(24, lines.length * 19 + 4);
+    const left = anchor === 'start' ? x : anchor === 'end' ? x - width : x - (width / 2);
+    return (
+      <foreignObject className={className} x={left} y={y - (height / 2)} width={width} height={height}>
+        <div className={`svg-scientific-label svg-label-${anchor}`}>
+          {lines.map((line, index) => <div key={`${line}-${index}`}><ScientificText text={line} /></div>)}
+        </div>
+      </foreignObject>
+    );
+  }
   return (
-    <text className={className} x={x} y={y - ((lines.length - 1) * 8)} textAnchor="middle">
+    <text className={className} x={x} y={y - ((lines.length - 1) * 8)} textAnchor={anchor}>
       {lines.map((line, index) => <tspan x={x} dy={index ? 17 : 0} key={`${line}-${index}`}>{line}</tspan>)}
     </text>
   );
@@ -27,8 +43,8 @@ function Axes({ xLabel, yLabel }: { xLabel: string; yLabel: string }) {
     <g className="scientific-axes">
       <line x1={LEFT} x2={RIGHT} y1={BOTTOM} y2={BOTTOM} />
       <line x1={LEFT} x2={LEFT} y1={BOTTOM} y2={TOP} />
-      <text x={(LEFT + RIGHT) / 2} y={382} textAnchor="middle">{xLabel}</text>
-      <text transform={`translate(21 ${(TOP + BOTTOM) / 2}) rotate(-90)`} textAnchor="middle">{yLabel}</text>
+      <SvgLabel x={(LEFT + RIGHT) / 2} y={382} text={xLabel} width={320} />
+      <g transform={`translate(21 ${(TOP + BOTTOM) / 2}) rotate(-90)`}><SvgLabel x={0} y={0} text={yLabel} width={250} /></g>
     </g>
   );
 }
@@ -45,7 +61,7 @@ function Curves({ curves, prefix }: { curves: FigureCurve[]; prefix: string }) {
       <g className="scientific-legend">
         {curves.map((curve, index) => {
           const x = LEFT + index * 158;
-          return <g key={`legend-${prefix}-${curve.label}`} transform={`translate(${x} 24)`}><line className={`scientific-curve curve-${index % 4}`} x1="0" x2="28" y1="0" y2="0" strokeDasharray={curve.dashed ? '8 5' : undefined} /><text x="36" y="4">{curve.label}</text></g>;
+          return <g key={`legend-${prefix}-${curve.label}`} transform={`translate(${x} 24)`}><line className={`scientific-curve curve-${index % 4}`} x1="0" x2="28" y1="0" y2="0" strokeDasharray={curve.dashed ? '8 5' : undefined} /><SvgLabel x={36} y={4} text={curve.label} anchor="start" width={118} /></g>;
         })}
       </g>
     </>
@@ -89,7 +105,7 @@ function TimelineGraphic({ figure, markerId, locale }: { figure: Extract<FigureI
   return (
     <>
       <defs><marker id={markerId} markerHeight="7" markerWidth="9" orient="auto" refX="8" refY="3.5"><path d="M0,0 L9,3.5 L0,7 Z" /></marker></defs>
-      {figure.lanes.map((lane, index) => <g className="timeline-lane" key={lane}><text x={LEFT - 12} y={laneY(index) + 4} textAnchor="end">{lane}</text><line x1={LEFT} x2={RIGHT} y1={laneY(index)} y2={laneY(index)} /></g>)}
+      {figure.lanes.map((lane, index) => <g className="timeline-lane" key={lane}><SvgLabel x={LEFT - 12} y={laneY(index) + 4} text={lane} anchor="end" width={110} /><line x1={LEFT} x2={RIGHT} y1={laneY(index)} y2={laneY(index)} /></g>)}
       {figure.links?.map((link, index) => {
         const from = figure.events[link.from]; const to = figure.events[link.to];
         if (!from || !to) return null;
@@ -120,17 +136,17 @@ export function ScientificFigure({ figure, locale = 'zh', compact = false }: { f
   const markerId = `${figure.id.replace(/[^A-Za-z0-9_-]/g, '-')}-arrow`;
   return (
     <figure className={`scientific-figure${compact ? ' scientific-figure-compact' : ''}`} id={figure.id}>
-      <div className="scientific-canvas" role="group" aria-label={locale === 'zh' ? `${figure.title} 图形区域，可横向滚动` : `${figure.title} figure; scroll horizontally if needed`}>
+      <div className="scientific-canvas" role="group" aria-label={locale === 'zh' ? `${scientificTextPlainText(figure.title)} 图形区域，可横向滚动` : `${scientificTextPlainText(figure.title)} figure; scroll horizontally if needed`}>
         <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-labelledby={`${titleId} ${descriptionId}`}>
-          <title id={titleId}>{figure.alt}</title>
-          <desc id={descriptionId}>{figure.caption}</desc>
+          <title id={titleId}>{scientificTextPlainText(figure.alt)}</title>
+          <desc id={descriptionId}>{scientificTextPlainText(figure.caption)}</desc>
           {figure.kind === 'flow' && <FlowGraphic figure={figure} markerId={markerId} />}
           {figure.kind === 'plot' && <PlotGraphic figure={figure} />}
           {figure.kind === 'timeline' && <TimelineGraphic figure={figure} markerId={markerId} locale={locale} />}
           {figure.kind === 'state-space' && <StateSpaceGraphic figure={figure} />}
         </svg>
       </div>
-      <figcaption><strong>{figure.title}{locale === 'zh' ? '。' : '.'}</strong> {figure.caption} <span className="figure-source">{locale === 'zh' ? '来源：' : 'Sources: '}{figure.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index ? (locale === 'zh' ? '；' : '; ') : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`}>{ref.file}{locale === 'zh' ? `，第 ${ref.page} 页` : `, p. ${ref.page}`}</a></span>)}. {locale === 'zh' ? '示意图。' : 'Schematic.'}</span></figcaption>
+      <figcaption><strong><ScientificText text={`${figure.title}${locale === 'zh' ? '。' : '.'}`} /></strong> <ScientificText text={figure.caption} /> <span className="figure-source">{locale === 'zh' ? '来源：' : 'Sources: '}{figure.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index ? (locale === 'zh' ? '；' : '; ') : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`}>{ref.file}{locale === 'zh' ? `，第 ${ref.page} 页` : `, p. ${ref.page}`}</a></span>)}. {locale === 'zh' ? '示意图。' : 'Schematic.'}</span></figcaption>
     </figure>
   );
 }

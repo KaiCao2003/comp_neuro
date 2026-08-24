@@ -167,7 +167,7 @@
           "steps": [
             {
               "title": "定义依赖函数",
-              "explanation": "H(t)表示memory age为t时hippocampal perturbation造成的retrieval deficit。"
+              "explanation": "\\(H(t)\\)表示memory age为t时hippocampal perturbation造成的retrieval deficit。"
             },
             {
               "title": "standard prediction",
@@ -188,8 +188,8 @@
             "t是memory age，H是causal deficit measure。",
             "导数符号是理论趋势，不指定具体时间常数。"
           ],
-          "unitsCheck": "若H用performance difference，通常为无量纲比例；dH/dt为每时间单位变化。",
-          "limitCheck": "t=0附近encoding disruption与retrieval disruption可能混合，应采用post-encoding perturbation设计。"
+          "unitsCheck": "若H用performance difference，通常为无量纲比例；\\(dH/dt\\)为每时间单位变化。",
+          "limitCheck": "\\(t=0\\)附近encoding disruption与retrieval disruption可能混合，应采用post-encoding perturbation设计。"
         },
         "workedExample": {
           "title": "拆分remote memory得分",
@@ -222,7 +222,7 @@
         ],
         "guidingQuestion": "为什么一个快记系统和一个慢学系统能同时减少catastrophic interference并提取规律？",
         "paragraphs": [
-          "沿用原始第 2–3 页符号，Teacher 从 z∼P(z|θ_T) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 ŷ=f_S(x;θ_S)。Notebook 为每个 z^(μ) 建立稀疏 code ξ^(μ)，快速保存成对的 {z^(μ),ξ^(μ)}。这里 z 始终表示 Student activity，ξ 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。",
+          "沿用原始第 2–3 页符号，Teacher 从 \\(z\\sim P(z|\\theta _{T})\\) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 \\(\\hat{y}=f_{S}(x;\\theta _{S})\\)。Notebook 为每个 \\(z^{\\mu }\\) 建立稀疏 code \\(\\xi ^{\\mu }\\)，快速保存成对的 \\({z^{\\mu },\\xi ^{\\mu }}\\)。这里 z 始终表示 Student activity，\\(\\xi\\) 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。",
           "只用slow Student，rare experience可能在学会前消失；只用fast Notebook，可精准回忆episodes却难抽取population规律，容量和interference也受限。互补timescales让online experience先写Notebook，随后interleaved replay把old与new samples混合给Student，减轻new learning覆盖旧structure。",
           "replay是consolidation channel：Notebook pattern completion产生approximate experience，Student对replayed targets更新。若replay distribution偏向salient或recent events，Student学到的是weighted environment而非原始frequency。selection rule因此直接影响generalization与bias。",
           "formal model与empirical mapping要分层。Teacher不对应“教师脑区”，Notebook不必保存raw sensory pixels，Student也不等于全neocortex。检验框架应提出role-specific predictions：快速hippocampal lesion影响one-shot recall，slow cortical learning影响跨episode regularities，replay disruption影响later transfer。"
@@ -243,12 +243,12 @@
             },
             {
               "title": "one-shot write",
-              "explanation": "Notebook 为 Student pattern zμ 生成并快速保存稀疏 activity code ξμ。",
+              "explanation": "Notebook 为 Student pattern \\(z\\mu\\) 生成并快速保存稀疏 activity code \\(\\xi \\mu\\)。",
               "latex": "\\boldsymbol\\xi_\\mu=f_N(\\mathbf z_\\mu)"
             },
             {
               "title": "partial-cue replay",
-              "explanation": "partial cue 先补全 ξμ，再由 Notebook→Student links 重建 Student pattern z tilde。",
+              "explanation": "partial cue 先补全 \\(\\xi \\mu\\)，再由 Notebook→Student links 重建 Student pattern z tilde。",
               "latex": "\\widetilde{\\mathbf z}_\\mu=g_N(\\boldsymbol\\xi_\\mu)"
             },
             {
@@ -258,11 +258,11 @@
             }
           ],
           "symbolNotes": [
-            "ηS 是 slow learning rate，μ 索引 episode。",
-            "z 是 N-dimensional Student activity，ξ 是 M-dimensional sparse Notebook activity；x 与 y 是用于具体 Student prediction 的变量。"
+            "\\(\\eta _{S}\\) 是 slow learning rate，\\(\\mu\\) 索引 episode。",
+            "z 是 N-dimensional Student activity，\\(\\xi\\) 是 M-dimensional sparse Notebook activity；x 与 y 是用于具体 Student prediction 的变量。"
           ],
-          "unitsCheck": "loss与gradient units依model定义，ηS使parameter update与wS一致。",
-          "limitCheck": "ηS=0时无cortical transfer；replay reconstruction完全错误时Student会学入bias。"
+          "unitsCheck": "loss与gradient units依model定义，\\(\\eta _{S}\\)使parameter update与wS一致。",
+          "limitCheck": "\\(\\eta _{S}=0\\)时无cortical transfer；replay reconstruction完全错误时Student会学入bias。"
         },
         "workedExample": {
           "title": "比较interleaved与blocked replay",
@@ -295,23 +295,23 @@
         ],
         "guidingQuestion": "相似episodes怎样在写入时分开，又在只有partial cue时恢复完整training signal？",
         "paragraphs": [
-          "pattern separation 把相似 Student patterns z^(μ) 映成低-overlap Notebook codes ξ^(μ)，减少新 episode 覆盖旧 episode。原页的教学近似把 ξ^(μ) 视为与 z^(μ) 独立的 sparse random code；真实系统还必须保留足够 addressability，使 partial cue 能指向正确 code。dentate gyrus 等结构常被连接到这一功能，但 formal model 先描述 input-output transformation。",
-          "pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor ξ^(μ)。完成后的 ξ^(μ) 再通过 Notebook→Student weights V 重建 Student activity z tilde；反向 Student→Notebook seeding 在图中由 U 表示，但原页没有给 U 的具体 learning rule，因此不能直接把 V 转置后冒充来源公式。",
+          "pattern separation 把相似 Student patterns \\(z^{\\mu }\\) 映成低-overlap Notebook codes \\(\\xi ^{\\mu }\\)，减少新 episode 覆盖旧 episode。原页的教学近似把 \\(\\xi ^{\\mu }\\) 视为与 \\(z^{\\mu }\\) 独立的 sparse random code；真实系统还必须保留足够 addressability，使 partial cue 能指向正确 code。dentate gyrus 等结构常被连接到这一功能，但 formal model 先描述 input-output transformation。",
+          "pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor \\(\\xi ^{\\mu }\\)。完成后的 \\(\\xi ^{\\mu }\\) 再通过 Notebook→Student weights V 重建 Student activity z tilde；反向 Student→Notebook seeding 在图中由 U 表示，但原页没有给 U 的具体 learning rule，因此不能直接把 V 转置后冒充来源公式。",
           "separation 与 completion 作用在不同阶段：encoding 扩大 episodes 间距离，retrieval 在单一 basin 内缩小 cue 与 stored pattern 的距离。过强 separation 会让 partial cue 无法 generalize 到正确 address，过强 completion 会把 ambiguous cue 强制归入错误 episode。两者需在 capacity、specificity 与 robustness 间平衡。",
           "Notebook 不必永远独立保存每个 sensory detail；它可索引 distributed cortical components。lesion prediction 依模型版本：破坏 Notebook 会特别损害 recent one-shot 与 unpredictable details，而已经由 Student 学到的 shared structure 较保留。不能从 pattern-completion 术语直接推出特定临床时间梯度。"
         ],
         "keyPoints": [
           "separation降低episode code overlap。",
           "completion由partial cue恢复stored code。",
-          "Notebook 内 J 完成 pattern completion，V 按原页稀疏中心化 rule 把 ξ replay 回 Student；U 负责反向 seeding，但源页未指定其 update。"
+          "Notebook 内 J 完成 pattern completion，V 按原页稀疏中心化 rule 把 \\(\\xi\\) replay 回 Student；U 负责反向 seeding，但源页未指定其 update。"
         ],
         "derivation": {
           "title": "按原页稀疏中心化 Hebbian rule 重建 Student activity",
-          "setup": "设 z_iμ 是第 μ 个 N-dimensional Student pattern，ξ_jμ 是对应的 M-dimensional sparse Notebook code，P(ξ_jμ=1)=a。以下精确保留原始第 3 页的 V rule。",
+          "setup": "设 \\(z_{i\\mu }\\) 是第 \\(\\mu\\) 个 N-dimensional Student pattern，\\(\\xi _{j}\\mu\\) 是对应的 M-dimensional sparse Notebook code，\\(P(\\xi _{j}\\mu =1)=a\\)。以下精确保留原始第 3 页的 V rule。",
           "steps": [
             {
               "title": "写完整 Notebook→Student matrix",
-              "explanation": "Notebook activity 先减去 sparse mean a，再与目标 Student activity z 相乘；M a(1-a) 固定 field scale。",
+              "explanation": "Notebook activity 先减去 sparse \\(\\operatorname{mean} a\\)，再与目标 Student activity z 相乘；M \\(a(1-a)\\) 固定 field scale。",
               "latex": "V_{ij}=\\frac{1}{Ma(1-a)}\\sum_{\\mu=1}^{P}z_{i\\mu}(\\xi_{j\\mu}-a)"
             },
             {
@@ -321,7 +321,7 @@
             },
             {
               "title": "先在 Notebook 内完成 pattern",
-              "explanation": "partial cue 经 U seed 后，由 autoassociative J dynamics 收敛到 stored ξ^(μ)；这一步先于 cortical replay。",
+              "explanation": "partial cue 经 U seed 后，由 autoassociative J dynamics 收敛到 stored \\(\\xi ^{\\mu }\\)；这一步先于 cortical replay。",
               "latex": "\\boldsymbol\\xi_{\\mathrm{partial}}\\xrightarrow{\\,J\\,}\\boldsymbol\\xi^{(\\mu)}"
             },
             {
@@ -332,17 +332,17 @@
           ],
           "symbolNotes": [
             "V 是 N×M：rows 对应 Student units i，columns 对应 Notebook units j；P 是 stored episode 数。",
-            "z 是 Student activity，ξ 是 sparse Notebook activity，a 是 ξ 的 mean activity；不能与前一版中把 z 改称 Notebook code 的符号混用。"
+            "z 是 Student activity，\\(\\xi\\) 是 sparse Notebook activity，a 是 \\(\\xi\\) 的 mean activity；不能与前一版中把 z 改称 Notebook code 的符号混用。"
           ],
-          "unitsCheck": "若 ξ 无量纲，V 继承 z 的 activity units；(N×M)(M×1) 返回 N×1 Student activity。",
-          "limitCheck": "若 ξ codes 相互独立且 sparse，cross-talk 较小；若 codes 相同，两个 episodes 无法由 Notebook address 区分。"
+          "unitsCheck": "若 \\(\\xi\\) 无量纲，V 继承 z 的 activity units；(N×M)(M×1) 返回 N×1 Student activity。",
+          "limitCheck": "若 \\(\\xi\\) codes 相互独立且 sparse，cross-talk 较小；若 codes 相同，两个 episodes 无法由 Notebook address 区分。"
         },
         "workedExample": {
           "title": "比较code overlap",
-          "problem": "三个 binary Notebook active sets：ξ1={1,2,3,4}，ξ2={3,4,5,6}，separation 后 ξ2′={5,6,7,8}。计算与 ξ1 共享的 active units 数。",
+          "problem": "三个 binary Notebook active sets：\\(\\xi _{1}={1,2,3,4}\\)，\\(\\xi _{2}={3,4,5,6}\\)，separation 后 \\(\\xi _{2}'={5,6,7,8}\\)。计算与 \\(\\xi _{1}\\) 共享的 active units 数。",
           "steps": [
-            "原 ξ1 与 ξ2 共享 {3,4}，数量 2。",
-            "ξ1 与 ξ2′ 没有共享 unit，数量 0。",
+            "原 \\(\\xi _{1}\\) 与 \\(\\xi _{2}\\) 共享 \\({3,4}\\)，数量 2。",
+            "\\(\\xi _{1}\\) 与 \\(\\xi _{2}'\\) 没有共享 unit，数量 0。",
             "separation 降低 overlap，但还需测试 partial cue 是否能指向正确 code。"
           ],
           "result": "shared count从2降到0。",
@@ -368,23 +368,23 @@
         ],
         "guidingQuestion": "为什么准确复现Notebook samples可能降低training error，却损害对新experiences的预测？",
         "paragraphs": [
-          "linear Teacher 产生 y=wT^T x+ε，其中 ε 是不可由 x 预测的 episode noise；Student 对新 input 预测 ŷ=wS^T x。原始第 4 页的 memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：e_m²=(1/P)Σ_μ(y_μ-wS^T x tilde_μ)²，并注明 x tilde_μ≈x_μ 是理想 recall 极限。generalization error e_g² 则对 Teacher distribution 中全新的 (x,y) 取 expectation。",
-          "early learning让wS接近wT，signal error下降，所以training与test errors都下降。继续拟合有限sample中的ε会让wS偏离population-optimal direction；training error继续下降，test error可能回升。这是overfitting，不代表memory本身变差，而是复现sample detail与预测新example的目标冲突。",
-          "Notebook可保留sample-specific ε，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。standard CLS若无限均匀replay每个noisy target，有限Student可能最终记入noise。regularization、early stopping或predictability-weighted replay可保护generalization。",
+          "linear Teacher 产生 \\(y=w_{\\mathrm{T}}^\\mathrm{T} x+\\epsilon\\)，其中 \\(\\epsilon\\) 是不可由 x 预测的 episode noise；Student 对新 input 预测 \\(\\hat{y}=w_{\\mathrm{S}}^\\mathrm{T} x\\)。原始第 4 页的 memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：\\(e_{m}^{2}=(1/P)\\sum _\\mu (y_\\mu -w_{\\mathrm{S}}^\\mathrm{T} \\widetilde{x}_{\\mu })^{2}\\)，并注明 \\(\\widetilde{x}_{\\mu }\\approx x_\\mu\\) 是理想 recall 极限。generalization error \\(e_{g}^{2}\\) 则对 Teacher distribution 中全新的 (x,y) 取 expectation。",
+          "early learning让wS接近wT，signal error下降，所以training与test errors都下降。继续拟合有限sample中的\\(\\epsilon\\)会让wS偏离population-optimal direction；training error继续下降，test error可能回升。这是overfitting，不代表memory本身变差，而是复现sample detail与预测新example的目标冲突。",
+          "Notebook可保留sample-specific \\(\\epsilon\\)，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。standard CLS若无限均匀replay每个noisy target，有限Student可能最终记入noise。regularization、early stopping或predictability-weighted replay可保护generalization。",
           "实验上 training memory 与 generalization 需用不同stimuli测量。用同一episodes既训练又测试只得到memory error，不能声称schema learning。还应报告P、input dimension、noise variance与learning time，因为overfitting发生位置由这些量决定。"
         ],
         "keyPoints": [
           "memory error 在 stored samples 的 Notebook-recalled inputs x tilde 上计算。",
           "generalization error在new Teacher samples上计算。",
-          "unpredictable ε可由Notebook记住，却不应被Student当作规律。"
+          "unpredictable \\(\\epsilon\\)可由Notebook记住，却不应被Student当作规律。"
         ],
         "derivation": {
           "title": "memory error 与 generalization error 的分界",
-          "setup": "先保留原页的 Notebook-recalled input x tilde，再假设 fresh x 与 ε 独立、E[ε]=0，分解 population generalization error。",
+          "setup": "先保留原页的 Notebook-recalled input x tilde，再假设 fresh x 与 \\(\\epsilon\\) 独立、\\(E[\\epsilon ]=0\\)，分解 population generalization error。",
           "steps": [
             {
               "title": "写 stored-memory error",
-              "explanation": "每个 stored target yμ 由 Student 对 Notebook recalled input x tilde μ 的 prediction 来检验。",
+              "explanation": "每个 stored target \\(y\\mu\\) 由 Student 对 Notebook recalled input x tilde \\(\\mu\\) 的 prediction 来检验。",
               "latex": "e_m^2=\\frac1P\\sum_{\\mu=1}^{P}(y_\\mu-\\mathbf w_S^{\\mathsf T}\\widetilde{\\mathbf x}_\\mu)^2"
             },
             {
@@ -408,26 +408,26 @@
             }
           ],
           "symbolNotes": [
-            "wT、wS 是 feature weights；ε 与 y 同单位；x tilde 表示 Notebook recalled input。",
-            "e_m² 与 e_g² 都使用 target units squared，但前者在 stored recalls 上算，后者在 fresh Teacher samples 上算。"
+            "wT、wS 是 feature weights；\\(\\epsilon\\) 与 y 同单位；x tilde 表示 Notebook recalled input。",
+            "\\(e_{m}^{2}\\) 与 \\(e_{g}^{2}\\) 都使用 target units squared，但前者在 stored recalls 上算，后者在 fresh Teacher samples 上算。"
           ],
-          "unitsCheck": "两项都是y²单位；cross term能否消失取决于independence与zero mean。",
-          "limitCheck": "wS=wT时generalization error仍有irreducible noise E[ε²]，不会降到零。"
+          "unitsCheck": "两项都是\\(y^{2}\\)单位；cross term能否消失取决于independence与zero mean。",
+          "limitCheck": "\\(w_{\\mathrm{S}}=w_{\\mathrm{T}}\\)时generalization error仍有irreducible noise \\(E[\\epsilon ^{2}]\\)，不会降到零。"
         },
         "workedExample": {
           "title": "手算training与test差异",
-          "problem": "一维 Teacher wT=2、Student wS=3。对 fresh x=1，noise variance=1，求 expected generalization squared error；另有 stored sample 的 ε=1、y=3，Notebook 恰好 recall x tilde=1。",
+          "problem": "一维 Teacher \\(w_{\\mathrm{T}}=2\\)、Student \\(w_{\\mathrm{S}}=3\\)。对 fresh \\(x=1\\)，noise \\(\\mathrm{variance}=1\\)，求 expected generalization squared error；另有 stored sample 的 \\(\\epsilon =1\\)、\\(y=3\\)，Notebook 恰好 recall x tilde=1。",
           "steps": [
-            "weight mismatch为2-3=-1，在x=1时平方1。",
+            "weight mismatch为\\(2-3=-1\\)，在\\(x=1\\)时平方1。",
             "加irreducible noise variance1，expected test error为2。",
-            "stored sample 上 Student 接收 x tilde=1，故 ŷ=3、y=3，memory error 为 0。"
+            "stored sample 上 Student 接收 x tilde=1，故 \\(\\hat{y}=3\\)、\\(y=3\\)，memory error 为 0。"
           ],
           "result": "memory error 可为 0，而 expected generalization error 为 2。",
-          "sanityCheck": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+          "sanityCheck": "若\\(w_{\\mathrm{S}}=2\\)，expected test error降为1但该stored sample prediction2、memory error1。"
         },
         "selfCheck": {
           "prompt": "为什么generalization error最低也可能大于零？",
-          "answer": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+          "answer": "Teacher target含不可预测noise \\(\\epsilon\\)；即使Student恢复true weight，也无法预知new episode的\\(\\epsilon\\)。"
         },
         "pitfalls": [
           "用 training error 下降证明 generalization 改善，或计算 memory error 时漏掉 recalled x tilde。",
@@ -445,8 +445,8 @@
         ],
         "guidingQuestion": "何时继续replay能提取signal，何时却开始把不可预测episode noise写进Student？",
         "paragraphs": [
-          "Go-CLS 把 consolidation 目标设为 generalization，而非把 Notebook 内容全部复制。原始第 5 页定义 signal-to-noise style quantity λ=E[(wT^T x)²]/E[ε²]。只有在 predictable signal 与 noise 都已中心化时，才可把它简写成 variance ratio。λ 高时跨 episodes 规律强，Student 从 replay 受益较久；λ 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。",
-          "formal stopping time t*=argmin_t eg²(t)。实际系统不知道population eg，可用validation-like signals、uncertainty、replay agreement或learning-curve curvature作proxy。模型核心是存在停止或gating，而非脑必须显式计算argmin。不同features可有不同predictability，因此consolidation可能按component而非整episode统一停止。",
+          "Go-CLS 把 consolidation 目标设为 generalization，而非把 Notebook 内容全部复制。原始第 5 页定义 signal-to-noise style quantity \\(\\lambda =E[(w_{\\mathrm{T}}^\\mathrm{T} x)^{2}]/E[\\epsilon ^{2}]\\)。只有在 predictable signal 与 noise 都已中心化时，才可把它简写成 variance ratio。\\(\\lambda\\) 高时跨 episodes 规律强，Student 从 replay 受益较久；\\(\\lambda\\) 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。",
+          "formal stopping time \\(t*=\\operatorname{argmin}_{t} eg^{2}(t)\\)。实际系统不知道population eg，可用validation-like signals、uncertainty、replay agreement或learning-curve curvature作proxy。模型核心是存在停止或gating，而非脑必须显式计算argmin。不同features可有不同predictability，因此consolidation可能按component而非整episode统一停止。",
           "lesion predictions随memory content分化：高predictability structure逐步进入Student，remote retrieval较能耐受Notebook lesion；unpredictable episodic detail 长期由Notebook支持，即使remote也可能受损。recent memories两种component都尚未充分transfer，因此整体更脆弱。这比单一age cutoff给更细预测。",
           "Go-CLS是formal model与prediction，不是已完成的empirical定论。检验可操纵training-set regularity与noise，匹配age和exposure，再测hippocampal disruption对gist和detail的影响。若只比较自然recent/remote memories，rehearsal、emotion和schema差异会与predictability混杂。"
         ],
@@ -466,7 +466,7 @@
             },
             {
               "title": "定义learning curve",
-              "explanation": "eg²(t)在early signal learning时下降，noise fitting占优后可能上升。",
+              "explanation": "\\(eg^{2}(t)\\)在early signal learning时下降，noise fitting占优后可能上升。",
               "latex": "e_g^2(t)=\\mathbb E[(y-\\widehat y_t)^2]"
             },
             {
@@ -476,25 +476,25 @@
             },
             {
               "title": "形成component prediction",
-              "explanation": "高λ component倾向较晚停止，低λ component倾向较早停止或不转移。"
+              "explanation": "高\\(\\lambda\\) component倾向较晚停止，低\\(\\lambda\\) component倾向较早停止或不转移。"
             }
           ],
           "symbolNotes": [
-            "λ无量纲；t可为replay次数或物理时间。",
-            "eg²是population/test error，不是stored-sample error。"
+            "\\(\\lambda\\)无量纲；t可为replay次数或物理时间。",
+            "\\(eg^{2}\\)是population/test error，不是stored-sample error。"
           ],
           "unitsCheck": "second-moment ratio 无量纲；argmin 返回与 t 相同的单位。",
-          "limitCheck": "noise second moment→0 时 λ 增大且 overfit pressure 减弱；signal second moment→0 时 transfer 不能改善 new-sample prediction。"
+          "limitCheck": "noise second moment→0 时 \\(\\lambda\\) 增大且 overfit pressure 减弱；signal second moment→0 时 transfer 不能改善 new-sample prediction。"
         },
         "workedExample": {
           "title": "比较两类memory component",
-          "problem": "假设 signal 与 noise 都是 zero mean。component A 的 signal variance=9、noise variance=1；B 的 signal variance=1、noise variance=4。计算 λ 并预测相对 stopping。",
+          "problem": "假设 signal 与 noise 都是 zero mean。component A 的 signal \\(\\mathrm{variance}=9\\)、noise \\(\\mathrm{variance}=1\\)；B 的 signal \\(\\mathrm{variance}=1\\)、noise \\(\\mathrm{variance}=4\\)。计算 \\(\\lambda\\) 并预测相对 stopping。",
           "steps": [
-            "λA=9/1=9。",
-            "λB=1/4=0.25。",
+            "\\(\\lambda _{A}=9/1=9\\)。",
+            "\\(\\lambda _{B}=1/4=0.25\\)。",
             "A高度predictable，允许更长Student training；B noise-dominant，应更早停止并保留Notebook dependence。"
           ],
-          "result": "λA=9、λB=0.25，预测A比B更充分consolidate。",
+          "result": "\\(\\lambda _{A}=9\\)、\\(\\lambda _{B}=0.25\\)，预测A比B更充分consolidate。",
           "sanityCheck": "ratio越高表示可重复structure相对noise越强。"
         },
         "selfCheck": {
@@ -502,7 +502,7 @@
           "answer": "停止的是继续向 Student 拟合该 component；Notebook 仍可保留并支持 episodic-detail retrieval。"
         },
         "pitfalls": [
-          "把t*写成固定年龄阈值，不考虑predictability。",
+          "把\\(t*\\)写成固定年龄阈值，不考虑predictability。",
           "把Go-CLS lesion curve作为既定临床事实而非待检验prediction。"
         ]
       }
@@ -515,7 +515,7 @@
       "moduleId": "l27-m3",
       "title": "Teacher–Student–Notebook 的离线 replay 通道",
       "alt": "Teacher 在线训练 Student，Student activity 与稀疏 Notebook code 成对存储，Notebook completion 后通过 V 重建 Student pattern 并离线回放",
-      "caption": "在线阶段 Teacher 产生训练经历，Student pattern z^(μ) 与 Notebook code ξ^(μ) 成对存储；检索时 Notebook 先把 partial cue 完成，再用 V 计算 z̃_i=Σ_jV_ijξ_j。虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。",
+      "caption": "在线阶段 Teacher 产生训练经历，Student pattern \\(z^{\\mu }\\) 与 Notebook code \\(\\xi ^{\\mu }\\) 成对存储；检索时 Notebook 先把 partial cue 完成，再用 V 计算 \\(\\widetilde{z}_i=\\sum _jV_{ij}\\xi _{j}\\)。虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。",
       "sourceRefs": [
         {
           "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
@@ -537,26 +537,26 @@
         },
         {
           "id": "student",
-          "label": "Student\nz^(μ)",
+          "label": "Student\n\\(z^{\\mu }\\)",
           "x": 35,
           "y": 70,
           "tone": "accent"
         },
         {
           "id": "notebook",
-          "label": "Notebook code\nξ^(μ)",
+          "label": "Notebook code\n\\(\\xi ^{\\mu }\\)",
           "x": 64,
           "y": 70
         },
         {
           "id": "complete",
-          "label": "completed code\nξ̂",
+          "label": "completed code\n\\(\\hat{\\xi }\\)",
           "x": 92,
           "y": 70
         },
         {
           "id": "replay",
-          "label": "replay target\nz̃ = Vξ̂",
+          "label": "replay target\n\\(\\widetilde{z} = V\\hat{\\xi }\\)",
           "x": 64,
           "y": 22,
           "tone": "accent"
@@ -603,22 +603,22 @@
     "思考题：pattern separation 的计算益处？",
     "5.2 Teacher-Student-Notebook formal roles",
     "【补全推导】 三个系统分别解决什么 computational problem？",
-    "z ∼ P (z | θT )",
+    "\\(z \\sim  P (z | \\theta T )\\)",
     "ŷ = f (x; θS ) {z µ }Pµ=1 ↔ {ξ µ }Pµ=1 1. Teacher/environment 生成 structured experiences。 2. Student/neocortex 用 slow learning 提取可预测 input-output relation。 3. Notebook/hippocampus 用 autoassociative one-shot storage 保存 episodes。 4. notebook pattern separation 减少 memories interference，pattern completion 支持 replay/seeding student。",
     "Geometric/computational intuition. fast memory 解决单次保存，slow learner 解决跨 experiences 泛化。 Biological interpretation / failure condition. 三个角色是 formal abstractions，不等于每个 anatomical region 只执行单一功能。",
     "思考题：pattern completion 的益处？",
     "5.3 linear teacher/student 的 memory 与 generalization error",
     "【跨页连接】 为什么训练误差下降不保证 population prediction 变好？",
-    "y = wTT x + ϵ",
-    "1 ∑ P em = (yµ − wTS xµ )2 P µ=1",
-    "eg = Ex,ϵ [(y − wTS x)2 ] 1. memory/training error 只在 notebook stored examples 上评估。 2. generalization error 对 teacher distribution 的新 samples 取 expectation。 3. fast notebook 可令 stored pattern recall 很好，即 e_m 低。 4. student 需要多 examples 才能估 teacher signal，过度拟合 ε 会使 e_g 上升。",
+    "y = wTT \\(x + \\epsilon \\)",
+    "1 \\(\\sum  P\\) em = (yµ − wTS xµ )2 P µ=1",
+    "eg = Ex,ϵ [(y − wTS x)2 ] 1. memory/training error 只在 notebook stored examples 上评估。 2. generalization error 对 teacher distribution 的新 samples 取 expectation。 3. fast notebook 可令 stored pattern recall 很好，即 \\(e_{m}\\) 低。 4. student 需要多 examples 才能估 teacher signal，过度拟合 \\(\\epsilon \\) 会使 \\(e_{g}\\) 上升。",
     "Geometric/computational intuition. 记住每个 episode 与学到可预测规律是不同 objectives。 Biological interpretation / failure condition. nonlinear/high-dimensional teacher 下 curves 取决于 model capacity、regularization 与 sample size。",
     "思考题：memory error 与 generalization error 区别？",
     "5.4 Go-CLS stopping 与 predictability",
     "【模型边界】 何时应停止 hippocampus→cortex consolidation？",
-    "E[(wTT x)2 ] λs = (predictability/SNR) E[ϵ2 ]",
+    "E[(wTT x)2 ] \\(\\lambda s = (predictability/SNR)\\) \\(E[\\epsilon _{2} ]\\)",
     "t∗ = arg min eg (t) t",
-    "1. 早期 transfer 学 signal，e_g 下降。 2. 继续 replay 后，student 开始拟合 notebook 中的 unpredictable ε，e_g 回升。 3. Go-CLS 在 minimum generalization error 附近停止/衰减 transfer。 4. 高 λ_s memories 更可 corticalize；低 λ_s detail 保持 hippocampal dependence。",
+    "1. 早期 transfer 学 signal，\\(e_{g}\\) 下降。 2. 继续 replay 后，student 开始拟合 notebook 中的 unpredictable \\(\\epsilon \\)，\\(e_{g}\\) 回升。 3. Go-CLS 在 minimum generalization error 附近停止/衰减 transfer。 4. 高 \\(\\lambda _{s}\\) memories 更可 corticalize；低 \\(\\lambda _{s}\\) detail 保持 hippocampal dependence。",
     "Geometric/computational intuition. 最优 consolidation 不是复制到零 training error，而是最大化未来 prediction。 Biological interpretation / failure condition. brain 如何估计 predictability/停止时机是 model prediction，需实验检验。",
     "思考题：为何 standard unlimited transfer 可过拟合？"
   ],
@@ -878,7 +878,7 @@
       "sourcePage": 5,
       "sectionId": "l27-m5",
       "originalIssue": "Page 5 的 predictability ratio 是 signal-to-noise style quantity；具体 normalization 依模型 convention。",
-      "explanation": "原始第 5 页定义 signal-to-noise style quantity λ=E[(wT^T x)²]/E[ε²]。",
+      "explanation": "原始第 5 页定义 signal-to-noise style quantity \\(\\lambda =E[(w_{\\mathrm{T}}^\\mathrm{T} x)^{2}]/E[\\epsilon ^{2}]\\)。",
       "correction": null
     }
   ],
@@ -1061,7 +1061,7 @@
         "b": "这是“语义记忆（semantic memory）”的定义。",
         "c": "这是“模式补全（pattern completion）”的定义。"
       },
-      "explanation": "减少相似 episodes 的 interference。 Notebook可保留sample-specific ε，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。"
+      "explanation": "减少相似 episodes 的 interference。 Notebook可保留sample-specific \\(\\epsilon\\)，支持episodic recall；Student应主要学习跨episodes稳定的wT structure。"
     },
     {
       "id": "L27-Q05",
@@ -1106,7 +1106,7 @@
         "c": "这是“模式分离（pattern separation）”的定义。",
         "d": "该选项回答的是“低 predictability detail 的 prediction？”。"
       },
-      "explanation": "partial cue 恢复完整 episode/replay seed。 λ 高时跨 episodes 规律强，Student 从 replay 受益较久；λ 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。"
+      "explanation": "partial cue 恢复完整 episode/replay seed。 \\(\\lambda\\) 高时跨 episodes 规律强，Student 从 replay 受益较久；\\(\\lambda\\) 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。"
     },
     {
       "id": "L27-Q06",
@@ -1151,7 +1151,7 @@
         "c": "这是“泛化误差（generalization error）”的定义。",
         "d": "这是“记忆误差（memory error）”的定义。"
       },
-      "explanation": "前者在 stored samples；后者在新 samples/distribution。 pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor ξ^(μ)。"
+      "explanation": "前者在 stored samples；后者在新 samples/distribution。 pattern completion 依靠 Notebook 内部 autoassociative weights J，从 partial/noisy Notebook state 收敛到 stored attractor \\(\\xi ^{\\mu }\\)。"
     },
     {
       "id": "L27-Q07",
@@ -1196,7 +1196,7 @@
         "b": "这是“过拟合（overfitting）”的定义。",
         "d": "这条推理对应 Lecture27-SystemsConsolidation-Generalization.pdf 第 5 页。"
       },
-      "explanation": "student 开始学习 notebook 中不可预测 episode noise。 这里 z 始终表示 Student activity，ξ 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。"
+      "explanation": "student 开始学习 notebook 中不可预测 episode noise。 这里 z 始终表示 Student activity，\\(\\xi\\) 表示 Notebook activity；名称描述计算角色，不表示三者位于同一解剖层级。"
     },
     {
       "id": "L27-Q08",
@@ -1241,7 +1241,7 @@
         "b": "这是“教师-学生-笔记本（Teacher-Student-Notebook）”的定义。",
         "c": "该选项回答的是“standard account 中 hippocampal replay 的作用？”。"
       },
-      "explanation": "在 generalization error minimum/由 predictability 控制的时点停止或减弱 transfer。 λ 高时跨 episodes 规律强，Student 从 replay 受益较久；λ 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。"
+      "explanation": "在 generalization error minimum/由 predictability 控制的时点停止或减弱 transfer。 \\(\\lambda\\) 高时跨 episodes 规律强，Student 从 replay 受益较久；\\(\\lambda\\) 低时 sample-specific detail 占主导，generalization optimum 较早，应停止或降低 transfer。"
     },
     {
       "id": "L27-Q09",
@@ -1351,7 +1351,7 @@
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "第 27 讲：λ_s 大表示什么？",
+      "stem": "第 27 讲：\\(\\lambda _{s}\\) 大表示什么？",
       "choices": [
         {
           "id": "a",
@@ -1556,7 +1556,7 @@
         "b": "该选项回答的是“Teacher、Student、Notebook 分别代表什么？”。",
         "d": "该选项回答的是“standard account 中 hippocampal replay 的作用？”。"
       },
-      "explanation": "虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。 沿用原始第 2-3 页符号，Teacher 从 z∼P(z|θ_T) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 ŷ=f_S(x;θ_S)。"
+      "explanation": "虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。 沿用原始第 2-3 页符号，Teacher 从 \\(z\\sim P(z|\\theta _{T})\\) 产生 Student activity patterns；在一个具体 prediction task 中，可从 z 取出 input x 与 output y，Student 用有限-capacity parameters 慢速学习 \\(\\hat{y}=f_{S}(x;\\theta _{S})\\)。"
     },
     {
       "id": "L27-Q16",
@@ -1601,7 +1601,7 @@
         "b": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
         "c": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。"
       },
-      "explanation": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。 pattern separation 把相似 Student patterns z^(μ) 映成低-overlap Notebook codes ξ^(μ)，减少新 episode 覆盖旧 episode。"
+      "explanation": "解释 notebook 的 pattern separation、pattern completion、Hebbian student↔notebook interaction 与 seeding。 pattern separation 把相似 Student patterns \\(z^{\\mu }\\) 映成低-overlap Notebook codes \\(\\xi ^{\\mu }\\)，减少新 episode 覆盖旧 episode。"
     },
     {
       "id": "L27-Q17",
@@ -1646,7 +1646,7 @@
         "c": "该陈述解释的是“overfitting unpredictable components、stopping consolidation、 Go-CLS”，不是题干指定的关系。",
         "d": "该陈述解释的是“Teacher-Student-Notebook framework、generative teacher、 neocortical student”，不是题干指定的关系。"
       },
-      "explanation": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。 原始第 4 页的 memory error 不是直接把完美 x 喂给 Student，而是在 P 个 stored samples 上使用 Notebook recalled input x tilde：e_m²=(1/P)Σ_μ(y_μ-wS^T x tilde_μ)²，并注明 x tilde_μ≈x_μ 是理想 recall 极限。"
+      "explanation": "从 linear teacher/student model 定义 memory error 与 population generalization error；说明 fast notebook memory 与 slow student generalization 的 tradeoff。 linear Teacher 产生 \\(y=w_{\\mathrm{T}}^\\mathrm{T} x+\\epsilon\\)，其中 \\(\\epsilon\\) 是不可由 x 预测的 episode noise；Student 对新 input 预测 \\(\\hat{y}=w_{\\mathrm{S}}^\\mathrm{T} x\\)。"
     },
     {
       "id": "L27-Q18",
@@ -1726,7 +1726,7 @@
         },
         {
           "id": "d",
-          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+          "text": "Teacher target含不可预测noise \\(\\epsilon\\)；即使Student恢复true weight，也无法预知new episode的\\(\\epsilon\\)。"
         }
       ],
       "correctChoiceId": "c",
@@ -1816,7 +1816,7 @@
         },
         {
           "id": "d",
-          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+          "text": "若\\(w_{\\mathrm{S}}=2\\)，expected test error降为1但该stored sample prediction2、memory error1。"
         }
       ],
       "correctChoiceId": "a",
@@ -1860,7 +1860,7 @@
         },
         {
           "id": "d",
-          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+          "text": "Teacher target含不可预测noise \\(\\epsilon\\)；即使Student恢复true weight，也无法预知new episode的\\(\\epsilon\\)。"
         }
       ],
       "correctChoiceId": "b",
@@ -1946,7 +1946,7 @@
         },
         {
           "id": "c",
-          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+          "text": "若\\(w_{\\mathrm{S}}=2\\)，expected test error降为1但该stored sample prediction2、memory error1。"
         },
         {
           "id": "d",
@@ -1994,7 +1994,7 @@
         },
         {
           "id": "d",
-          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+          "text": "Teacher target含不可预测noise \\(\\epsilon\\)；即使Student恢复true weight，也无法预知new episode的\\(\\epsilon\\)。"
         }
       ],
       "correctChoiceId": "a",
@@ -2021,9 +2021,9 @@
         "比较code overlap"
       ],
       "difficulty": 3,
-      "type": "concept",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 27 讲：完成\"三个 binary Notebook active sets：ξ1={1,2,3,4}，ξ2={3,4,5,6}，separation 后 ξ2′={5,6,7,8}。计算与 ξ1 共享的 active units 数。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 27 讲：完成\"三个 binary Notebook active sets：\\(\\xi _{1}={1,2,3,4}\\)，\\(\\xi _{2}={3,4,5,6}\\)，separation 后 \\(\\xi _{2}'={5,6,7,8}\\)。计算与 \\(\\xi _{1}\\) 共享的 active units 数。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2048,7 +2048,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "shared count从2降到0。 计算路径：原 ξ1 与 ξ2 共享 {3,4}，数量 2。 ξ1 与 ξ2′ 没有共享 unit，数量 0。 separation 降低 overlap，但还需测试 partial cue 是否能指向正确 code。"
+      "explanation": "shared count从2降到0。 计算路径：原 \\(\\xi _{1}\\) 与 \\(\\xi _{2}\\) 共享 \\({3,4}\\)，数量 2。 \\(\\xi _{1}\\) 与 \\(\\xi _{2}'\\) 没有共享 unit，数量 0。 separation 降低 overlap，但还需测试 partial cue 是否能指向正确 code。"
     },
     {
       "id": "L27-Q27",
@@ -2084,7 +2084,7 @@
         },
         {
           "id": "d",
-          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+          "text": "若\\(w_{\\mathrm{S}}=2\\)，expected test error降为1但该stored sample prediction2、memory error1。"
         }
       ],
       "correctChoiceId": "c",
@@ -2093,7 +2093,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。 这个检查对应题设\"三个 binary Notebook active sets：ξ1={1,2,3,4}，ξ2={3,4,5,6}，separation 后 ξ2′={5,6,7,8}。计算与 ξ1 共享的 active units 数。\"中的单位、方向或极限条件。"
+      "explanation": "每个code仍有4个active units，所以变化不是由稀疏度改变造成。 这个检查对应题设\"三个 binary Notebook active sets：\\(\\xi _{1}={1,2,3,4}\\)，\\(\\xi _{2}={3,4,5,6}\\)，separation 后 \\(\\xi _{2}'={5,6,7,8}\\)。计算与 \\(\\xi _{1}\\) 共享的 active units 数。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L27-Q28",
@@ -2128,7 +2128,7 @@
         },
         {
           "id": "d",
-          "text": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。"
+          "text": "Teacher target含不可预测noise \\(\\epsilon\\)；即使Student恢复true weight，也无法预知new episode的\\(\\epsilon\\)。"
         }
       ],
       "correctChoiceId": "d",
@@ -2137,7 +2137,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "c": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "Teacher target含不可预测noise ε；即使Student恢复true weight，也无法预知new episode的ε。 实验上 training memory 与 generalization 需用不同stimuli测量。用同一episodes既训练又测试只得到memory error，不能声称schema learning。还应报告P、input dimension、noise variance与learning time，因为overfitting发生位置由这些量决定。"
+      "explanation": "Teacher target含不可预测noise \\(\\epsilon\\)；即使Student恢复true weight，也无法预知new episode的\\(\\epsilon\\)。 实验上 training memory 与 generalization 需用不同stimuli测量。用同一episodes既训练又测试只得到memory error，不能声称schema learning。还应报告P、input dimension、noise variance与learning time，因为overfitting发生位置由这些量决定。"
     },
     {
       "id": "L27-Q29",
@@ -2155,9 +2155,9 @@
         "手算training与test差异"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 27 讲：完成\"一维 Teacher wT=2、Student wS=3。对 fresh x=1，noise variance=1，求 expected generalization squared error；另有 stored sample 的 ε=1、y=3，Notebook 恰好 recall x tilde=1。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 27 讲：完成\"一维 Teacher \\(w_{\\mathrm{T}}=2\\)、Student \\(w_{\\mathrm{S}}=3\\)。对 fresh \\(x=1\\)，noise \\(\\mathrm{variance}=1\\)，求 expected generalization squared error；另有 stored sample 的 \\(\\epsilon =1\\)、\\(y=3\\)，Notebook 恰好 recall x tilde=1。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2182,7 +2182,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "memory error 可为 0，而 expected generalization error 为 2。 计算路径：weight mismatch为2-3=-1，在x=1时平方1。 加irreducible noise variance1，expected test error为2。 stored sample 上 Student 接收 x tilde=1，故 ŷ=3、y=3，memory error 为 0。"
+      "explanation": "memory error 可为 0，而 expected generalization error 为 2。 计算路径：weight mismatch为\\(2-3=-1\\)，在\\(x=1\\)时平方1。 加irreducible noise variance1，expected test error为2。 stored sample 上 Student 接收 x tilde=1，故 \\(\\hat{y}=3\\)、\\(y=3\\)，memory error 为 0。"
     },
     {
       "id": "L27-Q30",
@@ -2210,7 +2210,7 @@
         },
         {
           "id": "b",
-          "text": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。"
+          "text": "若\\(w_{\\mathrm{S}}=2\\)，expected test error降为1但该stored sample prediction2、memory error1。"
         },
         {
           "id": "c",
@@ -2227,7 +2227,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "若wS=2，expected test error降为1但该stored sample prediction2、memory error1。 这个检查对应题设\"一维 Teacher wT=2、Student wS=3。对 fresh x=1，noise variance=1，求 expected generalization squared error；另有 stored sample 的 ε=1、y=3，Notebook 恰好 recall x tilde=1。\"中的单位、方向或极限条件。"
+      "explanation": "若\\(w_{\\mathrm{S}}=2\\)，expected test error降为1但该stored sample prediction2、memory error1。 这个检查对应题设\"一维 Teacher \\(w_{\\mathrm{T}}=2\\)、Student \\(w_{\\mathrm{S}}=3\\)。对 fresh \\(x=1\\)，noise \\(\\mathrm{variance}=1\\)，求 expected generalization squared error；另有 stored sample 的 \\(\\epsilon =1\\)、\\(y=3\\)，Notebook 恰好 recall x tilde=1。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L27-Q31",
@@ -2289,9 +2289,9 @@
         "比较两类memory component"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 27 讲：完成\"假设 signal 与 noise 都是 zero mean。component A 的 signal variance=9、noise variance=1；B 的 signal variance=1、noise variance=4。计算 λ 并预测相对 stopping。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 27 讲：完成\"假设 signal 与 noise 都是 zero mean。component A 的 signal \\(\\mathrm{variance}=9\\)、noise \\(\\mathrm{variance}=1\\)；B 的 signal \\(\\mathrm{variance}=1\\)、noise \\(\\mathrm{variance}=4\\)。计算 \\(\\lambda\\) 并预测相对 stopping。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2307,7 +2307,7 @@
         },
         {
           "id": "d",
-          "text": "λA=9、λB=0.25，预测A比B更充分consolidate。"
+          "text": "\\(\\lambda _{A}=9\\)、\\(\\lambda _{B}=0.25\\)，预测A比B更充分consolidate。"
         }
       ],
       "correctChoiceId": "d",
@@ -2316,7 +2316,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "λA=9、λB=0.25，预测A比B更充分consolidate。 计算路径：λA=9/1=9。 λB=1/4=0.25。 A高度predictable，允许更长Student training；B noise-dominant，应更早停止并保留Notebook dependence。"
+      "explanation": "\\(\\lambda _{A}=9\\)、\\(\\lambda _{B}=0.25\\)，预测A比B更充分consolidate。 计算路径：\\(\\lambda _{A}=9/1=9\\)。 \\(\\lambda _{B}=1/4=0.25\\)。 A高度predictable，允许更长Student training；B noise-dominant，应更早停止并保留Notebook dependence。"
     },
     {
       "id": "L27-Q33",
@@ -2336,7 +2336,7 @@
       "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "evaluate",
-      "stem": "第 27 讲：得到\"λA=9、λB=0.25，预测A比B更充分consolidate。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "stem": "第 27 讲：得到\"\\(\\lambda _{A}=9\\)、\\(\\lambda _{B}=0.25\\)，预测A比B更充分consolidate。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
       "choices": [
         {
           "id": "a",
@@ -2361,7 +2361,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "ratio越高表示可重复structure相对noise越强。 这个检查对应题设\"假设 signal 与 noise 都是 zero mean。component A 的 signal variance=9、noise variance=1；B 的 signal variance=1、noise variance=4。计算 λ 并预测相对 stopping。\"中的单位、方向或极限条件。"
+      "explanation": "ratio越高表示可重复structure相对noise越强。 这个检查对应题设\"假设 signal 与 noise 都是 zero mean。component A 的 signal \\(\\mathrm{variance}=9\\)、noise \\(\\mathrm{variance}=1\\)；B 的 signal \\(\\mathrm{variance}=1\\)、noise \\(\\mathrm{variance}=4\\)。计算 \\(\\lambda\\) 并预测相对 stopping。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L27-Q34",
@@ -2855,7 +2855,7 @@
         "b": "这是“memory/training error”的条件，不是题干公式的条件。",
         "c": "这是“population generalization error”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear teacher 的适用条件：signal+unpredictable noise linear Teacher 产生 y=wT^T x+ε，其中 ε 是不可由 x 预测的 episode noise；Student 对新 input 预测 ŷ=wS^T x。"
+      "explanation": "linear teacher 的适用条件：signal+unpredictable noise linear Teacher 产生 \\(y=w_{\\mathrm{T}}^\\mathrm{T} x+\\epsilon\\)，其中 \\(\\epsilon\\) 是不可由 x 预测的 episode noise；Student 对新 input 预测 \\(\\hat{y}=w_{\\mathrm{S}}^\\mathrm{T} x\\)。"
     },
     {
       "id": "L27-Q45",
@@ -2899,7 +2899,7 @@
         "c": "这是“memory/training error”的条件，不是题干公式的条件。",
         "d": "这是“population generalization error”的条件，不是题干公式的条件。"
       },
-      "explanation": "student predictor 的适用条件：linear model linear Teacher 产生 y=wT^T x+ε，其中 ε 是不可由 x 预测的 episode noise；Student 对新 input 预测 ŷ=wS^T x。"
+      "explanation": "student predictor 的适用条件：linear model linear Teacher 产生 \\(y=w_{\\mathrm{T}}^\\mathrm{T} x+\\epsilon\\)，其中 \\(\\epsilon\\) 是不可由 x 预测的 episode noise；Student 对新 input 预测 \\(\\hat{y}=w_{\\mathrm{S}}^\\mathrm{T} x\\)。"
     },
     {
       "id": "L27-Q46",
@@ -2943,7 +2943,7 @@
         "c": "这是“student predictor”的条件，不是题干公式的条件。",
         "d": "这是“population generalization error”的条件，不是题干公式的条件。"
       },
-      "explanation": "memory/training error 的适用条件：stored patterns pattern separation 把相似 Student patterns z^(μ) 映成低-overlap Notebook codes ξ^(μ)，减少新 episode 覆盖旧 episode。"
+      "explanation": "memory/training error 的适用条件：stored patterns pattern separation 把相似 Student patterns \\(z^{\\mu }\\) 映成低-overlap Notebook codes \\(\\xi ^{\\mu }\\)，减少新 episode 覆盖旧 episode。"
     },
     {
       "id": "L27-Q47",

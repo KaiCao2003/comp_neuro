@@ -31,8 +31,8 @@
   "dependencyMap": "two-neuron W → common/difference modes → mode regimes → activity-space trajectory → covariance → PCA top-K",
   "coreQuestion": "How do recurrent modes in a two-neuron network produce nearly one-dimensional population trajectories, and how does PCA recover maximum-variance dimensions from activity covariance alone?",
   "diagnostic": [
-    "What is the result of multiplying W=[[0,0.6],[0.6,0]] by (1,1)^T?",
-    "For τ=20 ms and λ=0.8, what is the effective time constant of τ dα/dt=-(1-λ)α?",
+    "What is the result of multiplying \\(W=[[0,0.6],[0.6,0]]\\) by \\((1,1)^\\mathrm{T}\\)?",
+    "For \\(\\tau =20 \\mathrm{ms}\\) and \\(\\lambda =0.8\\), what is the effective time constant of \\(\\tau  d\\alpha /dt=-(1-\\lambda )\\alpha\\)?",
     "Why must each neuron's mean activity be subtracted before computing the covariance?",
     "Does a nearly one-dimensional trajectory mean that only one neuron is active?",
     "If the PCA eigenvalues are 9, 3, 1, and 1, what cumulative variance is explained by retaining the first two PCs?"
@@ -47,7 +47,7 @@
       "noteMeaning": "The two-neuron weight matrix and its common and difference modes.",
       "reasoning": "Solve the eigenvalues and eigenvectors of the two-neuron weight matrix, normalize the common and difference modes, and transform the inputs. Keep the dynamical eigenvectors of recurrent matrix W distinct from the principal components of covariance C; they are not generally identical.",
       "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
-      "stopPredict": "What are the eigenvalues of W=[[0,w],[w,0]]?"
+      "stopPredict": "What are the eigenvalues of \\(W=[[0,w],[w,0]]\\)?"
     },
     {
       "id": "lecture-19-source-2",
@@ -80,7 +80,7 @@
       "noteMeaning": "Projection variance, centered covariance, and PCA.",
       "reasoning": "Derive PC1 as the covariance eigenvector with the largest eigenvalue by maximizing projection variance of centered activity, then extend the argument to orthogonal top-K PCs. Contrast covariance PCs with dynamical eigenvectors of recurrent W; the two are not generally the same.",
       "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
-      "stopPredict": "For w=0.8, what are τ+ and τ-?"
+      "stopPredict": "For \\(w=0.8\\), what are \\(\\tau _{+}\\) and \\(\\tau _{-}\\)?"
     },
     {
       "id": "lecture-19-source-5",
@@ -91,7 +91,7 @@
       "noteMeaning": "Top-K PCA, orthogonal projection, reconstruction, and information loss.",
       "reasoning": "Track matrix shapes through projection, dimensional truncation, and reconstruction, with a small numerical example. Connect PC1 to orthogonal top-K PCs and make clear that denoising requires an extra signal-versus-noise assumption.",
       "figureReading": "Match each diagram to the matrix geometry: axes denote variables or modes, ellipse orientation follows eigenvectors, and axis length or curvature reflects eigenvalues. Do not reinterpret a statistical axis automatically as a causal pathway.",
-      "stopPredict": "At w=1, which mode is a perfect integrator?"
+      "stopPredict": "At \\(w=1\\), which mode is a perfect integrator?"
     },
     {
       "id": "lecture-19-source-6",
@@ -114,30 +114,30 @@
       "Compare the updated and earlier notes: retain their shared material, then use the new page 6 to add the eigenvalue cliff and cumulative-variance curve."
     ],
     "prerequisiteBridge": [
-      "Begin by viewing a vector as an ordered list of numbers. At one moment, the firing-rate deviations of two neurons can be written h=(h1,h2)^T; matrix W specifies the feedback each neuron receives from the other. If Wv=λv, one recurrent mapping simply multiplies activity along v by λ, making v a natural direction for describing the network. The only matrix skills required are a two-by-two determinant, simultaneous linear equations, vector length, and dot products.",
-      "The dynamical equation τ dh/dt=-h+Wh+I contains intrinsic leak, recurrent feedback, and external input. Expanding h in the eigenvector basis of W separates the coupled system into independent one-dimensional equations. For τ dα/dt=-(1-λ)α+β, removing the input leaves exponential decay with effective time constant τ_eff=τ/(1-λ). Decay slows as λ approaches 1; at λ=1, this linear mode retains its accumulated state.",
-      "PCA answers a different question. Given population vectors from many times or trials, it finds a unit direction v that maximizes the variance of the centered projection v^T(h-h_bar). PCA uses the data covariance C, not W itself. Always ask whether a matrix comes from a model or from data before interpreting its eigenvectors; this prevents dynamical modes, principal components, and causal circuit directions from being conflated."
+      "Begin by viewing a vector as an ordered list of numbers. At one moment, the firing-rate deviations of two neurons can be written \\(h=(h_{1},h_{2})^\\mathrm{T}\\); matrix W specifies the feedback each neuron receives from the other. If \\(Wv=\\lambda v\\), one recurrent mapping simply multiplies activity along v by \\(\\lambda\\), making v a natural direction for describing the network. The only matrix skills required are a two-by-two determinant, simultaneous linear equations, vector length, and dot products.",
+      "The dynamical equation \\(\\tau  dh/dt=-h+Wh+I\\) contains intrinsic leak, recurrent feedback, and external input. Expanding h in the eigenvector basis of W separates the coupled system into independent one-dimensional equations. For \\(\\tau  d\\alpha /dt=-(1-\\lambda )\\alpha +\\beta\\), removing the input leaves exponential decay with effective time constant \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda )\\). Decay slows as \\(\\lambda\\) approaches 1; at \\(\\lambda =1\\), this linear mode retains its accumulated state.",
+      "PCA answers a different question. Given population vectors from many times or trials, it finds a unit direction v that maximizes the variance of the centered projection \\(v^\\mathrm{T}(h-\\bar{h})\\). PCA uses the data covariance C, not W itself. Always ask whether a matrix comes from a model or from data before interpreting its eigenvectors; this prevents dynamical modes, principal components, and causal circuit directions from being conflated."
     ],
     "diagnostic": [
       {
         "id": "l19-d1",
-        "prompt": "What is the result of multiplying W=[[0,0.6],[0.6,0]] by (1,1)^T?",
-        "answer": "The result is (0.6,0.6)^T, so (1,1)^T is an eigenvector with eigenvalue 0.6.",
-        "explanation": "Multiply row by row: the first row gives 0×1+0.6×1 and the second gives 0.6×1+0×1. If this calculation is unfamiliar, return to the common/difference-mode module and check each component.",
+        "prompt": "What is the result of multiplying \\(W=[[0,0.6],[0.6,0]]\\) by \\((1,1)^\\mathrm{T}\\)?",
+        "answer": "The result is \\((0.6,0.6)^\\mathrm{T}\\), so \\((1,1)^\\mathrm{T}\\) is an eigenvector with eigenvalue 0.6.",
+        "explanation": "Multiply row by row: the first row gives \\(0\\times 1+0.6\\times 1\\) and the second gives \\(0.6\\times 1+0\\times 1\\). If this calculation is unfamiliar, return to the common/difference-mode module and check each component.",
         "remediationModuleId": "l19-m1"
       },
       {
         "id": "l19-d2",
-        "prompt": "For τ=20 ms and λ=0.8, what is the effective time constant of τ dα/dt=-(1-λ)α?",
-        "answer": "τ_eff=20/(1-0.8)=100 ms.",
-        "explanation": "The coefficient 1-λ sets the decay rate: the smaller this gap, the longer the time constant. Do not mistake λ itself for a time constant measured in milliseconds.",
+        "prompt": "For \\(\\tau =20 \\mathrm{ms}\\) and \\(\\lambda =0.8\\), what is the effective time constant of \\(\\tau  d\\alpha /dt=-(1-\\lambda )\\alpha\\)?",
+        "answer": "\\(\\tau _{\\mathrm{eff}}=20/(1-0.8)=100 \\mathrm{ms}\\).",
+        "explanation": "The coefficient \\(1-\\lambda\\) sets the decay rate: the smaller this gap, the longer the time constant. Do not mistake \\(\\lambda\\) itself for a time constant measured in milliseconds.",
         "remediationModuleId": "l19-m2"
       },
       {
         "id": "l19-d3",
         "prompt": "Why must each neuron's mean activity be subtracted before computing the covariance?",
         "answer": "Centering makes covariance describe joint fluctuations around the mean firing pattern instead of mistaking the mean response direction for the direction of greatest variability.",
-        "explanation": "Without centering, the second moment h h^T contains both the mean outer product and trial-to-trial variation, so PC1 may primarily track mean activity.",
+        "explanation": "Without centering, the second moment h \\(h^\\mathrm{T}\\) contains both the mean outer product and trial-to-trial variation, so PC1 may primarily track mean activity.",
         "remediationModuleId": "l19-m4"
       },
       {
@@ -150,7 +150,7 @@
       {
         "id": "l19-d5",
         "prompt": "If the PCA eigenvalues are 9, 3, 1, and 1, what cumulative variance is explained by retaining the first two PCs?",
-        "answer": "(9+3)/(9+3+1+1)=12/14, or approximately 85.7%.",
+        "answer": "\\((9+3)/(9+3+1+1)=12/14\\), or approximately 85.7%.",
         "explanation": "The denominator of cumulative variance explained must contain every eigenvalue. Dividing only by the retained eigenvalues would incorrectly give 100%.",
         "remediationModuleId": "l19-m6"
       }
@@ -171,66 +171,66 @@
         ],
         "guidingQuestion": "Why does replacing h1 and h2 with common and opposing changes decouple the originally coupled network?",
         "paragraphs": [
-          "The source page gives W=[[0,w0],[w0,0]] and the rate equations τ dh1/dt=-h1+w0h2+I1 and τ dh2/dt=-h2+w0h1+I2. Zeros on the diagonal mean that this teaching example has no self-coupling, while equal off-diagonal entries make the reciprocal coupling symmetric. That symmetry suggests testing h1=h2 and h1=-h2: exchanging the neurons leaves the first pattern unchanged and changes only the sign of the second.",
-          "Set det(W-λI)=λ²-w0²=0 to obtain λ+=w0 and λ-=-w0. Substituting λ+ gives h2=h1, so a common eigenvector is (1,1)^T. Substituting λ- gives h2=-h1, so a difference eigenvector is (1,-1)^T. Dividing each by √2 produces unit vectors with zero dot product, an orthonormal basis V. Normalization preserves direction and lets coordinates be computed directly by dot products.",
-          "The new coordinates are α=V^T h: α+=(h1+h2)/√2 and α-=(h1-h2)/√2. Applying the same transformation to the input gives β+=(I1+I2)/√2 and β-=(I1-I2)/√2. Substitute h=Vα into the original equation and left-multiply by V^T to obtain τ dα+/dt=-(1-w0)α++β+ and τ dα-/dt=-(1+w0)α-+β-. Each equation now contains only its own coordinate, confirming that the basis change has decoupled the dynamics.",
-          "Both modes are population patterns, not patterns belonging separately to neuron 1 and neuron 2. Increasing the common mode changes both neurons in the same direction; increasing the difference mode raises one and lowers the other. In an asymmetric network the eigenvectors need not be orthogonal, so V^{-1} need not equal V^T. Mode decomposition may still be possible, but the coordinate transform and geometry must use the general inverse rather than the orthogonal formulas on this page."
+          "The source page gives \\(W=[[0,w_{0}],[w_{0},0]]\\) and the rate equations \\(\\tau  dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) and \\(\\tau  dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\). Zeros on the diagonal mean that this teaching example has no self-coupling, while equal off-diagonal entries make the reciprocal coupling symmetric. That symmetry suggests testing \\(h_{1}=h_{2}\\) and \\(h_{1}=-h_{2}\\): exchanging the neurons leaves the first pattern unchanged and changes only the sign of the second.",
+          "Set \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}=0\\) to obtain \\(\\lambda _{+}=w_{0}\\) and \\(\\lambda _{-}=-w_{0}\\). Substituting \\(\\lambda _{+}\\) gives \\(h_{2}=h_{1}\\), so a common eigenvector is \\((1,1)^\\mathrm{T}\\). Substituting \\(\\lambda _{-}\\) gives \\(h_{2}=-h_{1}\\), so a difference eigenvector is \\((1,-1)^\\mathrm{T}\\). Dividing each by \\(\\sqrt 2\\) produces unit vectors with zero dot product, an orthonormal basis V. Normalization preserves direction and lets coordinates be computed directly by dot products.",
+          "The new coordinates are \\(\\alpha =V^\\mathrm{T} h\\): \\(\\alpha _{+}=(h_{1}+h_{2})/\\sqrt 2\\) and \\(\\alpha _{-}=(h_{1}-h_{2})/\\sqrt 2\\). Applying the same transformation to the input gives \\(\\beta _{+}=(I_{1}+I_{2})/\\sqrt 2\\) and \\(\\beta _{-}=(I_{1}-I_{2})/\\sqrt 2\\). Substitute \\(h=V\\alpha\\) into the original equation and left-multiply by \\(V^\\mathrm{T}\\) to obtain \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}+\\beta _{+}\\) and \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}+\\beta _{-}\\). Each equation now contains only its own coordinate, confirming that the basis change has decoupled the dynamics.",
+          "Both modes are population patterns, not patterns belonging separately to neuron 1 and neuron 2. Increasing the common mode changes both neurons in the same direction; increasing the difference mode raises one and lowers the other. In an asymmetric network the eigenvectors need not be orthogonal, so \\(V^{-1}\\) need not equal \\(V^\\mathrm{T}\\). Mode decomposition may still be possible, but the coordinate transform and geometry must use the general inverse rather than the orthogonal formulas on this page."
         ],
         "keyPoints": [
-          "λ+=w0 corresponds to the normalized common vector (1,1)^T/√2.",
-          "λ-=-w0 corresponds to the normalized difference vector (1,-1)^T/√2.",
-          "Activity and input must be transformed in the same basis: α=V^Th and β=V^TI.",
+          "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\).",
+          "\\(\\lambda _{-}=-w_{0}\\) corresponds to the normalized difference vector \\((1,-1)^\\mathrm{T}/\\sqrt 2\\).",
+          "Activity and input must be transformed in the same basis: \\(\\alpha =V^\\mathrm{T}h\\) and \\(\\beta =V^\\mathrm{T}I\\).",
           "The eigenvectors of W describe directions of model dynamics; they are not the PCs obtained from data covariance."
         ],
         "derivation": {
           "title": "Complete solution of the common/difference eigensystem",
-          "setup": "Start from Wv=λv and det(W-λI)=0 without guessing the answer, then normalize the two eigenvectors and assemble V.",
+          "setup": "Start from \\(Wv=\\lambda v\\) and \\(\\det(W-\\lambda I)=0\\) without guessing the answer, then normalize the two eigenvectors and assemble V.",
           "steps": [
             {
               "title": "Write the characteristic equation",
-              "explanation": "For W-λI=[[-λ,w0],[w0,-λ]], the two-by-two determinant is (-λ)(-λ)-w0².",
+              "explanation": "For \\(W-\\lambda I=[[-\\lambda ,w_{0}],[w_{0},-\\lambda ]]\\), the two-by-two determinant is \\((-\\lambda )(-\\lambda )-w_{0}^{2}\\).",
               "latex": "\\det(W-\\lambda I)=\\lambda^2-w_0^2=0"
             },
             {
               "title": "Solve for the two directions",
-              "explanation": "When λ=w0, both rows require v1=v2; when λ=-w0, they require v1=-v2. Choose the shortest integer vector in each direction and then normalize it.",
+              "explanation": "When \\(\\lambda =w_{0}\\), both rows require \\(v_{1}=v_{2}\\); when \\(\\lambda =-w_{0}\\), they require \\(v_{1}=-v_{2}\\). Choose the shortest integer vector in each direction and then normalize it.",
               "latex": "\\boldsymbol{\\xi}_{+}=\\frac{1}{\\sqrt2}(1,1)^{\\mathsf T},\\quad \\boldsymbol{\\xi}_{-}=\\frac{1}{\\sqrt2}(1,-1)^{\\mathsf T}"
             },
             {
               "title": "Construct the coordinate transform",
-              "explanation": "Place the eigenvectors in the columns of V. Because they are orthogonal unit vectors, V^{-1}=V^T.",
+              "explanation": "Place the eigenvectors in the columns of V. Because they are orthogonal unit vectors, \\(V^{-1}=V^\\mathrm{T}\\).",
               "latex": "V=\\frac1{\\sqrt2}\\begin{bmatrix}1&1\\\\1&-1\\end{bmatrix},\\quad \\boldsymbol{\\alpha}=V^{\\mathsf T}\\mathbf h"
             },
             {
               "title": "Transform the dynamics",
-              "explanation": "Use V^TWV=diag(w0,-w0) to split the original coupled system into two scalar equations.",
+              "explanation": "Use \\(V^\\mathrm{T}WV=\\operatorname{diag}(w_{0},-w_{0})\\) to split the original coupled system into two scalar equations.",
               "latex": "\\tau\\dot\\alpha_{\\pm}=-(1\\mp w_0)\\alpha_{\\pm}+\\beta_{\\pm}"
             }
           ],
           "symbolNotes": [
-            "h, I, α, and β are 2×1 vectors; W and V are 2×2 matrices.",
-            "w0 and the eigenvalues are dimensionless feedback gains; τ carries the unit of time."
+            "h, I, \\(\\alpha\\), and \\(\\beta\\) are \\(2\\times 1\\) vectors; W and V are \\(2\\times 2\\) matrices.",
+            "w0 and the eigenvalues are dimensionless feedback gains; \\(\\tau\\) carries the unit of time."
           ],
-          "unitsCheck": "V^Th has shape (2×2)(2×1)=2×1, and every term in the mode ODE has units of a rate coordinate.",
-          "limitCheck": "At w0=0 the original neurons are uncoupled and the two basis directions decay at the same rate. The eigenbasis is then not unique: common/difference coordinates remain valid but are no longer the only choice."
+          "unitsCheck": "\\(V^\\mathrm{T}h\\) has shape \\((2\\times 2)(2\\times 1)=2\\times 1\\), and every term in the mode ODE has units of a rate coordinate.",
+          "limitCheck": "At \\(w_{0}=0\\) the original neurons are uncoupled and the two basis directions decay at the same rate. The eigenbasis is then not unique: common/difference coordinates remain valid but are no longer the only choice."
         },
         "workedExample": {
           "title": "Transform a population state into mode coordinates",
-          "problem": "Given h=(3,1)^T and I=(2,2)^T, calculate α and β, then verify that α reconstructs h without loss.",
+          "problem": "Given \\(h=(3,1)^\\mathrm{T}\\) and \\(I=(2,2)^\\mathrm{T}\\), calculate \\(\\alpha\\) and \\(\\beta\\), then verify that \\(\\alpha\\) reconstructs h without loss.",
           "steps": [
-            "Compute α+=(3+1)/√2=2√2 and α-=(3-1)/√2=√2.",
-            "Compute β+=(2+2)/√2=2√2 and β-=(2-2)/√2=0, so the input drives only the common mode.",
-            "Reconstruct α+ξ++α-ξ-: the first component is (2√2+√2)/√2=3 and the second is (2√2-√2)/√2=1."
+            "Compute \\(\\alpha _{+}=(3+1)/\\sqrt 2=2\\sqrt 2\\) and \\(\\alpha _{-}=(3-1)/\\sqrt 2=\\sqrt 2\\).",
+            "Compute \\(\\beta _{+}=(2+2)/\\sqrt 2=2\\sqrt 2\\) and \\(\\beta _{-}=(2-2)/\\sqrt 2=0\\), so the input drives only the common mode.",
+            "Reconstruct \\(\\alpha +\\xi _{+}+\\alpha -\\xi _{-}\\): the first component is \\((2\\sqrt 2+\\sqrt 2)/\\sqrt 2=3\\) and the second is \\((2\\sqrt 2-\\sqrt 2)/\\sqrt 2=1\\)."
           ],
-          "result": "The mode coordinates are α=(2√2,√2)^T, the input coordinates are β=(2√2,0)^T, and reconstruction returns exactly (3,1)^T.",
-          "sanityCheck": "The squared coordinates sum to 8+2=10, matching the original vector's squared length 3²+1²=10. An orthogonal transform preserves length, providing an arithmetic check."
+          "result": "The mode coordinates are \\(\\alpha =(2\\sqrt 2,\\sqrt 2)^\\mathrm{T}\\), the input coordinates are \\(\\beta =(2\\sqrt 2,0)^\\mathrm{T}\\), and reconstruction returns exactly \\((3,1)^\\mathrm{T}\\).",
+          "sanityCheck": "The squared coordinates sum to \\(8+2=10\\), matching the original vector's squared length \\(3^{2}+1^{2}=10\\). An orthogonal transform preserves length, providing an arithmetic check."
         },
         "selfCheck": {
-          "prompt": "If I1=1 and I2=-1, which mode is driven directly?",
-          "answer": "β+=(1-1)/√2=0 and β-=(1-(-1))/√2=√2, so only the difference mode is driven directly; the neurons tend to change in opposite directions."
+          "prompt": "If \\(I_{1}=1\\) and \\(I_{2}=-1\\), which mode is driven directly?",
+          "answer": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\) and \\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\), so only the difference mode is driven directly; the neurons tend to change in opposite directions."
         },
         "pitfalls": [
-          "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent.",
+          "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent.",
           "Treating the common and difference modes as separate neurons, even though each mode is a joint pattern of both neurons."
         ]
       },
@@ -249,15 +249,15 @@
         ],
         "guidingQuestion": "Why does the same w0 slow the common mode but accelerate the difference mode?",
         "paragraphs": [
-          "The homogeneous mode equations are τ dα+/dt=-(1-w0)α+ and τ dα-/dt=-(1+w0)α-. Comparing them with τ_eff dα/dt=-α gives τ+=τ/(1-w0) and τ-=τ/(1+w0). Page 1 of the source writes 1/(1∓w0), which is valid only after normalizing τ to 1; otherwise it loses the time unit. The dimensionally complete expression is τ/(1∓w0). Positive coupling supplies positive feedback to common changes and cancels part of the intrinsic leak. For opposing changes it acts as restoring feedback, because a rise in neuron 1 drives neuron 2 upward and reduces their difference.",
-          "When |w0|<1, both 1-w0 and 1+w0 are positive, so both modes decay exponentially after input removal. As w0 approaches 1, τ+ becomes long and the common coordinate behaves as a leaky integrator. At w0=1 the common equation has no leak: sustained input is integrated and the accumulated α+ remains after the input ends. The same logic moves to the difference mode as w0 approaches -1. Equality marks a perfect integrator and should not be lumped into the ordinary leaky regime.",
-          "If |w0|>1, at least one coefficient becomes negative. For example, at w0=1.2 the common equation is τ dα+/dt=+0.2α+, so a small perturbation grows exponentially. Mathematical instability does not mean a real firing rate can increase without bound; neuronal saturation, thresholds, and inhibition change the large-amplitude behavior. Linear analysis nevertheless identifies a direction that leaves the fixed point locally.",
-          "Read the activity-space sketches as follows. In the h1-h2 plane, the common axis has slope +1 and the difference axis has slope -1. If τ- is much smaller than τ+, an arbitrary initial state rapidly loses its difference component, approaches the common axis, and then moves slowly along it. The drawn axes show eigenvector directions; trajectory speed comes from the eigenvalues and τ, not from the lengths of the lines."
+          "The homogeneous mode equations are \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) and \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\). Comparing them with \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) gives \\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\). Page 1 of the source writes \\(1/(1\\mp w_{0})\\), which is valid only after normalizing \\(\\tau\\) to 1; otherwise it loses the time unit. The dimensionally complete expression is \\(\\tau /(1\\mp w_{0})\\). Positive coupling supplies positive feedback to common changes and cancels part of the intrinsic leak. For opposing changes it acts as restoring feedback, because a rise in neuron 1 drives neuron 2 upward and reduces their difference.",
+          "When \\(|w_{0}|<1\\), both 1-w0 and 1+w0 are positive, so both modes decay exponentially after input removal. As w0 approaches 1, \\(\\tau _{+}\\) becomes long and the common coordinate behaves as a leaky integrator. At \\(w_{0}=1\\) the common equation has no leak: sustained input is integrated and the accumulated \\(\\alpha _{+}\\) remains after the input ends. The same logic moves to the difference mode as w0 approaches -1. Equality marks a perfect integrator and should not be lumped into the ordinary leaky regime.",
+          "If \\(|w_{0}|>1\\), at least one coefficient becomes negative. For example, at \\(w_{0}=1.2\\) the common equation is \\(\\tau  d\\alpha _{+}/dt=+0.2\\alpha _{+}\\), so a small perturbation grows exponentially. Mathematical instability does not \\(\\operatorname{mean} a\\) real firing rate can increase without bound; neuronal saturation, thresholds, and inhibition change the large-amplitude behavior. Linear analysis nevertheless identifies a direction that leaves the fixed point locally.",
+          "Read the activity-space sketches as follows. In the h1-h2 plane, the common axis has slope +1 and the difference axis has slope -1. If \\(\\tau _{-}\\) is much smaller than \\(\\tau _{+}\\), an arbitrary initial state rapidly loses its difference component, approaches the common axis, and then moves slowly along it. The drawn axes show eigenvector directions; trajectory speed comes from the eigenvalues and \\(\\tau\\), not from the lengths of the lines."
         ],
         "keyPoints": [
-          "τ+=τ/(1-w0) and τ-=τ/(1+w0); the signs cannot be collapsed into a common denominator.",
-          "Only |w0|<1 makes both modes stable; w0=±1 produces a perfect integrator in one mode.",
-          "|w0|>1 makes the linear fixed point unstable along at least one mode.",
+          "\\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\); the signs cannot be collapsed into a common denominator.",
+          "Only \\(|w_{0}|<1\\) makes both modes stable; \\(w_{0}=\\pm 1\\) produces a perfect integrator in one mode.",
+          "\\(|w_{0}|>1\\) makes the linear fixed point unstable along at least one mode.",
           "An activity-space trajectory decomposes into independent exponential components along the eigenvectors."
         ],
         "derivation": {
@@ -266,12 +266,12 @@
           "steps": [
             {
               "title": "Isolate the standard decay rate",
-              "explanation": "Rewrite τ dα+/dt=-(1-w0)α+ as dα+/dt=-[(1-w0)/τ]α+.",
+              "explanation": "Rewrite \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) as \\(d\\alpha _{+}/dt=-[(1-w_{0})/\\tau ]\\alpha _{+}\\).",
               "latex": "\\dot\\alpha_+=-\\frac{1-w_0}{\\tau}\\alpha_+"
             },
             {
               "title": "Invert the rate to obtain the time constant",
-              "explanation": "The exponential decay rate is (1-w0)/τ, so its reciprocal is the time constant; the difference mode follows identically.",
+              "explanation": "The exponential decay rate is \\((1-w_{0})/\\tau\\), so its reciprocal is the time constant; the difference mode follows identically.",
               "latex": "\\tau_+=\\frac{\\tau}{1-w_0},\\qquad \\tau_-=\\frac{\\tau}{1+w_0}"
             },
             {
@@ -281,35 +281,35 @@
             },
             {
               "title": "Add constant input",
-              "explanation": "Under stable conditions, setting the derivative to zero gives α+*=β+/(1-w0), showing that gain also rises near the critical point.",
+              "explanation": "Under stable conditions, setting the derivative to zero gives \\(\\alpha _{+}*=\\beta _{+}/(1-w_{0})\\), showing that gain also rises near the critical point.",
               "latex": "\\alpha_+^*=\\frac{\\beta_+}{1-w_0}"
             }
           ],
           "symbolNotes": [
-            "α± and β± are rate coordinates. If the original input is a current, first determine whether I has already been converted to rate drive in the model.",
-            "τ± has units of time, whereas w0 and 1±w0 are dimensionless."
+            "\\(\\alpha \\pm\\) and \\(\\beta \\pm\\) are rate coordinates. If the original input is a current, first determine whether I has already been converted to rate drive in the model.",
+            "\\(\\tau \\pm\\) has units of time, whereas w0 and \\(1\\pm w_{0}\\) are dimensionless."
           ],
-          "unitsCheck": "Because the denominator is dimensionless, τ/(1∓w0) retains the time unit of τ. A unitless 'time constant' signals that τ was omitted.",
-          "limitCheck": "As w0→1^-, τ+→∞. Beyond 1 the formula becomes negative; this is not a negative physical time but a sign that the exponent now describes growth."
+          "unitsCheck": "Because the denominator is dimensionless, \\(\\tau /(1\\mp w_{0})\\) retains the time unit of \\(\\tau\\). A unitless 'time constant' signals that \\(\\tau\\) was omitted.",
+          "limitCheck": "As w0→1^-, \\(\\tau +\\to \\infty\\). Beyond 1 the formula becomes negative; this is not a negative physical time but a sign that the exponent now describes growth."
         },
         "workedExample": {
           "title": "Compare the speeds of the two modes",
-          "problem": "Let the single-cell time constant be τ=20 ms and w0=0.8. Remove the input, calculate both mode time constants, and predict the fraction remaining after 100 ms.",
+          "problem": "Let the single-cell time constant be \\(\\tau =20 \\mathrm{ms}\\) and \\(w_{0}=0.8\\). Remove the input, calculate both mode time constants, and predict the fraction remaining after 100 ms.",
           "steps": [
-            "τ+=20/(1-0.8)=100 ms; τ-=20/(1+0.8)=11.11 ms.",
-            "After 100 ms, the common-mode amplitude fraction is e^{-100/100}=e^{-1}≈0.368.",
-            "The difference-mode fraction is e^{-100/11.11}=e^{-9}≈0.000123, so it has nearly vanished."
+            "\\(\\tau _{+}=20/(1-0.8)=100 \\mathrm{ms}\\); \\(\\tau _{-}=20/(1+0.8)=11.11 \\mathrm{ms}\\).",
+            "After 100 ms, the common-mode amplitude fraction is \\(e^{-100/100}=e^{-1}\\approx 0.368\\).",
+            "The difference-mode fraction is \\(e^{-100/11.11}=e^{-9}\\approx 0.000123\\), so it has nearly vanished."
           ],
           "result": "At 100 ms the state contains almost only the common component, although both neurons may still have nonzero activity.",
           "sanityCheck": "Setting w0 to 0 should return both time constants to 20 ms. One long and one short time constant here agrees with the direction of positive reciprocal feedback."
         },
         "selfCheck": {
-          "prompt": "At w0=-0.9, which mode is slowest, and what is its time constant in units of τ?",
-          "answer": "The difference mode is slowest because τ-=τ/(1-0.9)=10τ; the common mode has τ+=τ/(1+0.9)≈0.526τ. Negative coupling near -1 preserves the opposing-change pattern."
+          "prompt": "At \\(w_{0}=-0.9\\), which mode is slowest, and what is its time constant in units of \\(\\tau\\)?",
+          "answer": "The difference mode is slowest because \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\); the common mode has \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\). Negative coupling near -1 preserves the opposing-change pattern."
         },
         "pitfalls": [
           "Judging stability from the sign of an eigenvalue of W while forgetting the -h term in the full ODE.",
-          "Using τ/(1-w0) for both modes and thereby losing the negative sign of the difference eigenvalue."
+          "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
         ]
       },
       {
@@ -327,10 +327,10 @@
         ],
         "guidingQuestion": "Precisely what does 'nearly one-dimensional population dynamics' mean, and what does it not claim?",
         "paragraphs": [
-          "Activity space uses (h1,h2) to describe the state of both neurons at each moment; mode space uses (α+,α-) to describe the same point. An invertible V connects the two, so they are not distinct datasets. Activity space corresponds directly to recorded firing rates, whereas mode space exposes the dynamics because each α coordinate evolves with its own time constant. A coordinate change removes no information; dimensionality reduction occurs only when coordinates are later discarded.",
-          "Any state can be written h(t)=α+(t)ξ++α-(t)ξ-. If τ- is much smaller than τ+ and no persistent difference input acts during the delay, α-(t) decays much faster than α+(t). After several τ-, h(t)≈α+(t)ξ+ and subsequent states lie near the common axis. 'One-dimensional' means that α+ is the main free coordinate needed for the trajectory, not that only one neuron participates.",
-          "Approximation quality can be measured by residual energy. Because the basis is orthonormal, ||h||²=α+²+α-². Discarding the difference mode gives squared reconstruction error exactly α-². An analyst may set a tolerance, for example calling the state 95% common-mode when α-²/(α+²+α-²)<0.05. This criterion is chosen for the analysis; it is not an absolute boundary that appears automatically in a sketch.",
-          "This reasoning also states the conditions for a low-dimensional conclusion. Strong drive to β- at every moment or trial-specific fast transients keep the difference coordinate away from zero. If nonlinear dynamics rotate directions with state, no fixed V describes the entire trajectory. Near-one-dimensionality is a property of a particular data distribution and time window, not a claim that the network can access only one line forever."
+          "Activity space uses (h1,h2) to describe the state of both neurons at each moment; mode space uses \\((\\alpha _{+},\\alpha _{-})\\) to describe the same point. An invertible V connects the two, so they are not distinct datasets. Activity space corresponds directly to recorded firing rates, whereas mode space exposes the dynamics because each \\(\\alpha\\) coordinate evolves with its own time constant. A coordinate change removes no information; dimensionality reduction occurs only when coordinates are later discarded.",
+          "Any state can be written \\(h(t)=\\alpha +(t)\\xi _{+}+\\alpha -(t)\\xi _{-}\\). If \\(\\tau _{-}\\) is much smaller than \\(\\tau _{+}\\) and no persistent difference input acts during the delay, \\(\\alpha -(t)\\) decays much faster than \\(\\alpha +(t)\\). After several \\(\\tau _{-}\\), \\(h(t)\\approx \\alpha +(t)\\xi _{+}\\) and subsequent states lie near the common axis. 'One-dimensional' means that \\(\\alpha _{+}\\) is the main free coordinate needed for the trajectory, not that only one neuron participates.",
+          "Approximation quality can be measured by residual energy. Because the basis is orthonormal, \\(||h||^{2}=\\alpha +^{2}+\\alpha -^{2}\\). Discarding the difference mode gives squared reconstruction error exactly \\(\\alpha -^{2}\\). An analyst may set a tolerance, for example calling the state 95% common-mode when \\(\\alpha -^{2}/(\\alpha +^{2}+\\alpha -^{2})<0.05\\). This criterion is chosen for the analysis; it is not an absolute boundary that appears automatically in a sketch.",
+          "This reasoning also states the conditions for a low-dimensional conclusion. Strong drive to \\(\\beta - at\\) every moment or trial-specific fast transients keep the difference coordinate away from zero. If nonlinear dynamics rotate directions with state, no fixed V describes the entire trajectory. Near-one-dimensionality is a property of a particular data distribution and time window, not a claim that the network can access only one line forever."
         ],
         "keyPoints": [
           "Activity coordinates and mode coordinates are reversible representations of the same state.",
@@ -354,36 +354,36 @@
             },
             {
               "title": "Compare relative amplitudes",
-              "explanation": "If τ-<τ+, then |α-/α+| contains the exponent -t(1/τ--1/τ+) and decreases with time.",
+              "explanation": "If \\(\\tau -<\\tau _{+}\\), then \\(|\\alpha _{-}/\\alpha +|\\) contains the exponent \\(-t(1/\\tau _{-}-1/\\tau _{+})\\) and decreases with time.",
               "latex": "\\left|\\frac{\\alpha_-(t)}{\\alpha_+(t)}\\right|=\\left|\\frac{\\alpha_-(0)}{\\alpha_+(0)}\\right|e^{-t(1/\\tau_- -1/\\tau_+)}"
             },
             {
               "title": "Obtain the one-dimensional approximation",
-              "explanation": "Once this ratio falls below a chosen tolerance, the relative error contributed by α- is small.",
+              "explanation": "Once this ratio falls below a chosen tolerance, the relative error contributed by \\(\\alpha _{-}\\) is small.",
               "latex": "\\mathbf h(t)\\approx\\alpha_+(t)\\boldsymbol\\xi_+"
             }
           ],
           "symbolNotes": [
             "The relative ratio is dimensionless and compares two coordinates in the same orthonormal basis.",
-            "If α+(0)=0, this ratio is undefined; use the residual-energy fraction directly."
+            "If \\(\\alpha +(0)=0\\), this ratio is undefined; use the residual-energy fraction directly."
           ],
-          "unitsCheck": "α± and h share the same units, while ξ± is dimensionless, so both terms in the reconstruction have compatible units.",
-          "limitCheck": "If τ-=τ+, both modes decay at the same relative rate, so timescale separation does not automatically collapse the initial two-dimensional structure to one dimension."
+          "unitsCheck": "\\(\\alpha \\pm\\) and h share the same units, while \\(\\xi \\pm\\) is dimensionless, so both terms in the reconstruction have compatible units.",
+          "limitCheck": "If \\(\\tau _{-}=\\tau _{+}\\), both modes decay at the same relative rate, so timescale separation does not automatically collapse the initial two-dimensional structure to one dimension."
         },
         "workedExample": {
           "title": "How quickly does the trajectory enter the low-dimensional manifold?",
-          "problem": "Let α+(0)=4, α-(0)=2, τ+=200 ms, and τ-=20 ms. Find both amplitudes and the difference-mode energy fraction after 100 ms.",
+          "problem": "Let \\(\\alpha +(0)=4\\), \\(\\alpha -(0)=2\\), \\(\\tau _{+}=200 \\mathrm{ms}\\), and \\(\\tau _{-}=20 \\mathrm{ms}\\). Find both amplitudes and the difference-mode energy fraction after 100 ms.",
           "steps": [
-            "α+(100)=4e^{-0.5}≈2.426.",
-            "α-(100)=2e^{-5}≈0.0135.",
-            "The difference fraction is 0.0135²/(2.426²+0.0135²)≈0.000031, or about 0.0031%."
+            "\\(\\alpha +(100)=4e^{-0.5}\\approx 2.426\\).",
+            "\\(\\alpha -(100)=2e^{-5}\\approx 0.0135\\).",
+            "The difference fraction is \\(0.0135^{2}/(2.426^{2}+0.0135^{2})\\approx 0.000031\\), or about 0.0031%."
           ],
           "result": "After 100 ms, well over 99.9% of the state energy lies on the common axis, so a one-dimensional approximation is safe.",
           "sanityCheck": "Swapping 20 ms and 200 ms reverses the fast/slow conclusion; first check which denominator is closer to zero."
         },
         "selfCheck": {
-          "prompt": "If a constant input β-=1 acts at every moment, must α- approach zero?",
-          "answer": "No. A stable difference mode approaches the nonzero fixed point α-* = β-/(1+w0), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure."
+          "prompt": "If a constant input \\(\\beta _{-}=1\\) acts at every moment, must \\(\\alpha _{-}\\) approach zero?",
+          "answer": "No. A stable difference mode approaches the nonzero fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure."
         },
         "pitfalls": [
           "Calling a coordinate transform itself dimensionality reduction; true reduction begins only when a coordinate is discarded.",
@@ -405,15 +405,15 @@
         ],
         "guidingQuestion": "Why must the direction of maximum variance be the eigenvector with the largest eigenvalue of the centered covariance?",
         "paragraphs": [
-          "Now suppose W is unknown and we observe only T population vectors h_t∈R^N. First compute the mean h_bar and define δh_t=h_t-h_bar. The covariance C=(1/T)Σ_t δh_tδh_t^T is an N×N symmetric positive-semidefinite matrix; C_ij describes centered cofluctuation between neurons i and j. For a chosen unit direction v, each sample has scalar projection p_t=v^Tδh_t.",
-          "The projection variance is (1/T)Σ p_t²=(1/T)Σ v^Tδh_tδh_t^Tv=v^TCv. Without a constraint on ||v||, scaling v arbitrarily would make the variance arbitrarily large, so require v^Tv=1. Maximize v^TCv-λ(v^Tv-1) with a Lagrange multiplier. Differentiating with respect to every component of v gives 2Cv-2λv=0, or Cv=λv. The candidate directions are therefore covariance eigenvectors.",
-          "Along eigenvector v_k, projected variance equals λ_k because v_k^TCv_k=v_k^T(λ_kv_k)=λ_k. Choosing v_1 for the largest eigenvalue gives PC1. The derivation establishes only maximum data variance. A small but reliable task signal or a large measurement artifact can make PC1 poor for decoding, nor is it automatically a causal circuit direction.",
+          "Now suppose W is unknown and we observe only T population vectors \\(h_{t}\\in \\mathbb{R}^N\\). First compute the \\(\\operatorname{mean} \\bar{h}\\) and define \\(\\delta h_{t}=h_{t}-\\bar{h}\\). The covariance \\(C=(1/T)\\sum _t \\delta h_{t}\\delta h_{t}^\\mathrm{T}\\) is an N×N symmetric positive-semidefinite matrix; \\(C_{ij}\\) describes centered cofluctuation between neurons i and j. For a chosen unit direction v, each sample has scalar projection \\(p_{t}=v^\\mathrm{T}\\delta h_{t}\\).",
+          "The projection variance is \\((1/T)\\sum  p_{t}^{2}=(1/T)\\sum  v^\\mathrm{T}\\delta h_{t}\\delta h_{t}^\\mathrm{T}v=v^\\mathrm{T}Cv\\). Without a constraint on ||v||, scaling v arbitrarily would make the variance arbitrarily large, so require \\(v^\\mathrm{T}v=1\\). Maximize \\(v^\\mathrm{T}Cv-\\lambda (v^\\mathrm{T}v-1)\\) with a Lagrange multiplier. Differentiating with respect to every component of v gives \\(2Cv-2\\lambda v=0\\), or \\(Cv=\\lambda v\\). The candidate directions are therefore covariance eigenvectors.",
+          "Along eigenvector \\(v_{k}\\), projected variance equals \\(\\lambda _{k}\\) because \\(v_{k}^\\mathrm{T}Cv_{k}=v_{k}^\\mathrm{T}(\\lambda _{k}v_{k})=\\lambda _{k}\\). Choosing \\(v_{1}\\) for the largest eigenvalue gives PC1. The derivation establishes only maximum data variance. A small but reliable task signal or a large measurement artifact can make PC1 poor for decoding, nor is it automatically a causal circuit direction.",
           "Modes of W and PCs of C align only under additional conditions. For example, in a linear network driven by isotropic noise at stationarity, with W normal or symmetric, slow dynamical modes often accumulate more variance. Structured input, unequal noise, trial conditions, and nonlinear observations can all rotate the covariance. Similar axes motivate a hypothesis; statistical collinearity does not identify recurrent weights by itself."
         ],
         "keyPoints": [
-          "PCA must be applied to centered activity: C=E[δhδh^T].",
-          "Under a unit-norm constraint, projected variance is v^TCv.",
-          "A stationary point satisfies Cv=λv, and the eigenvector with the largest λ is PC1.",
+          "PCA must be applied to centered activity: \\(C=E[\\delta h\\delta h^\\mathrm{T}]\\).",
+          "Under a unit-norm constraint, projected variance is \\(v^\\mathrm{T}Cv\\).",
+          "A stationary point satisfies \\(Cv=\\lambda v\\), and the eigenvector with the largest \\(\\lambda\\) is PC1.",
           "Maximum variance is not the same as maximum causal or behavioral relevance."
         ],
         "derivation": {
@@ -422,12 +422,12 @@
           "steps": [
             {
               "title": "Expand the projection variance",
-              "explanation": "Because p=v^Tδh is scalar, p²=v^Tδhδh^Tv; averaging over samples gives v^TCv.",
+              "explanation": "Because \\(p=v^\\mathrm{T}\\delta h\\) is scalar, \\(p^{2}=v^\\mathrm{T}\\delta h\\delta h^\\mathrm{T}v\\); averaging over samples gives \\(v^\\mathrm{T}Cv\\).",
               "latex": "\\operatorname{Var}(p)=\\mathbf v^{\\mathsf T}C\\mathbf v"
             },
             {
               "title": "Add the length constraint",
-              "explanation": "Construct L(v,λ)=v^TCv-λ(v^Tv-1) to prevent arbitrary rescaling.",
+              "explanation": "Construct \\(L(v,\\lambda )=v^\\mathrm{T}Cv-\\lambda (v^\\mathrm{T}v-1)\\) to prevent arbitrary rescaling.",
               "latex": "\\mathcal L=\\mathbf v^{\\mathsf T}C\\mathbf v-\\lambda(\\mathbf v^{\\mathsf T}\\mathbf v-1)"
             },
             {
@@ -437,35 +437,35 @@
             },
             {
               "title": "Choose the largest candidate",
-              "explanation": "For a normalized eigenvector v_k the objective equals λ_k, so choose the largest eigenvalue.",
+              "explanation": "For a normalized eigenvector \\(v_{k}\\) the objective equals \\(\\lambda _{k}\\), so choose the largest eigenvalue.",
               "latex": "\\mathbf v_1=\\operatorname*{arg\\,max}_{\\|\\mathbf v\\|=1}\\mathbf v^{\\mathsf T}C\\mathbf v"
             }
           ],
           "symbolNotes": [
-            "δh and v are N×1; C is N×N; p and λ are scalars.",
+            "\\(\\delta h\\) and v are N×1; C is N×N; p and \\(\\lambda\\) are scalars.",
             "Using 1/(T-1) instead of 1/T for C leaves the eigenvectors unchanged and rescales every eigenvalue by the same constant."
           ],
-          "unitsCheck": "If h is a firing rate, C and λ have units of rate²; v is dimensionless and projection p retains the rate unit.",
-          "limitCheck": "If every sample is identical, centering gives C=0. Variance is zero in every direction and the PC directions are not unique."
+          "unitsCheck": "If h is a firing rate, C and \\(\\lambda\\) have units of \\(\\mathrm{rate}^{2}\\); v is dimensionless and projection p retains the rate unit.",
+          "limitCheck": "If every sample is identical, centering gives \\(C=0\\). Variance is zero in every direction and the PC directions are not unique."
         },
         "workedExample": {
           "title": "Compute the PC of a two-dimensional covariance by hand",
-          "problem": "Given C=[[5,4],[4,5]], find both eigenvectors and eigenvalues, then interpret the long axis of the data cloud.",
+          "problem": "Given \\(C=[[5,4],[4,5]]\\), find both eigenvectors and eigenvalues, then interpret the long axis of the data cloud.",
           "steps": [
-            "For common vector (1,1)^T, C(1,1)^T=(9,9)^T, so the eigenvalue is 9.",
-            "For difference vector (1,-1)^T, C(1,-1)^T=(1,-1)^T, so the eigenvalue is 1.",
-            "After normalization, PC1=(1,1)^T/√2 and PC2=(1,-1)^T/√2; the variance of PC1 is 9 times that of PC2."
+            "For common vector \\((1,1)^\\mathrm{T}\\), \\(C(1,1)^\\mathrm{T}=(9,9)^\\mathrm{T}\\), so the eigenvalue is 9.",
+            "For difference vector \\((1,-1)^\\mathrm{T}\\), \\(C(1,-1)^\\mathrm{T}=(1,-1)^\\mathrm{T}\\), so the eigenvalue is 1.",
+            "After normalization, PC1=\\((1,1)^\\mathrm{T}/\\sqrt 2\\) and PC2=\\((1,-1)^\\mathrm{T}/\\sqrt 2\\); the variance of PC1 is 9 times that of PC2."
           ],
-          "result": "The data cloud is elongated along the common axis, where h1 and h2 vary together. Retaining PC1 explains 9/(9+1)=90% of the variance.",
-          "sanityCheck": "The trace of C is 10, equal to the eigenvalue sum 9+1, which checks the arithmetic."
+          "result": "The data cloud is elongated along the common axis, where h1 and h2 vary together. Retaining PC1 explains \\(9/(9+1)=90\\)% of the variance.",
+          "sanityCheck": "The trace of C is 10, equal to the eigenvalue \\(\\operatorname{sum} 9+1\\), which checks the arithmetic."
         },
         "selfCheck": {
-          "prompt": "What is chiefly mixed in if E[hh^T] is computed without centering?",
-          "answer": "The mean outer-product term h_bar h_bar^T is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations."
+          "prompt": "What is chiefly mixed in if \\(E[hh^\\mathrm{T}]\\) is computed without centering?",
+          "answer": "The mean outer-product term \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations."
         },
         "pitfalls": [
           "Calling covariance eigenvectors recurrent modes.",
-          "Forgetting to constrain ||v||=1, which leaves variance maximization unbounded."
+          "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
         ]
       },
       {
@@ -483,14 +483,14 @@
         ],
         "guidingQuestion": "When K PCs are retained, exactly what is preserved, and at what step is information lost?",
         "paragraphs": [
-          "Order the covariance eigenvalues λ1≥λ2≥...≥λN with orthonormal eigenvectors v1,...,vN. PC one uses v1. PC two must be orthogonal to v1 and maximize variance in the remaining subspace, so it uses v2. Continuing gives V_K=[v1,...,vK], an N×K matrix. For one centered sample, score vector p=V_K^T(h-h_bar) has K coordinates.",
-          "If all N components are retained, V is an orthogonal square matrix and h=h_bar+VV^T(h-h_bar); the transform is reversible and loses no information. With K<N, reconstruction h_hat=h_bar+V_KV_K^T(h-h_bar) is the sample's orthogonal projection onto the top-K subspace. The discarded residual e=(I-V_KV_K^T)(h-h_bar) is orthogonal to the retained subspace.",
-          "Mean squared reconstruction error equals the sum of discarded eigenvalues Σ_{k>K}λ_k. This is why PCA minimizes squared reconstruction error among all K-dimensional linear subspaces. Calling the reconstruction denoised requires an extra assumption: noise primarily occupies low-variance directions and signal occupies high-variance directions. A rare but important movement command on a low-variance axis would be treated as residual by PCA.",
+          "Order the covariance eigenvalues \\(\\lambda _{1}\\ge \\lambda _{2}\\ge \\cdots \\ge \\lambda _{N}\\) with orthonormal eigenvectors v1,...,vN. PC one uses v1. PC two must be orthogonal to v1 and maximize variance in the remaining subspace, so it uses v2. Continuing gives \\(V_{K}=[v_{1},\\cdots ,vK]\\), an N×K matrix. For one centered sample, score vector \\(p=V_{K}^\\mathrm{T}(h-\\bar{h})\\) has K coordinates.",
+          "If all N components are retained, V is an orthogonal square matrix and \\(h=\\bar{h}+VV^\\mathrm{T}(h-\\bar{h})\\); the transform is reversible and loses no information. With \\(K<N\\), reconstruction \\(\\hat{h}=\\bar{h}+V_{\\mathrm{KV},K}^\\mathrm{T}(h-\\bar{h})\\) is the sample's orthogonal projection onto the top-K subspace. The discarded residual \\(e=(I-V_{\\mathrm{KV},K}^\\mathrm{T})(h-\\bar{h})\\) is orthogonal to the retained subspace.",
+          "Mean squared reconstruction error equals the sum of discarded eigenvalues \\(\\sum _{k>K}\\lambda _{k}\\). This is why PCA minimizes squared reconstruction error among all K-dimensional linear subspaces. Calling the reconstruction denoised requires an extra assumption: noise primarily occupies low-variance directions and signal occupies high-variance directions. A rare but important movement command on a low-variance axis would be treated as residual by PCA.",
           "The practical algorithm has five steps: center across the neuron dimension; compute the N×N covariance or apply SVD to the data matrix; sort eigenpairs; project to obtain scores; and reconstruct or analyze for the task. Training and test data must use the training-set mean and PCs. Recomputing them separately and then comparing coordinates can turn a basis change into an apparent condition difference."
         ],
         "keyPoints": [
-          "V_K is N×K, scores are K×1, and reconstruction returns to N×1 neuron space.",
-          "A complete orthogonal basis transform is lossless; dimensions are discarded only by projection with K<N.",
+          "\\(V_{K}\\) is N×K, scores are K×1, and reconstruction returns to N×1 neuron space.",
+          "A complete orthogonal basis transform is lossless; dimensions are discarded only by projection with \\(K<N\\).",
           "PCA residual error equals the sum of the discarded eigenvalues.",
           "'Denoising' assumes high-variance signal and low-variance noise; the name of the algorithm does not establish that assumption."
         ],
@@ -510,36 +510,36 @@
             },
             {
               "title": "Write the residual",
-              "explanation": "Expand the full state and subtract the retained terms, leaving only coordinates with k>K.",
+              "explanation": "Expand the full state and subtract the retained terms, leaving only coordinates with \\(k>K\\).",
               "latex": "\\mathbf e=\\sum_{k=K+1}^{N}p_k\\mathbf v_k"
             },
             {
               "title": "Average the residual energy",
-              "explanation": "Orthogonality removes cross terms, so E(p_k²)=λ_k.",
+              "explanation": "Orthogonality removes cross terms, so \\(E(p_{k}^{2})=\\lambda _{k}\\).",
               "latex": "\\mathbb E\\|\\mathbf e\\|^2=\\sum_{k=K+1}^{N}\\lambda_k"
             }
           ],
           "symbolNotes": [
-            "The columns of V_K are N-dimensional unit vectors; p is a K-dimensional score vector.",
-            "h_hat and h have the same firing-rate units; λ_k and squared error both have units of rate²."
+            "The columns of \\(V_{K}\\) are N-dimensional unit vectors; p is a K-dimensional score vector.",
+            "\\(\\hat{h}\\) and h have the same firing-rate units; \\(\\lambda _{k}\\) and squared error both have units of \\(\\mathrm{rate}^{2}\\)."
           ],
-          "unitsCheck": "V_KV_K^T has shape N×N and acts on N×1 centered activity. V_K^TV_K=I_K, but V_KV_K^T is generally not I_N.",
-          "limitCheck": "At K=N, residual and error are zero; at K=0, reconstruction is only the mean and error equals total variance."
+          "unitsCheck": "\\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) has shape N×N and acts on N×1 centered activity. \\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\), but \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is generally not \\(I_{N}\\).",
+          "limitCheck": "At \\(K=N\\), residual and error are zero; at \\(K=0\\), reconstruction is only the mean and error equals total variance."
         },
         "workedExample": {
           "title": "Top-2 reconstruction of a three-dimensional state",
-          "problem": "Let mean=0, with PCs equal to coordinate axes v1=(1,0,0), v2=(0,1,0), v3=(0,0,1), and sample h=(4,2,1). Retain K=2.",
+          "problem": "Let \\(\\operatorname{mean}=0\\), with PCs equal to coordinate axes \\(v_{1}=(1,0,0)\\), \\(v_{2}=(0,1,0)\\), \\(v_{3}=(0,0,1)\\), and sample \\(h=(4,2,1)\\). Retain \\(K=2\\).",
           "steps": [
-            "The scores are p1=4, p2=2, and p3=1.",
-            "Keeping the first two terms gives h_hat=4v1+2v2=(4,2,0).",
-            "The residual is h-h_hat=(0,0,1), with squared error 1."
+            "The scores are \\(p_{1}=4\\), \\(p_{2}=2\\), and \\(p_{3}=1\\).",
+            "Keeping the first two terms gives \\(\\hat{h}=4v_{1}+2v_{2}=(4,2,0)\\).",
+            "The residual is \\(h-\\hat{h}=(0,0,1)\\), with squared error 1."
           ],
           "result": "Top-2 reconstruction keeps the first two coordinates and discards the third component. Whether this is denoising depends on whether the third axis is predominantly noise.",
-          "sanityCheck": "The original squared norm is 21, the reconstruction has 20, and the residual has 1, satisfying the orthogonal Pythagorean relation 21=20+1."
+          "sanityCheck": "The original squared norm is 21, the reconstruction has 20, and the residual has 1, satisfying the orthogonal Pythagorean relation \\(21=20+1\\)."
         },
         "selfCheck": {
-          "prompt": "Why does V_K^TV_K=I not imply V_KV_K^T=I?",
-          "answer": "When K<N, V_K is not square. V_K^TV_K is the identity in K-space, while V_KV_K^T is the N-space projector onto a K-dimensional subspace."
+          "prompt": "Why does \\(V_{K}^\\mathrm{T}V_{K}=I\\) not imply \\(V_{\\mathrm{KV},K}^\\mathrm{T}=I\\)?",
+          "answer": "When \\(K<N\\), \\(V_{K}\\) is not square. \\(V_{K}^\\mathrm{T}V_{K}\\) is the identity in K-space, while \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is the N-space projector onto a K-dimensional subspace."
         },
         "pitfalls": [
           "Fitting PCA separately in each condition and comparing PC1 coordinates directly, despite possible rotation of the axes.",
@@ -557,14 +557,14 @@
         ],
         "guidingQuestion": "How should K be selected from the eigenvalue spectrum without treating a convenient cutoff as a natural constant?",
         "paragraphs": [
-          "Update page 6 is a substantive addition absent from the earlier notes. A scree plot graphs sorted λ_k against component index k. If the first few eigenvalues are large and the curve then enters a flat tail, the transition is called an eigenvalue cliff or elbow. Directions before the cliff capture stronger coordinated variation; each direction after it contributes little additional variance. Real spectra often decline continuously, however, so different readers may place the elbow differently.",
-          "Cumulative variance explained F(K)=Σ_{k=1}^Kλ_k/Σ_{j=1}^Nλ_j increases monotonically from F(0)=0 to F(N)=1. The handwritten expression at the bottom of page 6 omits the total-variance denominator and writes the summand as λ_i. The cumulative definition requires numerator Σ_{j=1}^Kλ_j divided by Σ_{j=1}^Nλ_j, which is used throughout this module. Thresholds of 80%, 90%, or 95% give reproducible rules but need not be optimal for a particular scientific question. Measurement noise can raise the tail, condition means can create large PCs, and trial averaging can change the spectrum. Report preprocessing and the selection criterion together with K.",
+          "Update page 6 is a substantive addition absent from the earlier notes. A scree plot graphs sorted \\(\\lambda _{k}\\) against component index k. If the first few eigenvalues are large and the curve then enters a flat tail, the transition is called an eigenvalue cliff or elbow. Directions before the cliff capture stronger coordinated variation; each direction after it contributes little additional variance. Real spectra often decline continuously, however, so different readers may place the elbow differently.",
+          "Cumulative variance explained \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) increases monotonically from \\(F(0)=0\\) to \\(F(N)=1\\). The handwritten expression at the bottom of page 6 omits the total-variance denominator and writes the summand as \\(\\lambda _{i}\\). The cumulative definition requires numerator \\(\\sum _{j=1}^K\\lambda _{j}\\) divided by \\(\\sum _{j=1}^N\\lambda _{j}\\), which is used throughout this module. Thresholds of 80%, 90%, or 95% give reproducible rules but need not be optimal for a particular scientific question. Measurement noise can raise the tail, condition means can create large PCs, and trial averaging can change the spectrum. Report preprocessing and the selection criterion together with K.",
           "A stronger dimensionality choice uses held-out data. Fit PCs on training trials and compare reconstruction error on test trials, or evaluate behavioral decoding, likelihood, or downstream model performance as K changes. A low-variance component may still deserve retention if it materially improves held-out behavior prediction. PCA dimensionality depends on both the data and the purpose of the analysis.",
           "Finally separate three meanings of dimension. The number of slow dynamical modes of W follows from model stability; PCA dimension follows from the observed covariance spectrum; task dimension follows from behaviorally relevant variables. Carefully designed experiments can relate them, but no general identity equates them. Pages 1-5 of the earlier notes and the first five update pages are substantively the same, so this module cites only the newly added page 6 rather than inventing a counterpart in the earlier version."
         ],
         "keyPoints": [
           "A scree-plot elbow is a heuristic and usually has no unique location.",
-          "Cumulative variance F(K) is the partial sum of sorted eigenvalues divided by their total sum.",
+          "Cumulative variance \\(F(K)\\) is the partial sum of sorted eigenvalues divided by their total sum.",
           "A dimensionality choice should report preprocessing, threshold, and held-out criterion.",
           "PCA dimension, dynamical dimension, and task dimension should not be used interchangeably."
         ],
@@ -584,7 +584,7 @@
             },
             {
               "title": "Compute the discarded fraction",
-              "explanation": "Because the full fraction is 1, the unretained fraction is 1-F(K).",
+              "explanation": "Because the full fraction is 1, the unretained fraction is \\(1-F(K)\\).",
               "latex": "1-F(K)=\\frac{\\sum_{k=K+1}^{N}\\lambda_k}{\\sum_{j=1}^{N}\\lambda_j}"
             },
             {
@@ -594,22 +594,22 @@
             }
           ],
           "symbolNotes": [
-            "Every λ_k≥0 because a covariance matrix is positive semidefinite.",
-            "F(K) is dimensionless and lies between 0 and 1; multiply by 100% to express it as a percentage."
+            "Every \\(\\lambda _{k}\\ge 0\\) because a covariance matrix is positive semidefinite.",
+            "\\(F(K)\\) is dimensionless and lies between 0 and 1; multiply by 100% to express it as a percentage."
           ],
-          "unitsCheck": "Numerator and denominator both have units of rate², so the ratio is unitless. K is an integer index, not a continuous parameter.",
-          "limitCheck": "If λ1=...=λN, the spectrum has no cliff and F(K)=K/N. Any low-dimensional cutoff then reflects an external tolerance rather than a natural turning point in the data."
+          "unitsCheck": "Numerator and denominator both have units of \\(\\mathrm{rate}^{2}\\), so the ratio is unitless. K is an integer index, not a continuous parameter.",
+          "limitCheck": "If \\(\\lambda _{1}=\\cdots =\\lambda _{N}\\), the spectrum has no cliff and \\(F(K)=K/N\\). Any low-dimensional cutoff then reflects an external tolerance rather than a natural turning point in the data."
         },
         "workedExample": {
           "title": "Different cutoffs produce different values of K",
-          "problem": "The eigenvalues are [9,3,1,1]. Find the smallest K under cumulative-variance thresholds of 80% and 95%.",
+          "problem": "The eigenvalues are \\([9,3,1,1]\\). Find the smallest K under cumulative-variance thresholds of 80% and 95%.",
           "steps": [
-            "Total variance is 14; F(1)=9/14≈64.3%.",
-            "F(2)=12/14≈85.7%, so an 80% threshold selects K=2.",
-            "F(3)=13/14≈92.9% and F(4)=100%, so a 95% threshold selects K=4."
+            "Total variance is 14; \\(F(1)=9/14\\approx 64.3\\)%.",
+            "\\(F(2)=12/14\\approx 85.7\\)%, so an 80% threshold selects \\(K=2\\).",
+            "\\(F(3)=13/14\\approx 92.9\\)% and \\(F(4)=100\\)%, so a 95% threshold selects \\(K=4\\)."
           ],
-          "result": "The same data give K=2 or K=4 solely because the threshold changes. The cutoff is an analysis decision and must be reported explicitly.",
-          "sanityCheck": "Cumulative variance should never decrease and must equal 1 at K=N. Violating either condition usually signals an error in sorting or the denominator."
+          "result": "The same data give \\(K=2\\) or \\(K=4\\) solely because the threshold changes. The cutoff is an analysis decision and must be reported explicitly.",
+          "sanityCheck": "Cumulative variance should never decrease and must equal 1 at \\(K=N\\). Violating either condition usually signals an error in sorting or the denominator."
         },
         "selfCheck": {
           "prompt": "Why does '95% variance explained' not guarantee retention of 95% of behavioral information?",
@@ -642,7 +642,7 @@
       "yLabel": "Normalized variance / cumulative fraction",
       "curves": [
         {
-          "label": "eigenvalue λₖ",
+          "label": "eigenvalue \\(\\lambda _{k}\\)",
           "points": [
             [
               5,
@@ -676,7 +676,7 @@
           "markers": true
         },
         {
-          "label": "cumulative variance F(K)",
+          "label": "cumulative variance \\(F(K)\\)",
           "points": [
             [
               5,
@@ -725,25 +725,25 @@
   ],
   "derivations": [
     "6.1 对称 two-neuron eigensystem",
-    "【必要前置】 求 W=[[0,w0],[w0,0]] 的 modes。 1 λ+ = w 0 , ξ+ = √ (1, 1)T 2 1 λ− = −w0 , ξ− = √ (1, −1)T 2 [ ] −1 1 1 1 V =V =√ 2 1 −1 1. characteristic polynomial det(W−λI)=λ²−w0²。 2. λ=+w0 对应 h1=h2 的 common mode。 3. λ=−w0 对应 h1=−h2 的 difference mode。 4. orthonormal V 同时把 activity 与 input 变到 α±、β±。",
-    "Geometric/computational intuition. 网络的自然坐标不是两个 neurons，而是\"共同变化\"和 \"相反变化\"。 Biological interpretation / failure condition. 非对称 W 的 eigenvectors 不一定 orthogonal， V^{-1} 不再等于 V^T。",
-    "思考题：w=0.8 时 τ+ 与 τ-？",
+    "【必要前置】 求 \\(W=[[0,w_{0}],[w_{0},0]]\\) 的 modes。 1 \\(\\lambda + = w 0\\), \\(\\xi + = \\sqrt  (1, 1)T 2 1 \\lambda - = -w_{0}\\), \\(\\xi - = \\sqrt  (1, -1)T 2 [ ] -1 1 1 1 V =V =\\sqrt  2 1 -1 1\\). characteristic polynomial \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}\\)。 2. \\(\\lambda =+w_{0}\\) 对应 \\(h_{1}=h_{2}\\) 的 common mode。 3. \\(\\lambda =-w_{0}\\) 对应 \\(h_{1}=-h_{2}\\) 的 difference mode。 4. orthonormal V 同时把 activity 与 input 变到 \\(\\alpha \\pm \\)、\\(\\beta \\pm \\)。",
+    "Geometric/computational intuition. 网络的自然坐标不是两个 neurons，而是\"共同变化\"和 \"相反变化\"。 Biological interpretation / failure condition. 非对称 W 的 eigenvectors 不一定 orthogonal， \\(V^{-1}\\) 不再等于 \\(V^\\mathrm{T}\\)。",
+    "思考题：\\(w=0.8\\) 时 \\(\\tau _{+}\\) 与 \\(\\tau _{-}\\)？",
     "6.2 mode time constants 与 dynamical regimes",
     "【补全推导】 w0 如何决定 stability/integration？",
-    "I1 + I2 τ α̇+ = −(1 − w0 )α+ + √ 2 I1 − I2 τ α̇− = −(1 + w0 )α− + √ 2 τ τ τ+ = , τ− 1 − w0 1 + w0 1. |w0|<1 时两个 modes stable。 2. w0→1^- 时 common mode 变慢，w0=1 为 common perfect integrator。 3. w0→−1^+ 时 difference mode 变慢，w0=−1 为 difference integrator。 4. |w0|>1 至少一个 mode unstable。",
-    "Geometric/computational intuition. 同一个 coupling 参数对两个正交 patterns 提供相反 feedback。 Biological interpretation / failure condition. 笔记 time-constant formula 需保留 mode sign； 不能都写成 τ/(1−w0)。",
-    "思考题：w=1 时哪个 mode perfect integrator？",
+    "I1 + I2 \\(\\tau \\) α̇+ = −(1 − w0 )α+ + √ 2 I1 − I2 τ α̇− = −(1 + w0 )α− + √ 2 τ τ τ+ = , \\(\\tau - 1 - w_{0}\\) 1 + w0 1. \\(|w_{0}|<1\\) 时两个 modes stable。 2. w0→1^- 时 common mode 变慢，\\(w_{0}=1\\) 为 common perfect integrator。 3. w0→−1^+ 时 difference mode 变慢，\\(w_{0}=-1\\) 为 difference integrator。 4. \\(|w_{0}|>1\\) 至少一个 mode unstable。",
+    "Geometric/computational intuition. 同一个 coupling 参数对两个正交 patterns 提供相反 feedback。 Biological interpretation / failure condition. 笔记 time-constant formula 需保留 mode sign； 不能都写成 \\(\\tau /(1-w_{0})\\)。",
+    "思考题：\\(w=1\\) 时哪个 mode perfect integrator？",
     "6.3 approximate one-dimensional activity",
     "【跨页连接】 为什么 h-space trajectory 很快靠近一条 line？",
-    "h = α+ ξ+ + α− ξ−",
-    "(1, 1)T α− (t) → 0 ⇒ h(t) ≈ α+ (t) √ 2 1. 初始 state 可分解为 common 与 difference components。 2. 若 τ_-≪τ_+，difference transient 快速消失。 3. 之后 trajectory 仍在 two-neuron space，却几乎局限于 common axis。 4. 低维是 activity trajectory 的性质，不代表只剩一个 active neuron。",
+    "\\(h = \\alpha + \\xi + + \\alpha - \\xi _{-}\\)",
+    "(1, 1)T \\(\\alpha - (t) \\to  0 \\Rightarrow  h(t) \\approx  \\alpha + (t)\\) \\(\\sqrt  2\\) 1. 初始 state 可分解为 common 与 difference components。 2. 若 \\(\\tau _{-}\\ll \\tau _{+}\\)，difference transient 快速消失。 3. 之后 trajectory 仍在 two-neuron space，却几乎局限于 common axis。 4. 低维是 activity trajectory 的性质，不代表只剩一个 active neuron。",
     "Geometric/computational intuition. fast modes collapse，slow modes 支配长时间行为。 Biological interpretation / failure condition. 不同 inputs/trials 若持续驱动 fast modes，trajectory 不一定始终低维。",
     "思考题：为什么 trajectory 近一维？",
     "6.4 PCA variance maximization 与 top-K reconstruction",
     "【模型边界】 仅由数据找最大 variance direction。",
-    "Ch = E[(h − Eh)(h − Eh)T ]",
-    "Var(v T δh) = v T Ch v, ∥v∥ = 1 C h v k = λk v k ∑ K ĥ = h̄ + vk vkT (h − h̄) k=1",
-    "1. Lagrange multiplier 对 v^TCv−λ(v^Tv−1) 求导得到 eigenproblem。 2. PC1 是最大 eigenvalue eigenvector。 3. 后续 PCs 在与前面 orthogonal 的子空间中继续最大化 variance。 4. discarded dimensions 的 variance 被视作不需要/噪声的 approximation，但这不是 causal guarantee。",
+    "Ch = \\(E[(h - Eh)(h - Eh)T ]\\)",
+    "Var(v T δh) = v T Ch v, \\(\\Vert v\\Vert  = 1 C h v k = \\lambda _{k} v k\\) \\(\\sum  K\\) \\(\\hat{h} = \\bar{h} + v_{k}\\) vkT \\((h - \\bar{h})\\) \\(k=1\\)",
+    "1. Lagrange multiplier 对 \\(v^\\mathrm{T}Cv-\\lambda (v^\\mathrm{T}v-1)\\) 求导得到 eigenproblem。 2. PC1 是最大 eigenvalue eigenvector。 3. 后续 PCs 在与前面 orthogonal 的子空间中继续最大化 variance。 4. discarded dimensions 的 variance 被视作不需要/噪声的 approximation，但这不是 causal guarantee。",
     "Geometric/computational intuition. PCA 旋转坐标轴，使 covariance diagonal，并按 variance 排序。 Biological interpretation / failure condition. low-variance dimension 仍可能对 behavior/decoding 很重要；cutoff 有任意性。",
     "思考题：PCA 前为什么 center？"
   ],
@@ -752,10 +752,10 @@
   ],
   "workedExamples": [
     "8.1 two-neuron transform",
-    "【例题】题目：h=(3,1)^T。",
-    "Worked solution. α+=(3+1)/√2=2√2，α-=(3−1)/√2=√2；重构为 α+ξ++α-ξ-=(3,1)。 Check. basis change 不丢 information，除非主动 discard dimensions。",
+    "【例题】题目：\\(h=(3,1)^\\mathrm{T}\\)。",
+    "Worked solution. \\(\\alpha _{+}=(3+1)/\\sqrt 2=2\\sqrt 2\\)，\\(\\alpha _{-}=(3-1)/\\sqrt 2=\\sqrt 2\\)；重构为 \\(\\alpha +\\xi _{+}+\\alpha -\\xi _{-}=(3,1)\\)。 Check. basis change 不丢 information，除非主动 discard dimensions。",
     "8.2 PCA denoising",
-    "【拓展例题】题目：eigenvalues 为 9、1，保留 K=1。",
+    "【拓展例题】题目：eigenvalues 为 9、1，保留 \\(K=1\\)。",
     "Worked solution. 保留 90% total variance；reconstruction 投影到 PC1 line， 去掉 PC2 component。 Check. 称其 denoising 需要额外假设：低 variance dimension 主要是 noise。"
   ],
   "formulas": [
@@ -776,7 +776,7 @@
       "name": "orthonormal mode coordinates",
       "expression": "α = V Th",
       "latex": "\\boldsymbol{\\alpha}=V^{\\mathsf T}\\mathbf{h}",
-      "conditions": "V^TV=I",
+      "conditions": "\\(V^\\mathrm{T}V=I\\)",
       "sectionId": "lecture-19-source-1",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1
@@ -787,7 +787,7 @@
       "name": "mode time constants",
       "expression": "τ± = τ /(1 ∓ w0 )",
       "latex": "\\tau_{\\pm}=\\frac{\\tau}{1\\mp w_0}",
-      "conditions": "|w0|<1 for stability of both modes",
+      "conditions": "\\(|w_{0}|<1\\) for stability of both modes",
       "sectionId": "lecture-19-source-2",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 2
@@ -941,7 +941,7 @@
   ],
   "commonTraps": [
     "Equating eigenvectors of W with covariance PCs without additional assumptions.",
-    "Omitting 1/√2 when normalizing the common and difference modes.",
+    "Omitting \\(1/\\sqrt 2\\) when normalizing the common and difference modes.",
     "Using the wrong ± sign in the mode time constants.",
     "Misreading a low-dimensional trajectory as activity in only a few neurons.",
     "Applying PCA without centering the data.",
@@ -970,9 +970,9 @@
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1,
       "sectionId": "lecture-19-source-1",
-      "originalIssue": "The τ_- expression on Page 1 must follow λ_-=-w0, giving τ/(1+w0); the ± sign must be retained explicitly.",
+      "originalIssue": "The \\(\\tau _{-}\\) expression on Page 1 must follow \\(\\lambda _{-}=-w_{0}\\), giving \\(\\tau /(1+w_{0})\\); the ± sign must be retained explicitly.",
       "explanation": "Interpret this statement only within the approximation, parameter, and version boundaries specified here; it is not unconditional.",
-      "correction": "On Page 1, λ_-=-w0 requires τ_-=τ/(1+w0)."
+      "correction": "On Page 1, \\(\\lambda _{-}=-w_{0}\\) requires \\(\\tau _{-}=\\tau /(1+w_{0})\\)."
     },
     {
       "id": "L19-E03",
@@ -1010,11 +1010,11 @@
       "difficulty": 2,
       "type": "equation",
       "cognitiveLevel": "understand",
-      "stem": "What is the result of multiplying W=[[0,0.6],[0.6,0]] by (1,1)^T?",
+      "stem": "What is the result of multiplying \\(W=[[0,0.6],[0.6,0]]\\) by \\((1,1)^\\mathrm{T}\\)?",
       "choices": [
         {
           "id": "a",
-          "text": "The result is (0.6,0.6)^T, so (1,1)^T is an eigenvector with eigenvalue 0.6."
+          "text": "The result is \\((0.6,0.6)^\\mathrm{T}\\), so \\((1,1)^\\mathrm{T}\\) is an eigenvector with eigenvalue 0.6."
         },
         {
           "id": "b",
@@ -1030,7 +1030,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "Multiply row by row: the first row gives 0×1+0.6×1 and the second gives 0.6×1+0×1. If this calculation is unfamiliar, return to the common/difference-mode module and check each component. The result is (0.6,0.6)^T, so (1,1)^T is an eigenvector with eigenvalue 0.6.",
+      "explanation": "Multiply row by row: the first row gives \\(0\\times 1+0.6\\times 1\\) and the second gives \\(0.6\\times 1+0\\times 1\\). If this calculation is unfamiliar, return to the common/difference-mode module and check each component. The result is \\((0.6,0.6)^\\mathrm{T}\\), so \\((1,1)^\\mathrm{T}\\) is an eigenvector with eigenvalue 0.6.",
       "wrongChoiceExplanations": {
         "b": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -1059,7 +1059,7 @@
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "For τ=20 ms and λ=0.8, what is the effective time constant of τ dα/dt=-(1-λ)α?",
+      "stem": "For \\(\\tau =20 \\mathrm{ms}\\) and \\(\\lambda =0.8\\), what is the effective time constant of \\(\\tau d\\alpha /dt=-(1-\\lambda )\\alpha\\)?",
       "choices": [
         {
           "id": "a",
@@ -1067,7 +1067,7 @@
         },
         {
           "id": "b",
-          "text": "τ_eff=20/(1-0.8)=100 ms."
+          "text": "\\(\\tau _{\\mathrm{eff}}=20/(1-0.8)=100 \\mathrm{ms}\\)."
         },
         {
           "id": "c",
@@ -1079,7 +1079,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "The coefficient 1-λ sets the decay rate: the smaller this gap, the longer the time constant. Do not mistake λ itself for a time constant measured in milliseconds. τ_eff=20/(1-0.8)=100 ms.",
+      "explanation": "The coefficient \\(1-\\lambda\\) sets the decay rate: the smaller this gap, the longer the time constant. Do not mistake \\(\\lambda\\) itself for a time constant measured in milliseconds. \\(\\tau _{\\mathrm{eff}}=20/(1-0.8)=100 \\mathrm{ms}\\).",
       "wrongChoiceExplanations": {
         "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -1128,7 +1128,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Without centering, the second moment h h^T contains both the mean outer product and trial-to-trial variation, so PC1 may primarily track mean activity. Centering makes covariance describe joint fluctuations around the mean firing pattern instead of mistaking the mean response direction for the direction of greatest variability.",
+      "explanation": "Without centering, the second moment h \\(h^\\mathrm{T}\\) contains both the mean outer product and trial-to-trial variation, so PC1 may primarily track mean activity. Centering makes covariance describe joint fluctuations around the mean firing pattern instead of mistaking the mean response direction for the direction of greatest variability.",
       "wrongChoiceExplanations": {
         "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -1205,7 +1205,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "(9+3)/(9+3+1+1)=12/14, or approximately 85.7%."
+          "text": "\\((9+3)/(9+3+1+1)=12/14\\), or approximately 85.7%."
         },
         {
           "id": "b",
@@ -1221,7 +1221,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "The denominator of cumulative variance explained must contain every eigenvalue. Dividing only by the retained eigenvalues would incorrectly give 100%. (9+3)/(9+3+1+1)=12/14, or approximately 85.7%.",
+      "explanation": "The denominator of cumulative variance explained must contain every eigenvalue. Dividing only by the retained eigenvalues would incorrectly give 100%. \\((9+3)/(9+3+1+1)=12/14\\), or approximately 85.7%.",
       "wrongChoiceExplanations": {
         "b": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -1251,15 +1251,15 @@
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "If I1=1 and I2=-1, which mode is driven directly?",
+      "stem": "If \\(I_{1}=1\\) and \\(I_{2}=-1\\), which mode is driven directly?",
       "choices": [
         {
           "id": "a",
-          "text": "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent."
+          "text": "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent."
         },
         {
           "id": "b",
-          "text": "β+=(1-1)/√2=0 and β-=(1-(-1))/√2=√2, so only the difference mode is driven directly; the neurons tend to change in opposite directions."
+          "text": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\) and \\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\), so only the difference mode is driven directly; the neurons tend to change in opposite directions."
         },
         {
           "id": "c",
@@ -1271,7 +1271,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "β+=(1-1)/√2=0 and β-=(1-(-1))/√2=√2, so only the difference mode is driven directly; the neurons tend to change in opposite directions. This is the distinction tested in Symmetric two-neuron network: natural coordinates for coupled equations.",
+      "explanation": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\) and \\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\), so only the difference mode is driven directly; the neurons tend to change in opposite directions. This is the distinction tested in Symmetric two-neuron network: natural coordinates for coupled equations.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
@@ -1301,7 +1301,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Transform a population state into mode coordinates: Given h=(3,1)^T and I=(2,2)^T, calculate α and β, then verify that α reconstructs h without loss. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Transform a population state into mode coordinates: Given \\(h=(3,1)^\\mathrm{T}\\) and \\(I=(2,2)^\\mathrm{T}\\), calculate \\(\\alpha\\) and \\(\\beta\\), then verify that \\(\\alpha\\) reconstructs h without loss. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -1313,7 +1313,7 @@
         },
         {
           "id": "c",
-          "text": "The mode coordinates are α=(2√2,√2)^T, the input coordinates are β=(2√2,0)^T, and reconstruction returns exactly (3,1)^T."
+          "text": "The mode coordinates are \\(\\alpha =(2\\sqrt 2,\\sqrt 2)^\\mathrm{T}\\), the input coordinates are \\(\\beta =(2\\sqrt 2,0)^\\mathrm{T}\\), and reconstruction returns exactly \\((3,1)^\\mathrm{T}\\)."
         },
         {
           "id": "d",
@@ -1321,7 +1321,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Worked setup: Given h=(3,1)^T and I=(2,2)^T, calculate α and β, then verify that α reconstructs h without loss. Compute α+=(3+1)/√2=2√2 and α-=(3-1)/√2=√2. Compute β+=(2+2)/√2=2√2 and β-=(2-2)/√2=0, so the input drives only the common mode. Reconstruct α+ξ++α-ξ-: the first component is (2√2+√2)/√2=3 and the second is (2√2-√2)/√2=1. The squared coordinates sum to 8+2=10, matching the original vector's squared length 3²+1²=10. An orthogonal transform preserves length, providing an arithmetic check.",
+      "explanation": "Worked setup: Given \\(h=(3,1)^\\mathrm{T}\\) and \\(I=(2,2)^\\mathrm{T}\\), calculate \\(\\alpha\\) and \\(\\beta\\), then verify that \\(\\alpha\\) reconstructs h without loss. Compute \\(\\alpha _{+}=(3+1)/\\sqrt 2=2\\sqrt 2\\) and \\(\\alpha _{-}=(3-1)/\\sqrt 2=\\sqrt 2\\). Compute \\(\\beta _{+}=(2+2)/\\sqrt 2=2\\sqrt 2\\) and \\(\\beta _{-}=(2-2)/\\sqrt 2=0\\), so the input drives only the common mode. Reconstruct \\(\\alpha +\\xi _{+}+\\alpha -\\xi _{-}\\): the first component is \\((2\\sqrt 2+\\sqrt 2)/\\sqrt 2=3\\) and the second is \\((2\\sqrt 2-\\sqrt 2)/\\sqrt 2=1\\). The squared coordinates sum to \\(8+2=10\\), matching the original vector's squared length \\(3^{2}+1^{2}=10\\). An orthogonal transform preserves length, providing an arithmetic check.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -1355,7 +1355,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent."
+          "text": "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent."
         },
         {
           "id": "b",
@@ -1367,11 +1367,11 @@
         },
         {
           "id": "d",
-          "text": "λ+=w0 corresponds to the normalized common vector (1,1)^T/√2."
+          "text": "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\)."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "λ+=w0 corresponds to the normalized common vector (1,1)^T/√2. The module's worked example and checks support the same conclusion.",
+      "explanation": "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\). The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
@@ -1405,11 +1405,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "λ-=-w0 corresponds to the normalized difference vector (1,-1)^T/√2."
+          "text": "\\(\\lambda _{-}=-w_{0}\\) corresponds to the normalized difference vector \\((1,-1)^\\mathrm{T}/\\sqrt 2\\)."
         },
         {
           "id": "b",
-          "text": "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent."
+          "text": "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent."
         },
         {
           "id": "c",
@@ -1421,7 +1421,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "λ-=-w0 corresponds to the normalized difference vector (1,-1)^T/√2. The module's worked example and checks support the same conclusion.",
+      "explanation": "\\(\\lambda _{-}=-w_{0}\\) corresponds to the normalized difference vector \\((1,-1)^\\mathrm{T}/\\sqrt 2\\). The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
@@ -1455,11 +1455,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent."
+          "text": "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent."
         },
         {
           "id": "b",
-          "text": "λ+=w0 corresponds to the normalized common vector (1,1)^T/√2."
+          "text": "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\)."
         },
         {
           "id": "c",
@@ -1471,7 +1471,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "λ+=w0 corresponds to the normalized common vector (1,1)^T/√2. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "explanation": "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\). The variables may change in a new setting, but the model must still satisfy this constraint.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
@@ -1506,7 +1506,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent."
+          "text": "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent."
         },
         {
           "id": "b",
@@ -1514,7 +1514,7 @@
         },
         {
           "id": "c",
-          "text": "V^Th has shape (2×2)(2×1)=2×1, and every term in the mode ODE has units of a rate coordinate."
+          "text": "\\(V^\\mathrm{T}h\\) has shape \\((2\\times 2)(2\\times 1)=2\\times 1\\), and every term in the mode ODE has units of a rate coordinate."
         },
         {
           "id": "d",
@@ -1522,7 +1522,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "V^Th has shape (2×2)(2×1)=2×1, and every term in the mode ODE has units of a rate coordinate. At w0=0 the original neurons are uncoupled and the two basis directions decay at the same rate. The eigenbasis is then not unique: common/difference coordinates remain valid but are no longer the only choice. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "\\(V^\\mathrm{T}h\\) has shape \\((2\\times 2)(2\\times 1)=2\\times 1\\), and every term in the mode ODE has units of a rate coordinate. At \\(w_{0}=0\\) the original neurons are uncoupled and the two basis directions decay at the same rate. The eigenbasis is then not unique: common/difference coordinates remain valid but are no longer the only choice. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
@@ -1556,7 +1556,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "Omitting 1/√2 makes the coordinate and reconstruction scales inconsistent."
+          "text": "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent."
         },
         {
           "id": "b",
@@ -1568,11 +1568,11 @@
         },
         {
           "id": "d",
-          "text": "λ+=w0 corresponds to the normalized common vector (1,1)^T/√2."
+          "text": "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\)."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "The source page gives W=[[0,w0],[w0,0]] and the rate equations τ dh1/dt=-h1+w0h2+I1 and τ dh2/dt=-h2+w0h1+I2. Zeros on the diagonal mean that this teaching example has no self-coupling, while equal off-diagonal entries make the reciprocal coupling symmetric. That symmetry suggests testing h1=h2 and h1=-h2: exchanging the neurons leaves the first pattern unchanged and changes only the sign of the second. Set det(W-λI)=λ²-w0²=0 to obtain λ+=w0 and λ-=-w0. Substituting λ+ gives h2=h1, so a common eigenvector is (1,1)^T. Substituting λ- gives h2=-h1, so a difference eigenvector is (1,-1)^T. Dividing each by √2 produces unit vectors with zero dot product, an orthonormal basis V. Normalization preserves direction and lets coordinates be computed directly by dot products.",
+      "explanation": "The source page gives \\(W=[[0,w_{0}],[w_{0},0]]\\) and the rate equations \\(\\tau dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) and \\(\\tau dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\). Zeros on the diagonal mean that this teaching example has no self-coupling, while equal off-diagonal entries make the reciprocal coupling symmetric. That symmetry suggests testing \\(h_{1}=h_{2}\\) and \\(h_{1}=-h_{2}\\): exchanging the neurons leaves the first pattern unchanged and changes only the sign of the second. Set \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}=0\\) to obtain \\(\\lambda _{+}=w_{0}\\) and \\(\\lambda _{-}=-w_{0}\\). Substituting \\(\\lambda _{+}\\) gives \\(h_{2}=h_{1}\\), so a common eigenvector is \\((1,1)^\\mathrm{T}\\). Substituting \\(\\lambda _{-}\\) gives \\(h_{2}=-h_{1}\\), so a difference eigenvector is \\((1,-1)^\\mathrm{T}\\). Dividing each by \\(\\sqrt 2\\) produces unit vectors with zero dot product, an orthonormal basis V. Normalization preserves direction and lets coordinates be computed directly by dot products.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Symmetric two-neuron network: natural coordinates for coupled equations.” It describes the error the module is designed to prevent.",
@@ -1602,11 +1602,11 @@
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "At w0=-0.9, which mode is slowest, and what is its time constant in units of τ?",
+      "stem": "At \\(w_{0}=-0.9\\), which mode is slowest, and what is its time constant in units of \\(\\tau\\)?",
       "choices": [
         {
           "id": "a",
-          "text": "The difference mode is slowest because τ-=τ/(1-0.9)=10τ; the common mode has τ+=τ/(1+0.9)≈0.526τ. Negative coupling near -1 preserves the opposing-change pattern."
+          "text": "The difference mode is slowest because \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\); the common mode has \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\). Negative coupling near -1 preserves the opposing-change pattern."
         },
         {
           "id": "b",
@@ -1614,7 +1614,7 @@
         },
         {
           "id": "c",
-          "text": "Using τ/(1-w0) for both modes and thereby losing the negative sign of the difference eigenvalue."
+          "text": "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
         },
         {
           "id": "d",
@@ -1622,7 +1622,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "The difference mode is slowest because τ-=τ/(1-0.9)=10τ; the common mode has τ+=τ/(1+0.9)≈0.526τ. Negative coupling near -1 preserves the opposing-change pattern. This is the distinction tested in Coupling strength sets time constants, integration, and stability.",
+      "explanation": "The difference mode is slowest because \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\); the common mode has \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\). Negative coupling near -1 preserves the opposing-change pattern. This is the distinction tested in Coupling strength sets time constants, integration, and stability.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
@@ -1652,7 +1652,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Compare the speeds of the two modes: Let the single-cell time constant be τ=20 ms and w0=0.8. Remove the input, calculate both mode time constants, and predict the fraction remaining after 100 ms. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Compare the speeds of the two modes: Let the single-cell time constant be \\(\\tau =20 \\mathrm{ms}\\) and \\(w_{0}=0.8\\). Remove the input, calculate both mode time constants, and predict the fraction remaining after 100 ms. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -1672,7 +1672,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "Worked setup: Let the single-cell time constant be τ=20 ms and w0=0.8. Remove the input, calculate both mode time constants, and predict the fraction remaining after 100 ms. τ+=20/(1-0.8)=100 ms; τ-=20/(1+0.8)=11.11 ms. After 100 ms, the common-mode amplitude fraction is e^{-100/100}=e^{-1}≈0.368. The difference-mode fraction is e^{-100/11.11}=e^{-9}≈0.000123, so it has nearly vanished. Setting w0 to 0 should return both time constants to 20 ms. One long and one short time constant here agrees with the direction of positive reciprocal feedback.",
+      "explanation": "Worked setup: Let the single-cell time constant be \\(\\tau =20 \\mathrm{ms}\\) and \\(w_{0}=0.8\\). Remove the input, calculate both mode time constants, and predict the fraction remaining after 100 ms. \\(\\tau _{+}=20/(1-0.8)=100 \\mathrm{ms}\\); \\(\\tau _{-}=20/(1+0.8)=11.11 \\mathrm{ms}\\). After 100 ms, the common-mode amplitude fraction is \\(e^{-100/100}=e^{-1}\\approx 0.368\\). The difference-mode fraction is \\(e^{-100/11.11}=e^{-9}\\approx 0.000123\\), so it has nearly vanished. Setting w0 to 0 should return both time constants to 20 ms. One long and one short time constant here agrees with the direction of positive reciprocal feedback.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -1710,11 +1710,11 @@
         },
         {
           "id": "b",
-          "text": "Using τ/(1-w0) for both modes and thereby losing the negative sign of the difference eigenvalue."
+          "text": "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
         },
         {
           "id": "c",
-          "text": "τ+=τ/(1-w0) and τ-=τ/(1+w0); the signs cannot be collapsed into a common denominator."
+          "text": "\\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\); the signs cannot be collapsed into a common denominator."
         },
         {
           "id": "d",
@@ -1722,7 +1722,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "τ+=τ/(1-w0) and τ-=τ/(1+w0); the signs cannot be collapsed into a common denominator. The module's worked example and checks support the same conclusion.",
+      "explanation": "\\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\); the signs cannot be collapsed into a common denominator. The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
@@ -1760,7 +1760,7 @@
         },
         {
           "id": "b",
-          "text": "Using τ/(1-w0) for both modes and thereby losing the negative sign of the difference eigenvalue."
+          "text": "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
         },
         {
           "id": "c",
@@ -1768,11 +1768,11 @@
         },
         {
           "id": "d",
-          "text": "Only |w0|<1 makes both modes stable; w0=±1 produces a perfect integrator in one mode."
+          "text": "Only \\(|w_{0}|<1\\) makes both modes stable; \\(w_{0}=\\pm 1\\) produces a perfect integrator in one mode."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Only |w0|<1 makes both modes stable; w0=±1 produces a perfect integrator in one mode. The module's worked example and checks support the same conclusion.",
+      "explanation": "Only \\(|w_{0}|<1\\) makes both modes stable; \\(w_{0}=\\pm 1\\) produces a perfect integrator in one mode. The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
@@ -1806,7 +1806,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only |w0|<1 makes both modes stable; w0=±1 produces a perfect integrator in one mode."
+          "text": "Only \\(|w_{0}|<1\\) makes both modes stable; \\(w_{0}=\\pm 1\\) produces a perfect integrator in one mode."
         },
         {
           "id": "b",
@@ -1814,7 +1814,7 @@
         },
         {
           "id": "c",
-          "text": "Using τ/(1-w0) for both modes and thereby losing the negative sign of the difference eigenvalue."
+          "text": "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
         },
         {
           "id": "d",
@@ -1822,7 +1822,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "Only |w0|<1 makes both modes stable; w0=±1 produces a perfect integrator in one mode. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "explanation": "Only \\(|w_{0}|<1\\) makes both modes stable; \\(w_{0}=\\pm 1\\) produces a perfect integrator in one mode. The variables may change in a new setting, but the model must still satisfy this constraint.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
@@ -1861,11 +1861,11 @@
         },
         {
           "id": "b",
-          "text": "Because the denominator is dimensionless, τ/(1∓w0) retains the time unit of τ. A unitless 'time constant' signals that τ was omitted."
+          "text": "Because the denominator is dimensionless, \\(\\tau /(1\\mp w_{0})\\) retains the time unit of \\(\\tau\\). A unitless 'time constant' signals that \\(\\tau\\) was omitted."
         },
         {
           "id": "c",
-          "text": "Using τ/(1-w0) for both modes and thereby losing the negative sign of the difference eigenvalue."
+          "text": "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
         },
         {
           "id": "d",
@@ -1873,7 +1873,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "Because the denominator is dimensionless, τ/(1∓w0) retains the time unit of τ. A unitless 'time constant' signals that τ was omitted. As w0→1^-, τ+→∞. Beyond 1 the formula becomes negative; this is not a negative physical time but a sign that the exponent now describes growth. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "Because the denominator is dimensionless, \\(\\tau /(1\\mp w_{0})\\) retains the time unit of \\(\\tau\\). A unitless 'time constant' signals that \\(\\tau\\) was omitted. As w0→1^-, \\(\\tau +\\to \\infty\\). Beyond 1 the formula becomes negative; this is not a negative physical time but a sign that the exponent now describes growth. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Coupling strength sets time constants, integration, and stability.” It describes the error the module is designed to prevent.",
@@ -1903,7 +1903,7 @@
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "If a constant input β-=1 acts at every moment, must α- approach zero?",
+      "stem": "If a constant input \\(\\beta _{-}=1\\) acts at every moment, must \\(\\alpha _{-}\\) approach zero?",
       "choices": [
         {
           "id": "a",
@@ -1915,7 +1915,7 @@
         },
         {
           "id": "c",
-          "text": "No. A stable difference mode approaches the nonzero fixed point α-* = β-/(1+w0), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure."
+          "text": "No. A stable difference mode approaches the nonzero fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\), so the trajectory can remain away from the common axis."
         },
         {
           "id": "d",
@@ -1923,7 +1923,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "No. A stable difference mode approaches the nonzero fixed point α-* = β-/(1+w0), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure. This is the distinction tested in Activity-space and mode-space views of the same trajectory.",
+      "explanation": "No. A stable difference mode approaches the nonzero fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure. This is the distinction tested in Activity-space and mode-space views of the same trajectory.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Activity-space and mode-space views of the same trajectory.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Activity-space and mode-space views of the same trajectory.” It describes the error the module is designed to prevent.",
@@ -1953,7 +1953,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — How quickly does the trajectory enter the low-dimensional manifold?: Let α+(0)=4, α-(0)=2, τ+=200 ms, and τ-=20 ms. Find both amplitudes and the difference-mode energy fraction after 100 ms. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — How quickly does the trajectory enter the low-dimensional manifold?: Let \\(\\alpha +(0)=4\\), \\(\\alpha -(0)=2\\), \\(\\tau _{+}=200 \\mathrm{ms}\\), and \\(\\tau _{-}=20 \\mathrm{ms}\\). Find both amplitudes and the difference-mode energy fraction after 100 ms. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -1973,7 +1973,7 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Worked setup: Let α+(0)=4, α-(0)=2, τ+=200 ms, and τ-=20 ms. Find both amplitudes and the difference-mode energy fraction after 100 ms. α+(100)=4e^{-0.5}≈2.426. α-(100)=2e^{-5}≈0.0135. The difference fraction is 0.0135²/(2.426²+0.0135²)≈0.000031, or about 0.0031%. Swapping 20 ms and 200 ms reverses the fast/slow conclusion; first check which denominator is closer to zero.",
+      "explanation": "Worked setup: Let \\(\\alpha +(0)=4\\), \\(\\alpha -(0)=2\\), \\(\\tau _{+}=200 \\mathrm{ms}\\), and \\(\\tau _{-}=20 \\mathrm{ms}\\). Find both amplitudes and the difference-mode energy fraction after 100 ms. \\(\\alpha +(100)=4e^{-0.5}\\approx 2.426\\). \\(\\alpha -(100)=2e^{-5}\\approx 0.0135\\). The difference fraction is \\(0.0135^{2}/(2.426^{2}+0.0135^{2})\\approx 0.000031\\), or about 0.0031%. Swapping 20 ms and 200 ms reverses the fast/slow conclusion; first check which denominator is closer to zero.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -2170,11 +2170,11 @@
         },
         {
           "id": "d",
-          "text": "α± and h share the same units, while ξ± is dimensionless, so both terms in the reconstruction have compatible units."
+          "text": "\\(\\alpha \\pm\\) and h share the same units, while \\(\\xi \\pm\\) is dimensionless, so both terms in the reconstruction have compatible units."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "α± and h share the same units, while ξ± is dimensionless, so both terms in the reconstruction have compatible units. If τ-=τ+, both modes decay at the same relative rate, so timescale separation does not automatically collapse the initial two-dimensional structure to one dimension. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "\\(\\alpha \\pm\\) and h share the same units, while \\(\\xi \\pm\\) is dimensionless, so both terms in the reconstruction have compatible units. If \\(\\tau _{-}=\\tau _{+}\\), both modes decay at the same relative rate, so timescale separation does not automatically collapse the initial two-dimensional structure to one dimension. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Activity-space and mode-space views of the same trajectory.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Activity-space and mode-space views of the same trajectory.” It describes the error the module is designed to prevent.",
@@ -2204,11 +2204,11 @@
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "What is chiefly mixed in if E[hh^T] is computed without centering?",
+      "stem": "What is chiefly mixed in if \\(E[hh^\\mathrm{T}]\\) is computed without centering?",
       "choices": [
         {
           "id": "a",
-          "text": "The mean outer-product term h_bar h_bar^T is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations."
+          "text": "The mean outer-product term \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations."
         },
         {
           "id": "b",
@@ -2216,7 +2216,7 @@
         },
         {
           "id": "c",
-          "text": "Forgetting to constrain ||v||=1, which leaves variance maximization unbounded."
+          "text": "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
         },
         {
           "id": "d",
@@ -2224,7 +2224,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "The mean outer-product term h_bar h_bar^T is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations. This is the distinction tested in PCA: from projection variance to covariance eigenvectors.",
+      "explanation": "The mean outer-product term \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations. This is the distinction tested in PCA: from projection variance to covariance eigenvectors.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
@@ -2254,7 +2254,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Compute the PC of a two-dimensional covariance by hand: Given C=[[5,4],[4,5]], find both eigenvectors and eigenvalues, then interpret the long axis of the data cloud. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Compute the PC of a two-dimensional covariance by hand: Given \\(C=[[5,4],[4,5]]\\), find both eigenvectors and eigenvalues, then interpret the long axis of the data cloud. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -2262,7 +2262,7 @@
         },
         {
           "id": "b",
-          "text": "The data cloud is elongated along the common axis, where h1 and h2 vary together. Retaining PC1 explains 9/(9+1)=90% of the variance."
+          "text": "The data cloud is elongated along the common axis, where h1 and h2 vary together. Retaining PC1 explains \\(9/(9+1)=90\\)% of the variance."
         },
         {
           "id": "c",
@@ -2274,7 +2274,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "Worked setup: Given C=[[5,4],[4,5]], find both eigenvectors and eigenvalues, then interpret the long axis of the data cloud. For common vector (1,1)^T, C(1,1)^T=(9,9)^T, so the eigenvalue is 9. For difference vector (1,-1)^T, C(1,-1)^T=(1,-1)^T, so the eigenvalue is 1. After normalization, PC1=(1,1)^T/√2 and PC2=(1,-1)^T/√2; the variance of PC1 is 9 times that of PC2. The trace of C is 10, equal to the eigenvalue sum 9+1, which checks the arithmetic.",
+      "explanation": "Worked setup: Given \\(C=[[5,4],[4,5]]\\), find both eigenvectors and eigenvalues, then interpret the long axis of the data cloud. For common vector \\((1,1)^\\mathrm{T}\\), \\(C(1,1)^\\mathrm{T}=(9,9)^\\mathrm{T}\\), so the eigenvalue is 9. For difference vector \\((1,-1)^\\mathrm{T}\\), \\(C(1,-1)^\\mathrm{T}=(1,-1)^\\mathrm{T}\\), so the eigenvalue is 1. After normalization, PC1=\\((1,1)^\\mathrm{T}/\\sqrt 2\\) and PC2=\\((1,-1)^\\mathrm{T}/\\sqrt 2\\); the variance of PC1 is 9 times that of PC2. The trace of C is 10, equal to the eigenvalue \\(\\operatorname{sum} 9+1\\), which checks the arithmetic.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -2312,11 +2312,11 @@
         },
         {
           "id": "b",
-          "text": "Forgetting to constrain ||v||=1, which leaves variance maximization unbounded."
+          "text": "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
         },
         {
           "id": "c",
-          "text": "PCA must be applied to centered activity: C=E[δhδh^T]."
+          "text": "PCA must be applied to centered activity: \\(C=E[\\delta h\\delta h^\\mathrm{T}]\\)."
         },
         {
           "id": "d",
@@ -2324,7 +2324,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "PCA must be applied to centered activity: C=E[δhδh^T]. The module's worked example and checks support the same conclusion.",
+      "explanation": "PCA must be applied to centered activity: \\(C=E[\\delta h\\delta h^\\mathrm{T}]\\). The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
@@ -2362,7 +2362,7 @@
         },
         {
           "id": "b",
-          "text": "Forgetting to constrain ||v||=1, which leaves variance maximization unbounded."
+          "text": "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
         },
         {
           "id": "c",
@@ -2370,11 +2370,11 @@
         },
         {
           "id": "d",
-          "text": "Under a unit-norm constraint, projected variance is v^TCv."
+          "text": "Under a unit-norm constraint, projected variance is \\(v^\\mathrm{T}Cv\\)."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Under a unit-norm constraint, projected variance is v^TCv. The module's worked example and checks support the same conclusion.",
+      "explanation": "Under a unit-norm constraint, projected variance is \\(v^\\mathrm{T}Cv\\). The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
@@ -2416,7 +2416,7 @@
         },
         {
           "id": "c",
-          "text": "Forgetting to constrain ||v||=1, which leaves variance maximization unbounded."
+          "text": "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
         },
         {
           "id": "d",
@@ -2463,11 +2463,11 @@
         },
         {
           "id": "b",
-          "text": "If h is a firing rate, C and λ have units of rate²; v is dimensionless and projection p retains the rate unit."
+          "text": "If h is a firing rate, C and \\(\\lambda\\) have units of \\(\\mathrm{rate}^{2}\\); v is dimensionless and projection p retains the rate unit."
         },
         {
           "id": "c",
-          "text": "Forgetting to constrain ||v||=1, which leaves variance maximization unbounded."
+          "text": "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
         },
         {
           "id": "d",
@@ -2475,7 +2475,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "If h is a firing rate, C and λ have units of rate²; v is dimensionless and projection p retains the rate unit. If every sample is identical, centering gives C=0. Variance is zero in every direction and the PC directions are not unique. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "If h is a firing rate, C and \\(\\lambda\\) have units of \\(\\mathrm{rate}^{2}\\); v is dimensionless and projection p retains the rate unit. If every sample is identical, centering gives \\(C=0\\). Variance is zero in every direction and the PC directions are not unique. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “PCA: from projection variance to covariance eigenvectors.” It describes the error the module is designed to prevent.",
@@ -2505,7 +2505,7 @@
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "Why does V_K^TV_K=I not imply V_KV_K^T=I?",
+      "stem": "Why does \\(V_{K}^\\mathrm{T}V_{K}=I\\) not imply \\(V_{\\mathrm{KV},K}^\\mathrm{T}=I\\)?",
       "choices": [
         {
           "id": "a",
@@ -2517,7 +2517,7 @@
         },
         {
           "id": "c",
-          "text": "When K<N, V_K is not square. V_K^TV_K is the identity in K-space, while V_KV_K^T is the N-space projector onto a K-dimensional subspace."
+          "text": "When \\(K<N\\), \\(V_{K}\\) is not square. \\(V_{K}^\\mathrm{T}V_{K}\\) is the identity in K-space, while \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is the N-space projector onto a K-dimensional subspace."
         },
         {
           "id": "d",
@@ -2525,7 +2525,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "When K<N, V_K is not square. V_K^TV_K is the identity in K-space, while V_KV_K^T is the N-space projector onto a K-dimensional subspace. This is the distinction tested in Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.",
+      "explanation": "When \\(K<N\\), \\(V_{K}\\) is not square. \\(V_{K}^\\mathrm{T}V_{K}\\) is the identity in K-space, while \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is the N-space projector onto a K-dimensional subspace. This is the distinction tested in Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
@@ -2555,7 +2555,7 @@
       "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Top-2 reconstruction of a three-dimensional state: Let mean=0, with PCs equal to coordinate axes v1=(1,0,0), v2=(0,1,0), v3=(0,0,1), and sample h=(4,2,1). Retain K=2. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Top-2 reconstruction of a three-dimensional state: Let \\(\\operatorname{mean}=0\\), with PCs equal to coordinate axes \\(v_{1}=(1,0,0)\\), \\(v_{2}=(0,1,0)\\), \\(v_{3}=(0,0,1)\\), and sample \\(h=(4,2,1)\\). Retain \\(K=2\\). Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -2575,7 +2575,7 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Worked setup: Let mean=0, with PCs equal to coordinate axes v1=(1,0,0), v2=(0,1,0), v3=(0,0,1), and sample h=(4,2,1). Retain K=2. The scores are p1=4, p2=2, and p3=1. Keeping the first two terms gives h_hat=4v1+2v2=(4,2,0). The residual is h-h_hat=(0,0,1), with squared error 1. The original squared norm is 21, the reconstruction has 20, and the residual has 1, satisfying the orthogonal Pythagorean relation 21=20+1.",
+      "explanation": "Worked setup: Let \\(\\operatorname{mean}=0\\), with PCs equal to coordinate axes \\(v_{1}=(1,0,0)\\), \\(v_{2}=(0,1,0)\\), \\(v_{3}=(0,0,1)\\), and sample \\(h=(4,2,1)\\). Retain \\(K=2\\). The scores are \\(p_{1}=4\\), \\(p_{2}=2\\), and \\(p_{3}=1\\). Keeping the first two terms gives \\(\\hat{h}=4v_{1}+2v_{2}=(4,2,0)\\). The residual is \\(h-\\hat{h}=(0,0,1)\\), with squared error 1. The original squared norm is 21, the reconstruction has 20, and the residual has 1, satisfying the orthogonal Pythagorean relation \\(21=20+1\\).",
       "wrongChoiceExplanations": {
         "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -2609,7 +2609,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "V_K is N×K, scores are K×1, and reconstruction returns to N×1 neuron space."
+          "text": "\\(V_{K}\\) is N×K, scores are K×1, and reconstruction returns to N×1 neuron space."
         },
         {
           "id": "b",
@@ -2625,7 +2625,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "V_K is N×K, scores are K×1, and reconstruction returns to N×1 neuron space. The module's worked example and checks support the same conclusion.",
+      "explanation": "\\(V_{K}\\) is N×K, scores are K×1, and reconstruction returns to N×1 neuron space. The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
@@ -2663,7 +2663,7 @@
         },
         {
           "id": "b",
-          "text": "A complete orthogonal basis transform is lossless; dimensions are discarded only by projection with K<N."
+          "text": "A complete orthogonal basis transform is lossless; dimensions are discarded only by projection with \\(K<N\\)."
         },
         {
           "id": "c",
@@ -2675,7 +2675,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "A complete orthogonal basis transform is lossless; dimensions are discarded only by projection with K<N. The module's worked example and checks support the same conclusion.",
+      "explanation": "A complete orthogonal basis transform is lossless; dimensions are discarded only by projection with \\(K<N\\). The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
@@ -2717,7 +2717,7 @@
         },
         {
           "id": "c",
-          "text": "V_K is N×K, scores are K×1, and reconstruction returns to N×1 neuron space."
+          "text": "\\(V_{K}\\) is N×K, scores are K×1, and reconstruction returns to N×1 neuron space."
         },
         {
           "id": "d",
@@ -2725,7 +2725,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "V_K is N×K, scores are K×1, and reconstruction returns to N×1 neuron space. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "explanation": "\\(V_{K}\\) is N×K, scores are K×1, and reconstruction returns to N×1 neuron space. The variables may change in a new setting, but the model must still satisfy this constraint.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
@@ -2772,11 +2772,11 @@
         },
         {
           "id": "d",
-          "text": "V_KV_K^T has shape N×N and acts on N×1 centered activity. V_K^TV_K=I_K, but V_KV_K^T is generally not I_N."
+          "text": "\\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) has shape N×N and acts on N×1 centered activity. \\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\), but \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is generally not \\(I_{N}\\)."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "V_KV_K^T has shape N×N and acts on N×1 centered activity. V_K^TV_K=I_K, but V_KV_K^T is generally not I_N. At K=N, residual and error are zero; at K=0, reconstruction is only the mean and error equals total variance. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "\\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) has shape N×N and acts on N×1 centered activity. \\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\), but \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is generally not \\(I_{N}\\). At \\(K=N\\), residual and error are zero; at \\(K=0\\), reconstruction is only the mean and error equals total variance. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Top-K PCA, orthogonal projection, and the boundary between reversible and approximate representations.” It describes the error the module is designed to prevent.",
@@ -2846,7 +2846,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Different cutoffs produce different values of K: The eigenvalues are [9,3,1,1]. Find the smallest K under cumulative-variance thresholds of 80% and 95%. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Different cutoffs produce different values of K: The eigenvalues are \\([9,3,1,1]\\). Find the smallest K under cumulative-variance thresholds of 80% and 95%. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -2854,7 +2854,7 @@
         },
         {
           "id": "b",
-          "text": "The same data give K=2 or K=4 solely because the threshold changes. The cutoff is an analysis decision and must be reported explicitly."
+          "text": "The same data give \\(K=2\\) or \\(K=4\\) solely because the threshold changes. The cutoff is an analysis decision and must be reported explicitly."
         },
         {
           "id": "c",
@@ -2866,7 +2866,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "Worked setup: The eigenvalues are [9,3,1,1]. Find the smallest K under cumulative-variance thresholds of 80% and 95%. Total variance is 14; F(1)=9/14≈64.3%. F(2)=12/14≈85.7%, so an 80% threshold selects K=2. F(3)=13/14≈92.9% and F(4)=100%, so a 95% threshold selects K=4. Cumulative variance should never decrease and must equal 1 at K=N. Violating either condition usually signals an error in sorting or the denominator.",
+      "explanation": "Worked setup: The eigenvalues are \\([9,3,1,1]\\). Find the smallest K under cumulative-variance thresholds of 80% and 95%. Total variance is 14; \\(F(1)=9/14\\approx 64.3\\)%. \\(F(2)=12/14\\approx 85.7\\)%, so an 80% threshold selects \\(K=2\\). \\(F(3)=13/14\\approx 92.9\\)% and \\(F(4)=100\\)%, so a 95% threshold selects \\(K=4\\). Cumulative variance should never decrease and must equal 1 at \\(K=N\\). Violating either condition usually signals an error in sorting or the denominator.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "c": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -2952,11 +2952,11 @@
         },
         {
           "id": "d",
-          "text": "Cumulative variance F(K) is the partial sum of sorted eigenvalues divided by their total sum."
+          "text": "Cumulative variance \\(F(K)\\) is the partial sum of sorted eigenvalues divided by their total sum."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Cumulative variance F(K) is the partial sum of sorted eigenvalues divided by their total sum. The module's worked example and checks support the same conclusion.",
+      "explanation": "Cumulative variance \\(F(K)\\) is the partial sum of sorted eigenvalues divided by their total sum. The module's worked example and checks support the same conclusion.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “New page: eigenvalue cliff, cumulative variance, and dimensionality selection.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “New page: eigenvalue cliff, cumulative variance, and dimensionality selection.” It describes the error the module is designed to prevent.",
@@ -2985,7 +2985,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "Cumulative variance F(K) is the partial sum of sorted eigenvalues divided by their total sum."
+          "text": "Cumulative variance \\(F(K)\\) is the partial sum of sorted eigenvalues divided by their total sum."
         },
         {
           "id": "b",
@@ -3001,7 +3001,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "Cumulative variance F(K) is the partial sum of sorted eigenvalues divided by their total sum. The variables may change in a new setting, but the model must still satisfy this constraint.",
+      "explanation": "Cumulative variance \\(F(K)\\) is the partial sum of sorted eigenvalues divided by their total sum. The variables may change in a new setting, but the model must still satisfy this constraint.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “New page: eigenvalue cliff, cumulative variance, and dimensionality selection.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “New page: eigenvalue cliff, cumulative variance, and dimensionality selection.” It describes the error the module is designed to prevent.",
@@ -3035,7 +3035,7 @@
         },
         {
           "id": "b",
-          "text": "Numerator and denominator both have units of rate², so the ratio is unitless. K is an integer index, not a continuous parameter."
+          "text": "Numerator and denominator both have units of \\(\\mathrm{rate}^{2}\\), so the ratio is unitless. K is an integer index, not a continuous parameter."
         },
         {
           "id": "c",
@@ -3047,7 +3047,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "Numerator and denominator both have units of rate², so the ratio is unitless. K is an integer index, not a continuous parameter. If λ1=...=λN, the spectrum has no cliff and F(K)=K/N. Any low-dimensional cutoff then reflects an external tolerance rather than a natural turning point in the data. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "Numerator and denominator both have units of \\(\\mathrm{rate}^{2}\\), so the ratio is unitless. K is an integer index, not a continuous parameter. If \\(\\lambda _{1}=\\cdots =\\lambda _{N}\\), the spectrum has no cliff and \\(F(K)=K/N\\). Any low-dimensional cutoff then reflects an external tolerance rather than a natural turning point in the data. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “New page: eigenvalue cliff, cumulative variance, and dimensionality selection.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “New page: eigenvalue cliff, cumulative variance, and dimensionality selection.” It describes the error the module is designed to prevent.",
@@ -3533,7 +3533,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "common and difference modes: ξ± = (1, ±1)T / 2. symmetric two-neuron W This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "common and difference modes: \\(\\xi \\pm  = (1, \\pm 1)T / 2\\). symmetric two-neuron W This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "b": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -3566,7 +3566,7 @@
         },
         {
           "id": "b",
-          "text": "V^TV=I"
+          "text": "\\(V^\\mathrm{T}V=I\\)"
         },
         {
           "id": "c",
@@ -3578,7 +3578,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "orthonormal mode coordinates: α = V Th. V^TV=I This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "orthonormal mode coordinates: \\(\\alpha  = V\\) Th. \\(V^\\mathrm{T}V=I\\) This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -3615,7 +3615,7 @@
         },
         {
           "id": "c",
-          "text": "|w0|<1 for stability of both modes"
+          "text": "\\(|w_{0}|<1\\) for stability of both modes"
         },
         {
           "id": "d",
@@ -3623,7 +3623,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "mode time constants: τ± = τ /(1 ∓ w0 ). |w0|<1 for stability of both modes This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "mode time constants: \\(\\tau \\pm  = \\tau  /(1 \\mp  w_{0} )\\). \\(|w_{0}|<1\\) for stability of both modes This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -3668,7 +3668,7 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "activity covariance: C = E[δhδhT ]. centered data This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "activity covariance: \\(C = E[\\delta h\\delta hT ]\\). centered data This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -3713,7 +3713,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "PC1: v1 = arg max v T Cv ∥v∥=1. C symmetric positive semidefinite This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "PC1: v1 = arg \\(\\max v\\) T Cv \\(\\Vert v\\Vert =1\\). C symmetric positive semidefinite This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "b": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -3758,7 +3758,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "PC score and projection: pk = vkT (h − h̄). orthonormal PCs This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "PC score and projection: pk = vkT \\((h - \\bar{h})\\). orthonormal PCs This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -3803,7 +3803,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "cumulative variance explained: ∑ ∑ VarFrac(K) = λk / λj k≤K j. sorted eigenvalues This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "cumulative variance explained: ∑ ∑ VarFrac\\((K) = \\lambda _{k} / \\lambda _{j} k\\le K j\\). sorted eigenvalues This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",

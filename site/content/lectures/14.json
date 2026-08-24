@@ -109,14 +109,14 @@
       "能重构 retinal population GLM 的 stimulus、self-history 与 coupling filters，并说明 fitted coupling 是 conditional prediction 而非 direct synapse 证明。"
     ],
     "prerequisiteBridge": [
-      "STA 比较 spike 前 stimulus 的 mean；STC 比较其 covariance。对 centered vector s，covariance C=E[(s-μ)(s-μ)^T]。两个 covariance 的差 ΔC=C_spike-C_stim 若在某 eigenvector 上有正 eigenvalue，表示 spikes 前该 direction variance 增大；负 eigenvalue 表示该 direction 的 values 被限制在较窄范围。",
-      "likelihood 把 observed data 在给定 parameters 下的 probability 相乘，log likelihood 把 product 变成 sum，便于计算与优化。GLM 不是说 response mean 对 x 必须线性，而是先形成 predictor η=x^Tβ；link g 把 conditional mean m=E[y|x] 映到 η，即 g(m)=η。",
-      "Poisson variable 支持 nonnegative integer counts，mean λ>0；Bernoulli variable 只取 0 或 1，mean q 是 probability。log link λ=e^η 保证 positive rate，logit link log[q/(1-q)]=η 给 q=sigmoid(η)。neural history covariates 必须只使用当前 bin 之前的 spikes，避免用未来信息预测过去。"
+      "STA 比较 spike 前 stimulus 的 mean；STC 比较其 covariance。对 centered vector s，covariance \\(C=E[(s-\\mu )(s-\\mu )^\\mathrm{T}]\\)。两个 covariance 的差 \\(\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}\\) 若在某 eigenvector 上有正 eigenvalue，表示 spikes 前该 direction variance 增大；负 eigenvalue 表示该 direction 的 values 被限制在较窄范围。",
+      "likelihood 把 observed data 在给定 parameters 下的 probability 相乘，log likelihood 把 product 变成 sum，便于计算与优化。GLM 不是说 response mean 对 x 必须线性，而是先形成 predictor \\(\\eta =x^\\mathrm{T}\\beta\\)；link g 把 conditional \\(\\operatorname{mean} m=E[y|x]\\) 映到 \\(\\eta\\)，即 \\(g(m)=\\eta\\)。",
+      "Poisson variable 支持 nonnegative integer counts，\\(\\operatorname{mean} \\lambda >0\\)；Bernoulli variable 只取 0 或 1，\\(\\operatorname{mean} q\\) 是 probability。log link \\(\\lambda =e^\\eta\\) 保证 positive rate，logit link \\(\\log[q/(1-q)]=\\eta\\) 给 \\(q=\\operatorname{sigmoid}(\\eta )\\)。neural history covariates 必须只使用当前 bin 之前的 spikes，避免用未来信息预测过去。"
     ],
     "diagnostic": [
       {
         "id": "L14-D1",
-        "prompt": "若 C_stim=I、C_spike=diag(4,0.25)，ΔC 的两个 eigenvalues 是什么，各自表示什么？",
+        "prompt": "若 \\(C_{\\mathrm{stim}}=I\\)、\\(C_{\\mathrm{spike}}=\\operatorname{diag}(4,0.25)\\)，\\(\\Delta C\\) 的两个 eigenvalues 是什么，各自表示什么？",
         "answer": "eigenvalues 为 3 和 -0.75；第一方向 spike 前 variance 增大，第二方向 variance 减小。",
         "explanation": "STC 检测的是 conditional covariance 相对 raw stimulus covariance 的变化；正负都可揭示 relevant dimensions，不应只保留最大正 eigenvalue。",
         "remediationModuleId": "L14-M1"
@@ -124,15 +124,15 @@
       {
         "id": "L14-D2",
         "prompt": "GLM 名称中的 linear 指哪一部分？Poisson response mean 是否 linear？",
-        "answer": "linear 指 predictor η=Xβ；Poisson mean 经 inverse log link 为 λ=e^η，对 predictor 非线性。",
+        "answer": "linear 指 predictor \\(\\eta =X\\beta\\)；Poisson mean 经 inverse log link 为 \\(\\lambda =e^\\eta\\)，对 predictor 非线性。",
         "explanation": "distribution/link 决定 mean support 与 curvature。把 GLM 当 ordinary linear regression 会错误允许 negative count mean。",
         "remediationModuleId": "L14-M2"
       },
       {
         "id": "L14-D3",
-        "prompt": "η=log 2 的 Poisson GLM 预测 mean count 是多少？η=0 的 Bernoulli-logit model 预测 probability 是多少？",
-        "answer": "Poisson mean λ=e^{log2}=2；Bernoulli probability q=1/(1+e^0)=0.5。",
-        "explanation": "inverse links 分别把任意 real η 映到 positive real mean 与 (0,1) probability；这正是选择 link 的核心。",
+        "prompt": "\\(\\eta =\\log 2\\) 的 Poisson GLM 预测 mean count 是多少？\\(\\eta =0\\) 的 Bernoulli-logit model 预测 probability 是多少？",
+        "answer": "Poisson \\(\\operatorname{mean} \\lambda =e^{\\log 2}=2\\)；Bernoulli probability \\(q=1/(1+e^0)=0.5\\)。",
+        "explanation": "inverse links 分别把任意 real \\(\\eta\\) 映到 positive real mean 与 (0,1) probability；这正是选择 link 的核心。",
         "remediationModuleId": "L14-M2"
       },
       {
@@ -155,19 +155,19 @@
         ],
         "guidingQuestion": "当 neuron 对 projection 的正负或多个 directions 都敏感时，如何从 spike 前 stimulus distribution 的 shape 而不是 mean 找到 features？",
         "paragraphs": [
-          "原稿以 blowfly H1 neuron 为例，stimulus s(t)=v(t) 是 image velocity，而非二维 light pattern。response 可依多个 temporal filters K_1...K_n 的 projections，再经 multidimensional nonlinearity F。这个例子提醒：stimulus vector 的坐标由问题定义，可是 pixels、velocity history、past spikes 或其他 measured covariates。",
-          "若 nonlinearity 对 +K 与 -K symmetric，spike-triggered mean 会抵消；若 response 依多个 relevant filters，单一 STA 至多给出一个 spike-triggered mean direction，可能稳定地指向某个线性组合，却不能恢复完整 relevant subspace。前者是 symmetry cancellation，后者是 dimensionality limitation，不能把两者都解释成 noisy 或 unstable average。STC 先计算 spike-triggered covariance C_spike，再与 raw stimulus covariance C_stim 比较。ΔC 的 eigenvectors 给 variance changed directions，而 eigenvalue sign 给 variance 增大或减小。",
+          "原稿以 blowfly H1 neuron 为例，stimulus \\(s(t)=v(t)\\) 是 image velocity，而非二维 light pattern。response 可依多个 temporal filters \\(K_{1}\\cdots K_{n}\\) 的 projections，再经 multidimensional nonlinearity F。这个例子提醒：stimulus vector 的坐标由问题定义，可是 pixels、velocity history、past spikes 或其他 measured covariates。",
+          "若 nonlinearity 对 +K 与 -K symmetric，spike-triggered mean 会抵消；若 response 依多个 relevant filters，单一 STA 至多给出一个 spike-triggered mean direction，可能稳定地指向某个线性组合，却不能恢复完整 relevant subspace。前者是 symmetry cancellation，后者是 dimensionality limitation，不能把两者都解释成 noisy 或 unstable average。STC 先计算 spike-triggered covariance \\(C_{\\mathrm{spike}}\\)，再与 raw stimulus covariance \\(C_{\\mathrm{stim}}\\) 比较。\\(\\Delta C\\) 的 eigenvectors 给 variance changed directions，而 eigenvalue sign 给 variance 增大或减小。",
           "positive eigenvalue 表示 spike-conditioned ensemble 沿该 feature direction 展宽，例如只要 projection magnitude 大就 spike；negative eigenvalue 表示 spikes 要求 projection 落在较窄 range。eigenvector 的正负号本身不唯一，v 与 -v 表示同一轴；真正 response sign 需结合 multidimensional nonlinearity 解释。",
-          "white stimulus 下 C_stim≈σ^2I，可直接分析 ΔC。colored stimulus 会让高-variance input directions 即使与 neuron 无关也主导 covariance；应先 whitening，或解 generalized eigenproblem C_spike v=λ C_stim v。STC 仍受 finite spikes、高 dimension 与 non-Gaussian input 影响，需要 null distribution、regularization 与 held-out validation。"
+          "white stimulus 下 \\(C_{\\mathrm{stim}}\\approx \\sigma ^2I\\)，可直接分析 \\(\\Delta C\\)。colored stimulus 会让高-variance input directions 即使与 neuron 无关也主导 covariance；应先 whitening，或解 generalized eigenproblem \\(C_{\\mathrm{spike}}\\) \\(v=\\lambda  C_{\\mathrm{stim}} v\\)。STC 仍受 finite spikes、高 dimension 与 non-Gaussian input 影响，需要 null distribution、regularization 与 held-out validation。"
         ],
         "keyPoints": [
           "STC 寻找 spike-conditioned variance 改变，能发现 STA 因 symmetry 遗漏的 dimensions。",
           "positive 与 negative covariance changes 都有解释价值，eigenvector sign 不代表 excitation sign。",
-          "colored stimuli 必须 relative to C_stim 做 whitening 或 generalized eigen correction。"
+          "colored stimuli 必须 relative to \\(C_{\\mathrm{stim}}\\) 做 whitening 或 generalized eigen correction。"
         ],
         "derivation": {
           "title": "从 covariance difference 到 relevant axes",
-          "setup": "令 raw stimulus mean μ_s、spike-triggered mean μ_sp；分别对各自 mean 中心化得到 C_stim 与 C_spike。",
+          "setup": "令 raw stimulus \\(\\operatorname{mean} \\mu _{s}\\)、spike-triggered \\(\\operatorname{mean} \\mu _{sp}\\)；分别对各自 mean 中心化得到 \\(C_{\\mathrm{stim}}\\) 与 \\(C_{\\mathrm{spike}}\\)。",
           "steps": [
             {
               "title": "定义 covariance change",
@@ -176,39 +176,39 @@
             },
             {
               "title": "把任意 direction 的 variance change 写成 quadratic form",
-              "explanation": "unit vector v 上的 projection variance 差等于 v^TΔCv；这直接比较 spike-conditioned 与 baseline spread。",
+              "explanation": "unit vector v 上的 projection variance 差等于 \\(v^\\mathrm{T}\\Delta Cv\\)；这直接比较 spike-conditioned 与 baseline spread。",
               "latex": "\\Delta\\operatorname{Var}(\\mathbf v^{\\mathsf T}s)=\\mathbf v^{\\mathsf T}\\Delta C\\mathbf v"
             },
             {
               "title": "用 eigendecomposition 找 extrema",
-              "explanation": "在 ||v||=1 constraint 下，Rayleigh quotient 的 extrema 出现在 ΔC eigenvectors；eigenvalues 就是这些 axes 上的 variance change。",
+              "explanation": "在 \\(||v||=1\\) constraint 下，Rayleigh quotient 的 extrema 出现在 \\(\\Delta C\\) eigenvectors；eigenvalues 就是这些 axes 上的 variance change。",
               "latex": "\\Delta C\\mathbf v_k=\\lambda_k\\mathbf v_k"
             }
           ],
           "symbolNotes": [
-            "C_spike 与 C_stim 都是 P×P；sample count 常远小于 P 时 estimate rank deficient。",
-            "generalized eigenvalue λ 比较 relative variance ratio；与直接 ΔC eigenvalue 的 numerical scale 不同。"
+            "\\(C_{\\mathrm{spike}}\\) 与 \\(C_{\\mathrm{stim}}\\) 都是 P×P；sample count 常远小于 P 时 estimate rank deficient。",
+            "generalized eigenvalue \\(\\lambda\\) 比较 relative variance ratio；与直接 \\(\\Delta C\\) eigenvalue 的 numerical scale 不同。"
           ],
-          "unitsCheck": "covariance 与 ΔC 的单位是 stimulus^2，eigenvalue 同单位；normalized/whitened space 中可视为相对无量纲变化。",
-          "limitCheck": "若 C_spike=C_stim，second moment 不变，STC 不提供 feature；neuron 仍可能依赖更高阶 statistics。"
+          "unitsCheck": "covariance 与 \\(\\Delta C\\) 的单位是 stimulus^2，eigenvalue 同单位；normalized/whitened space 中可视为相对无量纲变化。",
+          "limitCheck": "若 \\(C_{\\mathrm{spike}}=C_{\\mathrm{stim}}\\)，second moment 不变，STC 不提供 feature；neuron 仍可能依赖更高阶 statistics。"
         },
         "workedExample": {
           "title": "二维 STC 的正负 directions",
-          "problem": "raw stimulus C_stim=I；spike-conditioned C_spike=diag(4,0.25)。求 ΔC、eigenvectors 与解释。",
+          "problem": "raw stimulus \\(C_{\\mathrm{stim}}=I\\)；spike-conditioned \\(C_{\\mathrm{spike}}=\\operatorname{diag}(4,0.25)\\)。求 \\(\\Delta C\\)、eigenvectors 与解释。",
           "steps": [
-            "ΔC=diag(3,-0.75)。matrix 已 diagonal，eigenvectors 是 e_1=(1,0)^T 与 e_2=(0,1)^T。",
-            "沿 e_1，spike-conditioned variance 从 1 增到 4，变化 +3，提示 large |s_1| 与 spiking 关联。",
-            "沿 e_2，variance 从 1 降到 0.25，变化 -0.75，提示 spiking 偏好 s_2 接近某窄 range。"
+            "\\(\\Delta C=\\operatorname{diag}(3,-0.75)\\)。matrix 已 diagonal，eigenvectors 是 \\(e_{1}=(1,0)^\\mathrm{T}\\) 与 \\(e_{2}=(0,1)^\\mathrm{T}\\)。",
+            "沿 \\(e_{1}\\)，spike-conditioned variance 从 1 增到 4，变化 +3，提示 large \\(|s_{1}|\\) 与 spiking 关联。",
+            "沿 \\(e_{2}\\)，variance 从 1 降到 0.25，变化 -0.75，提示 spiking 偏好 \\(s_{2}\\) 接近某窄 range。"
           ],
           "result": "同一个 neuron 可同时要求一个 projection magnitude 大、另一个 projection 受限，单一 STA 无法表达。",
-          "sanityCheck": "trace ΔC=2.25 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
+          "sanityCheck": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
         },
         "selfCheck": {
           "prompt": "为什么 STC eigenvector 的正负号不能直接告诉我们 stimulus 是 excitatory 还是 inhibitory？",
           "answer": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。"
         },
         "pitfalls": [
-          "在 colored stimulus 上直接挑 ΔC 最大 eigenvector，把 stimulus 自身的高 variance 误认为 neural feature。",
+          "在 colored stimulus 上直接挑 \\(\\Delta C\\) 最大 eigenvector，把 stimulus 自身的高 variance 误认为 neural feature。",
           "只报告正 eigenvalues，遗漏 spike-conditioned ensemble 被压窄的 negative directions。"
         ]
       },
@@ -231,9 +231,9 @@
         ],
         "guidingQuestion": "如何让同一套 linear covariates 适配 continuous response 与 spike count，并从 probability model 推出对应 objective？",
         "paragraphs": [
-          "GLM 有三个部件：response distribution p(y|θ)、linear predictor η=Xβ，以及把 conditional mean m 与 η 相连的 link g(m)=η。exponential family 的 canonical form p(y|θ)=exp[yθ+H(y)-D(θ)] 把 data-dependent term、base measure 与 log partition 分开；D 保证 distribution normalization，并决定 mean 与 variance。",
-          "Gaussian unit-variance model 取 identity link，m=η=x^Tβ。log likelihood 中与 β 有关的部分是 -1/2Σ(y-m)^2，因此 maximizing likelihood 等价于 minimizing mean-squared error。若 variance 未知或 heteroscedastic，这个简单等价需扩展，不能把 squared loss 当成所有 continuous response 的唯一模型。",
-          "Poisson model 对 count y≥0 使用 p(y|λ)=λ^ye^{-λ}/y!。canonical parameter θ=logλ，linear predictor η=θ，inverse link λ=e^η。exponential 让任何 real predictor 都映到 positive mean，并使 log likelihood 变成 Σ[yη-e^η-log(y!)]，其 gradient 是 covariate 乘 observed-minus-predicted count。",
+          "GLM 有三个部件：response distribution \\(p(y|\\theta )\\)、linear predictor \\(\\eta =X\\beta\\)，以及把 conditional \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 相连的 link \\(g(m)=\\eta\\)。exponential family 的 canonical form \\(p(y|\\theta )=\\exp[y\\theta +H(y)-D(\\theta )]\\) 把 data-dependent term、base measure 与 log partition 分开；D 保证 distribution normalization，并决定 mean 与 variance。",
+          "Gaussian unit-variance model 取 identity link，\\(m=\\eta =x^\\mathrm{T}\\beta\\)。log likelihood 中与 \\(\\beta\\) 有关的部分是 \\(-1/2\\Sigma (y-m)^2\\)，因此 maximizing likelihood 等价于 minimizing mean-squared error。若 variance 未知或 heteroscedastic，这个简单等价需扩展，不能把 squared loss 当成所有 continuous response 的唯一模型。",
+          "Poisson model 对 count \\(y\\ge 0\\) 使用 \\(p(y|\\lambda )=\\lambda ^ye^{-\\lambda }/y\\)!。canonical parameter \\(\\theta =\\log\\lambda\\)，linear predictor \\(\\eta =\\theta\\)，inverse link \\(\\lambda =e^\\eta\\)。exponential 让任何 real predictor 都映到 positive mean，并使 log likelihood 变成 Σ[yη-e^η-log(y!)]，其 gradient 是 covariate 乘 observed-minus-predicted count。",
           "Poisson conditional independence 表示给定所有 included covariates 后 bins/samples 独立，不等于真实 spike train 没有 refractory 或 coupling。把 past spikes 放入 design matrix 可使 conditional model 表达 history dependence。bin size 也决定 response support：较长 window 可有 count>1，极小 bin 更接近 Bernoulli。"
         ],
         "keyPoints": [
@@ -243,7 +243,7 @@
         ],
         "derivation": {
           "title": "从 probability mass 得到 Poisson log likelihood 与 gradient",
-          "setup": "P independent observations y_μ，predictor η_μ=x_μ^Tβ，mean λ_μ=e^{η_μ}。",
+          "setup": "P independent observations \\(y_\\mu\\)，predictor \\(\\eta _\\mu =x_\\mu ^\\mathrm{T}\\beta\\)，\\(\\operatorname{mean} \\lambda _\\mu =e^{\\eta _\\mu }\\)。",
           "steps": [
             {
               "title": "写 joint likelihood 并取 log",
@@ -252,36 +252,36 @@
             },
             {
               "title": "对 predictor 求 derivative",
-              "explanation": "yη derivative 是 y，-e^η derivative 是 -e^η=-λ；factorial term 与 β 无关。",
+              "explanation": "\\(y\\eta\\) derivative 是 y，\\(-e^\\eta\\) derivative 是 \\(-e^\\eta =-\\lambda\\)；factorial term 与 \\(\\beta\\) 无关。",
               "latex": "\\frac{\\partial\\ell}{\\partial\\eta_\\mu}=y_\\mu-\\lambda_\\mu"
             },
             {
               "title": "chain 到 coefficients",
-              "explanation": "∂η_μ/∂β=x_μ，因此所有 samples 贡献 covariate times count residual。",
+              "explanation": "\\(\\partial \\eta _\\mu /\\partial \\beta =x_\\mu\\)，因此所有 samples 贡献 covariate times count residual。",
               "latex": "\\nabla_\\beta\\ell=\\sum_\\mu \\mathbf x_\\mu(y_\\mu-e^{\\mathbf x_\\mu^{\\mathsf T}\\beta})"
             }
           ],
           "symbolNotes": [
-            "λ_μ 是 expected count per observation window；若 model rate 为 spikes/s，需乘 bin width 得 count mean。",
-            "log(y!) 影响 absolute likelihood 与 model comparison，但不影响 β gradient；不能在报告 likelihood value 时随意删除。"
+            "\\(\\lambda _\\mu\\) 是 expected count per observation window；若 model rate 为 spikes/s，需乘 bin width 得 count mean。",
+            "log(y!) 影响 absolute likelihood 与 model comparison，但不影响 \\(\\beta\\) gradient；不能在报告 likelihood value 时随意删除。"
           ],
-          "unitsCheck": "η 与 logλ 需无量纲；实际 count mean 是无量纲 expected events，continuous-time rate 乘 Δt 后才进入 Poisson mean。",
+          "unitsCheck": "\\(\\eta\\) 与 log\\(\\lambda\\) 需无量纲；实际 count mean 是无量纲 expected events，continuous-time rate 乘 \\(\\Delta t\\) 后才进入 Poisson mean。",
           "limitCheck": "若 data variance 远大于 mean，Poisson may be overdispersed；negative binomial 或 latent-state model 可能更适合。"
         },
         "workedExample": {
           "title": "单 coefficient Poisson update direction",
-          "problem": "一个 observation x=2、β=0，故 η=0、λ=1；observed count y=3。求 log-likelihood gradient 对 β 的 contribution。",
+          "problem": "一个 observation \\(x=2\\)、\\(\\beta =0\\)，故 \\(\\eta =0\\)、\\(\\lambda =1\\)；observed count \\(y=3\\)。求 log-likelihood gradient 对 \\(\\beta\\) 的 contribution。",
           "steps": [
-            "predictor η=xβ=0，inverse log link 给 λ=e^0=1。",
-            "count residual y-λ=2。",
-            "gradient contribution x(y-λ)=2×2=4，为正；gradient ascent 会增加 β，从而提高 predicted count。"
+            "predictor \\(\\eta =x\\beta =0\\)，inverse log link 给 \\(\\lambda =e^0=1\\)。",
+            "count residual \\(y-\\lambda =2\\)。",
+            "gradient contribution \\(x(y-\\lambda )=2\\times 2=4\\)，为正；gradient ascent 会增加 \\(\\beta\\)，从而提高 predicted count。"
           ],
           "result": "Poisson gradient 用 observed minus expected count 决定方向，同时由 covariate magnitude 决定该 sample 对 coefficient 的作用。",
-          "sanityCheck": "若 y=0，同一 sample gradient 为 2(0-1)=-2，会降低 β 与 λ；prediction 始终保持 positive。"
+          "sanityCheck": "若 \\(y=0\\)，同一 sample gradient 为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；prediction 始终保持 positive。"
         },
         "selfCheck": {
-          "prompt": "为什么 Poisson GLM 使用 identity link λ=η 会产生结构性问题？",
-          "answer": "linear predictor η 可取任意 real value，identity link 会允许 negative expected counts；log link 用 λ=e^η 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "prompt": "为什么 Poisson GLM 使用 identity link \\(\\lambda =\\eta\\) 会产生结构性问题？",
+          "answer": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
         },
         "pitfalls": [
           "把 Gaussian、Poisson 与 Bernoulli 只当三个 loss 名称，不检查 response support 与 variance assumption。",
@@ -303,10 +303,10 @@
         ],
         "guidingQuestion": "如何在一个 predictor 中同时表达外界 stimulus、neuron 自身 history 与其他 neurons 的过去 spikes，并选择 count 或 binary observation model？",
         "paragraphs": [
-          "retinal population GLM 为每个 neuron i 建 predictor η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)+b_i。stimulus filter k_i 描述 receptive-field drive；self-history h_i 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter c_{ij} 描述其他 neurons' past spikes 对 i 的 conditional rate。",
+          "retinal population GLM 为每个 neuron i 建 predictor η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)\\(+b_{i}\\)。stimulus filter \\(k_{i}\\) 描述 receptive-field drive；self-history \\(h_{i}\\) 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter \\(c_{ij}\\) 描述其他 neurons' past spikes 对 i 的 conditional rate。",
           "所有 filters 同时拟合很重要。若先忽略 self-history，refractory structure 可能被 stimulus filter 吸收；若忽略 shared stimulus，coupling filter 会把共同 stimulus drive 当成 interaction。即使 simultaneous fit，unobserved neurons 与 global state 仍可产生 residual coupling，因此 coefficient 是 predictive conditional dependence，不是 anatomical synapse label。",
-          "极小 bin 中 response y_t∈{0,1}，可用 Bernoulli likelihood。log odds θ=log[q/(1-q)] 作为 predictor η，inverse link q=e^η/(1+e^η)。η=0 时 q=0.5，η 增加一单位使 odds 乘 e；这种解释比直接说 probability 增加固定量更准确，因为 sigmoid near 0 与 near 1 的 slope 不同。",
-          "Bernoulli negative log likelihood 是 binary cross-entropy。它既可用于 small-bin spike/no-spike，也可用于 behavioral classification，但 observation unit 与 covariates 不同。若 r 是 continuous-time rate，则 Poisson bin mean 为 λ_bin=rΔt；在 λ_bin≪1 时，至少一个 spike 的概率 q=1-e^{-λ_bin}≈λ_bin≈rΔt，因而接近 Bernoulli。若上一模块的 λ 已表示每个 bin 的 expected count，就不能再乘一次 Δt。当 bin 内多 spikes 不可忽略时，Bernoulli 会丢掉 count information。选择模型前必须先声明每个 sample 是 count window、binary bin 还是 behavioral trial。"
+          "极小 bin 中 response \\(y_{t}\\in {0,1}\\)，可用 Bernoulli likelihood。log odds \\(\\theta =\\log[q/(1-q)]\\) 作为 predictor \\(\\eta\\)，inverse link \\(q=e^\\eta /(1+e^\\eta )\\)。\\(\\eta =0\\) 时 \\(q=0.5\\)，\\(\\eta\\) 增加一单位使 odds 乘 e；这种解释比直接说 probability 增加固定量更准确，因为 sigmoid near 0 与 near 1 的 slope 不同。",
+          "Bernoulli negative log likelihood 是 binary cross-entropy。它既可用于 small-bin spike/no-spike，也可用于 behavioral classification，但 observation unit 与 covariates 不同。若 r 是 continuous-time rate，则 Poisson bin mean 为 \\(\\lambda _{\\mathrm{bin}}=r\\Delta t\\)；在 \\(\\lambda _{\\mathrm{bin}}\\ll 1\\) 时，至少一个 spike 的概率 \\(q=1-e^{-\\lambda _{\\mathrm{bin}}}\\approx \\lambda _{\\mathrm{bin}}\\approx r\\Delta t\\)，因而接近 Bernoulli。若上一模块的 \\(\\lambda\\) 已表示每个 bin 的 expected count，就不能再乘一次 \\(\\Delta t\\)。当 bin 内多 spikes 不可忽略时，Bernoulli 会丢掉 count information。选择模型前必须先声明每个 sample 是 count window、binary bin 还是 behavioral trial。"
         ],
         "keyPoints": [
           "population predictor 可同时包含 stimulus、self-history、cross-neuron history 与 bias。",
@@ -315,37 +315,37 @@
         ],
         "derivation": {
           "title": "从 Bernoulli likelihood 到 sigmoid 与 cross-entropy",
-          "setup": "单 observation y∈{0,1}，spike probability q，logit predictor η=log[q/(1-q)]=x^Tβ。",
+          "setup": "单 observation \\(y\\in {0,1}\\)，spike probability q，logit predictor \\(\\eta =\\log[q/(1-q)]=x^\\mathrm{T}\\beta\\)。",
           "steps": [
             {
               "title": "解出 inverse link",
-              "explanation": "从 q/(1-q)=e^η 出发，移项得到 q=e^η/(1+e^η)=1/(1+e^{-η})。",
+              "explanation": "从 \\(q/(1-q)=e^\\eta\\) 出发，移项得到 \\(q=e^\\eta /(1+e^\\eta )=1/(1+e^{-\\eta })\\)。",
               "latex": "q=\\sigma(\\eta)=\\frac{1}{1+e^{-\\eta}}"
             },
             {
               "title": "写 log likelihood",
-              "explanation": "Bernoulli probability q^y(1-q)^{1-y} 取 log，得到 ylogq+(1-y)log(1-q)。",
+              "explanation": "Bernoulli probability \\(q^y(1-q)^{1-y}\\) 取 log，得到 \\(y\\log q+(1-y)\\log(1-q)\\)。",
               "latex": "\\ell=y\\log q+(1-y)\\log(1-q)"
             },
             {
               "title": "识别 residual gradient",
-              "explanation": "sigmoid derivative q(1-q) 与 log terms 的 derivative 抵消后，∂ell/∂η=y-q；再乘 x 得 coefficient gradient。",
+              "explanation": "sigmoid derivative \\(q(1-q)\\) 与 log terms 的 derivative 抵消后，\\(\\partial ell/\\partial \\eta =y-q\\)；再乘 x 得 coefficient gradient。",
               "latex": "\\nabla_\\beta\\ell=\\mathbf x(y-q)"
             }
           ],
           "symbolNotes": [
             "q 是当前 bin 至少一个 spike 的 probability；若 y 表示 behavioral choice，解释变为 choice probability。",
-            "odds=q/(1-q) 与 probability 不同；coefficient β_j 表示 x_j 增加一单位时 odds 乘 e^{β_j}，其他 covariates 固定。"
+            "odds=q/(1-q) 与 probability 不同；coefficient \\(\\beta _{j}\\) 表示 \\(x_{j}\\) 增加一单位时 odds 乘 \\(e^{\\beta _{j}}\\)，其他 covariates 固定。"
           ],
-          "unitsCheck": "η 和 log odds 无量纲，所以有单位的 covariate 需要 reciprocal-unit coefficient，使 x_jβ_j 无量纲。",
-          "limitCheck": "q 接近 0 或 1 时 sigmoid slope q(1-q) 很小；极端 separation 会让 unregularized logistic coefficients diverge。"
+          "unitsCheck": "\\(\\eta\\) 和 log odds 无量纲，所以有单位的 covariate 需要 reciprocal-unit coefficient，使 \\(x_{j}\\beta _{j}\\) 无量纲。",
+          "limitCheck": "q 接近 0 或 1 时 sigmoid slope \\(q(1-q)\\) 很小；极端 separation 会让 unregularized logistic coefficients diverge。"
         },
         "workedExample": {
           "title": "History filters 如何组合成 conditional spike probability",
-          "problem": "某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 η 与 q；再去掉 refractory term 比较。",
+          "problem": "某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 \\(\\eta\\) 与 q；再去掉 refractory term 比较。",
           "steps": [
-            "含全部 terms 时 η=-2+1.5-3+0.5=-3，q=1/(1+e^3)≈0.047。",
-            "去掉 refractory term 时 η=0，q=0.5。",
+            "含全部 terms 时 \\(\\eta =-2+1.5-3+0.5=-3\\)，\\(q=1/(1+e^3)\\approx 0.047\\)。",
+            "去掉 refractory term 时 \\(\\eta =0\\)，\\(q=0.5\\)。",
             "因此最近自身 spike 的强负 history filter 可在 stimulus 与 coupling drive 存在时仍压低 immediate spike probability。"
           ],
           "result": "GLM 在 predictor 中加总不同来源的 evidence，再由 sigmoid 把总量变成合法 probability。",
@@ -370,7 +370,7 @@
       "moduleId": "L14-M3",
       "title": "Population GLM 把 stimulus、self-history 与 coupling 放进同一 conditional predictor",
       "alt": "三个输入分支分别表示刺激历史、自身脉冲历史和其他神经元历史，它们经过滤波后汇入线性预测器，再经 inverse link 产生条件脉冲概率。",
-      "caption": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor η_i(t) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。simultaneous fitting 可减少 omitted-covariate 混淆，但 coupling coefficient 仍只表示给定已纳入变量后的 predictive dependence，不能直接当作 anatomical synapse。",
+      "caption": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor \\(\\eta _{i}(t)\\) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。simultaneous fitting 可减少 omitted-covariate 混淆，但 coupling coefficient 仍只表示给定已纳入变量后的 predictive dependence，不能直接当作 anatomical synapse。",
       "sourceRefs": [
         {
           "file": "Lecture14-STC-GLM.pdf",
@@ -386,25 +386,25 @@
       "nodes": [
         {
           "id": "stimulus",
-          "label": "stimulus history\nkᵢ * s",
+          "label": "stimulus history\n\\(k_{i} * s\\)",
           "x": 10,
           "y": 82
         },
         {
           "id": "self-history",
-          "label": "self-history\nhᵢ * yᵢ",
+          "label": "self-history\n\\(h_{i} * y_{i}\\)",
           "x": 10,
           "y": 55
         },
         {
           "id": "coupling",
-          "label": "other neurons\nΣ cᵢⱼ * yⱼ",
+          "label": "other neurons\n\\(\\sum  c_{ij} * y_{j}\\)",
           "x": 10,
           "y": 28
         },
         {
           "id": "predictor",
-          "label": "linear predictor\nηᵢ(t) + bias",
+          "label": "linear predictor\n\\(\\eta _{i}(t)\\)+ bias",
           "x": 45,
           "y": 55,
           "tone": "accent"
@@ -438,7 +438,7 @@
         {
           "from": "predictor",
           "to": "inverse-link",
-          "label": "ηᵢ"
+          "label": "\\(\\eta _{i}\\)"
         },
         {
           "from": "inverse-link",
@@ -453,21 +453,21 @@
     "5.1 STC 与 multiple relevant dimensions",
     "【必要前置】 STA 为零或 neuron 依赖多个 projections 时如何找 features？",
     "Csp = E[(s − µsp )(s − µsp )T | spike]",
-    "∆C = Csp − Cs ∆Cvk = λk vk 1. STA 检查 conditional mean shift；STC 检查 conditional covariance shift。 2. large positive/negative eigenvalues 表示 spike-triggered variance 相对 baseline 增/减的 directions。 3. energy model 的 ±feature stimuli 平均为零但 covariance 沿 feature direction 增大。 4. 若 C_s≠I，应先 whiten 或解 generalized eigenproblem。",
+    "∆\\(C = Csp - Cs\\) ∆Cvk = \\(\\lambda _{k}\\) vk 1. STA 检查 conditional mean shift；STC 检查 conditional covariance shift。 2. large positive/negative eigenvalues 表示 spike-triggered variance 相对 baseline 增/减的 directions。 3. energy model 的 ±feature stimuli 平均为零但 covariance 沿 feature direction 增大。 4. 若 \\(C_{s}\\ne I\\)，应先 whiten 或解 generalized eigenproblem。",
     "Geometric/computational intuition. STC 找的是\"spike 前 stimulus cloud 形状改变\"的轴。 Biological interpretation / failure condition. 高维 covariance 需要大量 spikes；有限样本 eigenvectors 易过拟合。",
     "思考题：GLM 的三个元素？",
     "5.2 GLM 三要素与 canonical form",
-    "【补全推导】 如何把不同 response types 放进统一建模语言？ ∑ ηµ = β 0 + βn xnµ n",
-    "g(mµ ) = ηµ P (yµ | ηµ ) = exp{yµ ηµ − H(yµ ) − D(ηµ )} 1. 选择 response distribution 决定 noise/variance structure。 2. linear predictor η 是 features 的 weighted sum。 3. link g 把 conditional mean m 映射到 η。 4. maximum likelihood 估计 β，而不是统一最小化 MSE。",
+    "【补全推导】 如何把不同 response types 放进统一建模语言？ \\(\\sum  \\eta \\)µ = \\(\\beta \\) \\(0 + \\beta n\\) xnµ n",
+    "g(mµ ) = \\(\\eta \\)µ P (yµ | ηµ ) = exp{yµ ηµ − H(yµ ) − D(ηµ )} 1. 选择 response distribution 决定 noise/variance structure。 2. linear predictor \\(\\eta \\) 是 features 的 weighted sum。 3. link g 把 conditional \\(\\operatorname{mean} m\\) 映射到 \\(\\eta \\)。 4. maximum likelihood 估计 \\(\\beta \\)，而不是统一最小化 MSE。",
     "Geometric/computational intuition. GLM 的\"linear\"指 predictor，对 mean 的关系可通过 nonlinear link。 Biological interpretation / failure condition. distribution/link 选择错误会导致 negative rates、probability 越界或 variance mismatch。",
     "思考题：GLM 中 linear 指什么？",
     "5.3 Gaussian、Poisson、Bernoulli 三种 likelihood",
-    "【跨页连接】 推导常用 GLMs。 1∑ Gaussian: m = η, ℓ = − (y − m)2 + const 2 ∑ Poisson: λ = eη , ℓ = [yη − eη − log(y!)] eη ∑ Bernoulli: q = η , ℓ= [y log q + (1 − y) log(1 − q)] 1+e 1. unit-variance Gaussian + identity link 使 MLE 等价于 least squares。 2. Poisson canonical log link 保证 λ>0。 3. Bernoulli logit link 令 η=log(q/(1−q))，inverse 是 sigmoid。 4. negative Bernoulli log-likelihood 即 binary cross-entropy。",
+    "【跨页连接】 推导常用 GLMs。 1∑ Gaussian: \\(m = \\eta \\), \\(\\ell  = - (y - m)2\\)+ const 2 ∑ Poisson: \\(\\lambda  = e\\eta \\), ℓ = [yη − eη − log(y!)] \\(e\\eta \\) ∑ Bernoulli: \\(q = \\eta \\), ℓ= [y log q + (1 − y) log(1 − q)] 1+e 1. unit-variance Gaussian + identity link 使 MLE 等价于 least squares。 2. Poisson canonical log link 保证 \\(\\lambda >0\\)。 3. Bernoulli logit link 令 \\(\\eta =\\log(q/(1-q))\\)，inverse 是 sigmoid。 4. negative Bernoulli log-likelihood 即 binary cross-entropy。",
     "Geometric/computational intuition. link 把 unrestricted linear score 转成 response mean 的合法范围。 Biological interpretation / failure condition. Poisson overdispersion、zero inflation 或 temporal dependence 需扩展。",
     "思考题：Gaussian identity-link MLE 与什么等价？",
     "5.4 retinal population GLM 的 filters",
     "【模型边界】 如何同时建模 stimulus、refractory/history 与 neuron interactions？ ∑ λi (t) = exp{ki ∗ s + hi ∗ yi + cij ∗ yj + bi } j̸=i",
-    "1. stimulus filter k_i 提取外界 drive。 2. self-history h_i 可表示 refractory suppression 或 bursting facilitation。 3. coupling filters c_ij 捕捉其他 neurons' past spikes 对 conditional rate 的预测。 4. 全部 filters 可在 joint likelihood 中同时优化，减少逐步拟合造成的 confounding。",
+    "1. stimulus filter \\(k_{i}\\) 提取外界 drive。 2. self-history \\(h_{i}\\) 可表示 refractory suppression 或 bursting facilitation。 3. coupling filters \\(c_{ij}\\) 捕捉其他 neurons' past spikes 对 conditional rate 的预测。 4. 全部 filters 可在 joint likelihood 中同时优化，减少逐步拟合造成的 confounding。",
     "Geometric/computational intuition. GLM 把多种历史变量都放进同一个 linear predictor，再用 exp 生成 positive rate。 Biological interpretation / failure condition. coupling coefficient 可能反映 shared input 或 unobserved neurons，不自动证明 direct synapse。",
     "思考题：Poisson 为什么常用 log link？"
   ],
@@ -477,7 +477,7 @@
   "workedExamples": [
     "7.1 distribution/link matching",
     "【例题】题目：200 ms 窗口 spike count、单 bin spike/no-spike、连续 eye velocity。",
-    "Worked solution. count 可用 Poisson/log； small-bin binary 可用 Bernoulli/logit； 连续近 Gaussian residual 可用 Gaussian/identity。 Check. response support 必须匹配：count≥0，probability∈[0,1]，continuous 可正可负。",
+    "Worked solution. count 可用 Poisson/log； small-bin binary 可用 Bernoulli/logit； 连续近 Gaussian residual 可用 Gaussian/identity。 Check. response support 必须匹配：count≥0，probability∈\\([0,1]\\)，continuous 可正可负。",
     "7.2 history filter prediction",
     "【拓展例题】题目：self-history filter 在 spike 后 5 ms 强负、20-50 ms 正。",
     "Worked solution. 模型预测立即 refractory suppression， 随后短暂 increased conditional rate/burst tendency。 Check. 这是 conditional statistical effect，不一定对应单一 ion channel。"
@@ -533,7 +533,7 @@
       "name": "logistic inverse link",
       "expression": "q = (1 + e−η )−1",
       "latex": "q=(1+e^{-\\eta})^{-1}",
-      "conditions": "0<q<1",
+      "conditions": "\\(0<q<1\\)",
       "sectionId": "lecture-14-source-3",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 3
@@ -597,7 +597,7 @@
       "lecture": 14,
       "zh": "线性预测子",
       "en": "linear predictor",
-      "definition": "η=Xβ。",
+      "definition": "\\(\\eta =X\\beta \\)。",
       "sectionId": "lecture-14-source-2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 2
@@ -607,7 +607,7 @@
       "lecture": 14,
       "zh": "链接函数",
       "en": "link function",
-      "definition": "conditional mean 与 η 之间的映射。",
+      "definition": "conditional mean 与 \\(\\eta \\) 之间的映射。",
       "sectionId": "lecture-14-source-1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -637,7 +637,7 @@
       "lecture": 14,
       "zh": "对数几率",
       "en": "log odds",
-      "definition": "log[q/(1−q)]。",
+      "definition": "\\(\\log[q/(1-q)]\\)。",
       "sectionId": "lecture-14-source-6",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 6
@@ -664,8 +664,8 @@
     }
   ],
   "commonTraps": [
-    "STA=0 就认为没有 relevant feature。",
-    "colored stimulus 下直接对 ΔC 做普通 eigendecomposition。",
+    "\\(STA=0\\) 就认为没有 relevant feature。",
+    "colored stimulus 下直接对 \\(\\Delta C\\) 做普通 eigendecomposition。",
     "把 GLM 的 linear 理解为 response mean 必须线性。",
     "Poisson link 使用 identity 导致 negative rate。",
     "把 Bernoulli logistic classification 与 Poisson small-count model 混同。",
@@ -800,7 +800,7 @@
         "c": "该选项回答的是“cross-entropy 从哪里来？”。",
         "d": "这是“逻辑回归（logistic regression）”的定义。"
       },
-      "explanation": "+feature 与 −feature 都触发，mean 相消。 GLM 有三个部件：response distribution p(y|θ)、linear predictor η=Xβ，以及把 conditional mean m 与 η 相连的 link g(m)=η。"
+      "explanation": "+feature 与 −feature 都触发，mean 相消。 GLM 有三个部件：response distribution \\(p(y|\\theta )\\)、linear predictor \\(\\eta =X\\beta\\)，以及把 conditional \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 相连的 link \\(g(m)=\\eta\\)。"
     },
     {
       "id": "L14-Q03",
@@ -845,7 +845,7 @@
         "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。",
         "d": "该选项回答的是“STC 比 STA 多检查什么？”。"
       },
-      "explanation": "whiten stimulus 或使用 generalized eigen/covariance correction。 Poisson model 对 count y≥0 使用 p(y|λ)=λ^ye^{-λ}/y!"
+      "explanation": "whiten stimulus 或使用 generalized eigen/covariance correction。 Poisson model 对 count \\(y\\ge 0\\) 使用 \\(p(y|\\lambda )=\\lambda ^ye^{-\\lambda }/y\\)!"
     },
     {
       "id": "L14-Q04",
@@ -890,7 +890,7 @@
         "b": "这是“Poisson 回归（Poisson regression）”的定义。",
         "d": "该选项回答的是“Poisson 为什么常用 log link？”。"
       },
-      "explanation": "response distribution、linear predictor、link function。 response 可依多个 temporal filters K_1...K_n 的 projections，再经 multidimensional nonlinearity F。"
+      "explanation": "response distribution、linear predictor、link function。 response 可依多个 temporal filters \\(K_{1}\\cdots K_{n}\\) 的 projections，再经 multidimensional nonlinearity F。"
     },
     {
       "id": "L14-Q05",
@@ -926,7 +926,7 @@
         },
         {
           "id": "d",
-          "text": "η 对 predictors linear。"
+          "text": "\\(\\eta \\) 对 predictors linear。"
         }
       ],
       "correctChoiceId": "d",
@@ -935,7 +935,7 @@
         "b": "这是“逻辑回归（logistic regression）”的定义。",
         "c": "该选项回答的是“GLM 的三个元素？”。"
       },
-      "explanation": "η 对 predictors linear。 retinal population GLM 为每个 neuron i 建 predictor η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)+b_i。"
+      "explanation": "\\(\\eta \\) 对 predictors linear。 retinal population GLM 为每个 neuron i 建 predictor η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)\\(+b_{i}\\)。"
     },
     {
       "id": "L14-Q06",
@@ -967,7 +967,7 @@
         },
         {
           "id": "c",
-          "text": "conditional mean 与 η 之间的映射。"
+          "text": "conditional mean 与 \\(\\eta \\) 之间的映射。"
         },
         {
           "id": "d",
@@ -980,7 +980,7 @@
         "c": "这是“链接函数（link function）”的定义。",
         "d": "这是“Poisson 回归（Poisson regression）”的定义。"
       },
-      "explanation": "minimize mean squared error。 若 r 是 continuous-time rate，则 Poisson bin mean 为 λ_bin=rΔt；在 λ_bin≪1 时，至少一个 spike 的概率 q=1-e^{-λ_bin}≈λ_bin≈rΔt，因而接近 Bernoulli。"
+      "explanation": "minimize mean squared error。 retinal population GLM 为每个 neuron i 建 predictor η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)\\(+b_{i}\\)。"
     },
     {
       "id": "L14-Q07",
@@ -1025,7 +1025,7 @@
         "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 6 页。"
       },
-      "explanation": "inverse exp 保证 rate/count mean 非负，并是 canonical link。 exponential family 的 canonical form p(y|θ)=exp[yθ+H(y)-D(θ)] 把 data-dependent term、base measure 与 log partition 分开；D 保证 distribution normalization，并决定 mean 与 variance。"
+      "explanation": "inverse exp 保证 rate/count mean 非负，并是 canonical link。 exponential family 的 canonical form \\(p(y|\\theta )=\\exp[y\\theta +H(y)-D(\\theta )]\\) 把 data-dependent term、base measure 与 log partition 分开；D 保证 distribution normalization，并决定 mean 与 variance。"
     },
     {
       "id": "L14-Q08",
@@ -1057,11 +1057,11 @@
         },
         {
           "id": "c",
-          "text": "sigmoid q=1/(1+e^{-η})。"
+          "text": "\\(\\operatorname{sigmoid} q=1/(1+e^{-\\eta })\\)。"
         },
         {
           "id": "d",
-          "text": "η 对 predictors linear。"
+          "text": "\\(\\eta \\) 对 predictors linear。"
         }
       ],
       "correctChoiceId": "c",
@@ -1070,7 +1070,7 @@
         "b": "这是“GLM linear predictor”的适用条件。",
         "d": "该选项回答的是“GLM 中 linear 指什么？”。"
       },
-      "explanation": "sigmoid q=1/(1+e^{-η})。 log odds θ=log[q/(1-q)] 作为 predictor η，inverse link q=e^η/(1+e^η)。"
+      "explanation": "\\(\\operatorname{sigmoid} q=1/(1+e^{-\\eta })\\)。 log odds \\(\\theta =\\log[q/(1-q)]\\) 作为 predictor \\(\\eta\\)，inverse link \\(q=e^\\eta /(1+e^\\eta )\\)。"
     },
     {
       "id": "L14-Q09",
@@ -1151,7 +1151,7 @@
         },
         {
           "id": "d",
-          "text": "η 对 predictors linear。"
+          "text": "\\(\\eta \\) 对 predictors linear。"
         }
       ],
       "correctChoiceId": "a",
@@ -1250,7 +1250,7 @@
         "b": "该选项回答的是“Poisson 为什么常用 log link？”。",
         "d": "这是“逻辑回归（logistic regression）”的定义。"
       },
-      "explanation": "前者允许 0,1,2⋯counts；后者每 bin 只允许 spike/no-spike。 若 r 是 continuous-time rate，则 Poisson bin mean 为 λ_bin=rΔt；在 λ_bin≪1 时，至少一个 spike 的概率 q=1-e^{-λ_bin}≈λ_bin≈rΔt，因而接近 Bernoulli。"
+      "explanation": "前者允许 0,1,2⋯counts；后者每 bin 只允许 spike/no-spike。 它既可用于 small-bin spike/no-spike，也可用于 behavioral classification，但 observation unit 与 covariates 不同。"
     },
     {
       "id": "L14-Q13",
@@ -1270,7 +1270,7 @@
       "difficulty": 4,
       "type": "concept",
       "cognitiveLevel": "analyze",
-      "stem": "第 14 讲：诊断并修正下面的说法：STA=0 就认为没有 relevant feature。",
+      "stem": "第 14 讲：诊断并修正下面的说法：\\(STA=0\\) 就认为没有 relevant feature。",
       "choices": [
         {
           "id": "a",
@@ -1340,7 +1340,7 @@
         "c": "该陈述解释的是“GLM 三要素与 exponential-family canonical form”，不是题干指定的关系。",
         "d": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。"
       },
-      "explanation": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。 原稿以 blowfly H1 neuron 为例，stimulus s(t)=v(t) 是 image velocity，而非二维 light pattern。"
+      "explanation": "说明 stimulus 不必是光强图像；用 H1 velocity model 引出 wide-field feature 与 multiple relevant filters。 原稿以 blowfly H1 neuron 为例，stimulus \\(s(t)=v(t)\\) 是 image velocity，而非二维 light pattern。"
     },
     {
       "id": "L14-Q15",
@@ -1385,7 +1385,7 @@
         "c": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
       },
-      "explanation": "系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。 GLM 有三个部件：response distribution p(y|θ)、linear predictor η=Xβ，以及把 conditional mean m 与 η 相连的 link g(m)=η。"
+      "explanation": "系统讲 GLM 的 response distribution、linear predictor、link function，并在不压垮读者的前提下解释 exponential family/canonical parameter。 GLM 有三个部件：response distribution \\(p(y|\\theta )\\)、linear predictor \\(\\eta =X\\beta\\)，以及把 conditional \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 相连的 link \\(g(m)=\\eta\\)。"
     },
     {
       "id": "L14-Q16",
@@ -1430,7 +1430,7 @@
         "b": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
       },
-      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。 log likelihood 中与 β 有关的部分是 -1/2Σ(y-m)^2，因此 maximizing likelihood 等价于 minimizing mean-squared error。"
+      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。 log likelihood 中与 \\(\\beta\\) 有关的部分是 \\(-1/2\\Sigma (y-m)^2\\)，因此 maximizing likelihood 等价于 minimizing mean-squared error。"
     },
     {
       "id": "L14-Q17",
@@ -1475,7 +1475,7 @@
         "b": "该陈述解释的是“Pillow-Simoncelli retinal population GLM、stimulus/history/- coupling filters”，不是题干指定的关系。",
         "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
       },
-      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。 log likelihood 中与 β 有关的部分是 -1/2Σ(y-m)^2，因此 maximizing likelihood 等价于 minimizing mean-squared error。"
+      "explanation": "解释 maximizing Gaussian log likelihood 等价于 minimizing MSE；Poisson regression 的 exp 保证非负 rate；logistic sigmoid 产生 probability。 log likelihood 中与 \\(\\beta\\) 有关的部分是 \\(-1/2\\Sigma (y-m)^2\\)，因此 maximizing likelihood 等价于 minimizing mean-squared error。"
     },
     {
       "id": "L14-Q18",
@@ -1520,7 +1520,7 @@
         "c": "该陈述解释的是“H1 blowfly motion example、multiple linear features、STC、 stimulus-correlation correction”，不是题干指定的关系。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。"
       },
-      "explanation": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。 stimulus filter k_i 描述 receptive-field drive；self-history h_i 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter c_{ij} 描述其他 neurons' past spikes 对 i 的 conditional rate。"
+      "explanation": "逐项重构 Pillow retinal GLM：stimulus filters、self-history refractory/burst filters、cross-neuron coupling filters，以及 simultaneous fitting。 stimulus filter \\(k_{i}\\) 描述 receptive-field drive；self-history \\(h_{i}\\) 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter \\(c_{ij}\\) 描述其他 neurons' past spikes 对 i 的 conditional rate。"
     },
     {
       "id": "L14-Q19",
@@ -1548,7 +1548,7 @@
         },
         {
           "id": "b",
-          "text": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor η_i(t) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。"
+          "text": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor \\(\\eta _{i}(t)\\) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。"
         },
         {
           "id": "c",
@@ -1565,7 +1565,7 @@
         "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。"
       },
-      "explanation": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor η_i(t) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。 stimulus filter k_i 描述 receptive-field drive；self-history h_i 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter c_{ij} 描述其他 neurons' past spikes 对 i 的 conditional rate。"
+      "explanation": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor \\(\\eta _{i}(t)\\) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。 stimulus filter \\(k_{i}\\) 描述 receptive-field drive；self-history \\(h_{i}\\) 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter \\(c_{ij}\\) 描述其他 neurons' past spikes 对 i 的 conditional rate。"
     },
     {
       "id": "L14-Q20",
@@ -1633,7 +1633,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "linear predictor η 可取任意 real value，identity link 会允许 negative expected counts；log link 用 λ=e^η 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
         },
         {
           "id": "b",
@@ -1654,7 +1654,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 5 页。"
       },
-      "explanation": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。 white stimulus 下 C_stim≈σ^2I，可直接分析 ΔC。colored stimulus 会让高-variance input directions 即使与 neuron 无关也主导 covariance；应先 whitening，或解 generalized eigenproblem C_spike v=λ C_stim v。STC 仍受 finite spikes、高 dimension 与 non-Gaussian input 影响，需要 null distribution、regularization 与 held-out validation。"
+      "explanation": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。 white stimulus 下 \\(C_{\\mathrm{stim}}\\approx \\sigma ^2I\\)，可直接分析 \\(\\Delta C\\)。colored stimulus 会让高-variance input directions 即使与 neuron 无关也主导 covariance；应先 whitening，或解 generalized eigenproblem \\(C_{\\mathrm{spike}}\\) \\(v=\\lambda C_{\\mathrm{stim}} v\\)。STC 仍受 finite spikes、高 dimension 与 non-Gaussian input 影响，需要 null distribution、regularization 与 held-out validation。"
     },
     {
       "id": "L14-Q22",
@@ -1672,9 +1672,9 @@
         "二维 STC 的正负 directions"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 14 讲：完成\"raw stimulus C_stim=I；spike-conditioned C_spike=diag(4,0.25)。求 ΔC、eigenvectors 与解释。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 14 讲：完成\"raw stimulus \\(C_{\\mathrm{stim}}=I\\)；spike-conditioned \\(C_{\\mathrm{spike}}=\\operatorname{diag}(4,0.25)\\)。求 \\(\\Delta C\\)、eigenvectors 与解释。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -1699,7 +1699,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该选项回答的是“colored stimulus 下 STC 应如何修正？”。"
       },
-      "explanation": "同一个 neuron 可同时要求一个 projection magnitude 大、另一个 projection 受限，单一 STA 无法表达。 计算路径：ΔC=diag(3,-0.75)。matrix 已 diagonal，eigenvectors 是 e_1=(1,0)^T 与 e_2=(0,1)^T。 沿 e_1，spike-conditioned variance 从 1 增到 4，变化 +3，提示 large |s_1| 与 spiking 关联。 沿 e_2，variance 从 1 降到 0.25，变化 -0.75，提示 spiking 偏好 s_2 接近某窄 range。"
+      "explanation": "同一个 neuron 可同时要求一个 projection magnitude 大、另一个 projection 受限，单一 STA 无法表达。 计算路径：\\(\\Delta C=\\operatorname{diag}(3,-0.75)\\)。matrix 已 diagonal，eigenvectors 是 \\(e_{1}=(1,0)^\\mathrm{T}\\) 与 \\(e_{2}=(0,1)^\\mathrm{T}\\)。 沿 \\(e_{1}\\)，spike-conditioned variance 从 1 增到 4，变化 +3，提示 large \\(|s_{1}|\\) 与 spiking 关联。 沿 \\(e_{2}\\)，variance 从 1 降到 0.25，变化 -0.75，提示 spiking 偏好 \\(s_{2}\\) 接近某窄 range。"
     },
     {
       "id": "L14-Q23",
@@ -1723,11 +1723,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "若 y=0，同一 sample gradient 为 2(0-1)=-2，会降低 β 与 λ；prediction 始终保持 positive。"
+          "text": "若 \\(y=0\\)，同一 sample gradient 为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；prediction 始终保持 positive。"
         },
         {
           "id": "b",
-          "text": "trace ΔC=2.25 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
+          "text": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
         },
         {
           "id": "c",
@@ -1735,16 +1735,16 @@
         },
         {
           "id": "d",
-          "text": "因此，严格区分 Poisson count model、Bernoulli small-bin model 和 logistic classification。"
+          "text": "因此，分别推导 Gaussian/identity-link、Poisson/log-link、Bernoulli/logit-link 的 likelihood 与 log likelihood。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
-        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 6 页。"
+        "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 4 页。"
       },
-      "explanation": "trace ΔC=2.25 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。 这个检查对应题设\"raw stimulus C_stim=I；spike-conditioned C_spike=diag(4,0.25)。求 ΔC、eigenvectors 与解释。\"中的单位、方向或极限条件。"
+      "explanation": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。 这个检查对应题设\"raw stimulus \\(C_{\\mathrm{stim}}=I\\)；spike-conditioned \\(C_{\\mathrm{spike}}=\\operatorname{diag}(4,0.25)\\)。求 \\(\\Delta C\\)、eigenvectors 与解释。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L14-Q24",
@@ -1761,9 +1761,9 @@
         "GLM 三要素与 Gaussian、Poisson likelihood"
       ],
       "difficulty": 2,
-      "type": "comparison",
+      "type": "debug",
       "cognitiveLevel": "understand",
-      "stem": "第 14 讲：为什么 Poisson GLM 使用 identity link λ=η 会产生结构性问题？",
+      "stem": "第 14 讲：为什么 Poisson GLM 使用 identity link \\(\\lambda =\\eta\\) 会产生结构性问题？",
       "choices": [
         {
           "id": "a",
@@ -1775,7 +1775,7 @@
         },
         {
           "id": "c",
-          "text": "linear predictor η 可取任意 real value，identity link 会允许 negative expected counts；log link 用 λ=e^η 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
         },
         {
           "id": "d",
@@ -1788,7 +1788,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 1 页。"
       },
-      "explanation": "linear predictor η 可取任意 real value，identity link 会允许 negative expected counts；log link 用 λ=e^η 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。 Poisson conditional independence 表示给定所有 included covariates 后 bins/samples 独立，不等于真实 spike train 没有 refractory 或 coupling。把 past spikes 放入 design matrix 可使 conditional model 表达 history dependence。bin size 也决定 response support：较长 window 可有 count>1，极小 bin 更接近 Bernoulli。"
+      "explanation": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。 Poisson conditional independence 表示给定所有 included covariates 后 bins/samples 独立，不等于真实 spike train 没有 refractory 或 coupling。把 past spikes 放入 design matrix 可使 conditional model 表达 history dependence。bin size 也决定 response support：较长 window 可有 count>1，极小 bin 更接近 Bernoulli。"
     },
     {
       "id": "L14-Q25",
@@ -1806,9 +1806,9 @@
         "单 coefficient Poisson update direction"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 14 讲：完成\"一个 observation x=2、β=0，故 η=0、λ=1；observed count y=3。求 log-likelihood gradient 对 β 的 contribution。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 14 讲：完成\"一个 observation \\(x=2\\)、\\(\\beta =0\\)，故 \\(\\eta =0\\)、\\(\\lambda =1\\)；observed count \\(y=3\\)。求 log-likelihood gradient 对 \\(\\beta\\) 的 contribution。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -1833,7 +1833,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "c": "这条推理对应 Lecture14-STC-GLM.pdf 第 6 页。"
       },
-      "explanation": "Poisson gradient 用 observed minus expected count 决定方向，同时由 covariate magnitude 决定该 sample 对 coefficient 的作用。 计算路径：predictor η=xβ=0，inverse log link 给 λ=e^0=1。 count residual y-λ=2。 gradient contribution x(y-λ)=2×2=4，为正；gradient ascent 会增加 β，从而提高 predicted count。"
+      "explanation": "Poisson gradient 用 observed minus expected count 决定方向，同时由 covariate magnitude 决定该 sample 对 coefficient 的作用。 计算路径：predictor \\(\\eta =x\\beta =0\\)，inverse log link 给 \\(\\lambda =e^0=1\\)。 count residual \\(y-\\lambda =2\\)。 gradient contribution \\(x(y-\\lambda )=2\\times 2=4\\)，为正；gradient ascent 会增加 \\(\\beta\\)，从而提高 predicted count。"
     },
     {
       "id": "L14-Q26",
@@ -1857,11 +1857,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "若 y=0，同一 sample gradient 为 2(0-1)=-2，会降低 β 与 λ；prediction 始终保持 positive。"
+          "text": "若 \\(y=0\\)，同一 sample gradient 为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；prediction 始终保持 positive。"
         },
         {
           "id": "b",
-          "text": "trace ΔC=2.25 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
+          "text": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
         },
         {
           "id": "c",
@@ -1878,7 +1878,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 6 页。"
       },
-      "explanation": "若 y=0，同一 sample gradient 为 2(0-1)=-2，会降低 β 与 λ；prediction 始终保持 positive。 这个检查对应题设\"一个 observation x=2、β=0，故 η=0、λ=1；observed count y=3。求 log-likelihood gradient 对 β 的 contribution。\"中的单位、方向或极限条件。"
+      "explanation": "若 \\(y=0\\)，同一 sample gradient 为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；prediction 始终保持 positive。 这个检查对应题设\"一个 observation \\(x=2\\)、\\(\\beta =0\\)，故 \\(\\eta =0\\)、\\(\\lambda =1\\)；observed count \\(y=3\\)。求 log-likelihood gradient 对 \\(\\beta\\) 的 contribution。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L14-Q27",
@@ -1909,7 +1909,7 @@
         },
         {
           "id": "c",
-          "text": "linear predictor η 可取任意 real value，identity link 会允许 negative expected counts；log link 用 λ=e^η 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
         },
         {
           "id": "d",
@@ -1922,7 +1922,7 @@
         "c": "该答案解决的是本讲另一个教学单元的问题。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 2 页。"
       },
-      "explanation": "模型只能控制已测 covariates；unobserved common input、global state、model mismatch 与 indirect network paths 仍可制造 conditional dependence。causal synapse 还需 intervention、anatomy 或更强 identifiability assumptions。 Bernoulli negative log likelihood 是 binary cross-entropy。它既可用于 small-bin spike/no-spike，也可用于 behavioral classification，但 observation unit 与 covariates 不同。若 r 是 continuous-time rate，则 Poisson bin mean 为 λ_bin=rΔt；在 λ_bin≪1 时，至少一个 spike 的概率 q=1-e^{-λ_bin}≈λ_bin≈rΔt，因而接近 Bernoulli。若上一模块的 λ 已表示每个 bin 的 expected count，就不能再乘一次 Δt。当 bin 内多 spikes 不可忽略时，Bernoulli 会丢掉 count information。选择模型前必须先声明每个 sample 是 count window、binary bin 还是 behavioral trial。"
+      "explanation": "模型只能控制已测 covariates；unobserved common input、global state、model mismatch 与 indirect network paths 仍可制造 conditional dependence。causal synapse 还需 intervention、anatomy 或更强 identifiability assumptions。 Bernoulli negative log likelihood 是 binary cross-entropy。它既可用于 small-bin spike/no-spike，也可用于 behavioral classification，但 observation unit 与 covariates 不同。若 r 是 continuous-time rate，则 Poisson bin mean 为 \\(\\lambda _{\\mathrm{bin}}=r\\Delta t\\)；在 \\(\\lambda _{\\mathrm{bin}}\\ll 1\\) 时，至少一个 spike 的概率 \\(q=1-e^{-\\lambda _{\\mathrm{bin}}}\\approx \\lambda _{\\mathrm{bin}}\\approx r\\Delta t\\)，因而接近 Bernoulli。若上一模块的 \\(\\lambda\\) 已表示每个 bin 的 expected count，就不能再乘一次 \\(\\Delta t\\)。当 bin 内多 spikes 不可忽略时，Bernoulli 会丢掉 count information。选择模型前必须先声明每个 sample 是 count window、binary bin 还是 behavioral trial。"
     },
     {
       "id": "L14-Q28",
@@ -1940,9 +1940,9 @@
         "History filters 如何组合成 conditional spike probability"
       ],
       "difficulty": 3,
-      "type": "comparison",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 14 讲：完成\"某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 η 与 q；再去掉 refractory term 比较。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 14 讲：完成\"某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 \\(\\eta\\) 与 q；再去掉 refractory term 比较。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -1967,7 +1967,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "这条推理对应 Lecture14-STC-GLM.pdf 第 5 页。"
       },
-      "explanation": "GLM 在 predictor 中加总不同来源的 evidence，再由 sigmoid 把总量变成合法 probability。 计算路径：含全部 terms 时 η=-2+1.5-3+0.5=-3，q=1/(1+e^3)≈0.047。 去掉 refractory term 时 η=0，q=0.5。 因此最近自身 spike 的强负 history filter 可在 stimulus 与 coupling drive 存在时仍压低 immediate spike probability。"
+      "explanation": "GLM 在 predictor 中加总不同来源的 evidence，再由 sigmoid 把总量变成合法 probability。 计算路径：含全部 terms 时 \\(\\eta =-2+1.5-3+0.5=-3\\)，\\(q=1/(1+e^3)\\approx 0.047\\)。 去掉 refractory term 时 \\(\\eta =0\\)，\\(q=0.5\\)。 因此最近自身 spike 的强负 history filter 可在 stimulus 与 coupling drive 存在时仍压低 immediate spike probability。"
     },
     {
       "id": "L14-Q29",
@@ -1991,11 +1991,11 @@
       "choices": [
         {
           "id": "a",
-          "text": "trace ΔC=2.25 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
+          "text": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
         },
         {
           "id": "b",
-          "text": "若 y=0，同一 sample gradient 为 2(0-1)=-2，会降低 β 与 λ；prediction 始终保持 positive。"
+          "text": "若 \\(y=0\\)，同一 sample gradient 为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；prediction 始终保持 positive。"
         },
         {
           "id": "c",
@@ -2012,7 +2012,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "c": "该选项回答的是“GLM 的三个元素？”。"
       },
-      "explanation": "贡献相加发生在 log-odds space，不是直接把 probabilities 相加；直接相加可能超过 1。 这个检查对应题设\"某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 η 与 q；再去掉 refractory term 比较。\"中的单位、方向或极限条件。"
+      "explanation": "贡献相加发生在 log-odds space，不是直接把 probabilities 相加；直接相加可能超过 1。 这个检查对应题设\"某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 \\(\\eta\\) 与 q；再去掉 refractory term 比较。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L14-Q30",
@@ -2055,7 +2055,7 @@
       "wrongChoiceExplanations": {
         "b": "“相关子空间（relevant subspace）”指：多个 stimulus filters 张成的 response-sensitive subspace。",
         "c": "“指数族（exponential family）”指：可写成特定 canonical statistic/parameter 形式的分布族。",
-        "d": "“线性预测子（linear predictor）”指：η=Xβ。"
+        "d": "“线性预测子（linear predictor）”指：\\(\\eta =X\\beta \\)。"
       },
       "explanation": "脉冲触发协方差（spike-triggered covariance, STC）：对 spike-triggered ensemble covariance 的分析。"
     },
@@ -2099,8 +2099,8 @@
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“指数族（exponential family）”指：可写成特定 canonical statistic/parameter 形式的分布族。",
-        "c": "“线性预测子（linear predictor）”指：η=Xβ。",
-        "d": "“链接函数（link function）”指：conditional mean 与 η 之间的映射。"
+        "c": "“线性预测子（linear predictor）”指：\\(\\eta =X\\beta \\)。",
+        "d": "“链接函数（link function）”指：conditional mean 与 \\(\\eta \\) 之间的映射。"
       },
       "explanation": "相关子空间（relevant subspace）：多个 stimulus filters 张成的 response-sensitive subspace。"
     },
@@ -2143,8 +2143,8 @@
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "“线性预测子（linear predictor）”指：η=Xβ。",
-        "b": "“链接函数（link function）”指：conditional mean 与 η 之间的映射。",
+        "a": "“线性预测子（linear predictor）”指：\\(\\eta =X\\beta \\)。",
+        "b": "“链接函数（link function）”指：conditional mean 与 \\(\\eta \\) 之间的映射。",
         "d": "“Poisson 回归（Poisson regression）”指：count/rate 的 log-link GLM。"
       },
       "explanation": "指数族（exponential family）：可写成特定 canonical statistic/parameter 形式的分布族。"
@@ -2167,7 +2167,7 @@
       "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
-      "stem": "第 14 讲：本讲把\"η=Xβ。\"称为什么？",
+      "stem": "第 14 讲：本讲把\"\\(\\eta =X\\beta \\)。\"称为什么？",
       "choices": [
         {
           "id": "a",
@@ -2188,11 +2188,11 @@
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "“链接函数（link function）”指：conditional mean 与 η 之间的映射。",
+        "a": "“链接函数（link function）”指：conditional mean 与 \\(\\eta \\) 之间的映射。",
         "b": "“Poisson 回归（Poisson regression）”指：count/rate 的 log-link GLM。",
         "c": "“逻辑回归（logistic regression）”指：Bernoulli outcome 的 logit-link GLM。"
       },
-      "explanation": "线性预测子（linear predictor）：η=Xβ。 GLM 有三个部件：response distribution p(y|θ)、linear predictor η=Xβ，以及把 conditional mean m 与 η 相连的 link g(m)=η。"
+      "explanation": "线性预测子（linear predictor）：\\(\\eta =X\\beta \\)。 GLM 有三个部件：response distribution \\(p(y|\\theta )\\)、linear predictor \\(\\eta =X\\beta\\)，以及把 conditional \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 相连的 link \\(g(m)=\\eta\\)。"
     },
     {
       "id": "L14-Q34",
@@ -2212,7 +2212,7 @@
       "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
-      "stem": "第 14 讲：本讲把\"conditional mean 与 η 之间的映射。\"称为什么？",
+      "stem": "第 14 讲：本讲把\"conditional mean 与 \\(\\eta \\) 之间的映射。\"称为什么？",
       "choices": [
         {
           "id": "a",
@@ -2235,9 +2235,9 @@
       "wrongChoiceExplanations": {
         "b": "“Poisson 回归（Poisson regression）”指：count/rate 的 log-link GLM。",
         "c": "“逻辑回归（logistic regression）”指：Bernoulli outcome 的 logit-link GLM。",
-        "d": "“对数几率（log odds）”指：log[q/(1−q)]。"
+        "d": "“对数几率（log odds）”指：\\(\\log[q/(1-q)]\\)。"
       },
-      "explanation": "链接函数（link function）：conditional mean 与 η 之间的映射。 若 nonlinearity 对 +K 与 -K symmetric，spike-triggered mean 会抵消；若 response 依多个 relevant filters，单一 STA 至多给出一个 spike-triggered mean direction，可能稳定地指向某个线性组合，却不能恢复完整 relevant subspace。"
+      "explanation": "链接函数（link function）：conditional mean 与 \\(\\eta \\) 之间的映射。 若 nonlinearity 对 +K 与 -K symmetric，spike-triggered mean 会抵消；若 response 依多个 relevant filters，单一 STA 至多给出一个 spike-triggered mean direction，可能稳定地指向某个线性组合，却不能恢复完整 relevant subspace。"
     },
     {
       "id": "L14-Q35",
@@ -2279,10 +2279,10 @@
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
         "a": "“逻辑回归（logistic regression）”指：Bernoulli outcome 的 logit-link GLM。",
-        "c": "“对数几率（log odds）”指：log[q/(1−q)]。",
+        "c": "“对数几率（log odds）”指：\\(\\log[q/(1-q)]\\)。",
         "d": "“历史滤波器（history filter）”指：过去 spikes 对当前 conditional response 的线性影响。"
       },
-      "explanation": "Poisson 回归（Poisson regression）：count/rate 的 log-link GLM。 Poisson model 对 count y≥0 使用 p(y|λ)=λ^ye^{-λ}/y!"
+      "explanation": "Poisson 回归（Poisson regression）：count/rate 的 log-link GLM。 Poisson model 对 count \\(y\\ge 0\\) 使用 \\(p(y|\\lambda )=\\lambda ^ye^{-\\lambda }/y\\)!"
     },
     {
       "id": "L14-Q36",
@@ -2323,11 +2323,11 @@
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "“对数几率（log odds）”指：log[q/(1−q)]。",
+        "a": "“对数几率（log odds）”指：\\(\\log[q/(1-q)]\\)。",
         "b": "“历史滤波器（history filter）”指：过去 spikes 对当前 conditional response 的线性影响。",
         "d": "“耦合滤波器（coupling filter）”指：其他 units' histories 的 predictive filter。"
       },
-      "explanation": "逻辑回归（logistic regression）：Bernoulli outcome 的 logit-link GLM。 GLM 有三个部件：response distribution p(y|θ)、linear predictor η=Xβ，以及把 conditional mean m 与 η 相连的 link g(m)=η。"
+      "explanation": "逻辑回归（logistic regression）：Bernoulli outcome 的 logit-link GLM。 GLM 有三个部件：response distribution \\(p(y|\\theta )\\)、linear predictor \\(\\eta =X\\beta\\)，以及把 conditional \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 相连的 link \\(g(m)=\\eta\\)。"
     },
     {
       "id": "L14-Q37",
@@ -2347,7 +2347,7 @@
       "difficulty": 1,
       "type": "concept",
       "cognitiveLevel": "remember",
-      "stem": "第 14 讲：本讲把\"log[q/(1−q)]。\"称为什么？",
+      "stem": "第 14 讲：本讲把\"\\(\\log[q/(1-q)]\\)。\"称为什么？",
       "choices": [
         {
           "id": "a",
@@ -2372,7 +2372,7 @@
         "b": "“耦合滤波器（coupling filter）”指：其他 units' histories 的 predictive filter。",
         "c": "“脉冲触发协方差（spike-triggered covariance, STC）”指：对 spike-triggered ensemble covariance 的分析。"
       },
-      "explanation": "对数几率（log odds）：log[q/(1−q)]。 log odds θ=log[q/(1-q)] 作为 predictor η，inverse link q=e^η/(1+e^η)。"
+      "explanation": "对数几率（log odds）：\\(\\log[q/(1-q)]\\)。 log odds \\(\\theta =\\log[q/(1-q)]\\) 作为 predictor \\(\\eta\\)，inverse link \\(q=e^\\eta /(1+e^\\eta )\\)。"
     },
     {
       "id": "L14-Q38",
@@ -2506,7 +2506,7 @@
         "b": "这是“link function”的条件，不是题干公式的条件。",
         "d": "这是“Poisson log-link inverse”的条件，不是题干公式的条件。"
       },
-      "explanation": "STC covariance change 的适用条件：centered ensembles STC 先计算 spike-triggered covariance C_spike，再与 raw stimulus covariance C_stim 比较。"
+      "explanation": "STC covariance change 的适用条件：centered ensembles STC 先计算 spike-triggered covariance \\(C_{\\mathrm{spike}}\\)，再与 raw stimulus covariance \\(C_{\\mathrm{stim}}\\) 比较。"
     },
     {
       "id": "L14-Q41",
@@ -2550,7 +2550,7 @@
         "b": "这是“link function”的条件，不是题干公式的条件。",
         "c": "这是“Poisson log-link inverse”的条件，不是题干公式的条件。"
       },
-      "explanation": "GLM linear predictor 的适用条件：shape-compatible design 原稿以 blowfly H1 neuron 为例，stimulus s(t)=v(t) 是 image velocity，而非二维 light pattern。"
+      "explanation": "GLM linear predictor 的适用条件：shape-compatible design 原稿以 blowfly H1 neuron 为例，stimulus \\(s(t)=v(t)\\) 是 image velocity，而非二维 light pattern。"
     },
     {
       "id": "L14-Q42",
@@ -2594,7 +2594,7 @@
         "c": "这是“GLM linear predictor”的条件，不是题干公式的条件。",
         "d": "这是“Poisson log-link inverse”的条件，不是题干公式的条件。"
       },
-      "explanation": "link function 的适用条件：chosen response family response 可依多个 temporal filters K_1...K_n 的 projections，再经 multidimensional nonlinearity F。"
+      "explanation": "link function 的适用条件：chosen response family response 可依多个 temporal filters \\(K_{1}\\cdots K_{n}\\) 的 projections，再经 multidimensional nonlinearity F。"
     },
     {
       "id": "L14-Q43",
@@ -2669,7 +2669,7 @@
         },
         {
           "id": "c",
-          "text": "0<q<1"
+          "text": "\\(0<q<1\\)"
         },
         {
           "id": "d",
@@ -2682,7 +2682,7 @@
         "b": "这是“GLM linear predictor”的条件，不是题干公式的条件。",
         "d": "这是“link function”的条件，不是题干公式的条件。"
       },
-      "explanation": "logistic inverse link 的适用条件：0<q<1 canonical parameter θ=logλ，linear predictor η=θ，inverse link λ=e^η。"
+      "explanation": "logistic inverse link 的适用条件：\\(0<q<1\\) canonical parameter \\(\\theta =\\log\\lambda\\)，linear predictor \\(\\eta =\\theta\\)，inverse link \\(\\lambda =e^\\eta\\)。"
     },
     {
       "id": "L14-Q45",

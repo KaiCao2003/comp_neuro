@@ -9,7 +9,15 @@ const bannedStem = /本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪�
 const bannedChoice = /不检查单位、?\s*shape\s*或\s*conditioning|Course-specific risk boundary|适用条件\/约定：.*sanity check|undefined|该结论忽略了题干中的第|该结论在任何参数和边界条件下都无条件成立|变量名称相似就足以推出结论|这是纯粹的记号约定，不会改变模型预测|该关系在任意参数和边界条件下都保持不变|(?:^|\s)1\.\s+.+\s+2\.\s+.+\s+3\.\s+/i;
 const bannedGuideLatex = /(?:^|[^\\A-Za-z])(?:mu|phi|theta|tau|lambda|sigma|sum|prod|ln|log|exp|sqrt|argmax|argmin|max|min|diag)(?=[_({=+\-*/\s]|$)|_(?:inf|star|new|hat|out|in|ion|tot|sp|post|pre)(?=[^A-Za-z]|$)|\.\.\.|<=|>=/;
 
-const comparisonText = (value: string) => value.normalize('NFKC').toLowerCase().replace(/[\p{P}\p{S}\s]+/gu, '');
+const latexLetterCommand = /\\(alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|vartheta|iota|kappa|lambda|mu|nu|xi|omicron|pi|varpi|rho|varrho|sigma|varsigma|tau|upsilon|phi|varphi|chi|psi|omega)(?=[^A-Za-z]|$)/g;
+const latexWordCommand = /\\(argmax|argmin|max|min|sup|inf|lim|log|ln|exp|sin|cos|tan|sinh|cosh|tanh|det|dim|ker|rank|tr|diag|mod|gcd|pr)(?=[^A-Za-z]|$)/g;
+const comparisonText = (value: string) => value
+  .normalize('NFKC')
+  .toLowerCase()
+  .replace(latexLetterCommand, (_command, name: string) => name[0])
+  .replace(latexWordCommand, '$1')
+  .replace(/\\[a-z]+/g, '')
+  .replace(/[\p{P}\p{S}\s]+/gu, '');
 const levenshteinDistance = (left: string, right: string) => {
   let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
   for (let row = 1; row <= left.length; row += 1) {

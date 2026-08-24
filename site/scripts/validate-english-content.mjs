@@ -58,12 +58,19 @@ const validateTranslationText = (label, values) => {
     if (repeatedToken) fail(`${label} repeats the token “${repeatedToken}” at least four times in a row.`);
   }
 };
-const numericSignature = (text) => (String(text)
+const numericSignature = (text) => [...new Set((String(text)
   .replace(/(?<=\d),(?=\d)/g, '')
+  .replace(/[_^](?:\{[+\-]?\d+(?:\.\d+)?[+\-]?\}|[+\-]?\d+(?:\.\d+)?)/g, '')
   .match(/\d+(?:\.\d+)?(?:e[+−-]?\d+)?/gi) ?? [])
-  .map((token) => token.toLocaleLowerCase('en-US'))
-  .sort();
-const scientificSymbolSignature = (text) => (String(text).match(/[≈≃≤≥√Σ∑∞τλΔδμσφΦπρ±∝∈∉→←↔×·]/gu) ?? []).sort();
+  .map((token) => token.toLocaleLowerCase('en-US')))].sort();
+const LATEX_SYMBOLS = {
+  approx: '≈', simeq: '≃', le: '≤', leq: '≤', ge: '≥', geq: '≥', sqrt: '√', sum: '∑', infty: '∞',
+  tau: 'τ', lambda: 'λ', Delta: 'Δ', delta: 'δ', mu: 'μ', sigma: 'σ', phi: 'φ', Phi: 'Φ', pi: 'π', rho: 'ρ',
+  pm: '±', propto: '∝', in: '∈', notin: '∉', to: '→', leftarrow: '←', leftrightarrow: '↔', times: '×', cdot: '·',
+};
+const scientificSymbolSignature = (text) => [...new Set((String(text)
+  .replace(/\\(approx|simeq|leq?|geq?|sqrt|sum|infty|tau|lambda|Delta|delta|mu|sigma|phi|Phi|pi|rho|pm|propto|in|notin|to|leftarrow|leftrightarrow|times|cdot)(?=[^A-Za-z]|$)/g, (_command, name) => LATEX_SYMBOLS[name])
+  .match(/[≈≃≤≥√Σ∑∞τλΔδμσφΦπρ±∝∈∉→←↔×·]/gu) ?? []))].sort();
 const validateScientificTokenParity = (label, englishValue, chineseValue, trail = []) => {
   if (typeof englishValue === 'string' && typeof chineseValue === 'string') {
     const numbersEn = numericSignature(englishValue);

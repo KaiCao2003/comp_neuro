@@ -27,9 +27,17 @@ const studyParagraphs = new Map();
 const scientificFigureIds = new Set();
 const erratumIds = new Set();
 
+const LATEX_LETTER_COMMAND = /\\(alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|vartheta|iota|kappa|lambda|mu|nu|xi|omicron|pi|varpi|rho|varrho|sigma|varsigma|tau|upsilon|phi|varphi|chi|psi|omega)(?=[^A-Za-z]|$)/g;
+const LATEX_WORD_COMMAND = /\\(argmax|argmin|max|min|sup|inf|lim|log|ln|exp|sin|cos|tan|sinh|cosh|tanh|det|dim|ker|rank|tr|diag|mod|gcd|pr)(?=[^A-Za-z]|$)/g;
+
 const comparisonText = (value = '') => value
   .normalize('NFKC')
   .toLowerCase()
+  // Compare the rendered meaning, not LaTeX command spelling introduced by
+  // explicit inline-math boundaries (for example, `\\times` versus `×`).
+  .replace(LATEX_LETTER_COMMAND, (_command, name) => name[0])
+  .replace(LATEX_WORD_COMMAND, '$1')
+  .replace(/\\[a-z]+/g, '')
   .replace(/[\p{P}\p{S}\s]+/gu, '');
 
 function levenshteinDistance(left, right) {

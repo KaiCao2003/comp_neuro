@@ -7,6 +7,7 @@ import { balanceQuestionPoolByLecture, loadStudyState, selectQuestionIds } from 
 import { practiceTopics, questionMatchesTopic } from '@/lib/topics';
 import type { CourseSummary, Question } from '@/lib/types';
 import { QuestionBlock } from './QuestionBlock';
+import { ScientificText } from './ScientificText';
 
 type Mode = 'lecture' | 'topic' | 'cumulative' | 'difficult' | 'unseen';
 
@@ -89,7 +90,7 @@ export function PracticeClient({ locale, course, questions, initialMode = 'lectu
               <p>{locale === 'zh' ? `首答正确 ${correct} / ${selected.length}` : `Correct on first attempt: ${correct} / ${selected.length}`}</p>
               {missedTags.length > 0 && <><h3>{locale === 'zh' ? '需要回看的概念' : 'Concepts to revisit'}</h3><ul>{missedTags.map((tag) => <li key={tag}>{tag}</li>)}</ul></>}
               <h3>{locale === 'zh' ? '正文链接' : 'Lesson links'}</h3>
-              <ul>{selected.filter((question) => answers[question.id] === false).map((question) => <li key={question.id}><Link href={localizedHref(locale, `/lectures/${String(question.lecture).padStart(2, '0')}/#${question.sectionId}`)}>{locale === 'zh' ? `第 ${question.lecture} 讲` : `Lecture ${question.lecture}`} · {question.stem}</Link></li>)}</ul>
+              <ul>{selected.filter((question) => answers[question.id] === false).map((question) => <li key={question.id}><Link href={localizedHref(locale, `/lectures/${String(question.lecture).padStart(2, '0')}/#${question.sectionId}`)}>{locale === 'zh' ? `第 ${question.lecture} 讲` : `Lecture ${question.lecture}`} · <ScientificText text={question.stem} /></Link></li>)}</ul>
             </section>
           )}
         </div>

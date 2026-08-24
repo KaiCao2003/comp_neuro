@@ -91,7 +91,7 @@
       {
         "id": "L01-D1",
         "prompt": "Researchers record firing rate r at several sound intensities s. Identify the input and output, and propose a minimal testable hypothesis.",
-        "answer": "The input is sound intensity s and the output is firing rate r. One testable hypothesis is r=max(0,ws+b), where w is the intensity gain and b is the baseline offset.",
+        "answer": "The input is sound intensity s and the output is firing rate r. One testable hypothesis is \\(r=\\max(0,ws+b)\\), where w is the intensity gain and b is the baseline offset.",
         "explanation": "Naming the variables is not enough: a testable hypothesis must specify their relationship and allow data to contradict it. If firing rate saturates as intensity rises, for example, the threshold-linear relationship will leave systematic residuals.",
         "remediationModuleId": "L01-M2"
       },
@@ -130,7 +130,7 @@
         "guidingQuestion": "Why does computational neuroscience require neuroscience, physics, mathematics, and engineering together rather than any one discipline alone?",
         "paragraphs": [
           "The first page uses the instructor's background across neurobiology, physics, and applied mathematics to reveal the field's working pattern. Experiments define the nervous-system objects and constraints. Mathematics compresses verbal hypotheses into relationships that can be derived. Computation extends those derivations beyond hand-calculable scales. Engineering forces models to produce operational outputs. These are not four unrelated labels; they form a chain from observation to explanation to test.",
-          "Consider the question “How does an animal judge motion direction?” Neuroscience selects the area to record and the stimulus and behavioral measures. Mathematics defines stimulus direction s, neural response n, and choice y. A model proposes P(n|s) or P(y|n). A program estimates parameters and compares predictions. Code without a well-defined question cannot generate a scientific explanation automatically; biological description without quantitative relationships cannot distinguish competing mechanisms.",
+          "Consider the question “How does an animal judge motion direction?” Neuroscience selects the area to record and the stimulus and behavioral measures. Mathematics defines stimulus direction s, neural response n, and choice y. A model proposes \\(P(n|s)\\) or \\(P(y|n)\\). A program estimates parameters and compares predictions. Code without a well-defined question cannot generate a scientific explanation automatically; biological description without quantitative relationships cannot distinguish competing mechanisms.",
           "Interdisciplinary work often breaks at the level of terminology. “Encoding,” for example, might mean that mean firing rate changes with a stimulus, or that a full conditional distribution carries information. Repair the ambiguity by replacing nouns with observables and operations: hold stimulus s fixed, repeat the trial to obtain responses n, ask whether the distribution of n changes with s, and measure how accurately s can be estimated after observing n. Once the claim is operationalized, the disagreement has a calculable target.",
           "Three levels of explanation recur in this field. A descriptive model summarizes a pattern in data, such as a tuning curve. A mechanistic model proposes components that generate the pattern, such as ion channels or network connections. A normative model asks for the best strategy for a task, such as maximum-likelihood decoding. The three levels may give different answers for the same phenomenon; choose among them according to the question, not the length of the equation."
         ],
@@ -150,12 +150,12 @@
             },
             {
               "title": "Factor the relationship",
-              "explanation": "The general chain rule is P(n,y|s)=P(y|n,s,φ)P(n|s,θ). The first factor simplifies to P(y|n,φ) only under the additional assumption that the recorded n fully mediates the effect of s on y—that is, y and s are conditionally independent given n. This Markov assumption must be tested; it is not a probability identity.",
+              "explanation": "The general chain rule is \\(P(n,y|s)=P(y|n,s,\\phi )P(n|s,\\theta )\\). The first factor simplifies to \\(P(y|n,\\phi )\\) only under the additional assumption that the recorded n fully mediates the effect of s on y—that is, y and s are conditionally independent given n. This Markov assumption must be tested; it is not a probability identity.",
               "latex": "P(n,y\\mid s)=P(y\\mid n,s,\\phi)P(n\\mid s,\\theta)\\xrightarrow{\\;y\\perp s\\mid n\\;}P(y\\mid n,\\phi)P(n\\mid s,\\theta)"
             },
             {
               "title": "Generate a prediction",
-              "explanation": "Estimate θ and φ from one portion of the data, then calculate response or choice probabilities for new trials that were not used in estimation and compare them with observed frequencies.",
+              "explanation": "Estimate \\(\\theta\\) and \\(\\phi\\) from one portion of the data, then calculate response or choice probabilities for new trials that were not used in estimation and compare them with observed frequencies.",
               "latex": "\\hat y=\\operatorname*{arg\\,max}_y P(y\\mid n,\\hat\\phi)"
             },
             {
@@ -165,19 +165,19 @@
           ],
           "symbolNotes": [
             "s is the experimentally controlled stimulus, n is a neural response that may be a count or vector, and y is the behavioral outcome.",
-            "θ and φ parameterize the two model stages; a hat marks a value estimated from training data.",
-            "y⊥s|n states conditional independence: once n is known, s provides no additional information for predicting y. The assumption often fails when the neural recording is incomplete."
+            "\\(\\theta\\) and \\(\\phi\\) parameterize the two model stages; a hat marks a value estimated from training data.",
+            "\\(y\\perp s|n\\) states conditional independence: once n is known, s provides no additional information for predicting y. The assumption often fails when the neural recording is incomplete."
           ],
           "unitsCheck": "Probability is dimensionless and lies between 0 and 1. A count n is dimensionless, but its counting window must be stated explicitly in seconds or milliseconds.",
-          "limitCheck": "If n is completely unrelated to s, P(n|s) is identical for every s, so the response cannot discriminate stimuli. If P(y|n,s) still changes substantially with s after conditioning on n, the simplified s→n→y Markov chain fails and must include a missing neural state or direct stimulus pathway."
+          "limitCheck": "If n is completely unrelated to s, \\(P(n|s)\\) is identical for every s, so the response cannot discriminate stimuli. If \\(P(y|n,s)\\) still changes substantially with s after conditioning on n, the simplified \\(s\\to n\\to y\\) Markov chain fails and must include a missing neural state or direct stimulus pathway."
         },
         "workedExample": {
           "title": "Split a perception problem into two tests",
-          "problem": "Present 50 motion trials in each direction. A neuron produces an average of 12 spikes for rightward motion and 5 for leftward motion. A threshold n≥9 predicts “right”; 38 rightward trials and 7 leftward trials cross threshold. Calculate accuracy and identify which part of the model this rule tests.",
+          "problem": "Present 50 motion trials in each direction. A neuron produces an average of 12 spikes for rightward motion and 5 for leftward motion. A threshold \\(n\\ge 9\\) predicts “right”; 38 rightward trials and 7 leftward trials cross threshold. Calculate accuracy and identify which part of the model this rule tests.",
           "steps": [
             "The rule correctly classifies 38 rightward trials; the remaining 12 are incorrectly labeled left.",
-            "For leftward motion, 50−7=43 trials remain below threshold, so 43 trials are classified correctly.",
-            "The total is 38+43=81 correct trials out of 100, for an accuracy of 81%.",
+            "For leftward motion, \\(50-7=43\\) trials remain below threshold, so 43 trials are classified correctly.",
+            "The total is \\(38+43=81\\) correct trials out of 100, for an accuracy of 81%.",
             "The difference in means supports an effect of stimulus on response. The 81% accuracy tests whether a specific readout rule can convert the response into a stimulus judgment."
           ],
           "result": "This threshold decoder has accuracy 0.81. That does not prove that the brain uses the same threshold, but it supplies a comparable decoding baseline.",
@@ -204,8 +204,8 @@
         "guidingQuestion": "How can broad questions about sensory extraction, body control, memory, and intelligence be reduced to one computable and falsifiable study?",
         "paragraphs": [
           "The second page groups the field's targets into extracting information from sensation, controlling the body, forming memories, and producing intelligent behavior. Each is too broad until an object, time scale, and observable are specified. “How does vision work?” can become “How does the spike count of an MT neuron change with coherence during a 200 millisecond random-dot-motion stimulus?” Narrowing the question does not diminish it; it links theory to experiment.",
-          "The model–data loop has five repeatable actions: define variables, write relationships, estimate parameters, predict held-out data, and inspect the error structure. In r(s)=max(0,ws+b), s is stimulus intensity, r is mean firing rate, w controls slope, and b is the extrapolated intercept at zero stimulus. Data must constrain the parameters, and predictions must target observations that were not used for fitting.",
-          "Error is evidence for what to do next, not a nuisance outside the model. For stimulus s_i, define residual e_i=r_i−r_hat_i. Residuals scattered without pattern around zero reveal no obvious systematic bias in the mean relation. Persistently positive residuals at large stimuli suggest missing upward curvature or another input. Residual magnitude that grows with the mean suggests that the noise model must change. Different shapes motivate different revisions.",
+          "The model–data loop has five repeatable actions: define variables, write relationships, estimate parameters, predict held-out data, and inspect the error structure. In \\(r(s)=\\max(0,ws+b)\\), s is stimulus intensity, r is mean firing rate, w controls slope, and b is the extrapolated intercept at zero stimulus. Data must constrain the parameters, and predictions must target observations that were not used for fitting.",
+          "Error is evidence for what to do next, not a nuisance outside the model. For stimulus \\(s_{i}\\), define residual \\(e_{i}=r_{i}-\\hat{r}_{i}\\). Residuals scattered without pattern around zero reveal no obvious systematic bias in the mean relation. Persistently positive residuals at large stimuli suggest missing upward curvature or another input. Residual magnitude that grows with the mean suggests that the noise model must change. Different shapes motivate different revisions.",
           "Simulation, data analysis, machine learning, and mathematical modeling play distinct roles in the loop. Simulation generates consequences of a specified model. Data analysis summarizes and displays observations. Machine learning can uncover high-dimensional predictive relationships. Mathematical modeling emphasizes the logical path from assumptions to results. A study may use all four, but each step needs explicit inputs, outputs, and evaluation criteria so that a high prediction score does not conceal a wrong interpretation."
         ],
         "keyPoints": [
@@ -215,21 +215,21 @@
         ],
         "derivation": {
           "title": "Minimal prediction and diagnosis with a threshold-linear model",
-          "setup": "Given stimulus s and observed mean firing rate r, use r_hat=max(0,ws+b) to represent a neuron that is silent below threshold and increases linearly above threshold.",
+          "setup": "Given stimulus s and observed mean firing rate r, use \\(\\hat{r}=\\max(0,ws+b)\\) to represent a neuron that is silent below threshold and increases linearly above threshold.",
           "steps": [
             {
               "title": "Find the threshold",
-              "explanation": "When w>0, the linear term crosses zero at ws+b=0, so the stimulus threshold is s0=−b/w.",
+              "explanation": "When \\(w>0\\), the linear term crosses zero at \\(ws+b=0\\), so the stimulus threshold is \\(s_{0}=-b/w\\).",
               "latex": "s_0=-\\frac{b}{w}"
             },
             {
               "title": "Write the piecewise prediction",
-              "explanation": "For s≤s0, the model predicts r_hat=0; for s>s0, it predicts r_hat=ws+b. The piecewise form makes the threshold interpretation explicit.",
+              "explanation": "For \\(s\\le s_{0}\\), the model predicts \\(\\hat{r}=0\\); for \\(s>s_{0}\\), it predicts \\(\\hat{r}=ws+b\\). The piecewise form makes the threshold interpretation explicit.",
               "latex": "\\hat r(s)=0\\ (s\\le s_0),\\quad \\hat r(s)=ws+b\\ (s>s_0)"
             },
             {
               "title": "Calculate residuals",
-              "explanation": "For every data point, compute e_i=r_i−r_hat_i. A positive residual means that the model underpredicts; a negative residual means that it overpredicts.",
+              "explanation": "For every data point, compute \\(e_{i}=r_{i}-\\hat{r}_{i}\\). A positive residual means that the model underpredicts; a negative residual means that it overpredicts.",
               "latex": "e_i=r_i-\\hat r_i"
             },
             {
@@ -239,18 +239,18 @@
           ],
           "symbolNotes": [
             "w has units of firing rate divided by stimulus units; b and r are both measured in Hz.",
-            "max(0,z) returns 0 when z is negative and z when z is positive; it does not mean the maximum response in the dataset."
+            "\\(\\max(0,z)\\) returns 0 when z is negative and z when z is positive; it does not mean the maximum response in the dataset."
           ],
-          "unitsCheck": "ws and b must both have units of Hz before they can be added. The residual r−r_hat is also measured in Hz.",
-          "limitCheck": "If w=0, response does not vary with stimulus. If b≥0 and w>0, the nonnegative stimulus range may contain no visible threshold."
+          "unitsCheck": "ws and b must both have units of Hz before they can be added. The residual \\(r-\\hat{r}\\) is also measured in Hz.",
+          "limitCheck": "If \\(w=0\\), response does not vary with stimulus. If \\(b\\ge 0\\) and \\(w>0\\), the nonnegative stimulus range may contain no visible threshold."
         },
         "workedExample": {
           "title": "Calculate threshold, predictions, and residuals by hand",
-          "problem": "Let w=4 Hz/unit and b=−8 Hz. At stimuli s=1, 3, and 5, the observed mean firing rates are 1, 5, and 15 Hz. Calculate the threshold, predictions, and residuals.",
+          "problem": "Let \\(w=4 \\mathrm{Hz}/unit\\) and \\(b=-8 \\mathrm{Hz}\\). At stimuli \\(s=1\\), 3, and 5, the observed mean firing rates are 1, 5, and 15 Hz. Calculate the threshold, predictions, and residuals.",
           "steps": [
-            "The threshold is s0=−b/w=8/4=2, so s=1 is below threshold while s=3 and 5 are above it.",
-            "The predictions are max(0,4−8)=0, max(0,12−8)=4, and max(0,20−8)=12 Hz.",
-            "The residuals r−r_hat are 1−0=1, 5−4=1, and 15−12=3 Hz.",
+            "The threshold is \\(s_{0}=-b/w=8/4=2\\), so \\(s=1\\) is below threshold while \\(s=3\\) and 5 are above it.",
+            "The predictions are \\(\\max(0,4-8)=0\\), \\(\\max(0,12-8)=4\\), and \\(\\max(0,20-8)=12 \\mathrm{Hz}\\).",
+            "The residuals \\(r-\\hat{r}\\) are \\(1-0=1\\), \\(5-4=1\\), and \\(15-12=3 \\mathrm{Hz}\\).",
             "Residuals increase with stimulus, suggesting that the true gain may exceed 4 or that the relationship bends upward at high stimulus values."
           ],
           "result": "The threshold is 2; predictions are 0, 4, and 12 Hz; residuals are 1, 1, and 3 Hz.",
@@ -293,15 +293,15 @@
         "derivation": null,
         "workedExample": {
           "title": "Design a twenty-minute model-learning loop",
-          "problem": "You need to study r=max(0,3s−6) with only paper, pencil, and any programming environment. Give a short verifiable workflow and calculate the response for s=0, 1, 2, and 4.",
+          "problem": "You need to study \\(r=\\max(0,3s-6)\\) with only paper, pencil, and any programming environment. Give a short verifiable workflow and calculate the response for \\(s=0\\), 1, 2, and 4.",
           "steps": [
             "State in words: below threshold the response is zero; above threshold each additional stimulus unit raises the response by 3 Hz.",
             "By hand, the linear term 3s−6 equals −6, −3, 0, and 6. After nonnegative rectification, the responses are 0, 0, 0, and 6 Hz.",
             "Enter only these four inputs in the program and print the outputs, confirming exact agreement with all four hand calculations.",
-            "Then plot the curve from s=0 to 5, mark threshold s=2, and note two boundaries: the model has no saturation and no trial-to-trial variability."
+            "Then plot the curve from \\(s=0\\) to 5, mark threshold \\(s=2\\), and note two boundaries: the model has no saturation and no trial-to-trial variability."
           ],
-          "result": "The verified prediction is [0,0,0,6] Hz, accompanied by a verbal explanation, hand calculation, code check, plot, and limitation check.",
-          "sanityCheck": "At s=2 the linear term is exactly zero. For every increase of 1 in s above threshold, response should rise by 3 Hz."
+          "result": "The verified prediction is \\([0,0,0,6]\\) Hz, accompanied by a verbal explanation, hand calculation, code check, plot, and limitation check.",
+          "sanityCheck": "At \\(s=2\\) the linear term is exactly zero. For every increase of 1 in s above threshold, response should rise by 3 Hz."
         },
         "selfCheck": {
           "prompt": "Why begin with a hand-calculable example before running a large simulation?",
@@ -387,14 +387,14 @@
   "derivations": [
     "5.1 最小神经元输入-输出模型：从语言到方程",
     "【必要前置】 把\"刺激越强，神经元通常放电越多，但低于阈值时不响应\"转写为可检验模型。",
-    "r(s) = [ws + b]+ ≡ max(0, ws + b)",
-    "n | s ∼ Poisson(T r(s)) b 1. 令 s 表示刺激强度，r 表示预测 firing rate，w 表示敏感度，b 表示基线/阈值偏置。 2. 线性部分 ws+b 给出刺激投影；rectification 保证预测 rate 不为负。 3. 给定观察窗 T，Poisson 层把连续 rate 转成可与 spike count 比较的概率预测。 4. 改变 w、b 或非线性形式会产生不同、可由数据区分的预测。",
+    "\\(r(s) = [ws + b]+ \\equiv  \\max(0, ws + b)\\)",
+    "\\(n | s \\sim  \\operatorname{Poisson}(T r(s))\\) b 1. 令 s 表示刺激强度，r 表示预测 firing rate，w 表示敏感度，b 表示基线/阈值偏置。 2. 线性部分 ws+b 给出刺激投影；rectification 保证预测 rate 不为负。 3. 给定观察窗 T，Poisson 层把连续 rate 转成可与 spike count 比较的概率预测。 4. 改变 w、b 或非线性形式会产生不同、可由数据区分的预测。",
     "Geometric/computational intuition. 模型不是\"真实神经元本身\"，而是把一句模糊陈述压缩为可计算的输入-输出规则。 Biological interpretation / failure condition. 若神经元有 history dependence、适应、多个刺激维度或相关噪声，这个一维静态模型会失败。",
     "思考题：为什么模型必须报告 assumptions？",
     "5.2 model-data-inference 三角",
     "【补全推导】 区分模拟、数据分析和推断各自在做什么。",
-    "model: P (y | x, θ), fit: θb = arg max P (y | x, θ) θ",
-    "b prediction: yb = f (x; θ) 1. simulation 从假设和参数出发生成可能数据；analysis 从已观测数据计算统计量；inference 用数据约束未知参数或模型。 2. 同一段代码可能同时包含三者，因此必须用问题方向而不是软件名称来分类。 3. 可证伪性来自模型对未用于拟合的数据作出具体预测。",
+    "model: \\(P (y | x, \\theta )\\), fit: θb = arg \\(\\max P (y | x, \\theta )\\) \\(\\theta \\)",
+    "b prediction: yb = \\(f (x; \\theta )\\) 1. simulation 从假设和参数出发生成可能数据；analysis 从已观测数据计算统计量；inference 用数据约束未知参数或模型。 2. 同一段代码可能同时包含三者，因此必须用问题方向而不是软件名称来分类。 3. 可证伪性来自模型对未用于拟合的数据作出具体预测。",
     "Geometric/computational intuition. 箭头方向不同：model→data 是生成；data→parameter 是推断；parameter+new input→prediction 是泛化。 Biological interpretation / failure condition. 只在训练数据上重现现象而没有 held-out prediction，不能充分区分解释与记忆。",
     "思考题：举例说明 machine learning 与 nervous-system modeling 的交集但非同义。"
   ],
@@ -404,10 +404,10 @@
   "workedExamples": [
     "7.1 receptive-field mapping 的计算化",
     "【例题】题目：自然语言问题：某神经元在视野哪里最敏感？",
-    "Worked solution. 定义 stimulus pixel/位置 x、时间窗 T、spike count n；建立 P(n|x) 或 rate map r(x)，用重复试验估计并用新试验验证。必须同时记录空间坐标系、曝光时间、baseline 和不确定度。 Check. 改变坐标系（screen-centered vs head-centered）会改变问题本身，而不仅是画图方式。",
+    "Worked solution. 定义 stimulus pixel/位置 x、时间窗 T、spike count n；建立 \\(P(n|x)\\) 或 rate map \\(r(x)\\)，用重复试验估计并用新试验验证。必须同时记录空间坐标系、曝光时间、baseline 和不确定度。 Check. 改变坐标系（screen-centered vs head-centered）会改变问题本身，而不仅是画图方式。",
     "7.2 head-direction coding 的可检验预测",
     "【拓展例题】题目：假设神经元只编码 allocentric head direction。",
-    "Worked solution. 预测 firing rate 应主要由世界坐标中的角度 θ 决定；在改变视觉背景但保持 θ 时 tuning 应较稳定。若响应随 egocentric visual angle 改变，则需扩展模型。",
+    "Worked solution. 预测 firing rate 应主要由世界坐标中的角度 \\(\\theta \\) 决定；在改变视觉背景但保持 \\(\\theta \\) 时 tuning 应较稳定。若响应随 egocentric visual angle 改变，则需扩展模型。",
     "Check. 相关性不能单独证明 causal computation；需要控制行为、速度、视觉输入与采样不均。"
   ],
   "formulas": [
@@ -621,7 +621,7 @@
         },
         {
           "id": "c",
-          "text": "The input is sound intensity s and the output is firing rate r. One testable hypothesis is r=max(0,ws+b), where w is the intensity gain and b is the baseline offset."
+          "text": "The input is sound intensity s and the output is firing rate r. One testable hypothesis is \\(r=\\max(0,ws+b)\\), where w is the intensity gain and b is the baseline offset."
         },
         {
           "id": "d",
@@ -629,7 +629,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Naming the variables is not enough: a testable hypothesis must specify their relationship and allow data to contradict it. If firing rate saturates as intensity rises, for example, the threshold-linear relationship will leave systematic residuals. The input is sound intensity s and the output is firing rate r. One testable hypothesis is r=max(0,ws+b), where w is the intensity gain and b is the baseline offset.",
+      "explanation": "Naming the variables is not enough: a testable hypothesis must specify their relationship and allow data to contradict it. If firing rate saturates as intensity rises, for example, the threshold-linear relationship will leave systematic residuals. The input is sound intensity s and the output is firing rate r. One testable hypothesis is \\(r=\\max(0,ws+b)\\), where w is the intensity gain and b is the baseline offset.",
       "wrongChoiceExplanations": {
         "a": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "b": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -831,7 +831,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Split a perception problem into two tests: Present 50 motion trials in each direction. A neuron produces an average of 12 spikes for rightward motion and 5 for leftward motion. A threshold n≥9 predicts “right”; 38 rightward trials and 7 leftward trials cross threshold. Calculate accuracy and identify which part of the model this rule tests. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Split a perception problem into two tests: Present 50 motion trials in each direction. A neuron produces an average of 12 spikes for rightward motion and 5 for leftward motion. A threshold \\(n\\ge 9\\) predicts “right”; 38 rightward trials and 7 leftward trials cross threshold. Calculate accuracy and identify which part of the model this rule tests. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -851,7 +851,7 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Worked setup: Present 50 motion trials in each direction. A neuron produces an average of 12 spikes for rightward motion and 5 for leftward motion. A threshold n≥9 predicts “right”; 38 rightward trials and 7 leftward trials cross threshold. Calculate accuracy and identify which part of the model this rule tests. The rule correctly classifies 38 rightward trials; the remaining 12 are incorrectly labeled left. For leftward motion, 50−7=43 trials remain below threshold, so 43 trials are classified correctly. The total is 38+43=81 correct trials out of 100, for an accuracy of 81%. The difference in means supports an effect of stimulus on response. The 81% accuracy tests whether a specific readout rule can convert the response into a stimulus judgment. Accuracy must lie between 0 and 1. Swapping every left/right label would give 19%, and the two accuracies sum to 100%.",
+      "explanation": "Worked setup: Present 50 motion trials in each direction. A neuron produces an average of 12 spikes for rightward motion and 5 for leftward motion. A threshold \\(n\\ge 9\\) predicts “right”; 38 rightward trials and 7 leftward trials cross threshold. Calculate accuracy and identify which part of the model this rule tests. The rule correctly classifies 38 rightward trials; the remaining 12 are incorrectly labeled left. For leftward motion, \\(50-7=43\\) trials remain below threshold, so 43 trials are classified correctly. The total is \\(38+43=81\\) correct trials out of 100, for an accuracy of 81%. The difference in means supports an effect of stimulus on response. The 81% accuracy tests whether a specific readout rule can convert the response into a stimulus judgment. Accuracy must lie between 0 and 1. Swapping every left/right label would give 19%, and the two accuracies sum to 100%.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -1032,7 +1032,7 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Probability is dimensionless and lies between 0 and 1. A count n is dimensionless, but its counting window must be stated explicitly in seconds or milliseconds. If n is completely unrelated to s, P(n|s) is identical for every s, so the response cannot discriminate stimuli. If P(y|n,s) still changes substantially with s after conditioning on n, the simplified s→n→y Markov chain fails and must include a missing neural state or direct stimulus pathway. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "Probability is dimensionless and lies between 0 and 1. A count n is dimensionless, but its counting window must be stated explicitly in seconds or milliseconds. If n is completely unrelated to s, \\(P(n|s)\\) is identical for every s, so the response cannot discriminate stimuli. If \\(P(y|n,s)\\) still changes substantially with s after conditioning on n, the simplified \\(s\\to n\\to y\\) Markov chain fails and must include a missing neural state or direct stimulus pathway. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “From interdisciplinary backgrounds to answerable questions.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “From interdisciplinary backgrounds to answerable questions.” It describes the error the module is designed to prevent.",
@@ -1077,7 +1077,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "The first page uses the instructor's background across neurobiology, physics, and applied mathematics to reveal the field's working pattern. Experiments define the nervous-system objects and constraints. Mathematics compresses verbal hypotheses into relationships that can be derived. Computation extends those derivations beyond hand-calculable scales. Engineering forces models to produce operational outputs. These are not four unrelated labels; they form a chain from observation to explanation to test. Consider the question “How does an animal judge motion direction?” Neuroscience selects the area to record and the stimulus and behavioral measures. Mathematics defines stimulus direction s, neural response n, and choice y. A model proposes P(n|s) or P(y|n). A program estimates parameters and compares predictions. Code without a well-defined question cannot generate a scientific explanation automatically; biological description without quantitative relationships cannot distinguish competing mechanisms.",
+      "explanation": "The first page uses the instructor's background across neurobiology, physics, and applied mathematics to reveal the field's working pattern. Experiments define the nervous-system objects and constraints. Mathematics compresses verbal hypotheses into relationships that can be derived. Computation extends those derivations beyond hand-calculable scales. Engineering forces models to produce operational outputs. These are not four unrelated labels; they form a chain from observation to explanation to test. Consider the question “How does an animal judge motion direction?” Neuroscience selects the area to record and the stimulus and behavioral measures. Mathematics defines stimulus direction s, neural response n, and choice y. A model proposes \\(P(n|s)\\) or \\(P(y|n)\\). A program estimates parameters and compares predictions. Code without a well-defined question cannot generate a scientific explanation automatically; biological description without quantitative relationships cannot distinguish competing mechanisms.",
       "wrongChoiceExplanations": {
         "b": "This is a listed pitfall for “From interdisciplinary backgrounds to answerable questions.” It describes the error the module is designed to prevent.",
         "c": "This is a listed pitfall for “From interdisciplinary backgrounds to answerable questions.” It describes the error the module is designed to prevent.",
@@ -1147,7 +1147,7 @@
       "difficulty": 3,
       "type": "calculation",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Calculate threshold, predictions, and residuals by hand: Let w=4 Hz/unit and b=−8 Hz. At stimuli s=1, 3, and 5, the observed mean firing rates are 1, 5, and 15 Hz. Calculate the threshold, predictions, and residuals. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Calculate threshold, predictions, and residuals by hand: Let \\(w=4 \\mathrm{Hz}/unit\\) and \\(b=-8 \\mathrm{Hz}\\). At stimuli \\(s=1\\), 3, and 5, the observed mean firing rates are 1, 5, and 15 Hz. Calculate the threshold, predictions, and residuals. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
@@ -1167,7 +1167,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Worked setup: Let w=4 Hz/unit and b=−8 Hz. At stimuli s=1, 3, and 5, the observed mean firing rates are 1, 5, and 15 Hz. Calculate the threshold, predictions, and residuals. The threshold is s0=−b/w=8/4=2, so s=1 is below threshold while s=3 and 5 are above it. The predictions are max(0,4−8)=0, max(0,12−8)=4, and max(0,20−8)=12 Hz. The residuals r−r_hat are 1−0=1, 5−4=1, and 15−12=3 Hz. Residuals increase with stimulus, suggesting that the true gain may exceed 4 or that the relationship bends upward at high stimulus values. Every prediction is nonnegative, the linear segment begins at zero at threshold, and units remain Hz throughout.",
+      "explanation": "Worked setup: Let \\(w=4 \\mathrm{Hz}/unit\\) and \\(b=-8 \\mathrm{Hz}\\). At stimuli \\(s=1\\), 3, and 5, the observed mean firing rates are 1, 5, and 15 Hz. Calculate the threshold, predictions, and residuals. The threshold is \\(s_{0}=-b/w=8/4=2\\), so \\(s=1\\) is below threshold while \\(s=3\\) and 5 are above it. The predictions are \\(\\max(0,4-8)=0\\), \\(\\max(0,12-8)=4\\), and \\(\\max(0,20-8)=12 \\mathrm{Hz}\\). The residuals \\(r-\\hat{r}\\) are \\(1-0=1\\), \\(5-4=1\\), and \\(15-12=3 \\mathrm{Hz}\\). Residuals increase with stimulus, suggesting that the true gain may exceed 4 or that the relationship bends upward at high stimulus values. Every prediction is nonnegative, the linear segment begins at zero at threshold, and units remain Hz throughout.",
       "wrongChoiceExplanations": {
         "a": "Signs, units, inputs, equations, boundary conditions, and parameter regimes determine the numerical result; changing them requires a new calculation.",
         "b": "A result from another worked example was obtained under different inputs or assumptions. It cannot be transferred without carrying out the present substitution and checks.",
@@ -1340,7 +1340,7 @@
         },
         {
           "id": "c",
-          "text": "ws and b must both have units of Hz before they can be added. The residual r−r_hat is also measured in Hz."
+          "text": "ws and b must both have units of Hz before they can be added. The residual \\(r-\\hat{r}\\) is also measured in Hz."
         },
         {
           "id": "d",
@@ -1348,7 +1348,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "ws and b must both have units of Hz before they can be added. The residual r−r_hat is also measured in Hz. If w=0, response does not vary with stimulus. If b≥0 and w>0, the nonnegative stimulus range may contain no visible threshold. These checks test both dimensional consistency and limiting behavior.",
+      "explanation": "ws and b must both have units of Hz before they can be added. The residual \\(r-\\hat{r}\\) is also measured in Hz. If \\(w=0\\), response does not vary with stimulus. If \\(b\\ge 0\\) and \\(w>0\\), the nonnegative stimulus range may contain no visible threshold. These checks test both dimensional consistency and limiting behavior.",
       "wrongChoiceExplanations": {
         "a": "This is a listed pitfall for “Four core questions and the model–data loop.” It describes the error the module is designed to prevent.",
         "b": "This is a listed pitfall for “Four core questions and the model–data loop.” It describes the error the module is designed to prevent.",
@@ -1428,11 +1428,11 @@
       "difficulty": 3,
       "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "Worked example — Design a twenty-minute model-learning loop: You need to study r=max(0,3s−6) with only paper, pencil, and any programming environment. Give a short verifiable workflow and calculate the response for s=0, 1, 2, and 4. Which result or conclusion follows from these stated inputs?",
+      "stem": "Worked example — Design a twenty-minute model-learning loop: You need to study \\(r=\\max(0,3s-6)\\) with only paper, pencil, and any programming environment. Give a short verifiable workflow and calculate the response for \\(s=0\\), 1, 2, and 4. Which result or conclusion follows from these stated inputs?",
       "choices": [
         {
           "id": "a",
-          "text": "The verified prediction is [0,0,0,6] Hz, accompanied by a verbal explanation, hand calculation, code check, plot, and limitation check."
+          "text": "The verified prediction is \\([0,0,0,6]\\) Hz, accompanied by a verbal explanation, hand calculation, code check, plot, and limitation check."
         },
         {
           "id": "b",
@@ -1448,7 +1448,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "Worked setup: You need to study r=max(0,3s−6) with only paper, pencil, and any programming environment. Give a short verifiable workflow and calculate the response for s=0, 1, 2, and 4. State in words: below threshold the response is zero; above threshold each additional stimulus unit raises the response by 3 Hz. By hand, the linear term 3s−6 equals −6, −3, 0, and 6. After nonnegative rectification, the responses are 0, 0, 0, and 6 Hz. Enter only these four inputs in the program and print the outputs, confirming exact agreement with all four hand calculations. Then plot the curve from s=0 to 5, mark threshold s=2, and note two boundaries: the model has no saturation and no trial-to-trial variability. At s=2 the linear term is exactly zero. For every increase of 1 in s above threshold, response should rise by 3 Hz.",
+      "explanation": "Worked setup: You need to study \\(r=\\max(0,3s-6)\\) with only paper, pencil, and any programming environment. Give a short verifiable workflow and calculate the response for \\(s=0\\), 1, 2, and 4. State in words: below threshold the response is zero; above threshold each additional stimulus unit raises the response by 3 Hz. By hand, the linear term 3s−6 equals −6, −3, 0, and 6. After nonnegative rectification, the responses are 0, 0, 0, and 6 Hz. Enter only these four inputs in the program and print the outputs, confirming exact agreement with all four hand calculations. Then plot the curve from \\(s=0\\) to 5, mark threshold \\(s=2\\), and note two boundaries: the model has no saturation and no trial-to-trial variability. At \\(s=2\\) the linear term is exactly zero. For every increase of 1 in s above threshold, response should rise by 3 Hz.",
       "wrongChoiceExplanations": {
         "b": "Terminology alone cannot establish the conclusion. The relevant definitions, units, equations, assumptions, and parameter regime must match the prompt.",
         "c": "Inputs, outputs, signs, variable roles, and boundary conditions constrain the prediction. Swapping them changes the question rather than answering it.",
@@ -2084,7 +2084,7 @@
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Minimal threshold-linear input–output model: r(s) = [ws + b]+. Static, one-dimensional stimulus; nonnegative rate This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "Minimal threshold-linear input–output model: \\(r(s) = [ws + b]+\\). Static, one-dimensional stimulus; nonnegative rate This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -2129,7 +2129,7 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "Generative model: distribution of the data given inputs and parameters: P (y | x, θ). Conditioning variables and random variables are defined explicitly This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "Generative model: distribution of the data given inputs and parameters: \\(P (y | x, \\theta )\\). Conditioning variables and random variables are defined explicitly This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "b": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -2174,7 +2174,7 @@
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "Maximum-likelihood parameter estimate: θb = arg max P (y | x, θ) θ. The model class and assumptions about data independence hold This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "Maximum-likelihood parameter estimate: θb = arg \\(\\max P (y | x, \\theta )\\) \\(\\theta \\). The model class and assumptions about data independence hold This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "b": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",
@@ -2219,7 +2219,7 @@
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "Prediction from a fitted model for a new input: b yb = f (x; θ). The relationship between the new input and the training distribution is stated This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
+      "explanation": "Prediction from a fitted model for a new input: b yb = \\(f (x; \\theta )\\). The relationship between the new input and the training distribution is stated This condition keeps the operation's dimensions and interpretation well defined; without it, the formula cannot be applied as written.",
       "wrongChoiceExplanations": {
         "a": "Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.",
         "c": "A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.",

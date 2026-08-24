@@ -109,22 +109,22 @@
       "把 conductance model 的 phase-plane geometry 迁移到带 adaptation 的 firing-rate model，同时保留模型层级差异。"
     ],
     "prerequisiteBridge": [
-      "振荡需要同时回答“是否往返变化”和“振幅是否长期保持”。复数 z=a+ib 可以用平面上的横纵坐标理解；Euler relation e^{ibt}=cos(bt)+i sin(bt) 把旋转写成正弦与余弦。若动态解含 e^{(a+ib)t}，a 控制包络增长或衰减，|b| 控制角频率。仅看到 b≠0 只能说明轨迹有旋转成分，不能说明存在长期稳定的节律。",
-      "二维 phase plane 把每个状态写成点 (V,N)。V-nullcline 是 dV/dt=0 的点集，N-nullcline 是 dN/dt=0 的点集；两线交点才是 fixed point。离开 nullcline 后，dV/dt 与 dN/dt 的符号决定箭头方向。nullcline 不是 trajectory，交点也不自动稳定；需要查看附近 arrows 是朝向还是离开交点。",
+      "振荡需要同时回答“是否往返变化”和“振幅是否长期保持”。复数 \\(z=a+ib\\) 可以用平面上的横纵坐标理解；Euler relation \\(e^{ibt}=\\cos(bt)+i \\sin(bt)\\) 把旋转写成正弦与余弦。若动态解含 \\(e^{(a+ib)t}\\)，a 控制包络增长或衰减，|b| 控制角频率。仅看到 \\(b\\ne 0\\) 只能说明轨迹有旋转成分，不能说明存在长期稳定的节律。",
+      "二维 phase plane 把每个状态写成点 (V,N)。V-nullcline 是 \\(dV/dt=0\\) 的点集，N-nullcline 是 \\(dN/dt=0\\) 的点集；两线交点才是 fixed point。离开 nullcline 后，\\(dV/dt\\) 与 \\(dN/dt\\) 的符号决定箭头方向。nullcline 不是 trajectory，交点也不自动稳定；需要查看附近 arrows 是朝向还是离开交点。",
       "fast-slow system 含一个快速变量和一个慢变量。Morris-Lecar 中 membrane voltage V 受 current balance 快速改变，K activation/recovery N 较慢。轨迹常沿 V-nullcline 的 stable branch 慢移，到 fold 后 V 快跳到另一 branch。理解这一“慢走—快跳”结构后，pacemaker relaxation oscillation、互抑 half-center 和 rate-adaptation oscillator 可用同一几何语言比较。"
     ],
     "diagnostic": [
       {
         "id": "l20-d1",
         "prompt": "一个 neuron 的线性 mode eigenvalue 为 -2+6i s^-1。振幅长期增长还是衰减？",
-        "answer": "振幅按 e^{-2t} 衰减，6 rad/s 只决定旋转角频率。",
+        "answer": "振幅按 \\(e^{-2t}\\) 衰减，6 rad/s 只决定旋转角频率。",
         "explanation": "先读 real part 决定 envelope，再读 imaginary part 决定 oscillation。若把 complex 直接等同于 sustained rhythm，请复习线性 complex modes。",
         "remediationModuleId": "l20-m2"
       },
       {
         "id": "l20-d2",
         "prompt": "V-nullcline 与 N-nullcline 的交点表示什么？",
-        "answer": "交点同时满足 dV/dt=0 与 dN/dt=0，因此是二维系统的 fixed point。",
+        "answer": "交点同时满足 \\(dV/dt=0\\) 与 \\(dN/dt=0\\)，因此是二维系统的 fixed point。",
         "explanation": "交点的 stability 还要看附近 vector field；仅有交点不能判断它是稳定、鞍点还是不稳定点。",
         "remediationModuleId": "l20-m3"
       },
@@ -191,7 +191,7 @@
             "这里的“保留”应由 frequency、phase regularity 与 waveform 等可测量指标定义。",
             "机制预测针对同一 preparation 的 counterfactual 条件。"
           ],
-          "unitsCheck": "频率用 Hz、周期用 s，二者应满足 f=1/T；若 block 后比较，记录窗口需足够长。",
+          "unitsCheck": "频率用 Hz、周期用 s，二者应满足 \\(f=1/T\\)；若 block 后比较，记录窗口需足够长。",
           "limitCheck": "若两个 cells 同时具有 intrinsic oscillation 与 reciprocal inhibition，block 结果会显示混合机制，不能强迫归入单一类别。"
         },
         "workedExample": {
@@ -225,29 +225,29 @@
         ],
         "guidingQuestion": "为什么 imaginary eigenvalue component 产生往返变化，而 intrinsic leak 又让这种变化衰减？",
         "paragraphs": [
-          "原页的 W=[[0,-w0],[w0,0]] 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。完整 rate equation 仍是 τ dh/dt=-h+Wh+I，所以决定 continuous-time stability 的不是 W 单独的 ±iw0，而是 A=(-I+W)/τ 的 eigenvalues (-1±iw0)/τ。real part 固定为 -1/τ，说明无输入时 envelope 必定衰减。",
-          "characteristic polynomial det(W-λI)=λ²+w0²=0 给 λ_W=±i|w0|。沿 complex mode 的解含 e^{(-1±iw0)t/τ}=e^{-t/τ}[cos(|w0|t/τ)±i sin(|w0|t/τ)]。把 conjugate pair 合并可得到真实 h1、h2 的 sine-cosine trajectory。角频率 ω=|w0|/τ rad/s，普通频率 f=ω/(2π)。",
-          "phase-plane 中轨迹绕 fixed point 旋转，同时 radius 按 e^{-t/τ} 缩小，形成 inward spiral。若 full real part 为正，radius 会放大成 outward spiral；若恰为零，线性系统出现 neutrally stable closed orbits，却没有 amplitude selection，noise 会让 radius 漂移。稳定 autonomous limit cycle 通常需要 nonlinearity 让小 amplitude 增长而大 amplitude 收缩。",
+          "原页的 \\(W=[[0,-w_{0}],[w_{0},0]]\\) 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。完整 rate equation 仍是 \\(\\tau  dh/dt=-h+Wh+I\\)，所以决定 continuous-time stability 的不是 W 单独的 ±iw0，而是 \\(A=(-I+W)/\\tau\\) 的 eigenvalues \\((-1\\pm iw0)/\\tau\\)。real part 固定为 \\(-1/\\tau\\)，说明无输入时 envelope 必定衰减。",
+          "characteristic polynomial \\(\\det(W-\\lambda I)=\\lambda ^{2}+w_{0}^{2}=0\\) 给 λ_W=±i|w0|。沿 complex mode 的解含 \\(e^{(-1\\pm iw0)t/\\tau }=e^{-t/\\tau }[\\cos(|w_{0}|t/\\tau )\\pm i \\sin(|w_{0}|t/\\tau )]\\)。把 conjugate pair 合并可得到真实 h1、h2 的 sine-cosine trajectory。角频率 \\(\\omega =|w_{0}|/\\tau  \\mathrm{rad}/s\\)，普通频率 \\(f=\\omega /(2\\pi )\\)。",
+          "phase-plane 中轨迹绕 fixed point 旋转，同时 radius 按 \\(e^{-t/\\tau }\\) 缩小，形成 inward spiral。若 full real part 为正，radius 会放大成 outward spiral；若恰为零，线性系统出现 neutrally stable closed orbits，却没有 amplitude selection，noise 会让 radius 漂移。稳定 autonomous limit cycle 通常需要 nonlinearity 让小 amplitude 增长而大 amplitude 收缩。",
           "因此“有 complex eigenvalues”与“有 sustained CPG rhythm”不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。原页选择随后转向 Morris-Lecar，正是为了引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
         ],
         "keyPoints": [
-          "full system eigenvalues 是 (-1±iw0)/τ，而不是只看 W 的 ±iw0。",
+          "full system eigenvalues 是 \\((-1\\pm iw0)/\\tau\\)，而不是只看 W 的 ±iw0。",
           "real part 决定 envelope，imaginary part 决定 angular frequency。",
           "negative real part 给 inward spiral 与 damped oscillation。",
           "stable limit cycle 需要 amplitude regulation，complex eigenvalues 本身不够。"
         ],
         "derivation": {
           "title": "求 complex modes 并还原真实振荡",
-          "setup": "先求 W 的 eigenvalues，再把 intrinsic leak 与 τ 加回 continuous-time generator。",
+          "setup": "先求 W 的 eigenvalues，再把 intrinsic leak 与 \\(\\tau\\) 加回 continuous-time generator。",
           "steps": [
             {
               "title": "求 W 的 characteristic roots",
-              "explanation": "det([[-λ,-w0],[w0,-λ]])=λ²+w0²。",
+              "explanation": "\\(\\det([[-\\lambda ,-w_{0}],[w_{0},-\\lambda ]])=\\lambda ^{2}+w_{0}^{2}\\)。",
               "latex": "\\lambda_W=\\pm i|w_0|"
             },
             {
               "title": "得到 full generator roots",
-              "explanation": "A=(-I+W)/τ 会把每个 W eigenvalue 先减 1 再除以 τ。",
+              "explanation": "\\(A=(-I+W)/\\tau\\) 会把每个 W eigenvalue 先减 1 再除以 \\(\\tau\\)。",
               "latex": "\\lambda_A=\\frac{-1\\pm i|w_0|}{\\tau}"
             },
             {
@@ -257,34 +257,34 @@
             },
             {
               "title": "换算 frequency",
-              "explanation": "imaginary part 是 rad/s，除以 2π 才是 cycles/s。",
+              "explanation": "imaginary part 是 rad/s，除以 \\(2\\pi\\) 才是 cycles/s。",
               "latex": "f=\\frac{|w_0|}{2\\pi\\tau}"
             }
           ],
           "symbolNotes": [
-            "w0 无量纲；τ 用 s 时 λ_A 单位为 s^-1。",
+            "w0 无量纲；\\(\\tau\\) 用 s 时 \\(\\lambda _{A}\\) 单位为 s^-1。",
             "complex eigenvectors 是计算工具，真实 firing-rate trajectory 由 conjugate modes 组合得到。"
           ],
-          "unitsCheck": "ω 的单位 rad/s，f 的单位 Hz；e^{-t/τ} 的 exponent 必须无量纲。",
-          "limitCheck": "w0=0 时 ω=0，系统只作无振荡指数衰减；τ→∞ 时本模型同时让 decay 与 rotation 变慢。"
+          "unitsCheck": "\\(\\omega\\) 的单位 rad/s，f 的单位 Hz；\\(e^{-t/\\tau }\\) 的 exponent 必须无量纲。",
+          "limitCheck": "\\(w_{0}=0\\) 时 \\(\\omega =0\\)，系统只作无振荡指数衰减；\\(\\tau \\to \\infty\\) 时本模型同时让 decay 与 rotation 变慢。"
         },
         "workedExample": {
           "title": "从 full eigenvalue 读出 waveform",
-          "problem": "给定 τ=0.2 s、w0=4，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。",
+          "problem": "给定 \\(\\tau =0.2 \\mathrm{s}\\)、\\(w_{0}=4\\)，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。",
           "steps": [
-            "full eigenvalues=(-1±4i)/0.2=-5±20i s^-1。",
-            "envelope time constant=1/5=0.2 s；f=20/(2π)≈3.18 Hz，period≈0.314 s。",
-            "一周期后 amplitude fraction=e^{-0.314/0.2}=e^{-1.57}≈0.208。"
+            "full eigenvalues=\\((-1\\pm 4i)/0.2=-5\\pm 20i s^{-1}\\)。",
+            "envelope time constant=\\(1/5=0.2 \\mathrm{s}\\)；\\(f=20/(2\\pi )\\approx 3.18 \\mathrm{Hz}\\)，period≈0.314 s。",
+            "一周期后 amplitude fraction=\\(e^{-0.314/0.2}=e^{-1.57}\\approx 0.208\\)。"
           ],
           "result": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。",
-          "sanityCheck": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "sanityCheck": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         "selfCheck": {
-          "prompt": "若 full eigenvalues 为 0.2±5i s^-1，轨迹会怎样？",
-          "answer": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "prompt": "若 full eigenvalues 为 \\(0.2\\pm 5i s^{-1}\\)，轨迹会怎样？",
+          "answer": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         },
         "pitfalls": [
-          "把 rad/s 直接写成 Hz，漏除 2π。",
+          "把 rad/s 直接写成 Hz，漏除 \\(2\\pi\\)。",
           "只报告 imaginary part 而忽略 full equation 的 -h leak。"
         ]
       },
@@ -299,14 +299,14 @@
         ],
         "guidingQuestion": "如何从 ionic current equation 画出二维 phase plane，并判断 resting 与 oscillatory candidates？",
         "paragraphs": [
-          "Morris-Lecar 用 V 与 N 两个 state variables 压缩 conductance dynamics。voltage equation 是 C dV/dt=-gL(V-EL)-gCa M∞(V)(V-ECa)-gK N(V-EK)+Ie。每个 g(V-E) 是 conductance 乘 driving force；前面的负号遵守 outward-current convention。M∞(V) 假定 Ca activation 很快，直接取 voltage-dependent steady state；N 则以较慢时间常数追随 N∞(V)。",
-          "recovery equation 可写 τN dN/dt=N∞(V)-N。N<N∞ 时 dN/dt>0，K activation 增加；N>N∞ 时下降。N-nullcline 因此是 N=N∞(V) 的 sigmoid。V-nullcline 由 net membrane current 为零求得，常呈 cubic-like 或 N-shaped curve。两条 nullclines 交点同时令两 derivatives 为零，是 candidate equilibrium。",
-          "读 phase plane 时在每个区域分别判断符号。V-nullcline 左右或上下哪一侧 dV/dt 为正，必须代入一个 test point，不能只按曲线外观猜。N-nullcline 下方通常 N<N∞，所以 arrows 向上；上方 arrows 向下。若交点附近 arrows 汇入，fixed point stable；若一方向汇入另一方向离开，则是 saddle；若整体离开，则 unstable。",
-          "fast-slow separation 的依据是 voltage timescale C/g 与 τN 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
+          "Morris-Lecar 用 V 与 N 两个 state variables 压缩 conductance dynamics。voltage equation 是 C dV/dt=-gL(V-EL)-gCa M∞(V)(V-ECa)-gK \\(N(V-E_{K})+I_{e}\\)。每个 \\(g(V-E)\\) 是 conductance 乘 driving force；前面的负号遵守 outward-current convention。\\(M_{\\infty }(V)\\) 假定 Ca activation 很快，直接取 voltage-dependent steady state；N 则以较慢时间常数追随 \\(N_{\\infty }(V)\\)。",
+          "recovery equation 可写 \\(\\tau N dN/dt=N_{\\infty }(V)-N\\)。\\(N<N_{\\infty }\\) 时 \\(dN/dt>0\\)，K activation 增加；\\(N>N_{\\infty }\\) 时下降。N-nullcline 因此是 \\(N=N_{\\infty }(V)\\) 的 sigmoid。V-nullcline 由 net membrane current 为零求得，常呈 cubic-like 或 N-shaped curve。两条 nullclines 交点同时令两 derivatives 为零，是 candidate equilibrium。",
+          "读 phase plane 时在每个区域分别判断符号。V-nullcline 左右或上下哪一侧 \\(dV/dt\\) 为正，必须代入一个 test point，不能只按曲线外观猜。N-nullcline 下方通常 \\(N<N_{\\infty }\\)，所以 arrows 向上；上方 arrows 向下。若交点附近 arrows 汇入，fixed point stable；若一方向汇入另一方向离开，则是 saddle；若整体离开，则 unstable。",
+          "fast-slow separation 的依据是 voltage timescale C/g 与 \\(\\tau N\\) 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
         ],
         "keyPoints": [
           "V equation 是 leak、Ca、K 与 external currents 的电荷平衡。",
-          "V-nullcline 满足 dV/dt=0；N-nullcline 满足 N=N∞(V)。",
+          "V-nullcline 满足 \\(dV/dt=0\\)；N-nullcline 满足 \\(N=N_{\\infty }(V)\\)。",
           "nullcline intersections 是 fixed points，stability 还需 vector field。",
           "fast voltage 与 slow recovery 允许沿 branch 慢行并在 fold 快跳。"
         ],
@@ -321,32 +321,32 @@
             },
             {
               "title": "求 V-nullcline",
-              "explanation": "令 dV/dt=0，把 N 隔离；所得 N 作为 V 的函数，其形状受 activation 与 driving forces 决定。",
+              "explanation": "令 \\(dV/dt=0\\)，把 N 隔离；所得 N 作为 V 的函数，其形状受 activation 与 driving forces 决定。",
               "latex": "N=\\frac{I_e-g_L(V-E_L)-\\bar g_{Ca}M_\\infty(V)(V-E_{Ca})}{\\bar g_K(V-E_K)}"
             },
             {
               "title": "求 N-nullcline",
-              "explanation": "令 τN dN/dt=N∞(V)-N=0。",
+              "explanation": "令 \\(\\tau N dN/dt=N_{\\infty }(V)-N=0\\)。",
               "latex": "N=N_\\infty(V)"
             },
             {
               "title": "确定 arrows",
-              "explanation": "在每条 nullcline 两侧选 test point 代入 F(V,N)、G(V,N)，分别记录 V 与 N 增减。"
+              "explanation": "在每条 nullcline 两侧选 test point 代入 \\(F(V,N)\\)、\\(G(V,N)\\)，分别记录 V 与 N 增减。"
             }
           ],
           "symbolNotes": [
-            "V、E 用 mV；conductance 用 nS 或 mS/cm²；C 与面积 convention 必须一致。",
-            "N、M∞、N∞ 是 0 到 1 的 dimensionless gating quantities。"
+            "V、E 用 mV；conductance 用 nS 或 \\(\\mathrm{mS}/\\mathrm{cm}^{2}\\)；C 与面积 convention 必须一致。",
+            "N、\\(M_{\\infty }\\)、\\(N_{\\infty }\\) 是 0 到 1 的 dimensionless gating quantities。"
           ],
           "unitsCheck": "conductance×voltage 给 current；C dV/dt 也给 current。recovery equation 两边均为 dimensionless change per time。",
-          "limitCheck": "若 gK=0，隔离 N 的 V-nullcline 公式不可用，且 N 不再反馈 voltage；二维 oscillator mechanism随之改变。"
+          "limitCheck": "若 \\(g_{K}=0\\)，隔离 N 的 V-nullcline 公式不可用，且 N 不再反馈 voltage；二维 oscillator mechanism随之改变。"
         },
         "workedExample": {
           "title": "用符号判断一个 phase-plane 点的方向",
-          "problem": "某点位于 V-nullcline 上方且代入得 dV/dt<0；同时它位于 N-nullcline 下方。判断初始运动方向。",
+          "problem": "某点位于 V-nullcline 上方且代入得 \\(dV/dt<0\\)；同时它位于 N-nullcline 下方。判断初始运动方向。",
           "steps": [
-            "dV/dt<0 表示 V 向左移动。",
-            "N-nullcline 下方有 N<N∞(V)，所以 dN/dt>0，N 向上移动。",
+            "\\(dV/dt<0\\) 表示 V 向左移动。",
+            "N-nullcline 下方有 \\(N<N_{\\infty }(V)\\)，所以 \\(dN/dt>0\\)，N 向上移动。",
             "合成向量指向左上；若下一时刻跨过 nullcline，要重新判断符号。"
           ],
           "result": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。",
@@ -374,7 +374,7 @@
         "paragraphs": [
           "当 fixed point 不稳定且 V-nullcline 有两条 attracting outer branches，trajectory 可循环经历四阶段。低 V branch 上，V 快速贴近 branch，N 缓慢减少；到 lower fold 后再无邻近 stable voltage solution，V 快跳到 high branch；在 high branch 上 N 缓慢增加，增强 hyperpolarizing K current；到 upper fold 后 V 快跳回 low branch。重复这一顺序得到 autonomous relaxation oscillation。",
           "图中 voltage trace 的缓慢段与 phase-plane branch motion 对应，陡峭上升或下降对应 fast jump。period 主要受 slow N evolution 决定，spike-like transition duration 受 fast V dynamics 决定。若改变 Ie 或 conductances，nullcline 位置移动，fixed point 可能落到 stable branch，cycle 便停止；因此 oscillator 不是单一 waveform，而是 parameter-dependent attractor。",
-          "half-center 把两个 Morris-Lecar cells 互相 inhibitory coupling。对 cell i，synaptic current 可写 -gS∞(Vj)(Vi-Es)，其中 Es 较负。presynaptic cell j 在 high state 时 S∞≈1，把 i 的 V-nullcline 推到受抑位置；j 在 low state 时 S∞≈0，i 恢复 free nullcline。交替节律来自每次 synaptic state 切换对 partner geometry 的重排。",
+          "half-center 把两个 Morris-Lecar cells 互相 inhibitory coupling。对 cell i，synaptic current 可写 \\(-gS_{\\infty }(V_{j})(V_{i}-Es)\\)，其中 Es 较负。presynaptic cell j 在 high state 时 \\(S_{\\infty }\\approx 1\\)，把 i 的 V-nullcline 推到受抑位置；j 在 low state 时 \\(S_{\\infty }\\approx 0\\)，i 恢复 free nullcline。交替节律来自每次 synaptic state 切换对 partner geometry 的重排。",
           "即使单独 cells 的 fixed point stable，mutual inhibition 与 recovery 也可能让 pair oscillate；反之，不是任意 mutual inhibition 都会振荡。必须同时有能在 active 与 inhibited phases 中缓慢演化的 intrinsic variable、合适 synaptic threshold 和 transition ordering。外界 sensory pulse 可把某 cell 推过 separatrix，从而 reset phase，而不必生成整个 rhythm。"
         ],
         "keyPoints": [
@@ -385,7 +385,7 @@
         ],
         "derivation": {
           "title": "四阶段 trajectory 的符号链",
-          "setup": "沿原页标注的 cycle 顺序，使用 dV/dt 与 dN/dt 的 signs 说明每段发生什么。",
+          "setup": "沿原页标注的 cycle 顺序，使用 \\(dV/dt\\) 与 \\(dN/dt\\) 的 signs 说明每段发生什么。",
           "steps": [
             {
               "title": "lower branch 慢行",
@@ -393,7 +393,7 @@
             },
             {
               "title": "lower-to-upper jump",
-              "explanation": "fold 后附近不再有 low-voltage attracting solution，fast dV/dt 使 V 跳到 high branch。"
+              "explanation": "fold 后附近不再有 low-voltage attracting solution，fast \\(dV/dt\\) 使 V 跳到 high branch。"
             },
             {
               "title": "upper branch 慢行",
@@ -413,10 +413,10 @@
         },
         "workedExample": {
           "title": "预测增大 recovery time constant 的效果",
-          "problem": "保持 nullcline shapes 不变，将 τN 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。",
+          "problem": "保持 nullcline shapes 不变，将 \\(\\tau N\\) 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。",
           "steps": [
-            "slow branch motion 大约变慢三倍，因为 dN/dt 缩小。",
-            "cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 τN 放大。",
+            "slow branch motion 大约变慢三倍，因为 \\(dN/dt\\) 缩小。",
+            "cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 \\(\\tau N\\) 放大。",
             "fast V jump 主要由 C 与 conductances 决定，duration 不应同步放大三倍。"
           ],
           "result": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。",
@@ -442,13 +442,13 @@
         ],
         "guidingQuestion": "观察到两个 cells 交替 firing 时，怎样判断 phase transition 是 active cell 放手还是 inhibited cell 逃脱？",
         "paragraphs": [
-          "原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。free neuron 使用 F(V,N)=0 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。两套 geometry 的切换让“谁先跨门槛”成为可检查的机制判据。",
+          "原页用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。free neuron 使用 \\(F(V,N)=0\\) 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。两套 geometry 的切换让“谁先跨门槛”成为可检查的机制判据。",
           "release mechanism 中，active cell 在 upper branch 上随着 N 增加而逐渐失去维持 high V 的能力。它先向 low branch 跳并跌破 VT，synapse 关闭，于是 partner 被释放并跳到自己的 high state。换相原因是发放者 intrinsic adaptation；如果固定 active cell 的 recovery variable，phase switch 应被延迟或阻断。",
           "escape mechanism 中，inhibited cell 在 low state 内 N 逐渐恢复，最终即使 inhibition 仍开着，也跨过受抑 nullcline 的 fold 或 separatrix，跳到 high state。它的上升随后抑制原 active cell。换相原因是被抑制者的 intrinsic recovery；改变 inhibited cell 的 recovery speed 会显著改变 phase duration。",
           "真实 circuits 可处于 mixed regime：active cell 接近 release 时，partner 也接近 escape，noise 或 sensory input 决定谁先发生。实验上应在 phase transition 前追踪 both cells 的 voltage 与 recovery proxy，并用短 pulse 分别推 active cell向下或 inhibited cell向上。仅从 alternating spike raster 看不出 causal ordering。"
         ],
         "keyPoints": [
-          "sharp S∞ threshold 把 synapse 近似成 on/off switch。",
+          "sharp \\(S_{\\infty }\\) threshold 把 synapse 近似成 on/off switch。",
           "release 由 active cell intrinsic termination 触发。",
           "escape 由 inhibited cell intrinsic recovery crossing 触发。",
           "mixed regimes 与 noise 可让两机制共同决定 phase。"
@@ -459,7 +459,7 @@
           "steps": [
             {
               "title": "定义 synaptic state",
-              "explanation": "当 Vpre>VT 时 inhibition on；Vpre<VT 时 inhibition off。",
+              "explanation": "当 \\(V_{\\mathrm{pre}}>VT\\) 时 inhibition on；\\(V_{\\mathrm{pre}}<VT\\) 时 inhibition off。",
               "latex": "S_\\infty(V_{pre})\\approx H(V_{pre}-V_T)"
             },
             {
@@ -476,15 +476,15 @@
             }
           ],
           "symbolNotes": [
-            "VT 是 voltage threshold；S∞ 无量纲。",
+            "VT 是 voltage threshold；\\(S_{\\infty }\\) 无量纲。",
             "“先”需要相对于 time resolution 和 synaptic delay 定义。"
           ],
-          "unitsCheck": "synaptic current gS(V-Es) 是 current；Heaviside S 只选择 conductance是否开启。",
+          "unitsCheck": "synaptic current \\(gS(V-Es)\\) 是 current；Heaviside S 只选择 conductance是否开启。",
           "limitCheck": "若 synapse activation平滑而非 sharp，on/off时刻不唯一，应比较 conductance rise与intrinsic transitions的相对先后。"
         },
         "workedExample": {
           "title": "从事件时间判断换相机制",
-          "problem": "记录显示 A active；t=500 ms 时 B 在 inhibition仍为强时突然 depolarize，t=507 ms A 被抑制，t=512 ms A 跌破 VT。判断主导机制。",
+          "problem": "记录显示 A active；\\(t=500 \\mathrm{ms}\\) 时 B 在 inhibition仍为强时突然 depolarize，\\(t=507 \\mathrm{ms} A\\) 被抑制，\\(t=512 \\mathrm{ms} A\\) 跌破 VT。判断主导机制。",
           "steps": [
             "B 的 depolarization 发生在 A 跌破 VT 之前，说明 B 不是等 inhibition关闭才上升。",
             "B 上升后先抑制 A，符合 inhibited cell 主动逃出 low state。",
@@ -513,10 +513,10 @@
         ],
         "guidingQuestion": "去掉 ion-channel细节后，最少需要哪些 rate-level variables 才能保留 half-center 的几何机制？",
         "paragraphs": [
-          "第 6 页只给出 extension 方向：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a，仍可构造相似 nullcline geometry。一个最小 pair 可写 τh dhi/dt=-hi+F(Ii-w hj-a_i)，τa dai/dt=-a_i+b h_i。F 是 threshold-saturating nonlinearity，w>0 表示 reciprocal inhibition，b 控制 activity如何积累adaptation。",
-          "在某 cell active 时，h_i高使 a_i缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。partner受到的 inhibition随之减弱并开始上升，随后抑制原 cell。这个过程对应 release-like switching。若 inhibited cell 的 a_j在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。",
-          "rate model 保留的是状态依赖 feedback、slow recovery 与 threshold geometry，不保留具体 Ca/K currents、spike waveform 或 reversal potentials。它适合研究population rhythm、phase relationship与parameter effects，却不能凭一个 rate variable判断某种ionic mechanism。模型层级降低后，参数含义也改变：τh是rate response time，不是 membrane capacitance直接给出的时间常数。",
-          "验证该模型应画 h_i-a_i nullclines、模拟 both rates、改变 w、b、τa，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
+          "第 6 页只给出 extension 方向：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a，仍可构造相似 nullcline geometry。一个最小 pair 可写 \\(\\tau _{h} dh_{i}/dt=-h_{i}+F(I_{i}-w h_{j}-a_{i})\\)，\\(\\tau a da_{i}/dt=-a_{i}+b h_{i}\\)。F 是 threshold-saturating nonlinearity，\\(w>0\\) 表示 reciprocal inhibition，b 控制 activity如何积累adaptation。",
+          "在某 cell active 时，\\(h_{i}\\)高使 \\(a_{i}\\)缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。partner受到的 inhibition随之减弱并开始上升，随后抑制原 cell。这个过程对应 release-like switching。若 inhibited cell 的 \\(a_{j}\\)在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。",
+          "rate model 保留的是状态依赖 feedback、slow recovery 与 threshold geometry，不保留具体 Ca/K currents、spike waveform 或 reversal potentials。它适合研究population rhythm、phase relationship与parameter effects，却不能凭一个 rate variable判断某种ionic mechanism。模型层级降低后，参数含义也改变：\\(\\tau _{h}\\)是rate response time，不是 membrane capacitance直接给出的时间常数。",
+          "验证该模型应画 \\(h_{i}-a_{i}\\) nullclines、模拟 both rates、改变 w、b、\\(\\tau a\\)，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
         ],
         "keyPoints": [
           "rate-adaptation model 至少需要 fast activity、slow recovery、reciprocal inhibition 与 nonlinearity。",
@@ -535,7 +535,7 @@
             },
             {
               "title": "写 slow adaptation",
-              "explanation": "activity把a_i推高，缺少activity时a_i回落。",
+              "explanation": "activity把\\(a_{i}\\)推高，缺少activity时\\(a_{i}\\)回落。",
               "latex": "\\tau_a\\dot a_i=-a_i+b h_i"
             },
             {
@@ -549,21 +549,21 @@
           ],
           "symbolNotes": [
             "h可用normalized rate或Hz，取决于F；a与I必须使用同一effective-input单位。",
-            "τa应显著大于τh才有清楚fast-slow alternation。"
+            "\\(\\tau a\\)应显著大于\\(\\tau _{h}\\)才有清楚fast-slow alternation。"
           ],
-          "unitsCheck": "若h用Hz而F输出Hz，方程各项为Hz；除以τ后是Hz/s。a与I、w h必须可相加。",
-          "limitCheck": "b=0时activity不再积累adaptation；若单纯reciprocal inhibition没有其他slow process，稳定交替通常失去。"
+          "unitsCheck": "若h用Hz而F输出Hz，方程各项为Hz；除以\\(\\tau\\)后是Hz/s。a与I、w h必须可相加。",
+          "limitCheck": "\\(b=0\\)时activity不再积累adaptation；若单纯reciprocal inhibition没有其他slow process，稳定交替通常失去。"
         },
         "workedExample": {
           "title": "用参数变化预测节律",
-          "problem": "模型原有τh=20 ms、τa=400 ms。只把τa加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。",
+          "problem": "模型原有\\(\\tau _{h}=20 \\mathrm{ms}\\)、\\(\\tau a=400 \\mathrm{ms}\\)。只把\\(\\tau a\\)加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。",
           "steps": [
             "slow adaptation与recovery都变慢，active phase通常延长。",
             "两个cells结构对称，所以仍预期近似anti-phase，而不是产生固定phase bias。",
             "period主要由slowprocess决定，近似增加；frequency因此下降，但不要求精确减半。"
           ],
           "result": "预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为switch threshold与nonlinear F也参与。",
-          "sanityCheck": "τh没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
+          "sanityCheck": "\\(\\tau _{h}\\)没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
         },
         "selfCheck": {
           "prompt": "为什么只有 h1、h2 两个线性rate变量通常不足以产生稳定half-center limit cycle？",
@@ -641,7 +641,7 @@
           ]
         },
         {
-          "label": "N = N∞(V)",
+          "label": "\\(N = N_{\\infty }(V)\\)",
           "points": [
             [
               5,
@@ -753,25 +753,25 @@
   "specialSection": [],
   "derivations": [
     "5.1 linear two-neuron complex modes",
-    "【必要前置】 分析 W=[[0,−w0],[w0,0]]。 λ± = ±i|w0 | τ α̇± = −(1 ∓ i|w0 |)α± α± (t) = α± (0)e−t/τ e±i|w0 |t/τ 1. characteristic polynomial λ²+w0²=0。 2. network ODE 还有 intrinsic −I term，所以 full mode exponent real part 为 −1/τ。 3. Euler identity 把 complex exponential 分成 sine/cosine。 4. amplitude e^{-t/τ} 衰减，因此不是 sustained oscillator。",
+    "【必要前置】 分析 \\(W=[[0,-w_{0}],[w_{0},0]]\\)。 \\(\\lambda \\pm  = \\pm i|w_{0} | \\tau  \\dot{\\alpha }\\pm  = -(1 \\mp  i|w_{0} |)\\alpha \\pm  \\alpha \\pm  (t) = \\alpha \\pm  (0)e^{-t/\\tau } e\\pm i|w_{0} |t/\\tau  1\\). characteristic polynomial \\(\\lambda ^{2}+w_{0}^{2}=0\\)。 2. network ODE 还有 intrinsic −I term，所以 full mode exponent real part 为 \\(-1/\\tau \\)。 3. Euler identity 把 complex exponential 分成 sine/cosine。 4. amplitude \\(e^{-t/\\tau }\\) 衰减，因此不是 sustained oscillator。",
     "Geometric/computational intuition. imaginary part 给 angular frequency，real part 给 envelope decay/growth。 Biological interpretation / failure condition. 看到 complex eigenvalues 就断言 limit cycle， 是线性/非线性混淆。",
     "思考题：imaginary part 决定什么？",
     "5.2 Morris-Lecar fast-slow equations",
     "【补全推导】 用两个 variables 描述 intrinsic bursting/spiking geometry。",
-    "C V̇ = −gL (V − EL ) − ḡCa M∞ (V )(V − ECa ) − ḡK N (V − EK ) + I",
-    "τN Ṅ = N∞ (V ) − N 1. V 是 fast voltage，N 是 slower K activation/recovery。 2. V-nullcline 由 dV/dt=0，常呈 cubic/N shape；N-nullcline 为 N=N∞(V)。 3. intersection 是 fixed point，其 stability 决定 resting vs oscillatory regime。 4. fast-slow separation 让 trajectory 沿 stable branches 慢走，在 fold 附近快跳。",
+    "\\(C \\dot{V} = -g_{L} (V - E_{L} ) - \\bar{g}\\)Ca M∞ (V )(V − ECa ) \\(- \\bar{g}K N (V - E_{K} ) + I\\)",
+    "\\(\\tau N \\dot{N} = N_{\\infty } (V ) - N 1\\). V 是 fast voltage，N 是 slower K activation/recovery。 2. V-nullcline 由 \\(dV/dt=0\\)，常呈 cubic/N shape；N-nullcline 为 \\(N=N_{\\infty }(V)\\)。 3. intersection 是 fixed point，其 stability 决定 resting vs oscillatory regime。 4. fast-slow separation 让 trajectory 沿 stable branches 慢走，在 fold 附近快跳。",
     "Geometric/computational intuition. relaxation oscillator 在慢积累与快 transition 之间循环。 Biological interpretation / failure condition. 具体 nullcline shapes/parameters 不同会改变 bifurcation 与 oscillation type。",
     "思考题：为什么笔记线性 network 不产生 sustained rhythm？",
     "5.3 relaxation cycle 四阶段",
     "【跨页连接】 按 phase-plane 解释 autonomous oscillation。",
-    "V̇ = F (V, N ), Ṅ = G(V, N )",
+    "\\(\\dot{V} = F (V, N )\\), \\(\\dot{N} = G(V, N )\\)",
     "1. lower branch 上 N 下降或缓慢变化，V 低。 2. 达到 fold 后 fast V 跳到 upper branch。 3. upper branch 上 N 增加，K current 增强。 4. 达到另一 fold 后 V 快速回到 lower branch，cycle 重复。",
     "Geometric/computational intuition. 一条变量慢慢改变系统的 instantaneous equilibrium，最终触发快速 jump。 Biological interpretation / failure condition. phase-plane arrows 必须由 F/G signs 判断，不能仅按图形顺时针猜。",
     "思考题：Morris-Lecar 的两个 state？",
     "5.4 half-center release 与 escape",
     "【模型边界】 互抑 neurons 如何轮流 active？",
-    "Isyn = −ḡs S∞ (Vpre )(V − Es )",
-    "S∞ (V ) ≈ H(V − VT ) 1. active neuron 超过 V_T，强抑制另一 neuron。 2. release：active neuron 的 intrinsic adaptation 使其离开 upper branch/停止，解除对 partner 抑制。 3. escape：inhibited neuron 的 intrinsic recovery 使其越过 lower-branch threshold，即使 inhibition 仍存在也跳出。 4. 两者可通过相位图中由哪一个 cell 的 intrinsic transition 先发生来区分。",
+    "\\(I_{\\mathrm{syn}} = -\\bar{g}s S_{\\infty }\\) \\((V_{\\mathrm{pre}} )(V - Es )\\)",
+    "\\(S_{\\infty } (V ) \\approx  H(V - VT )\\) 1. active neuron 超过 \\(V_{T}\\)，强抑制另一 neuron。 2. release：active neuron 的 intrinsic adaptation 使其离开 upper branch/停止，解除对 partner 抑制。 3. escape：inhibited neuron 的 intrinsic recovery 使其越过 lower-branch threshold，即使 inhibition 仍存在也跳出。 4. 两者可通过相位图中由哪一个 cell 的 intrinsic transition 先发生来区分。",
     "Geometric/computational intuition. 交替可由\"发放者放手\"或\"被抑制者逃脱\"启动。 Biological interpretation / failure condition. 实际 circuits 可能混合 release/escape、sensory feedback 与 neuromodulation。",
     "思考题：nullcline intersection 是什么？"
   ],
@@ -783,7 +783,7 @@
     "【例题】题目：阻断 synapses 后 neuron 1 仍 rhythmic，neuron 2 变 tonic。",
     "Worked solution. 支持 neuron 1 intrinsic pacemaker、neuron 2 follower；但药物也可能改变 intrinsic currents，仍需控制。 Check. network-generated half-center 通常在互抑被破坏后失去交替 rhythm。",
     "7.2 complex eigenvalue reading",
-    "【拓展例题】题目：full system eigenvalue 为 −2±5i s^{-1}。",
+    "【拓展例题】题目：full system eigenvalue 为 \\(-2\\pm 5i s^{-1}\\)。",
     "Worked solution. envelope time constant 1/2 s，angular frequency 5 rad/s（约 0.80 Hz）；是 damped oscillation。 Check. real part 决定 stability，imaginary part 决定 rotation frequency。"
   ],
   "formulas": [
@@ -826,7 +826,7 @@
       "name": "V-nullcline",
       "expression": "F (V, N ) = 0",
       "latex": "F(V,N)=0",
-      "conditions": "dV/dt=0",
+      "conditions": "\\(dV/dt=0\\)",
       "sectionId": "lecture-20-source-4",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 4
@@ -837,7 +837,7 @@
       "name": "N-nullcline",
       "expression": "G(V, N ) = 0",
       "latex": "G(V,N)=0",
-      "conditions": "dN/dt=0",
+      "conditions": "\\(dN/dt=0\\)",
       "sectionId": "lecture-20-source-5",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 5
@@ -975,7 +975,7 @@
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 2,
       "sectionId": "l20-m2",
-      "originalIssue": "Page 2 的线性 oscillations 含 e^{-t/τ} envelope，是 damped components，不是 autonomous sustained CPG。",
+      "originalIssue": "Page 2 的线性 oscillations 含 \\(e^{-t/\\tau }\\) envelope，是 damped components，不是 autonomous sustained CPG。",
       "explanation": "因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。",
       "correction": null
     },
@@ -1093,7 +1093,7 @@
         "b": "这是“sharp synaptic threshold approximation”的适用条件。",
         "d": "这是“Euler decomposition”的适用条件。"
       },
-      "explanation": "mutual inhibition。 原页的 W=[[0,-w0],[w0,0]] 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。"
+      "explanation": "mutual inhibition。 原页的 \\(W=[[0,-w_{0}],[w_{0},0]]\\) 把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。"
     },
     {
       "id": "L20-Q03",
@@ -1121,7 +1121,7 @@
         },
         {
           "id": "b",
-          "text": "full modes real part 为 −1/τ，amplitude 衰减。"
+          "text": "full modes real part 为 \\(-1/\\tau \\)，amplitude 衰减。"
         },
         {
           "id": "c",
@@ -1166,7 +1166,7 @@
         },
         {
           "id": "b",
-          "text": "full modes real part 为 −1/τ，amplitude 衰减。"
+          "text": "full modes real part 为 \\(-1/\\tau \\)，amplitude 衰减。"
         },
         {
           "id": "c",
@@ -1211,7 +1211,7 @@
         },
         {
           "id": "b",
-          "text": "full modes real part 为 −1/τ，amplitude 衰减。"
+          "text": "full modes real part 为 \\(-1/\\tau \\)，amplitude 衰减。"
         },
         {
           "id": "c",
@@ -1228,7 +1228,7 @@
         "c": "这是“半中心振荡器（half-center oscillator）”的定义。",
         "d": "该选项回答的是“escape 由谁先变化？”。"
       },
-      "explanation": "full modes real part 为 −1/τ，amplitude 衰减。 原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。"
+      "explanation": "full modes real part 为 \\(-1/\\tau \\)，amplitude 衰减。 原页用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。"
     },
     {
       "id": "L20-Q06",
@@ -1301,11 +1301,11 @@
         },
         {
           "id": "b",
-          "text": "dV/dt=0"
+          "text": "\\(dV/dt=0\\)"
         },
         {
           "id": "c",
-          "text": "dN/dt=0"
+          "text": "\\(dN/dt=0\\)"
         },
         {
           "id": "d",
@@ -1399,7 +1399,7 @@
         },
         {
           "id": "d",
-          "text": "full modes real part 为 −1/τ，amplitude 衰减。"
+          "text": "full modes real part 为 \\(-1/\\tau \\)，amplitude 衰减。"
         }
       ],
       "correctChoiceId": "b",
@@ -1408,7 +1408,7 @@
         "c": "该选项回答的是“synapse block 后 rhythm 保留支持什么？”。",
         "d": "该选项回答的是“为什么笔记线性 network 不产生 sustained rhythm？”。"
       },
-      "explanation": "active neuron intrinsic adaptation 使其停止。 在某 cell active 时，h_i高使 a_i缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。"
+      "explanation": "active neuron intrinsic adaptation 使其停止。 在某 cell active 时，\\(h_{i}\\)高使 \\(a_{i}\\)缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。"
     },
     {
       "id": "L20-Q10",
@@ -1432,7 +1432,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "full modes real part 为 −1/τ，amplitude 衰减。"
+          "text": "full modes real part 为 \\(-1/\\tau \\)，amplitude 衰减。"
         },
         {
           "id": "b",
@@ -1453,7 +1453,7 @@
         "b": "该选项回答的是“release 由谁先变化？”。",
         "d": "这是“半中心振荡器（half-center oscillator）”的定义。"
       },
-      "explanation": "inhibited neuron intrinsic recovery 使其跳出。 若 inhibited cell 的 a_j在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。"
+      "explanation": "inhibited neuron intrinsic recovery 使其跳出。 若 inhibited cell 的 \\(a_{j}\\)在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。"
     },
     {
       "id": "L20-Q11",
@@ -1473,7 +1473,7 @@
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "第 20 讲：sharp threshold S∞ 的作用？",
+      "stem": "第 20 讲：sharp threshold \\(S_{\\infty }\\) 的作用？",
       "choices": [
         {
           "id": "a",
@@ -1498,7 +1498,7 @@
         "b": "该选项回答的是“damped oscillation 与 limit cycle 的区别？”。",
         "c": "这是“Morris-Lecar 模型（Morris-Lecar model）”的定义。"
       },
-      "explanation": "把 presynaptic voltage 对 synaptic activation 简化成开/关。 原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。"
+      "explanation": "把 presynaptic voltage 对 synaptic activation 简化成开/关。 原页用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。"
     },
     {
       "id": "L20-Q12",
@@ -1678,7 +1678,7 @@
         "b": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
         "c": "该陈述解释的是“half-center firing-rate model extension”，不是题干指定的关系。"
       },
-      "explanation": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。 fast-slow separation 的依据是 voltage timescale C/g 与 τN 差异。"
+      "explanation": "逐项解释 Morris-Lecar voltage/recovery equations、sigmoidal steady-state functions、fast-slow separation。 fast-slow separation 的依据是 voltage timescale C/g 与 \\(\\tau N\\) 差异。"
     },
     {
       "id": "L20-Q16",
@@ -1811,9 +1811,9 @@
       "wrongChoiceExplanations": {
         "a": "该陈述解释的是“linear two-neuron oscillator、complex eigenvalues、Euler formula、damped oscillations”，不是题干指定的关系。",
         "b": "该陈述解释的是“Morris-Lecar equations、V/N nullclines、fixed points”，不是题干指定的关系。",
-        "d": "该选项回答的是“sharp threshold S∞ 的作用？”。"
+        "d": "该选项回答的是“sharp threshold \\(S_{\\infty }\\) 的作用？”。"
       },
-      "explanation": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。 原页用 sharp threshold S∞(V)=0 when V<VT、1 when V>VT 简化 synapse。"
+      "explanation": "分析 mutually inhibitory half-center with synaptic threshold；逐步区分 intrinsic release 和 intrinsic escape。 原页用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。"
     },
     {
       "id": "L20-Q19",
@@ -1885,7 +1885,7 @@
         },
         {
           "id": "b",
-          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         },
         {
           "id": "c",
@@ -1971,7 +1971,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         {
           "id": "b",
@@ -2009,9 +2009,9 @@
         "线性双神经元系统的复数模态与阻尼振荡"
       ],
       "difficulty": 2,
-      "type": "concept",
+      "type": "debug",
       "cognitiveLevel": "understand",
-      "stem": "第 20 讲：若 full eigenvalues 为 0.2±5i s^-1，轨迹会怎样？",
+      "stem": "第 20 讲：若 full eigenvalues 为 \\(0.2\\pm 5i s^{-1}\\)，轨迹会怎样？",
       "choices": [
         {
           "id": "a",
@@ -2027,7 +2027,7 @@
         },
         {
           "id": "d",
-          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         }
       ],
       "correctChoiceId": "d",
@@ -2036,7 +2036,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "c": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。 因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。原页选择随后转向 Morris-Lecar，正是为了引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
+      "explanation": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。 因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。原页选择随后转向 Morris-Lecar，正是为了引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
     },
     {
       "id": "L20-Q24",
@@ -2054,9 +2054,9 @@
         "从 full eigenvalue 读出 waveform"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 20 讲：完成\"给定 τ=0.2 s、w0=4，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 20 讲：完成\"给定 \\(\\tau =0.2 \\mathrm{s}\\)、\\(w_{0}=4\\)，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2081,7 +2081,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。 计算路径：full eigenvalues=(-1±4i)/0.2=-5±20i s^-1。 envelope time constant=1/5=0.2 s；f=20/(2π)≈3.18 Hz，period≈0.314 s。 一周期后 amplitude fraction=e^{-0.314/0.2}=e^{-1.57}≈0.208。"
+      "explanation": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。 计算路径：full eigenvalues=\\((-1\\pm 4i)/0.2=-5\\pm 20i s^{-1}\\)。 envelope time constant=\\(1/5=0.2 \\mathrm{s}\\)；\\(f=20/(2\\pi )\\approx 3.18 \\mathrm{Hz}\\)，period≈0.314 s。 一周期后 amplitude fraction=\\(e^{-0.314/0.2}=e^{-1.57}\\approx 0.208\\)。"
     },
     {
       "id": "L20-Q25",
@@ -2109,7 +2109,7 @@
         },
         {
           "id": "b",
-          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         {
           "id": "c",
@@ -2126,7 +2126,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。 这个检查对应题设\"给定 τ=0.2 s、w0=4，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。\"中的单位、方向或极限条件。"
+      "explanation": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。 这个检查对应题设\"给定 \\(\\tau =0.2 \\mathrm{s}\\)、\\(w_{0}=4\\)，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L20-Q26",
@@ -2153,7 +2153,7 @@
         },
         {
           "id": "b",
-          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         },
         {
           "id": "c",
@@ -2170,7 +2170,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "d": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。 fast-slow separation 的依据是 voltage timescale C/g 与 τN 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
+      "explanation": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。 fast-slow separation 的依据是 voltage timescale C/g 与 \\(\\tau N\\) 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
     },
     {
       "id": "L20-Q27",
@@ -2188,9 +2188,9 @@
         "用符号判断一个 phase-plane 点的方向"
       ],
       "difficulty": 3,
-      "type": "figure",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 20 讲：完成\"某点位于 V-nullcline 上方且代入得 dV/dt<0；同时它位于 N-nullcline 下方。判断初始运动方向。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 20 讲：完成\"某点位于 V-nullcline 上方且代入得 \\(dV/dt<0\\)；同时它位于 N-nullcline 下方。判断初始运动方向。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2215,7 +2215,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。 计算路径：dV/dt<0 表示 V 向左移动。 N-nullcline 下方有 N<N∞(V)，所以 dN/dt>0，N 向上移动。 合成向量指向左上；若下一时刻跨过 nullcline，要重新判断符号。"
+      "explanation": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。 计算路径：\\(dV/dt<0\\) 表示 V 向左移动。 N-nullcline 下方有 \\(N<N_{\\infty }(V)\\)，所以 \\(dN/dt>0\\)，N 向上移动。 合成向量指向左上；若下一时刻跨过 nullcline，要重新判断符号。"
     },
     {
       "id": "L20-Q28",
@@ -2247,7 +2247,7 @@
         },
         {
           "id": "c",
-          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         {
           "id": "d",
@@ -2260,7 +2260,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。 这个检查对应题设\"某点位于 V-nullcline 上方且代入得 dV/dt<0；同时它位于 N-nullcline 下方。判断初始运动方向。\"中的单位、方向或极限条件。"
+      "explanation": "nullcline 上只有对应 derivative 为零；位于\"V-nullcline 上方\"本身不足以判 dV sign，题目已给 test-point sign。 这个检查对应题设\"某点位于 V-nullcline 上方且代入得 \\(dV/dt<0\\)；同时它位于 N-nullcline 下方。判断初始运动方向。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L20-Q29",
@@ -2291,7 +2291,7 @@
         },
         {
           "id": "c",
-          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         },
         {
           "id": "d",
@@ -2322,9 +2322,9 @@
         "预测增大 recovery time constant 的效果"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 20 讲：完成\"保持 nullcline shapes 不变，将 τN 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 20 讲：完成\"保持 nullcline shapes 不变，将 \\(\\tau N\\) 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2349,7 +2349,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。 计算路径：slow branch motion 大约变慢三倍，因为 dN/dt 缩小。 cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 τN 放大。 fast V jump 主要由 C 与 conductances 决定，duration 不应同步放大三倍。"
+      "explanation": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。 计算路径：slow branch motion 大约变慢三倍，因为 \\(dN/dt\\) 缩小。 cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 \\(\\tau N\\) 放大。 fast V jump 主要由 C 与 conductances 决定，duration 不应同步放大三倍。"
     },
     {
       "id": "L20-Q31",
@@ -2377,7 +2377,7 @@
         },
         {
           "id": "b",
-          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         {
           "id": "c",
@@ -2394,7 +2394,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。 这个检查对应题设\"保持 nullcline shapes 不变，将 τN 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。\"中的单位、方向或极限条件。"
+      "explanation": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。 这个检查对应题设\"保持 nullcline shapes 不变，将 \\(\\tau N\\) 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L20-Q32",
@@ -2425,7 +2425,7 @@
         },
         {
           "id": "c",
-          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         },
         {
           "id": "d",
@@ -2456,9 +2456,9 @@
         "从事件时间判断换相机制"
       ],
       "difficulty": 3,
-      "type": "concept",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 20 讲：完成\"记录显示 A active；t=500 ms 时 B 在 inhibition仍为强时突然 depolarize，t=507 ms A 被抑制，t=512 ms A 跌破 VT。判断主导机制。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 20 讲：完成\"记录显示 A active；\\(t=500 \\mathrm{ms}\\) 时 B 在 inhibition仍为强时突然 depolarize，\\(t=507 \\mathrm{ms} A\\) 被抑制，\\(t=512 \\mathrm{ms} A\\) 跌破 VT。判断主导机制。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2511,7 +2511,7 @@
         },
         {
           "id": "b",
-          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         {
           "id": "c",
@@ -2528,7 +2528,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "需要确认 synaptic conductance在 B depolarize时确实仍高；仅用 A spikes可能低估真实 conductance offset。 这个检查对应题设\"记录显示 A active；t=500 ms 时 B 在 inhibition仍为强时突然 depolarize，t=507 ms A 被抑制，t=512 ms A 跌破 VT。判断主导机制。\"中的单位、方向或极限条件。"
+      "explanation": "需要确认 synaptic conductance在 B depolarize时确实仍高；仅用 A spikes可能低估真实 conductance offset。 这个检查对应题设\"记录显示 A active；\\(t=500 \\mathrm{ms}\\) 时 B 在 inhibition仍为强时突然 depolarize，\\(t=507 \\mathrm{ms} A\\) 被抑制，\\(t=512 \\mathrm{ms} A\\) 跌破 VT。判断主导机制。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L20-Q35",
@@ -2555,7 +2555,7 @@
         },
         {
           "id": "b",
-          "text": "它会旋转且 envelope 按 e^{0.2t} 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
         },
         {
           "id": "c",
@@ -2572,7 +2572,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "c": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。 验证该模型应画 h_i-a_i nullclines、模拟 both rates、改变 w、b、τa，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
+      "explanation": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。 验证该模型应画 \\(h_{i}-a_{i}\\) nullclines、模拟 both rates、改变 w、b、\\(\\tau a\\)，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
     },
     {
       "id": "L20-Q36",
@@ -2590,9 +2590,9 @@
         "用参数变化预测节律"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 20 讲：完成\"模型原有τh=20 ms、τa=400 ms。只把τa加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 20 讲：完成\"模型原有\\(\\tau _{h}=20 \\mathrm{ms}\\)、\\(\\tau a=400 \\mathrm{ms}\\)。只把\\(\\tau a\\)加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2645,11 +2645,11 @@
         },
         {
           "id": "b",
-          "text": "τh没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
+          "text": "\\(\\tau _{h}\\)没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
         },
         {
           "id": "c",
-          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 |λ|，会得到不一致结果。"
+          "text": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         {
           "id": "d",
@@ -2662,7 +2662,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "τh没有改变，所以快速rate transition的edge不应与plateau同倍拉长。 这个检查对应题设\"模型原有τh=20 ms、τa=400 ms。只把τa加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。\"中的单位、方向或极限条件。"
+      "explanation": "\\(\\tau _{h}\\)没有改变，所以快速rate transition的edge不应与plateau同倍拉长。 这个检查对应题设\"模型原有\\(\\tau _{h}=20 \\mathrm{ms}\\)、\\(\\tau a=400 \\mathrm{ms}\\)。只把\\(\\tau a\\)加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L20-Q38",
@@ -3147,7 +3147,7 @@
         },
         {
           "id": "d",
-          "text": "dV/dt=0"
+          "text": "\\(dV/dt=0\\)"
         }
       ],
       "correctChoiceId": "a",
@@ -3156,7 +3156,7 @@
         "c": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。",
         "d": "这是“V-nullcline”的条件，不是题干公式的条件。"
       },
-      "explanation": "complex mode 的适用条件：a controls envelope, b frequency 沿 complex mode 的解含 e^{(-1±iw0)t/τ}=e^{-t/τ}[cos(|w0|t/τ)±i sin(|w0|t/τ)]。"
+      "explanation": "complex mode 的适用条件：a controls envelope, b frequency 沿 complex mode 的解含 \\(e^{(-1\\pm iw0)t/\\tau }=e^{-t/\\tau }[\\cos(|w_{0}|t/\\tau )\\pm i \\sin(|w_{0}|t/\\tau )]\\)。"
     },
     {
       "id": "L20-Q49",
@@ -3191,7 +3191,7 @@
         },
         {
           "id": "d",
-          "text": "dV/dt=0"
+          "text": "\\(dV/dt=0\\)"
         }
       ],
       "correctChoiceId": "b",
@@ -3200,7 +3200,7 @@
         "c": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。",
         "d": "这是“V-nullcline”的条件，不是题干公式的条件。"
       },
-      "explanation": "Euler decomposition 的适用条件：complex representation 沿 complex mode 的解含 e^{(-1±iw0)t/τ}=e^{-t/τ}[cos(|w0|t/τ)±i sin(|w0|t/τ)]。"
+      "explanation": "Euler decomposition 的适用条件：complex representation 沿 complex mode 的解含 \\(e^{(-1\\pm iw0)t/\\tau }=e^{-t/\\tau }[\\cos(|w_{0}|t/\\tau )\\pm i \\sin(|w_{0}|t/\\tau )]\\)。"
     },
     {
       "id": "L20-Q50",
@@ -3235,7 +3235,7 @@
         },
         {
           "id": "d",
-          "text": "dV/dt=0"
+          "text": "\\(dV/dt=0\\)"
         }
       ],
       "correctChoiceId": "c",
@@ -3279,7 +3279,7 @@
         },
         {
           "id": "d",
-          "text": "dV/dt=0"
+          "text": "\\(dV/dt=0\\)"
         }
       ],
       "correctChoiceId": "d",
@@ -3288,7 +3288,7 @@
         "b": "这是“Euler decomposition”的条件，不是题干公式的条件。",
         "c": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。"
       },
-      "explanation": "V-nullcline 的适用条件：dV/dt=0 当 fixed point 不稳定且 V-nullcline 有两条 attracting outer branches，trajectory 可循环经历四阶段。"
+      "explanation": "V-nullcline 的适用条件：\\(dV/dt=0\\) 当 fixed point 不稳定且 V-nullcline 有两条 attracting outer branches，trajectory 可循环经历四阶段。"
     },
     {
       "id": "L20-Q52",
@@ -3311,7 +3311,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "dN/dt=0"
+          "text": "\\(dN/dt=0\\)"
         },
         {
           "id": "b",
@@ -3332,7 +3332,7 @@
         "c": "这是“Euler decomposition”的条件，不是题干公式的条件。",
         "d": "这是“two-dimensional conductance model”的条件，不是题干公式的条件。"
       },
-      "explanation": "N-nullcline 的适用条件：dN/dt=0 free neuron 使用 F(V,N)=0 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。"
+      "explanation": "N-nullcline 的适用条件：\\(dN/dt=0\\) free neuron 使用 \\(F(V,N)=0\\) 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。"
     },
     {
       "id": "L20-Q53",

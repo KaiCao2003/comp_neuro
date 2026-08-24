@@ -9,11 +9,12 @@ import type { Lecture, Question, SourceUnit } from '@/lib/types';
 import { FormulaView } from './FormulaView';
 import { QuestionBlock } from './QuestionBlock';
 import { StudyModule } from './StudyModule';
+import { ScientificText } from './ScientificText';
 
 type ViewMode = 'textbook' | 'notes' | 'side';
 
 function TextParagraphs({ items }: { items: string[] }) {
-  return <>{items.map((item, index) => /^\d+\.\d+\s/.test(item) ? <h3 key={`${item}-${index}`}>{item}</h3> : <p key={`${item}-${index}`}>{item}</p>)}</>;
+  return <>{items.map((item, index) => /^\d+\.\d+\s/.test(item) ? <h3 key={`${item}-${index}`}><ScientificText text={item} /></h3> : <p key={`${item}-${index}`}><ScientificText text={item} /></p>)}</>;
 }
 
 function SourceNote({ lecture, unit, active, locale }: { lecture: Lecture; unit: SourceUnit; active: boolean; locale: Locale }) {
@@ -96,7 +97,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
         <p className="rail-title">{locale === 'zh' ? `第 ${lecture.lecture} 讲` : `Lecture ${lecture.lecture}`}</p>
         <a href="#overview">{locale === 'zh' ? '概览' : 'Overview'}</a>
         <a href="#prerequisite">{locale === 'zh' ? '前置知识' : 'Prerequisites'}</a>
-        {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={module.id}>{module.title}</a>)}
+        {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={module.id}><ScientificText text={module.title} /></a>)}
         {lecture.specialSection.length > 0 && <a href={`#lecture-${lecture.slug}-supplement`}>{locale === 'zh' ? '补充来源' : 'Supplement'}</a>}
         <a href="#synthesis">{locale === 'zh' ? '全讲串联' : 'Synthesis'}</a>
         {crossLinks.length > 0 && <a href="#cross-lecture">{locale === 'zh' ? '跨讲关联' : 'Cross-lecture links'}</a>}
@@ -111,7 +112,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
         <nav aria-label={locale === 'zh' ? '本讲移动目录' : 'Mobile lecture contents'}>
           <a href="#overview" onClick={closeMobileToc}>{locale === 'zh' ? '概览' : 'Overview'}</a>
           <a href="#prerequisite" onClick={closeMobileToc}>{locale === 'zh' ? '前置知识' : 'Prerequisites'}</a>
-          {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={`mobile-${module.id}`} onClick={closeMobileToc}>{module.title}</a>)}
+          {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={`mobile-${module.id}`} onClick={closeMobileToc}><ScientificText text={module.title} /></a>)}
           <a href="#synthesis" onClick={closeMobileToc}>{locale === 'zh' ? '全讲串联' : 'Synthesis'}</a>
           <a href="#formulas" onClick={closeMobileToc}>{locale === 'zh' ? '公式' : 'Formulas'}</a>
           <a href="#glossary" onClick={closeMobileToc}>{locale === 'zh' ? '术语' : 'Glossary'}</a>
@@ -122,9 +123,9 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
       <main className="lecture-main" id="main-content">
         <header className="chapter-header" id="overview">
           <p className="eyebrow">Lecture {lecture.slug}</p>
-          <h1>{locale === 'zh' ? lecture.zhTitle : lecture.enTitle}</h1>
-          {locale === 'zh' && <p className="english-title">{lecture.enTitle}</p>}
-          <p className="core-question">{lecture.coreQuestion}</p>
+          <h1><ScientificText text={locale === 'zh' ? lecture.zhTitle : lecture.enTitle} /></h1>
+          {locale === 'zh' && <p className="english-title"><ScientificText text={lecture.enTitle} /></p>}
+          <p className="core-question"><ScientificText text={lecture.coreQuestion} /></p>
           <div className="view-controls" role="group" aria-label={locale === 'zh' ? '阅读模式' : 'Reading mode'}>
             {([['textbook', locale === 'zh' ? '教材' : 'Textbook'], ['notes', locale === 'zh' ? '原始讲义' : 'Original notes'], ['side', locale === 'zh' ? '并排' : 'Side by side']] as const).map(([value, label]) => (
               <button type="button" key={value} aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</button>
@@ -134,19 +135,19 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
 
         <section className="chapter-section objectives">
           <h2>{locale === 'zh' ? '学习目标' : 'Learning objectives'}</h2>
-          <ul>{lecture.studyGuide.objectives.map((objective) => <li key={objective}>{objective}</li>)}</ul>
+          <ul>{lecture.studyGuide.objectives.map((objective) => <li key={objective}><ScientificText text={objective} /></li>)}</ul>
           <h3>{locale === 'zh' ? '知识链' : 'Concept chain'}</h3>
-          <p className="dependency-chain">{lecture.dependencyMap}</p>
+          <p className="dependency-chain"><ScientificText text={lecture.dependencyMap} /></p>
           <h3>{locale === 'zh' ? '五分钟诊断' : 'Five-minute diagnostic'}</h3>
           <p>{locale === 'zh' ? '先在纸上写出答案，再逐题核对。答不完整时，按题目后的链接补课。' : 'Write each answer before opening the check. If an answer is incomplete, use the linked module to repair the prerequisite.'}</p>
           <ol className="diagnostic-list">
             {lecture.studyGuide.diagnostic.map((item) => (
               <li key={item.id}>
-                <p>{item.prompt}</p>
+                <p><ScientificText text={item.prompt} /></p>
                 <details>
                   <summary>{locale === 'zh' ? '核对答案' : 'Check answer'}</summary>
-                  <p><strong>{locale === 'zh' ? '答案。' : 'Answer. '}</strong>{item.answer}</p>
-                  <p>{item.explanation}</p>
+                  <p><strong>{locale === 'zh' ? '答案。' : 'Answer. '}</strong><ScientificText text={item.answer} /></p>
+                  <p><ScientificText text={item.explanation} /></p>
                   <p><a href={`#${item.remediationModuleId}`}>{locale === 'zh' ? '回到对应教学单元' : 'Review the relevant module'}</a></p>
                 </details>
               </li>
@@ -156,7 +157,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
 
         <section className="chapter-section prerequisite-bridge" id="prerequisite">
           <h2>{locale === 'zh' ? '前置知识' : 'Prerequisite bridge'}</h2>
-          {lecture.studyGuide.prerequisiteBridge.map((paragraph, index) => <p key={`prerequisite-${index}`}>{paragraph}</p>)}
+          {lecture.studyGuide.prerequisiteBridge.map((paragraph, index) => <p key={`prerequisite-${index}`}><ScientificText text={paragraph} /></p>)}
         </section>
 
         {lecture.sourceUnits.map((unit) => {
@@ -173,7 +174,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
             <section className={`source-unit mode-${mode}`} id={unit.id} key={unit.id}>
               <header className="source-unit-heading">
                 <p>{unit.sourceFile} · {locale === 'zh' ? `第 ${unit.page} 页` : `p. ${unit.page}`}</p>
-                <h2>{modules.length > 0 ? modules.map((module) => module.title).join(' / ') : (locale === 'zh' ? `第 ${unit.page} 页` : `Page ${unit.page}`)}</h2>
+                <h2><ScientificText text={modules.length > 0 ? modules.map((module) => module.title).join(' / ') : (locale === 'zh' ? `第 ${unit.page} 页` : `Page ${unit.page}`)} /></h2>
               </header>
               <div className="source-layout">
                 <SourceNote lecture={lecture} unit={unit} active={mode !== 'textbook'} locale={locale} />
@@ -190,7 +191,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
                     />
                   ))}
                   {modules.length === 0 && relatedModules.length > 0 && (
-                    <p className="source-page-module-link">{locale === 'zh' ? '本页与前面的教学单元合并讲解：' : 'This page is taught with the preceding module: '}{relatedModules.map((module, index) => <span key={module.id}>{index > 0 ? (locale === 'zh' ? '、' : ', ') : ''}<a href={`#${module.id}`}>{module.title}</a></span>)}</p>
+                    <p className="source-page-module-link">{locale === 'zh' ? '本页与前面的教学单元合并讲解：' : 'This page is taught with the preceding module: '}{relatedModules.map((module, index) => <span key={module.id}>{index > 0 ? (locale === 'zh' ? '、' : ', ') : ''}<a href={`#${module.id}`}><ScientificText text={module.title} /></a></span>)}</p>
                   )}
                   {mode !== 'notes' && inline && (inline.position === 'after-module' || !inlineFigureModuleId) && <QuestionBlock locale={locale} question={inline.question} seed={sessionSeed} />}
                 </div>
@@ -213,7 +214,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
           <TextParagraphs items={lecture.synthesis} />
         </section>
 
-        {crossLinks.length > 0 && <section className="chapter-section" id="cross-lecture"><h2>{locale === 'zh' ? '跨讲关联' : 'Cross-lecture links'}</h2><dl className="cross-links">{crossLinks.map((link) => <div key={link.term}><dt>{link.term}</dt><dd>{link.targets.map((target, index) => <span key={`${link.term}-${target.lecture}`}>{index > 0 ? (locale === 'zh' ? '、' : ', ') : ''}<Link href={localizedHref(locale, `/lectures/${target.slug}/#${target.sectionId}`)}>{target.lecture} · {target.title}</Link></span>)}</dd></div>)}</dl></section>}
+        {crossLinks.length > 0 && <section className="chapter-section" id="cross-lecture"><h2>{locale === 'zh' ? '跨讲关联' : 'Cross-lecture links'}</h2><dl className="cross-links">{crossLinks.map((link) => <div key={link.term}><dt><ScientificText text={link.term} /></dt><dd>{link.targets.map((target, index) => <span key={`${link.term}-${target.lecture}`}>{index > 0 ? (locale === 'zh' ? '、' : ', ') : ''}<Link href={localizedHref(locale, `/lectures/${target.slug}/#${target.sectionId}`)}>{target.lecture} · <ScientificText text={target.title} /></Link></span>)}</dd></div>)}</dl></section>}
 
         <section className="chapter-section" id="formulas">
           <h2>{locale === 'zh' ? '公式与记号' : 'Formulas and notation'}</h2>
@@ -223,13 +224,13 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
         <section className="chapter-section" id="glossary">
           <h2>{locale === 'zh' ? '术语' : 'Glossary'}</h2>
           <div className="table-scroll"><table><thead><tr><th>{locale === 'zh' ? '中文' : 'Term'}</th><th>{locale === 'zh' ? 'English / symbol' : 'Chinese / symbol'}</th><th>{locale === 'zh' ? '定义' : 'Definition'}</th></tr></thead><tbody>
-            {lecture.glossary.map((entry) => <tr key={entry.id}><td>{locale === 'zh' ? entry.zh : entry.en}</td><td>{locale === 'zh' ? entry.en : entry.zh}</td><td>{entry.definition}</td></tr>)}
+            {lecture.glossary.map((entry) => <tr key={entry.id}><td><ScientificText text={locale === 'zh' ? entry.zh : entry.en} /></td><td><ScientificText text={locale === 'zh' ? entry.en : entry.zh} /></td><td><ScientificText text={entry.definition} /></td></tr>)}
           </tbody></table></div>
         </section>
 
         <section className="chapter-section" id="traps">
           <h2>{locale === 'zh' ? '常见错误、假设与限制' : 'Common errors, assumptions, and limitations'}</h2>
-          <ul>{lecture.commonTraps.map((item) => <li key={item}>{item}</li>)}</ul>
+          <ul>{lecture.commonTraps.map((item) => <li key={item}><ScientificText text={item} /></li>)}</ul>
         </section>
 
         <section className="chapter-section" id="practice">
@@ -250,7 +251,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
           </tbody></table></div>
         </section>
 
-        {lecture.errata.length > 0 && <section className="chapter-section" id="errata"><h2>{locale === 'zh' ? '勘误与不确定项' : 'Errata and uncertainties'}</h2><ol className="errata-list">{lecture.errata.map((item) => <li key={item.id}><p className="reference-kicker">{item.sourceFile}{item.sourcePage ? (locale === 'zh' ? `，第 ${item.sourcePage} 页` : `, p. ${item.sourcePage}`) : ''}</p><p><strong>{locale === 'zh' ? '原问题。' : 'Issue. '}</strong>{item.originalIssue}</p><p><strong>{locale === 'zh' ? '解释。' : 'Explanation. '}</strong>{item.explanation}</p>{item.correction && <p><strong>{locale === 'zh' ? '修正。' : 'Correction. '}</strong>{item.correction}</p>}<p><a href={`#${item.sectionId}`}>{locale === 'zh' ? '对应正文' : 'Related lesson'}</a> · <a href={`${assetPath(`/resources/original/${encodeURIComponent(item.sourceFile)}`)}${item.sourcePage ? `#page=${item.sourcePage}` : ''}`} target="_blank" rel="noreferrer">{locale === 'zh' ? '源文件' : 'Source file'}</a></p></li>)}</ol></section>}
+        {lecture.errata.length > 0 && <section className="chapter-section" id="errata"><h2>{locale === 'zh' ? '勘误与不确定项' : 'Errata and uncertainties'}</h2><ol className="errata-list">{lecture.errata.map((item) => <li key={item.id}><p className="reference-kicker">{item.sourceFile}{item.sourcePage ? (locale === 'zh' ? `，第 ${item.sourcePage} 页` : `, p. ${item.sourcePage}`) : ''}</p><p><strong>{locale === 'zh' ? '原问题。' : 'Issue. '}</strong><ScientificText text={item.originalIssue} /></p><p><strong>{locale === 'zh' ? '解释。' : 'Explanation. '}</strong><ScientificText text={item.explanation} /></p>{item.correction && <p><strong>{locale === 'zh' ? '修正。' : 'Correction. '}</strong><ScientificText text={item.correction} /></p>}<p><a href={`#${item.sectionId}`}>{locale === 'zh' ? '对应正文' : 'Related lesson'}</a> · <a href={`${assetPath(`/resources/original/${encodeURIComponent(item.sourceFile)}`)}${item.sourcePage ? `#page=${item.sourcePage}` : ''}`} target="_blank" rel="noreferrer">{locale === 'zh' ? '源文件' : 'Source file'}</a></p></li>)}</ol></section>}
 
         <div className="print-controls">
           <button type="button" onClick={() => print(false)}>{locale === 'zh' ? '打印本讲' : 'Print lecture'}</button>

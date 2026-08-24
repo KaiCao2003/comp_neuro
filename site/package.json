@@ -6,14 +6,16 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "content": "node scripts/build-content.mjs && node scripts/build-english-content.mjs",
+    "content": "node scripts/build-content.mjs && node scripts/build-english-content.mjs && npm run content:mark",
+    "content:mark": "node --experimental-strip-types scripts/scientific-markers.ts --write-generated",
     "dev": "next dev",
     "build": "next build",
     "start": "npx serve out",
     "lint": "eslint . --ignore-pattern out --ignore-pattern .next",
     "test": "vitest run",
     "validate:pedagogy": "node scripts/validate-pedagogy.mjs",
-    "validate": "npm run content && node scripts/validate-content.mjs && node scripts/validate-english-content.mjs && npm run validate:pedagogy",
+    "validate:scientific": "node --experimental-strip-types scripts/scientific-markers.ts --check",
+    "validate": "npm run content && node scripts/validate-content.mjs && node scripts/validate-english-content.mjs && npm run validate:pedagogy && npm run validate:scientific",
     "validate:export": "node scripts/validate-export.mjs"
   },
   "dependencies": {

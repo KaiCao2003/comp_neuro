@@ -95,7 +95,7 @@
       "page": 6,
       "reconstruction": "Page 6：dopamine reward-prediction error patterns、value/Q signals、 action selection。",
       "noteMeaning": "matching law 与 Rescorla-Wagner：dopamine reward-prediction error patterns、value/Q signals、action selection。",
-      "reasoning": "解释 temporal features/state representation、Q value 与 greedy action selection。 因此，从 delayed rewards 推导 discounted return、value function 和 TD errordelta=RV+gamma V_next。",
+      "reasoning": "解释 temporal features/state representation、Q value 与 greedy action selection。 因此，从 delayed rewards 推导 discounted return、value function 和 TD errordelta=RV+gamma \\(V_{\\mathrm{next}}\\)。",
       "figureReading": "先识别图中对象、箭头、参数和坐标系，再问它表达的是定义、推导、模型预测还是经验观察；示意图不提供未标注的定量精度。",
       "stopPredict": "blocking 为什么发生？"
     }
@@ -110,21 +110,21 @@
     ],
     "prerequisiteBridge": [
       "reward learning 的最小问题不是“reward 是否让神经元兴奋”，而是 credit assignment：在许多先前 stimuli、actions 和 synapses 中，哪一个应因本次 outcome 改变。Hebbian pre×post activity 提供局部 eligibility，reward-related third factor 决定更新方向或幅度。三者相乘只是计算框架；具体 biological factor 可涉及 dopamine、receptor state 与时间延迟，并非所有任务只有一种实现。",
-      "baseline subtraction 可用生活中的“超出预期”理解。若 reward 本来就常见，每次获得它都正向加强会让 weights 没有停止点。用 R-b，其中 b 是平均或预测 reward，优于 baseline 才增强、劣于 baseline 则减弱。数学上 E[(R-b)e] 在 b=E[R] 时成为 reward 与 eligibility 的 covariance，消除了与选择无关的恒定 reward offset。",
-      "价值预测把学习写成误差修正：prediction 太低就上调，太高就下调。即时任务用 R-V，跨时间任务用 R+γVnext-V。这里 V 是未来 discounted reward 的预测，不是神经电压；δ 是有正有负的 prediction error，不等于 reward 本身。先分清这些量，才能理解 blocking、cue transfer 和 omitted reward dip。"
+      "baseline subtraction 可用生活中的“超出预期”理解。若 reward 本来就常见，每次获得它都正向加强会让 weights 没有停止点。用 R-b，其中 b 是平均或预测 reward，优于 baseline 才增强、劣于 baseline 则减弱。数学上 \\(E[(R-b)e]\\) 在 \\(b=E[R]\\) 时成为 reward 与 eligibility 的 covariance，消除了与选择无关的恒定 reward offset。",
+      "价值预测把学习写成误差修正：prediction 太低就上调，太高就下调。即时任务用 R-V，跨时间任务用 \\(R+\\gamma V_{\\mathrm{next}}-V\\)。这里 V 是未来 discounted reward 的预测，不是神经电压；\\(\\delta\\) 是有正有负的 prediction error，不等于 reward 本身。先分清这些量，才能理解 blocking、cue transfer 和 omitted reward dip。"
     ],
     "diagnostic": [
       {
         "id": "l24-d1",
-        "prompt": "若 reward 总为 1，naive update Δw=ηRxy 且 x,y 经常为正，会发生什么？",
+        "prompt": "若 reward 总为 1，naive update \\(\\Delta w=\\eta Rxy\\) 且 x,y 经常为正，会发生什么？",
         "answer": "weight 会在每次共同活动时继续增加，没有由“已经预测到 reward”产生的自然停止点。",
         "explanation": "需要 baseline、prediction error、normalization 或其他稳定机制。",
         "remediationModuleId": "l24-m1"
       },
       {
         "id": "l24-d2",
-        "prompt": "R=0、baseline b=0.4、eligibility e=2、η=0.1 时 covariance update 是多少？",
-        "answer": "Δw=0.1×(0-0.4)×2=-0.08。",
+        "prompt": "\\(R=0\\)、baseline \\(b=0.4\\)、eligibility \\(e=2\\)、\\(\\eta =0.1\\) 时 covariance update 是多少？",
+        "answer": "\\(\\Delta w=0.1\\times (0-0.4)\\times 2=-0.08\\)。",
         "explanation": "未获 reward 相对于正 baseline 是负 outcome，会削弱本 trial eligible connection。",
         "remediationModuleId": "l24-m2"
       },
@@ -145,7 +145,7 @@
       {
         "id": "l24-d5",
         "prompt": "cue 已学会预测 reward 后，reward 时刻 dopamine response 变小是否表示 reward 不再有价值？",
-        "answer": "不是；value 已由 cue 预测，RPE 转移到 cue，reward 时刻实际与预测相符所以 δ 接近零。",
+        "answer": "不是；value 已由 cue 预测，RPE 转移到 cue，reward 时刻实际与预测相符所以 \\(\\delta\\) 接近零。",
         "explanation": "要把 value、received reward 与 prediction error 三条时间序列分开。",
         "remediationModuleId": "l24-m6"
       }
@@ -162,8 +162,8 @@
         ],
         "guidingQuestion": "一次 reward 到来时，怎样只改变先前参与该 choice 的 connections？",
         "paragraphs": [
-          "foraging animal 从 sensory cue 选择 action 并得到 reward。学习需建立 stimulus-action-outcome relation，而非把所有近期活跃 synapses 一起加强。令 x 为 presynaptic stimulus feature，y 为 postsynaptic/action activity，xy 形成 eligibility；第三因子 M 在 outcome 后到达，update 可写 Δw=ηMxy。eligibility trace 可跨过 action 到 delayed reward 的时间差。",
-          "若 M 直接取非负 reward R，任何 rewarded coactivity 都正向增长。已掌握的 action 仍会被重复增强，frequent reward 的 common offset 也污染 credit；weights 最终受 saturation 而非正确 equilibrium 限制。未 rewarded choice 若 R=0 只是不更新，无法主动削弱错误 association。",
+          "foraging animal 从 sensory cue 选择 action 并得到 reward。学习需建立 stimulus-action-outcome relation，而非把所有近期活跃 synapses 一起加强。令 x 为 presynaptic stimulus feature，y 为 postsynaptic/action activity，xy 形成 eligibility；第三因子 M 在 outcome 后到达，update 可写 \\(\\Delta w=\\eta Mxy\\)。eligibility trace 可跨过 action 到 delayed reward 的时间差。",
+          "若 M 直接取非负 reward R，任何 rewarded coactivity 都正向增长。已掌握的 action 仍会被重复增强，frequent reward 的 common offset 也污染 credit；weights 最终受 saturation 而非正确 equilibrium 限制。未 rewarded choice 若 \\(R=0\\) 只是不更新，无法主动削弱错误 association。",
           "将 M 改为 reward prediction error 或 reward-minus-baseline，unexpected good outcome增强，unexpected bad outcome减弱，expected outcome近零。dopamine 是 canonical candidate third factor，因为其 phasic responses 与 RPE 有重要对应，但不同 dopamine neurons、timescales 和 tasks 可能编码 movement、novelty 或 salience components。",
           "实验验证要对 pre/post eligibility 与 third factor 做时序控制：在无相应 eligibility 的 synapses 上同一 dopamine pulse不应产生相同 task-specific update；推迟 pulse超过eligibility window应减弱学习。仅观察 reward、dopamine、behavior 同时变化不足以说明局部三因子乘法已经实现。"
         ],
@@ -178,7 +178,7 @@
           "steps": [
             {
               "title": "写 eligibility dynamics",
-              "explanation": "pre-post coactivity 将 e 推高，随后按 τe 衰减。",
+              "explanation": "pre-post coactivity 将 e 推高，随后按 \\(\\tau e\\) 衰减。",
               "latex": "\\tau_e\\dot e=-e+x(t)y(t)"
             },
             {
@@ -193,23 +193,23 @@
             },
             {
               "title": "判断符号",
-              "explanation": "e>0 时，M 正增强、M 负削弱、M=0 不变。"
+              "explanation": "\\(e>0\\) 时，M 正增强、M 负削弱、\\(M=0\\) 不变。"
             }
           ],
           "symbolNotes": [
-            "e 是 eligibility，单位依 x、y convention；τe 是时间。",
-            "η 吸收把 M·e 换成 weight/time 的比例单位。"
+            "e 是 eligibility，单位依 x、y convention；\\(\\tau e\\) 是时间。",
+            "\\(\\eta\\) 吸收把 M·e 换成 weight/time 的比例单位。"
           ],
-          "unitsCheck": "x与y若视为 rates，trace equation需以相同 normalization 处理；weight derivative 两侧单位由η配平。",
-          "limitCheck": "τe→0 时 delayed outcome 几乎不能 credit 先前 action；b=R 时 M=0，停止更新。"
+          "unitsCheck": "x与y若视为 rates，trace equation需以相同 normalization 处理；weight derivative 两侧单位由\\(\\eta\\)配平。",
+          "limitCheck": "\\(\\tau e\\to 0\\) 时 delayed outcome 几乎不能 credit 先前 action；\\(b=R\\) 时 \\(M=0\\)，停止更新。"
         },
         "workedExample": {
           "title": "延迟 reward 下的 eligibility",
-          "problem": "action 时 e0=1，之后无新 coactivity，τe=2 s；1 s 后得到 M=0.6，η=0.1。求瞬时 update 幅度 ηMe。",
+          "problem": "action 时 \\(e_{0}=1\\)，之后无新 coactivity，\\(\\tau e=2 \\mathrm{s}\\)；1 s 后得到 \\(M=0.6\\)，\\(\\eta =0.1\\)。求瞬时 update 幅度 \\(\\eta Me\\)。",
           "steps": [
-            "trace 衰减为 e=e^{-1/2}≈0.607。",
-            "乘 third factor 得 Me≈0.364。",
-            "再乘 η，update 幅度约 0.0364。"
+            "trace 衰减为 \\(e=e^{-1/2}\\approx 0.607\\)。",
+            "乘 third factor 得 \\(Me\\approx 0.364\\)。",
+            "再乘 \\(\\eta\\)，update 幅度约 0.0364。"
           ],
           "result": "该 reward 对 connection 的 update 约 +0.0364。",
           "sanityCheck": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。"
@@ -234,7 +234,7 @@
         ],
         "guidingQuestion": "减去 baseline 怎样移除无信息 reward offset，并让好于平均与差于平均的 choices 产生相反更新？",
         "paragraphs": [
-          "设某 choice 的 eligibility 为 e，update Δw=η(R-b)e。若 b=E[R]，取期望得 E[Δw]/η=E[Re]-E[R]E[e]=Cov(R,e)。因此只有 reward 与该 eligibility 的共同变化驱动平均学习；把所有 rewards 加同一个常数不会改变 covariance。",
+          "设某 choice 的 eligibility 为 e，update \\(\\Delta w=\\eta (R-b)e\\)。若 \\(b=E[R]\\)，取期望得 \\(E[\\Delta w]/\\eta =E[Re]-E[R]E[e]=\\operatorname{Cov}(R,e)\\)。因此只有 reward 与该 eligibility 的共同变化驱动平均学习；把所有 rewards 加同一个常数不会改变 covariance。",
           "baseline 可为全局 running average，也可依 state 或 choice。全局 baseline 方差较低却可能在不同 states reward scales 差异大时产生偏差；state-dependent value baseline 更精确但需要学习更多参数。baseline 影响 variance 与 credit，不改变期望的条件依赖需满足它不偷看当前 action outcome 的不当信息。",
           "两-choice stochastic learner 中，选择 A 后若 RA 高于 baseline，A preference上升；低于 baseline则下降。长期内部稳态要求两种仍被采样的 actions 具有相同 expected advantage，否则 preference继续漂移。边界 action 若概率降到零便不再更新，所以 exploration 对发现环境变化仍重要。",
           "baseline subtraction 不保证所有 weights 有界；eligibility、choice nonlinearity、learning rate 与 reward nonstationarity 都影响稳定性。短期 baseline lag 会在 reward probability改变后产生 transient overshoot。分析数据应同时画 reward、baseline、advantage 与 choice probability，不能从一条 weight curve 倒推出唯一机制。"
@@ -250,12 +250,12 @@
           "steps": [
             {
               "title": "写单 trial update",
-              "explanation": "η 为 learning rate，e 为该 synapse eligibility。",
+              "explanation": "\\(\\eta\\) 为 learning rate，e 为该 synapse eligibility。",
               "latex": "\\Delta w=\\eta(R-b)e"
             },
             {
               "title": "取固定 baseline",
-              "explanation": "令 b=E[R] 并对 trials 取期望。",
+              "explanation": "令 \\(b=E[R]\\) 并对 trials 取期望。",
               "latex": "\\frac{\\mathbb E[\\Delta w]}{\\eta}=\\mathbb E[Re]-\\mathbb E[R]\\mathbb E[e]"
             },
             {
@@ -265,27 +265,27 @@
             },
             {
               "title": "检查常量 offset",
-              "explanation": "R′=R+c 时 covariance 不变。",
+              "explanation": "\\(R'=R+c\\) 时 covariance 不变。",
               "latex": "\\operatorname{Cov}(R+c,e)=\\operatorname{Cov}(R,e)"
             }
           ],
           "symbolNotes": [
             "R 与 b 使用同一 reward units，e 是 eligibility。",
-            "η 决定每 trial weight change scale。"
+            "\\(\\eta\\) 决定每 trial weight change scale。"
           ],
-          "unitsCheck": "R-b 与 R 单位相同；ηe 需把它换成无量纲或指定单位的 weight change。",
-          "limitCheck": "若 e 恒定，covariance 为零；若 b不是E[R]，update还含 baseline mismatch term。"
+          "unitsCheck": "R-b 与 R 单位相同；\\(\\eta e\\) 需把它换成无量纲或指定单位的 weight change。",
+          "limitCheck": "若 e 恒定，covariance 为零；若 b不是\\(E[R]\\)，update还含 baseline mismatch term。"
         },
         "workedExample": {
           "title": "计算四 trial covariance update",
-          "problem": "四 trials 的 R=[1,0,1,0]，e=[2,1,0,1]，b=0.5，η=0.1。求平均 update。",
+          "problem": "四 trials 的 \\(R=[1,0,1,0]\\)，\\(e=[2,1,0,1]\\)，\\(b=0.5\\)，\\(\\eta =0.1\\)。求平均 update。",
           "steps": [
             "逐 trial (R-b)e 为 1、-0.5、0、-0.5。",
             "四项平均为 0。",
-            "乘 η 后平均 Δw 为 0，尽管个别 trials 有正负更新。"
+            "乘 \\(\\eta\\) 后平均 \\(\\Delta w\\) 为 0，尽管个别 trials 有正负更新。"
           ],
           "result": "平均 update 为 0。",
-          "sanityCheck": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "sanityCheck": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         "selfCheck": {
           "prompt": "为什么 baseline 估得太低会造成系统性正向漂移？",
@@ -307,10 +307,10 @@
         ],
         "guidingQuestion": "choice ratio 何时会跟随 obtained reward ratio，而这一关系依赖哪些行为与学习假设？",
         "paragraphs": [
-          "matching law 的常见形式是 CA/CB≈RA/RB，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。它描述 allocation，而非每次选择的确定规则。若两 options 的 scheduled rewards 随未选择时间累积，少选一侧的下一次回报机会会上升，形成把选择拉回的负反馈。",
-          "在 interior equilibrium，choice-conditioned expected rewards qA=E[R|A] 与 qB=E[R|B] 相等；否则 advantage rule 会继续增加较高一侧 preference。若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 qA≈RA/CA、qB≈RB/CB。令二者相等便得到 CA/CB≈RA/RB。",
-          "推导需要双方持续被采样、reward schedule 近似 stationary、每次 choice cost 相当，并忽略 changeover delay、satiety与risk sensitivity。若 reward magnitudes 不同，应匹配所得价值而非单纯次数。undermatching、overmatching或bias可用 generalized matching log(CA/CB)=a log(RA/RB)+log b描述。",
-          "fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 Y=Σ_iW_iX_i，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
+          "matching law 的常见形式是 \\(CA/CB\\approx RA/RB\\)，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。它描述 allocation，而非每次选择的确定规则。若两 options 的 scheduled rewards 随未选择时间累积，少选一侧的下一次回报机会会上升，形成把选择拉回的负反馈。",
+          "在 interior equilibrium，choice-conditioned expected rewards \\(qA=E[R|A]\\) 与 \\(qB=E[R|B]\\) 相等；否则 advantage rule 会继续增加较高一侧 preference。若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 \\(qA\\approx RA/CA\\)、\\(qB\\approx RB/CB\\)。令二者相等便得到 \\(CA/CB\\approx RA/RB\\)。",
+          "推导需要双方持续被采样、reward schedule 近似 stationary、每次 choice cost 相当，并忽略 changeover delay、satiety与risk sensitivity。若 reward magnitudes 不同，应匹配所得价值而非单纯次数。undermatching、overmatching或bias可用 generalized matching \\(\\log(CA/CB)=a \\log(RA/RB)+\\log b\\)描述。",
+          "fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 \\(Y=\\sum _iW_{i}X_{i}\\)，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
         ],
         "keyPoints": [
           "matching 是长期 choice allocation 与 obtained reward allocation 的关系。",
@@ -347,15 +347,15 @@
             "若 rewards有不同magnitude，应以总value替代counts。"
           ],
           "unitsCheck": "比值两侧都无量纲；观察窗口必须相同。",
-          "limitCheck": "RB=0 或 CB=0 时ratio form不可用，应保留交叉乘式并讨论boundary behavior。"
+          "limitCheck": "\\(RB=0\\) 或 \\(CB=0\\) 时ratio form不可用，应保留交叉乘式并讨论boundary behavior。"
         },
         "workedExample": {
           "title": "检查 matching",
           "problem": "100 次 choice 中 A 选 60 次获 30 rewards，B 选 40 次获 20 rewards。检查 conditional returns 与 ratios。",
           "steps": [
-            "qA=30/60=0.5 reward/choice。",
-            "qB=20/40=0.5 reward/choice。",
-            "choice ratio 60/40=1.5，reward ratio 30/20=1.5。"
+            "\\(qA=30/60=0.5\\) reward/choice。",
+            "\\(qB=20/40=0.5\\) reward/choice。",
+            "choice ratio \\(60/40=1.5\\)，reward ratio \\(30/20=1.5\\)。"
           ],
           "result": "条件回报相等且两种 ratios 都为 1.5，符合 matching。",
           "sanityCheck": "总 rewards 50、总 choices 100，整体 reward rate 0.5，与两侧条件率一致。"
@@ -380,9 +380,9 @@
         ],
         "guidingQuestion": "为什么 prediction error 能让学习在已经预测到 reward 时停止，并自然产生 blocking？",
         "paragraphs": [
-          "用 features x 线性预测 value V=w^T x，目标 reward为R。squared error L=1/2(R-V)^2 的 negative gradient 给 Δw=η(R-V)x。active cue且R高于prediction时weight上升，R低于prediction时下降；当V=R时prediction error为零，学习停止。",
-          "blocking先训练cue A→reward，使wA已能预测R。随后A与novel cue B共同呈现，total prediction V=wA+wB≈R，error接近零，wB更新很小。纯reward-gated Hebb只看B active且rewarded，会错误预测B强学习；因此blocking提供error-correction的重要行为证据。",
-          "若reward延迟，当前state的目标不只是即时R，还含next-state value。temporal-difference error δt=Rt+1+γV(st+1)-V(st)比较连续两时刻prediction。它可在reward真正到来前通过predictive cue逐步back up value，实现 reward response 向 cue 转移。",
+          "用 features x 线性预测 value \\(V=w^\\mathrm{T} x\\)，目标 reward为R。squared error \\(L=1/2(R-V)^2\\) 的 negative gradient 给 \\(\\Delta w=\\eta (R-V)x\\)。active cue且R高于prediction时weight上升，R低于prediction时下降；当\\(V=R\\)时prediction error为零，学习停止。",
+          "blocking先训练cue A→reward，使wA已能预测R。随后A与novel cue B共同呈现，total prediction \\(V=wA+wB\\approx R\\)，error接近零，wB更新很小。纯reward-gated Hebb只看B active且rewarded，会错误预测B强学习；因此blocking提供error-correction的重要行为证据。",
+          "若reward延迟，当前state的目标不只是即时R，还含next-state value。temporal-difference error \\(\\delta t=Rt+1+\\gamma V(st+1)-V(st)\\)比较连续两时刻prediction。它可在reward真正到来前通过predictive cue逐步back up value，实现 reward response 向 cue 转移。",
           "Rescorla–Wagner与TD都依feature representation。若A和B高度相似或隐藏context改变，blocking强度会不同；zero error 也可能来自attention下降。模型解释应列出alternative mechanisms，并用unblocking、reward revaluation和 trial-level learning curves 区分。"
         ],
         "keyPoints": [
@@ -417,18 +417,18 @@
           ],
           "symbolNotes": [
             "R与V同为value units，xi可为binary或连续feature。",
-            "η的单位使Δwi与wi一致。"
+            "\\(\\eta\\)的单位使\\(\\Delta w_{i}\\)与wi一致。"
           ],
-          "unitsCheck": "w^T x必须与R可相减；loss用value平方单位。",
-          "limitCheck": "V=R时update为零；x_i=0时该cue weight不因本trial改变。"
+          "unitsCheck": "\\(w^\\mathrm{T} x\\)必须与R可相减；loss用value平方单位。",
+          "limitCheck": "\\(V=R\\)时update为零；\\(x_{i}=0\\)时该cue weight不因本trial改变。"
         },
         "workedExample": {
           "title": "数值演示 blocking",
-          "problem": "reward R=1。A-alone训练后wA=0.9，novel B 的wB=0；compound trial xA=xB=1、η=0.2。求两weights update。",
+          "problem": "reward \\(R=1\\)。A-alone训练后\\(wA=0.9\\)，novel B 的\\(wB=0\\)；compound trial \\(xA=xB=1\\)、\\(\\eta =0.2\\)。求两weights update。",
           "steps": [
-            "total V=0.9+0=0.9。",
-            "error R-V=0.1。",
-            "A与B均active，所以各更新0.2×0.1=0.02；B只获很小增量。"
+            "total \\(V=0.9+0=0.9\\)。",
+            "error \\(R-V=0.1\\)。",
+            "A与B均active，所以各更新\\(0.2\\times 0.1=0.02\\)；B只获很小增量。"
           ],
           "result": "wA变0.92，wB变0.02，显示强但非完全blocking。",
           "sanityCheck": "若wA恰为1，error为0，两weights都不变。"
@@ -454,8 +454,8 @@
         "guidingQuestion": "同一物理 cue 在不同时间和action下为何需要不同features与Q values？",
         "paragraphs": [
           "delayed task中，一个持续cue可展开为 time-specific features x1,x2,…，使learner知道“cue后第几个时间段”。TD updates从reward-near features开始，逐trial向更早features传播。若只有一个不随时间变化的feature，模型难以表达reward在何时到来，也难预测omission time的negative error。",
-          "state value V(s)平均某policy下从state出发的future return；action value Q(s,a)还指定first action。choice需比较同state的多个Q values，可用greedy、softmax或其他stochastic rule。V高不告诉你哪个action好，Q把credit分配到action channel。",
-          "greedy选择argmax_a Q利用当前知识，却可能永远不尝试初始低估action；temperature或ε exploration提供采样。生物选择还受effort、uncertainty和habit影响，因此把某neural signal与Q相关不能直接证明精确max operation。",
+          "state value \\(V(s)\\)平均某policy下从state出发的future return；action value \\(Q(s,a)\\)还指定first action。choice需比较同state的多个Q values，可用greedy、softmax或其他stochastic rule。V高不告诉你哪个action好，Q把credit分配到action channel。",
+          "greedy选择\\(\\operatorname{argmax}_{a}\\) Q利用当前知识，却可能永远不尝试初始低估action；temperature或\\(\\epsilon\\) exploration提供采样。生物选择还受effort、uncertainty和habit影响，因此把某neural signal与Q相关不能直接证明精确max operation。",
           "features决定generalization：共享feature会把一个state-action的learning传到相似situations，提高sample efficiency，也可能造成错误transfer。检验Q-like signal应同时操纵state、action和future reward，确认它不是即时reward、movement vigor或statevalue单独造成。"
         ],
         "keyPoints": [
@@ -466,21 +466,21 @@
         "derivation": null,
         "workedExample": {
           "title": "从两个Q值作softmax choice",
-          "problem": "某state中QA=2、QB=1，inverse temperature β=ln3。求 P(A)=exp(βQA)/[exp(βQA)+exp(βQB)]。",
+          "problem": "某state中\\(QA=2\\)、\\(QB=1\\)，inverse temperature \\(\\beta =\\ln 3\\)。求 \\(P(A)=\\exp(\\beta QA)/[\\exp(\\beta QA)+\\exp(\\beta QB)]\\)。",
           "steps": [
-            "提取共同因子exp(βQB)，P(A)=exp(β)/(exp(β)+1)。",
-            "β=ln3，所以exp(β)=3。",
-            "P(A)=3/(3+1)=0.75，B为0.25。"
+            "提取共同因子\\(\\exp(\\beta QB)\\)，\\(P(A)=\\exp(\\beta )/(\\exp(\\beta )+1)\\)。",
+            "\\(\\beta =\\ln 3\\)，所以\\(\\exp(\\beta )=3\\)。",
+            "\\(P(A)=3/(3+1)=0.75\\)，B为0.25。"
           ],
           "result": "A的选择概率为0.75。",
-          "sanityCheck": "两概率和为1；若QA=QB则应各0.5。"
+          "sanityCheck": "两概率和为1；若\\(QA=QB\\)则应各0.5。"
         },
         "selfCheck": {
           "prompt": "为什么state value相同不能推出两个actions同样好？",
           "answer": "V是policy加权平均；一个action的Q可高、另一个低，却在特定policy下给同一总体V。"
         },
         "pitfalls": [
-          "把Q(s,a)与即时reward混为一谈。",
+          "把\\(Q(s,a)\\)与即时reward混为一谈。",
           "忽略feature representation对learning transfer的决定作用。"
         ]
       },
@@ -495,10 +495,10 @@
         ],
         "guidingQuestion": "early reward、predictive cue 与 omitted reward 三种情况怎样由同一个 TD error解释？",
         "paragraphs": [
-          "learning前reward unexpected：reward时Rt+1为正，而先前V低，δ产生positive transient。cue-reward pairing后，cue后的state value上升；cue onset带来positive ΔV，δ转移到cue。reward按预测到来时Rt+1与value drop相抵，reward时δ接近零。",
-          "若predicted reward在预期时刻omitted，Rt+1=0且next value坍塌，δ在该时刻为负，形成dip。dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。三幅时间图共同约束“prediction error”而非单纯reward response。",
-          "value、RPE和action signal须分开：value可在cue后持续，δ突出变化或surprise，action-selection比较Q。dopamine neurons群体有异质性，运动与salience也影响responses。课程图支持canonical RPE pattern，但任何单cell response都应结合task events、expected value与movement controls解释。",
-          "连接plasticity时，dopamine-like δ作为third factor作用于仍有eligibility的synapses；连接choice时，learnedQ改变policy。这两个环节不同：dopamine perturbation可同时影响learning与performance。只在training后测choice不能定位它改变的是update还是momentary vigor。"
+          "learning前reward unexpected：reward时Rt+1为正，而先前V低，\\(\\delta\\)产生positive transient。cue-reward pairing后，cue后的state value上升；cue onset带来positive \\(\\Delta V\\)，\\(\\delta\\)转移到cue。reward按预测到来时Rt+1与value drop相抵，reward时\\(\\delta\\)接近零。",
+          "若predicted reward在预期时刻omitted，\\(Rt+1=0\\)且next value坍塌，\\(\\delta\\)在该时刻为负，形成dip。dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。三幅时间图共同约束“prediction error”而非单纯reward response。",
+          "value、RPE和action signal须分开：value可在cue后持续，\\(\\delta\\)突出变化或surprise，action-selection比较Q。dopamine neurons群体有异质性，运动与salience也影响responses。课程图支持canonical RPE pattern，但任何单cell response都应结合task events、expected value与movement controls解释。",
+          "连接plasticity时，dopamine-like \\(\\delta\\)作为third factor作用于仍有eligibility的synapses；连接choice时，learnedQ改变policy。这两个环节不同：dopamine perturbation可同时影响learning与performance。只在training后测choice不能定位它改变的是update还是momentary vigor。"
         ],
         "keyPoints": [
           "RPE由实际reward与连续 value prediction 共同决定。",
@@ -507,7 +507,7 @@
         ],
         "derivation": {
           "title": "三种事件的TD error符号",
-          "setup": "用 δ=R+γV_next-V_current 逐项比较。",
+          "setup": "用 \\(\\delta =R+\\gamma V_{\\mathrm{next}}-V_{\\mathrm{current}}\\) 逐项比较。",
           "steps": [
             {
               "title": "unexpected reward",
@@ -531,22 +531,22 @@
             }
           ],
           "symbolNotes": [
-            "δ、R、V使用同一discounted value单位。",
-            "γ无量纲且通常0≤γ≤1。"
+            "\\(\\delta\\)、R、V使用同一discounted value单位。",
+            "\\(\\gamma\\)无量纲且通常\\(0\\le \\gamma \\le 1\\)。"
           ],
-          "unitsCheck": "R与γV可相加，δ保留value单位。",
-          "limitCheck": "γ=0时只学习immediate reward；完美预测时所有非transition surprises的δ趋近零。"
+          "unitsCheck": "R与\\(\\gamma V\\)可相加，\\(\\delta\\)保留value单位。",
+          "limitCheck": "\\(\\gamma =0\\)时只学习immediate reward；完美预测时所有非transition surprises的\\(\\delta\\)趋近零。"
         },
         "workedExample": {
           "title": "计算一次omission error",
-          "problem": "reward deadline前Vcurrent=0.8，deadline后Vnext=0，R=0，γ=0.95。求δ。",
+          "problem": "reward deadline前\\(V_{\\mathrm{current}}=0.8\\)，deadline后\\(V_{\\mathrm{next}}=0\\)，\\(R=0\\)，\\(\\gamma =0.95\\)。求\\(\\delta\\)。",
           "steps": [
-            "代入δ=0+0.95×0-0.8。",
-            "得到δ=-0.8。",
+            "代入\\(\\delta =0+0.95\\times 0-0.8\\)。",
+            "得到\\(\\delta =-0.8\\)。",
             "负号表示outcome差于prediction，而不是得到负的物理reward。"
           ],
-          "result": "δ=-0.8 value units。",
-          "sanityCheck": "若reward如期提供R=0.8且next value为0，则δ=0，符合已经预测。"
+          "result": "\\(\\delta =-0.8\\) value units。",
+          "sanityCheck": "若reward如期提供\\(R=0.8\\)且next value为0，则\\(\\delta =0\\)，符合已经预测。"
         },
         "selfCheck": {
           "prompt": "为什么omission dip比“reward时无burst”更强地支持prediction error？",
@@ -566,7 +566,7 @@
       "moduleId": "l24-m6",
       "title": "TD error 从 reward 转移到 predictive cue",
       "alt": "三条时间线比较学习前、学习后和奖励省略时 cue 与 reward deadline 附近的 dopamine prediction error",
-      "caption": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 δ；学会 cue–reward 关系后，正 δ 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 δ。这个符号组合支持 prediction error，而不是单纯 reward response。",
+      "caption": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 \\(\\delta\\)；学会 cue–reward 关系后，正 \\(\\delta\\) 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 \\(\\delta\\)。这个符号组合支持 prediction error，而不是单纯 reward response。",
       "sourceRefs": [
         {
           "file": "Lecture24-LearningFromRewards.pdf",
@@ -576,43 +576,43 @@
       "schematic": true,
       "kind": "timeline",
       "lanes": [
-        "学习前 δ",
-        "学习后 δ",
-        "省略奖励 δ"
+        "学习前 \\(\\delta\\)",
+        "学习后 \\(\\delta\\)",
+        "省略奖励 \\(\\delta\\)"
       ],
       "events": [
         {
           "x": 20,
           "lane": 0,
-          "label": "cue: δ≈0"
+          "label": "cue: \\(\\delta \\approx 0\\)"
         },
         {
           "x": 75,
           "lane": 0,
-          "label": "reward: +δ",
+          "label": "reward: \\(+\\delta\\)",
           "tone": "accent"
         },
         {
           "x": 20,
           "lane": 1,
-          "label": "cue: +δ",
+          "label": "cue: \\(+\\delta\\)",
           "tone": "accent"
         },
         {
           "x": 75,
           "lane": 1,
-          "label": "reward: δ≈0"
+          "label": "reward: \\(\\delta \\approx 0\\)"
         },
         {
           "x": 20,
           "lane": 2,
-          "label": "cue: +δ",
+          "label": "cue: \\(+\\delta\\)",
           "tone": "accent"
         },
         {
           "x": 75,
           "lane": 2,
-          "label": "omission: −δ",
+          "label": "omission: \\(-\\delta\\)",
           "tone": "accent"
         }
       ],
@@ -635,28 +635,28 @@
   "specialSection": [],
   "derivations": [
     "5.1 reward-baseline three-factor rule",
-    "【必要前置】 为什么 Δw=pre×post×R 会 over-strengthen？",
-    "∆w = η e(x, y)R",
-    "∆w = η e(x, y)(R − R̄) E[∆w] = η Cov(e, R) 1. eligibility/coactivity e 在行为与 reward 发生时为正。 2. 若 R 总为正，naive rule 平均持续 potentiates。 3. 减去 expected reward 使普通/已预测 reward 的 mean update 为零。 4. 只有 coactivity 与 above-baseline reward 共变时净增强。",
+    "【必要前置】 为什么 \\(\\Delta w=pre\\times post\\times R\\) 会 over-strengthen？",
+    "∆\\(w = \\eta  e(x, y)R\\)",
+    "∆\\(w = \\eta  e(x, y)(R - \\bar{R})\\) E[∆w] = \\(\\eta  \\operatorname{Cov}(e, R)\\) 1. eligibility/coactivity e 在行为与 reward 发生时为正。 2. 若 R 总为正，naive rule 平均持续 potentiates。 3. 减去 expected reward 使普通/已预测 reward 的 mean update 为零。 4. 只有 coactivity 与 above-baseline reward 共变时净增强。",
     "Geometric/computational intuition. 学习的是\"比预期好/坏\"，而不是 reward 的绝对存在。 Biological interpretation / failure condition. baseline 估计错误、delayed credit assignment 与 nonstationary rewards 需更复杂 mechanisms。",
     "思考题：matching law 的 ratio？",
     "5.2 matching condition",
     "【补全推导】 stationary learning 如何导出 choice ratio≈reward ratio？",
-    "E[∆w] = 0 ⇒ Cov(N, R) = 0",
-    "E[R | C = A] = E[R | C = B] CA RA ≈ CB RB 1. 假设 neural activity N 的 conditional mean 随 choice 改变。 2. covariance=0 可分解为 choice-conditioned reward means 的差。 3. stationarity 要求两 choice 的 obtained reward rate 相等，否则权重继续改变。 4. 在 baiting/foraging assumptions 下，这等价于 choice fractions 匹配 reward fractions。",
+    "E[∆w] = \\(0 \\Rightarrow  \\operatorname{Cov}(N, R) = 0\\)",
+    "\\(E[R | C = A] = E[R | C = B]\\) CA \\(RA \\approx  CB RB 1\\). 假设 neural activity N 的 conditional mean 随 choice 改变。 2. covariance=0 可分解为 choice-conditioned reward means 的差。 3. stationarity 要求两 choice 的 obtained reward rate 相等，否则权重继续改变。 4. 在 baiting/foraging assumptions 下，这等价于 choice fractions 匹配 reward fractions。",
     "Geometric/computational intuition. agent 重新分配 choices，直到两个 options 的 marginal return 相等。 Biological interpretation / failure condition. matching law 依 task reward schedule、choice stochasticity 与 learning assumptions。",
     "思考题：Rescorla-Wagner error？",
     "5.3 Rescorla-Wagner 与 blocking",
-    "【跨页连接】 cue weights 如何学习 immediate reward prediction？ ∑ V = w i xi i",
-    "∆wi = ηxi (R − V ) 1. squared prediction error 的 negative gradient 给 x_i(R−V)。 2. 未预测 reward 产生 positive error，active cue 增权。 3. 已由 cue S1 完全预测 reward 时，再加入 S2 有 R−V≈0。 4. 因此 S2 没有学习信号，产生 blocking。",
+    "【跨页连接】 cue weights 如何学习 immediate reward prediction？ \\(\\sum  V = w i\\) xi i",
+    "∆wi = ηxi (R − V ) 1. squared prediction error 的 negative gradient 给 \\(x_{i}(R-V)\\)。 2. 未预测 reward 产生 positive error，active cue 增权。 3. 已由 cue S1 完全预测 reward 时，再加入 S2 有 \\(R-V\\approx 0\\)。 4. 因此 S2 没有学习信号，产生 blocking。",
     "Geometric/computational intuition. 学习由 surprise/prediction error 驱动，而不是简单 stimulus-reward coincidence。 Biological interpretation / failure condition. configural representations、attention 与 nonstationary associations 会改变 blocking。",
     "思考题：blocking 为什么发生？",
     "5.4 TD error、temporal features 与 Q",
     "【模型边界】 reward 延迟时如何把 credit 传回早期 cues/actions？",
-    "Gt = Rt+1 + γRt+2 + γ 2 Rt+3 + · · ·",
-    "δt = Rt+1 + γVt+1 − Vt Q(s, a) = E[Gt | st = s, at = a] 1. γ 控制未来 reward discount。 2. TD error 比较当前 estimate 与 one-step reward+next value bootstrap target。 3. temporal/state features 使 cue 的不同 time-since-onset 有不同 weights。 4. Q 将 value 条件化于 action，可支持 argmax action selection。",
+    "Gt = \\(Rt+1 + \\gamma Rt+2 + \\gamma \\) 2 Rt+3 + · · ·",
+    "\\(\\delta t = Rt+1 + \\gamma Vt+1 - Vt Q(s, a) = E[G_{t} | s_{t} = s, a_{t} = a]\\) 1. \\(\\gamma \\) 控制未来 reward discount。 2. TD error 比较当前 estimate 与 one-step reward\\(+n_{\\mathrm{ext}}\\) value bootstrap target。 3. temporal/state features 使 cue 的不同 time-since-onset 有不同 weights。 4. Q 将 value 条件化于 action，可支持 argmax action selection。",
     "Geometric/computational intuition. prediction error 从 reward 时刻向 predictor cue 转移。 Biological interpretation / failure condition. partial observability、state representation 错误与 off-policy issues 在下一课系统化。",
-    "思考题：discounted return 中 γ→0 表示什么？"
+    "思考题：discounted return 中 \\(\\gamma \\to 0\\) 表示什么？"
   ],
   "synthesis": [
     "learned decisions 需要把 stimulus/action activity 与 delayed reward 联系起来。简单 rewardgated Hebb 在 reward 常出现时会持续增权；减去 expected reward baseline 后，更新变成 covariance rule。在特定 choice model/assumptions 下，stationary covariance condition 推出 matching behavior。Rescorla-Wagner 用 current reward prediction error 学 cue value；TD 将 error 延伸到 future value，dopamine 的 cue transfer/omission pattern 与 RPE 形式对应，但 dopamine 也可能混合 salience/movement signals。"
@@ -666,8 +666,8 @@
     "【例题】题目：early unexpected reward、 learned cue+expected reward、 omitted reward。",
     "Worked solution. early：reward 时 positive transient；learned：transient 转到 cue，reward 时近零；omission：cue positive、expected reward time negative dip。 Check. 这是 canonical RPE resemblance，不排除 dopamine 同时编码 salience/movement。",
     "7.2 TD 数值",
-    "【拓展例题】题目：R=0, γ=0.9, V_t=4, V_{t+1}=6。",
-    "Worked solution. δ=0+0.9×6−4=1.4，当前 prediction 低，应增加 active features' weights。 Check. next value 需 discount；符号决定 potentiation/depression 方向。"
+    "【拓展例题】题目：\\(R=0\\), \\(\\gamma =0.9\\), \\(V_{t}=4\\), \\(V_{t+1}=6\\)。",
+    "Worked solution. \\(\\delta =0+0.9\\times 6-4=1.4\\)，当前 prediction 低，应增加 active features' weights。 Check. next value 需 discount；符号决定 potentiation/depression 方向。"
   ],
   "formulas": [
     {
@@ -855,7 +855,7 @@
     "matching 当作无条件理性最优 law。",
     "blocking 解释成 S2 没有和 reward 同时出现。",
     "把 RPE、value 与 salience 混为一谈。",
-    "TD error 中漏掉 γ 或 next value。",
+    "TD error 中漏掉 \\(\\gamma \\) 或 next value。",
     "把 dopamine 视为所有 reward learning 的唯一第三因子。",
     "提前把本课简化 Q 概念当作完整 Q-learning algorithm。",
     "Lecture 24 是 biological/reward-learning bridge，Lecture 25 才系统化 MDP/RL。不要提前让 Bellman/Q-learning 淹没本课的 plasticity 与 dopamine 逻辑。"
@@ -1032,7 +1032,7 @@
         "b": "该选项回答的是“matching law 的 ratio？”。",
         "c": "这是“奖励学习（reward learning）”的定义。"
       },
-      "explanation": "两个 chosen options 的 expected reward rate 相等。 若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 qA≈RA/CA、qB≈RB/CB。"
+      "explanation": "两个 chosen options 的 expected reward rate 相等。 若每侧 obtained reward rate 可近似为总 rewards 除以 choice counts，则 \\(qA\\approx RA/CA\\)、\\(qB\\approx RB/CB\\)。"
     },
     {
       "id": "L24-Q04",
@@ -1109,7 +1109,7 @@
         },
         {
           "id": "c",
-          "text": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。"
+          "text": "已有 cue 使 \\(V\\approx R\\)，新 cue 出现时 prediction error≈0。"
         },
         {
           "id": "d",
@@ -1122,7 +1122,7 @@
         "c": "该选项回答的是“blocking 为什么发生？”。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "R−V。 squared error L=1/2(R-V)^2 的 negative gradient 给 Δw=η(R-V)x。"
+      "explanation": "R−V。 squared error \\(L=1/2(R-V)^2\\) 的 negative gradient 给 \\(\\Delta w=\\eta (R-V)x\\)。"
     },
     {
       "id": "L24-Q06",
@@ -1154,7 +1154,7 @@
         },
         {
           "id": "c",
-          "text": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。"
+          "text": "已有 cue 使 \\(V\\approx R\\)，新 cue 出现时 prediction error≈0。"
         },
         {
           "id": "d",
@@ -1167,7 +1167,7 @@
         "b": "这是“价值（value）”的定义。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。 三幅时间图共同约束\"prediction error\"而非单纯reward response。"
+      "explanation": "已有 cue 使 \\(V\\approx R\\)，新 cue 出现时 prediction error≈0。 三幅时间图共同约束\"prediction error\"而非单纯reward response。"
     },
     {
       "id": "L24-Q07",
@@ -1187,7 +1187,7 @@
       "difficulty": 3,
       "type": "concept",
       "cognitiveLevel": "apply",
-      "stem": "第 24 讲：discounted return 中 γ→0 表示什么？",
+      "stem": "第 24 讲：discounted return 中 \\(\\gamma \\to 0\\) 表示什么？",
       "choices": [
         {
           "id": "a",
@@ -1199,7 +1199,7 @@
         },
         {
           "id": "c",
-          "text": "从 delayed rewards 推导 discounted return、value function 和 TD errordelta=RV+gamma V_next。"
+          "text": "从 delayed rewards 推导 discounted return、value function 和 TD errordelta=RV+gamma \\(V_{\\mathrm{next}}\\)。"
         },
         {
           "id": "d",
@@ -1212,7 +1212,7 @@
         "b": "这是“价值（value）”的定义。",
         "c": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 6 页。"
       },
-      "explanation": "几乎只重视 immediate reward。 learning前reward unexpected：reward时Rt+1为正，而先前V低，δ产生positive transient。"
+      "explanation": "几乎只重视 immediate reward。 learning前reward unexpected：reward时Rt+1为正，而先前V低，\\(\\delta\\)产生positive transient。"
     },
     {
       "id": "L24-Q08",
@@ -1236,7 +1236,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "δ=R_{t+1}+γV_{t+1}−V_t。"
+          "text": "\\(\\delta =R_{t+1}+\\gamma V_{t+1}-V_{t}\\)。"
         },
         {
           "id": "b",
@@ -1244,7 +1244,7 @@
         },
         {
           "id": "c",
-          "text": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。"
+          "text": "已有 cue 使 \\(V\\approx R\\)，新 cue 出现时 prediction error≈0。"
         },
         {
           "id": "d",
@@ -1257,7 +1257,7 @@
         "c": "该选项回答的是“blocking 为什么发生？”。",
         "d": "这是“Rescorla-Wagner 规则（Rescorla-Wagner rule）”的定义。"
       },
-      "explanation": "δ=R_{t+1}+γV_{t+1}−V_t。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
+      "explanation": "\\(\\delta =R_{t+1}+\\gamma V_{t+1}-V_{t}\\)。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
     },
     {
       "id": "L24-Q09",
@@ -1330,7 +1330,7 @@
         },
         {
           "id": "b",
-          "text": "已有 cue 使 V≈R，新 cue 出现时 prediction error≈0。"
+          "text": "已有 cue 使 \\(V\\approx R\\)，新 cue 出现时 prediction error≈0。"
         },
         {
           "id": "c",
@@ -1345,7 +1345,7 @@
       "wrongChoiceExplanations": {
         "a": "这是“reward-baseline three-factor update”的适用条件。",
         "b": "该选项回答的是“blocking 为什么发生？”。",
-        "d": "该选项回答的是“discounted return 中 γ→0 表示什么？”。"
+        "d": "该选项回答的是“discounted return 中 \\(\\gamma \\to 0\\) 表示什么？”。"
       },
       "explanation": "预期 reward 应出现但未出现的时刻。 eligibility trace 可跨过 action 到 delayed reward 的时间差。"
     },
@@ -1731,28 +1731,28 @@
       "choices": [
         {
           "id": "a",
-          "text": "因此，解释 temporal features/state representation、Q value 与 greedy action selection。"
+          "text": "用 foraging 示例解释 stimulus/action/reward association 与 three-factor plasticity；明确 dopamine 是 canonical candidate third factor 而非所有 reward learning 的唯一机制。"
         },
         {
           "id": "b",
-          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
+          "text": "因此，解释 temporal features/state representation、Q value 与 greedy action selection。"
         },
         {
           "id": "c",
-          "text": "重绘 dopamine RPE 的 early reward、cue transfer、omitted reward 三种模式，并区分 RPE、value 和 salience alternative。"
+          "text": "从 linear value prediction 和 squared prediction error 推导 Rescorla-Wagner； 用 blocking 解释 zero prediction error。"
         },
         {
           "id": "d",
-          "text": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 δ；学会 cue-reward 关系后，正 δ 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 δ。"
+          "text": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 \\(\\delta\\)；学会 cue-reward 关系后，正 \\(\\delta\\) 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 \\(\\delta\\)。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 4 页。",
+        "a": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 1 页。",
         "b": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 4 页。",
-        "c": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 1 页。"
+        "c": "这条推理对应 Lecture24-LearningFromRewards.pdf 第 4 页。"
       },
-      "explanation": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 δ；学会 cue-reward 关系后，正 δ 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 δ。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
+      "explanation": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 \\(\\delta\\)；学会 cue-reward 关系后，正 \\(\\delta\\) 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 \\(\\delta\\)。 dip的timing要求temporal representation足以预期reward何时来；只有整trial一个state的model无法精确放置negative error。"
     },
     {
       "id": "L24-Q20",
@@ -1814,9 +1814,9 @@
         "延迟 reward 下的 eligibility"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 24 讲：完成\"action 时 e0=1，之后无新 coactivity，τe=2 s；1 s 后得到 M=0.6，η=0.1。求瞬时 update 幅度 ηMe。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 24 讲：完成\"action 时 \\(e_{0}=1\\)，之后无新 coactivity，\\(\\tau e=2 \\mathrm{s}\\)；1 s 后得到 \\(M=0.6\\)，\\(\\eta =0.1\\)。求瞬时 update 幅度 \\(\\eta Me\\)。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -1841,7 +1841,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "该 reward 对 connection 的 update 约 +0.0364。 计算路径：trace 衰减为 e=e^{-1/2}≈0.607。 乘 third factor 得 Me≈0.364。 再乘 η，update 幅度约 0.0364。"
+      "explanation": "该 reward 对 connection 的 update 约 +0.0364。 计算路径：trace 衰减为 \\(e=e^{-1/2}\\approx 0.607\\)。 乘 third factor 得 \\(Me\\approx 0.364\\)。 再乘 \\(\\eta\\)，update 幅度约 0.0364。"
     },
     {
       "id": "L24-Q22",
@@ -1865,7 +1865,7 @@
       "choices": [
         {
           "id": "a",
-          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "text": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         {
           "id": "b",
@@ -1886,7 +1886,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。 这个检查对应题设\"action 时 e0=1，之后无新 coactivity，τe=2 s；1 s 后得到 M=0.6，η=0.1。求瞬时 update 幅度 ηMe。\"中的单位、方向或极限条件。"
+      "explanation": "若延迟为 0，update 应为 0.06；延迟后较小符合 trace decay。 这个检查对应题设\"action 时 \\(e_{0}=1\\)，之后无新 coactivity，\\(\\tau e=2 \\mathrm{s}\\)；1 s 后得到 \\(M=0.6\\)，\\(\\eta =0.1\\)。求瞬时 update 幅度 \\(\\eta Me\\)。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L24-Q23",
@@ -1948,9 +1948,9 @@
         "计算四 trial covariance update"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 24 讲：完成\"四 trials 的 R=[1,0,1,0]，e=[2,1,0,1]，b=0.5，η=0.1。求平均 update。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 24 讲：完成\"四 trials 的 \\(R=[1,0,1,0]\\)，\\(e=[2,1,0,1]\\)，\\(b=0.5\\)，\\(\\eta =0.1\\)。求平均 update。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -1975,7 +1975,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "平均 update 为 0。 计算路径：逐 trial (R-b)e 为 1、-0.5、0、-0.5。 四项平均为 0。 乘 η 后平均 Δw 为 0，尽管个别 trials 有正负更新。"
+      "explanation": "平均 update 为 0。 计算路径：逐 trial (R-b)e 为 1、-0.5、0、-0.5。 四项平均为 0。 乘 \\(\\eta\\) 后平均 \\(\\Delta w\\) 为 0，尽管个别 trials 有正负更新。"
     },
     {
       "id": "L24-Q25",
@@ -2003,7 +2003,7 @@
         },
         {
           "id": "b",
-          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "text": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         {
           "id": "c",
@@ -2020,7 +2020,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。 这个检查对应题设\"四 trials 的 R=[1,0,1,0]，e=[2,1,0,1]，b=0.5，η=0.1。求平均 update。\"中的单位、方向或极限条件。"
+      "explanation": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。 这个检查对应题设\"四 trials 的 \\(R=[1,0,1,0]\\)，\\(e=[2,1,0,1]\\)，\\(b=0.5\\)，\\(\\eta =0.1\\)。求平均 update。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L24-Q26",
@@ -2064,7 +2064,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "d": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。 fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 Y=Σ_iW_iX_i，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
+      "explanation": "ratio可由局部prediction-error更新与stochastic choice在长期自动形成；behavioral等式不唯一标识内部算法。 fly mushroom-body model 可把 odor features、action channels、dopaminergic outcome 与 stochastic choice 连接。原始第 3 页采用 \\(Y=\\sum _iW_{i}X_{i}\\)，并令 approach probability 随 Y 增大而下降，所以其 reward-modulated rule 写成 ΔW_i=-ηX_i(R-⟨R⟩)：reward 高于 baseline 时降低 Y，反而提高 approach probability。这个负号来自 Y 的方向约定；若 postsynaptic variable 定义为 approach drive，同一 covariance logic 可写成正号。模型 reproduces matching 并不表示 fly 明确计算一个比值；局部 covariance updates 与 choice competition 可让 aggregate ratio 出现。"
     },
     {
       "id": "L24-Q27",
@@ -2109,7 +2109,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "条件回报相等且两种 ratios 都为 1.5，符合 matching。 计算路径：qA=30/60=0.5 reward/choice。 qB=20/40=0.5 reward/choice。 choice ratio 60/40=1.5，reward ratio 30/20=1.5。"
+      "explanation": "条件回报相等且两种 ratios 都为 1.5，符合 matching。 计算路径：\\(qA=30/60=0.5\\) reward/choice。 \\(qB=20/40=0.5\\) reward/choice。 choice ratio \\(60/40=1.5\\)，reward ratio \\(30/20=1.5\\)。"
     },
     {
       "id": "L24-Q28",
@@ -2141,7 +2141,7 @@
         },
         {
           "id": "c",
-          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "text": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         {
           "id": "d",
@@ -2216,9 +2216,9 @@
         "数值演示 blocking"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 24 讲：完成\"reward R=1。A-alone训练后wA=0.9，novel B 的wB=0；compound trial xA=xB=1、η=0.2。求两weights update。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 24 讲：完成\"reward \\(R=1\\)。A-alone训练后\\(wA=0.9\\)，novel B 的\\(wB=0\\)；compound trial \\(xA=xB=1\\)、\\(\\eta =0.2\\)。求两weights update。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2243,7 +2243,7 @@
         "b": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "wA变0.92，wB变0.02，显示强但非完全blocking。 计算路径：total V=0.9+0=0.9。 error R-V=0.1。 A与B均active，所以各更新0.2×0.1=0.02；B只获很小增量。"
+      "explanation": "wA变0.92，wB变0.02，显示强但非完全blocking。 计算路径：total \\(V=0.9+0=0.9\\)。 error \\(R-V=0.1\\)。 A与B均active，所以各更新\\(0.2\\times 0.1=0.02\\)；B只获很小增量。"
     },
     {
       "id": "L24-Q31",
@@ -2271,7 +2271,7 @@
         },
         {
           "id": "b",
-          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "text": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         {
           "id": "c",
@@ -2288,7 +2288,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "若wA恰为1，error为0，两weights都不变。 这个检查对应题设\"reward R=1。A-alone训练后wA=0.9，novel B 的wB=0；compound trial xA=xB=1、η=0.2。求两weights update。\"中的单位、方向或极限条件。"
+      "explanation": "若wA恰为1，error为0，两weights都不变。 这个检查对应题设\"reward \\(R=1\\)。A-alone训练后\\(wA=0.9\\)，novel B 的\\(wB=0\\)；compound trial \\(xA=xB=1\\)、\\(\\eta =0.2\\)。求两weights update。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L24-Q32",
@@ -2350,9 +2350,9 @@
         "从两个Q值作softmax choice"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 24 讲：完成\"某state中QA=2、QB=1，inverse temperature β=ln3。求 P(A)=exp(βQA)/[exp(βQA)+exp(βQB)]。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 24 讲：完成\"某state中\\(QA=2\\)、\\(QB=1\\)，inverse temperature \\(\\beta =\\ln 3\\)。求 \\(P(A)=\\exp(\\beta QA)/[\\exp(\\beta QA)+\\exp(\\beta QB)]\\)。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
@@ -2377,7 +2377,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "A的选择概率为0.75。 计算路径：提取共同因子exp(βQB)，P(A)=exp(β)/(exp(β)+1)。 β=ln3，所以exp(β)=3。 P(A)=3/(3+1)=0.75，B为0.25。"
+      "explanation": "A的选择概率为0.75。 计算路径：提取共同因子\\(\\exp(\\beta QB)\\)，\\(P(A)=\\exp(\\beta )/(\\exp(\\beta )+1)\\)。 \\(\\beta =\\ln 3\\)，所以\\(\\exp(\\beta )=3\\)。 \\(P(A)=3/(3+1)=0.75\\)，B为0.25。"
     },
     {
       "id": "L24-Q34",
@@ -2405,11 +2405,11 @@
         },
         {
           "id": "b",
-          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "text": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         {
           "id": "c",
-          "text": "两概率和为1；若QA=QB则应各0.5。"
+          "text": "两概率和为1；若\\(QA=QB\\)则应各0.5。"
         },
         {
           "id": "d",
@@ -2422,7 +2422,7 @@
         "b": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "两概率和为1；若QA=QB则应各0.5。 这个检查对应题设\"某state中QA=2、QB=1，inverse temperature β=ln3。求 P(A)=exp(βQA)/[exp(βQA)+exp(βQB)]。\"中的单位、方向或极限条件。"
+      "explanation": "两概率和为1；若\\(QA=QB\\)则应各0.5。 这个检查对应题设\"某state中\\(QA=2\\)、\\(QB=1\\)，inverse temperature \\(\\beta =\\ln 3\\)。求 \\(P(A)=\\exp(\\beta QA)/[\\exp(\\beta QA)+\\exp(\\beta QB)]\\)。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L24-Q35",
@@ -2466,7 +2466,7 @@
         "b": "该答案解决的是本讲另一个教学单元的问题。",
         "c": "该答案解决的是本讲另一个教学单元的问题。"
       },
-      "explanation": "它是低于baseline的负信号，发生在预期reward时刻，纯非负reward detector无法自然产生该定时负响应。 连接plasticity时，dopamine-like δ作为third factor作用于仍有eligibility的synapses；连接choice时，learnedQ改变policy。这两个环节不同：dopamine perturbation可同时影响learning与performance。只在training后测choice不能定位它改变的是update还是momentary vigor。"
+      "explanation": "它是低于baseline的负信号，发生在预期reward时刻，纯非负reward detector无法自然产生该定时负响应。 连接plasticity时，dopamine-like \\(\\delta\\)作为third factor作用于仍有eligibility的synapses；连接choice时，learnedQ改变policy。这两个环节不同：dopamine perturbation可同时影响learning与performance。只在training后测choice不能定位它改变的是update还是momentary vigor。"
     },
     {
       "id": "L24-Q36",
@@ -2484,13 +2484,13 @@
         "计算一次omission error"
       ],
       "difficulty": 3,
-      "type": "calculation",
+      "type": "debug",
       "cognitiveLevel": "apply",
-      "stem": "第 24 讲：完成\"reward deadline前Vcurrent=0.8，deadline后Vnext=0，R=0，γ=0.95。求δ。\"中的计算或推理后，哪项结果成立？",
+      "stem": "第 24 讲：完成\"reward deadline前\\(V_{\\mathrm{current}}=0.8\\)，deadline后\\(V_{\\mathrm{next}}=0\\)，\\(R=0\\)，\\(\\gamma =0.95\\)。求\\(\\delta\\)。\"中的计算或推理后，哪项结果成立？",
       "choices": [
         {
           "id": "a",
-          "text": "δ=-0.8 value units。"
+          "text": "\\(\\delta =-0.8\\) value units。"
         },
         {
           "id": "b",
@@ -2511,7 +2511,7 @@
         "c": "该结果来自本讲另一个例题，使用了不同的条件或参数。",
         "d": "该结果来自本讲另一个例题，使用了不同的条件或参数。"
       },
-      "explanation": "δ=-0.8 value units。 计算路径：代入δ=0+0.95×0-0.8。 得到δ=-0.8。 负号表示outcome差于prediction，而不是得到负的物理reward。"
+      "explanation": "\\(\\delta =-0.8\\) value units。 计算路径：代入\\(\\delta =0+0.95\\times 0-0.8\\)。 得到\\(\\delta =-0.8\\)。 负号表示outcome差于prediction，而不是得到负的物理reward。"
     },
     {
       "id": "L24-Q37",
@@ -2531,7 +2531,7 @@
       "difficulty": 5,
       "type": "assumption",
       "cognitiveLevel": "evaluate",
-      "stem": "第 24 讲：得到\"δ=-0.8 value units。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
+      "stem": "第 24 讲：得到\"\\(\\delta =-0.8\\) value units。\"后，哪项检查最能判断这个结果是否与题设和模型边界一致？",
       "choices": [
         {
           "id": "a",
@@ -2539,11 +2539,11 @@
         },
         {
           "id": "b",
-          "text": "若reward如期提供R=0.8且next value为0，则δ=0，符合已经预测。"
+          "text": "若reward如期提供\\(R=0.8\\)且next value为0，则\\(\\delta =0\\)，符合已经预测。"
         },
         {
           "id": "c",
-          "text": "E[R]=0.5 与给定 baseline一致；直接算 E[Re]=0.5、E[R]E[e]=0.5，也得 covariance零。"
+          "text": "\\(E[R]=0.5\\) 与给定 baseline一致；直接算 \\(E[Re]=0.5\\)、\\(E[R]E[e]=0.5\\)，也得 covariance零。"
         },
         {
           "id": "d",
@@ -2556,7 +2556,7 @@
         "c": "这项检查针对本讲另一个例题，不能检验题干中的结果。",
         "d": "这项检查针对本讲另一个例题，不能检验题干中的结果。"
       },
-      "explanation": "若reward如期提供R=0.8且next value为0，则δ=0，符合已经预测。 这个检查对应题设\"reward deadline前Vcurrent=0.8，deadline后Vnext=0，R=0，γ=0.95。求δ。\"中的单位、方向或极限条件。"
+      "explanation": "若reward如期提供\\(R=0.8\\)且next value为0，则\\(\\delta =0\\)，符合已经预测。 这个检查对应题设\"reward deadline前\\(V_{\\mathrm{current}}=0.8\\)，deadline后\\(V_{\\mathrm{next}}=0\\)，\\(R=0\\)，\\(\\gamma =0.95\\)。求\\(\\delta\\)。\"中的单位、方向或极限条件。"
     },
     {
       "id": "L24-Q38",
@@ -2871,7 +2871,7 @@
         "c": "“奖励预测误差（reward-prediction error, RPE）”指：实际或更新 target 与 predicted value 的差。",
         "d": "“Q值（Q value）”指：state-action conditioned expected return。"
       },
-      "explanation": "阻断（blocking）：已有 predictor 使新 cue 因零 error 而不学习。 active cue且R高于prediction时weight上升，R低于prediction时下降；当V=R时prediction error为零，学习停止。"
+      "explanation": "阻断（blocking）：已有 predictor 使新 cue 因零 error 而不学习。 active cue且R高于prediction时weight上升，R低于prediction时下降；当\\(V=R\\)时prediction error为零，学习停止。"
     },
     {
       "id": "L24-Q45",
@@ -2961,7 +2961,7 @@
         "b": "“奖励学习（reward learning）”指：由 outcomes 调整 stimulus/action associations。",
         "d": "“资格迹（eligibility trace）”指：标记近期 pre/post/action activity 可被后续 reward 修改的变量。"
       },
-      "explanation": "奖励预测误差（reward-prediction error, RPE）：实际或更新 target 与 predicted value 的差。 若predicted reward在预期时刻omitted，Rt+1=0且next value坍塌，δ在该时刻为负，形成dip。"
+      "explanation": "奖励预测误差（reward-prediction error, RPE）：实际或更新 target 与 predicted value 的差。 若predicted reward在预期时刻omitted，\\(Rt+1=0\\)且next value坍塌，\\(\\delta\\)在该时刻为负，形成dip。"
     },
     {
       "id": "L24-Q47",
@@ -3138,7 +3138,7 @@
         "b": "这是“covariance learning”的条件，不是题干公式的条件。",
         "d": "这是“linear value predictor”的条件，不是题干公式的条件。"
       },
-      "explanation": "matching law 的适用条件：specific foraging assumptions matching law 的常见形式是 CA/CB≈RA/RB，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。"
+      "explanation": "matching law 的适用条件：specific foraging assumptions matching law 的常见形式是 \\(CA/CB\\approx RA/RB\\)，其中 C 表示一段时间内 choices 数，R 表示 obtained rewards 数。"
     },
     {
       "id": "L24-Q51",
@@ -3182,7 +3182,7 @@
         "b": "这是“covariance learning”的条件，不是题干公式的条件。",
         "c": "这是“matching law”的条件，不是题干公式的条件。"
       },
-      "explanation": "linear value predictor 的适用条件：features x 用 features x 线性预测 value V=w^T x，目标 reward为R。"
+      "explanation": "linear value predictor 的适用条件：features x 用 features x 线性预测 value \\(V=w^\\mathrm{T} x\\)，目标 reward为R。"
     },
     {
       "id": "L24-Q52",
@@ -3226,7 +3226,7 @@
         "c": "这是“covariance learning”的条件，不是题干公式的条件。",
         "d": "这是“matching law”的条件，不是题干公式的条件。"
       },
-      "explanation": "Rescorla-Wagner update 的适用条件：immediate/represented reward 设某 choice 的 eligibility 为 e，update Δw=η(R-b)e。"
+      "explanation": "Rescorla-Wagner update 的适用条件：immediate/represented reward 设某 choice 的 eligibility 为 e，update \\(\\Delta w=\\eta (R-b)e\\)。"
     },
     {
       "id": "L24-Q53",
@@ -3314,7 +3314,7 @@
         "b": "这是“covariance learning”的条件，不是题干公式的条件。",
         "d": "这是“matching law”的条件，不是题干公式的条件。"
       },
-      "explanation": "state-action value 的适用条件：policy/future behavior specified state value V(s)平均某policy下从state出发的future return；action value Q(s,a)还指定first action。"
+      "explanation": "state-action value 的适用条件：policy/future behavior specified state value \\(V(s)\\)平均某policy下从state出发的future return；action value \\(Q(s,a)\\)还指定first action。"
     }
   ]
 }

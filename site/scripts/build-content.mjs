@@ -58,6 +58,9 @@ const compact = (value = '') => normalize(value)
   .replace(/\bflippedclassroom\b/g, 'flipped-classroom')
   .replace(/\bsourcepage\b/g, 'source-page')
   .replace(/\bMATLABclear\b/g, 'MATLAB clear')
+  .replace(/\bpopulationtau\b/g, 'population tau')
+  .replace(/\bconstanttau\b/g, 'constant tau')
+  .replace(/\btauis\b/g, 'tau is')
   .replace(/\bfigure,的/g, 'figure, 中的')
   .trim();
 
@@ -126,6 +129,8 @@ const cleanRiskBoundary = (value = '') => cleanTextbookParagraph(value)
 
 const MAX_CHOICE_LENGTH = 220;
 const BANNED_QUESTION_TEXT = /不检查单位、?\s*shape\s*或\s*conditioning|Course-specific risk boundary|适用条件\/约定：.*sanity check|undefined|本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪项推理最准确)|以下哪项属于本讲讨论的核心内容|根据原讲义.+第\s*\d+\s*页主要讨论什么|哪一项概括了该页主题|公式表中的.+解决什么问题|该结论忽略了题干中的第|该结论在任何参数和边界条件下都无条件成立|变量名称相似就足以推出结论|这是纯粹的记号约定，不会改变模型预测|该关系在任意参数和边界条件下都保持不变/i;
+const LATEX_LETTER_COMMAND = /\\(alpha|beta|gamma|delta|epsilon|varepsilon|zeta|eta|theta|vartheta|iota|kappa|lambda|mu|nu|xi|omicron|pi|varpi|rho|varrho|sigma|varsigma|tau|upsilon|phi|varphi|chi|psi|omega)(?=[^A-Za-z]|$)/g;
+const LATEX_WORD_COMMAND = /\\(argmax|argmin|max|min|sup|inf|lim|log|ln|exp|sin|cos|tan|sinh|cosh|tanh|det|dim|ker|rank|tr|diag|mod|gcd|pr)(?=[^A-Za-z]|$)/g;
 const cleanChoiceText = (value = '') => cleanTextbookParagraph(value)
   .replace(/^(?:UPDATE\s+|Notes\s+|Exercise\s+)?Page\s+\d+[：:]\s*/i, '')
   .replace(/^\d+\.\s+/, '')
@@ -134,6 +139,11 @@ const cleanChoiceText = (value = '') => cleanTextbookParagraph(value)
 const comparisonText = (value = '') => cleanChoiceText(value)
   .normalize('NFKC')
   .toLowerCase()
+  // Explicit LaTeX is authoring syntax, so it must not make a short rendered
+  // expression look artificially verbose to question-quality heuristics.
+  .replace(LATEX_LETTER_COMMAND, (_command, name) => name[0])
+  .replace(LATEX_WORD_COMMAND, '$1')
+  .replace(/\\[a-z]+/g, '')
   .replace(/[\p{P}\p{S}\s]+/gu, '');
 
 function levenshteinDistance(left, right) {
@@ -168,7 +178,17 @@ function areNearDuplicateChoices(left, right) {
 }
 
 function semanticTokens(value = '') {
-  const normalized = compact(value).toLowerCase();
+  const normalized = compact(value)
+    .toLowerCase()
+    // Marker syntax must not create new search/routing evidence. A translated
+    // `δ` becoming `\\delta` must still score like one scientific symbol, not
+    // like the English word "delta" appearing in the prose.
+    .replace(/\\\(([\s\S]*?)\\\)/g, (_marker, latex) => latex
+      .replace(/([a-z])_\{([a-z0-9]+)\}/g, '$1$2')
+      .replace(/([a-z])_([a-z0-9])/g, '$1$2')
+      .replace(LATEX_LETTER_COMMAND, '')
+      .replace(LATEX_WORD_COMMAND, '$1')
+      .replace(/\\[a-z]+/g, ''));
   // Two-character tokens matter in this course: dv, dt, rf, on/off and many
   // matrix/code symbols carry more signal than ordinary prose similarity.
   const latin = normalized.match(/[a-z][a-z0-9-]{1,}/g) ?? [];

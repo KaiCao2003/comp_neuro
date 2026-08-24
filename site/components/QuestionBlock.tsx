@@ -6,6 +6,7 @@ import { localizedHref, type Locale } from '@/lib/i18n';
 import { assetPath } from '@/lib/site';
 import { recordQuestionAttempt, recordQuestionExposure, seededShuffle } from '@/lib/study-state';
 import type { Question } from '@/lib/types';
+import { ScientificText } from './ScientificText';
 
 const questionTypeLabel: Record<Locale, Record<Question['type'], string>> = {
   zh: { concept: '概念', equation: '公式', calculation: '计算', figure: '图示', code: '代码', assumption: '假设', transfer: '迁移', comparison: '比较', debug: '调试', cross_lecture: '跨讲' },
@@ -60,13 +61,13 @@ export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = 
   return (
     <aside className="question-block" aria-labelledby={`${question.id}-stem`} ref={blockRef}>
       <p className="exercise-label">{locale === 'zh' ? '练习' : 'Practice'} · {questionTypeLabel[locale][question.type]} · {locale === 'zh' ? '难度' : 'Difficulty'} {question.difficulty}</p>
-      <p className="question-stem" id={`${question.id}-stem`}>{question.stem}</p>
+      <p className="question-stem" id={`${question.id}-stem`}><ScientificText text={question.stem} /></p>
       <fieldset disabled={submitted} ref={fieldsetRef}>
         <legend className="sr-only">{locale === 'zh' ? '选择一个答案' : 'Choose one answer'}</legend>
         {choices.map((choice) => (
           <label className="answer-choice" key={choice.id}>
             <input type="radio" name={question.id} value={choice.id} checked={selected === choice.id} onChange={() => setSelected(choice.id)} />
-            <span>{choice.text}</span>
+            <span><ScientificText text={choice.text} /></span>
           </label>
         ))}
       </fieldset>
@@ -74,19 +75,19 @@ export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = 
       {!submitted && wrongAttempts.length > 0 && (
         <div className="answer-feedback retry-feedback" role="status">
           <p className="answer-status">{locale === 'zh' ? '第一次答案不正确，再试一次' : 'That first answer is not correct. Try once more.'}</p>
-          <p>{question.wrongChoiceExplanations[wrongAttempts[0]]}</p>
+          <p><ScientificText text={question.wrongChoiceExplanations[wrongAttempts[0]]} /></p>
         </div>
       )}
       {submitted && (
         <div className="answer-feedback" role="status" tabIndex={-1} ref={feedbackRef}>
           <p className="answer-status">{correct ? (wrongAttempts.length ? (locale === 'zh' ? '第二次答对了' : 'Correct on the second attempt') : (locale === 'zh' ? '正确' : 'Correct')) : (locale === 'zh' ? '第二次仍不正确' : 'The second answer is still not correct')}</p>
-          <p><strong>{locale === 'zh' ? '正确答案：' : 'Correct answer: '}</strong>{question.choices.find((choice) => choice.id === question.correctChoiceId)?.text}</p>
-          <p>{question.explanation}</p>
+          <p><strong>{locale === 'zh' ? '正确答案：' : 'Correct answer: '}</strong><ScientificText text={question.choices.find((choice) => choice.id === question.correctChoiceId)?.text ?? ''} /></p>
+          <p><ScientificText text={question.explanation} /></p>
           <details>
             <summary>{locale === 'zh' ? '其他选项为什么不对' : 'Why the other options are incorrect'}</summary>
             <ul>
               {choices.filter((choice) => choice.id !== question.correctChoiceId).map((choice) => (
-                <li key={choice.id}><span>{choice.text}</span><br />{question.wrongChoiceExplanations[choice.id]}</li>
+                <li key={choice.id}><span><ScientificText text={choice.text} /></span><br /><ScientificText text={question.wrongChoiceExplanations[choice.id]} /></li>
               ))}
             </ul>
           </details>
@@ -94,7 +95,7 @@ export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = 
         </div>
       )}
       <div className="print-answer-key">
-        <strong>{locale === 'zh' ? '答案：' : 'Answer: '}</strong> {question.choices.find((choice) => choice.id === question.correctChoiceId)?.text}. {question.explanation}
+        <strong>{locale === 'zh' ? '答案：' : 'Answer: '}</strong> <ScientificText text={question.choices.find((choice) => choice.id === question.correctChoiceId)?.text ?? ''} />. <ScientificText text={question.explanation} />
       </div>
     </aside>
   );
