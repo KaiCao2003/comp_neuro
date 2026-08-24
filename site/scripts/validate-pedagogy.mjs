@@ -33,7 +33,7 @@ for (const edition of editions) {
     const lecture = readJson(lecturePath);
     const prefix = `${edition.label}:L${summary.slug}`;
     const modules = lecture.studyGuide?.modules ?? [];
-    const moduleIds = new Set(modules.map((module) => module.id));
+    const moduleIds = new Set(modules.map((studyModule) => studyModule.id));
     const referencedPages = new Set();
 
     requireGate((lecture.studyGuide?.objectives ?? []).length >= 3, `${prefix}: fewer than three measurable objectives`);
@@ -48,29 +48,29 @@ for (const edition of editions) {
       requireGate(normalize(diagnostic.prompt) !== normalize(diagnostic.answer), `${prefix}:${diagnostic.id}: prompt leaks the answer`);
     }
 
-    for (const module of modules) {
-      const id = `${prefix}:${module.id}`;
+    for (const studyModule of modules) {
+      const id = `${prefix}:${studyModule.id}`;
       moduleCount += 1;
-      requireGate((module.sourceRefs ?? []).length >= 1, `${id}: no source anchor`);
-      requireGate(String(module.guidingQuestion ?? '').length >= 18, `${id}: guiding question is too short`);
-      requireGate((module.paragraphs ?? []).length >= 4, `${id}: fewer than four explanatory paragraphs`);
-      requireGate((module.paragraphs ?? []).join('').length >= 500, `${id}: explanation is not standalone-length`);
-      requireGate((module.keyPoints ?? []).length >= 3, `${id}: fewer than three explain-back targets`);
-      requireGate((module.workedExample?.steps ?? []).length >= 3, `${id}: worked example has fewer than three steps`);
-      requireGate(String(module.workedExample?.problem ?? '').trim().length >= 20, `${id}: worked-example problem is missing substantive content`);
-      requireGate(String(module.workedExample?.result ?? '').trim().length >= 4, `${id}: worked-example result is missing`);
-      requireGate(String(module.workedExample?.sanityCheck ?? '').trim().length >= 8, `${id}: worked example lacks a check`);
-      requireGate(String(module.selfCheck?.prompt ?? '').trim().length >= 8, `${id}: self-check prompt is missing`);
-      requireGate(String(module.selfCheck?.answer ?? '').length >= 35, `${id}: self-check answer is too short`);
-      requireGate(normalize(module.selfCheck?.prompt) !== normalize(module.selfCheck?.answer), `${id}: self-check prompt leaks the answer`);
-      requireGate((module.pitfalls ?? []).length >= 2, `${id}: fewer than two failure modes`);
+      requireGate((studyModule.sourceRefs ?? []).length >= 1, `${id}: no source anchor`);
+      requireGate(String(studyModule.guidingQuestion ?? '').length >= 18, `${id}: guiding question is too short`);
+      requireGate((studyModule.paragraphs ?? []).length >= 4, `${id}: fewer than four explanatory paragraphs`);
+      requireGate((studyModule.paragraphs ?? []).join('').length >= 500, `${id}: explanation is not standalone-length`);
+      requireGate((studyModule.keyPoints ?? []).length >= 3, `${id}: fewer than three explain-back targets`);
+      requireGate((studyModule.workedExample?.steps ?? []).length >= 3, `${id}: worked example has fewer than three steps`);
+      requireGate(String(studyModule.workedExample?.problem ?? '').trim().length >= 20, `${id}: worked-example problem is missing substantive content`);
+      requireGate(String(studyModule.workedExample?.result ?? '').trim().length >= 4, `${id}: worked-example result is missing`);
+      requireGate(String(studyModule.workedExample?.sanityCheck ?? '').trim().length >= 8, `${id}: worked example lacks a check`);
+      requireGate(String(studyModule.selfCheck?.prompt ?? '').trim().length >= 8, `${id}: self-check prompt is missing`);
+      requireGate(String(studyModule.selfCheck?.answer ?? '').length >= 35, `${id}: self-check answer is too short`);
+      requireGate(normalize(studyModule.selfCheck?.prompt) !== normalize(studyModule.selfCheck?.answer), `${id}: self-check prompt leaks the answer`);
+      requireGate((studyModule.pitfalls ?? []).length >= 2, `${id}: fewer than two failure modes`);
 
-      for (const ref of module.sourceRefs ?? []) referencedPages.add(`${ref.file}::${ref.page}`);
-      if (module.derivation) {
-        requireGate((module.derivation.steps ?? []).length >= 3, `${id}: derivation has fewer than three explicit steps`);
-        requireGate((module.derivation.symbolNotes ?? []).length >= 2, `${id}: derivation lacks symbol interpretation`);
-        requireGate(String(module.derivation.unitsCheck ?? '').trim().length >= 4, `${id}: derivation lacks a units check`);
-        requireGate(String(module.derivation.limitCheck ?? '').trim().length >= 8, `${id}: derivation lacks a limiting-case check`);
+      for (const ref of studyModule.sourceRefs ?? []) referencedPages.add(`${ref.file}::${ref.page}`);
+      if (studyModule.derivation) {
+        requireGate((studyModule.derivation.steps ?? []).length >= 3, `${id}: derivation has fewer than three explicit steps`);
+        requireGate((studyModule.derivation.symbolNotes ?? []).length >= 2, `${id}: derivation lacks symbol interpretation`);
+        requireGate(String(studyModule.derivation.unitsCheck ?? '').trim().length >= 4, `${id}: derivation lacks a units check`);
+        requireGate(String(studyModule.derivation.limitCheck ?? '').trim().length >= 8, `${id}: derivation lacks a limiting-case check`);
       }
     }
 
