@@ -1,7 +1,8 @@
 name: Validate and deploy GitHub Pages
 
 on:
-  push:
+  push: {}
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -11,8 +12,8 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -54,6 +55,7 @@ jobs:
           path: site/out
 
   deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
