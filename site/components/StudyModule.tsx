@@ -1,7 +1,7 @@
 'use client';
 
 import katex from 'katex';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import type { Locale } from '@/lib/i18n';
 import { assetPath } from '@/lib/site';
 import {
@@ -63,11 +63,11 @@ export function StudyModule({ module, locale = 'zh', figures = [], afterFigure }
   const [paper, setPaper] = useState({ prediction: false, example: false, selfCheck: false });
   const [hintLevel, setHintLevel] = useState(0);
 
-  const hints = useMemo(() => [
+  const hints = [
     t('先列出对象、变量、方向和可观测量，不要急着写结论。', 'First list the objects, variables, directions, and observables; do not rush to the conclusion.'),
     module.derivation?.symbolNotes[0] ?? t('把口头结论改写成“输入 → 变换或动力学 → 可观测输出”。', 'Rewrite the claim as “input → transformation or dynamics → observable output.”'),
     module.keyPoints[0],
-  ], [locale, module.derivation?.symbolNotes, module.keyPoints]);
+  ];
 
   useEffect(() => {
     const saved = getSocraticModuleProgress(module.id);
@@ -131,7 +131,7 @@ export function StudyModule({ module, locale = 'zh', figures = [], afterFigure }
       <p className="study-source-refs">{module.sourceRefs.map((ref, index) => <span key={`${ref.file}-${ref.page}`}>{index > 0 ? ' · ' : ''}<a href={`${assetPath(`/resources/original/${encodeURIComponent(ref.file)}`)}#page=${ref.page}`} target="_blank" rel="noreferrer">{ref.file}{t(`，第 ${ref.page} 页`, `, p. ${ref.page}`)}</a></span>)}</p>
     </header>
 
-    <noscript><style>{`.${styles.concealed}{display:block!important}`}</style><p className={styles.noScript}>{t('浏览器未运行 JavaScript，因此已显示全部教材；请仍先在纸上作答。', 'JavaScript is unavailable, so all lesson content is visible; still answer on paper before reading each solution.')}</p></noscript>
+    <noscript><style>{`.${styles.concealed},.${styles.solutionConcealed}{display:block!important}`}</style><p className={styles.noScript}>{t('浏览器未运行 JavaScript，因此已显示全部教材；请仍先在纸上作答。', 'JavaScript is unavailable, so all lesson content is visible; still answer on paper before reading each solution.')}</p></noscript>
 
     <section className={styles.entry} aria-labelledby={`${module.id}-entry`}>
       <div className={styles.entryHeader}><StepLead number={1} id={`${module.id}-entry`} title={t('先作答，再看讲解', 'Commit an answer before reading')} />{progress.opened && <button type="button" className={styles.resetButton} onClick={reset}>{t('重做本单元', 'Restart module')}</button>}</div>
