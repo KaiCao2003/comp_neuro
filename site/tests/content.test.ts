@@ -59,6 +59,96 @@ describe('course content', () => {
     }
   });
 
+  it('publishes line-aligned MATLAB audits instead of flattened OCR text', () => {
+    const fixture = {
+      '02': [
+        ['1–3', '清理工作区', 'Workspace cleanup', ['clear all;'], ['`clear all`', '`clearvars`'], []],
+        ['8–14', '定义对象', 'Object definitions', ['s = 2;', 'C = [3 4; 6 8];'], ['2\\times 1', '4\\times 1', '4\\times 2', '2\\times 2'], []],
+        ['17–18', '同形加法', 'Same-shape addition', ['u+v', 'B+C'], ['`u+v`', '`B+C`'], ['`u+v = [2; 6]`', '`B+C = [7 8; 14 17]`']],
+        ['21–22', '标量扩展', 'Scalar expansion', ['s+A', 's+A-A'], ['`s`', '`A`'], ['`s+A = [2 2.5; 12 3; 4 11; 4 9]`', '`2*ones(4,2)`']],
+        ['25', '点积', 'Dot product', ['dot(u,v)'], ['`dot(u,v)`', 'u^{\\mathrm{T}}v'], ['`dot(u,v) = 5`']],
+        ['28–29', '欧氏范数', 'Euclidean norm', ['norm(w)', 'sqrt(dot(w,w))'], ['`norm(w)`', '`sqrt(dot(w,w))`'], ['\\sqrt{30}\\approx 5.4772']],
+        ['32', '矩阵–向量乘法', 'Matrix–vector product', ['A*v'], ['A_{4\\times 2}v_{2\\times 1}', '4\\times 1'], ['`A*v = [2.5; 25; 49; 39]`']],
+        ['35', '矩阵乘法', 'Matrix product', ['B*C'], ['`B*C`'], ['`B*C = [36 48; 78 104]`']],
+        ['38', '单位矩阵', 'Identity matrix', ['eye(3)'], ['`eye(3)`', '3\\times 3'], ['`[1 0 0; 0 1 0; 0 0 1]`']],
+        ['41', '转置', 'Transpose', ["A'"], ["`'`"], ["`A' = [0 10 2 2; 0.5 1 9 7]`", '2\\times 4']],
+        ['44–45', '逆矩阵', 'Matrix inverse', ['inv(B)', 'inv(C)'], ['\\det(B)=4', '`C`'], ['`inv(B) = [2.25 -1; -2 1]`', '`inv(C)`']],
+        ['48–50', '行列式', 'Determinants', ['det(s)', 'det(B)', 'det(C)'], ['1\\times 1', '`det`'], ['`det(s) = 2`', '`det(B) = 4`', '`det(C) = 0`']],
+        ['53–54', '逐元素乘法', 'Elementwise product', ['u.*v', 'B.*C'], ['`.*`', '`*`'], ['`u.*v = [0; 5]`', '`B.*C = [12 16; 48 72]`']],
+      ],
+      '03': [
+        ['1–3', '清理工作区', 'Workspace cleanup', ['clear all;'], ['`clear all`', '`clearvars`'], []],
+        ['7–15', 'Part 1 时间网格与参数', 'Part 1 grid and parameters', ['dt = 0.001;', 'T = 0.250;', 'tau = 0.01;', 'omega = 220;', 't0 = 0.150;'], ['`dt=0.001 s`', '`T=0.250 s`', '`dt/tau=0.1`', '`omega=220 rad/s`', '`t0=0.150 s`'], ['`t0`', 'frequency']],
+        ['17–30', '分段输入与端点', 'Piecewise input and endpoint', ['I = NaN(num_t,1);', 't_values(t) < 0.250'], ['251\\times 1', '`<`'], ['`t=0.250 s`', '`I(251)`', '`NaN`']],
+        ['32–37', '显式 Euler', 'Forward Euler', ['x(t) = x(t-1)+dt/tau*(-x(t-1)+I(t-1));'], ['`x(k)=x(k-1)+(dt/tau)*(-x(k-1)+I(k-1))`', '1-dt/\\tau=0.9'], ['`x(251)`', '`I(250)`']],
+        ['39–44', 'Part 1 绘图', 'Part 1 plots', ['plot(t_values,I);', 'plot(t_values,x);'], ['`I(t)`', '`x(t)`'], ['`0.250 s`']],
+        ['48–61', 'Part 2 振子', 'Part 2 oscillator', ['dt = 0.0001;', 'x = NaN(num_t,2);', 'x(t,1)', 'x(t,2)'], ['`dt=0.0001 au`', '`T=10 au`', '100001\\times 2', '\\dot{x}_1=x_{2}', '\\dot{x}_2=-x_{1}'], ['x_{1}(t)=\\sin(t)', 'x_{2}(t)=\\cos(t)', 'Euler']],
+        ['63–69', '绘图与数值漂移', 'Plots and numerical drift', ['close all;', 'plot(t_values,x(:,1))', 'plot(t_values,x(:,2))'], ['`close all`', '1\\pm i h', '\\sqrt{1+h^2}>1'], ['`h=10^-4`', '1.0005', 'h\\to 0']],
+      ],
+    } as const;
+
+    for (const [slug, expectations] of Object.entries(fixture)) {
+      const zh = read(`lectures/${slug}.json`);
+      const en = read(`en/lectures/${slug}.json`);
+      expect(zh.specialSection, `zh lecture ${slug}`).toEqual([]);
+      expect(en.specialSection, `en lecture ${slug}`).toEqual([]);
+      expect(en.codeSources).toEqual(zh.codeSources);
+      expect(zh.codeAudit).toHaveLength(expectations.length);
+      expect(en.codeAudit).toHaveLength(expectations.length);
+      const sourceLines = zh.codeSources[0].text.replace(/(?:\r?\n)+$/, '').split(/\r?\n/);
+
+      expectations.forEach(([lines, zhRole, enRole, sourceTokens, explanationTokens, resultTokens], index) => {
+        const [start, end = start] = lines.split(/[–-]/).map(Number);
+        const sourceRange = sourceLines.slice(start - 1, end).join('\n');
+        for (const token of sourceTokens) expect(sourceRange, `${slug}:${lines} source`).toContain(token);
+        for (const [locale, row, role] of [['zh', zh.codeAudit[index], zhRole], ['en', en.codeAudit[index], enRole]] as const) {
+          expect(Object.keys(row).sort(), `${locale}:${slug}:${lines} fields`).toEqual(['explanation', 'lines', 'result', 'role']);
+          expect(row.lines, `${locale}:${slug}:${lines}`).toBe(lines);
+          expect(row.role, `${locale}:${slug}:${lines}`).toBe(role);
+          for (const token of explanationTokens) expect(row.explanation, `${locale}:${slug}:${lines} explanation`).toContain(token);
+          for (const token of resultTokens) expect(row.result, `${locale}:${slug}:${lines} result`).toContain(token);
+        }
+      });
+
+      for (let index = 1; index < expectations.length; index += 1) {
+        const previousEnd = Number(expectations[index - 1][0].split(/[–-]/).at(-1));
+        const currentStart = Number(expectations[index][0].split(/[–-]/)[0]);
+        expect(currentStart, `${slug} audit range ${index + 1}`).toBeGreaterThan(previousEnd);
+      }
+    }
+
+    const lecture02 = read('lectures/02.json');
+    const audit02 = lecture02.codeAudit.flatMap((row: { explanation: string; result: string }) => [row.explanation, row.result]).join(' ');
+    for (const absentExpression of ['sum(A)', 'u*v', "u*v'", 'B*u', 'A*B', 'B*A', 'A.*A', 'A*A']) expect(audit02).not.toContain(absentExpression);
+    expect(audit02).toContain('`A*v = [2.5; 25; 49; 39]`');
+    expect(audit02).toContain('`B.*C = [12 16; 48 72]`');
+
+    const audit03 = read('lectures/03.json').codeAudit.flatMap((row: { explanation: string; result: string }) => [row.explanation, row.result]).join(' ');
+    expect(audit03).toContain('`I(251)` 保持 `NaN`');
+    expect(audit03).toContain('`x(251)` 读取 `I(250)`');
+    expect(audit03).not.toContain('The state may input 250');
+    expect(read('lectures/02.json').codeAudit[0].result).toContain('不产生数学结果');
+    expect(read('en/lectures/02.json').codeAudit[0].result).toContain('no mathematical result');
+    expect(read('lectures/03.json').codeAudit[0].result).toContain('不属于模型方程');
+    expect(read('en/lectures/03.json').codeAudit[0].result).toContain('not part of the model equation');
+    expect(read('lectures/03.json').codeAudit[4].result).toContain('末点仍为有限值');
+    expect(read('en/lectures/03.json').codeAudit[4].result).toContain('final state sample remains finite');
+  });
+
+  it('indexes the authored MATLAB audit in both languages', () => {
+    const expectations = [
+      ['search-index.json', 'lecture-02', '2*ones(4,2)'],
+      ['en/search-index.json', 'en-lecture-02', '2*ones(4,2)'],
+      ['search-index.json', 'lecture-03', '1.0005'],
+      ['en/search-index.json', 'en-lecture-03', '1.0005'],
+    ] as const;
+    for (const [file, id, token] of expectations) {
+      const record = read(file).find((item: { id: string }) => item.id === id);
+      expect(record, id).toBeTruthy();
+      expect(record.text, id).toContain(token);
+    }
+  });
+
   it('publishes at least one source-aligned authored SVG figure per lecture', () => {
     expect(figures.length).toBeGreaterThanOrEqual(27);
     expect(new Set(figures.map((figure: { id: string }) => figure.id)).size).toBe(figures.length);

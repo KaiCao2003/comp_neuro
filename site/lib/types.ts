@@ -111,6 +111,13 @@ export type StudyGuide = {
   modules: StudyModule[];
 };
 
+export type CodeAuditRow = {
+  lines: string;
+  role: string;
+  explanation: string;
+  result: string;
+};
+
 export type Formula = {
   id: string;
   lecture: number;
@@ -179,6 +186,7 @@ export type Lecture = {
   studyGuide: StudyGuide;
   figures: FigureIndexEntry[];
   specialSection: string[];
+  codeAudit?: CodeAuditRow[];
   derivations: string[];
   synthesis: string[];
   workedExamples: string[];

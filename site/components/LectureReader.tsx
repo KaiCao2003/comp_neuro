@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { type MouseEvent, useEffect, useState } from 'react';
+import { type KeyboardEvent, type MouseEvent, useEffect, useState } from 'react';
 import { localizedHref, type Locale } from '@/lib/i18n';
 import { assetPath } from '@/lib/site';
 import { beginLectureSession, saveReadingLocation, seededShuffle, selectQuestionIds } from '@/lib/study-state';
@@ -13,6 +13,70 @@ import { StudyModule } from './StudyModule';
 
 function TextParagraphs({ items }: { items: string[] }) {
   return <>{items.map((item, index) => /^\d+\.\d+\s/.test(item) ? <h3 key={`${item}-${index}`}><ScientificText text={item} /></h3> : <p key={`${item}-${index}`}><ScientificText text={item} /></p>)}</>;
+}
+
+function SourceCodeListing({ source, locale }: { source: Lecture['codeSources'][number]; locale: Locale }) {
+  const lines = source.text.replace(/(?:\r?\n)+$/, '').split(/\r?\n/);
+  return (
+    <figure className="source-code">
+      <figcaption>{locale === 'zh' ? `MATLAB 原始代码 · ${source.file}` : `MATLAB source · ${source.file}`}</figcaption>
+      <pre><code>{lines.map((line, index) => (
+        <span className="source-code-line" key={`${source.file}-${index}`}>
+          <span aria-hidden="true" className="source-code-number">{index + 1}</span>
+          <span className="source-code-text">{line || ' '}</span>
+        </span>
+      ))}</code></pre>
+    </figure>
+  );
+}
+
+function scrollCodeAudit(event: KeyboardEvent<HTMLDivElement>) {
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  event.preventDefault();
+  event.currentTarget.scrollBy({
+    behavior: 'auto',
+    left: event.key === 'ArrowRight' ? 96 : -96,
+  });
+}
+
+function CodeAuditTable({ lecture, locale }: { lecture: Lecture; locale: Locale }) {
+  if (!lecture.codeAudit?.length) return null;
+  const tableId = `lecture-${lecture.slug}-code-audit`;
+  return (
+    <>
+      <p className="code-audit-scroll-hint" id={`${tableId}-hint`}>
+        {locale === 'zh'
+          ? '表格较宽时可横向滚动；键盘用户请先聚焦表格区域，再使用方向键。'
+          : 'When the table is wider than the page, focus this region and use the arrow keys to scroll horizontally.'}
+      </p>
+      <div
+        aria-describedby={`${tableId}-hint`}
+        aria-labelledby={`${tableId}-caption`}
+        className="table-scroll code-audit-scroll"
+        onKeyDown={scrollCodeAudit}
+        role="region"
+        tabIndex={0}
+      >
+        <table className="code-audit-table">
+          <caption className="sr-only" id={`${tableId}-caption`}>{locale === 'zh' ? 'MATLAB 代码逐行审计' : 'Line-aligned MATLAB code audit'}</caption>
+          <thead><tr>
+            <th scope="col">{locale === 'zh' ? '行号' : 'Lines'}</th>
+            <th scope="col">{locale === 'zh' ? '作用' : 'Role'}</th>
+            <th scope="col">{locale === 'zh' ? '准确说明' : 'Explanation'}</th>
+            <th scope="col">{locale === 'zh' ? '结果 / 注意' : 'Result / caution'}</th>
+          </tr></thead>
+          <tbody>{lecture.codeAudit.map((row) => (
+            <tr key={`${row.lines}-${row.role}`}>
+              <th scope="row">{row.lines}</th>
+              <td><ScientificText text={row.role} /></td>
+              <td><ScientificText text={row.explanation} /></td>
+              <td><ScientificText text={row.result} /></td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </div>
+    </>
+  );
 }
 
 function transitionTo(previous: StudyModuleData, current: StudyModuleData, locale: Locale) {
@@ -33,6 +97,11 @@ function closeMobileToc(event: MouseEvent<HTMLAnchorElement>) {
 export function LectureReader({ lecture, previous, next, crossLinks = [], locale = 'zh' }: { lecture: Lecture; previous?: LectureNavigation; next?: LectureNavigation; crossLinks?: CrossLink[]; locale?: Locale }) {
   const [sessionSeed, setSessionSeed] = useState(`lecture-${lecture.slug}`);
   const [selectedQuestions, setSelectedQuestions] = useState<Record<string, Question>>({});
+  const hasCodeAudit = Boolean(lecture.codeAudit?.length);
+  const hasSupplement = lecture.specialSection.length > 0 || lecture.codeSources.length > 0 || hasCodeAudit;
+  const supplementLabel = hasCodeAudit
+    ? (locale === 'zh' ? 'MATLAB 源码审计' : 'MATLAB source audit')
+    : (locale === 'zh' ? '补充讲解' : 'Further explanation');
 
   useEffect(() => {
     const { state, session } = beginLectureSession(lecture.lecture);
@@ -84,7 +153,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
       <aside className="lecture-toc" aria-label={locale === 'zh' ? '本讲目录' : 'Lecture contents'}>
         <p className="rail-title">{locale === 'zh' ? `第 ${lecture.lecture} 讲` : `Lecture ${lecture.lecture}`}</p>
         {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={module.id}><ScientificText text={module.title} /></a>)}
-        {lecture.specialSection.length > 0 && <a href={`#lecture-${lecture.slug}-supplement`}>{locale === 'zh' ? '补充讲解' : 'Further explanation'}</a>}
+        {hasSupplement && <a href={`#lecture-${lecture.slug}-supplement`}>{supplementLabel}</a>}
         <a href="#synthesis">{locale === 'zh' ? '串联' : 'Synthesis'}</a>
         {crossLinks.length > 0 && <a href="#cross-lecture">{locale === 'zh' ? '跨讲关联' : 'Cross-lecture links'}</a>}
         <a href="#formulas">{locale === 'zh' ? '公式' : 'Formulas'}</a>
@@ -97,6 +166,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
         <summary>{locale === 'zh' ? '本讲目录' : 'Lecture contents'}</summary>
         <nav aria-label={locale === 'zh' ? '本讲移动目录' : 'Mobile lecture contents'}>
           {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={`mobile-${module.id}`} onClick={closeMobileToc}><ScientificText text={module.title} /></a>)}
+          {hasSupplement && <a href={`#lecture-${lecture.slug}-supplement`} onClick={closeMobileToc}>{supplementLabel}</a>}
           <a href="#synthesis" onClick={closeMobileToc}>{locale === 'zh' ? '串联' : 'Synthesis'}</a>
           <a href="#formulas" onClick={closeMobileToc}>{locale === 'zh' ? '公式' : 'Formulas'}</a>
           <a href="#glossary" onClick={closeMobileToc}>{locale === 'zh' ? '术语' : 'Glossary'}</a>
@@ -131,11 +201,12 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
           ))}
         </div>
 
-        {lecture.specialSection.length > 0 && (
+        {hasSupplement && (
           <section className="chapter-section" id={`lecture-${lecture.slug}-supplement`}>
-            <h2>{locale === 'zh' ? '补充讲解' : 'Further explanation'}</h2>
+            <h2>{supplementLabel}</h2>
             <TextParagraphs items={lecture.specialSection} />
-            {(lecture.codeSources ?? []).map((source) => <figure className="source-code" key={source.file}><figcaption>{locale === 'zh' ? 'MATLAB 示例代码' : 'MATLAB example'}</figcaption><pre><code>{source.text}</code></pre></figure>)}
+            {lecture.codeSources.map((source) => <SourceCodeListing key={source.file} locale={locale} source={source} />)}
+            <CodeAuditTable lecture={lecture} locale={locale} />
           </section>
         )}
 

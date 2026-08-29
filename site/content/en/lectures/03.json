@@ -425,10 +425,50 @@
       ]
     }
   ],
-  "specialSection": [
-    "1 %% Clear workspace before starting work 2 3 clear all; 4 5 %% Part 1 6 7 \\(dt = 0.001\\); % Delta t in seconds 8 \\(T = 0.250\\); % Simulation duration in seconds 9 t_values = 0:dt:T; 10 num_t = length(t_values); 11 12 \\(\\tau = 0.01\\); % Time constant in seconds 13 \\(\\omega = 220\\); % Input oscillation frequency in radians per second 14 \\(t_{0} = 0.150\\); % Input oscillation frequency in seconds 15 16 % Define input pattern 17 I = NaN(num_t,1); 18 for \\(t = 1\\):num_t % There are more numerically efficient ways to do this, but this is fast enough for this problem, and I thought it would be a useful demonstration 19 if t_values(t) < 0.050 20 I(t) = 0; 21 elseif t_values(t) < 0.100 22 I(t) = 2; 23 elseif t_values(t) < 0.150 24 I(t) = 1; 25 elseif t_values(t) < 0.200 26 I(t) = cos(omega*(t_values(t)-t0)); 27 elseif t_values(t) < 0.250 28 I(t) = 0; 29 end 30 end 31 32 x = NaN(num_t,1); 33 \\(x_{0} = 0\\); 34 \\(x(1) = x_{0}\\); 35 for \\(t = 2\\):num_t 36 \\(x(t) = x(t-1)+dt/\\tau*(-x(t-1)+I(t-1))\\); 37 end 38 39 close all; 40 figure, 41 subplot(1,2,1) 42 plot(t_values,I); 43 subplot(1,2,2) 44 plot(t_values,x); 45 46 %% Part 2 47 48 \\(dt = 0.0001\\); % Delta t in au 49 \\(T = 10\\); % Simulation duration in au 50 51 t_values = 0:dt:T; 52 num_t = length(t_values); 53 54 x = NaN(num_t,2); 55 \\(x_{1,0} = 0\\); 56 \\(x_{2,0} = 1\\); 57 x(1,:) = \\([x_{1,0}, x_{2,0}]\\); 58 for \\(t = 2\\):num_t 59 \\(x(t,1) = x(t-1,1)+dt*(x(t-1,2))\\); 60 \\(x(t,2) = x(t-1,2)+dt*(-x(t-1,1))\\); 61 end 62 63 close all;",
-    "64 65 figure, 66 subplot(1,2,1) 67 plot(t_values,x(:,1)) 68 subplot(1,2,2) 69 plot(t_values,x(:,2))",
-    "Lines 1-3 — Reset: clear all is pedagogically harmless but heavier than clearvars; it does not change the model. Lines 7-15 — Time grid and parameters: t0 is a time shift or onset, not a frequency. The source comment conflicts with its use. Units are seconds. Lines 17-30 — Piecewise input: the strict condition < 0.250 leaves I(end)=NaN at \\(T=0\\). The state may input 250; use a final else or <=. It can remain finite because Euler uses \\(I(i-1)\\), but the input plot loses its endpoint. Lines 32-44 — Euler integration: \\(x(i)=x(i-1)+dt*(-x(i-1)+I(i-1))/\\tau\\) is explicit Euler evaluated from the previous state and right-hand side. Check \\(dt/\\tau\\) and units. Lines 48-61 — Second-order conversion: the harmonic oscillator is implemented as \\(x'=y\\) and \\(y'=-x\\) with two first-order updates. The state vector is conceptually \\(2\\times 1\\). Lines 63-69 — Numerical behavior: explicit Euler has update eigenvalues \\(1\\pm i\\) dt with modulus >1, so the orbit slowly spirals outward. This numerical instability is not biological energy input."
+  "specialSection": [],
+  "codeAudit": [
+    {
+      "lines": "1–3",
+      "role": "Workspace cleanup",
+      "explanation": "`clear all` removes workspace variables and unloads functions and persistent state. `clearvars` is usually sufficient for this self-contained script.",
+      "result": "The command is not part of the model equation and does not by itself make the environment reproducible."
+    },
+    {
+      "lines": "7–15",
+      "role": "Part 1 grid and parameters",
+      "explanation": "With `dt=0.001 s` and `T=0.250 s`, `t_values` has 251 samples; `tau=0.01 s`, so `dt/tau=0.1`; `omega=220 rad/s` is angular frequency; and `t0=0.150 s` is the cosine phase-reference time.",
+      "result": "`t0` also coincides with the start of the cosine segment. The source comment calls it a frequency, which conflicts with its units and use."
+    },
+    {
+      "lines": "17–30",
+      "role": "Piecewise input and endpoint",
+      "explanation": "`I` is a \\(251\\times 1\\) column vector whose segments are 0, 2, 1, a cosine, and 0. Every branch uses a strict `<` condition.",
+      "result": "The endpoint `t=0.250 s` matches no branch, so `I(251)` remains `NaN`; use a final `else` or explicitly include `t<=T`."
+    },
+    {
+      "lines": "32–37",
+      "role": "Forward Euler",
+      "explanation": "The code discretizes \\(\\tau dx/dt=-x+I(t)\\) as `x(k)=x(k-1)+(dt/tau)*(-x(k-1)+I(k-1))`. On a constant-input segment, the one-step deviation factor is \\(1-dt/\\tau=0.9\\).",
+      "result": "This update is stable and non-oscillatory here. The final `x(251)` reads `I(250)`, so it is not contaminated by `I(251)=NaN`."
+    },
+    {
+      "lines": "39–44",
+      "role": "Part 1 plots",
+      "explanation": "The two panels show `I(t)` and `x(t)`.",
+      "result": "The input curve is missing its final sample at `0.250 s`, while the final state sample remains finite."
+    },
+    {
+      "lines": "48–61",
+      "role": "Part 2 oscillator",
+      "explanation": "With `dt=0.0001 au` and `T=10 au`, there are 100001 time samples. `x` is stored as \\(100001\\times 2\\), with each row holding `[x1,x2]`. The updates implement \\(\\dot{x}_1=x_{2}\\) and \\(\\dot{x}_2=-x_{1}\\), hence \\(\\ddot{x}_1=-x_{1}\\).",
+      "result": "For initial state `[0,1]`, the exact solution is \\(x_{1}(t)=\\sin(t)\\) and \\(x_{2}(t)=\\cos(t)\\). Both assignments read only the previous row, so this is forward Euler."
+    },
+    {
+      "lines": "63–69",
+      "role": "Plots and numerical drift",
+      "explanation": "`close all` removes the Part 1 figure before separate panels plot `x1(t)` and `x2(t)`. The one-step eigenvalues are \\(1\\pm i h\\), with modulus \\(\\sqrt{1+h^2}>1\\).",
+      "result": "A phase-plane plot would spiral slowly outward because of numerical energy drift, not physical growth. With `h=10^-4` and `T=10`, the total radius increase is about 1.0005; at fixed duration, the error vanishes as \\(h\\to 0\\)."
+    }
   ],
   "derivations": [
     "6.1 separation of variables：指数增长",

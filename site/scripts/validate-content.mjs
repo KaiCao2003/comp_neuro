@@ -98,6 +98,34 @@ for (const lecture of course) {
   if (!Array.isArray(guide.prerequisiteBridge) || guide.prerequisiteBridge.length < 3 || guide.prerequisiteBridge.join('').length < 500) fail(`Lecture ${lecture.lecture} prerequisite bridge is too short.`);
   if ('diagnostic' in guide) fail(`Lecture ${lecture.lecture} still publishes diagnostic prompts.`);
   if (guide.modules.length < 3) fail(`Lecture ${lecture.lecture} needs at least three self-study modules.`);
+  const codeAudit = content.codeAudit ?? [];
+  if (content.codeSources.length > 0 && codeAudit.length === 0) fail(`Lecture ${lecture.lecture} has source code but no authored code audit.`);
+  if (content.codeSources.length === 0 && codeAudit.length > 0) fail(`Lecture ${lecture.lecture} has a code audit without source code.`);
+  if (codeAudit.length > 0) {
+    if (content.codeSources.length !== 1) fail(`Lecture ${lecture.lecture} needs one source file per line-aligned code audit.`);
+    if (content.specialSection.length > 0) fail(`Lecture ${lecture.lecture} still publishes OCR-derived source-audit paragraphs.`);
+    const sourceLineCount = content.codeSources[0].text.replace(/(?:\r?\n)+$/, '').split(/\r?\n/).length;
+    let previousEnd = 0;
+    let maximumLine = 0;
+    for (const [index, row] of codeAudit.entries()) {
+      if (!row || !['lines', 'role', 'explanation', 'result'].every((key) => typeof row[key] === 'string' && row[key].trim())) fail(`Lecture ${lecture.lecture} code-audit row ${index + 1} is incomplete.`);
+      const lineMatch = row.lines.match(/^(\d+)(?:[–-](\d+))?$/);
+      if (!lineMatch) fail(`Lecture ${lecture.lecture} code-audit row ${index + 1} has an invalid line range.`);
+      const start = Number(lineMatch[1]);
+      const end = Number(lineMatch[2] ?? lineMatch[1]);
+      if (start <= previousEnd || end < start || end > sourceLineCount) fail(`Lecture ${lecture.lecture} code-audit row ${index + 1} overlaps an earlier row, is out of order, or falls outside the source file.`);
+      previousEnd = end;
+      maximumLine = Math.max(maximumLine, end);
+    }
+    if (maximumLine !== sourceLineCount) fail(`Lecture ${lecture.lecture} code audit stops at line ${maximumLine}, but the source has ${sourceLineCount} lines.`);
+  }
+  if ((content.specialSection ?? []).some((item) => /^\s*1\s+%%[\s\S]+\bclear all\b/i.test(item))) fail(`Lecture ${lecture.lecture} contains a flattened source listing in prose.`);
+  if (lecture.lecture === 2) {
+    const auditText = codeAudit.flatMap((row) => [row.explanation, row.result]).join(' ');
+    for (const retiredExpression of ['sum(A)', 'u*v', "u*v'", 'B*u', 'A*B', 'B*A', 'A.*A', 'A*A']) {
+      if (auditText.includes(retiredExpression)) fail(`Lecture 2 code audit hallucinates an expression absent from the source: ${retiredExpression}`);
+    }
+  }
   const guideText = [
     ...guide.objectives,
     ...guide.prerequisiteBridge,
@@ -123,6 +151,7 @@ for (const lecture of course) {
     content.dependencyMap ?? '',
     guideText,
     ...(content.specialSection ?? []),
+    ...codeAudit.flatMap((row) => [row.role, row.explanation, row.result]),
     ...(content.synthesis ?? []),
     ...(content.commonTraps ?? []),
     ...content.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]),

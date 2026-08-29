@@ -447,9 +447,86 @@
       ]
     }
   ],
-  "specialSection": [
-    "1 %% Clear workspace before starting work 2 3 clear all; 4 5 %% Problem 1 6 7 % Bullet 1 \\(8 s = 2\\); 9 \\(u = [0; 1]\\); 10 \\(v = [2; 5]\\); 11 \\(w = [0; 1; 2; 5]\\); \\(12 A = [0 0.5; 10 1; 2 9; 2 7]\\); 13 \\(B = [4 4; 8 9]\\); 14 \\(C = [3 4; 6 8]\\); 15 16 % Well-defined mathematical objects 17 u+v 18 B+C 19 20 % Imprecise MATLAB notation 21 s+A 22 s+A-A 23 24 % Bullet 2 25 dot(u,v) 26 27 % Bullet 3 \\(28 \\operatorname{norm}(w)\\) 29 sqrt(dot(w,w)) 30 31 % Bullet 5 \\(32 \\mathrm{A}*v\\) 33 34 % Bullet 6 35 \\(B*C\\) 36 37 % Bullet 7 38 eye(3) 39 40 % Bullet 8 41 A' 42 43 % Bullet 10 \\(44 \\operatorname{inv}(B)\\) \\(45 \\operatorname{inv}(C)\\) 46 47 % BUllet 11 \\(48 \\det(s)\\) \\(49 \\det(B)\\) \\(50 \\det(C)\\) 51 52 % Bullet 12 53 u.*v 54 B.*C",
-    "行号 作用 说明 影响 1-3 Workspace clear all 可复现课程环境，但会清函数缓存； No mathematical reset 日常更常用 clearvars; close all; clc. effect, but avoid unnecessary global reset. 8-14 Objects and s + Arelies on MATLAB scalar expansion. Separate language scalar This is valid MATLAB, but it is not \"matrix semantics from expansion addition of unequal shapes.\" abstract linear algebra. 17-22 Sums and \\(\\operatorname{sum}(A)\\)reduces by columns by default;\\(u*vis\\) Always state output products dimensionally invalid whileu*v'is an outer shape. product. 25-29 Matrix \\(A*v\\),\\(B*u\\),\\(A*B\\),\\(B*Aare\\) determined by inner Predict shape before multiplication dimensions; only defined products should execution. be interpreted. 32-44 Inverse, The script demonstrates explicit inversion Do not use determinant, for B. Numerical solving should determinant alone as singularity use left division. C is singular becausedet( a stable numerical C)=0;\\(\\operatorname{inv}(C)\\)is not a mathematical inverse. singularity test. 47-54 Hadamard A.*Ais elementwise and distinct fromA*A. Same symbols, product different algebra."
+  "specialSection": [],
+  "codeAudit": [
+    {
+      "lines": "1–3",
+      "role": "清理工作区",
+      "explanation": "`clear all` 清除变量，并卸载已载入函数等状态；通常用 `clearvars` 清除变量已经足够。",
+      "result": "不产生数学结果，也不能单独保证随机数、依赖项和软件版本均可复现。"
+    },
+    {
+      "lines": "8–14",
+      "role": "定义对象",
+      "explanation": "`s` 为标量；`u`、`v` 为 \\(2\\times 1\\)；`w` 为 \\(4\\times 1\\)；`A` 为 \\(4\\times 2\\)；`B`、`C` 为 \\(2\\times 2\\)。",
+      "result": "后续运算是否成立以及输出 shape，都由这些尺寸决定。"
+    },
+    {
+      "lines": "17–18",
+      "role": "同形加法",
+      "explanation": "`u+v` 与 `B+C` 都在相同 shape 的对象之间逐项相加。",
+      "result": "`u+v = [2; 6]`；`B+C = [7 8; 14 17]`。"
+    },
+    {
+      "lines": "21–22",
+      "role": "标量扩展",
+      "explanation": "MATLAB 把标量 `s` 扩展到 `A` 的 shape；这是一项数组语言规则，不是通常抽象线性代数中的同形矩阵加法。",
+      "result": "`s+A = [2 2.5; 12 3; 4 11; 4 9]`；左结合的 `s+A-A` 得到 `2*ones(4,2)`，不是标量 `2`。"
+    },
+    {
+      "lines": "25",
+      "role": "点积",
+      "explanation": "对这里的实列向量，`dot(u,v)` 等于 \\(u^{\\mathrm{T}}v\\)，输出为标量。",
+      "result": "`dot(u,v) = 5`。"
+    },
+    {
+      "lines": "28–29",
+      "role": "欧氏范数",
+      "explanation": "`norm(w)` 默认计算 2-范数；对实向量，它与 `sqrt(dot(w,w))` 相同。",
+      "result": "两行都得到 \\(\\sqrt{30}\\approx 5.4772\\)。"
+    },
+    {
+      "lines": "32",
+      "role": "矩阵–向量乘法",
+      "explanation": "\\(A_{4\\times 2}v_{2\\times 1}\\) 的内部维度匹配，所以输出为 \\(4\\times 1\\)。",
+      "result": "`A*v = [2.5; 25; 49; 39]`。"
+    },
+    {
+      "lines": "35",
+      "role": "矩阵乘法",
+      "explanation": "`B*C` 按左矩阵的行与右矩阵的列做内积，不是逐元素乘法。",
+      "result": "`B*C = [36 48; 78 104]`。"
+    },
+    {
+      "lines": "38",
+      "role": "单位矩阵",
+      "explanation": "`eye(3)` 创建 \\(3\\times 3\\) 单位矩阵。",
+      "result": "`[1 0 0; 0 1 0; 0 0 1]`。"
+    },
+    {
+      "lines": "41",
+      "role": "转置",
+      "explanation": "MATLAB 的 `'` 是共轭转置；这里 `A` 为实数，因此等同普通转置。",
+      "result": "`A' = [0 10 2 2; 0.5 1 9 7]`，shape 为 \\(2\\times 4\\)。"
+    },
+    {
+      "lines": "44–45",
+      "role": "逆矩阵",
+      "explanation": "\\(\\det(B)=4\\)，所以 `B` 可逆；`C` 的第二行是第一行的 2 倍，所以 `C` 奇异。",
+      "result": "`inv(B) = [2.25 -1; -2 1]`；`C` 不存在数学逆，`inv(C)` 的警告及非有限或不可靠输出不能当作逆矩阵。"
+    },
+    {
+      "lines": "48–50",
+      "role": "行列式",
+      "explanation": "MATLAB 将标量视作 \\(1\\times 1\\) 方阵；对一般浮点矩阵，不应只凭很小的 `det` 判断数值病态性。",
+      "result": "`det(s) = 2`，`det(B) = 4`，`det(C) = 0`。"
+    },
+    {
+      "lines": "53–54",
+      "role": "逐元素乘法",
+      "explanation": "`.*` 按对应位置相乘，与第 35 行的矩阵乘法 `*` 不同。",
+      "result": "`u.*v = [0; 5]`；`B.*C = [12 16; 48 72]`。"
+    }
   ],
   "derivations": [
     "6.1 shape-first 线性代数",

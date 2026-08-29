@@ -829,7 +829,11 @@ const lectures = indexRows.map((row) => {
   if (!sourceUnits.length) throw new Error(`No source units parsed for lecture ${row.lecture}`);
   const studyGuideRecord = selfStudyGuideByLecture.get(row.lecture);
   if (!studyGuideRecord) throw new Error(`Missing self-study guide for lecture ${row.lecture}`);
-  const { lecture: studyGuideLecture, ...studyGuide } = studyGuideRecord;
+  const {
+    lecture: studyGuideLecture,
+    codeAudit: authoredCodeAudit = [],
+    ...studyGuide
+  } = studyGuideRecord;
   if (studyGuideLecture !== row.lecture) throw new Error(`Self-study guide lecture mismatch for lecture ${row.lecture}`);
   const lectureFigures = authoredFigures
     .filter((figure) => figure.lecture === row.lecture)
@@ -873,10 +877,11 @@ const lectures = indexRows.map((row) => {
   const diagnostic = readNumbered(sliceBetween(raw, 'Five-minute prerequisite diagnostic', 'Source-aligned lesson / 按原笔记页序')).map((item) => cleanDiagnostic(item.text)).filter(Boolean);
   const errata = structureErrata(parseErrata(raw), sourceFiles, sourceUnits, studyGuide, row.lecture, row.zhTitle);
   const specialHeading = row.lecture === 2 || row.lecture === 3 ? 'MATLAB source audit / 代码逐行审计' : null;
-  const specialSection = specialHeading ? paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, specialHeading)) + 1, findActualHeading(raw, 'Derivations')))
+  const extractedSpecialSection = specialHeading ? paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, specialHeading)) + 1, findActualHeading(raw, 'Derivations')))
     .filter((item) => !/^Authority\. The listing below is the actual uploaded source/i.test(item))
     .map(cleanTextbookParagraph)
     .filter(Boolean) : [];
+  const specialSection = authoredCodeAudit.length ? [] : extractedSpecialSection;
   const codeSources = sourceFiles.filter((source) => source.role === 'code').map((source) => ({ file: source.file, text: fs.readFileSync(path.join(originalsDir, source.file), 'utf8') }));
   return {
     lecture: row.lecture,
@@ -895,6 +900,7 @@ const lectures = indexRows.map((row) => {
     studyGuide,
     figures: lectureFigures,
     specialSection,
+    ...(authoredCodeAudit.length ? { codeAudit: authoredCodeAudit } : {}),
     derivations,
     synthesis,
     workedExamples,
@@ -992,7 +998,7 @@ const searchIndex = publishedLectures.map((lecture) => ({
   title: `第 ${lecture.lecture} 讲 · ${lecture.zhTitle}`,
   subtitle: lecture.enTitle,
   href: `/lectures/${lecture.slug}/`,
-  text: compact([lecture.zhTitle, lecture.enTitle, ...lecture.studyGuide.prerequisiteBridge, ...lecture.studyGuide.modules.flatMap((module) => [module.title, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, ...module.pitfalls]), ...lecture.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]), ...lecture.synthesis, ...lecture.commonTraps, ...lecture.glossary.flatMap((entry) => [entry.zh, entry.en, entry.definition]), ...lecture.formulas.flatMap((formula) => [formula.name, formula.conditions]), ...lecture.questions.map((question) => question.stem)].join(' ')),
+  text: compact([lecture.zhTitle, lecture.enTitle, ...lecture.studyGuide.prerequisiteBridge, ...lecture.studyGuide.modules.flatMap((module) => [module.title, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, ...module.pitfalls]), ...(lecture.codeAudit ?? []).flatMap((row) => [row.role, row.explanation, row.result]), ...lecture.figures.flatMap((figure) => [figure.title, figure.alt, figure.caption]), ...lecture.synthesis, ...lecture.commonTraps, ...lecture.glossary.flatMap((entry) => [entry.zh, entry.en, entry.definition]), ...lecture.formulas.flatMap((formula) => [formula.name, formula.conditions]), ...lecture.questions.map((question) => question.stem)].join(' ')),
 }));
 
 for (const publishedLecture of publishedLectures) {

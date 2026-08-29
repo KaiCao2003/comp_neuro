@@ -30,4 +30,18 @@ describe('lesson question presentation', () => {
     expect(lectureReader).not.toContain('lecture.sourceUnits');
     expect(lectureReader).not.toContain('lecture.errata');
   });
+
+  it('renders MATLAB source once with line numbers and an accessible audit table', () => {
+    expect(lectureReader).toContain('SourceCodeListing');
+    expect(lectureReader).toContain('source-code-number');
+    expect(lectureReader).toContain('CodeAuditTable');
+    expect(lectureReader).toContain('<caption className="sr-only"');
+    expect(lectureReader).toContain('role="region"');
+    expect(lectureReader).toContain('tabIndex={0}');
+    expect(lectureReader).toContain('onKeyDown={scrollCodeAudit}');
+    expect(lectureReader).toContain("event.key !== 'ArrowLeft' && event.key !== 'ArrowRight'");
+    expect(lectureReader).toContain('aria-labelledby={`${tableId}-caption`}');
+    expect(lectureReader).toContain('aria-describedby={`${tableId}-hint`}');
+    expect(lectureReader.indexOf('<SourceCodeListing')).toBeLessThan(lectureReader.indexOf('<CodeAuditTable'));
+  });
 });

@@ -124,12 +124,17 @@ for (const summary of englishCourse) {
   if (!same(en.glossary.map((entry) => withoutKeys(entry, ['definition'])), zh.glossary.map((entry) => withoutKeys(entry, ['definition'])))) fail(`Lecture ${slug} protected glossary fields differ across languages.`);
   if (!same(en.figures.map(figureStructure), zh.figures.map(figureStructure))) fail(`Lecture ${slug} protected figure geometry differs across languages.`);
   if (!same(en.errata.map((item) => withoutKeys(item, ['lectureTitle', 'originalIssue', 'explanation', 'correction'])), zh.errata.map((item) => withoutKeys(item, ['lectureTitle', 'originalIssue', 'explanation', 'correction'])))) fail(`Lecture ${slug} protected errata fields differ across languages.`);
+  const enCodeAudit = en.codeAudit ?? [];
+  const zhCodeAudit = zh.codeAudit ?? [];
+  if (!same(enCodeAudit.map((row) => row.lines), zhCodeAudit.map((row) => row.lines))) fail(`Lecture ${slug} code-audit line ranges differ across languages.`);
+  if (en.codeSources.length > 0 && enCodeAudit.length === 0) fail(`Lecture ${slug} English edition has source code but no authored code audit.`);
   validateScientificTokenParity(`Lecture ${slug}`, {
     dependencyMap: en.dependencyMap,
     studyGuide: en.studyGuide,
     sourceUnits: en.sourceUnits,
     figures: en.figures,
     specialSection: en.specialSection,
+    codeAudit: enCodeAudit,
     synthesis: en.synthesis,
     commonTraps: en.commonTraps,
     formulas: en.formulas,
@@ -140,6 +145,7 @@ for (const summary of englishCourse) {
     sourceUnits: zh.sourceUnits,
     figures: zh.figures,
     specialSection: zh.specialSection,
+    codeAudit: zhCodeAudit,
     synthesis: zh.synthesis,
     commonTraps: zh.commonTraps,
     formulas: zh.formulas,
@@ -160,6 +166,7 @@ for (const summary of englishCourse) {
     en.dependencyMap,
     ...en.sourceUnits.flatMap((unit) => [unit.reconstruction, unit.noteMeaning, unit.reasoning, unit.figureReading]),
     ...en.specialSection,
+    ...enCodeAudit.flatMap((row) => [row.role, row.explanation, row.result]),
     ...en.synthesis,
     ...en.commonTraps,
     ...en.formulas.flatMap((formula) => [formula.name, formula.conditions]),
@@ -173,6 +180,7 @@ for (const summary of englishCourse) {
     guideText,
     en.dependencyMap,
     ...en.specialSection,
+    ...enCodeAudit.flatMap((row) => [row.role, row.explanation, row.result]),
     ...en.synthesis,
     ...en.commonTraps,
     ...en.formulas.flatMap((formula) => [formula.name, formula.conditions]),
