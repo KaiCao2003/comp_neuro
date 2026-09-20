@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "用 synaptic-block logic 区分 cell-intrinsic pacemaker、follower 与 network-generated half-center rhythm，并陈述实验诊断的限制。",
-      "求解 two-neuron rotation matrix 的 complex eigenvalues，用 real part 与 imaginary part 分别判断 envelope stability 和 oscillation frequency。",
-      "逐项解释 Morris-Lecar voltage/recovery equations，依据 nullclines、fixed points 与 fast-slow separation 重建 relaxation cycle。",
-      "在互抑 half-center 中区分 intrinsic release 与 intrinsic escape，指出是哪一个细胞的哪次 intrinsic transition 触发 phase switch。",
-      "把 conductance model 的 phase-plane geometry 迁移到带 adaptation 的 firing-rate model，同时保留模型层级差异。"
+      "用突触阻断实验区分细胞内源的起搏细胞、跟随细胞与网络产生的半中心振荡节律，并陈述实验诊断的限制。",
+      "求解双神经元旋转矩阵的复特征值，用实部与虚部分别判断包络稳定性和振荡频率。",
+      "逐项解释 Morris-Lecar 电压/恢复方程，依据零流线、固定点与快慢分离重建弛豫振荡周期。",
+      "在互抑半中心振荡器中区分内源性释放与内源性逃逸，指出是哪一个细胞的哪次内源性转移触发相位切换。",
+      "把电导模型的相平面几何迁移到带适应的发放率模型，同时保留模型层级差异。"
     ],
     "prerequisiteBridge": [
-      "振荡需要同时回答“是否往返变化”和“振幅是否长期保持”。复数 \\(z=a+ib\\) 可以用平面上的横纵坐标理解；Euler relation \\(e^{ibt}=\\cos(bt)+i \\sin(bt)\\) 把旋转写成正弦与余弦。若动态解含 \\(e^{(a+ib)t}\\)，a 控制包络增长或衰减，|b| 控制角频率。仅看到 \\(b\\ne 0\\) 只能说明轨迹有旋转成分，不能说明存在长期稳定的节律。",
-      "二维 phase plane 把每个状态写成点 (V,N)。V-nullcline 是 \\(dV/dt=0\\) 的点集，N-nullcline 是 \\(dN/dt=0\\) 的点集；两线交点才是 fixed point。离开 nullcline 后，\\(dV/dt\\) 与 \\(dN/dt\\) 的符号决定箭头方向。nullcline 不是 trajectory，交点也不自动稳定；需要查看附近 arrows 是朝向还是离开交点。",
-      "fast-slow system 含一个快速变量和一个慢变量。Morris-Lecar 中 membrane voltage V 受 current balance 快速改变，K activation/recovery N 较慢。轨迹常沿 V-nullcline 的 stable branch 慢移，到 fold 后 V 快跳到另一 branch。理解这一“慢走—快跳”结构后，pacemaker relaxation oscillation、互抑 half-center 和 rate-adaptation oscillator 可用同一几何语言比较。"
+      "振荡有两个不同的问题：状态是否往返变化，振幅能否长期保持。复数 \\(z=a+ib\\) 可表示平面上的点，欧拉公式 \\(e^{ibt}=\\cos(bt)+i \\sin(bt)\\) 则把旋转写成正弦和余弦。若解中含有 \\(e^{(a+ib)t}\\)，实部 a 决定振幅包络的增长或衰减，|b| 决定角频率。\\(b\\ne 0\\) 只说明存在旋转成分，尚不能保证持续的稳定节律。",
+      "二维相平面以 (V,N) 表示状态。电压零流线上的点满足 \\(dV/dt=0\\)，恢复变量零流线上的点满足 \\(dN/dt=0\\)；两线交点才是固定点。其他位置的运动方向由 \\(dV/dt\\) 与 \\(dN/dt\\) 的正负决定。零流线并非轨迹，固定点也未必稳定，必须查看其周围的向量场。",
+      "快慢系统同时包含快速和慢速变量。在 Morris–Lecar 模型中，膜电压 V 随电流平衡快速变化，钾通道激活或恢复变量 N 变化较慢。轨迹可沿电压零流线的稳定分支缓慢移动，到折点后快速跳到另一分支。这种“慢移—快跳”的几何结构，也适用于比较起搏细胞、互抑半中心回路和发放率—适应模型。 零流线给出速度分量为零的位置，却不指定轨迹一定沿线运动；判断方向还必须代入附近状态，比较各分量的符号。"
     ],
     "modules": [
       {
         "id": "l20-m1",
-        "title": "节律来源：pacemaker、follower 与 network half-center",
+        "title": "起搏细胞与半中心节律",
         "sourceRefs": [
           {
             "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -110,64 +110,64 @@
           }
         ],
         "paragraphs": [
-          "先区分两种来源。cell-intrinsic pacemaker 即使失去周期性 synaptic input，靠自身 voltage-gated currents 仍能产生 rhythm；follower 本身不振荡，只跟随 pacemaker 的 synaptic drive。第二种来源是 network-generated rhythm：单个细胞可保持 tonic 或 silent，但 reciprocal inhibition 使两个细胞交替 active，形成 half-center oscillator。respiration 与 walking muscle alternation 是对应的功能例子。",
-          "synaptic block 是干预逻辑而非标签游戏。若 neuron 1 的节律在 block 后保留而 neuron 2 变成 tonic 或 silent，结果符合“1 是 pacemaker、2 是 follower”。若两者自然状态交替而 block 后都失去节律，则符合 network-generated candidate。关键 observation 是同一细胞在自然与 block 条件下的 time series，不是仅比较不同动物的平均 frequency。",
-          "该试验不能排除所有替代解释。阻断药可能改变 intrinsic conductances，block 可能不完全，electrical coupling 可能保留，sensory feedback 也可能在 intact preparation 中参与。较强设计应同时记录 membrane potential、验证 synaptic current 消失、使用 washout 或不同阻断方法，并检查 single-cell current injection 能否重新诱发 rhythm。结果应写成“支持某候选机制”，而非“证明唯一机制”。",
-          "CPG 指在缺少相同周期的外部指令时，central neural circuit 仍能组织 patterned motor output。这个定义不要求真实行为完全独立于 sensory feedback；感觉输入可以重置 phase、调节 speed 或稳定 gait。把所有 rhythmic neural activity 都称为 CPG 会混淆 oscillator、sensory entrainment 与 downstream follower response。"
+          "节律可以来自细胞自身，也可以由网络相互作用产生。内源性起搏细胞靠电压门控电流振荡，即使没有周期性突触输入仍可保持节律；跟随细胞本身不振荡，而是受起搏细胞驱动。半中心振荡器则由相互抑制的两侧组成：单个细胞独立时可持续发放或静默，连接后却交替活跃。呼吸与步行中的肌群交替是相关功能例子。",
+          "阻断突触输入可检验节律来源。如果阻断后细胞 1 仍有节律，细胞 2 却变为持续发放或静默，结果支持前者起搏、后者跟随。如果原本交替活动的两个细胞在阻断后都失去节律，则支持网络产生节律的候选机制。关键是比较同一细胞在阻断前后的时间序列，而非只比较不同动物的平均频率。",
+          "还需排除阻断不完全、药物改变内源电导、保留电耦合以及感觉反馈参与等解释。较完整的实验应同时记录膜电位，确认突触电流消失，检查洗脱或其他阻断方法，并测试单细胞电流注入能否重新诱发节律。这些结果用于支持候选机制，不能单次证明机制唯一。",
+          "中枢模式发生器（CPG）在缺少同周期外部指令时，仍能组织有节律的运动输出。感觉反馈可以重置相位、调节速度或稳定步态，因此 CPG 的存在不表示真实行为完全开环。振荡源、感觉输入造成的同步，以及下游跟随响应也应区分。 实验还需排除药物对细胞内在电导的直接影响。若阻断后振荡消失，只能说明完整网络对当前节律必要，不能单凭这一结果断定哪种连接产生了节律。"
         ],
         "keyPoints": [
-          "block 后 intrinsic rhythm 保留支持 pacemaker，交替节律消失支持 network dependence。",
-          "synaptic-block observation 需要验证 block 完整性与 intrinsic-current side effects。",
-          "half-center 的基本 motif 是 reciprocal inhibition 与 phase alternation。",
-          "CPG 可被 sensory feedback 调制，并不等于行为处于 open loop。"
+          "阻断后仍有内源节律支持起搏机制；交替节律消失支持网络依赖。",
+          "须验证突触阻断程度，并检查对内源电流的副作用。",
+          "半中心回路的基本结构是相互抑制与交替活动。",
+          "CPG 可受感觉反馈调节。"
         ],
         "derivation": {
           "title": "用干预结果比较机制假设",
-          "setup": "把三种候选机制各自对 intact 与 synaptic-block 条件的预测列清，再用观测排除不相容者。",
+          "setup": "把三种候选机制各自对完整与突触阻断条件的预测列清，再用观测排除不相容者。",
           "steps": [
             {
-              "title": "写 pacemaker 预测",
-              "explanation": "pacemaker 的 rhythm 由 intrinsic state variables 产生，所以充分 block 后该 cell 仍应振荡，频率可因 tonic input 改变。"
+              "title": "写起搏细胞预测",
+              "explanation": "起搏细胞的节律由内在状态变量产生，所以充分突触阻断后该细胞仍应振荡，频率可因持续输入改变。"
             },
             {
-              "title": "写 follower 预测",
-              "explanation": "follower 的周期 drive 被移除后不应保持原节律，常转为 tonic、silent 或只响应 injected pulses。"
+              "title": "写跟随细胞预测",
+              "explanation": "跟随细胞的周期驱动被移除后不应保持原节律，常转为持续、静默或只响应注入的脉冲。"
             },
             {
-              "title": "写 half-center 预测",
-              "explanation": "mutual inhibition 被破坏后 coordinated alternation 消失；单 cells 是否仍振荡取决于它们自身是否也有 pacemaker currents。"
+              "title": "写半中心振荡器预测",
+              "explanation": "相互抑制被破坏后协调的交替消失；单细胞是否仍振荡取决于它们自身是否也有起搏细胞电流。"
             },
             {
               "title": "加入控制条件",
-              "explanation": "只有在确认 synaptic transmission 消失且 membrane health 保持时，observed contrast 才能指向 rhythm source。"
+              "explanation": "只有在确认突触传递消失且膜健康状态保持时，观测到的差异才能指向节律来源。"
             }
           ],
           "symbolNotes": [
-            "这里的“保留”应由 frequency、phase regularity 与 waveform 等可测量指标定义。",
-            "机制预测针对同一 preparation 的 counterfactual 条件。"
+            "这里的“保留”应由频率、相位规律性与波形等可测量指标定义。",
+            "机制预测针对同一准备的反事实条件。"
           ],
-          "unitsCheck": "频率用 Hz、周期用 s，二者应满足 \\(f=1/T\\)；若 block 后比较，记录窗口需足够长。",
-          "limitCheck": "若两个 cells 同时具有 intrinsic oscillation 与 reciprocal inhibition，block 结果会显示混合机制，不能强迫归入单一类别。"
+          "unitsCheck": "频率用 Hz、周期用 s，二者应满足 \\(f=1/T\\)；若突触阻断后比较，记录窗口需足够长。",
+          "limitCheck": "若两个细胞同时具有内在振荡与倒数抑制，block 结果会显示混合机制，不能强迫归入单一类别。"
         },
         "workedExample": {
           "title": "根据 block 结果诊断候选网络",
-          "problem": "intact 时 cells A/B 以 2 Hz 交替；block 后 A 仍以 1.8 Hz 振荡，B 维持 constant firing。给出最小机制解释与下一步控制。",
+          "problem": "完整时细胞 A/B 以 2 Hz 交替；突触阻断后 A 仍以 1.8 Hz 振荡，B 维持常数发放。给出最小机制解释与下一步控制。",
           "steps": [
-            "A 的节律近似保留，先把 A 列为 intrinsic pacemaker candidate。",
-            "B 失去 modulation，符合 follower candidate；intact alternation 可由 A 对 B 的周期 drive 或更复杂 inhibition 形成。",
-            "下一步向 B 注入周期 current 并验证其可跟随，同时测 synaptic current 确认 block 完整，检查 A waveform 是否因药物改变。"
+            "A 的节律近似保留，先把 A 列为内在起搏细胞候选。",
+            "B 失去调节，符合跟随细胞候选；完整交替可由 A 对 B 的周期驱动或更复杂抑制形成。",
+            "下一步向 B 注入周期电流并验证其可跟随，同时测突触电流确认 block 完整，检查 A 波形是否因药物改变。"
           ],
-          "result": "最小解释是 A 提供 intrinsic rhythmic drive、B 跟随；这尚未排除 A/B 同时参与 network feedback。",
-          "sanityCheck": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除 coupling 后 pacemaker frequency 略变，而不是要求完全相同。"
+          "result": "最小解释是 A 提供内在有节律的驱动、B 跟随；这尚未排除 A/B 同时参与网络反馈。",
+          "sanityCheck": "1.8 Hz 接近但不等于 2 Hz，合理地提示去除耦合后起搏细胞频率略变，而不是要求完全相同。"
         },
         "pitfalls": [
-          "把“节律在 block 后消失”直接解释成某个 cell 死亡，而不验证 excitability。",
-          "把 CPG 写成不受 sensory feedback 影响的完全自治系统。"
+          "节律消失后直接认定细胞失活，却未检查其兴奋性。",
+          "将 CPG 写成完全不受感觉反馈影响的系统。"
         ]
       },
       {
         "id": "l20-m2",
-        "title": "线性双神经元系统的复数模态与阻尼振荡",
+        "title": "复数模态与阻尼振荡",
         "sourceRefs": [
           {
             "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -175,68 +175,69 @@
           }
         ],
         "paragraphs": [
-          "令 \\(W=[[0,-w_{0}],[w_{0},0]]\\)，把一个方向的 coupling 设为 excitation、另一个设为 inhibition，形式上像二维 rotation generator。完整 rate equation 仍是 \\(\\tau dh/dt=-h+Wh+I\\)，所以决定 continuous-time stability 的不是 W 单独的 ±iw0，而是 \\(A=(-I+W)/\\tau\\) 的 eigenvalues \\((-1\\pm iw0)/\\tau\\)。real part 固定为 \\(-1/\\tau\\)，说明无输入时 envelope 必定衰减。",
-          "characteristic polynomial \\(\\det(W-\\lambda I)=\\lambda ^{2}+w_{0}^{2}=0\\) 给 λ_W=±i|w0|。沿 complex mode 的解含 \\(e^{(-1\\pm iw0)t/\\tau }=e^{-t/\\tau }[\\cos(|w_{0}|t/\\tau )\\pm i \\sin(|w_{0}|t/\\tau )]\\)。把 conjugate pair 合并可得到真实 h1、h2 的 sine-cosine trajectory。角频率 \\(\\omega =|w_{0}|/\\tau \\mathrm{rad}/s\\)，普通频率 \\(f=\\omega /(2\\pi )\\)。",
-          "phase-plane 中轨迹绕 fixed point 旋转，同时 radius 按 \\(e^{-t/\\tau }\\) 缩小，形成 inward spiral。若 full real part 为正，radius 会放大成 outward spiral；若恰为零，线性系统出现 neutrally stable closed orbits，却没有 amplitude selection，noise 会让 radius 漂移。稳定 autonomous limit cycle 通常需要 nonlinearity 让小 amplitude 增长而大 amplitude 收缩。",
-          "因此“有 complex eigenvalues”与“有 sustained CPG rhythm”不是同一结论。complex pair 说明对扰动的 transient response 可能 oscillatory；长期 rhythm 还需 real part、nonlinear saturation、external drive 与 noise 的信息。这正是接着讨论 Morris-Lecar 的原因：它引入能产生 stable nonlinear cycle 的 fast-slow geometry。"
+          "令 \\(W=[[0,-w_{0}],[w_{0},0]]\\)，一侧连接兴奋、另一侧抑制，形式上相当于二维旋转生成器。完整发放率方程仍为 \\(\\tau dh/dt=-h+Wh+I\\)，所以连续时间稳定性由 \\(A=(-I+W)/\\tau\\) 的特征值 \\((-1\\pm iw0)/\\tau\\) 决定，不能只看 W 的纯虚特征值。实部固定为 \\(-1/\\tau\\)，说明没有输入时振幅包络必然衰减。",
+          "特征多项式 \\(\\det(W-\\lambda I)=\\lambda ^{2}+w_{0}^{2}=0\\) 给出一对纯虚特征值，其大小由耦合强度决定。复模态的解含有 \\(e^{(-1\\pm iw0)t/\\tau }=e^{-t/\\tau }[\\cos(|w_{0}|t/\\tau )\\pm i \\sin(|w_{0}|t/\\tau )]\\)，共轭两项合并后得到两个真实活动变量的正弦—余弦轨迹。角频率为 \\(\\omega =|w_{0}|/\\tau \\mathrm{rad}/s\\)，普通频率为 \\(f=\\omega /(2\\pi )\\)；二者相差一个完整周期的角度。",
+          "在相平面中，轨迹绕固定点旋转，同时半径按 \\(e^{-t/\\tau }\\) 缩小，形成向内螺旋。若完整系统的实部为正，则形成向外螺旋；若实部恰为零，线性系统有中性稳定的闭轨，却不能选择振幅，噪声可使半径漂移。稳定自主极限环通常需要非线性，使小振幅增长而大振幅收缩。",
+          "复特征值说明扰动后的瞬态响应可能振荡，尚不能保证持续的 CPG 节律。长期行为还取决于实部、非线性饱和、外部驱动和噪声。Morris–Lecar 模型引入快慢非线性结构，可进一步分析振幅受调节的稳定振荡。"
         ],
         "keyPoints": [
-          "full system eigenvalues 是 \\((-1\\pm iw0)/\\tau\\)，而不是只看 W 的 ±iw0。",
-          "real part 决定 envelope，imaginary part 决定 angular frequency。",
-          "negative real part 给 inward spiral 与 damped oscillation。",
-          "stable limit cycle 需要 amplitude regulation，complex eigenvalues 本身不够。"
+          "完整系统的特征值为 \\((-1\\pm iw0)/\\tau\\)，不能只看连接矩阵的虚部。",
+          "实部决定包络，虚部决定角频率。",
+          "负实部产生向内螺旋和阻尼振荡。",
+          "稳定极限环需要振幅调节，复特征值本身不足以保证。"
         ],
         "derivation": {
-          "title": "求 complex modes 并还原真实振荡",
-          "setup": "先求 W 的 eigenvalues，再把 intrinsic leak 与 \\(\\tau\\) 加回 continuous-time generator。",
+          "title": "求复数模态并还原真实振荡",
+          "setup": "先求 W 的特征值，再把内在泄漏与 \\(\\tau\\) 加回连续时间生成器。",
           "steps": [
             {
-              "title": "求 W 的 characteristic roots",
+              "title": "求 W 的特征根",
               "explanation": "\\(\\det([[-\\lambda,-w_{0}],[w_{0},-\\lambda ]])=\\lambda ^{2}+w_{0}^{2}\\)。",
               "latex": "\\lambda_W=\\pm i|w_0|"
             },
             {
-              "title": "得到 full generator roots",
-              "explanation": "\\(A=(-I+W)/\\tau\\) 会把每个 W eigenvalue 先减 1 再除以 \\(\\tau\\)。",
+              "title": "得到完整生成器根",
+              "explanation": "\\(A=(-I+W)/\\tau\\) 会把每个 W 特征值先减 1 再除以 \\(\\tau\\)。",
               "latex": "\\lambda_A=\\frac{-1\\pm i|w_0|}{\\tau}"
             },
             {
-              "title": "应用 Euler relation",
-              "explanation": "把 complex exponential 分为 decay envelope 与 sine/cosine rotation。",
+              "title": "应用 Euler 关系",
+              "explanation": "把复数指数分为衰减包络与正弦/余弦旋转。",
               "latex": "e^{\\lambda_A t}=e^{-t/\\tau}[\\cos(\\omega t)\\pm i\\sin(\\omega t)]"
             },
             {
-              "title": "换算 frequency",
-              "explanation": "imaginary part 是 rad/s，除以 \\(2\\pi\\) 才是 cycles/s。",
+              "title": "换算频率",
+              "explanation": "虚部分是 rad/s，除以 \\(2\\pi\\) 才是周期/s。",
               "latex": "f=\\frac{|w_0|}{2\\pi\\tau}"
             }
           ],
           "symbolNotes": [
             "w0 无量纲；\\(\\tau\\) 用 s 时 \\(\\lambda _{A}\\) 单位为 s^-1。",
-            "complex eigenvectors 是计算工具，真实 firing-rate trajectory 由 conjugate modes 组合得到。"
+            "复数特征向量是计算工具，真实发放率轨迹由共轭模态组合得到。"
           ],
-          "unitsCheck": "\\(\\omega\\) 的单位 rad/s，f 的单位 Hz；\\(e^{-t/\\tau }\\) 的 exponent 必须无量纲。",
-          "limitCheck": "\\(w_{0}=0\\) 时 \\(\\omega =0\\)，系统只作无振荡指数衰减；\\(\\tau \\to \\infty\\) 时本模型同时让 decay 与 rotation 变慢。"
+          "unitsCheck": "\\(\\omega\\) 的单位 rad/s，f 的单位 Hz；\\(e^{-t/\\tau }\\) 的指数必须无量纲。",
+          "limitCheck": "\\(w_{0}=0\\) 时 \\(\\omega =0\\)，系统只作无振荡指数衰减；\\(\\tau \\to \\infty\\) 时本模型同时让衰减与旋转变慢。"
         },
         "workedExample": {
-          "title": "从 full eigenvalue 读出 waveform",
-          "problem": "给定 \\(\\tau =0.2 \\mathrm{s}\\)、\\(w_{0}=4\\)，求 envelope time constant、angular frequency、Hz frequency 和一周期后的 amplitude fraction。",
+          "title": "从完整特征值读出波形",
+          "problem": "给定 \\(\\tau =0.2 \\mathrm{s}\\)、\\(w_{0}=4\\)，求包络时间常数、角频率、Hz 频率和一周期后的振幅比例。",
           "steps": [
-            "full eigenvalues=\\((-1\\pm 4i)/0.2=-5\\pm 20i s^{-1}\\)。",
-            "envelope time constant=\\(1/5=0.2 \\mathrm{s}\\)；\\(f=20/(2\\pi )\\approx 3.18 \\mathrm{Hz}\\)，period≈0.314 s。",
-            "一周期后 amplitude fraction=\\(e^{-0.314/0.2}=e^{-1.57}\\approx 0.208\\)。"
+            "完整特征值=\\((-1\\pm 4i)/0.2=-5\\pm 20i s^{-1}\\)。",
+            "包络时间常数=\\(1/5=0.2 \\mathrm{s}\\)；\\(f=20/(2\\pi )\\approx 3.18 \\mathrm{Hz}\\)，周期≈0.314 s。",
+            "一周期后振幅比例=\\(e^{-0.314/0.2}=e^{-1.57}\\approx 0.208\\)。"
           ],
-          "result": "轨迹每转一圈只剩约 20.8% 初始 amplitude，因此是强阻尼 transient，不是 sustained oscillator。",
-          "sanityCheck": "period 由 imaginary part 得到，envelope 由 real part得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
+          "result": "轨迹每转一圈只剩约 20.8% 初始振幅，因此是强阻尼瞬态，不是持续的振荡器。",
+          "sanityCheck": "周期由虚部分得到，包络由真实部分得到；若二者都误用 \\(|\\lambda |\\)，会得到不一致结果。"
         },
         "pitfalls": [
-          "把 rad/s 直接写成 Hz，漏除 \\(2\\pi\\)。",
-          "只报告 imaginary part 而忽略 full equation 的 -h leak。"
-        ]
+          "将 rad/s 直接当作 Hz，遗漏除以 \\(2\\pi\\)。",
+          "只报告虚部，忽略完整方程中的自身漏电。"
+        ],
+        "transition": "起搏细胞和半中心回路都能产生节律。线性双神经元模型先帮助我们区分两种现象：扰动后逐渐衰减的振荡，以及长期维持的自主振荡。"
       },
       {
         "id": "l20-m3",
-        "title": "Morris-Lecar 电流平衡、nullclines 与固定点",
+        "title": "Morris–Lecar 模型的零流线与固定点",
         "sourceRefs": [
           {
             "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -244,67 +245,68 @@
           }
         ],
         "paragraphs": [
-          "Morris-Lecar 用 V 与 N 两个 state variables 压缩 conductance dynamics。voltage equation 是 C dV/dt=-gL(V-EL)-gCa M∞(V)(V-ECa)-gK \\(N(V-E_{K})+I_{e}\\)。每个 \\(g(V-E)\\) 是 conductance 乘 driving force；前面的负号遵守 outward-current convention。\\(M_{\\infty }(V)\\) 假定 Ca activation 很快，直接取 voltage-dependent steady state；N 则以较慢时间常数追随 \\(N_{\\infty }(V)\\)。",
-          "recovery equation 可写 \\(\\tau N dN/dt=N_{\\infty }(V)-N\\)。\\(N<N_{\\infty }\\) 时 \\(dN/dt>0\\)，K activation 增加；\\(N>N_{\\infty }\\) 时下降。N-nullcline 因此是 \\(N=N_{\\infty }(V)\\) 的 sigmoid。V-nullcline 由 net membrane current 为零求得，常呈 cubic-like 或 N-shaped curve。两条 nullclines 交点同时令两 derivatives 为零，是 candidate equilibrium。",
-          "读 phase plane 时在每个区域分别判断符号。V-nullcline 左右或上下哪一侧 \\(dV/dt\\) 为正，必须代入一个 test point，不能只按曲线外观猜。N-nullcline 下方通常 \\(N<N_{\\infty }\\)，所以 arrows 向上；上方 arrows 向下。若交点附近 arrows 汇入，fixed point stable；若一方向汇入另一方向离开，则是 saddle；若整体离开，则 unstable。",
-          "fast-slow separation 的依据是 voltage timescale C/g 与 \\(\\tau N\\) 差异。V 快时，trajectory 很快靠近 V-nullcline 的 attracting branch，然后 N 缓慢推动它沿 branch 移动。若 fixed point 位于 unstable middle region，state 可能无法停住，而在两条 stable branches 间跳跃形成 relaxation oscillation。具体 bifurcation 依 parameters，手画 nullcline 只是机制图，不提供通用数值。"
+          "Morris–Lecar 用膜电压 V 和恢复变量 N 简化电导动力学。电压方程为 \\(C\\,dV/dt=-g_{L}(V-E_{L})-g_{Ca}M_{\\infty}(V)(V-E_{Ca})-g_{K}N(V-E_{K})+I_{e}\\)。每项 \\(g(V-E)\\) 都是电导乘驱动力，前面的负号来自以外向电流为正的约定。\\(M_{\\infty }(V)\\) 假定钙通道激活足够快，直接采用电压相关的稳态值；N 则较慢地追随 \\(N_{\\infty }(V)\\)。",
+          "恢复方程可写为 \\(\\tau N dN/dt=N_{\\infty }(V)-N\\)。当 \\(N<N_{\\infty }\\) 时，\\(dN/dt>0\\)，钾通道激活增加；当 \\(N>N_{\\infty }\\) 时则减少。因此，恢复变量的零流线为 S 形曲线 \\(N=N_{\\infty }(V)\\)。电压零流线由净膜电流为零确定，常呈近似三次曲线或 N 形。两线交点同时令两个导数为零，是平衡点。",
+          "相平面中的箭头要按方程判断。在电压零流线的各侧，\\(dV/dt\\) 的符号应代入测试点确定，不能只凭曲线外观推断。恢复变量零流线下方通常满足 \\(N<N_{\\infty }\\)，箭头向上，上方则向下。交点附近各方向汇入表示稳定；一方向汇入、另一方向离开表示鞍点；整体离开则表示不稳定。",
+          "快慢分离来自电压时间尺度 C/g 与 \\(\\tau N\\) 的差异。电压较快时，轨迹先靠近电压零流线的吸引分支，再由 N 缓慢推动。如果固定点位于不稳定的中间区域，状态可能无法停下，而在两条稳定分支之间跳跃，形成松弛振荡。具体分岔取决于参数，示意零流线并不提供通用数值。"
         ],
         "keyPoints": [
-          "V equation 是 leak、Ca、K 与 external currents 的电荷平衡。",
-          "V-nullcline 满足 \\(dV/dt=0\\)；N-nullcline 满足 \\(N=N_{\\infty }(V)\\)。",
-          "nullcline intersections 是 fixed points，stability 还需 vector field。",
-          "fast voltage 与 slow recovery 允许沿 branch 慢行并在 fold 快跳。"
+          "电压方程平衡漏电流、钙电流、钾电流与外部电流。",
+          "电压零流线满足 \\(dV/dt=0\\)；恢复零流线满足 \\(N=N_{\\infty }(V)\\)。",
+          "零流线交点是固定点，稳定性还需由向量场判断。",
+          "快电压与慢恢复允许沿分支慢移，并在折点快速跳跃。"
         ],
         "derivation": {
-          "title": "由电流平衡得到两条 nullclines",
-          "setup": "把两个 derivatives 分别设为零，并保留每个 conductance 与 reversal potential 的作用。",
+          "title": "由电流平衡得到两条零流线",
+          "setup": "把两个导数分别设为零，并保留每个电导与反转电位的作用。",
           "steps": [
             {
-              "title": "写 voltage balance",
-              "explanation": "capacitive current 等于 applied current 减去 leak、Ca 与 K ionic currents。",
+              "title": "写电压平衡",
+              "explanation": "电容电流等于外加电流减去泄漏、Ca 与 K 离子电流。",
               "latex": "C\\dot V=-g_L(V-E_L)-\\bar g_{Ca}M_\\infty(V)(V-E_{Ca})-\\bar g_KN(V-E_K)+I_e"
             },
             {
-              "title": "求 V-nullcline",
-              "explanation": "令 \\(dV/dt=0\\)，把 N 隔离；所得 N 作为 V 的函数，其形状受 activation 与 driving forces 决定。",
+              "title": "求 V-零流线",
+              "explanation": "令 \\(dV/dt=0\\)，把 N 隔离；所得 N 作为 V 的函数，其形状受激活与驱动力决定。",
               "latex": "N=\\frac{I_e-g_L(V-E_L)-\\bar g_{Ca}M_\\infty(V)(V-E_{Ca})}{\\bar g_K(V-E_K)}"
             },
             {
-              "title": "求 N-nullcline",
+              "title": "求 N-零流线",
               "explanation": "令 \\(\\tau N dN/dt=N_{\\infty }(V)-N=0\\)。",
               "latex": "N=N_\\infty(V)"
             },
             {
-              "title": "确定 arrows",
-              "explanation": "在每条 nullcline 两侧选 test point 代入 \\(F(V,N)\\)、\\(G(V,N)\\)，分别记录 V 与 N 增减。"
+              "title": "确定箭头",
+              "explanation": "在每条零流线两侧选测试点代入 \\(F(V,N)\\)、\\(G(V,N)\\)，分别记录 V 与 N 增减。"
             }
           ],
           "symbolNotes": [
-            "V、E 用 mV；conductance 用 nS 或 \\(\\mathrm{mS}/\\mathrm{cm}^{2}\\)；C 与面积 convention 必须一致。",
-            "N、\\(M_{\\infty }\\)、\\(N_{\\infty }\\) 是 0 到 1 的 dimensionless gating quantities。"
+            "V、E 用 mV；电导用 nS 或 \\(\\mathrm{mS}/\\mathrm{cm}^{2}\\)；C 与面积约定必须一致。",
+            "N、\\(M_{\\infty }\\)、\\(N_{\\infty }\\) 是 0 到 1 的无量纲门控量。"
           ],
-          "unitsCheck": "conductance×voltage 给 current；C dV/dt 也给 current。recovery equation 两边均为 dimensionless change per time。",
-          "limitCheck": "若 \\(g_{K}=0\\)，隔离 N 的 V-nullcline 公式不可用，且 N 不再反馈 voltage；二维 oscillator mechanism随之改变。"
+          "unitsCheck": "电导×电压得到电流；C dV/dt 也得到电流。恢复方程两边均为无量纲变化每时间。",
+          "limitCheck": "若 \\(g_{K}=0\\)，隔离 N 的 V-零流线公式不可用，且 N 不再反馈电压；二维振荡器机制随之改变。"
         },
         "workedExample": {
-          "title": "用符号判断一个 phase-plane 点的方向",
-          "problem": "某点位于 V-nullcline 上方且代入得 \\(dV/dt<0\\)；同时它位于 N-nullcline 下方。判断初始运动方向。",
+          "title": "用符号判断一个相平面点的方向",
+          "problem": "某点位于 V-零流线上方且代入得 \\(dV/dt<0\\)；同时它位于 N-零流线下方。判断初始运动方向。",
           "steps": [
             "\\(dV/dt<0\\) 表示 V 向左移动。",
-            "N-nullcline 下方有 \\(N<N_{\\infty }(V)\\)，所以 \\(dN/dt>0\\)，N 向上移动。",
-            "合成向量指向左上；若下一时刻跨过 nullcline，要重新判断符号。"
+            "N-零流线下方有 \\(N<N_{\\infty }(V)\\)，所以 \\(dN/dt>0\\)，N 向上移动。",
+            "合成向量指向左上；若下一时刻跨过零流线，要重新判断符号。"
           ],
-          "result": "该点的 instantaneous trajectory direction 是左上，而不是沿任意一条 nullcline。",
-          "sanityCheck": "nullcline 上只有对应 derivative 为零；位于“V-nullcline 上方”本身不足以判 dV sign，题目已给 test-point sign。"
+          "result": "该点的瞬时轨迹方向是左上，而不是沿任意一条零流线。",
+          "sanityCheck": "零流线上只有对应导数为零；位于“V-零流线上方”本身不足以判 dV 符号，题目已给测试点符号。"
         },
         "pitfalls": [
-          "把 reversal potential 当作固定 current，而忽略 V-E 的 driving force。",
-          "只凭 cubic curve 形状给 arrows，不用方程在区域中验证符号。"
-        ]
+          "将反转电位当作固定电流，忽略电压差决定驱动力。",
+          "只凭三次曲线的形状绘制箭头，未代入方程核对符号。"
+        ],
+        "transition": "线性模态虽能旋转，负实部仍使振幅消失。引入非线性电导和慢恢复变量后，可以研究持续振荡怎样形成。"
       },
       {
         "id": "l20-m4",
-        "title": "Relaxation cycle 与互抑 half-center 的相位几何",
+        "title": "松弛振荡与互抑制的相平面",
         "sourceRefs": [
           {
             "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -312,64 +314,65 @@
           }
         ],
         "paragraphs": [
-          "当 fixed point 不稳定且 V-nullcline 有两条 attracting outer branches，trajectory 可循环经历四阶段。低 V branch 上，V 快速贴近 branch，N 缓慢减少；到 lower fold 后再无邻近 stable voltage solution，V 快跳到 high branch；在 high branch 上 N 缓慢增加，增强 hyperpolarizing K current；到 upper fold 后 V 快跳回 low branch。重复这一顺序得到 autonomous relaxation oscillation。",
-          "图中 voltage trace 的缓慢段与 phase-plane branch motion 对应，陡峭上升或下降对应 fast jump。period 主要受 slow N evolution 决定，spike-like transition duration 受 fast V dynamics 决定。若改变 Ie 或 conductances，nullcline 位置移动，fixed point 可能落到 stable branch，cycle 便停止；因此 oscillator 不是单一 waveform，而是 parameter-dependent attractor。",
-          "half-center 把两个 Morris-Lecar cells 互相 inhibitory coupling。对 cell i，synaptic current 可写 \\(-gS_{\\infty }(V_{j})(V_{i}-Es)\\)，其中 Es 较负。presynaptic cell j 在 high state 时 \\(S_{\\infty }\\approx 1\\)，把 i 的 V-nullcline 推到受抑位置；j 在 low state 时 \\(S_{\\infty }\\approx 0\\)，i 恢复 free nullcline。交替节律来自每次 synaptic state 切换对 partner geometry 的重排。",
-          "即使单独 cells 的 fixed point stable，mutual inhibition 与 recovery 也可能让 pair oscillate；反之，不是任意 mutual inhibition 都会振荡。必须同时有能在 active 与 inhibited phases 中缓慢演化的 intrinsic variable、合适 synaptic threshold 和 transition ordering。外界 sensory pulse 可把某 cell 推过 separatrix，从而 reset phase，而不必生成整个 rhythm。"
+          "固定点不稳定且电压零流线有两条外侧吸引分支时，轨迹可经历四个阶段：在低电压分支上，V 快速贴近分支，N 缓慢减少；到折点后，附近不再有稳定电压解，V 快跳到高分支；随后 N 缓慢增加，钾电流使电压趋向超极化；到另一折点后，V 快跳回低分支。循环重复便形成自主松弛振荡。",
+          "电压轨迹的缓慢段对应沿分支运动，陡峭的上升或下降对应快速跳跃。周期主要由 N 的慢变化决定，跳跃持续时间则取决于快速电压动力学。改变外部电流或电导可移动零流线，使固定点落到稳定分支而终止周期。振荡因此是依赖参数的吸引行为，而非固定不变的波形。",
+          "将两个 Morris–Lecar 细胞相互抑制连接，可构成半中心模型。细胞 i 的突触电流写为 \\(-gS_{\\infty }(V_{j})(V_{i}-Es)\\)，其中反转电位较负。突触前细胞 j 处于高状态时，\\(S_{\\infty }\\approx 1\\)，使另一细胞的电压零流线移向受抑位置；处于低状态时，\\(S_{\\infty }\\approx 0\\)，另一细胞恢复未受抑制的零流线。突触状态交替切换，便不断改变对侧的相平面结构。",
+          "即使单个细胞具有稳定固定点，相互抑制结合恢复过程也可能使成对细胞振荡，但任意互抑连接并不足够。还需要在活跃期和受抑期缓慢演化的内源变量、合适的突触阈值与切换顺序。外部感觉脉冲可将某细胞推过分界线，重置相位，而不必负责产生整个节律。"
         ],
         "keyPoints": [
-          "relaxation cycle 是低 branch 慢行、上跳、高 branch 慢行、下跳四阶段。",
-          "period 多由 slow recovery 决定，fast jumps 决定 waveform edges。",
-          "active presynaptic cell 通过 inhibitory current移动 partner 的 effective V-nullcline。",
-          "half-center rhythm 需要 intrinsic recovery 与 synaptic switching 协同。"
+          "松弛振荡依次经历低分支慢移、上跳、高分支慢移、下跳。",
+          "慢恢复主要决定周期，快跳跃决定波形边缘。",
+          "活跃的突触前细胞通过抑制电流移动对侧的有效电压零流线。",
+          "半中心节律依赖内源恢复与突触切换的配合。"
         ],
         "derivation": {
-          "title": "四阶段 trajectory 的符号链",
-          "setup": "沿标注的 cycle 顺序，使用 \\(dV/dt\\) 与 \\(dN/dt\\) 的 signs 说明每段发生什么。",
+          "title": "四阶段轨迹的符号链",
+          "setup": "沿标注的周期顺序，使用 \\(dV/dt\\) 与 \\(dN/dt\\) 的符号说明每段发生什么。",
           "steps": [
             {
-              "title": "lower branch 慢行",
-              "explanation": "V 已贴近 attracting branch，N 的负向或正向慢变化把 state 推向 lower fold。"
+              "title": "下分支慢行",
+              "explanation": "V 已贴近吸引分支，N 的负向或正向慢变化把状态推向下折点。"
             },
             {
-              "title": "lower-to-upper jump",
-              "explanation": "fold 后附近不再有 low-voltage attracting solution，fast \\(dV/dt\\) 使 V 跳到 high branch。"
+              "title": "下-到上跳跃",
+              "explanation": "折点后附近不再有低电压吸引解，快 \\(dV/dt\\) 使 V 跳到高分支。"
             },
             {
-              "title": "upper branch 慢行",
-              "explanation": "高 V 促进 N activation，K current 增强，state 朝 upper fold 移动。"
+              "title": "上分支慢行",
+              "explanation": "高 V 促进 N 激活，K 电流增强，状态朝上折点移动。"
             },
             {
-              "title": "upper-to-lower jump",
-              "explanation": "到达 upper fold 后 high-voltage solution失去，fast V 向 low branch 跳回并重新开始。"
+              "title": "上-到下跳跃",
+              "explanation": "到达上折点后高电压解失去，快 V 向低分支跳回并重新开始。"
             }
           ],
           "symbolNotes": [
-            "“上/下 branch”描述 V 大小，“N 增/减”必须由具体 arrow field确认。",
-            "cycle orientation 依坐标与 parameters；不能脱离原方程套用顺时针。"
+            "“上/下分支”描述 V 大小，“N 增/减”必须由具体箭头局部场确认。",
+            "周期朝向依坐标与参数；不能脱离原方程套用顺时针。"
           ],
-          "unitsCheck": "phase-plane axes 是 mV 与 dimensionless N；trajectory time 不由图上几何距离单独决定。",
-          "limitCheck": "若 slow-fast separation 消失，cycle 仍可能存在，但“沿 branch 慢走、在 fold 快跳”的近似会变差。"
+          "unitsCheck": "相平面坐标轴是 mV 与无量纲 N；轨迹时间不由图上几何距离单独决定。",
+          "limitCheck": "若慢快分离消失，周期仍可能存在，但“沿分支慢走、在折点快跳”的近似会变差。"
         },
         "workedExample": {
-          "title": "预测增大 recovery time constant 的效果",
-          "problem": "保持 nullcline shapes 不变，将 \\(\\tau N\\) 从 100 ms 增至 300 ms。预测 period 与 fast jump duration 的主要变化。",
+          "title": "预测增大恢复时间常数的效果",
+          "problem": "保持零流线形状不变，将 \\(\\tau N\\) 从 100 ms 增至 300 ms。预测周期与快跳跃持续时间的主要变化。",
           "steps": [
-            "slow branch motion 大约变慢三倍，因为 \\(dN/dt\\) 缩小。",
-            "cycle 的大部分时间在 slow branches，因此 period 会显著变长，近似按 \\(\\tau N\\) 放大。",
-            "fast V jump 主要由 C 与 conductances 决定，duration 不应同步放大三倍。"
+            "慢分支运动大约变慢三倍，因为 \\(dN/dt\\) 缩小。",
+            "周期的大部分时间在慢分支，因此周期会显著变长，近似按 \\(\\tau N\\) 放大。",
+            "快 V 跳跃主要由 C 与电导决定，持续时间不应同步放大三倍。"
           ],
-          "result": "预期 frequency 下降，waveform 的 plateau 延长，而每次快速 jump 的边缘变化较小。",
-          "sanityCheck": "若参数改变导致 fixed point stability 或 branch range 变化，简单 proportional prediction 会失效；题目明确保持 shapes 不变。"
+          "result": "预期频率下降，波形的平台延长，而每次快速跳跃的边缘变化较小。",
+          "sanityCheck": "若参数改变导致固定点稳定性或分支范围变化，简单正比预测会失效；题目明确保持形状不变。"
         },
         "pitfalls": [
-          "把 fast jump 当作沿 nullcline运动；跳跃时 state 离开 slow manifold。",
-          "认为 mutual inhibition 单独就足够，不检查 recovery variable 与 threshold ordering。"
-        ]
+          "将快跳跃画成沿零流线运动，忽略此时轨迹已离开慢流形。",
+          "认为相互抑制必然振荡，没有检查恢复变量和阈值顺序。"
+        ],
+        "transition": "零流线确定固定点的位置，时间尺度差则决定轨迹如何移动。沿稳定分支慢移与跨分支快跳，可以组织成一个完整周期。"
       },
       {
         "id": "l20-m5",
-        "title": "Intrinsic release 与 intrinsic escape：谁触发换相",
+        "title": "释放与逃逸：哪一侧触发换相",
         "sourceRefs": [
           {
             "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -377,65 +380,66 @@
           }
         ],
         "paragraphs": [
-          "用 sharp threshold \\(S_{\\infty }(V)=0\\) when \\(V<VT\\)、1 when \\(V>VT\\) 简化 synapse。active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。free neuron 使用 \\(F(V,N)=0\\) 的 nullcline，inhibited neuron 使用包含 synaptic current 的 shifted nullcline。两套 geometry 的切换让“谁先跨门槛”成为可检查的机制判据。",
-          "release mechanism 中，active cell 在 upper branch 上随着 N 增加而逐渐失去维持 high V 的能力。它先向 low branch 跳并跌破 VT，synapse 关闭，于是 partner 被释放并跳到自己的 high state。换相原因是发放者 intrinsic adaptation；如果固定 active cell 的 recovery variable，phase switch 应被延迟或阻断。",
-          "escape mechanism 中，inhibited cell 在 low state 内 N 逐渐恢复，最终即使 inhibition 仍开着，也跨过受抑 nullcline 的 fold 或 separatrix，跳到 high state。它的上升随后抑制原 active cell。换相原因是被抑制者的 intrinsic recovery；改变 inhibited cell 的 recovery speed 会显著改变 phase duration。",
-          "真实 circuits 可处于 mixed regime：active cell 接近 release 时，partner 也接近 escape，noise 或 sensory input 决定谁先发生。实验上应在 phase transition 前追踪 both cells 的 voltage 与 recovery proxy，并用短 pulse 分别推 active cell向下或 inhibited cell向上。仅从 alternating spike raster 看不出 causal ordering。"
+          "用陡峭阈值简化突触：\\(S_{\\infty }(V)=0\\) 当 \\(V<VT\\)，而在 \\(V>VT\\) 时取 1。活跃细胞电压高于阈值时抑制对侧，降到阈值以下时解除抑制。未受抑细胞采用 \\(F(V,N)=0\\) 的零流线，受抑细胞则采用包含突触电流的偏移零流线。比较谁先跨过阈值，可以区分换相机制。",
+          "内源性释放（内源性释放）由活跃侧先停止触发。细胞沿高分支运动时，N 增加，逐渐失去维持高电压的能力；它先跳到低分支并跌破突触阈值，解除对侧抑制。对侧随后跃入高状态。如果固定活跃细胞的恢复变量，这种相位切换应被延迟或阻断。",
+          "内源性逃逸（内源性逃逸）由受抑侧先恢复触发。低状态中的 N 逐渐恢复，使细胞在抑制仍存在时越过受抑零流线的折点或分界线，跃入高状态，再抑制原先活跃的一侧。改变受抑细胞的恢复速度，应显著改变相位持续时间。",
+          "真实回路也可能处于混合状态：活跃侧接近释放时，对侧也接近逃逸，噪声或感觉输入决定谁先发生。实验需在切换前同时追踪两侧电压与恢复指标，并分别用短脉冲压低活跃侧或抬高受抑侧。只看交替发放图，无法识别因果先后。 判断触发侧时，应比较换相前的膜电位、慢变量和突触输入，而不只记录哪一侧先出现脉冲。改变慢变量速度或抑制强度后，周期变化也能帮助区分两种机制；相同的交替波形可能来自不同的参数区域。"
         ],
         "keyPoints": [
-          "sharp \\(S_{\\infty }\\) threshold 把 synapse 近似成 on/off switch。",
-          "release 由 active cell intrinsic termination 触发。",
-          "escape 由 inhibited cell intrinsic recovery crossing 触发。",
-          "mixed regimes 与 noise 可让两机制共同决定 phase。"
+          "陡峭的 \\(S_{\\infty }\\) 阈值把突触近似成开关。",
+          "释放由活跃细胞自身活动终止触发。",
+          "逃逸由受抑细胞恢复后突破抑制触发。",
+          "混合状态与噪声可使两种机制共同决定相位。"
         ],
         "derivation": {
-          "title": "用 threshold-crossing 顺序区分 release 与 escape",
-          "setup": "把换相前最后一段分成 presynaptic threshold、inhibited fold 与 synaptic-state变化三件事件。",
+          "title": "用阈值越界顺序区分释放与逃逸",
+          "setup": "把换相前最后一段分成突触前阈值、受抑制的折点与突触状态变化三件事件。",
           "steps": [
             {
-              "title": "定义 synaptic state",
-              "explanation": "当 \\(V_{\\mathrm{pre}}>VT\\) 时 inhibition on；\\(V_{\\mathrm{pre}}<VT\\) 时 inhibition off。",
+              "title": "定义突触状态",
+              "explanation": "当 \\(V_{\\mathrm{pre}}>VT\\) 时抑制开启；\\(V_{\\mathrm{pre}}<VT\\) 时抑制关闭。",
               "latex": "S_\\infty(V_{pre})\\approx H(V_{pre}-V_T)"
             },
             {
-              "title": "检查 release ordering",
-              "explanation": "若 active V 先跌破 VT，S 从 1 变 0，随后 partner 上跳，则是 release-dominant。"
+              "title": "检查释放顺序",
+              "explanation": "若活跃 V 先跌破 VT，S 从 1 变 0，随后对侧上跳，则是释放-主导。"
             },
             {
-              "title": "检查 escape ordering",
-              "explanation": "若 partner 在 S仍为1时先越过受抑 threshold并上跳，随后原 active cell被抑制，则是 escape-dominant。"
+              "title": "检查逃逸顺序",
+              "explanation": "若对侧在 S 仍为1 时先越过受抑阈值并上跳，随后原活跃细胞被抑制，则是逃逸-主导。"
             },
             {
               "title": "提出干预测试",
-              "explanation": "选择性减慢 active adaptation应延长 release cycle；减慢 inhibited recovery应延长 escape cycle。"
+              "explanation": "选择性减慢活跃适应应延长释放周期；减慢受抑制的恢复应延长逃逸周期。"
             }
           ],
           "symbolNotes": [
-            "VT 是 voltage threshold；\\(S_{\\infty }\\) 无量纲。",
-            "“先”需要相对于 time resolution 和 synaptic delay 定义。"
+            "VT 是电压阈值；\\(S_{\\infty }\\) 无量纲。",
+            "“先”需要相对于时间分辨率和突触延迟定义。"
           ],
-          "unitsCheck": "synaptic current \\(gS(V-Es)\\) 是 current；Heaviside S 只选择 conductance是否开启。",
-          "limitCheck": "若 synapse activation平滑而非 sharp，on/off时刻不唯一，应比较 conductance rise与intrinsic transitions的相对先后。"
+          "unitsCheck": "突触电流 \\(gS(V-Es)\\) 是电流；Heaviside S 只选择电导是否开启。",
+          "limitCheck": "若突触激活平滑而非 sharp，on/off 时刻不唯一，应比较电导 rise 与内在转移的相对先后。"
         },
         "workedExample": {
           "title": "从事件时间判断换相机制",
-          "problem": "记录显示 A active；\\(t=500 \\mathrm{ms}\\) 时 B 在 inhibition仍为强时突然 depolarize，\\(t=507 \\mathrm{ms} A\\) 被抑制，\\(t=512 \\mathrm{ms} A\\) 跌破 VT。判断主导机制。",
+          "problem": "记录显示 A 活跃；\\(t=500 \\mathrm{ms}\\) 时 B 在抑制仍为强时突然去极化，\\(t=507 \\mathrm{ms} A\\) 被抑制，\\(t=512 \\mathrm{ms} A\\) 跌破 VT。判断主导机制。",
           "steps": [
-            "B 的 depolarization 发生在 A 跌破 VT 之前，说明 B 不是等 inhibition关闭才上升。",
-            "B 上升后先抑制 A，符合 inhibited cell 主动逃出 low state。",
-            "因此标记为 escape-dominant，并应检验操纵 B recovery variable 是否改变 500 ms latency。"
+            "B 的去极化发生在 A 跌破 VT 之前，说明 B 不是等抑制关闭才上升。",
+            "B 上升后先抑制 A，符合受抑制的细胞主动逃出低状态。",
+            "因此标记为逃逸-主导，并应检验操纵 B 恢复变量是否改变 500 ms 潜伏期。"
           ],
-          "result": "事件顺序支持 intrinsic escape，而非 active-cell release。",
-          "sanityCheck": "需要确认 synaptic conductance在 B depolarize时确实仍高；仅用 A spikes可能低估真实 conductance offset。"
+          "result": "事件顺序支持内在逃逸，而非活跃细胞释放。",
+          "sanityCheck": "需要确认突触电导在 B 去极化时确实仍高；仅用 A 脉冲可能低估真实电导偏移。"
         },
         "pitfalls": [
-          "只根据哪一个 cell 先发 spike 命名机制，不看 synaptic state。",
-          "把 release 与 escape 当成互斥类别，忽略 mixed regime 与 stochastic switching。"
-        ]
+          "仅按哪个细胞先发放命名机制，没有查看抑制是否已解除。",
+          "将释放与逃逸当作绝对互斥的类别，忽略混合状态。"
+        ],
+        "transition": "相同的交替活动可以由不同事件触发：活跃侧先停止，或受抑侧先突破抑制。两侧细胞在换相前的状态，决定应如何解释机制。"
       },
       {
         "id": "l20-m6",
-        "title": "从 conductance oscillator 到 rate-adaptation half-center",
+        "title": "发放率与适应变量组成的半中心模型",
         "sourceRefs": [
           {
             "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -443,62 +447,63 @@
           }
         ],
         "paragraphs": [
-          "相同 geometry 可扩展到 firing-rate model：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a。一个最小 pair 可写 \\(\\tau _{h} dh_{i}/dt=-h_{i}+F(I_{i}-w h_{j}-a_{i})\\)，\\(\\tau a da_{i}/dt=-a_{i}+b h_{i}\\)。F 是 threshold-saturating nonlinearity，\\(w>0\\) 表示 reciprocal inhibition，b 控制 activity 如何积累 adaptation。",
-          "在某 cell active 时，\\(h_{i}\\)高使 \\(a_{i}\\)缓慢上升；上升的 adaptation降低 effective drive，最终 active rate下降。partner受到的 inhibition随之减弱并开始上升，随后抑制原 cell。这个过程对应 release-like switching。若 inhibited cell 的 \\(a_{j}\\)在低活动期下降，使其 effective excitability逐渐恢复并率先越过 threshold，则出现escape-like switching。",
-          "rate model 保留的是状态依赖 feedback、slow recovery 与 threshold geometry，不保留具体 Ca/K currents、spike waveform 或 reversal potentials。它适合研究population rhythm、phase relationship与parameter effects，却不能凭一个 rate variable判断某种ionic mechanism。模型层级降低后，参数含义也改变：\\(\\tau _{h}\\)是rate response time，不是 membrane capacitance直接给出的时间常数。",
-          "验证该模型应画 \\(h_{i}-a_{i}\\) nullclines、模拟 both rates、改变 w、b、\\(\\tau a\\)，并测试 phase reset。若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。rate-level fit能说明一种computational mechanism与数据相容，但不能唯一定位cellular conductances。"
+          "在发放率模型中，以发放率 h 替代膜电压，以适应或恢复变量 a 替代通道变量。最小双侧模型可写为 \\(\\tau _{h} dh_{i}/dt=-h_{i}+F(I_{i}-w h_{j}-a_{i})\\) 和 \\(\\tau a da_{i}/dt=-a_{i}+b h_{i}\\)。F 是具有阈值和饱和的非线性函数，\\(w>0\\) 表示相互抑制，b 控制活动积累适应的强度。",
+          "某侧活跃时，较高的 \\(h_{i}\\) 使 \\(a_{i}\\) 缓慢上升，适应增强又降低有效驱动，最终使该侧发放率下降。对侧受到的抑制减弱后开始升高，再反过来抑制原活跃侧，这对应释放式切换。若受抑侧的 \\(a_{j}\\) 在低活动期下降，使兴奋性先恢复并越过阈值，则对应逃逸式切换。",
+          "发放率模型保留状态相关反馈、慢恢复和阈值结构，并不逐项描述钙钾电流、脉冲波形或反转电位。它适合研究群体节律、相位关系与参数影响，不能只凭一个发放率变量识别离子机制。此处 \\(\\tau _{h}\\) 是发放率响应时间，也不能直接等同于由膜电容决定的时间常数。",
+          "检验时应绘制 \\(h_{i}-a_{i}\\) 零流线、模拟双侧活动，改变抑制强度、适应强度和 \\(\\tau a\\)，并比较相位重置。如果 F 完全线性且没有饱和，强反馈可能只产生衰减或发散；非线性才能调节振幅并支持稳定周期。拟合成功说明计算机制与数据相容，尚不能唯一定位细胞电导。"
         ],
         "keyPoints": [
-          "rate-adaptation model 至少需要 fast activity、slow recovery、reciprocal inhibition 与 nonlinearity。",
-          "adaptation积累可触发release，低activity期恢复可支持escape。",
-          "rate variable与voltage/gating variable不是同一生物量。",
-          "模型应通过 phase、frequency、reset 与 perturbation predictions检验。"
+          "模型需要快速活动、慢恢复、相互抑制与非线性。",
+          "适应积累可触发释放，低活动期的恢复可支持逃逸。",
+          "发放率与膜电压、通道门控变量是不同生物量。",
+          "应检验相位、频率、重置和干预预测。"
         ],
         "derivation": {
-          "title": "最小 rate half-center 的 feedback chain",
-          "setup": "从一对 fast rate equations与slow adaptation equations逐步追踪一次换相。",
+          "title": "最小发放率半中心振荡器的反馈链",
+          "setup": "从一对快发放率方程与慢适应方程逐步追踪一次换相。",
           "steps": [
             {
-              "title": "写 fast rates",
-              "explanation": "每个rate受到tonic input、partner inhibition与自身adaptation。",
+              "title": "写快发放率",
+              "explanation": "每个发放率受到持续输入、对侧抑制与自身适应。",
               "latex": "\\tau_h\\dot h_i=-h_i+F(I_i-w h_j-a_i)"
             },
             {
-              "title": "写 slow adaptation",
-              "explanation": "activity把\\(a_{i}\\)推高，缺少activity时\\(a_{i}\\)回落。",
+              "title": "写慢适应",
+              "explanation": "活动把\\(a_{i}\\)推高，缺少活动时\\(a_{i}\\)回落。",
               "latex": "\\tau_a\\dot a_i=-a_i+b h_i"
             },
             {
-              "title": "追踪active phase",
-              "explanation": "h1高使a1缓慢升高；h2被w h1压低且a2逐渐下降。"
+              "title": "追踪活跃相位",
+              "explanation": "h1 高使 a1 缓慢升高；h2 被 w h1 压低且 a2 逐渐下降。"
             },
             {
-              "title": "达到switch",
-              "explanation": "当cell1 effective drive跌破F threshold或cell2恢复到threshold，rates快速交换高低状态。"
+              "title": "达到切换条件",
+              "explanation": "当细胞1 有效驱动跌破 F 阈值或细胞2 恢复到阈值，发放率快速交换高低状态。"
             }
           ],
           "symbolNotes": [
-            "h可用normalized rate或Hz，取决于F；a与I必须使用同一effective-input单位。",
-            "\\(\\tau a\\)应显著大于\\(\\tau _{h}\\)才有清楚fast-slow alternation。"
+            "h 可用归一化的发放率或 Hz，取决于 F；a 与 I 必须使用同一有效-输入单位。",
+            "\\(\\tau a\\)应显著大于\\(\\tau _{h}\\)才有清楚快慢交替。"
           ],
-          "unitsCheck": "若h用Hz而F输出Hz，方程各项为Hz；除以\\(\\tau\\)后是Hz/s。a与I、w h必须可相加。",
-          "limitCheck": "\\(b=0\\)时activity不再积累adaptation；若单纯reciprocal inhibition没有其他slow process，稳定交替通常失去。"
+          "unitsCheck": "若 h 用 Hz 而 F 输出 Hz，方程各项为 Hz；除以\\(\\tau\\)后是 Hz/s。a 与 I、w h 必须可相加。",
+          "limitCheck": "\\(b=0\\)时活动不再积累适应；若单纯倒数抑制没有其他慢过程，稳定交替通常失去。"
         },
         "workedExample": {
           "title": "用参数变化预测节律",
-          "problem": "模型原有\\(\\tau _{h}=20 \\mathrm{ms}\\)、\\(\\tau a=400 \\mathrm{ms}\\)。只把\\(\\tau a\\)加倍到800 ms，其他不变且cycle仍存在。预测频率与phase关系。",
+          "problem": "模型原有\\(\\tau _{h}=20 \\mathrm{ms}\\)、\\(\\tau a=400 \\mathrm{ms}\\)。只把\\(\\tau a\\)加倍到800 ms，其他不变且周期仍存在。预测频率与相位关系。",
           "steps": [
-            "slow adaptation与recovery都变慢，active phase通常延长。",
-            "两个cells结构对称，所以仍预期近似anti-phase，而不是产生固定phase bias。",
-            "period主要由slowprocess决定，近似增加；frequency因此下降，但不要求精确减半。"
+            "慢适应与恢复都变慢，活跃相位通常延长。",
+            "两个细胞结构对称，所以仍预期近似 anti-相位，而不是产生固定相位偏差。",
+            "周期主要由 slowprocess 决定，近似增加；频率因此下降，但不要求精确减半。"
           ],
-          "result": "预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为switch threshold与nonlinear F也参与。",
-          "sanityCheck": "\\(\\tau _{h}\\)没有改变，所以快速rate transition的edge不应与plateau同倍拉长。"
+          "result": "预期保持交替、周期变长、频率下降；精确比例需数值模拟，因为 切换阈值与非线性 F 也参与。",
+          "sanityCheck": "\\(\\tau _{h}\\)没有改变，所以快速发放率转移的边缘不应与平台同倍拉长。"
         },
         "pitfalls": [
-          "把rate-model的a直接命名为某一特定K channel，而没有额外实验。",
-          "只看一条rate trace就判断half-center，未验证partner anti-phase与perturbation response。"
-        ]
+          "缺少额外实验时，将适应变量直接等同于某种钾通道。",
+          "只看一侧活动就判定半中心机制，没有验证双侧反相和干预响应。"
+        ],
+        "transition": "两种换相机制都依赖快速活动、慢恢复和抑制切换。保留这些关系，就能用发放率与适应变量构建更简化的半中心模型。"
       }
     ]
   },
@@ -507,9 +512,9 @@
       "id": "L20-FIG-A1",
       "lecture": 20,
       "moduleId": "l20-m4",
-      "title": "Morris–Lecar nullclines 与 relaxation cycle",
-      "alt": "电压恢复相平面中的 N 形电压 nullcline、S 形恢复 nullcline、不稳定交点和环绕交点的 relaxation trajectory",
-      "caption": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。闭环的长段对应慢 recovery，近水平跨越对应快 voltage transition；曲线是这里机制的归一化示意。",
+      "title": "Morris–Lecar 零流线与弛豫振荡周期",
+      "alt": "电压恢复相平面中的 N 形电压零流线、S 形恢复零流线、不稳定交点和环绕交点的弛豫轨迹",
+      "caption": "两条零流线的交点是候选平衡点；这里交点不稳定，轨迹便沿电压零流线的外侧吸引支缓慢移动，并在折点附近快速跳到另一支。闭环的长段对应慢恢复，近水平跨越对应快电压转移；曲线是这里机制的归一化示意。",
       "sourceRefs": [
         {
           "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -522,11 +527,11 @@
       ],
       "schematic": true,
       "kind": "state-space",
-      "xLabel": "membrane voltage V（low → high）",
-      "yLabel": "recovery variable N",
+      "xLabel": "膜电压 V（低 → 高）",
+      "yLabel": "恢复变量 N",
       "nullclines": [
         {
-          "label": "V-nullcline",
+          "label": "电压零流线",
           "points": [
             [
               8,
@@ -603,7 +608,7 @@
       ],
       "trajectories": [
         {
-          "label": "relaxation cycle",
+          "label": "弛豫振荡周期",
           "points": [
             [
               24,
@@ -652,7 +657,7 @@
         {
           "x": 50,
           "y": 40,
-          "label": "unstable fixed point",
+          "label": "不稳定固定点",
           "stable": false
         }
       ],
@@ -702,7 +707,7 @@
     "思考题：nullcline intersection 是什么？"
   ],
   "synthesis": [
-    "阻断 synapses 后 rhythm 是否保留，可区分 intrinsic pacemaker 与 network-generated rhythm 的候选机制。线性 two-neuron complex eigenvalues 只产生 damped 或 growing oscillatory components；稳定的 autonomous limit cycle 需要 nonlinearity。Morris-Lecar 的 fast voltage/slow recovery nullclines 产生 relaxation oscillation；互抑 half-center 可通过 intrinsic release 或 escape 交替。"
+    "阻断突触后节律是否保留，有助于区分单细胞起搏与网络生成节律。双神经元线性系统的复特征值描述振荡分量，但其振幅可能衰减或增长；稳定的自主极限环需要非线性。Morris–Lecar 模型通过快电压与慢恢复变量产生弛豫振荡，互抑网络则可通过释放或逃逸机制交替活动。"
   ],
   "workedExamples": [
     "7.1 synaptic block diagnostic",
@@ -716,10 +721,10 @@
     {
       "id": "L20-F01",
       "lecture": 20,
-      "name": "complex mode",
+      "name": "复特征模态",
       "expression": "λ = a ± ib",
       "latex": "\\lambda=a\\pm ib",
-      "conditions": "a controls envelope, b frequency",
+      "conditions": "a 控制包络，b 控制振荡频率",
       "sectionId": "l20-m2",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 2
@@ -727,10 +732,10 @@
     {
       "id": "L20-F02",
       "lecture": 20,
-      "name": "Euler decomposition",
+      "name": "欧拉公式的分解",
       "expression": "e(a+ib)t = eat (cos bt + i sin bt)",
       "latex": "e^{(a+ib)t}=e^{at}\\left(\\cos(bt)+i\\sin(bt)\\right)",
-      "conditions": "complex representation",
+      "conditions": "采用复数表示",
       "sectionId": "l20-m2",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 2
@@ -738,10 +743,10 @@
     {
       "id": "L20-F03",
       "lecture": 20,
-      "name": "two-dimensional conductance model",
+      "name": "二维电导模型",
       "expression": "V̇ = F (V, N ), Ṅ = G(V, N )",
       "latex": "\\dot V=F(V,N),\\qquad \\dot N=G(V,N)",
-      "conditions": "fast-slow variables",
+      "conditions": "同时包含快变量与慢变量",
       "sectionId": "l20-m3",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 3
@@ -749,7 +754,7 @@
     {
       "id": "L20-F04",
       "lecture": 20,
-      "name": "V-nullcline",
+      "name": "电压零流线",
       "expression": "F (V, N ) = 0",
       "latex": "F(V,N)=0",
       "conditions": "\\(dV/dt=0\\)",
@@ -760,7 +765,7 @@
     {
       "id": "L20-F05",
       "lecture": 20,
-      "name": "N-nullcline",
+      "name": "恢复变量零流线",
       "expression": "G(V, N ) = 0",
       "latex": "G(V,N)=0",
       "conditions": "\\(dN/dt=0\\)",
@@ -771,10 +776,10 @@
     {
       "id": "L20-F06",
       "lecture": 20,
-      "name": "sharp synaptic threshold approximation",
+      "name": "突触阈值的陡峭近似",
       "expression": "S∞ (V ) = H(V − VT )",
       "latex": "S_{\\infty}(V)=H(V-V_T)",
-      "conditions": "idealized switch",
+      "conditions": "采用理想化的开关规则",
       "sectionId": "l20-m5",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 5
@@ -786,7 +791,7 @@
       "lecture": 20,
       "zh": "中央模式发生器",
       "en": "central pattern generator, CPG",
-      "definition": "无需周期 sensory drive 也能产生 rhythmic motor pattern 的 neural circuit。",
+      "definition": "无需周期性感觉输入，也能产生节律性运动输出的神经回路。",
       "sectionId": "l20-m2",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 2
@@ -796,7 +801,7 @@
       "lecture": 20,
       "zh": "起搏细胞",
       "en": "pacemaker neuron",
-      "definition": "依 intrinsic dynamics 自发 rhythmic。",
+      "definition": "依靠内源性动力学自发产生节律的细胞。",
       "sectionId": "l20-m1",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 1
@@ -806,7 +811,7 @@
       "lecture": 20,
       "zh": "半中心振荡器",
       "en": "half-center oscillator",
-      "definition": "两个互抑 units 交替 active 的 network oscillator。",
+      "definition": "由两个互相抑制、交替活跃的单元构成的网络振荡器。",
       "sectionId": "l20-m1",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 1
@@ -816,7 +821,7 @@
       "lecture": 20,
       "zh": "复特征值",
       "en": "complex eigenvalue",
-      "definition": "同时编码 exponential envelope 与 oscillatory phase 的 eigenvalue。",
+      "definition": "同时描述指数包络与振荡相位变化的特征值。",
       "sectionId": "l20-m2",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 2
@@ -826,7 +831,7 @@
       "lecture": 20,
       "zh": "Morris-Lecar 模型",
       "en": "Morris-Lecar model",
-      "definition": "简化的 conductance-based two-variable neuron model。",
+      "definition": "用两个状态变量简化描述电导动力学的神经元模型。",
       "sectionId": "l20-m6",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 6
@@ -836,7 +841,7 @@
       "lecture": 20,
       "zh": "相平面",
       "en": "phase plane",
-      "definition": "二维 state space 中的 trajectories/nullclines。",
+      "definition": "在二维状态空间中表示轨迹和零流线。",
       "sectionId": "l20-m6",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 6
@@ -846,7 +851,7 @@
       "lecture": 20,
       "zh": "松弛振荡",
       "en": "relaxation oscillation",
-      "definition": "slow drift 与 fast jumps 交替的 limit cycle。",
+      "definition": "缓慢漂移与快速跳跃交替出现的周期运动。",
       "sectionId": "l20-m3",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 3
@@ -856,7 +861,7 @@
       "lecture": 20,
       "zh": "内在释放",
       "en": "intrinsic release",
-      "definition": "active neuron 停止后解除 inhibition。",
+      "definition": "活跃神经元先停止活动，从而解除对侧抑制的换相机制。",
       "sectionId": "l20-m1",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 1
@@ -866,7 +871,7 @@
       "lecture": 20,
       "zh": "内在逃逸",
       "en": "intrinsic escape",
-      "definition": "inhibited neuron 先恢复并跳出 inhibition。",
+      "definition": "受抑神经元先恢复并越过抑制约束的换相机制。",
       "sectionId": "l20-m1",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 1
@@ -876,21 +881,21 @@
       "lecture": 20,
       "zh": "极限环",
       "en": "limit cycle",
-      "definition": "吸引附近 trajectories 的 closed periodic orbit。",
+      "definition": "孤立的闭合周期轨道；稳定时会吸引附近轨迹。",
       "sectionId": "l20-m2",
       "sourceFile": "Lecture20-CentralPatternGenerators.pdf",
       "sourcePage": 2
     }
   ],
   "commonTraps": [
-    "所有 rhythmic activity 都称 CPG。",
-    "complex eigenvalues 自动等于 sustained oscillation。",
-    "忽略 full eigenvalue 的 real part。",
-    "nullcline 当作 trajectory。",
-    "fixed point intersection 存在就认为 stable。",
-    "release 与 escape 只按表面 firing order 区分，而不看哪个 intrinsic transition 触发 switch。",
-    "把 sensory feedback 排除在真实 locomotor rhythm 外。",
-    "需避免把所有 rhythmic activity 都归为 CPG，也需避免把 damped linear oscillation 与 autonomous nonlinear oscillator 混为一谈。"
+    "把所有节律活动都称为中枢模式发生器（CPG）。",
+    "看到复特征值就认定系统会持续振荡。",
+    "只看特征值的虚部，忽略完整动力系统特征值的实部决定振幅增长或衰减。",
+    "把零流线当成状态随时间演化的轨迹。",
+    "看到零流线存在交点，就认定该固定点稳定。",
+    "只按表面的发放顺序区分释放与逃逸，未识别是哪一个内在状态转变触发了切换。",
+    "将感觉反馈排除在真实运动节律的形成与调节之外。",
+    "把衰减的线性振荡与自主非线性振荡器混为一谈，并将所有节律活动都归为 CPG。"
   ],
   "errata": [
     {
@@ -902,7 +907,7 @@
       "sourcePage": 2,
       "sectionId": "l20-m2",
       "originalIssue": "这里 的线性 oscillations 含 \\(e^{-t/\\tau }\\) envelope，是 damped components，不是 autonomous sustained CPG。",
-      "explanation": "因此\"有 complex eigenvalues\"与\"有 sustained CPG rhythm\"不是同一结论。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     },
     {
@@ -926,7 +931,7 @@
       "sourcePage": 6,
       "sectionId": "l20-m6",
       "originalIssue": "这里 仅指出 firing-rate model 可复现相同 geometry，未给唯一方程。",
-      "explanation": "相同 geometry 可扩展到 firing-rate model：把 V 换成 firing rate h，把 N 换成 adaptation 或 recovery variable a。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     }
   ],
@@ -943,37 +948,37 @@
         }
       ],
       "conceptTags": [
-        "节律来源：pacemaker、follower 与 network half-center"
+        "起搏细胞与半中心节律"
       ],
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "如果 block 后两 cells 都停止交替但各自仍以不同频率振荡，能否称为纯 network-generated rhythm？",
+      "stem": "如果突触阻断后两细胞都停止交替但各自仍以不同频率振荡，能否称为纯网络产生的节律？",
       "choices": [
         {
           "id": "a",
-          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+          "text": "是纯网络节律，因为一旦交替消失，就说明细胞原本完全没有自主振荡能力。"
         },
         {
           "id": "b",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "不是纯网络节律；耦合组织交替，而阻断后保留的各自振荡说明细胞也有内在节律能力。"
         },
         {
           "id": "c",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "是纯网络节律；两种频率只表示阻断前的共同相位被重新设定，阻断后的持续振荡也必然来自原有互抑制。"
         },
         {
           "id": "d",
-          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "两侧仍振荡说明它们只是外部起搏器的跟随者，因此可以排除任何内在振荡贡献。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Relaxation cycle 与互抑 half-center 的相位几何”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“从 conductance oscillator 到 rate-adaptation half-center”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“线性双神经元系统的复数模态与阻尼振荡”中的另一组变量与条件，不能由题干推出。"
+        "a": "交替与单细胞振荡不是同一个观测；阻断后仍振荡正是内在节律能力的证据。",
+        "c": "若阻断完整，原有互抑制不能继续驱动节律；频率分离与耦合解除后的内在振荡相符。",
+        "d": "该结果并未建立外部起搏器；需控制残余驱动，但不能由持续振荡直接排除内在能力。"
       },
-      "explanation": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。 阻断药可能改变 intrinsic conductances，block 可能不完全，electrical coupling 可能保留，sensory feedback 也可能在 intact preparation 中参与。"
+      "explanation": "不能。结果说明协调的交替依赖网络耦合，但每个细胞仍有内源性振荡能力；整体机制是内源性振荡器加耦合。 如果原本交替活动的两个细胞在阻断后都失去节律，则支持网络产生节律的候选机制。"
     },
     {
       "id": "L20-Q02",
@@ -987,37 +992,37 @@
         }
       ],
       "conceptTags": [
-        "线性双神经元系统的复数模态与阻尼振荡"
+        "复数模态与阻尼振荡"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "若 full eigenvalues 为 \\(0.2\\pm 5i s^{-1}\\)，轨迹会怎样？",
+      "stem": "若完整系统的特征值为 \\(0.2\\pm 5i s^{-1}\\)，轨迹会怎样？",
       "choices": [
         {
           "id": "a",
-          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+          "text": "轨迹向内旋转并衰减，因为虚部远大于实部，足以抵消正实部造成的增长。"
         },
         {
           "id": "b",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "轨迹立即成为稳定闭合环；非零虚部固定振荡频率，正实部同时把振幅稳定在唯一大小。"
         },
         {
           "id": "c",
-          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "轨迹旋转且振幅指数增长，形成不稳定的向外螺旋；是否最终成环还取决于非线性。"
         },
         {
           "id": "d",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "状态只作单调指数增长而不旋转，因为任何正实部都会让虚部失去动力学作用。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Relaxation cycle 与互抑 half-center 的相位几何”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“节律来源：pacemaker、follower 与 network half-center”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“从 conductance oscillator 到 rate-adaptation half-center”中的另一组变量与条件，不能由题干推出。"
+        "a": "实部决定包络增长或衰减，虚部决定旋转频率；二者不能这样相减。",
+        "b": "正实部使线性解持续放大，不提供幅度稳定机制。稳定周期需要额外非线性条件。",
+        "d": "复共轭特征值的虚部仍产生旋转；正实部只改变旋转过程中的幅度包络。"
       },
-      "explanation": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。 若 full real part 为正，radius 会放大成 outward spiral；若恰为零，线性系统出现 neutrally stable closed orbits，却没有 amplitude selection，noise 会让 radius 漂移。"
+      "explanation": "它会旋转且包络按 \\(e^{0.2t}\\) 增长，是向外螺旋；线性模型不稳定，后续是否形成极限环取决于非线性饱和。 若完整系统的实部为正，则形成向外螺旋；若实部恰为零，线性系统有中性稳定的闭轨，却不能选择振幅，噪声可使半径漂移。"
     },
     {
       "id": "L20-Q03",
@@ -1031,37 +1036,37 @@
         }
       ],
       "conceptTags": [
-        "Morris-Lecar 电流平衡、nullclines 与固定点"
+        "Morris–Lecar 模型的零流线与固定点"
       ],
       "difficulty": 2,
-      "type": "figure",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 nullcline 不是神经元实际运行轨迹？",
+      "stem": "为什么零流线不是神经元实际运行轨迹？",
       "choices": [
         {
           "id": "a",
-          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+          "text": "零流线已经是轨迹，只是必须把曲线上的每一点按横坐标顺序连接，才能看出实际运动方向。"
         },
         {
           "id": "b",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "每个零流线点都让两个变量同时停止，因此轨迹一碰到任一零流线就会永久停在那里。"
         },
         {
           "id": "c",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "零流线不是轨迹，唯一原因是神经元必有噪声；没有噪声时任何初值都会沿同一条零流线运动。"
         },
         {
           "id": "d",
-          "text": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。"
+          "text": "零流线只让一个瞬时导数为零；另一变量仍可变化，只有两条零流线的交点才可能静止。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Relaxation cycle 与互抑 half-center 的相位几何”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“节律来源：pacemaker、follower 与 network half-center”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“从 conductance oscillator 到 rate-adaptation half-center”中的另一组变量与条件，不能由题干推出。"
+        "a": "点集的几何顺序不是时间顺序；轨迹方向必须由两个导数组成的向量场决定。",
+        "b": "单条零流线只约束一个导数；另一导数不为零时，状态仍会离开该点。",
+        "c": "即使完全确定性的二维系统，另一个非零导数也会使状态穿过零流线；噪声不是必要原因。"
       },
-      "explanation": "nullcline 只是某一 derivative 瞬时为零的点集；另一 variable 通常仍在变化，所以 state 会穿过或沿附近移动，只有两线交点才可静止。 若交点附近 arrows 汇入，fixed point stable；若一方向汇入另一方向离开，则是 saddle；若整体离开，则 unstable。"
+      "explanation": "零流线只是某一导数瞬时为零的点集；另一变量通常仍在变化，所以状态会穿过或沿附近移动，只有两线交点才可静止。 两线交点同时令两个导数为零，是平衡点。"
     },
     {
       "id": "L20-Q04",
@@ -1075,37 +1080,37 @@
         }
       ],
       "conceptTags": [
-        "Relaxation cycle 与互抑 half-center 的相位几何"
+        "松弛振荡与互抑制的相平面"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么两个互抑 cells 可以在各自单独不振荡时产生 network rhythm？",
+      "stem": "为什么两个互抑细胞可以在各自单独不振荡时产生网络节律？",
       "choices": [
         {
           "id": "a",
-          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+          "text": "互抑制切换有效零流线，慢恢复让两侧轮流到达切换条件；合适参数下耦合可产生周期。"
         },
         {
           "id": "b",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "互抑制只需把两侧电压同时固定在低值，就能产生周期；恢复变量是否随时间变化并不重要。"
         },
         {
           "id": "c",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "每次抑制都会永久提高受抑制侧的输入电流；电流无限积累后，任何互抑制权重都必然形成稳定周期。"
         },
         {
           "id": "d",
-          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "两侧的静止解一经连接就自动消失，因为加入任何负权重都会使所有平衡点失去稳定性。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“节律来源：pacemaker、follower 与 network half-center”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“从 conductance oscillator 到 rate-adaptation half-center”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“线性双神经元系统的复数模态与阻尼振荡”中的另一组变量与条件，不能由题干推出。"
+        "b": "同时静止于低状态不是交替节律；需要随时间推进到下一转换的机制。",
+        "c": "抑制不是永久正电流累积；节律需要合适的恢复、阈值与切换顺序，并非任意参数均成立。",
+        "d": "负权重本身不能保证固定点消失或失稳；应分析连接后的零流线和向量场。"
       },
-      "explanation": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。 即使单独 cells 的 fixed point stable，mutual inhibition 与 recovery 也可能让 pair oscillate；反之，不是任意 mutual inhibition 都会振荡。"
+      "explanation": "对侧细胞的活跃与静默会改变抑制输入，从而切换有效零流线；慢恢复变量使状态交替到达切换条件，两者结合便可形成周期性活动。 突触前细胞 j 处于高状态时，\\(S_{\\infty }\\approx 1\\)，使另一细胞的电压零流线移向受抑位置；处于低状态时，\\(S_{\\infty }\\approx 0\\)，另一细胞恢复未受抑制的零流线。"
     },
     {
       "id": "L20-Q05",
@@ -1119,37 +1124,37 @@
         }
       ],
       "conceptTags": [
-        "Intrinsic release 与 intrinsic escape：谁触发换相"
+        "释放与逃逸：哪一侧触发换相"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "若 active cell 先跌破 VT，20 ms 后 partner才上跳，这个延迟是否反驳 release？",
+      "stem": "若活跃细胞先跌破 VT，20 ms 后对侧才上跳，这个延迟是否反驳内源性释放机制？",
       "choices": [
         {
           "id": "a",
-          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+          "text": "反驳；内源性释放要求两侧同时跳变，任何延迟都证明是内源性逃逸。"
         },
         {
           "id": "b",
-          "text": "不反驳。release只要求 inhibition解除是上游触发；partner仍需按自身 membrane/recovery dynamics离开低状态，出现有限latency很合理。"
+          "text": "不反驳；解除抑制可以先触发转换，另一侧仍需有限的膜与恢复时间才能离开低状态。"
         },
         {
           "id": "c",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "反驳；只要受抑制侧在解除抑制后才发放，就说明它必然先完成了内在逃逸，主动侧的下降只是结果。"
         },
         {
           "id": "d",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "不反驳，但只有假定解除抑制后的膜电压不受自身动力学影响，延迟全部来自记录装置，才能保留内源性释放。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Relaxation cycle 与互抑 half-center 的相位几何”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“节律来源：pacemaker、follower 与 network half-center”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“从 conductance oscillator 到 rate-adaptation half-center”中的另一组变量与条件，不能由题干推出。"
+        "a": "内源性释放定义的是先后因果触发关系，不是两个有限速率过程必须同时完成。",
+        "c": "题干给出的时间顺序与这个反向因果推断不符；需要观察解除抑制前的状态才能判断内源性逃逸。",
+        "d": "膜与慢恢复动力学本身就能产生延迟，无需把它全部归为测量误差。"
       },
-      "explanation": "不反驳。release只要求 inhibition解除是上游触发；partner仍需按自身 membrane/recovery dynamics离开低状态，出现有限latency很合理。 active cell 的 V 超过 VT 时抑制 partner；跌破 VT 时抑制迅速解除。"
+      "explanation": "不反驳。内源性释放要求抑制解除是触发换相的上游事件；对侧细胞仍需按自身膜电位和恢复变量的动力学离开低状态，因此可以有有限潜伏期。 如果固定活跃细胞的恢复变量，这种相位切换应被延迟或阻断。"
     },
     {
       "id": "L20-Q06",
@@ -1163,37 +1168,37 @@
         }
       ],
       "conceptTags": [
-        "从 conductance oscillator 到 rate-adaptation half-center"
+        "发放率与适应变量组成的半中心模型"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么只有 h1、h2 两个线性rate变量通常不足以产生稳定half-center limit cycle？",
+      "stem": "为什么只有 h1、h2 两个线性发放率变量通常不足以产生稳定半中心振荡器极限环？",
       "choices": [
         {
           "id": "a",
-          "text": "inhibition 会在 partner active 与 inactive 时切换 effective nullcline；slow recovery 使每个 cell 依次到达 transition，从而由 coupling 创造周期性 state switching。"
+          "text": "两个特征值有虚部就能把振幅吸引到唯一值，慢变量没有作用。"
         },
         {
           "id": "b",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "线性系统的问题只是神经元数量不足；复制成更多完全线性的单元，无需非线性也一定会得到唯一稳定极限环。"
         },
         {
           "id": "c",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "线性状态缺少吸引性的幅度调节；慢适应配合非线性，才可能支持有界的交替周期。"
         },
         {
           "id": "d",
-          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "给两个线性率方程加入任意恒定输入就足够；恒定输入会在每个周期自动改变符号并维持交替。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Relaxation cycle 与互抑 half-center 的相位几何”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“节律来源：pacemaker、follower 与 network half-center”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“线性双神经元系统的复数模态与阻尼振荡”中的另一组变量与条件，不能由题干推出。"
+        "a": "纯虚特征值的闭合轨道依赖初值而非吸引性周期；负或正实部则使幅度衰减或增长。",
+        "b": "增加线性维度不提供吸引到有限非零振幅的机制；线性组合仍由各模式的增长率控制。",
+        "d": "常量输入不会周期性换号；它可移动线性固定点，却不自动建立相位切换。"
       },
-      "explanation": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。 若 F完全线性且没有saturation，强feedback可能只产生decay或divergence；nonlinearity限制amplitude并允许stable cycle。"
+      "explanation": "线性系统只能给衰减、中性旋转或增长，缺少慢变量与振幅调节；适应或恢复变量与非线性函数 F提供换相与有界周期。 在发放率模型中，以发放率 h 替代膜电压，以适应或恢复变量 a 替代通道变量。"
     },
     {
       "id": "L20-Q07",
@@ -1207,37 +1212,37 @@
         }
       ],
       "conceptTags": [
-        "Morris–Lecar nullclines 与 relaxation cycle"
+        "Morris–Lecar 零流线与弛豫振荡周期"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Morris-Lecar nullclines 与 relaxation cycle\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"Morris-Lecar 零流线与弛豫振荡周期\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "不能。结果说明 coordinated alternation 依赖 network coupling，但每个 cell 仍有 intrinsic oscillatory capacity；整体机制是 intrinsic oscillators 加 coupling。"
+          "text": "零流线就是时间轨迹；交点稳定，因此状态沿闭环反复经过交点。"
         },
         {
           "id": "b",
-          "text": "线性系统只能给decay、neutral rotation或growth，缺少slowstate与amplitude regulation；adaptation/recovery和nonlinearF提供换相与有界cycle。"
+          "text": "近水平跨越表示电压几乎不变而恢复变量快速跃迁；沿外分支的长段才是电压以相同速度持续增长的过程。"
         },
         {
           "id": "c",
-          "text": "它会旋转且 envelope 按 \\(e^{0.2t}\\) 增长，是 outward spiral；线性模型不稳定，后续是否形成 limit cycle 取决于 nonlinear saturation。"
+          "text": "闭合环只由初值决定；图中每个点都使两个导数为零，所以轨迹不需要任何快慢变化就能持续绕行。"
         },
         {
           "id": "d",
-          "text": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。"
+          "text": "外侧分支上的慢恢复与折点附近的快速电压跳跃组成循环；图中交点不稳定，轨迹不在那里停下。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "图中没有“节律来源：pacemaker、follower 与 network half-center”所需的变量与条件。",
-        "b": "图中没有“从 conductance oscillator 到 rate-adaptation half-center”所需的变量与条件。",
-        "c": "图中没有“线性双神经元系统的复数模态与阻尼振荡”所需的变量与条件。"
+        "a": "零流线是导数为零的点集，不是时间分段；图中交点不稳定，闭环绕过它。",
+        "b": "横轴是电压；近水平跨越主要改变电压，而外分支段体现慢恢复，不是恒速电压增长。",
+        "c": "两个导数同时为零只能静止，不能沿闭环运动；循环来自沿途非零的向量场。"
       },
-      "explanation": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。闭环的长段对应慢 recovery，近水平跨越对应快 voltage transition；曲线是这里机制的归一化示意。"
+      "explanation": "两条零流线的交点是候选平衡点；这里交点不稳定，轨迹便沿电压零流线的外侧吸引支缓慢移动，并在折点附近快速跳到另一支。闭环的长段对应慢恢复，近水平跨越对应快电压转移；曲线是这里机制的归一化示意。"
     }
   ]
 }

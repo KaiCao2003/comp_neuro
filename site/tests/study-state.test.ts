@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { applyAttempt, applyExposure, balanceQuestionPoolByLecture, createEmptyStudyState, isLectureSessionReusable, normalizeStudyState, seededShuffle, selectQuestionIds } from '../lib/study-state';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { applyAttempt, applyExposure, balanceQuestionPoolByLecture, beginLectureSession, clearStudyState, createEmptyStudyState, isLectureSessionReusable, loadStudyState, normalizeStudyState, seededShuffle, selectQuestionIds } from '../lib/study-state';
 import type { Question } from '../lib/types';
 
 const makeQuestion = (index: number): Question => ({
@@ -81,6 +81,17 @@ describe('seeded selection', () => {
     expect(selected).toContain('Q0');
   });
 
+  it('fills all requested slots after reserving delayed misses in a homogeneous pool', () => {
+    const similarQuestions = pool.slice(0, 10).map((question) => ({ ...question, conceptTags: ['same'], type: 'concept' as const, difficulty: 1 as const }));
+    let state = createEmptyStudyState('install');
+    state = applyAttempt(state, 'Q0', false, '2026-08-20T12:00:00.000Z');
+    state = applyAttempt(state, 'Q1', false, '2026-08-20T12:00:00.000Z');
+    const selected = selectQuestionIds(similarQuestions, state, 5, 'mixed', new Date('2026-08-23T12:00:00.000Z'));
+    expect(selected).toHaveLength(5);
+    expect(new Set(selected).size).toBe(5);
+    expect(selected).toEqual(expect.arrayContaining(['Q0', 'Q1']));
+  });
+
   it('records exposure without inventing an answer attempt', () => {
     const state = applyExposure(createEmptyStudyState('install'), 'Q0', '2026-08-23T12:00:00.000Z');
     expect(state.questions.Q0).toMatchObject({ seenCount: 1, attempts: 0, correctCount: 0, incorrectCount: 0 });
@@ -97,5 +108,32 @@ describe('seeded selection', () => {
     const session = { lecture: 4, visitNumber: 2, dayBucket: '2026-08-23', seed: 's', startedAt: '2026-08-23T12:00:00.000Z' };
     expect(isLectureSessionReusable(session, 4, new Date('2026-08-23T13:59:59.000Z'))).toBe(true);
     expect(isLectureSessionReusable(session, 4, new Date('2026-08-23T14:00:00.000Z'))).toBe(false);
+  });
+});
+
+describe('reading history', () => {
+  afterEach(() => {
+    clearStudyState();
+    vi.unstubAllGlobals();
+  });
+
+  it('continues the latest opened lecture even when its existing session is reused', () => {
+    const localValues = new Map<string, string>();
+    const sessionValues = new Map<string, string>();
+    const storage = (values: Map<string, string>) => ({
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+    });
+    vi.stubGlobal('window', {});
+    vi.stubGlobal('localStorage', storage(localValues));
+    vi.stubGlobal('sessionStorage', storage(sessionValues));
+    const first = beginLectureSession(3, new Date('2026-08-23T12:00:00.000Z'));
+    beginLectureSession(5, new Date('2026-08-23T12:01:00.000Z'));
+    const revisit = beginLectureSession(3, new Date('2026-08-23T12:02:00.000Z'));
+    expect(revisit.session.seed).toBe(first.session.seed);
+    expect(revisit.state.lectures['3'].visitCount).toBe(1);
+    expect(loadStudyState().recentLecture).toBe(3);
+    expect(loadStudyState().lectures['3'].lastVisitedAt).toBe('2026-08-23T12:02:00.000Z');
   });
 });

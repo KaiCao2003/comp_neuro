@@ -31,6 +31,7 @@ import lecture25 from '@/content/lectures/25.json';
 import lecture26 from '@/content/lectures/26.json';
 import lecture27 from '@/content/lectures/27.json';
 import type { CourseSummary, FigureIndexEntry, Formula, GlossaryEntry, Lecture, Question, SearchRecord } from './types';
+import { buildSearchIndex } from './search-index';
 
 export const course = (courseJson as unknown as CourseSummary[]).filter((lecture) => lecture.lecture !== 1);
 export const lectures = [lecture02, lecture03, lecture04, lecture05, lecture06, lecture07, lecture08, lecture09, lecture10, lecture11, lecture12, lecture13, lecture14, lecture15, lecture16, lecture17, lecture18, lecture19, lecture20, lecture21, lecture22, lecture23, lecture24, lecture25, lecture26, lecture27] as unknown as Lecture[];
@@ -38,5 +39,5 @@ export const lectureBySlug = new Map(lectures.map((lecture) => [lecture.slug, le
 export const questions = (questionsJson as unknown as Question[]).filter((item) => item.lecture !== 1);
 export const glossary = (glossaryJson as unknown as GlossaryEntry[]).filter((item) => item.lecture !== 1);
 export const formulas = (formulasJson as unknown as Formula[]).filter((item) => item.lecture !== 1);
-export const searchIndex = (searchIndexJson as unknown as SearchRecord[]).filter((item) => item.lecture !== 1);
+export const searchIndex = buildSearchIndex(lectures, searchIndexJson as SearchRecord[], 'zh');
 export const figures = (figuresJson as unknown as FigureIndexEntry[]).filter((item) => item.lecture !== 1);

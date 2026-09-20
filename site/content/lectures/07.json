@@ -1,7 +1,7 @@
 {
   "lecture": 7,
   "slug": "07",
-  "zhTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+  "zhTitle": "群体编码、Fisher 信息与贝叶斯解码",
   "enTitle": "Neural Coding II: Population Decoding, Fisher Information, and Bayes",
   "companionFile": "NEUROSCI366_Lecture07_Neural_Coding2_Population_Fisher_Bayes_Companion.pdf",
   "companionPages": 24,
@@ -95,10 +95,10 @@
       "能推导偏差—方差分解，解释有偏或 Bayesian 解码器如何用先验降低方差以及付出的偏差代价。"
     ],
     "prerequisiteBridge": [
-      "上一讲得到独立 Poisson 群体的信息 \\(J(\\theta )=T\\sum _i[f_{i}'(\\theta )]^{2}/f_{i}(\\theta )\\)。这一式的每一项都在问：刺激微小改变时，平均反应改变多快，相对于该神经元自身 Poisson 波动有多大。导数为零的调谐峰顶可能放电很多，却对局部方向改变不敏感；斜坡区域的反应变化更快，往往贡献更多局部信息。信息不是平均率的同义词。",
-      "方差衡量估计在重复数据中的散布。对无偏估计，平均估计等于真实刺激；Cramér–Rao 下界给出任何满足正则条件的无偏估计方差不能低于 1/J。它是理论地板，不保证某个实际解码器到达地板，也不包含所有有限样本偏差。比较行为阈值与 \\(1/\\sqrt J\\) 时，应说明刺激单位、试次数、观察时间和解码假设。",
+      "上一讲得到独立 Poisson 群体的信息 \\(J(\\theta )=T\\sum _i[f_{i}'(\\theta )]^{2}/f_{i}(\\theta )\\)。这一式的每一项都在问：刺激微小改变时，平均反应改变多快，相对于该神经元自身 Poisson 波动有多大。导数为零的调谐峰顶可能放电很多，却对局部方向改变不敏感；斜坡区域的反应变化更快，往往贡献更多局部信息。信息不是平均发放率的同义词。",
+      "方差衡量估计在重复数据中的散布。对无偏估计，平均估计等于真实刺激；Cramér–Rao 下界给出任何满足正则条件的无偏估计方差不能低于 1/J。这是理论下界，并不保证实际解码器能达到，也不能直接描述有偏估计的有限样本误差。比较行为阈值与 \\(1/\\sqrt J\\) 时，应说明刺激单位、试次数、观察时间和解码假设。",
       "协方差矩阵 C 把多神经元噪声的方差放在对角线、共同波动放在非对角线。二维椭圆的长轴是噪声较大的方向。刺激改变造成的平均反应位移 \\(\\mu '(s)\\) 也是群体空间中的方向；噪声是否有害取决于椭圆长轴是否沿着 \\(\\mu '\\)，而不是相关系数单独为正或负。\\(C^{-1}\\) 会降低高噪声方向的权重。",
-      "有偏估计不要求重复平均恰等于真值。总均方误差 MSE 可以分为方差与偏差平方，因此适度把估计拉向常见刺激，可能以小偏差换来更大的方差下降。Bayesian 解码通过先验 \\(P(s)\\) 实现这种拉动。先验不是随意修饰；它应表达刺激在任务环境中的出现频率，并与当前试次的似然相乘形成后验。"
+      "有偏估计不要求重复平均恰等于真值。总均方误差 MSE 可以分为方差与偏差平方，因此适度把估计拉向常见刺激，可能以小偏差换来更大的方差下降。贝叶斯解码通过先验 \\(P(s)\\) 实现这种拉动。先验不是随意修饰；它应表达刺激在任务环境中的出现频率，并与当前试次的似然相乘形成后验。"
     ],
     "modules": [
       {
@@ -115,9 +115,9 @@
           }
         ],
         "paragraphs": [
-          "单个钟形调谐曲线在峰两侧可能给同一放电率，因此计数 \\(k_{i}\\) 对方向 \\(\\alpha\\) 与 \\(\\beta\\) 的似然相同。群体中第 i 个神经元有偏好 \\(\\theta _{i}\\)，调谐写成 \\(f_{i}(\\theta )=f(\\theta -\\theta _{i})\\)。两个刺激虽然对某一单元退化，却会在其他单元上形成不同计数模式。联合概率比较的是整个模式，群体通过分布式偏好破除单元歧义。",
-          "在窗口 T 中，独立 Poisson 似然为 Π_i[(f_i(θ)T)^{k_i}e^{−f_i(θ)T}/k_i!]。对数似然把乘积变成求和，求导后得到 score。对真实 \\(\\theta\\) 取二阶导的负期望，含 \\(f_{i}''\\) 的项因 \\(E[k_{i}]=f_{i}T\\) 消失，留下 \\(J(\\theta )=T\\sum _i[f_{i}'(\\theta )]^{2}/f_{i}(\\theta )\\)。每个神经元的局部证据为非负并可相加。",
-          "若 N 个偏好方向 \\(\\theta _{i}=2\\pi _{i}/N\\) 在圆周上均匀分布且 N 很大，求和可用 Riemann 积分近似：\\(\\sum _i F(\\theta _{i})\\approx N\\int _{0}^{2\\pi }F(\\vartheta )d\\vartheta /(2\\pi )\\)。由于所有调谐只是平移，换变量后积分不依赖当前 \\(\\theta\\)，得到 \\(J=N T\\) 乘一个只由调谐形状决定的常数。均匀群体因此在各方向具有近似相同的局部精度。",
+          "单个钟形调谐曲线在峰两侧可能给同一放电率，因此计数 \\(k_{i}\\) 对方向 \\(\\alpha\\) 与 \\(\\beta\\) 的似然相同。群体中第 i 个神经元有偏好 \\(\\theta _{i}\\)，调谐写成 \\(f_{i}(\\theta )=f(\\theta -\\theta _{i})\\)。单个神经元无法区分的两个刺激，可能在其他神经元上产生不同反应。联合概率比较整个计数模式，因此偏好方向不同的神经元可以共同消除这种歧义。",
+          "在窗口 T 中，独立 Poisson 似然为 Π_i[(f_i(θ)T)^{k_i}e^{−f_i(θ)T}/k_i!]。对数似然把乘积变成求和，求导后得到得分函数（score）。对真实 \\(\\theta\\) 取二阶导的负期望，含 \\(f_{i}''\\) 的项因 \\(E[k_{i}]=f_{i}T\\) 消失，留下 \\(J(\\theta )=T\\sum _i[f_{i}'(\\theta )]^{2}/f_{i}(\\theta )\\)。每个神经元的局部证据为非负并可相加。",
+          "若 N 个偏好方向 \\(\\theta _{i}=2\\pi _{i}/N\\) 在圆周上均匀分布且 N 很大，求和可用黎曼积分近似：\\(\\sum _i F(\\theta _{i})\\approx N\\int _{0}^{2\\pi }F(\\vartheta )d\\vartheta /(2\\pi )\\)。由于所有调谐只是平移，换变量后积分不依赖当前 \\(\\theta\\)，得到 \\(J=N T\\) 乘一个只由调谐形状决定的常数。均匀群体因此在各方向具有近似相同的局部精度。",
           "大样本下最大似然估计近似 \\(N(\\theta _{0},1/J)\\)。这说明信息随 N 和 T 线性增加，方差随 1/(NT) 下降，标准差随 \\(1/\\sqrt{NT}\\) 下降。将观察时间翻四倍才使标准差减半。这个缩放依赖独立性与稳定调谐；共同噪声、漂移或神经元冗余会改变可加性。",
           "模型曲线若预测信息无限随 N 增长，而行为或生物数据出现饱和，至少有三类解释：相关结构产生信息限制、记录到的神经元不能代表实际读出、实际解码器次优。仅看到饱和不能在三者中自动择一，必须构造能区分它们的协方差与解码实验。"
         ],
@@ -128,7 +128,7 @@
         ],
         "derivation": {
           "title": "从均匀偏好方向的求和到连续积分",
-          "setup": "N 个独立 Poisson 神经元，\\(\\theta _{i}=2\\pi _{i}/N\\)，\\(f_{i}(\\theta )=f(\\theta -\\theta _{i})\\)，已知 \\(J(\\theta )=T\\sum _i[f_{i}'(\\theta )]^{2}/f_{i}(\\theta )\\)。",
+          "setup": "N 个独立泊松神经元，\\(\\theta _{i}=2\\pi _{i}/N\\)，\\(f_{i}(\\theta )=f(\\theta -\\theta _{i})\\)，已知 \\(J(\\theta )=T\\sum _i[f_{i}'(\\theta )]^{2}/f_{i}(\\theta )\\)。",
           "steps": [
             {
               "title": "定义被求和函数",
@@ -181,7 +181,8 @@
       },
       {
         "id": "L07-M2",
-        "title": "CRLB、噪声相关与信息限制",
+        "title": "估计精度的下界与噪声相关",
+        "transition": "独立神经元的信息可以相加，但这并不保证实际解码误差按同样比例下降。需要分别考察估计器能否达到理论下界，以及共享噪声是否限制新增神经元提供的信息。",
         "sourceRefs": [
           {
             "file": "Lecture7-NeuralCoding2.pdf",
@@ -198,9 +199,9 @@
         ],
         "paragraphs": [
           "Cramér–Rao 下界对满足可导、支持集规则且无偏的估计器给出 \\(\\operatorname{Var}(\\hat{s})\\ge 1/J(s)\\)。它约束任何解码方法，不只最大似然；但下界不保证有限样本能达到，也不直接适用于带偏差估计。将 \\(1/\\sqrt J\\) 与心理物理辨别阈值比较，可检验记录群体是否含有足够信息，却不能证明动物实际使用了最优读出。",
-          "先区分两种‘相关’：signal correlation 比较神经元跨刺激的条件均值或调谐形状；noise correlation 则先固定刺激，再比较每次计数偏离各自条件均值的残差。只有后者进入当前池化方差。设右选择池的 \\(N_{R}\\) 个残差方差均为 \\(\\sigma _{R}^{2}\\)、任意不同对残差相关系数为 \\(c_{R}\\)，池平均 R 的方差为 \\(c_{R}\\sigma _{R}^{2}+(1-c_{R})\\sigma _{R}^{2}/N_{R}\\)；独立部分随 \\(N_{R}\\) 消失，共同残差部分保留。",
-          "这个池化饱和展示“相关可限制特定读出”，却不等于最优群体信息也必然饱和。均匀相关结构下，简单平均可能把可分辨的差异一并压缩；最优线性或非线性解码可利用其他方向。因此区分信息限制相关、只有极大 N 才饱和的模型，以及次优解码器自身的性能饱和。",
-          "更一般地令计数向量 k 在刺激 s 下近似高斯 \\(N(\\mu (s),C)\\)，且 C 暂不随 s 改变。对数似然的刺激相关部分是 \\(-(k-\\mu )^{\\mathrm{T}}C^{-1}(k-\\mu )/2\\)，Fisher 信息为 \\(J=\\mu '^{\\mathrm{T}}C^{-1}\\mu '\\)。这是一种 Mahalanobis 几何：沿高噪声特征方向的均值变化被降权，沿低噪声方向的变化被放大。",
+          "信号相关（信号相关）比较神经元跨刺激的条件均值或调谐形状；噪声相关（噪声相关）则固定刺激，比较每次计数偏离各自条件均值的残差。只有后者进入当前池化方差。设右选择池的 \\(N_{R}\\) 个残差方差均为 \\(\\sigma _{R}^{2}\\)、任意不同对残差相关系数为 \\(c_{R}\\)，池平均 R 的方差为 \\(c_{R}\\sigma _{R}^{2}+(1-c_{R})\\sigma _{R}^{2}/N_{R}\\)；独立部分随 \\(N_{R}\\) 消失，共同残差部分保留。",
+          "这个池化饱和展示“相关可限制特定读出”，却不等于最优群体信息也必然饱和。均匀相关结构下，简单平均可能把可分辨的差异一并压缩；最优线性或非线性解码可利用其他方向。分析饱和现象时，应区分信息限制相关、仅在极大 N 下才表现出饱和的模型，以及由次优解码造成的性能上限。",
+          "更一般地令计数向量 k 在刺激 s 下近似高斯 \\(N(\\mu (s),C)\\)，且 C 暂不随 s 改变。对数似然的刺激相关部分是 \\(-(k-\\mu )^{\\mathrm{T}}C^{-1}(k-\\mu )/2\\)，Fisher 信息为 \\(J=\\mu '^{\\mathrm{T}}C^{-1}\\mu '\\)。这一表达式采用马氏距离（Mahalanobis 距离）对应的几何：沿高噪声特征方向的均值变化被降权，沿低噪声方向的变化被放大。",
           "信息限制噪声特指与信号变化不可区分的共同波动，例如噪声包含沿 \\(\\mu '(s)\\) 的分量，使群体反应看起来像刺激本身略有改变。再多同类神经元也难以平均掉该方向。正相关、负相关都不是充分判据；需要比较协方差特征向量与 \\(\\mu '\\) 的对齐，并区分生物信息、记录子群和实际解码器。"
         ],
         "keyPoints": [
@@ -214,11 +215,11 @@
           "steps": [
             {
               "title": "先去除条件均值",
-              "explanation": "减去每个刺激条件下的均值，排除由调谐曲线共同变化产生的 signal correlation，只保留固定条件下的 noise residual。",
+              "explanation": "减去每个刺激条件下的均值，排除由调谐曲线共同变化产生的信号相关性，只保留固定条件下的噪声残差。",
               "latex": "\\varepsilon_i=k_i-\\mathbb E[k_i\\mid s]"
             },
             {
-              "title": "写 noise covariance 假设",
+              "title": "写噪声协方差假设",
               "explanation": "对角项是残差方差，非对角项是固定刺激下的共同残差。",
               "latex": "\\operatorname{Var}(\\varepsilon_i\\mid s)=\\sigma^2,\\qquad \\operatorname{Cov}(\\varepsilon_i,\\varepsilon_j\\mid s)=c\\sigma^2"
             },
@@ -238,12 +239,12 @@
             }
           ],
           "symbolNotes": [
-            "signal correlation 描述跨刺激条件均值的相似性；noise correlation 描述固定 s 后试次残差的共同波动。",
+            "信号相关性描述跨刺激条件均值的相似性；噪声相关性描述固定 s 后试次残差的共同波动。",
             "c 是残差相关系数；等相关协方差矩阵必须保持半正定。",
             "R 是简单算术平均而非最优解码器，因此该推导只说明这一投影的方差。"
           ],
           "unitsCheck": "\\(\\epsilon\\)、k 与 R 都是计数；c 无单位，\\(\\sigma ^{2}\\) 与 \\(\\operatorname{Var}(R|s)\\) 都是计数平方。",
-          "limitCheck": "\\(c=0\\) 时方差按 1/N 降低；\\(N=1\\) 时还原 \\(\\sigma ^{2}\\)；固定 \\(c>0\\) 时大 N 留下地板。若先混合不同刺激再算相关，所得值同时包含 signal 与 noise，不能代入本式。"
+          "limitCheck": "\\(c=0\\) 时方差按 1/N 降低；\\(N=1\\) 时还原 \\(\\sigma ^{2}\\)；固定 \\(c>0\\) 时大 N 留下地板。若先混合不同刺激再算相关，所得值同时包含信号与噪声，不能代入本式。"
         },
         "workedExample": {
           "title": "量化共同波动造成的池化地板",
@@ -258,14 +259,15 @@
           "sanityCheck": "结果应小于单神经元方差 4，但大于独立平均 0.04；0.436 满足两者。"
         },
         "pitfalls": [
-          "把所有非零相关都称为 information-limiting correlation。",
+          "把所有非零相关都称为信息限制相关，未检查噪声与信号变化的方向。",
           "把 CRLB 写成任意有限样本估计器都达到的等式。",
           "求逆协方差前不检查样本量、正定性与正则化对结果的影响。"
         ]
       },
       {
         "id": "L07-M3",
-        "title": "有偏解码、偏差—方差与 Bayesian 先验",
+        "title": "有偏估计与贝叶斯解码",
+        "transition": "无偏估计的方差下界不适用于所有解码策略。将估计拉向常见刺激会引入偏差，却可能降低方差；要判断这种策略是否有利，需要比较包含两者的总误差。",
         "sourceRefs": [
           {
             "file": "Lecture7-NeuralCoding2.pdf",
@@ -276,13 +278,13 @@
           "估计器在真实刺激 \\(s_{0}\\) 下的平均输出记为 \\(s_{e}=E[\\hat{s}|s_{0}]\\)，偏差 \\(b(s_{0})=s_{e}-s_{0}\\)。无偏要求 \\(b=0\\)，但行为与神经解码常表现中心偏置、收缩或类别先验。评价有偏估计时不能只看方差，因为一个总输出常数的估计器方差为零，却可能离真值很远；应使用均方误差 \\(E[(\\hat{s}-s_{0})^{2}]\\)。",
           "把误差写成 \\((\\hat{s}-s_{e})+(s_{e}-s_{0})\\)。平方取期望后，交叉项为 \\(2bE[\\hat{s}-s_{e}]=0\\)，因此 \\(MSE=\\operatorname{Var}(\\hat{s})+b^{2}\\)。这个恒等式说明减小方差可以补偿一定偏差。最优折中依赖真实 \\(s_{0}\\) 与损失函数；一个在常见刺激附近改善平均 MSE 的收缩估计，可能在罕见极端刺激上产生更大偏差。",
           "有偏版本的 Cramér–Rao 界为 \\(\\operatorname{Var}(\\hat{s})\\ge [1+b'(s)]^{2}/J(s)\\)。当估计器平均响应随真实刺激变化较慢时，b' 为负，方差下界可低于无偏的 1/J；代价体现在偏差平方。这个界仍需正则条件，也不是选择偏差函数的处方。最终应比较完整 MSE 或任务相关损失。",
-          "Bayesian 解码器用 \\(P(s|n)\\propto P(n|s)P(s)\\) 合并当前反应的似然与环境先验。MAP 选择使 \\(\\ell (s)+\\ln P(s)\\) 最大的刺激，后验均值则在平方损失下最小化期望误差。数据弱时先验影响大，估计被拉向常见刺激；数据强时似然尖锐，后验主要由观察决定。",
+          "贝叶斯解码器用 \\(P(s|n)\\propto P(n|s)P(s)\\) 合并当前反应的似然与环境先验。MAP 选择使 \\(\\ell (s)+\\ln P(s)\\) 最大的刺激，后验均值则在平方损失下最小化期望误差。数据弱时先验影响大，估计被拉向常见刺激；数据强时似然尖锐，后验主要由观察决定。",
           "先验造成的偏差可以是合理适应，也可能是错配。若实验环境改变而内部先验未更新，系统会系统性偏向旧环境。区分先验、似然与读出噪声需要操纵刺激频率、反应可靠性或训练历史，而不是从单条偏置曲线反推唯一机制。"
         ],
         "keyPoints": [
           "MSE=方差+偏差平方，低方差本身不代表估计准确。",
           "有偏 CRLB 包含偏差导数，允许以响应压缩换取更低方差。",
-          "Bayesian 后验由似然乘先验，MAP 与后验均值对应不同损失选择。"
+          "贝叶斯后验由似然乘先验，MAP 与后验均值对应不同损失选择。"
         ],
         "derivation": {
           "title": "偏差—方差分解",
@@ -342,7 +344,7 @@
     {
       "id": "L07-FIG-A1",
       "lecture": 7,
-      "lectureTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+      "lectureTitle": "群体编码、Fisher 信息与贝叶斯解码",
       "moduleId": "L07-M1",
       "title": "独立 Poisson 群体的 Fisher 信息按 NT 缩放",
       "alt": "两种观测时长下 Fisher 信息随神经元数线性增加的归一化示意图",
@@ -451,7 +453,7 @@
     "思考题：information-limiting correlation 的核心特征是什么？"
   ],
   "synthesis": [
-    "单个 tuning curve 常对多个 stimulus 给出相似 rate，population pattern 可打破 ambiguity。在 independent Poisson 与均匀 preferred direction 的理想条件下，Fisher information 对 N 和 T 线性增长。真实群体的 noise correlations、decoder mismatch 与 behavioral constraints 使性能可能饱和；Bayesian prior 以可控 bias 换取 variance reduction。"
+    "单个神经元的调谐曲线可能对应多个刺激，群体响应可以减少这种歧义。在条件独立的泊松模型与均匀偏好方向等假设下，Fisher 信息随神经元数量 N 和观察时长 T 线性增长。真实解码还受到噪声相关、模型失配和行为约束的影响；贝叶斯先验可以降低估计方差，同时引入偏差。"
   ],
   "workedExamples": [
     "7.1 N/T scaling",
@@ -466,10 +468,10 @@
     {
       "id": "L07-F01",
       "lecture": 7,
-      "name": "independent Poisson population Fisher",
+      "name": "独立泊松群体的 Fisher 信息",
       "expression": "X J =T (fi′ )2 /fi i",
       "latex": "J(s)=T\\sum_i\\frac{[f_i'(s)]^2}{f_i(s)}",
-      "conditions": "counts independent",
+      "conditions": "各神经元计数独立",
       "sectionId": "L07-M1",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 1
@@ -477,10 +479,10 @@
     {
       "id": "L07-F02",
       "lecture": 7,
-      "name": "unbiased CRLB",
+      "name": "无偏估计的 Cramér–Rao 下界",
       "expression": "Var(θ̂) ≥ 1/J",
       "latex": "\\operatorname{Var}(\\hat{\\theta})\\ge\\frac{1}{J(\\theta)}",
-      "conditions": "regularity/unbiased",
+      "conditions": "满足正则条件，估计器无偏",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -488,10 +490,10 @@
     {
       "id": "L07-F03",
       "lecture": 7,
-      "name": "noise covariance",
+      "name": "噪声协方差",
       "expression": "Cij = Cov(ri, rj )",
       "latex": "C_{ij}=\\operatorname{Cov}(r_i,r_j)",
-      "conditions": "同 stimulus、跨 trial residual",
+      "conditions": "固定刺激，比较跨试次残差",
       "sectionId": "L07-M1",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 2
@@ -499,10 +501,10 @@
     {
       "id": "L07-F04",
       "lecture": 7,
-      "name": "Pearson noise correlation",
+      "name": "Pearson 噪声相关系数",
       "expression": "ρij = Cij /(σi σj )",
       "latex": "\\rho_{ij}=\\frac{C_{ij}}{\\sigma_i\\sigma_j}",
-      "conditions": "非零 variances",
+      "conditions": "各变量的方差非零",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -510,10 +512,10 @@
     {
       "id": "L07-F05",
       "lecture": 7,
-      "name": "Mahalanobis separation",
+      "name": "马氏距离",
       "expression": "d2M = ∆µT C −1 ∆µ",
       "latex": "d_M^2=\\Delta\\mu^\\top C^{-1}\\Delta\\mu",
-      "conditions": "C 正定",
+      "conditions": "C 为正定矩阵",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 4
@@ -521,10 +523,10 @@
     {
       "id": "L07-F06",
       "lecture": 7,
-      "name": "bias-variance decomposition",
+      "name": "偏差—方差分解",
       "expression": "M SE = Var +b2",
       "latex": "\\mathbb{E}[(\\hat{s}-s)^2]=\\operatorname{Var}(\\hat{s})+b(s)^2",
-      "conditions": "标量 estimator",
+      "conditions": "标量估计器",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -532,10 +534,10 @@
     {
       "id": "L07-F07",
       "lecture": 7,
-      "name": "Bayesian decoding",
+      "name": "贝叶斯解码",
       "expression": "P (s|n) ∝ P (n|s)P (s)",
       "latex": "P(s\\mid\\mathbf{n})\\propto P(\\mathbf{n}\\mid s)P(s)",
-      "conditions": "posterior properly normalized",
+      "conditions": "后验分布已正确归一化",
       "sectionId": "L07-M3",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 6
@@ -547,7 +549,7 @@
       "lecture": 7,
       "zh": "群体编码",
       "en": "population code",
-      "definition": "多个 neurons 的联合 response pattern。",
+      "definition": "多个神经元联合响应所形成的编码。",
       "sectionId": "L07-M1",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 1
@@ -557,7 +559,7 @@
       "lecture": 7,
       "zh": "Cramér-Rao 下界",
       "en": "Cramér-Rao lower bound",
-      "definition": "无偏估计量方差在正则条件下的信息论下界。",
+      "definition": "在正则条件下，无偏估计量方差所满足的下界。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -567,7 +569,7 @@
       "lecture": 7,
       "zh": "噪声相关",
       "en": "noise correlation",
-      "definition": "固定 stimulus 时 trial residual 的相关性。",
+      "definition": "固定刺激时，神经元跨试次响应残差之间的相关性。",
       "sectionId": "L07-M1",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 2
@@ -577,7 +579,7 @@
       "lecture": 7,
       "zh": "信号相关",
       "en": "signal correlation",
-      "definition": "tuning curves across stimuli 的相似性。",
+      "definition": "神经元跨刺激的平均响应或调谐曲线之间的相似性。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -587,7 +589,7 @@
       "lecture": 7,
       "zh": "协方差矩阵",
       "en": "covariance matrix",
-      "definition": "各维 variance 与 pairwise covariance 的矩阵。",
+      "definition": "包含各维方差及成对协方差的矩阵。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 4
@@ -597,7 +599,7 @@
       "lecture": 7,
       "zh": "Mahalanobis 距离",
       "en": "Mahalanobis distance",
-      "definition": "按 noise covariance 归一化的距离。",
+      "definition": "由噪声协方差加权归一化后的距离。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 4
@@ -607,7 +609,7 @@
       "lecture": 7,
       "zh": "信息限制相关",
       "en": "information-limiting correlation",
-      "definition": "沿 stimulus signal direction、无法通过扩大群体平均消除的 shared noise。",
+      "definition": "沿刺激信号方向的共享噪声，无法靠增加神经元数量并平均来消除。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -617,7 +619,7 @@
       "lecture": 7,
       "zh": "次优解码器",
       "en": "suboptimal decoder",
-      "definition": "未充分利用 encoding information 的 readout。",
+      "definition": "未充分利用群体编码信息的读出方法。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 5
@@ -627,7 +629,7 @@
       "lecture": 7,
       "zh": "偏差",
       "en": "bias",
-      "definition": "估计均值与真值之差。",
+      "definition": "估计量的均值与真实值之差。",
       "sectionId": "L07-M2",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3
@@ -637,26 +639,26 @@
       "lecture": 7,
       "zh": "正则化",
       "en": "regularization",
-      "definition": "通过约束或 prior 降低 variance/复杂度。",
+      "definition": "利用约束或先验，控制估计方差与模型复杂度。",
       "sectionId": "L07-M3",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 6
     }
   ],
   "commonTraps": [
-    "把 CRLB 当作所有 decoder 的实际误差，而非有条件的下界。",
-    "认为正相关总是有害、负相关总是有利。",
-    "混淆 encoding distribution、decoder algorithm 与 behavior 三个层级。",
-    "把 Fisher information saturation 自动归因于唯一生物机制。",
-    "忽略 biased decoder 的 modified bound。",
-    "把 prior 当作额外数据而非对 stimulus frequency/structure 的假设。",
-    "需要明确区分 three levels：neural encoding distribution、decoder algorithm、behavioral performance；相关性存在不等于某个 decoder 一定使用或不使用它。"
+    "把 Cramér–Rao 下界（CRLB）当成所有解码器的实际误差，忽略正则性与无偏等适用条件。",
+    "认为正相关一定有害、负相关一定有利，未比较噪声方向与信号变化方向。",
+    "混淆神经编码分布、解码算法与行为表现，把其中一层的结果直接当作另一层的解释。",
+    "看到 Fisher 信息饱和就归因于某个唯一的生物机制。",
+    "分析有偏解码器时仍套用无偏方差下界，遗漏偏差导数带来的修正。",
+    "把先验当作当前试次新增的数据，忽略它表达的是对刺激频率或结构的已有假设。",
+    "仅凭编码群体中存在相关性，就断定实际解码器使用或忽略了它，未检验读出规则与行为表现。"
   ],
   "errata": [
     {
       "id": "L07-E01",
       "lecture": 7,
-      "lectureTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+      "lectureTitle": "群体编码、Fisher 信息与贝叶斯解码",
       "kind": "caution",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 2,
@@ -668,7 +670,7 @@
     {
       "id": "L07-E02",
       "lecture": 7,
-      "lectureTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+      "lectureTitle": "群体编码、Fisher 信息与贝叶斯解码",
       "kind": "caution",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 3,
@@ -680,7 +682,7 @@
     {
       "id": "L07-E03",
       "lecture": 7,
-      "lectureTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+      "lectureTitle": "群体编码、Fisher 信息与贝叶斯解码",
       "kind": "uncertainty",
       "sourceFile": "Lecture7-NeuralCoding2.pdf",
       "sourcePage": 5,
@@ -712,26 +714,26 @@
       "choices": [
         {
           "id": "a",
-          "text": "Poisson 信息项是 \\((f')^{2}/f\\)；峰顶虽然 f 大，但斜率 f' 通常为零，因此对极小刺激变化的均值几乎不变，局部信息可为零。"
+          "text": "局部 Poisson 信息取决于调谐斜率的平方除以平均发放率；峰顶斜率可为零，高放电率本身不能保证高信息。"
         },
         {
           "id": "b",
-          "text": "简单池化只使用反应空间的一个投影，可能丢弃其他可解码方向；必须分析完整协方差和均值导数，或比较更优解码器，才能判断群体本身是否信息受限。"
+          "text": "峰顶计数最多，Poisson 方差也最大；信息仅由噪声大小决定，所以所有低放电率位置都必然比峰顶信息更多。"
         },
         {
           "id": "c",
-          "text": "可靠数据产生尖锐似然，其在后验乘积中的相对变化远大于平滑先验；归一化后概率集中在似然峰附近，先验只造成较小修正。"
+          "text": "峰顶刺激的出现概率最高，因此先验把所有反应解释为同一刺激；局部 Fisher 信息下降来自先验集中，而非调谐斜率。"
         },
         {
           "id": "d",
-          "text": "把信息与总脉冲数等同，忽略调谐斜率。"
+          "text": "峰顶的斜率虽然为零，但二阶导数可以直接替代斜率平方；因此只要峰足够尖，就一定贡献最大的这一阶局部信息。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“CRLB、噪声相关与信息限制”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“有偏解码、偏差—方差与 Bayesian 先验”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把信息与总脉冲数等同，忽略调谐斜率。"
+        "b": "信息同时取决于均值随刺激变化的斜率和噪声；低率若也几乎不随刺激变化，并不自动更有信息。",
+        "c": "这里的 Fisher 信息由条件反应分布决定；调谐峰不是刺激先验峰，也没有因为先验集中而改变斜率项。",
+        "d": "当前 Poisson Fisher 公式使用一阶斜率；峰的曲率不能直接代替该项，即使有限刺激变化仍可能可辨。"
       },
       "explanation": "Poisson 信息项是 \\((f')^{2}/f\\)；峰顶虽然 f 大，但斜率 f' 通常为零，因此对极小刺激变化的均值几乎不变，局部信息可为零。 单个钟形调谐曲线在峰两侧可能给同一放电率，因此计数 \\(k_{i}\\) 对方向 \\(\\alpha\\) 与 \\(\\beta\\) 的似然相同。"
     },
@@ -747,7 +749,7 @@
         }
       ],
       "conceptTags": [
-        "CRLB、噪声相关与信息限制"
+        "估计精度的下界与噪声相关"
       ],
       "difficulty": 2,
       "type": "equation",
@@ -756,26 +758,26 @@
       "choices": [
         {
           "id": "a",
-          "text": "Poisson 信息项是 \\((f')^{2}/f\\)；峰顶虽然 f 大，但斜率 f' 通常为零，因此对极小刺激变化的均值几乎不变，局部信息可为零。"
+          "text": "只要池化用了所有神经元，它就保留了群体的全部信息；饱和只能来自 Fisher 信息上限，与读出方式无关。"
         },
         {
           "id": "b",
-          "text": "简单池化只使用反应空间的一个投影，可能丢弃其他可解码方向；必须分析完整协方差和均值导数，或比较更优解码器，才能判断群体本身是否信息受限。"
+          "text": "简单池化可能丢掉其他有用反应方向；要判断群体信息是否受限，还需分析完整协方差与信号变化方向或更优解码器。"
         },
         {
           "id": "c",
-          "text": "可靠数据产生尖锐似然，其在后验乘积中的相对变化远大于平滑先验；归一化后概率集中在似然峰附近，先验只造成较小修正。"
+          "text": "Fisher 信息只由神经元数决定而不受相关影响；池化饱和只能说明神经元数量不足，增加同类细胞总能消除误差。"
         },
         {
           "id": "d",
-          "text": "把所有非零相关都称为 information-limiting correlation。"
+          "text": "池化把正负噪声平均后就得到最优读出；若它饱和，完整协方差矩阵最多改变单位，不会带来新的可解码方向。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“群体解码与 Fisher 信息的 N、T 缩放”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“有偏解码、偏差—方差与 Bayesian 先验”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把所有非零相关都称为 information-limiting correlation。"
+        "a": "使用所有神经元不等于保留所有反应方向；把向量压成一个池化值可能丢失刺激信息。",
+        "c": "Fisher 信息依赖调谐与噪声结构；沿信号方向的共同噪声可能使增加同类细胞也无法无限改善精度。",
+        "d": "协方差决定不同方向的噪声大小；简单平均未必按信号方向和噪声结构作最优加权。"
       },
       "explanation": "简单池化只使用反应空间的一个投影，可能丢弃其他可解码方向；必须分析完整协方差和均值导数，或比较更优解码器，才能判断群体本身是否信息受限。 将 \\(1/\\sqrt J\\) 与心理物理辨别阈值比较，可检验记录群体是否含有足够信息，却不能证明动物实际使用了最优读出。"
     },
@@ -791,7 +793,7 @@
         }
       ],
       "conceptTags": [
-        "有偏解码、偏差—方差与 Bayesian 先验"
+        "有偏估计与贝叶斯解码"
       ],
       "difficulty": 2,
       "type": "equation",
@@ -800,26 +802,26 @@
       "choices": [
         {
           "id": "a",
-          "text": "Poisson 信息项是 \\((f')^{2}/f\\)；峰顶虽然 f 大，但斜率 f' 通常为零，因此对极小刺激变化的均值几乎不变，局部信息可为零。"
+          "text": "可靠数据使 Bayes 公式中的先验项自动消失；即使先验在似然峰附近为零，后验也必须等于归一化似然。"
         },
         {
           "id": "b",
-          "text": "简单池化只使用反应空间的一个投影，可能丢弃其他可解码方向；必须分析完整协方差和均值导数，或比较更优解码器，才能判断群体本身是否信息受限。"
+          "text": "归一化把先验在不同刺激间的差异全部抵消；只要算出分母，可靠与不可靠数据都会得到相同的无先验后验。"
         },
         {
           "id": "c",
-          "text": "可靠数据产生尖锐似然，其在后验乘积中的相对变化远大于平滑先验；归一化后概率集中在似然峰附近，先验只造成较小修正。"
+          "text": "可靠数据给出较尖锐的似然；若先验在该区域平滑且非零，后验主要集中在似然峰附近，先验只作较小修正。"
         },
         {
           "id": "d",
-          "text": "只比较估计方差而不计算偏差平方。"
+          "text": "数据可靠时似然会变得更平坦，从而减小它与先验的冲突；先验保持原形但对最终估计的拉动自然更弱。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“群体解码与 Fisher 信息的 N、T 缩放”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“CRLB、噪声相关与信息限制”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：只比较估计方差而不计算偏差平方。"
+        "a": "先验仍然参与乘积；若某区域先验为零，后验也为零，因此题目的弱影响结论需要适当的先验条件。",
+        "b": "归一化除以同一个常数，保留先验对不同刺激相对权重的影响，不会把该影响全部消去。",
+        "d": "更可靠的数据通常使似然更尖锐而非更平坦；平坦似然反而会让先验更能决定后验。"
       },
       "explanation": "可靠数据产生尖锐似然，其在后验乘积中的相对变化远大于平滑先验；归一化后概率集中在似然峰附近，先验只造成较小修正。 数据弱时先验影响大，估计被拉向常见刺激；数据强时似然尖锐，后验主要由观察决定。"
     },
@@ -844,28 +846,28 @@
       "choices": [
         {
           "id": "a",
-          "text": "简单池化只使用反应空间的一个投影，可能丢弃其他可解码方向；必须分析完整协方差和均值导数，或比较更优解码器，才能判断群体本身是否信息受限。"
+          "text": "较长观察时间的曲线高一倍，说明估计的误差标准差也改善一倍；因此时间加倍就能让标准差直接减半。"
         },
         {
           "id": "b",
-          "text": "可靠数据产生尖锐似然，其在后验乘积中的相对变化远大于平滑先验；归一化后概率集中在似然峰附近，先验只造成较小修正。"
+          "text": "两条直线表明增加神经元总能无限提高信息；即使群体有沿信号方向的共同噪声，也不必修改这种线性外推。"
         },
         {
           "id": "c",
-          "text": "把信息与总脉冲数等同，忽略调谐斜率。"
+          "text": "更长观察时间只是重复计数同一份证据，所以信息不应增加；两条曲线的斜率差只能由不同神经元调谐造成。"
         },
         {
           "id": "d",
-          "text": "均匀调谐且条件独立时，\\(J\\approx NTj_{f}\\)；因此固定调谐形状后，神经元数 N 或观测时间 T 加倍都会使信息加倍，而渐近误差标准差只按 \\(1/\\sqrt{NT}\\) 缩小。"
+          "text": "条件独立且调谐形状固定时，观察时间加倍使群体的信息加倍；渐近误差标准差下降，但并不会随之减半。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "图中没有“CRLB、噪声相关与信息限制”所需的变量与条件。",
-        "b": "图中没有“有偏解码、偏差—方差与 Bayesian 先验”所需的变量与条件。",
-        "c": "图中的标注与关系不支持这种读法：把信息与总脉冲数等同，忽略调谐斜率。"
+        "a": "信息的倒数控制渐近方差，而不是标准差；信息加倍时，标准差只缩小一个根号二的因子。",
+        "b": "这幅缩放图依赖条件独立；与信号方向对齐的共同噪声可能破坏信息独立相加并产生信息限制。",
+        "c": "在稳定的 Poisson 模型下，不重叠时间段提供额外独立事件证据；固定调谐时信息也可随观察时间增加。"
       },
-      "explanation": "均匀调谐且条件独立时，\\(J\\approx NTj_{f}\\)；因此固定调谐形状后，神经元数 N 或观测时间 T 加倍都会使信息加倍，而渐近误差标准差只按 \\(1/\\sqrt{NT}\\) 缩小。 这个缩放依赖独立性与稳定调谐；共同噪声、漂移或神经元冗余会改变可加性。"
+      "explanation": "均匀调谐且条件独立时，\\(J\\approx NTj_{f}\\)；因此固定调谐形状后，神经元数 N 或观测时间 T 加倍都会使信息加倍，而渐近误差标准差只按 \\(1/\\sqrt{NT}\\) 缩小。 将观察时间翻四倍才使标准差减半。"
     }
   ]
 }

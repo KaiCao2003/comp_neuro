@@ -1,7 +1,7 @@
 {
   "lecture": 3,
   "slug": "03",
-  "zhTitle": "微分方程与 Euler 数值模拟",
+  "zhTitle": "微分方程与欧拉法",
   "enTitle": "Differential Equations and Euler Simulation",
   "companionFile": "NEUROSCI366_Lecture03_Differential_Equations_Euler_Companion.pdf",
   "companionPages": 26,
@@ -180,6 +180,7 @@
       {
         "id": "L03-M2",
         "title": "Euler's method: from the derivative definition to a stable step size",
+        "transition": "The exact solution for constant input gives us a trajectory against which numerical values can be checked; more complicated inputs or equations often require stepping forward numerically. Euler’s method advances the state using its current slope, and the exact solution lets us test when those steps are accurate or introduce artificial oscillation and divergence.",
         "sourceRefs": [
           {
             "file": "Lecture3-Differential-Equations.pdf",
@@ -249,6 +250,7 @@
       {
         "id": "L03-M3",
         "title": "Second-order oscillator, state space, and code-boundary audit",
+        "transition": "The step-size condition for first-order decay follows from that system’s amplification factor and cannot simply be transferred to an oscillator. Combining position and velocity into a state lets us examine whether Euler preserves the continuous system’s energy, before checking how indexing and endpoints affect the code.",
         "sourceRefs": [
           {
             "file": "Lecture3-Differential-Equations.pdf",
@@ -781,27 +783,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The new steady state is −2, and the value of x at the switching time becomes the new initial condition. A continuous first-order state does not jump; it approaches −2 exponentially with time constant \\(\\tau\\)."
+          "text": "The steady state becomes −2; x remains continuous and approaches it exponentially from its value at the switching time."
         },
         {
           "id": "b",
-          "text": "First calculate a continuous invariant such as the energy derivative, or the system's eigenvalues. Then vary the step size and compare with an energy-preserving method or an exact solution."
+          "text": "The state jumps immediately to −2 and stays there, because the steady state always equals the input."
         },
         {
           "id": "c",
-          "text": "This first-order continuous equation has only a real negative decay rate. Alternation may come from a negative Euler amplification factor."
+          "text": "The state still approaches the old steady state of 5, but its time constant becomes negative."
         },
         {
           "id": "d",
-          "text": "Dropping the integration constant and thereby losing the ability to satisfy an arbitrary initial condition."
+          "text": "Replacing the input by −2 while retaining the original initial value and time origin automatically preserves continuity."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "The new steady state is −2, and the value of x at the switching time becomes the new initial condition. A continuous first-order state does not jump; it approaches −2 exponentially with time constant \\(\\tau\\). The examples \\(dx/dt=x\\) and \\(d^{2}x/dt^{2}=-x\\) show that a differential equation specifies a dynamical rule. A candidate solution is checked by substitution, not by visual resemblance. The derivative of \\(x=e^t\\) is \\(e^t\\), satisfying the first equation; the second derivative of \\(x=\\sin t\\) is \\(-\\sin t\\), satisfying the second. Initial conditions then select the amplitude and phase.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Second-order oscillator, state space, and code-boundary audit,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Euler's method: from the derivative definition to a stable step size,” not the relationship asked about here.",
-        "d": "The error is: Dropping the integration constant and thereby losing the ability to satisfy an arbitrary initial condition."
+        "b": "The steady state is a long-term limit, not the state at the switching instant. A finite input step changes the derivative; the continuous state starts its new transient from its current value.",
+        "c": "The new input sets the steady state to −2. The system parameter \\(\\tau\\) does not become negative when the input changes.",
+        "d": "The new transient must match the state at the switching time. Reusing the original initial value without adjusting the time origin generally fails that continuity condition."
       }
     },
     {
@@ -825,27 +827,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "First calculate a continuous invariant such as the energy derivative, or the system's eigenvalues. Then vary the step size and compare with an energy-preserving method or an exact solution."
+          "text": "Every continuous first-order system can oscillate, and Euler simply samples that biological oscillation."
         },
         {
           "id": "b",
-          "text": "This first-order continuous equation has only a real negative decay rate. Alternation may come from a negative Euler amplification factor."
+          "text": "A negative Euler amplification factor can create alternation absent from the continuous solution; reducing the step tests this."
         },
         {
           "id": "c",
-          "text": "The new steady state is −2, and the value of x at the switching time becomes the new initial condition. A continuous first-order state does not jump; it approaches −2 exponentially with time constant \\(\\tau\\)."
+          "text": "Alternation only indicates a poor initial condition; changing the initial value at fixed step size determines numerical stability."
         },
         {
           "id": "d",
-          "text": "Accepting a trajectory because the program ran without error, without checking \\(\\Delta t\\) relative to \\(\\tau\\)."
+          "text": "Whenever the discrete oscillation shrinks, the continuous system must have an oscillation with the same frequency."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "This first-order continuous equation has only a real negative decay rate. Alternation may come from a negative Euler amplification factor. Reduce \\(\\Delta t\\) and compare with the exact solution before calling it model dynamics rather than a numerical artifact. For \\(\\tau dx/dt=-x+I\\), Euler gives \\(x_{n+1}=x_{n}+(\\Delta t/\\tau )(-x_{n}+I)\\). Define \\(\\alpha =\\Delta t/\\tau\\) and \\(y_{n}=x_{n}-I\\) to obtain \\(y_{n+1}=(1-\\alpha )y_{n}\\). The continuous deviation always decays smoothly; the discrete deviation is controlled by amplification factor \\(a=1-\\alpha\\). Its magnitude shrinks only when \\(|a|<1\\).",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Second-order oscillator, state space, and code-boundary audit,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “From a rate of change to the exact solution of a first-order system,” not the relationship asked about here.",
-        "d": "The error is: Accepting a trajectory because the program ran without error, without checking \\(\\Delta t\\) relative to \\(\\tau\\)."
+        "a": "This continuous first-order equation has one real negative decay rate and a monotonic solution. A negative Euler amplification factor can introduce alternation absent from that solution.",
+        "c": "The initial value sets the error amplitude, but the sign of \\(1-\\Delta t/\\tau\\) determines whether nonzero deviations alternate. Check the step size and compare against the exact solution.",
+        "d": "Numerical stability does not guarantee preservation of monotonicity. A decaying alternating sequence can be a numerical artifact even when the continuous solution never crosses steady state."
       }
     },
     {
@@ -874,27 +876,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "This first-order continuous equation has only a real negative decay rate. Alternation may come from a negative Euler amplification factor."
+          "text": "Check that the program runs without an error and that the phase portrait looks smooth; together these prove continuous instability."
         },
         {
           "id": "b",
-          "text": "The new steady state is −2, and the value of x at the switching time becomes the new initial condition. A continuous first-order state does not jump; it approaches −2 exponentially with time constant \\(\\tau\\)."
+          "text": "Double the simulation duration while keeping the step fixed; a longer outward spiral rules out numerical error."
         },
         {
           "id": "c",
-          "text": "First calculate a continuous invariant such as the energy derivative, or the system's eigenvalues. Then vary the step size and compare with an energy-preserving method or an exact solution."
+          "text": "Analyze continuous energy or eigenvalues, then vary the step size and compare with an exact solution or another integration method."
         },
         {
           "id": "d",
-          "text": "Interpreting a spiral in a phase portrait as damping or self-excitation before checking the discrete update matrix."
+          "text": "Measure the initial energy and swap the plot axes; an outward spiral in both plots proves continuous energy growth."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "First calculate a continuous invariant such as the energy derivative, or the system's eigenvalues. Then vary the step size and compare with an energy-preserving method or an exact solution. If continuous energy is constant while Euler energy grows, the artifact is localized. The accompanying code also simulates a first-order system with \\(\\tau =0.01 \\mathrm{s}\\), step 0.001 s, and duration 0.250 s. Inputs are 0, 2, 1, a cosine, and 0 in sequence. Each update reads the previous input \\(I(t-1)\\), as expected for the current-time slope in explicit Euler. The final condition is `time<0.250`, but the time vector includes the endpoint 0.250 exactly. Consequently, \\(I(end)\\) remains NaN and the last input point is not plotted normally.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Euler's method: from the derivative definition to a stable step size,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “From a rate of change to the exact solution of a first-order system,” not the relationship asked about here.",
-        "d": "The error is: Interpreting a spiral in a phase portrait as damping or self-excitation before checking the discrete update matrix."
+        "a": "Successful execution and a smooth plot do not validate the dynamics. Analyze continuous energy or eigenvalues, then compare numerical trajectories across step sizes or integration methods.",
+        "b": "A longer run can accumulate more discretization error. Vary the step size or compare with another integration method to assess whether Euler causes the energy growth.",
+        "d": "One energy value does not establish its rate of change, and swapping axes does not diagnose the integrator. Compute the continuous energy derivative and check the discrete energy update."
       }
     },
     {
@@ -918,27 +920,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "First calculate a continuous invariant such as the energy derivative, or the system's eigenvalues. Then vary the step size and compare with an energy-preserving method or an exact solution."
+          "text": "At \\(\\Delta t=\\tau/2\\), every Euler point exactly coincides with the exponential, so the approximation has no discretization error."
         },
         {
           "id": "b",
-          "text": "The new steady state is −2, and the value of x at the switching time becomes the new initial condition. A continuous first-order state does not jump; it approaches −2 exponentially with time constant \\(\\tau\\)."
+          "text": "Faster decay of the Euler points reveals an additional damping term in the continuous equation."
         },
         {
           "id": "c",
-          "text": "Accepting a trajectory because the program ran without error, without checking \\(\\Delta t\\) relative to \\(\\tau\\)."
+          "text": "Reducing the step moves Euler points farther from the exact curve, because a tangent approximation works best over long intervals."
         },
         {
           "id": "d",
-          "text": "Comparison of the exact solution of first-order exponential decay with Euler points using a step equal to half the time constant"
+          "text": "Euler approximates the same decay equation but decays too quickly at this finite step; reducing the step improves agreement."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "For \\(\\tau dx/dt=-x\\), forward Euler advances one step along the current tangent. With \\(\\Delta t=\\tau /2\\) it is stable, but at finite step size it decays faster than the exact exponential. Reducing \\(\\Delta t\\) moves the discrete points toward the exact curve.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Second-order oscillator, state space, and code-boundary audit.”",
-        "b": "The diagram does not show the variables and conditions discussed in “From a rate of change to the exact solution of a first-order system.”",
-        "c": "The error is: Accepting a trajectory because the program ran without error, without checking \\(\\Delta t\\) relative to \\(\\tau\\)."
+        "a": "The Euler decay factor is \\(1/2\\), whereas the exact factor is \\(\\exp(-1/2)\\). They differ, so this finite step still introduces error.",
+        "b": "Both curves represent the same continuous equation. The difference comes from the integration method, not an extra physical damping term.",
+        "c": "A tangent is a local approximation. For this stable sequence of step sizes, reducing the step decreases discretization error and brings Euler closer to the exact solution."
       }
     }
   ]

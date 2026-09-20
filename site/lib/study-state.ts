@@ -209,13 +209,14 @@ export function selectQuestionIds(
   const usedTags = new Set<string>();
   const usedDifficulties = new Set<number>();
   const take = (candidates: typeof scored, target: number) => {
-    for (let index = 0; index < candidates.length && selected.length < target; index += 1) {
-      const candidate = candidates[index];
-      if (selectedIds.has(candidate.question.id)) continue;
+    // Reserved review questions must not consume the remaining candidate count.
+    const available = candidates.filter((candidate) => !selectedIds.has(candidate.question.id));
+    for (let index = 0; index < available.length && selected.length < target; index += 1) {
+      const candidate = available[index];
       const newType = !usedTypes.has(candidate.question.type);
       const newTag = candidate.question.conceptTags.some((tag) => !usedTags.has(tag));
       const newDifficulty = !usedDifficulties.has(candidate.question.difficulty);
-      const remaining = candidates.length - index;
+      const remaining = available.length - index;
       const slots = target - selected.length;
       if (selected.length < Math.min(target, 4) || newType || newTag || newDifficulty || remaining <= slots) {
         selected.push(candidate.question);
@@ -280,7 +281,18 @@ export function beginLectureSession(lecture: number, now = new Date()): { state:
   const sessionKey = `${SESSION_PREFIX}${lecture}`;
   try {
     const existing = JSON.parse(readSessionValue(sessionKey) ?? 'null') as LectureSession | null;
-    if (isLectureSessionReusable(existing, lecture, now)) return { state, session: existing! };
+    if (isLectureSessionReusable(existing, lecture, now)) {
+      const nextState: StudyState = {
+        ...state,
+        recentLecture: lecture,
+        lectures: {
+          ...state.lectures,
+          [String(lecture)]: { ...state.lectures[String(lecture)], lastVisitedAt: now.toISOString() },
+        },
+      };
+      saveStudyState(nextState);
+      return { state: nextState, session: existing! };
+    }
   } catch {
     // Begin a fresh stable visit when the session record cannot be read.
   }

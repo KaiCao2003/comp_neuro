@@ -1,7 +1,7 @@
 {
   "lecture": 25,
   "slug": "25",
-  "zhTitle": "强化学习：MDP、Bellman 方程与 Q-learning",
+  "zhTitle": "强化学习、贝尔曼方程与 Q 学习",
   "enTitle": "Reinforcement Learning: MDPs, Bellman Equations, and Q-Learning",
   "companionFile": "NEUROSCI366_Lecture25_Reinforcement_Learning_MDP_Q_Learning_Companion.pdf",
   "companionPages": 25,
@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "用 agent、state、action、reward 与 transition distribution 完整定义 MDP，并用反例检验 state 是否满足 Markov property。",
-      "从 reward sequence 推导 discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)，手算有限链和无限 geometric series。",
-      "从 return 的首步拆分推导 Bellman expectation 与 optimality equations，明确 max 对下一状态 action 取值。",
-      "逐次执行 tabular Q-learning 与 ε-greedy exploration，区分 behavior policy、target 与 off-policy 更新。",
-      "比较 model-free、model-based、generative representation 与 replay，严格区分算法变量和 hippocampal evidence。"
+      "用智能体、状态、动作、奖励与转移分布完整定义 MDP，并用反例检验状态是否满足马尔可夫性质。",
+      "从奖励序列推导折扣回报、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)，手算有限链和无限几何级数。",
+      "从回报的首步拆分推导贝尔曼期望与最优性方程，明确 max 对下一状态动作取值。",
+      "逐次执行表格型 Q 学习与 \\(\\epsilon\\)-贪心探索，区分行为策略、目标与离策略更新。",
+      "比较无模型、基于模型的、生成式表征与重放，严格区分算法变量和海马证据。"
     ],
     "prerequisiteBridge": [
-      "reinforcement learning 把互动写成循环：在 state \\(s_{t}\\) 选 action \\(a_{t}\\)，环境给 reward \\(R_{t+1}\\) 并转到 \\(s_{t+1}\\)。state 不是屏幕上的任意观察，而应包含预测未来所需的历史摘要。若同一观察在“刚拿过钥匙”和“未拿钥匙”时未来不同，钥匙状态必须加入，否则 Markov property 失败，算法会把两个不同情境错误平均。",
-      "return 是未来 rewards 的折扣和。\\(\\gamma\\) 小偏重近期，\\(\\gamma\\) 接近一重视远期；它也让 continuing task 的无限和有限。\\(V_{\\pi }(s)\\) 是遵循 policy \\(\\pi\\) 时从 state 出发的 expected return，\\(Q_{\\pi }(s,a)\\) 额外固定第一步 action。两者不是单次 reward，也不是当前 firing rate，而是对未来随机 transition 和 future choices 的平均。",
-      "Bellman 思想只是“整段未来=下一次 reward+从下一 state 开始的剩余未来”。它把长时间问题化成一步递归。Q-learning用实际采样的一步构造 target \\(R+\\gamma \\max Q_{\\mathrm{next}}\\)，再把旧估计向target移动。max负责假设之后采取最佳action；当前行为仍可探索，因此算法可在非greedy data上学习greedy target。"
+      "强化学习描述个体与环境的循环：在状态 \\(s_{t}\\) 选择动作 \\(a_{t}\\)，获得奖励 \\(R_{t+1}\\)，再进入 \\(s_{t+1}\\)。状态需要包含预测未来所需的历史摘要。若“已拿到钥匙”和“尚未拿到钥匙”时看到同一画面，却有不同的后续结果，就必须把钥匙信息加入状态；否则马尔可夫条件不成立，算法会错误地平均两种情境。",
+      "回报是未来奖励的折扣和。\\(\\gamma\\) 较小时侧重近期，\\(\\gamma\\) 接近 1 时更重视远期；适当的折扣也使持续任务中的无限和有限。\\(V_{\\pi }(s)\\) 表示遵循策略 \\(\\pi\\) 从某状态出发的期望回报，\\(Q_{\\pi }(s,a)\\) 则进一步固定第一步动作。它们既非单次奖励，也非当前发放率，而是对后续随机转移和选择取平均。",
+      "贝尔曼关系把整个未来分为下一次奖励，以及从下一状态开始的剩余回报，从而将长期目标写成一步递归。Q 学习用一次实际转移构造目标 \\(R+\\gamma \\max Q_{\\mathrm{next}}\\)，再让旧估计向目标靠近。最大值运算假定后续选择最佳动作，当前行为仍可探索，因此非贪心行为收集的数据也能用于学习贪心策略的价值。"
     ],
     "modules": [
       {
         "id": "l25-m1",
-        "title": "MDP 与 Markov state：把历史压缩到可预测状态",
+        "title": "马尔可夫状态怎样概括历史",
         "sourceRefs": [
           {
             "file": "Lecture25-ReinforcementLearning.pdf",
@@ -110,62 +110,62 @@
           }
         ],
         "paragraphs": [
-          "MDP 由states、actions、reward与transition-reward distribution \\(p(s',r|s,a)\\)定义。Markov property表示给定当前s,a后，next outcome不再因更早trajectory而改变。它不是说environment deterministic；同一s,a仍可随机到多个\\(s'\\)，只是概率由当前state充分决定。",
-          "state representation是建模选择。Tolman maze中location可能不足：门状态、food是否耗尽或latent context会改变未来。若遗漏变量，agent看到aliasing states，Q值平均冲突outcomes，表面上出现不稳定learning。加入完整history总能恢复预测，却失去压缩与generalization；目标是足够而不过度的state。",
-          "policy \\(\\pi (a|s)\\)规定choice distribution。environment transition与policy是两种随机性：前者回答action后去哪，后者回答state中选什么。评估因果时要分别操纵；改变choice frequencies会改变observed transitions distribution，却不代表physical \\(p(s'|s,a)\\)改变。",
-          "检验Markov可比较history-augmented predictor与state-only predictor的held-out likelihood。若给定s,a后past仍显著预测\\(s'\\)或r，state不充分。有限数据下“未发现history effect”不等于证明；task design应主动构造相同观察、不同hidden context的probe trials。"
+          "MDP 由状态、动作、奖励与状态转移与奖励的联合分布 \\(p(s',r|s,a)\\)定义。马尔可夫性质表示给定当前 s,a 后，下一步结果不再因更早轨迹而改变。它不是说环境确定性；同一 s,a 仍可随机到多个\\(s'\\)，只是概率由当前状态充分决定。",
+          "状态表征是建模选择。Tolman 迷宫中位置可能不足：门状态、食物是否耗尽或潜在情境会改变未来。若遗漏变量，智能体看到混叠状态，Q 值平均冲突结果，表面上出现不稳定学习。加入完整历史总能恢复预测，却失去压缩与泛化；目标是足够而不过度的状态。",
+          "策略 \\(\\pi (a|s)\\)规定选择分布。环境转移与策略是两种随机性：前者回答动作后去哪，后者回答状态中选什么。评估因果时要分别操纵；改变选择频率会改变观测到的转移分布，却不代表物理 \\(p(s'|s,a)\\)改变。",
+          "检验 Markov 可比较历史扩充的预测量与状态仅预测量的留出似然。若给定 s,a 后过去仍显著预测\\(s'\\)或 r，状态不充分。有限数据下“未发现历史效应”不等于证明；任务设计应主动构造相同观察、不同隐藏情境的探测试次。 例如，单独的位置未必足以预测迷宫中下一次奖励：动物是否已经取走食物，也可能改变转移结果。将任务阶段纳入状态后，原先表现为历史依赖的差异可能被解释。状态是否充分因此要通过预测检验，而不是根据变量名称决定。"
         ],
         "keyPoints": [
-          "Markov允许随机transition，但要求历史条件独立。",
-          "state aliasing 会把不同未来错误平均。",
-          "policy randomness与environment randomness需分开。"
+          "马尔可夫性质允许随机转移，但要求历史条件独立。",
+          "状态混叠会把不同未来错误平均。",
+          "策略随机性与环境随机性需分开。"
         ],
         "derivation": {
-          "title": "Markov 条件与trajectory概率分解",
-          "setup": "从一步条件独立写出一段trajectory的生成概率。",
+          "title": "马尔可夫条件与轨迹概率分解",
+          "setup": "从一步条件独立写出一段轨迹的生成概率。",
           "steps": [
             {
-              "title": "写Markov条件",
-              "explanation": "在给定当前state/action后移除更早history。",
+              "title": "写马尔可夫条件",
+              "explanation": "在给定当前状态/动作后移除更早历史。",
               "latex": "p(s_{t+1},r_{t+1}\\mid s_t,a_t,H_t)=p(s_{t+1},r_{t+1}\\mid s_t,a_t)"
             },
             {
-              "title": "加入policy",
-              "explanation": "action由policy在当前state抽样。",
+              "title": "加入策略",
+              "explanation": "动作由策略在当前状态抽样。",
               "latex": "a_t\\sim\\pi(\\cdot\\mid s_t)"
             },
             {
-              "title": "分解trajectory",
-              "explanation": "每一步的policy factor与environment factor相乘。",
+              "title": "分解轨迹",
+              "explanation": "每一步的策略因子与环境因子相乘。",
               "latex": "p(\\tau)=p(s_0)\\prod_t\\pi(a_t\\mid s_t)p(s_{t+1},r_{t+1}\\mid s_t,a_t)"
             }
           ],
           "symbolNotes": [
-            "\\(H_{t}\\) 是t前history，\\(\\tau\\)在此处代表trajectory而非时间常数。",
-            "所有p为probability或density，具体取决于变量离散性。"
+            "\\(H_{t}\\) 是 t 前历史，\\(\\tau\\)在此处代表轨迹而非时间常数。",
+            "所有 p 为概率或密度，具体取决于变量离散性。"
           ],
-          "unitsCheck": "离散概率无量纲；trajectory probability由无量纲factors相乘。",
-          "limitCheck": "deterministic environment时transition factor为0或1；partial observation下Markov等式通常失败。"
+          "unitsCheck": "离散概率无量纲；轨迹概率由无量纲因子相乘。",
+          "limitCheck": "确定性环境时转移因子为0 或1；部分观测下马尔可夫等式通常失败。"
         },
         "workedExample": {
-          "title": "修补一个非Markov state",
-          "problem": "agent在同一房间位置x，若之前拿到钥匙可开门得10，否则撞门得0。给出最小state扩展。",
+          "title": "修补一个非马尔可夫状态",
+          "problem": "智能体在同一房间位置 x，若之前拿到钥匙可开门得10，否则撞门得0。给出最小状态扩展。",
           "steps": [
-            "原state只有x，同一x/action产生两套依history不同的reward。",
-            "加入binary变量\\(k\\in {0,1}\\)表示是否有钥匙。",
-            "新state \\(s=(x,k)\\)后，开门outcome可由当前s和action预测。"
+            "原状态只有 x，同一 x/动作产生两套依历史不同的奖励。",
+            "加入二值变量\\(k\\in {0,1}\\)表示是否有钥匙。",
+            "新状态 \\(s=(x,k)\\)后，开门结果可由当前 s 和动作预测。"
           ],
-          "result": "用位置与钥匙状态的二元组作为state。",
+          "result": "用位置与钥匙状态的二元组作为状态。",
           "sanityCheck": "不需保存完整路线，只保留对未来有影响的钥匙信息。"
         },
         "pitfalls": [
-          "把Markov误解为next state必须唯一。",
-          "将可观测画面直接等同于充分state。"
+          "把 Markov 误解为下一步状态必须唯一。",
+          "将可观测画面直接等同于充分状态。"
         ]
       },
       {
         "id": "l25-m2",
-        "title": "Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)",
+        "title": "折扣回报、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)",
         "sourceRefs": [
           {
             "file": "Lecture25-ReinforcementLearning.pdf",
@@ -173,23 +173,23 @@
           }
         ],
         "paragraphs": [
-          "从time t出发的return定义为 \\(G_{t}=\\sum _{k=0}\\infty \\gamma ^kR_{t+k+1}\\)。第一项没有折扣，下一步reward乘\\(\\gamma\\)，以此类推。\\(\\gamma\\)不是学习率；它改变目标对时间的偏好与数学收敛。finite episode可用\\(\\gamma =1\\)，continuing positive reward通常需\\(\\gamma <1\\)。",
-          "\\(V_{\\pi }(s)=E_{\\pi }[G_{t}|s_{t}=s]\\)对environment randomness与policy future actions取平均。\\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\)只固定第一action，之后仍遵循\\(\\pi\\)。由此\\(V_{\\pi }(s)=\\sum _{a}\\pi (a|s)Q_{\\pi }(s,a)\\)；deterministic policy时只取所选action。",
-          "value scale随reward units和\\(\\gamma\\)变化。比较animals或sessions时若reward normalization不同，不能直接比较V magnitude。\\(\\gamma\\)也可等效成time horizon约\\(1/(1-\\gamma )\\) steps，但这只是粗略尺度；episodic termination和transition structure会改变实际影响。",
-          "神经signal与V/Q相关时需控制immediate reward、state identity和action。state value可在多个actions前共同出现，Q应随candidate action而异。一个cell在高reward trials firing更多，不足以区分received reward、expected return和movement vigor。"
+          "从时间 t 出发的回报定义为 \\(G_{t}=\\sum _{k=0}^{\\infty} \\gamma ^kR_{t+k+1}\\)。第一项没有折扣，下一步奖励乘\\(\\gamma\\)，以此类推。\\(\\gamma\\)不是学习率；它改变目标对时间的偏好与数学收敛。有限回合可用\\(\\gamma =1\\)，持续的正奖励通常需\\(\\gamma <1\\)。",
+          "\\(V_{\\pi }(s)=E_{\\pi }[G_{t}|s_{t}=s]\\)对环境随机性与策略未来动作取平均。\\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\)只固定第一动作，之后仍遵循\\(\\pi\\)。由此\\(V_{\\pi }(s)=\\sum _{a}\\pi (a|s)Q_{\\pi }(s,a)\\)；确定性策略时只取所选动作。 固定当前动作只限制首次选择，不能把整个未来轨迹也视为确定；后续动作和环境转移仍然参与期望。",
+          "价值尺度随奖励单元和\\(\\gamma\\)变化。比较动物或实验批次时若奖励归一化不同，不能直接比较 V 大小。\\(\\gamma\\)也可等效成时间范围约\\(1/(1-\\gamma )\\) 步，但这只是粗略尺度；情节性终止和转移结构会改变实际影响。",
+          "神经信号与 V/Q 相关时需控制即时奖励、状态身份和动作。状态价值可在多个动作前共同出现，Q 应随候选动作而异。一个细胞在高奖励试次发放更多，不足以区分收到的奖励、预期回报和运动活力。"
         ],
         "keyPoints": [
-          "return是discounted future reward sum。",
-          "V固定state，Q还固定first action。",
-          "\\(\\gamma\\)决定目标时间权重，不是update step size。"
+          "回报是折扣未来奖励求和。",
+          "V 固定状态，Q 还固定首次动作。",
+          "\\(\\gamma\\)决定目标时间权重，不是更新步大小。"
         ],
         "derivation": {
-          "title": "把无限reward stream求和",
+          "title": "把无限奖励序列求和",
           "setup": "先写前几项，再用几何级数。",
           "steps": [
             {
-              "title": "写return",
-              "explanation": "每步constant reward为r。",
+              "title": "写回报",
+              "explanation": "每步常数奖励为 r。",
               "latex": "G_t=r+\\gamma r+\\gamma^2r+\\cdots"
             },
             {
@@ -209,31 +209,32 @@
             }
           ],
           "symbolNotes": [
-            "r与G使用reward/value单位，\\(\\gamma\\)无量纲。",
-            "time step定义会影响同一物理时间对应的\\(\\gamma\\)。"
+            "r 与 G 使用奖励/价值单位，\\(\\gamma\\)无量纲。",
+            "时间步定义会影响同一物理时间对应的\\(\\gamma\\)。"
           ],
-          "unitsCheck": "\\(\\gamma\\)的幂无量纲，因此每一项与总和都保持reward单位。",
-          "limitCheck": "\\(\\gamma =0\\)时\\(G=r\\)；γ→1^-时continuing constant-positive return发散。"
+          "unitsCheck": "\\(\\gamma\\)的幂无量纲，因此每一项与总和都保持奖励单位。",
+          "limitCheck": "\\(\\gamma =0\\)时\\(G=r\\)；γ→1^-时持续常数正回报发散。"
         },
         "workedExample": {
-          "title": "有限三步return",
-          "problem": "未来rewards依次为2、0、4，episode随后结束，\\(\\gamma =0.5\\)。求Gt。",
+          "title": "有限三步回报",
+          "problem": "未来奖励依次为2、0、4，回合随后结束，\\(\\gamma =0.5\\)。求 Gt。",
           "steps": [
             "第一项2。",
             "第二项\\(0.5\\times 0=0\\)。",
             "第三项\\(0.5^{2}\\times 4=1\\)。"
           ],
           "result": "\\(G_{t}=3\\)。",
-          "sanityCheck": "return小于未折扣总和6，且最后reward权重为0.25。"
+          "sanityCheck": "回报小于未折扣总和6，且最后奖励权重为0.25。"
         },
         "pitfalls": [
-          "把\\(\\gamma\\)当作learning rate \\(\\alpha\\)。",
-          "把single-trial return与expected value混为一谈。"
-        ]
+          "把\\(\\gamma\\)当作学习率 \\(\\alpha\\)。",
+          "把单个试次回报与预期价值混为一谈。"
+        ],
+        "transition": "马尔可夫状态规定了哪些当前信息足以预测下一步，但还没有定义选择行动的长期目标。折扣回报给出目标，状态价值与状态—动作价值则明确期望分别固定了哪些条件。"
       },
       {
         "id": "l25-m3",
-        "title": "Bellman 递归：从整段未来到一步backup",
+        "title": "贝尔曼方程的一步递推",
         "sourceRefs": [
           {
             "file": "Lecture25-ReinforcementLearning.pdf",
@@ -241,67 +242,68 @@
           }
         ],
         "paragraphs": [
-          "return可拆成\\(G_{t}=R_{t+1}+\\gamma G_{t+1}\\)。条件于s,a取期望，得到\\(Q_{\\pi }(s,a)=E[R+\\gamma \\sum _{a'}\\pi (a'|s')Q_{\\pi }(s',a')|s,a]\\)。这只是total expectation与return拆分，不需要先假设deterministic transitions。",
-          "optimal Q假设下一state以后总选最佳action，因此把policy-weighted average替换为\\(\\max_{a'}Q^{*}(s',a')\\)。max位于expectation内部，因为不同随机next states各有自己的best action；一般不能先对所有\\(s'\\)平均Q再取一个共同action。",
-          "Bellman operator把一张Q表映成新表，\\(\\gamma <1\\)时tabular discounted setting下是contraction，反复backup趋向唯一fixed point。\\(\\gamma\\)接近1会让信息传播更远但contraction更慢；function approximation与off-policy sampling可破坏简单收敛保证。",
-          "“backup”不是生物脑必须逐格扫表，而是计算关系。神经数据可检验successor value、RPE和revaluation，但把一个brain region命名为Bellman operator需额外mechanistic evidence。算法层推导与biological mapping应分开书写。"
+          "回报可拆成\\(G_{t}=R_{t+1}+\\gamma G_{t+1}\\)。条件于 s,a 取期望，得到\\(Q_{\\pi }(s,a)=E[R+\\gamma \\sum _{a'}\\pi (a'|s')Q_{\\pi }(s',a')|s,a]\\)。这只是全期望公式与回报拆分，不需要先假设确定性转移。 条件期望保留了环境和后续动作的随机性，所以该关系既适用于确定性路径，也适用于可能走向不同后继状态的环境。",
+          "最优 Q 假设下一状态以后总选最佳动作，因此把策略加权平均替换为\\(\\max_{a'}Q^{*}(s',a')\\)。max 位于期望内部，因为不同随机下一步状态各有自己的最佳动作；一般不能先对所有\\(s'\\)平均 Q 再取一个共同动作。",
+          "贝尔曼算子把一张 Q 表映成新表，\\(\\gamma <1\\)时表格型折扣条件下是压缩映射，反复更新趋向唯一固定点。\\(\\gamma\\)接近1 会让信息传播更远但压缩映射更慢；函数近似与离策略采样可破坏简单收敛保证。 这些保证依赖表示方式与更新规则，不能仅因算法使用了贝尔曼目标就自动推广到任意深层网络。",
+          "“更新”不是生物大大脑必须逐格扫表，而是计算关系。神经数据可检验后继价值、RPE 和价值重估，但把一个脑区命名为贝尔曼算子需额外机制证据。算法层推导与生物映射应分开书写。 递推关系把一次转移之前与之后的价值联系起来。它给出的是期望的一致性条件；实际学习还需要规定如何采样、更新以及处理有限数据的误差。"
         ],
         "keyPoints": [
-          "Bellman来自Gt的一步拆分。",
-          "optimal max对每个next state的next action取。",
-          "tabular contraction保证不自动推广到任意function approximation。"
+          "贝尔曼来自 Gt 的一步拆分。",
+          "最优 max 对每个下一步状态的下一步动作取。",
+          "表格型压缩映射保证不自动推广到任意函数近似。"
         ],
         "derivation": {
-          "title": "Bellman optimality equation",
-          "setup": "从optimal return的首步reward与optimal continuation构造。",
+          "title": "贝尔曼最优性方程",
+          "setup": "从最优回报的首步奖励与最优延续构造。",
           "steps": [
             {
               "title": "首步拆分",
-              "explanation": "当前action后，return等于即时reward加discounted remainder。",
+              "explanation": "当前动作后，回报等于即时奖励加折扣剩余回报。",
               "latex": "G_t=R_{t+1}+\\gamma G_{t+1}"
             },
             {
               "title": "条件期望",
-              "explanation": "固定当前s,a并对next outcome取平均。",
+              "explanation": "固定当前 s,a 并对下一步结果取平均。",
               "latex": "Q^*(s,a)=\\mathbb E[R_{t+1}+\\gamma G_{t+1}\\mid s_t=s,a_t=a]"
             },
             {
-              "title": "最佳continuation",
-              "explanation": "next state中的optimal remainder等于最大action value。",
+              "title": "最佳延续",
+              "explanation": "下一步状态中的最优剩余回报等于最大动作价值。",
               "latex": "G_{t+1}\\leadsto\\max_{a^{\\prime}}Q^*(s_{t+1},a^{\\prime})"
             },
             {
               "title": "合并",
-              "explanation": "得到Bellman optimality fixed-point relation。",
+              "explanation": "得到贝尔曼最优性固定点关系。",
               "latex": "Q^*(s,a)=\\mathbb E\\!\\left[R_{t+1}+\\gamma\\max_{a^{\\prime}}Q^*(s_{t+1},a^{\\prime})\\mid s_t=s,a_t=a\\right]"
             }
           ],
           "symbolNotes": [
-            "\\(s'\\)与\\(a'\\)表示next state/action，星号表示optimal policy。",
-            "expectation覆盖transition与reward randomness。"
+            "\\(s'\\)与\\(a'\\)表示下一步状态/动作，星号表示最优策略。",
+            "期望覆盖转移与奖励随机性。"
           ],
-          "unitsCheck": "Q与R为同一value单位，\\(\\gamma\\)无量纲。",
-          "limitCheck": "terminal state令future \\(\\max Q\\)为0；\\(\\gamma =0\\)时\\(Q^{*}\\)只等于expected immediate reward。"
+          "unitsCheck": "Q 与 R 为同一价值单位，\\(\\gamma\\)无量纲。",
+          "limitCheck": "终止状态令未来 \\(\\max Q\\)为0；\\(\\gamma =0\\)时\\(Q^{*}\\)只等于预期即时奖励。"
         },
         "workedExample": {
-          "title": "两next-state Bellman backup",
-          "problem": "action后以0.5概率得\\(R=1\\)到s1，maxQ\\((s_{1})=4\\)；以0.5概率得\\(R=3\\)到s2，maxQ\\((s_{2})=2\\)；\\(\\gamma =0.9\\)。",
+          "title": "两下一步状态贝尔曼更新",
+          "problem": "动作后以0.5 概率得\\(R=1\\)到 s1，maxQ\\((s_{1})=4\\)；以0.5 概率得\\(R=3\\)到 s2，maxQ\\((s_{2})=2\\)；\\(\\gamma =0.9\\)。",
           "steps": [
-            "s1 target=\\(1+0.9\\times 4=4.6\\)。",
-            "s2 target=\\(3+0.9\\times 2=4.8\\)。",
+            "s1 目标=\\(1+0.9\\times 4=4.6\\)。",
+            "s2 目标=\\(3+0.9\\times 2=4.8\\)。",
             "取概率平均\\(Q^{*}=0.5\\times 4.6+0.5\\times 4.8=4.7\\)。"
           ],
-          "result": "该state-action的Bellman target为4.7。",
-          "sanityCheck": "target介于两个outcome targets 4.6与4.8之间。"
+          "result": "该状态—动作的贝尔曼目标为4.7。",
+          "sanityCheck": "目标介于两个结果目标 4.6 与4.8 之间。"
         },
         "pitfalls": [
-          "把max作用在当前已执行action上。",
-          "将tabular收敛定理无条件推广到deep network。"
-        ]
+          "把 max 作用在当前已执行动作上。",
+          "将表格型收敛定理无条件推广到深层网络。"
+        ],
+        "transition": "价值的定义包含整个未来，直接枚举所有后续轨迹通常不可行。把回报分成眼前奖励与剩余回报，再对下一状态取条件期望，就能得到用于递推计算的贝尔曼关系。"
       },
       {
         "id": "l25-m4",
-        "title": "Tabular Q-learning 与 exploration",
+        "title": "表格型 Q 学习与探索",
         "sourceRefs": [
           {
             "file": "Lecture25-ReinforcementLearning.pdf",
@@ -309,67 +311,68 @@
           }
         ],
         "paragraphs": [
-          "Q-learning观察\\((s,a,R,s')\\)，构造target \\(y=R+\\gamma maxa'Q(s',a')\\)，error \\(\\delta =y-Q(s,a)\\)，再更新\\(Q\\leftarrow Q+\\alpha \\delta\\)。只有访问的(s,a)格直接改变；重复随机samples后，其平均target逼近Bellman expectation。terminal transition的future term设为零。",
-          "它是off-policy：behavior可用ε-greedy探索，target仍用greedy max。ε-greedy以\\(1-\\epsilon\\)选当前greedy action，以\\(\\epsilon\\)从action set随机；若random分支也可能选greedy，实际greedy概率需加上\\(\\epsilon /|A|\\)。探索保证发现被低估options，但固定大\\(\\epsilon\\)会长期牺牲reward。",
-          "\\(\\alpha\\)过大使new samples覆盖旧知识并震荡，过小适应缓慢；tabular convergence需要充分visit与合适递减steps。max over noisy estimates还产生positive maximization bias，可由Double Q methods缓解。课程公式是基础tabular form，不代表function approximation始终稳定。",
-          "behavior analysis中exploration不能简单等同于random错误；animals可定向探索uncertain actions。若用ε-greedy拟合，系统性uncertainty-seeking会被误分到value或temperature。模型比较应包含softmax、directed exploration等alternatives。"
+          "Q 学习观察\\((s,a,R,s')\\)，构造目标 \\(y=R+\\gamma maxa'Q(s',a')\\)，误差 \\(\\delta =y-Q(s,a)\\)，再更新\\(Q\\leftarrow Q+\\alpha \\delta\\)。只有访问的(s,a)格直接改变；重复随机样本后，其平均目标逼近贝尔曼期望。终止转移的未来价值项设为零。 学习率决定单次样本对已有估计的影响，而折扣因子决定未来奖励在目标中的权重。",
+          "它是离策略：行为可用\\(\\epsilon\\)-贪心探索，目标仍用贪心 max。\\(\\epsilon\\)-贪心以\\(1-\\epsilon\\)选当前贪心动作，以\\(\\epsilon\\)从动作集合随机；若随机分支也可能选贪心，实际贪心概率需加上\\(\\epsilon /|A|\\)。探索保证发现被低估选项，但固定大\\(\\epsilon\\)会长期牺牲奖励。",
+          "\\(\\alpha\\)过大使新的样本覆盖旧知识并震荡，过小适应缓慢；表格型收敛需要充分访问与合适递减步。对含噪估计取最大值还产生正最大化偏差，可由 Double Q 方法缓解。课程公式是基础表格型形式，不代表函数近似始终稳定。",
+          "行为分析中探索不能简单等同于随机错误；动物可定向探索不确定的动作。若用\\(\\epsilon\\)-贪心拟合，系统性不确定性寻求会被误分到价值或温度。模型比较应包含 softmax、定向探索等候选项。 比较时还应检验模型是否预测了动物偏向尚未充分采样选项的行为，而不只比较总体正确率。"
         ],
         "keyPoints": [
-          "Q-learning用sampled Bellman target更新一个state-action entry。",
-          "behavior policy可探索，target policy仍greedy。",
-          "tabular公式的收敛条件与function approximation不同。"
+          "Q 学习用采样的贝尔曼目标更新一个状态—动作条目。",
+          "行为策略可探索，目标策略仍贪心。",
+          "表格型公式的收敛条件与函数近似不同。"
         ],
         "derivation": {
-          "title": "一次Q-learning update的误差结构",
-          "setup": "把旧值、sample target与convex step分开。",
+          "title": "一次 Q 学习更新的误差结构",
+          "setup": "把旧值、样本目标与凸步分开。",
           "steps": [
             {
-              "title": "构造target",
-              "explanation": "用observed reward与next-state greedy estimate。",
+              "title": "构造目标",
+              "explanation": "用观测到的奖励与下一步状态贪心估计。",
               "latex": "y_t=R_{t+1}+\\gamma\\max_{a^{\\prime}}Q(s_{t+1},a^{\\prime})"
             },
             {
-              "title": "计算TD error",
-              "explanation": "比较target与current estimate。",
+              "title": "计算 TD 误差",
+              "explanation": "比较目标与当前估计。",
               "latex": "\\delta_t=y_t-Q(s_t,a_t)"
             },
             {
               "title": "移动一部分",
-              "explanation": "learning rate \\(\\alpha\\)决定更新比例。",
+              "explanation": "学习率 \\(\\alpha\\)决定更新比例。",
               "latex": "Q_{\\mathrm{new}}(s_t,a_t)=Q_{\\mathrm{old}}(s_t,a_t)+\\alpha\\delta_t"
             },
             {
-              "title": "写convex form",
-              "explanation": "\\(0\\le \\alpha \\le 1\\)时new value位于old与target之间。",
+              "title": "写凸形式",
+              "explanation": "\\(0\\le \\alpha \\le 1\\)时新的价值位于旧的与目标之间。",
               "latex": "Q_{\\mathrm{new}}=(1-\\alpha)Q_{\\mathrm{old}}+\\alpha y_t"
             }
           ],
           "symbolNotes": [
-            "\\(\\alpha\\)与\\(\\gamma\\)无量纲；Q、R、\\(\\delta\\)、y同单位。",
+            "\\(\\alpha\\)与\\(\\gamma\\)无量纲；Q、R、\\(\\delta\\)、y 同单位。",
             "只更新当前访问的\\((s_{t},a_{t})\\)。"
           ],
-          "unitsCheck": "convex coefficients和为1，new Q保留value单位。",
-          "limitCheck": "\\(\\alpha =0\\)不学；\\(\\alpha =1\\)完全替换为本次sample target。"
+          "unitsCheck": "凸系数和为1，新的 Q 保留价值单位。",
+          "limitCheck": "\\(\\alpha =0\\)不学；\\(\\alpha =1\\)完全替换为本次样本目标。"
         },
         "workedExample": {
-          "title": "连续两次update",
-          "problem": "初始\\(Q=0\\)，\\(\\gamma =0.5\\)，\\(\\alpha =0.5\\)。第一次\\(R=2\\)、next maxQ=4；第二次同格\\(R=0\\)、next maxQ=2。",
+          "title": "连续两次更新",
+          "problem": "初始\\(Q=0\\)，\\(\\gamma =0.5\\)，\\(\\alpha =0.5\\)。第一次\\(R=2\\)、下一步 maxQ=4；第二次同格\\(R=0\\)、下一步 maxQ=2。",
           "steps": [
-            "第一次target=\\(2+2=4\\)，new \\(Q=0+0.5\\times 4=2\\)。",
-            "第二次target=\\(0+1=1\\)，error=\\(1-2=-1\\)。",
-            "new \\(Q=2+0.5\\times (-1)=1.5\\)。"
+            "第一次目标=\\(2+2=4\\)，新的 \\(Q=0+0.5\\times 4=2\\)。",
+            "第二次目标=\\(0+1=1\\)，误差=\\(1-2=-1\\)。",
+            "新的 \\(Q=2+0.5\\times (-1)=1.5\\)。"
           ],
           "result": "两次后\\(Q=1.5\\)。",
-          "sanityCheck": "第二个target低于旧值，所以Q下降但只走一半。"
+          "sanityCheck": "第二个目标低于旧值，所以 Q 下降但只走一半。"
         },
         "pitfalls": [
-          "把Q直接设成即时reward。",
-          "认为off-policy意味着数据无需覆盖未访问actions。"
-        ]
+          "把 Q 直接设成即时奖励。",
+          "认为离策略意味着数据无需覆盖未访问动作。"
+        ],
+        "transition": "贝尔曼关系描述应满足的期望一致性，学习者却未必知道环境的转移分布。Q 学习用实际观察到的一次转移构造更新目标，并依靠探索获得其他动作所需的数据。"
       },
       {
         "id": "l25-m5",
-        "title": "Tolman maze、latent state 与 generative map",
+        "title": "迷宫任务与环境模型",
         "sourceRefs": [
           {
             "file": "Lecture25-ReinforcementLearning.pdf",
@@ -377,36 +380,37 @@
           }
         ],
         "paragraphs": [
-          "Tolman式maze结果强调动物可能学习environment structure而非单一stimulus-response chain。若reward location改变或熟悉路径封闭，拥有transition map与reward model的agent可在未重新走遍所有routes前规划；纯 cached model-free Q 通常需新的prediction errors逐步改值。",
-          "generative model \\(p(s',r|s,a)\\)可simulate candidate futures。state representation必须区分locations、contexts与goals，同时允许相似routes共享structure。hippocampal place/state coding与cognitive-map hypothesis提供biological bridge，但place activity也受movement、sensory与task variables影响。",
-          "planning可通过tree search、dynamic programming或sampling trajectories完成，计算成本随horizon和branching增长。model-based flexibility换来memory与computation代价；habitual cached values速度快。behavior常呈mixture，不能用一次detour表现把animal归为纯算法类别。",
-          "关键实验是outcome devaluation或transition revaluation后，在没有直接new-path reward experience时测试choice。立即调整支持model-based information use；仍需排除instruction、sensory cue或simple heuristic。neural perturbation若选择性破坏revaluation而保留well-trained habit，会加强circuit-level解释。"
+          "Tolman 式迷宫结果强调动物可能学习环境结构而非单一刺激—响应链。若奖励位置改变或熟悉路径封闭，拥有状态转移图与奖励模型的智能体可在未重新走遍所有路径前规划；纯缓存的无模型 Q 值通常需新的预测误差逐步改值。",
+          "生成式模型 \\(p(s',r|s,a)\\)可模拟候选未来。状态表征必须区分位置、情境与目标，同时允许相似路径共享结构。海马位置/状态编码与认知地图假说提供生物衔接，但位置活动也受运动、感觉与任务变量影响。 模型需要预测在指定状态采取某个动作后会发生什么；仅记录常见位置之间的关联，尚不足以支持行动规划。因而可以通过改变动作规则、同时保留视觉线索来区分环境模型与位置熟悉度。",
+          "规划可通过树搜索、动态规划或采样轨迹完成，计算成本随范围和分支数量增长。基于模型的灵活性换来记忆与计算代价；习惯性的缓存的数值速度快。行为常呈混合态，不能用一次绕路表现就断定动物采用了某一种算法。",
+          "关键实验是结果贬值或转移价值重估后，在没有直接新路径奖励经历时测试选择。立即调整支持基于模型的信息利用；仍需排除任务指令、感觉线索或简单启发式规则。神经扰动若选择性破坏价值重估而保留训练充分的习惯，会加强回路层次解释。 结果贬值改变的是奖励意义，转移重估改变的是通向结果的路径。将两种操作分开，并在重新获得奖励前测试，才能判断选择是否利用了新信息，而不是通过新的试错逐渐形成。"
         ],
         "keyPoints": [
-          "generative model可在未真实执行前模拟future。",
-          "model-based灵活但计算昂贵，model-free快速但更新滞后。",
-          "hippocampal map是证据桥，不是算法一一对应。"
+          "生成式模型可在未真实执行前模拟未来。",
+          "基于模型的灵活但计算昂贵，无模型快速但更新滞后。",
+          "海马映射是证据桥，不是算法一一对应。"
         ],
         "derivation": null,
         "workedExample": {
-          "title": "一步revaluation规划",
-          "problem": "在 state s，action A 确定转移到 terminal state s1 并得到 reward 5，B 确定转移到 terminal state s2 并得到 reward 3。随后 outcome devaluation 告知 agent：到达 s1 的 reward 已变为 -1；transition 不变。比较 model-based 与 cached model-free choice。",
+          "title": "一步价值重估规划",
+          "problem": "在状态 s，动作 A 确定转移到终止状态 s1 并得到奖励 5，B 确定转移到终止状态 s2 并得到奖励 3。随后结果贬值告知智能体：到达 s1 的奖励已变为 -1；转移不变。比较基于模型的与缓存的无模型选择。",
           "steps": [
-            "model-based learner 把 reward model 中的 \\(r(s,A,s_{1})\\) 从 5 改成 -1；它更新的是 outcome model，不是直接把派生 value 当作环境参数。",
-            "两 next states 都是 terminal，continuation value 为 0，因此重新规划得到 \\(Q_{\\mathrm{MB}}(s,A)=-1\\)、\\(Q_{\\mathrm{MB}}(s,B)=3\\)。",
-            "无需再次执行 A 即可改选 B；未收到新 prediction error 的 cached \\(Q_{\\mathrm{MF}}(s,A)\\) 仍可能保持 5，因而暂时继续选择 A。"
+            "基于模型的学习者把奖励模型中的 \\(r(s,A,s_{1})\\) 从 5 改成 -1；它更新的是结果模型，不是直接把派生价值当作环境参数。",
+            "两下一步状态都是终止，延续价值为 0，因此重新规划得到 \\(Q_{\\mathrm{MB}}(s,A)=-1\\)、\\(Q_{\\mathrm{MB}}(s,B)=3\\)。",
+            "无需再次执行 A 即可改选 B；未收到新预测误差的缓存的 \\(Q_{\\mathrm{MF}}(s,A)\\) 仍可能保持 5，因而暂时继续选择 A。"
           ],
-          "result": "model-based choice 转向 B；cached model-free choice 可能暂不改变。",
-          "sanityCheck": "terminal continuation 为 0，所以新的 Q 排序必须与更新后的 immediate rewards 一致。"
+          "result": "基于模型的选择转向 B；缓存的无模型选择可能暂不改变。",
+          "sanityCheck": "终止延续为 0，所以新的 Q 排序必须与更新后的即时奖励一致。"
         },
         "pitfalls": [
-          "把place field直接称为transition model。",
-          "将behavior混合策略硬分成纯model-free或纯model-based。"
-        ]
+          "把位置局部场直接称为转移模型。",
+          "将行为混合策略硬分成纯无模型或纯基于模型的。"
+        ],
+        "transition": "缓存的 Q 值可从直接经历中更新，但不能自动利用尚未重新走过的路径变化。环境转移与奖励的生成模型提供了另一种方式，Tolman 式迷宫和重估实验可检验动物是否使用这种结构知识。"
       },
       {
         "id": "l25-m6",
-        "title": "Simulated experience、hippocampal replay 与sample efficiency",
+        "title": "模拟经验、重放与样本效率",
         "sourceRefs": [
           {
             "file": "Lecture25-ReinforcementLearning.pdf",
@@ -414,63 +418,64 @@
           }
         ],
         "paragraphs": [
-          "model-based agent可从learned model采样imagined transition，再用与真实transition相同的Bellman或Q update。Dyna框架把real experience同时用于更新model与value，并在间歇中做simulated backups，提高sample efficiency。错误model也会反复传播bias，产生model exploitation。",
-          "hippocampal replay在rest或sleep中重现place-cell sequences，可能正向、反向、压缩并偏向reward或future paths。它与memory consolidation、planning及credit propagation相容；然而检测到sequence不说明下游一定执行某个数值update，replay也可能服务多个功能。",
-          "causal检验应在保持总体sleep、arousal和firing的条件下选择性扰乱task-relevant sequences，观察subsequent planning或learning。还可测试replay content是否预测下一choice、是否随reward relocation重排，以及cortical/striatal value signals是否在replay后按模型变化。",
-          "real与simulated samples来自不同distributions。优先重放large prediction-error或policy-relevant transitions可提高效率，但也会造成sampling bias；若update是off-policy可部分容忍，若估计behavioral averages则需importance correction。把replay统称“重复记忆”会丢失selection rule这一关键计算问题。"
+          "基于模型的智能体可从学得的模型采样想象的状态转移，再用与真实转移相同的贝尔曼或 Q 更新。Dyna 框架把真实经验同时用于更新模型与价值，并在间歇中做模拟更新，提高样本效率。错误模型也会反复传播偏差，让智能体利用模型误差获得虚高的预测回报。",
+          "海马重放在静息或睡眠中重现位置细胞序列，可能正向、反向、压缩并偏向奖励或未来路径。它与记忆巩固、规划及信用分配传播相容；然而检测到序列不说明下游一定执行某个数值更新，重放也可能服务多个功能。 重放内容和重放后的行为变化应在同一任务中联系起来。",
+          "因果检验应在保持总体睡眠、唤醒水平和发放的条件下选择性扰乱任务相关序列，观察后续规划或学习。还可测试重放内容是否预测下一选择、是否随奖励位置改变重排，以及皮层/纹状体价值信号是否在重放后按模型变化。",
+          "真实与模拟样本来自不同分布。优先重放较大的预测误差或策略相关转移可提高效率，但也会造成采样偏差；若更新是离策略可部分容忍，若估计行为平均值则需重要性校正。把重放统称“重复记忆”会丢失选择规则这一关键计算问题。 因而重放数量增加并不必然改善策略；只有模型在规划所涉及的状态与动作上足够准确，模拟更新才可靠。 可以把模型误差与价值误差分别测量：前者比较预测和真实转移，后者比较估计回报与实际回报。这样才能判断更多模拟更新是在纠正数据不足，还是在放大模型已有的偏差。"
         ],
         "keyPoints": [
-          "simulated transitions可重复驱动value backups。",
-          "replay sequence evidence不自动指定下游learning rule。",
-          "prioritized replay提高效率也改变sample distribution。"
+          "模拟转移可重复驱动价值更新。",
+          "重放序列证据不自动指定下游学习规则。",
+          "优先重放提高效率也改变样本分布。"
         ],
         "derivation": {
-          "title": "Dyna式real与simulated update链",
-          "setup": "先用真实transition学model，再从model生成额外target。",
+          "title": "Dyna 式真实与模拟更新链",
+          "setup": "先用真实转移学模型，再从模型生成额外目标。",
           "steps": [
             {
-              "title": "观察真实transition",
-              "explanation": "记录\\((s,a,R,s')\\)并更新Q一次。",
+              "title": "观察真实转移",
+              "explanation": "记录\\((s,a,R,s')\\)并更新 Q 一次。",
               "latex": "Q(s,a)\\leftarrow Q(s,a)+\\alpha\\left[R+\\gamma\\max_{a^{\\prime}}Q(s^{\\prime},a^{\\prime})-Q(s,a)\\right]"
             },
             {
-              "title": "更新model",
-              "explanation": "估计conditional transition-reward distribution。",
+              "title": "更新模型",
+              "explanation": "估计条件状态转移与奖励的联合分布。",
               "latex": "\\widehat p(s^{\\prime},r\\mid s,a)"
             },
             {
-              "title": "模拟sample",
-              "explanation": "从已学model抽取虚拟outcome。",
+              "title": "模拟样本",
+              "explanation": "从已学模型抽取虚拟结果。",
               "latex": "(\\widetilde s^{\\prime},\\widetilde r)\\sim\\widehat p(\\cdot,\\cdot\\mid s,a)"
             },
             {
-              "title": "做额外backup",
-              "explanation": "用模拟sample构造同型target。",
+              "title": "做额外更新",
+              "explanation": "用模拟样本构造同型目标。",
               "latex": "Q(s,a)\\leftarrow Q(s,a)+\\alpha\\left[\\widetilde r+\\gamma\\max_{a^{\\prime}}Q(\\widetilde s^{\\prime},a^{\\prime})-Q(s,a)\\right]"
             }
           ],
           "symbolNotes": [
-            "带tilde变量来自model sample，不是新外界experience。",
-            "model probability需对每个s,a归一化。"
+            "带波浪号变量来自模型样本，不是新外界经历。",
+            "模型概率需对每个 s,a 归一化。"
           ],
-          "unitsCheck": "真实与模拟reward必须采用相同value单位，才能共享Q表。",
-          "limitCheck": "零simulated updates退化为普通model-free sampling；model完全错误时多做simulation可加重偏差。"
+          "unitsCheck": "真实与模拟奖励必须采用相同价值单位，才能共享 Q 表。",
+          "limitCheck": "零模拟更新退化为普通无模型采样；模型完全错误时多做模拟可加重偏差。"
         },
         "workedExample": {
-          "title": "一次真实加两次模拟backup",
-          "problem": "某Q初值0、\\(\\alpha =0.5\\)、\\(\\gamma =0\\)。真实reward2，随后model模拟rewards 2与0。依次更新。",
+          "title": "一次真实加两次模拟更新",
+          "problem": "某 Q 初值0、\\(\\alpha =0.5\\)、\\(\\gamma =0\\)。真实奖励2，随后模型模拟奖励 2 与0。依次更新。",
           "steps": [
-            "真实update：\\(Q=0+0.5\\times (2-0)=1\\)。",
-            "模拟reward2：\\(Q=1+0.5\\times (2-1)=1.5\\)。",
-            "模拟reward0：\\(Q=1.5+0.5\\times (0-1.5)=0.75\\)。"
+            "真实更新：\\(Q=0+0.5\\times (2-0)=1\\)。",
+            "模拟奖励2：\\(Q=1+0.5\\times (2-1)=1.5\\)。",
+            "模拟奖励0：\\(Q=1.5+0.5\\times (0-1.5)=0.75\\)。"
           ],
-          "result": "三次backup后\\(Q=0.75\\)，展示simulated samples也改变estimate。",
-          "sanityCheck": "三samples平均reward为4/3；constant \\(\\alpha\\)使近期sample权重较大，所以结果不等于简单平均。"
+          "result": "三次更新后\\(Q=0.75\\)，展示模拟样本也改变估计。",
+          "sanityCheck": "三样本平均奖励为4/3；常数 \\(\\alpha\\)使近期样本权重较大，所以结果不等于简单平均。"
         },
         "pitfalls": [
-          "把压缩sequence直接等同于Bellman backup。",
-          "只报告sample efficiency，不测model bias造成的planning failure。"
-        ]
+          "把压缩序列直接等同于贝尔曼更新。",
+          "只报告样本效率，不测模型偏差造成的规划失败。"
+        ],
+        "transition": "生成地图不仅能比较未来路线，也能产生模拟的转移样本来更新价值。把模拟与真实经验放进同一种更新规则后，便可以讨论重放为什么提高样本效率，以及模型偏差为何也可能被反复放大。"
       }
     ]
   },
@@ -479,9 +484,9 @@
       "id": "L25-FIG-A1",
       "lecture": 25,
       "moduleId": "l25-m3",
-      "title": "Agent–environment loop 与一步 Bellman backup",
-      "alt": "agent 从当前状态选择动作，environment 返回奖励和下一状态，再用一步 Bellman target 反向更新 action value",
-      "caption": "前向 interaction 由 \\(s_{t}\\) 经 policy 产生 \\(a_{t}\\)，environment 再采样 r 与 \\(s_{t+1}\\)；随后 backup 用 \\(r+\\gamma \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。虚线把 \\(s_{t+1}\\) 送回下一轮，显示 Markov transition 与 value backup 是方向相反但相互连接的两步。",
+      "title": "智能体–环境循环与一步贝尔曼回传更新",
+      "alt": "智能体从当前状态选择动作，环境返回奖励和下一状态，再用一步贝尔曼目标反向更新动作价值",
+      "caption": "前向交互由 \\(s_{t}\\) 经策略产生 \\(a_{t}\\)，环境再采样 r 与 \\(s_{t+1}\\)；随后回传更新用 \\(r+\\gamma \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。虚线把 \\(s_{t+1}\\) 送回下一轮，显示马尔可夫状态转移与价值回传更新是方向相反但相互连接的两步。",
       "sourceRefs": [
         {
           "file": "Lecture25-ReinforcementLearning.pdf",
@@ -497,45 +502,45 @@
       "nodes": [
         {
           "id": "state",
-          "label": "state\n\\(s_{t}\\)",
+          "label": "状态\n\\(s_{t}\\)",
           "x": 8,
           "y": 72
         },
         {
           "id": "agent",
-          "label": "Agent\n\\(\\pi\\), Q",
+          "label": "智能体\n\\(\\pi\\), Q",
           "x": 35,
           "y": 72,
           "tone": "accent"
         },
         {
           "id": "action",
-          "label": "action\n\\(a_{t}\\)",
+          "label": "动作\n\\(a_{t}\\)",
           "x": 62,
           "y": 72
         },
         {
           "id": "environment",
-          "label": "Environment\nP, R",
+          "label": "环境\nP, R",
           "x": 90,
           "y": 72
         },
         {
           "id": "outcome",
-          "label": "outcome\nr, \\(s'\\)",
+          "label": "结果\nr, \\(s'\\)",
           "x": 90,
           "y": 25
         },
         {
           "id": "target",
-          "label": "Bellman target\n\\(r + \\gamma \\max Q'\\)",
+          "label": "贝尔曼目标\n\\(r + \\gamma \\max Q'\\)",
           "x": 62,
           "y": 25,
           "tone": "accent"
         },
         {
           "id": "update",
-          "label": "update\n\\(Q(s_{t},a_{t})\\)",
+          "label": "更新\n\\(Q(s_{t},a_{t})\\)",
           "x": 35,
           "y": 25
         }
@@ -557,7 +562,7 @@
         {
           "from": "environment",
           "to": "outcome",
-          "label": "sample"
+          "label": "样本"
         },
         {
           "from": "outcome",
@@ -566,7 +571,7 @@
         {
           "from": "target",
           "to": "update",
-          "label": "backup"
+          "label": "回传更新"
         },
         {
           "from": "update",
@@ -579,7 +584,7 @@
           "dashed": true
         }
       ],
-      "lectureTitle": "强化学习：MDP、Bellman 方程与 Q-learning"
+      "lectureTitle": "强化学习、贝尔曼方程与 Q 学习"
     }
   ],
   "specialSection": [],
@@ -616,7 +621,7 @@
     "思考题：为什么 Q-learning off-policy？"
   ],
   "synthesis": [
-    "MDP 的核心不是\"环境没有历史\"，而是 chosen state representation 使 future 在给定 current state/action 后与更早历史条件独立。discounted return 可递归拆成 immediate reward \\(+ \\gamma \\) future return，导出 Bellman optimality equation。Q-learning 用 sampled Bellman error 做 off-policy bootstrap update；model-based RL 另学习 transition/reward model，并可通过 simulated experience/replay 提高 sample efficiency。"
+    "马尔可夫性质要求所选状态保留预测未来所需的信息，而不是要求环境没有历史。折扣回报可拆成即时奖励 \\(+ \\gamma\\) 后续回报，由此得到贝尔曼方程。Q 学习使用采样得到的贝尔曼误差更新动作价值，其目标策略可以不同于采样策略。基于模型的方法另外学习状态转移和奖励，并可利用模拟经验或重放减少真实交互需求。"
   ],
   "workedExamples": [
     "7.1 两状态 Bellman backup",
@@ -630,10 +635,10 @@
     {
       "id": "L25-F01",
       "lecture": 25,
-      "name": "MDP transition/reward model",
+      "name": "MDP 状态转移与奖励模型",
       "expression": "p(s′, r|s, a)",
       "latex": "p(s',r\\mid s,a)",
-      "conditions": "Markov state",
+      "conditions": "状态满足马尔可夫性质",
       "sectionId": "l25-m1",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 1
@@ -641,10 +646,10 @@
     {
       "id": "L25-F02",
       "lecture": 25,
-      "name": "discounted return",
+      "name": "折扣回报",
       "expression": "Gt = γ k Rt+k+1 k≥0",
       "latex": "G_t=\\sum_{k=0}^{\\infty}\\gamma^k R_{t+k+1}",
-      "conditions": "\\(0\\le \\gamma <1\\) or finite episode",
+      "conditions": "\\(0\\le \\gamma <1\\)，或回合长度有限",
       "sectionId": "l25-m2",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 2
@@ -652,10 +657,10 @@
     {
       "id": "L25-F03",
       "lecture": 25,
-      "name": "state value",
+      "name": "状态价值",
       "expression": "Vπ (s) = Eπ [Gt |st = s]",
       "latex": "V_{\\pi}(s)=\\mathbb{E}_{\\pi}[G_t\\mid s_t=s]",
-      "conditions": "policy \\(\\pi \\)",
+      "conditions": "遵循策略 \\(\\pi\\)",
       "sectionId": "l25-m2",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 2
@@ -663,10 +668,10 @@
     {
       "id": "L25-F04",
       "lecture": 25,
-      "name": "state-action value",
+      "name": "状态—动作价值",
       "expression": "Qπ (s, a) = Eπ [Gt |st = s, at = a]",
       "latex": "Q_{\\pi}(s,a)=\\mathbb{E}_{\\pi}[G_t\\mid s_t=s,a_t=a]",
-      "conditions": "first action fixed",
+      "conditions": "固定第一步动作",
       "sectionId": "l25-m2",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 2
@@ -674,10 +679,10 @@
     {
       "id": "L25-F05",
       "lecture": 25,
-      "name": "Bellman optimality",
+      "name": "贝尔曼最优方程",
       "expression": "Q∗ = E[R + γ max Q∗ ]",
       "latex": "Q^*(s,a)=\\mathbb{E}\\!\\left[R_{t+1}+\\gamma\\max_{a'}Q^*(s_{t+1},a')\\mid s_t=s,a_t=a\\right]",
-      "conditions": "optimal continuation",
+      "conditions": "此后采用最优动作",
       "sectionId": "l25-m3",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 3
@@ -685,10 +690,10 @@
     {
       "id": "L25-F06",
       "lecture": 25,
-      "name": "tabular Q-learning",
+      "name": "表格型 Q 学习",
       "expression": "Q ← Q + α(R + γ max Q′ − Q)",
       "latex": "Q(s,a)\\leftarrow Q(s,a)+\\alpha\\left[R_{t+1}+\\gamma\\max_{a'}Q(s_{t+1},a')-Q(s,a)\\right]",
-      "conditions": "sampled transition",
+      "conditions": "使用采样得到的状态转移",
       "sectionId": "l25-m3",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 3
@@ -696,10 +701,10 @@
     {
       "id": "L25-F07",
       "lecture": 25,
-      "name": "ε-greedy exploration",
+      "name": "\\(\\epsilon _{-}\\)贪心探索",
       "expression": "πϵ = (1 − ϵ)greedy + ϵrandom",
       "latex": "\\pi_{\\varepsilon}=(1-\\varepsilon)\\pi_{\\mathrm{greedy}}+\\varepsilon\\pi_{\\mathrm{random}}",
-      "conditions": "finite action set",
+      "conditions": "动作集合有限",
       "sectionId": "l25-m1",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 1
@@ -711,7 +716,7 @@
       "lecture": 25,
       "zh": "强化学习",
       "en": "reinforcement learning",
-      "definition": "通过 interaction 与 rewards 学 policy/value。",
+      "definition": "通过与环境交互和获得奖励来学习策略或价值。",
       "sectionId": "l25-m1",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 1
@@ -721,7 +726,7 @@
       "lecture": 25,
       "zh": "智能体",
       "en": "agent",
-      "definition": "选择 actions、更新内部 policy/model 的 learner。",
+      "definition": "选择动作并更新内部策略或模型的学习者。",
       "sectionId": "l25-m2",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 2
@@ -731,7 +736,7 @@
       "lecture": 25,
       "zh": "状态",
       "en": "state",
-      "definition": "用于预测 future 与选择 action 的 environment representation。",
+      "definition": "用于预测未来与选择动作的环境表征。",
       "sectionId": "l25-m1",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 1
@@ -741,7 +746,7 @@
       "lecture": 25,
       "zh": "马尔可夫性质",
       "en": "Markov property",
-      "definition": "given current state/action 后 future 与更早 history 条件独立。",
+      "definition": "给定当前状态和动作后，未来与更早历史条件独立。",
       "sectionId": "l25-m1",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 1
@@ -751,7 +756,7 @@
       "lecture": 25,
       "zh": "策略",
       "en": "policy",
-      "definition": "state 到 action probability 的映射。",
+      "definition": "从状态到动作选择概率的映射。",
       "sectionId": "l25-m1",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 1
@@ -761,7 +766,7 @@
       "lecture": 25,
       "zh": "回报",
       "en": "return",
-      "definition": "未来 rewards 的 discounted sum。",
+      "definition": "未来奖励的折扣总和。",
       "sectionId": "l25-m2",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 2
@@ -769,9 +774,9 @@
     {
       "id": "L25-G07",
       "lecture": 25,
-      "zh": "Bellman 方程",
+      "zh": "贝尔曼方程",
       "en": "Bellman equation",
-      "definition": "value 的 recursive self-consistency relation。",
+      "definition": "价值满足的一步递归自洽关系。",
       "sectionId": "l25-m3",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 3
@@ -779,9 +784,9 @@
     {
       "id": "L25-G08",
       "lecture": 25,
-      "zh": "Q-learning",
+      "zh": "Q 学习",
       "en": "Q-learning",
-      "definition": "model-free off-policy TD control algorithm。",
+      "definition": "无模型、离策略的时间差分控制算法。",
       "sectionId": "l25-m3",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 3
@@ -791,7 +796,7 @@
       "lecture": 25,
       "zh": "探索-利用",
       "en": "exploration-exploitation",
-      "definition": "收集新信息与选择当前最佳 action 的权衡。",
+      "definition": "收集新信息与选择当前最优动作之间的权衡。",
       "sectionId": "l25-m4",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 4
@@ -801,7 +806,7 @@
       "lecture": 25,
       "zh": "基于模型的强化学习",
       "en": "model-based reinforcement learning",
-      "definition": "学习或使用 environment model 进行 planning。",
+      "definition": "学习或使用环境模型进行规划。",
       "sectionId": "l25-m5",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 5
@@ -811,57 +816,57 @@
       "lecture": 25,
       "zh": "重放",
       "en": "replay",
-      "definition": "离线重现/模拟 state sequences 的 neural/computational process。",
+      "definition": "离线重现或模拟状态序列的神经或计算过程。",
       "sectionId": "l25-m4",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 4
     }
   ],
   "commonTraps": [
-    "Markov property 等于环境没有历史。",
-    "混淆 \\(V_{\\pi }\\)、\\(Q_{\\pi }\\)、\\(V^{*}\\)、\\(Q^{*}\\)。",
-    "Bellman equation 忘记 transition expectation。",
-    "Q-learning target 使用 behavior action 而误写成 SARSA。",
-    "ε-greedy 的 random branch 只在非 greedy actions 中选而不说明 convention。",
-    "把 model-free 等同于无 internal representation。",
-    "把 hippocampal replay 直接等同于精确 Bellman backup。",
-    "需避免把 Q-learning 与所有 TD learning 同义化；需避免把 hippocampal replay 直接等同于精确 Bellman backup，需要标明 evidence 与 inference 的层级。"
+    "把马尔可夫性质理解为环境没有历史，忽略关键在于当前状态是否保留预测所需的信息。",
+    "混淆 \\(V_{\\pi }\\)、\\(Q_{\\pi }\\)、\\(V^{*}\\) 和 \\(Q^{*}\\)。",
+    "写贝尔曼方程时遗漏对状态转移的期望。",
+    "在 Q 学习目标中使用实际行为策略选出的下一动作，把更新误写成 SARSA。",
+    "使用 ε-greedy 策略时，只从非贪心动作中随机选择，却未说明自己采用的约定。",
+    "把无模型学习理解为没有内部表征。",
+    "把海马重放直接等同于精确的贝尔曼更新。",
+    "把 Q 学习与所有时序差分学习视为同义，或把海马重放支持计算更新的推断当成已直接观察到的算法事实。"
   ],
   "errata": [
     {
       "id": "L25-E01",
       "lecture": 25,
-      "lectureTitle": "强化学习：MDP、Bellman 方程与 Q-learning",
+      "lectureTitle": "强化学习、贝尔曼方程与 Q 学习",
       "kind": "caution",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 2,
       "sectionId": "l25-m2",
       "originalIssue": "这里 的 \\(\\gamma \\) 范围在 continuing tasks 常取 <1；episodic finite tasks 可使用 \\(\\gamma =1\\)，需说明。",
-      "explanation": "finite episode可用\\(\\gamma =1\\)，continuing positive reward通常需\\(\\gamma <1\\)。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": "episodic finite tasks 可使用 \\(\\gamma =1\\)，需说明"
     },
     {
       "id": "L25-E02",
       "lecture": 25,
-      "lectureTitle": "强化学习：MDP、Bellman 方程与 Q-learning",
+      "lectureTitle": "强化学习、贝尔曼方程与 Q 学习",
       "kind": "caution",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 4,
       "sectionId": "l25-m4",
       "originalIssue": "这里 的 Q-learning 是 tabular form；function approximation/convergence issues 未在源页展开。",
-      "explanation": "课程公式是基础tabular form，不代表function approximation始终稳定。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     },
     {
       "id": "L25-E03",
       "lecture": 25,
-      "lectureTitle": "强化学习：MDP、Bellman 方程与 Q-learning",
+      "lectureTitle": "强化学习、贝尔曼方程与 Q 学习",
       "kind": "erratum",
       "sourceFile": "Lecture25-ReinforcementLearning.pdf",
       "sourcePage": 5,
       "sectionId": "l25-m5",
       "originalIssue": "这里 的 hippocampal planning/replay connection 是 evidence+inference bridge，不是算法级一一对应。",
-      "explanation": "hippocampal place/state coding与cognitive-map hypothesis提供biological bridge，但place activity也受movement、sensory与task variables影响。",
+      "explanation": "该记号或实现与后续推导所需的定义不一致，照字面使用会得到错误结果。",
       "correction": "这里 的 hippocampal planning/replay connection 是 evidence+inference bridge，不是算法级一一对应"
     }
   ],
@@ -878,37 +883,37 @@
         }
       ],
       "conceptTags": [
-        "MDP 与 Markov state：把历史压缩到可预测状态"
+        "马尔可夫状态怎样概括历史"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么把trial编号加入state可能让training prediction变好却不是好表示？",
+      "stem": "为什么把试次编号加入状态可能让训练集预测变好却不是好表示？",
       "choices": [
         {
           "id": "a",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "任何增加的变量都必然使状态满足马尔可夫条件，所以训练改善就证明表示正确。"
         },
         {
           "id": "b",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "好的马尔可夫状态必须包含全部原始历史，不能对历史进行任何压缩。"
         },
         {
           "id": "c",
-          "text": "它可能记住样本而不捕捉可泛化的future-relevant structure，held-out contexts表现会差。"
+          "text": "编号可能只记住训练样本，未表达决定未来的结构，在新情境下仍会失效。"
         },
         {
           "id": "d",
-          "text": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。"
+          "text": "只要环境转移是随机的，就不存在可用的马尔可夫状态，编号因此只能是唯一选择。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Simulated experience、hippocampal replay 与sample efficiency”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Bellman 递归：从整段未来到一步backup”中的另一组变量与条件，不能由题干推出。"
+        "a": "加入变量不保证包含所有预测未来所需的信息，训练误差也不证明条件独立。",
+        "b": "只需保留对未来有预测作用的信息，无需逐项保存全部历史。",
+        "d": "马尔可夫性允许随机转移，限制的是给定当前状态后的历史依赖。"
       },
-      "explanation": "它可能记住样本而不捕捉可泛化的future-relevant structure，held-out contexts表现会差。 加入完整history总能恢复预测，却失去压缩与generalization；目标是足够而不过度的state。"
+      "explanation": "试次编号可能只帮助记住训练样本，没有表达决定未来的结构，因此到了未见过的情境仍可能预测失败。 它不是说环境确定性；同一 s,a 仍可随机到多个\\(s'\\)，只是概率由当前状态充分决定。"
     },
     {
       "id": "L25-Q02",
@@ -922,37 +927,37 @@
         }
       ],
       "conceptTags": [
-        "Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)"
+        "折扣回报、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "为什么\\(Q_{\\pi }(s,a)\\)中的a只固定第一步？",
       "choices": [
         {
           "id": "a",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "动作价值要求以后每一步都重复当前动作，与后来到达哪个状态无关。"
         },
         {
           "id": "b",
-          "text": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。"
+          "text": "第一步动作固定以后，后续每一步都必须选最大价值动作，即使所评价的策略并非贪婪。"
         },
         {
           "id": "c",
-          "text": "random是在全部actions中均匀抽样；greedy action也属于集合，因此总greedy概率高于\\(1-\\epsilon\\)。"
+          "text": "固定第一步动作会消除后续环境随机性，因此动作价值无需再对未来结果取期望。"
         },
         {
           "id": "d",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "动作条件只固定当前第一步；到达下一状态后，未来动作仍按所评价的策略选择。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Simulated experience、hippocampal replay 与sample efficiency”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Bellman 递归：从整段未来到一步backup”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Tabular Q-learning 与 exploration”中的另一组变量与条件，不能由题干推出。"
+        "a": "固定的是第一步动作，不是整个未来动作序列。",
+        "b": "策略动作价值的后续行为遵循该策略，不能擅自替换为最优策略。",
+        "c": "条件于一个动作后，转移、奖励和未来动作仍可能随机。"
       },
-      "explanation": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。 \\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\)只固定第一action，之后仍遵循\\(\\pi\\)。"
+      "explanation": "定义条件于\\(a_{t}=a\\)；从下一状态开始未来动作仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。 \\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\)只固定第一动作，之后仍遵循\\(\\pi\\)。"
     },
     {
       "id": "L25-Q03",
@@ -966,37 +971,37 @@
         }
       ],
       "conceptTags": [
-        "Bellman 递归：从整段未来到一步backup"
+        "贝尔曼方程的一步递推"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么不能把max移到expectation外并固定同一个\\(a'\\)？",
+      "stem": "为什么不能把max移到期望外并固定同一个\\(a'\\)？",
       "choices": [
         {
           "id": "a",
-          "text": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。"
+          "text": "不同下一状态可有不同最佳动作；先平均再固定一个动作，会排除依状态调整的后续选择。"
         },
         {
           "id": "b",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "max 与期望总能交换，因为期望对所有函数和运算都具有线性。"
         },
         {
           "id": "c",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "应在看到下一状态之前固定同一个后续动作，否则当前价值就违反了马尔可夫条件而无法定义。"
         },
         {
           "id": "d",
-          "text": "random是在全部actions中均匀抽样；greedy action也属于集合，因此总greedy概率高于\\(1-\\epsilon\\)。"
+          "text": "把 max 放在外面会让每个随机下一状态独立选择最佳动作，因此一定更灵活。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Simulated experience、hippocampal replay 与sample efficiency”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Tabular Q-learning 与 exploration”中的另一组变量与条件，不能由题干推出。"
+        "b": "期望的线性不适用于把非线性的最大化操作任意移出。",
+        "c": "Markov 策略可以依赖实际到达的状态，不要求不同状态共享动作。",
+        "d": "外层固定一个动作恰好减少了状态依赖的选择自由。"
       },
-      "explanation": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。 max位于expectation内部，因为不同随机next states各有自己的best action；一般不能先对所有\\(s'\\)平均Q再取一个共同action。"
+      "explanation": "随机下一状态可有不同最佳动作；先平均会强迫跨状态共享动作，改变最优延续问题。 max 位于期望内部，因为不同随机下一步状态各有自己的最佳动作；一般不能先对所有\\(s'\\)平均 Q 再取一个共同动作。"
     },
     {
       "id": "L25-Q04",
@@ -1010,37 +1015,37 @@
         }
       ],
       "conceptTags": [
-        "Tabular Q-learning 与 exploration"
+        "表格型 Q 学习与探索"
       ],
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "ε-greedy的random分支为何仍可能选择greedy action？",
+      "stem": "\\(\\epsilon\\)-贪心策略的随机分支为何仍可能选择贪心动作？",
       "choices": [
         {
           "id": "a",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "随机分支必须排除贪婪动作，否则就不属于探索。"
         },
         {
           "id": "b",
-          "text": "random是在全部actions中均匀抽样；greedy action也属于集合，因此总greedy概率高于\\(1-\\epsilon\\)。"
+          "text": "随机分支从全部动作中抽样，也包含贪婪动作；它因此还能额外贡献选择贪婪动作的概率。"
         },
         {
           "id": "c",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "随机分支按动作价值比例抽样，所以贪婪动作在这一分支中总比任何其他动作更常被选中。"
         },
         {
           "id": "d",
-          "text": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。"
+          "text": "进入随机分支后，选中贪婪动作的概率仍是探索率除以动作数，因为还要再乘一次进入该分支的概率。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Simulated experience、hippocampal replay 与sample efficiency”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Bellman 递归：从整段未来到一步backup”中的另一组变量与条件，不能由题干推出。"
+        "a": "这里的标准 \\(\\epsilon\\)-贪心策略随机分支在全部动作中均匀抽样。",
+        "c": "标准随机分支采用均匀分布，而不是按价值加权。",
+        "d": "给定已经进入随机分支，均匀抽样选中某一动作的条件概率只是动作数的倒数；乘探索率得到的是该分支对总选择概率的贡献。"
       },
-      "explanation": "random是在全部actions中均匀抽样；greedy action也属于集合，因此总greedy概率高于\\(1-\\epsilon\\)。 ε-greedy以\\(1-\\epsilon\\)选当前greedy action，以\\(\\epsilon\\)从action set随机；若random分支也可能选greedy，实际greedy概率需加上\\(\\epsilon /|A|\\)。"
+      "explanation": "随机是在全部动作中均匀抽样；贪心动作也属于集合，因此总贪心概率高于\\(1-\\epsilon\\)。 \\(\\epsilon\\)-贪心以\\(1-\\epsilon\\)选当前贪心动作，以\\(\\epsilon\\)从动作集合随机；若随机分支也可能选贪心，实际贪心概率需加上\\(\\epsilon /|A|\\)。"
     },
     {
       "id": "L25-Q05",
@@ -1054,37 +1059,37 @@
         }
       ],
       "conceptTags": [
-        "Tolman maze、latent state 与 generative map"
+        "迷宫任务与环境模型"
       ],
       "difficulty": 2,
       "type": "figure",
       "cognitiveLevel": "understand",
-      "stem": "为什么immediate revaluation sensitivity不是\"拥有完整地图\"的充分证明？",
+      "stem": "为什么立即重估敏感性不是\"拥有完整地图\"的充分证明？",
       "choices": [
         {
           "id": "a",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "奖励重新估值后的任何立即改变，都只能由完整的环境生成地图产生。"
         },
         {
           "id": "b",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "只要某个海马神经元具有位置调谐，就已经证明动物显式存有全部环境转移和奖励函数。"
         },
         {
           "id": "c",
-          "text": "其他rule、instructions或直接cue也可快速改变choice；需多种novel transitions与控制条件约束。"
+          "text": "规则、指令或直接线索也能快速改变选择；还需新转移及控制条件来检验地图式规划。"
         },
         {
           "id": "d",
-          "text": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。"
+          "text": "立即改变选择只能排除所有形式的学习，却不能为任何状态表示提供信息。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Simulated experience、hippocampal replay 与sample efficiency”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Bellman 递归：从整段未来到一步backup”中的另一组变量与条件，不能由题干推出。"
+        "a": "多种机制可使选择迅速改变，这个行为现象并不唯一标识完整地图。",
+        "b": "位置相关活动不等同于完整生成模型，也不证明其被当前决策使用。",
+        "d": "适当设计重估与控制实验能够限制候选学习机制和状态表示。"
       },
-      "explanation": "其他rule、instructions或直接cue也可快速改变choice；需多种novel transitions与控制条件约束。 关键实验是outcome devaluation或transition revaluation后，在没有直接new-path reward experience时测试choice。"
+      "explanation": "其他规则、指令或直接线索也可快速改变选择；需多种新的转移与控制条件约束。 若奖励位置改变或熟悉路径封闭，拥有状态转移图与奖励模型的智能体可在未重新走遍所有路径前规划；纯缓存的无模型 Q 值通常需新的预测误差逐步改值。"
     },
     {
       "id": "L25-Q06",
@@ -1098,37 +1103,37 @@
         }
       ],
       "conceptTags": [
-        "Simulated experience、hippocampal replay 与sample efficiency"
+        "模拟经验、重放与样本效率"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么replay越多不一定越好？",
+      "stem": "为什么重放越多不一定越好？",
       "choices": [
         {
           "id": "a",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "只要回放次数足够多，生成模型中的系统偏差就必然像独立噪声一样相互抵消。"
         },
         {
           "id": "b",
-          "text": "随机next states可有不同最佳action；先平均会强迫跨states共享action，改变optimal continuation问题。"
+          "text": "每个回放样本都提供一次新的独立环境观察，所以其信息量与真实新试次完全相同。"
         },
         {
           "id": "c",
-          "text": "random是在全部actions中均匀抽样；greedy action也属于集合，因此总greedy概率高于\\(1-\\epsilon\\)。"
+          "text": "回放越多就越能保证所有状态动作被均匀覆盖，因此完全不需要考虑采样分布或优先级。"
         },
         {
           "id": "d",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "有偏模型的回放可能强化错误价值；收益还取决于覆盖、优先级和模型不确定性。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Bellman 递归：从整段未来到一步backup”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Tabular Q-learning 与 exploration”中的另一组变量与条件，不能由题干推出。"
+        "a": "重复同一有偏模型不会自动抵消系统误差。",
+        "b": "模拟样本由已有模型生成，不等于额外观察真实环境。",
+        "c": "回放可以反复集中于少数经历，次数增加不保证覆盖。"
       },
-      "explanation": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。 model-based agent可从learned model采样imagined transition，再用与真实transition相同的Bellman或Q update。"
+      "explanation": "若学得的模型有系统误差，重复模拟会放大偏置；还需平衡覆盖范围、优先级与模型不确定性。 基于模型的智能体可从学得的模型采样想象的状态转移，再用与真实转移相同的贝尔曼或 Q 更新。"
     },
     {
       "id": "L25-Q07",
@@ -1142,37 +1147,37 @@
         }
       ],
       "conceptTags": [
-        "Agent–environment loop 与一步 Bellman backup"
+        "智能体–环境循环与一步贝尔曼回传更新"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Agent-environment loop 与一步 Bellman backup\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"智能体-环境循环与一步贝尔曼回传更新\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "前向 interaction 由 \\(s_{t}\\) 经 policy 产生 \\(a_{t}\\)，environment 再采样 r 与 \\(s_{t+1}\\)；随后 backup 用 \\(r+\\gamma \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。"
+          "text": "环境先给出奖励与下一状态，再用一步目标更新当前动作价值；下一状态进入新一轮交互。"
         },
         {
           "id": "b",
-          "text": "若learned model有系统误差，重复simulation会放大bias；还需平衡coverage、priority与model uncertainty。"
+          "text": "贝尔曼回传更新直接改变环境转移概率，使环境按照当前价值最大的路径移动。"
         },
         {
           "id": "c",
-          "text": "定义条件于\\(a_{t}=a\\)；从下一state开始future actions仍按\\(\\pi\\)抽样，因此Q评价\"先做a再遵循\\(\\pi\\)\"。"
+          "text": "智能体在选择当前动作之前就能观察其真实下一状态和奖励，因此无需与环境交互即可得到目标。"
         },
         {
           "id": "d",
-          "text": "random是在全部actions中均匀抽样；greedy action也属于集合，因此总greedy概率高于\\(1-\\epsilon\\)。"
+          "text": "奖励只用于更新下一状态所有动作的价值，当前执行过的动作价值保持不变。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "图中没有“Simulated experience、hippocampal replay 与sample efficiency”所需的变量与条件。",
-        "c": "图中没有“Discounted return、\\(V_{\\pi }\\) 与 \\(Q_{\\pi }\\)”所需的变量与条件。",
-        "d": "图中没有“Tabular Q-learning 与 exploration”所需的变量与条件。"
+        "b": "图中的回传更新更新价值估计，并不直接改写环境转移机制。",
+        "c": "真实的下一状态与奖励是在执行动作、环境响应之后获得的。",
+        "d": "图中被更新的是当前状态下实际执行动作的价值。"
       },
-      "explanation": "前向 interaction 由 \\(s_{t}\\) 经 policy 产生 \\(a_{t}\\)，environment 再采样 r 与 \\(s_{t+1}\\)；随后 backup 用 \\(r+\\gamma \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。虚线把 \\(s_{t+1}\\) 送回下一轮，显示 Markov transition 与 value backup 是方向相反但相互连接的两步。"
+      "explanation": "前向交互由 \\(s_{t}\\) 经策略产生 \\(a_{t}\\)，环境再采样 r 与 \\(s_{t+1}\\)；随后回传更新用 \\(r+\\gamma \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。虚线把 \\(s_{t+1}\\) 送回下一轮，显示马尔可夫状态转移与价值回传更新是方向相反但相互连接的两步。"
     }
   ]
 }

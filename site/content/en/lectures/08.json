@@ -1,7 +1,7 @@
 {
   "lecture": 8,
   "slug": "08",
-  "zhTitle": "神经网络 I：脉冲表示、卷积与 E/I 平衡",
+  "zhTitle": "脉冲卷积与兴奋—抑制平衡",
   "enTitle": "Neural Networks I: Spikes, Convolution, and E/I Balance",
   "companionFile": "NEUROSCI366_Lecture08_Neural_Networks1_Spikes_Balance_Companion.pdf",
   "companionPages": 24,
@@ -184,7 +184,8 @@
       },
       {
         "id": "L08-M2",
-        "title": "Mean, variance, and the failure of 1/N scaling for stochastic E/I input",
+        "title": "Mean and variance of excitatory and inhibitory inputs",
+        "transition": "Synaptic convolution tells us how each past spike contributes to current, but not the mean and variability produced by summing many inputs. Before analyzing the full feedback network, we approximate excitatory and inhibitory inputs as independent random counts and examine which statistics survive as weights scale with connection number.",
         "sourceRefs": [
           {
             "file": "Lecture8-NeuralNetworks1.pdf",
@@ -197,7 +198,7 @@
         ],
         "paragraphs": [
           "Consider \\(N_{E}\\) excitatory inputs, each with rate \\(r_{E}\\) and weight \\(W_{E}>0\\), and \\(N_{I}\\) inhibitory inputs, each with rate \\(r_{I}\\) and magnitude \\(W_{I}>0\\) that is subtracted from total charge. Temporarily ignore kernel shape and let the count of each input during \\(\\Delta t\\) be Poisson. Total charge is \\(Q=\\sum _E W_{E} K_{j}-\\sum _I W_{I} K_{j}\\). The sign affects the mean, but squared weights make excitatory and inhibitory fluctuations both contribute positively to variance.",
-          "Using \\(E[K]=\\operatorname{Var}(K)=r\\Delta t\\) gives \\(E[Q]=(N_{\\mathrm{EW},Er,E}-N_{\\mathrm{IW},Ir,I})\\Delta t\\). Independence gives \\(\\operatorname{Var}(Q)=(N_{\\mathrm{EW},E}^{2}r_{E}+N_{\\mathrm{IW},I}^{2}r_{I})\\Delta t\\). E/I contributions can cancel in the mean, but their variances cannot cancel merely because their signs differ. If inputs are correlated, pairwise covariance terms must be added and the independent formula may underestimate or otherwise alter the fluctuations.",
+          "Using \\(E[K]=\\operatorname{Var}(K)=r\\Delta t\\) gives \\(E[Q]=(N_{E} W_{E} r_{E}-N_{I} W_{I} r_{I})\\Delta t\\). Independence gives \\(\\operatorname{Var}(Q)=(N_{E} W_{E}^{2}r_{E}+N_{I} W_{I}^{2}r_{I})\\Delta t\\). E/I contributions can cancel in the mean, but their variances cannot cancel merely because their signs differ. If inputs are correlated, pairwise covariance terms must be added and the independent formula may underestimate or otherwise alter the fluctuations.",
           "First try \\(W_{E}\\),\\(W_{I}\\sim 1/N\\). Each population \\(\\operatorname{mean} N W\\) remains \\(O(1)\\), so it does not diverge even without precise cancellation. But variance \\(N W^{2}\\sim 1/N\\to 0\\) and standard deviation∼\\(1/\\sqrt N\\to 0\\). Input to a large network becomes almost a deterministic mean current. A deterministic downstream LIF neuron then fires regularly if the mean is above threshold and remains silent if it is below, rather than preserving Poisson-like trial variability.",
           "This does not mean fluctuations are exactly zero at finite N; it means that they systematically shrink as connectivity grows. Kernel smoothing further averages rapid fluctuations in time without changing the essential appearance of squared weights in the variance. To identify the simulated limit, measure means and variances across several N values instead of inspecting a voltage trace at one network size.",
           "Same-sign independent input alone cannot keep both mean and fluctuations finite. \\(W\\sim 1/N\\) preserves the mean but loses the variance, whereas \\(W\\sim 1/\\sqrt N\\) preserves the variance but makes each population mean grow as \\(\\sqrt N\\). The solution is cancellation between the large excitatory and inhibitory means, which leads to the balanced state on the next step. This cancellation affects the signed first moment, not the variance created by independent events. Precisely because means and variances obey different addition rules, balance can prevent divergence while retaining fluctuations."
@@ -232,7 +233,7 @@
             },
             {
               "title": "Interpret the voltage consequence",
-              "explanation": "Input standard deviation is \\(O(N^{-1}/^{2})\\). At large N, voltage responds mainly to the deterministic mean and random threshold crossings disappear."
+              "explanation": "Input standard deviation is \\(O(N^{-1/2})\\). At large N, voltage responds mainly to the deterministic mean and random threshold crossings disappear."
             }
           ],
           "symbolNotes": [
@@ -263,6 +264,7 @@
       {
         "id": "L08-M3",
         "title": "Strong \\(1/\\sqrt N\\) coupling, E/I balance, and irregular spiking",
+        "transition": "Weak coupling can keep the mean input finite while averaging away fluctuations in a large network. To retain finite variability, we next increase individual synaptic weights and examine the conditions under which the large excitatory and inhibitory means can cancel.",
         "sourceRefs": [
           {
             "file": "Lecture8-NeuralNetworks1.pdf",
@@ -270,7 +272,7 @@
           }
         ],
         "paragraphs": [
-          "If weights scale as \\(W\\sim 1/\\sqrt N\\), variance \\(N W^{2}\\sim O(1)\\), so total-input standard deviation remains finite as N grows. The cost is that each population \\(\\operatorname{mean} N W\\sim \\sqrt N\\) becomes large. For the net mean to stay \\(O(1)\\), leading-order balance \\(N_{\\mathrm{EW},Er,E}\\approx N_{\\mathrm{IW},Ir,I}\\) is required: two \\(O(\\sqrt N)\\) terms cancel and leave only a finite residual.",
+          "If weights scale as \\(W\\sim 1/\\sqrt N\\), variance \\(N W^{2}\\sim O(1)\\), so total-input standard deviation remains finite as N grows. The cost is that each population \\(\\operatorname{mean} N W\\sim \\sqrt N\\) becomes large. For the net mean to stay \\(O(1)\\), leading-order balance \\(N_{E} W_{E} r_{E}\\approx N_{I} W_{I} r_{I}\\) is required: two \\(O(\\sqrt N)\\) terms cancel and leave only a finite residual.",
           "Balance does not require excitatory and inhibitory currents to be exactly equal in every millisecond. It constrains conditional means or leading terms at a large scale; instantaneous differences between independent spikes retain \\(O(1)\\) fluctuations. Those differences make LIF voltage wander irregularly and occasionally cross threshold. With excitation dominance, the mean slope remains upward and firing is more regular. With inhibition dominance, voltage stays below threshold. In the balanced state, fluctuations drive threshold crossings at irregular intervals.",
           "The balance condition is sensitive to relative mismatch. Each canceled term is \\(O(\\sqrt N)\\), so if their relative mismatch remains constant, the net input also grows as \\(\\sqrt N\\). Through \\(E\\to I\\), \\(I\\to E\\), recurrent connections, and external drive, network dynamics must adjust firing rates so that mean inhibition tracks mean excitation. Dynamic balance is a network-generated state, not merely a manual choice of equal external rates.",
           "A dynamic-balance framework shows how recurrent E/I networks can maintain this cancellation spontaneously and produce nearly Poisson variability. “Nearly” should be tested using ISIs, Fano factors, correlations, and state dependence. Irregular firing can also arise from external noise or slow modulation, so a balanced network is a candidate mechanism, not something uniquely identified by one jagged voltage trace.",
@@ -283,21 +285,21 @@
         ],
         "derivation": {
           "title": "Finite variance and the balance condition under \\(1/\\sqrt N\\) scaling",
-          "setup": "Let \\(N_{E}=a_{\\mathrm{EN}}\\), \\(N_{I}=a_{\\mathrm{IN}}\\), \\(W_{E}=w_{E}/\\sqrt N\\), and \\(W_{I}=w_{I}/\\sqrt N\\), while rates and \\(\\Delta t\\) remain independent of N.",
+          "setup": "Let \\(N_{E}=a_{E} N\\), \\(N_{I}=a_{I} N\\), \\(W_{E}=w_{E}/\\sqrt N\\), and \\(W_{I}=w_{I}/\\sqrt N\\), while rates and \\(\\Delta t\\) remain independent of N.",
           "steps": [
             {
               "title": "Substitute into the mean",
-              "explanation": "The E-population mean is \\(a_{E}\\sqrt N\\) \\(w_{Er,E}\\Delta t\\), with an analogous I-population term. The leading net mean is \\(\\sqrt N\\) times their difference.",
+              "explanation": "The E-population mean is \\(a_{E}\\sqrt N\\) \\(w_{E} r_{E}\\Delta t\\), with an analogous I-population term. The leading net mean is \\(\\sqrt N\\) times their difference.",
               "latex": "\\mathbb{E}[Q]=\\sqrt{N}\\,(a_Ew_Er_E-a_Iw_Ir_I)\\Delta t"
             },
             {
               "title": "Impose leading-order balance",
-              "explanation": "To prevent divergence of the net mean, require \\(a_{Ew,Er,E}-a_{Iw,Ir,I}=O(N^{-1/2})\\); the leading terms are equal in the limit.",
+              "explanation": "To prevent divergence of the net mean, require \\(a_{E} w_{E} r_{E}-a_{I} w_{I} r_{I}=O(N^{-1/2})\\); the leading terms are equal in the limit.",
               "latex": "a_Ew_Er_E\\approx a_Iw_Ir_I"
             },
             {
               "title": "Substitute into the variance",
-              "explanation": "\\(N_{\\mathrm{EW},E}^{2}=a_{\\mathrm{EN}}\\cdot w_{E}^{2}/N=a_{Ew,E}^{2}\\), so N disappears.",
+              "explanation": "\\(N_{E} W_{E}^{2}=a_{E} N\\cdot w_{E}^{2}/N=a_{E} w_{E}^{2}\\), so N disappears.",
               "latex": "\\operatorname{Var}(Q)=(a_Ew_E^2r_E+a_Iw_I^2r_I)\\Delta t"
             },
             {
@@ -684,27 +686,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Variance measures squared deviations from the mean."
+          "text": "Infinity is only idealized notation, so the event sample should always be set to one; that fixed unit height preserves unit area at every time step."
         },
         {
           "id": "b",
-          "text": "\\(\\delta\\) is defined by how it acts under integration. Numerical implementations usually store event indices and add a discrete kernel afterward, or approximate the event with area 1 in a finite bin."
+          "text": "An impulse is defined by integration and area; code represents events through a kernel or jump rather than treating infinite height as an ordinary number."
         },
         {
           "id": "c",
-          "text": "Weak inputs can also give zero net mean. Strong balance additionally requires large separate E and I means that cancel at leading order, finite net variance, and the predicted scaling as connectivity changes."
+          "text": "Use the largest finite machine number instead; once it is sufficiently large, convolution depends only on event timing and becomes independent of that amplitude."
         },
         {
           "id": "d",
-          "text": "Reading \\(W_{ij}\\) as \\(i\\to j\\) and thereby transposing the direction of network connections."
+          "text": "An event lasts zero time and therefore contributes zero to every integral; code can skip it, leaving subsequent current fully determined by continuous decay."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "\\(\\delta\\) is defined by how it acts under integration. Numerical implementations usually store event indices and add a discrete kernel afterward, or approximate the event with area 1 in a finite bin. Storing infinity directly would break units and arithmetic. The network contains N interconnected neurons and M external inputs. \\(W_{ij}\\) is the recurrent weight \\(j\\to i\\), and \\(U_{ij}\\) is the weight from external input j→network neuron i. For each i, the membrane equation contains leak, every network sender, and every external sender. Whether diagonal entries of W allow self-connections is a modeling choice. A network is recurrent when W contains feedback paths, not because of where nodes happen to be drawn.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Mean, variance, and the failure of 1/N scaling for stochastic E/I input,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Strong \\(1/\\sqrt N\\) coupling, E/I balance, and irregular spiking,” not the relationship asked about here.",
-        "d": "The error is: Reading \\(W_{ij}\\) as \\(i\\to j\\) and thereby transposing the direction of network connections."
+        "a": "Discrete area equals height times step size. A fixed unit height does not preserve area when the step changes.",
+        "c": "An arbitrary large number gives arbitrary area and output amplitude. The response must respect kernel normalization and impulse area.",
+        "d": "An impulse is concentrated at one time but has finite integral. Skipping it removes the intended charge input or state jump."
       }
     },
     {
@@ -724,7 +726,7 @@
         }
       ],
       "conceptTags": [
-        "Mean, variance, and the failure of 1/N scaling for stochastic E/I input"
+        "Mean and variance of excitatory and inhibitory inputs"
       ],
       "difficulty": 2,
       "type": "concept",
@@ -733,27 +735,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "\\(\\delta\\) is defined by how it acts under integration. Numerical implementations usually store event indices and add a discrete kernel afterward, or approximate the event with area 1 in a finite bin."
+          "text": "The minus sign is omitted only to keep the answer nonnegative; if excitatory and inhibitory means cancel, their independent variances actually cancel too."
         },
         {
           "id": "b",
-          "text": "Weak inputs can also give zero net mean. Strong balance additionally requires large separate E and I means that cancel at leading order, finite net variance, and the predicted scaling as connectivity changes."
+          "text": "Inhibitory event counts are negative, so multiplying by a negative weight gives positive variance; nonnegative counts would instead contribute negative variance."
         },
         {
           "id": "c",
-          "text": "Variance measures squared deviations from the mean."
+          "text": "Inhibitory weight reverses fluctuation direction, but variance uses squared deviations; under independence, both input classes add to total variance through squared weights."
         },
         {
           "id": "d",
-          "text": "Keeping the inhibitory minus sign in the variance formula and obtaining a potentially negative variance."
+          "text": "Positive variance terms mean excitation and inhibition must be perfectly synchronized; only simultaneous paired events can combine opposite means with positive variance contributions."
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Variance measures squared deviations from the mean. Multiplication by −W only reverses the direction of a fluctuation; its squared magnitude remains \\(W^{2}\\), so independent uncertainty from both excitation and inhibition increases total variance. Using \\(E[K]=\\operatorname{Var}(K)=r\\Delta t\\) gives \\(E[Q]=(N_{\\mathrm{EW},Er,E}-N_{\\mathrm{IW},Ir,I})\\Delta t\\). Independence gives \\(\\operatorname{Var}(Q)=(N_{\\mathrm{EW},E}^{2}r_{E}+N_{\\mathrm{IW},I}^{2}r_{I})\\Delta t\\). E/I contributions can cancel in the mean, but their variances cannot cancel merely because their signs differ. If inputs are correlated, pairwise covariance terms must be added and the independent formula may underestimate or otherwise alter the fluctuations.",
+      "explanation": "Variance measures squared deviations from the mean. Multiplication by −W only reverses the direction of a fluctuation; its squared magnitude remains \\(W^{2}\\), so independent uncertainty from both excitation and inhibition increases total variance. Using \\(E[K]=\\operatorname{Var}(K)=r\\Delta t\\) gives \\(E[Q]=(N_{E} W_{E} r_{E}-N_{I} W_{I} r_{I})\\Delta t\\). Independence gives \\(\\operatorname{Var}(Q)=(N_{E} W_{E}^{2}r_{E}+N_{I} W_{I}^{2}r_{I})\\Delta t\\). E/I contributions can cancel in the mean, but their variances cannot cancel merely because their signs differ. If inputs are correlated, pairwise covariance terms must be added and the independent formula may underestimate or otherwise alter the fluctuations.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Coupled networks, \\(\\delta\\) spike trains, and synaptic convolution,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Strong \\(1/\\sqrt N\\) coupling, E/I balance, and irregular spiking,” not the relationship asked about here.",
-        "d": "The error is: Keeping the inhibitory minus sign in the variance formula and obtaining a potentially negative variance."
+        "a": "Squared deviations are part of the variance definition, not an after-the-fact sign correction. Independent fluctuations can remain when means cancel.",
+        "b": "Inhibitory spike counts are nonnegative. The weight carries the inhibitory sign, while variance remains nonnegative under a sign reversal.",
+        "d": "The formula assumes independent inputs. Perfect synchronization would introduce covariance terms and is not implied by adding independent variances."
       }
     },
     {
@@ -777,27 +779,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "\\(\\delta\\) is defined by how it acts under integration. Numerical implementations usually store event indices and add a discrete kernel afterward, or approximate the event with area 1 in a finite bin."
+          "text": "A near-zero net mean already means cancellation at every instant; any remaining fluctuations show that balance has not been reached and rule out strong balance."
         },
         {
           "id": "b",
-          "text": "Variance measures squared deviations from the mean."
+          "text": "Zero net mean guarantees that excitation and inhibition are individually large; the net current alone therefore identifies strong coupling without separately measuring either input class."
         },
         {
           "id": "c",
-          "text": "Interpreting balance as exact equality of E and I current at every instant and therefore predicting zero fluctuations."
+          "text": "Zero net mean plus irregular firing uniquely identifies strong balance; external noise or slow modulation can alter mean rate but cannot produce similar spike variability."
         },
         {
           "id": "d",
-          "text": "Weak inputs can also give zero net mean. Strong balance additionally requires large separate E and I means that cancel at leading order, finite net variance, and the predicted scaling as connectivity changes."
+          "text": "Zero net mean can reflect weak input; strong balance requires large cancelling excitatory and inhibitory mean inputs, finite fluctuations, and the predicted scaling with connectivity."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "Weak inputs can also give zero net mean. Strong balance additionally requires large separate E and I means that cancel at leading order, finite net variance, and the predicted scaling as connectivity changes. The balance condition is sensitive to relative mismatch. Each canceled term is \\(O(\\sqrt N)\\), so if their relative mismatch remains constant, the net input also grows as \\(\\sqrt N\\). Through \\(E\\to I\\), \\(I\\to E\\), recurrent connections, and external drive, network dynamics must adjust firing rates so that mean inhibition tracks mean excitation. Dynamic balance is a network-generated state, not merely a manual choice of equal external rates.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Coupled networks, \\(\\delta\\) spike trains, and synaptic convolution,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Mean, variance, and the failure of 1/N scaling for stochastic E/I input,” not the relationship asked about here.",
-        "c": "The error is: Interpreting balance as exact equality of E and I current at every instant and therefore predicting zero fluctuations."
+        "a": "Strong balance constrains leading-order means, not exact moment-by-moment cancellation. Finite fluctuations can drive irregular firing.",
+        "b": "Two small inputs can also have zero difference. Observing the difference alone cannot establish two large cancelling components.",
+        "c": "External noise and slow state changes can also produce irregular firing. Separate inputs, fluctuations, and scaling must be examined to distinguish mechanisms."
       }
     },
     {
@@ -821,27 +823,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Flow diagram in which many excitatory and inhibitory spikes are filtered into large opposing inputs that cancel in the net input"
+          "text": "Excitatory and inhibitory mean inputs are individually large and cancel at leading order; net input retains finite moment-to-moment fluctuations that can drive irregular firing."
         },
         {
           "id": "b",
-          "text": "\\(\\delta\\) is defined by how it acts under integration. Numerical implementations usually store event indices and add a discrete kernel afterward, or approximate the event with area 1 in a finite bin."
+          "text": "Leading-order cancellation means excitation and inhibition are identical at every instant; both net input and its variance vanish, so irregular firing must be a plotting artifact."
         },
         {
           "id": "c",
-          "text": "Variance measures squared deviations from the mean."
+          "text": "Net input is finite because excitation and inhibition individually remain finite; the two large inputs are only drawn large for visibility and do not depend on network size."
         },
         {
           "id": "d",
-          "text": "Interpreting balance as exact equality of E and I current at every instant and therefore predicting zero fluctuations."
+          "text": "The inhibitory minus sign persists in variance and cancels excitatory variance; larger networks therefore achieve more precise balance and inevitably lose all random fluctuations."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Under \\(W\\sim 1/\\sqrt N\\), the conditional means of excitatory and inhibitory input are each \\(O(\\sqrt N)\\) and must cancel at leading order. Their instantaneous difference remains \\(O(1)\\), so net input is not zero at every instant and can continue to drive irregular spiking.",
       "wrongChoiceExplanations": {
-        "b": "The diagram does not show the variables and conditions discussed in “Coupled networks, \\(\\delta\\) spike trains, and synaptic convolution.”",
-        "c": "The diagram does not show the variables and conditions discussed in “Mean, variance, and the failure of 1/N scaling for stochastic E/I input.”",
-        "d": "The error is: Interpreting balance as exact equality of E and I current at every instant and therefore predicting zero fluctuations."
+        "b": "Cancellation of means is not cancellation at every instant. The balanced regime shown retains finite fluctuations rather than removing all input variation.",
+        "c": "Under the stated scaling, each mean grows with the square root of connection number. A finite net value requires cancellation between those large terms.",
+        "d": "Independent variances add with squared weights. The inhibitory sign in the mean does not cancel variance; this strong-coupling scaling retains finite fluctuations."
       }
     }
   ]

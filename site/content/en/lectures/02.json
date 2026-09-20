@@ -165,6 +165,7 @@
       {
         "id": "L02-M2",
         "title": "Identity, transpose, inverse, and singularity",
+        "transition": "Once we know how a matrix transforms an input, we can ask whether the output determines that input uniquely. Transposition only exchanges indices; recovering the input requires examining whether the transformation collapses distinct inputs onto the same result.",
         "sourceRefs": [
           {
             "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
@@ -232,6 +233,7 @@
       {
         "id": "L02-M3",
         "title": "From Bernoulli and exponential distributions to joint Gaussians and Bayes",
+        "transition": "The matrix operations above describe deterministic mappings, whereas spikes and behavior vary even under repeated conditions. Probability distributions describe that variability, mean vectors and covariance matrices bring linear algebra into population statistics, and Bayes’ rule connects observations to inference about unknown quantities.",
         "sourceRefs": [
           {
             "file": "Lecture2-FC_NEUROSCI_366_F2025.pdf",
@@ -887,27 +889,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The likelihood fixes the observed data and compares how well parameter values explain them."
+          "text": "Each output fixes one weight column and sums over output indices; matrix columns therefore specify all input weights for a single output."
         },
         {
           "id": "b",
-          "text": "Because \\(C(4,-3)^{\\mathrm{T}}=(0,0)^{\\mathrm{T}}\\), any x and \\(x+a(4,-3)^{\\mathrm{T}}\\) have the same output. The output cannot determine a, so it cannot recover a unique input."
+          "text": "Each output retains every elementwise weight-input product without summing; the result therefore remains a matrix, just like an outer product."
         },
         {
           "id": "c",
-          "text": "Multiplying whenever two objects have the same number of entries, without checking the inner dimensions required by matrix multiplication."
+          "text": "Each row first sums its weights and multiplies by the sum of input components; distributivity makes this identical to summing corresponding weight-input pairs."
         },
         {
           "id": "d",
-          "text": "By definition, matrix multiplication gives \\(y_{i}=\\sum _j A_{ij} v_{j}\\). Once output row i is fixed, the sum runs only over input index j, so that row lists how the output weights each input."
+          "text": "Each individual output fixes a row of weights and sums corresponding weight-input products, eliminating the input index while retaining the output index."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "By definition, matrix multiplication gives \\(y_{i}=\\sum _j A_{ij} v_{j}\\). Once output row i is fixed, the sum runs only over input index j, so that row lists how the output weights each input. Start with concrete objects: \\(s=2\\), \\(u=(0,1)^{\\mathrm{T}}\\), \\(v=(2,5)^{\\mathrm{T}}\\), \\(w=(0,1,2,5)^{\\mathrm{T}}\\), and matrices A, B, and C. These are more than arithmetic exercises: a vector may represent responses from several neurons, and a matrix may represent a linear map from stimulus to response. Shape records the input and output slots. If you ignore it, you may swap neuron and condition indices even when the arithmetic itself is correct.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “From Bernoulli and exponential distributions to joint Gaussians and Bayes,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Identity, transpose, inverse, and singularity,” not the relationship asked about here.",
-        "c": "The error is: Multiplying whenever two objects have the same number of entries, without checking the inner dimensions required by matrix multiplication."
+        "a": "The usual matrix-vector product fixes a row and sums over the input index associated with columns. This reverses the input and output indices.",
+        "b": "Retaining pairwise products is not matrix-vector multiplication. Summing over the shared dimension produces an output vector.",
+        "c": "Multiplying two sums introduces cross terms between different indices. A weighted sum contains only matching weight-input pairs."
       }
     },
     {
@@ -931,27 +933,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Because \\(C(4,-3)^{\\mathrm{T}}=(0,0)^{\\mathrm{T}}\\), any x and \\(x+a(4,-3)^{\\mathrm{T}}\\) have the same output. The output cannot determine a, so it cannot recover a unique input."
+          "text": "Any input \\(x\\) and \\(x+a(4,-3)^{\\mathrm{T}}\\) give equal outputs; the component along this null-space direction cannot be recovered from the output alone."
         },
         {
           "id": "b",
-          "text": "The likelihood fixes the observed data and compares how well parameter values explain them."
+          "text": "Any input \\(x\\) and \\(x+a(3,4)^{\\mathrm{T}}\\) produce the same output; the first row itself is the null-space direction removed by the matrix."
         },
         {
           "id": "c",
-          "text": "By definition, matrix multiplication gives \\(y_{i}=\\sum _j A_{ij} v_{j}\\). Once output row i is fixed, the sum runs only over input index j, so that row lists how the output weights each input."
+          "text": "Inputs \\(x\\) and \\(2x\\) are indistinguishable for every nonzero output; doubling the first row to obtain the second eliminates overall input amplitude."
         },
         {
           "id": "d",
-          "text": "Treating a nonzero determinant as sufficient for numerical stability and ignoring error amplification near singularity."
+          "text": "Although the outputs are proportional, they still provide two independent equations; multiplying the output by the transpose recovers both input components."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Because \\(C(4,-3)^{\\mathrm{T}}=(0,0)^{\\mathrm{T}}\\), any x and \\(x+a(4,-3)^{\\mathrm{T}}\\) have the same output. The output cannot determine a, so it cannot recover a unique input. For a two-by-two matrix \\(B=[[a,b],[c,d]]\\), \\(\\det(B)=ad-bc\\). Geometrically, the determinant is the signed area scale factor of the linear map. A zero determinant means that a two-dimensional region is compressed into a line or point, so distinct inputs yield the same output. Once the map flattens information, output alone cannot identify the original input and no inverse exists. This is the same fact as linear dependence among rows or columns.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “From Bernoulli and exponential distributions to joint Gaussians and Bayes,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Start with shape: scalars, vectors, matrices, and products,” not the relationship asked about here.",
-        "d": "The error is: Treating a nonzero determinant as sufficient for numerical stability and ignoring error amplification near singularity."
+        "b": "The first row is orthogonal to the null-space direction, rather than being in the null space. Multiplying the matrix by the transposed first row does not give zero.",
+        "c": "Linearity doubles the output when the input doubles. Dependent rows eliminate a particular direction, not all amplitude information.",
+        "d": "Proportional outputs provide only one independent constraint. Transposition cannot restore the lost dimension and is not generally inversion."
       }
     },
     {
@@ -980,27 +982,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "By definition, matrix multiplication gives \\(y_{i}=\\sum _j A_{ij} v_{j}\\). Once output row i is fixed, the sum runs only over input index j, so that row lists how the output weights each input."
+          "text": "Likelihood differs from a posterior only because it is not normalized over parameters; normalizing it gives the posterior regardless of the prior."
         },
         {
           "id": "b",
-          "text": "The likelihood fixes the observed data and compares how well parameter values explain them."
+          "text": "Likelihood compares candidate parameters with observed data fixed; a posterior also weights them by the prior and normalizes across parameter space."
         },
         {
           "id": "c",
-          "text": "Because \\(C(4,-3)^{\\mathrm{T}}=(0,0)^{\\mathrm{T}}\\), any x and \\(x+a(4,-3)^{\\mathrm{T}}\\) have the same output. The output cannot determine a, so it cannot recover a unique input."
+          "text": "Likelihood fixes parameters and compares unobserved data, whereas the posterior fixes data; the likelihood formula therefore cannot compare candidate parameter values."
         },
         {
           "id": "d",
-          "text": "Treating a continuous density \\(f(x)\\) as a point probability \\(P(X=x)\\), even though probability comes from integration over an interval."
+          "text": "The reversed conditioning makes likelihood valid only for discrete parameters; continuous parameters require a posterior density and cannot have a likelihood maximizer."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "The likelihood fixes the observed data and compares how well parameter values explain them. The parameter posterior must also incorporate a prior and normalize across every candidate parameter; the two expressions condition in opposite directions. A bivariate Gaussian is determined completely by its mean vector and covariance matrix. Integrating out one variable gives a Gaussian marginal; fixing an observation and renormalizing gives a Gaussian conditional distribution. Conditioning shifts the mean and reduces variance to the uncertainty left after accounting for the correlation. The derivation below gives the conditional mean, conditional variance, and Bayesian reweighting, allowing you to calculate the complete distribution rather than merely infer the tilt of an ellipse.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Start with shape: scalars, vectors, matrices, and products,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Identity, transpose, inverse, and singularity,” not the relationship asked about here.",
-        "d": "The error is: Treating a continuous density \\(f(x)\\) as a point probability \\(P(X=x)\\), even though probability comes from integration over an interval."
+        "a": "Normalizing likelihood corresponds to a posterior only under suitable assumptions such as a flat prior. A general prior changes relative parameter weights.",
+        "c": "When used as a likelihood, the observed data are fixed and parameters are compared. That comparison is its central purpose.",
+        "d": "Likelihood is defined for both discrete and continuous parameters. Parameter type neither rules out maximum likelihood nor determines whether a prior is used."
       }
     },
     {
@@ -1024,27 +1026,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "By definition, matrix multiplication gives \\(y_{i}=\\sum _j A_{ij} v_{j}\\). Once output row i is fixed, the sum runs only over input index j, so that row lists how the output weights each input."
+          "text": "Conditioning integrates out the other variable, so both curves must share mean and variance; their visible difference can only reflect different vertical-axis units."
         },
         {
           "id": "b",
-          "text": "Because \\(C(4,-3)^{\\mathrm{T}}=(0,0)^{\\mathrm{T}}\\), any x and \\(x+a(4,-3)^{\\mathrm{T}}\\) have the same output. The output cannot determine a, so it cannot recover a unique input."
+          "text": "The narrower conditional curve means observation has hard-truncated the original variable’s range; values beyond that curve now have zero probability under the Gaussian model."
         },
         {
           "id": "c",
-          "text": "Comparison of a variable's marginal Gaussian density with its conditional Gaussian density after fixing the other variable"
+          "text": "Conditioning on the correlated variable can shift the mean and narrow the distribution; the curves depict conditional and marginal densities, not newly collected counts."
         },
         {
           "id": "d",
-          "text": "Treating a continuous density \\(f(x)\\) as a point probability \\(P(X=x)\\), even though probability comes from integration over an interval."
+          "text": "Observing another variable adds uncertainty, so conditional variance must exceed marginal variance; the narrower curve therefore represents the larger variance."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "When two variables are correlated, fixing \\(X_{2}\\) takes a slice through the joint density. The conditional mean shifts along the correlation direction, while conditional variance decreases from \\(\\sigma _{1}^{2}\\) to \\(\\sigma _{1}^{2}(1-c^{2})\\). The curves are normalized illustrations of the formula, not empirical histograms.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Start with shape: scalars, vectors, matrices, and products.”",
-        "b": "The diagram does not show the variables and conditions discussed in “Identity, transpose, inverse, and singularity.”",
-        "d": "The error is: Treating a continuous density \\(f(x)\\) as a point probability \\(P(X=x)\\), even though probability comes from integration over an interval."
+        "a": "Integrating out the other variable gives a marginal distribution. Conditioning fixes it and renormalizes, generally changing mean and variance.",
+        "b": "A nondegenerate conditional Gaussian still has unbounded support. Reduced variance is not a hard truncation of its tails.",
+        "d": "Conditioning a joint Gaussian reduces variance according to correlation strength. On a common horizontal scale, a narrower Gaussian has smaller variance."
       }
     }
   ]

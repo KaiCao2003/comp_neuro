@@ -169,6 +169,7 @@
       {
         "id": "L13-M2",
         "title": "Least Squares, the Hessian, and White-Noise Isotropy",
+        "transition": "Aligning stimulus histories before spikes organizes the data. Whether those data uniquely constrain a receptive field depends on which directions the stimulus covariance covers; the least-squares Hessian expresses that identifiability as curvature of the loss.",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -236,6 +237,7 @@
       {
         "id": "L13-M3",
         "title": "From the Kernel Estimate to the STA, Nonlinearity, and Failure Diagnostics",
+        "transition": "White noise simplifies covariance correction, but experiments record spike counts rather than a noiseless continuous firing rate. Expressing the stimulus–count correlation through the spike-triggered average exposes the STA's scale factors and leads to estimating the nonlinearity that converts projections into firing rates.",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -540,7 +542,7 @@
     {
       "id": "L13-G06",
       "lecture": 13,
-      "zh": "Hessian",
+      "zh": "Hessian 矩阵",
       "en": "Hessian",
       "definition": "The matrix of second derivatives of loss with respect to parameters.",
       "sectionId": "L13-M2",
@@ -663,27 +665,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Moving along the ellipse's long axis raises loss only slightly."
+          "text": "Current frames always contain future information, and histories only remove it."
         },
         {
           "id": "b",
-          "text": "Both K and F were estimated from the same data, and binning plus a flexible curve can absorb noise."
+          "text": "A history vector repeats the current frame to increase sample count, and more repetitions independently identify each lag's contribution."
         },
         {
           "id": "c",
-          "text": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time."
+          "text": "Spikes have latency and can depend on several past moments; stimulus histories preserve temporal structure that the current frame may miss."
         },
         {
           "id": "d",
-          "text": "Flattening the stimulus without recording pixel and lag order, so the resulting vector cannot be reshaped correctly into a receptive field."
+          "text": "Responses depend only on the current frame, so past frames merely smooth measurement noise and cannot change the estimated temporal structure."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time. A history vector permits simultaneous estimation of spatial and temporal receptive-field structure. System identification reverses forward prediction. A forward LNP model predicts spikes from known K and F; the experiment supplies stimulus s and spikes k and seeks K and F. A standard protocol presents random checkerboard white noise, records neural spikes, looks backward from every spike over the same time lags, and averages those stimulus histories. Stimulus coordinates, frame duration, and neural latency must be defined first.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Least Squares, the Hessian, and White-Noise Isotropy,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “From the Kernel Estimate to the STA, Nonlinearity, and Failure Diagnostics,” not the relationship asked about here.",
-        "d": "The error is: Flattening the stimulus without recording pixel and lag order, so the resulting vector cannot be reshaped correctly into a receptive field."
+        "a": "A current frame need not contain future information; earlier stimulation may drive the spike through temporal filtering.",
+        "b": "Histories need actual past frames; repeating one frame adds no independent information about temporal filtering.",
+        "d": "Latency and integration across past moments are part of the receptive field being estimated, not merely measurement noise."
       }
     },
     {
@@ -712,27 +714,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time."
+          "text": "The long axis has the largest Hessian eigenvalue, so tiny parameter changes create large losses and therefore make that direction least reliable."
         },
         {
           "id": "b",
-          "text": "Both K and F were estimated from the same data, and binning plus a flexible curve can absorb noise."
+          "text": "Elongated contours prove that the spatial receptive field itself is elongated."
         },
         {
           "id": "c",
-          "text": "Interpreting a circular loss contour as a circular receptive field; the contour describes curvature in parameter space, not spatial shape."
+          "text": "Every filter along the long axis makes exactly identical predictions with zero loss, so an elongated contour always implies a nonunique solution."
         },
         {
           "id": "d",
-          "text": "Moving along the ellipse's long axis raises loss only slightly."
+          "text": "Low curvature along the long axis lets different filters predict similarly, so noise can move the estimate far in that direction."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "Moving along the ellipse's long axis raises loss only slightly. This is a small-eigenvalue direction of the Hessian, where many different K values make similar predictions on the sampled stimuli, allowing finite noise to shift the minimum substantially. For a linear model with quadratic loss, the Hessian \\(H=SS^\\mathrm{T}/T\\) is independent of K. Its eigenvectors are the principal axes of the loss ellipse and its eigenvalues are curvatures. Along a large-eigenvalue direction, a small change in K noticeably changes predictions and the data tightly constrain the minimum. Along a small-eigenvalue direction, the loss is flat and recording noise, finite samples, or regularization can move the estimate substantially.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “White-Noise System Identification in Three Notations,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “From the Kernel Estimate to the STA, Nonlinearity, and Failure Diagnostics,” not the relationship asked about here.",
-        "c": "The error is: Interpreting a circular loss contour as a circular receptive field; the contour describes curvature in parameter space, not spatial shape."
+        "a": "At a fixed loss increment, the long axis corresponds to small curvature and weak constraints.",
+        "b": "These contours describe parameter-space loss, not the receptive field's shape in visual space.",
+        "c": "A small nonzero eigenvalue can produce a unique but unstable estimate; strict nonuniqueness requires missing constraints."
       }
     },
     {
@@ -761,27 +763,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Both K and F were estimated from the same data, and binning plus a flexible curve can absorb noise."
+          "text": "The filter and curve fitted to the same data may absorb noise; freeze the model and test spike predictions on held-out stimuli."
         },
         {
           "id": "b",
-          "text": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time."
+          "text": "A strictly monotonic training curve removes all noise, so it eliminates the need for held-out evaluation."
         },
         {
           "id": "c",
-          "text": "Moving along the ellipse's long axis raises loss only slightly."
+          "text": "Refit both the filter and nonlinearity on test spikes, then use those same spikes to demonstrate that the resulting model generalizes."
         },
         {
           "id": "d",
-          "text": "Comparing raw STA amplitudes across conditions without correcting for spike rate, stimulus variance, duration, and bin width."
+          "text": "Matching the overall mean firing rate guarantees correct stimulus-specific predictions."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Both K and F were estimated from the same data, and binning plus a flexible curve can absorb noise. Generalization must be tested by computing projections on held-out stimuli and predicting conditional rates or spikes there. After estimating \\(\\hat{K}\\), compute \\(L_{t}=\\hat{K}^\\mathrm{T}s_{t}\\) in every time bin, group values into bins of L, and estimate empirical \\(P(\\mathrm{spike}|L)\\). The small-bin Poisson approximation gives \\(P(k=1|L)\\approx \\Delta tF(L)\\), hence \\(\\hat{F}(L)=P(\\mathrm{spike}|L)/\\Delta t\\). Finally combine \\(\\hat{K}\\), \\(\\hat{F}\\), and the Poisson stage on held-out stimuli and compare predicted with observed spikes; a training STA alone is not a model test.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “White-Noise System Identification in Three Notations,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Least Squares, the Hessian, and White-Noise Isotropy,” not the relationship asked about here.",
-        "d": "The error is: Comparing raw STA amplitudes across conditions without correcting for spike rate, stimulus variance, duration, and bin width."
+        "b": "Monotonicity or smoothness can still permit overfitting and does not establish prediction on new data.",
+        "c": "Refitting to test responses uses the answers being evaluated and destroys independence of the prediction test.",
+        "d": "A correct overall mean can coexist with large errors in conditional responses."
       }
     },
     {
@@ -810,27 +812,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time."
+          "text": "Looking backward from spikes means future stimuli cause current responses, making STA an acausal encoding model."
         },
         {
           "id": "b",
-          "text": "A flow diagram showing white-noise stimulus histories passing through a linear projection and nonlinearity to generate spikes, after which pre-spike stimuli are aligned and averaged to produce an STA parallel."
+          "text": "Forward LNP predicts spikes; reverse averaging estimates the filter direction when the white Gaussian single-feature STA is nonzero."
         },
         {
           "id": "c",
-          "text": "Moving along the ellipse's long axis raises loss only slightly."
+          "text": "The STA–filter relation holds for all stimulus distributions and even nonlinearities, and sufficient sampling always guarantees a nonzero STA that recovers the complete filter."
         },
         {
           "id": "d",
-          "text": "Comparing raw STA amplitudes across conditions without correcting for spike rate, stimulus variance, duration, and bin width."
+          "text": "The STA alone determines the nonlinearity, noise distribution, and all future predictions."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "A forward LNP model projects stimulus history onto \\(L=k^{\\mathrm{T}}s\\), transforms it through \\(F(L)\\) into a conditional firing rate, and generates spikes. Reverse analysis aligns and averages the stimulus history before each spike. For zero-mean white Gaussian input, one relevant dimension, and sufficient data, STA points along k. Colored input, an even nonlinearity, or multiple relevant dimensions breaks this simple relation.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “White-Noise System Identification in Three Notations.”",
-        "c": "The diagram does not show the variables and conditions discussed in “Least Squares, the Hessian, and White-Noise Isotropy.”",
-        "d": "The error is: Comparing raw STA amplitudes across conditions without correcting for spike rate, stimulus variance, duration, and bin width."
+        "a": "Reverse analysis describes an estimation procedure using earlier stimuli, not a reversal of physiological causality.",
+        "c": "Colored inputs can bias the STA, while even responses can cancel it even with abundant data.",
+        "d": "The STA primarily supplies directional information; nonlinearity, scale, and predictive validation require separate treatment."
       }
     }
   ]

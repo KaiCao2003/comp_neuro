@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能把 white-noise stimulus、spike train 与 spike-triggered ensemble 组织成 system-identification workflow，并区分 descriptive STA、filter estimator 与完整 LNP component。",
-      "能在 continuous convolution、pixel-index sum 与 matrix notation 之间转换，明确 S、K、L、count vector 的 shape 与 time-lag orientation。",
-      "能从 linear-neuron mean-squared loss 推导 normal equation 与 Hessian，并由 stimulus covariance 解释 circular 或 elongated loss contours。",
-      "能从 \\(SS^\\mathrm{T}\\approx T\\sigma _{s}^2I\\) 推导 Khat 与 STA 的比例关系，保留 spike count、bin width 和 stimulus variance scaling。",
-      "能用 small-bin Poisson approximation 恢复 static nonlinearity，并诊断 multiple features、even nonlinearity、colored stimulus 与 data shortage 导致的 STA failure。"
+      "说明如何结合白噪声刺激与脉冲记录估计感受野，区分脉冲触发平均、滤波器估计和完整 LNP 模型。",
+      "在连续卷积、像素求和与矩阵记号之间转换，明确刺激矩阵、滤波核、驱动及计数向量的维度与延迟方向。",
+      "从线性神经元的均方损失推导正规方程与 Hessian，并用刺激协方差解释损失等高线的形状。",
+      "从 \\(SS^\\mathrm{T}\\approx T\\sigma _{s}^2I\\) 推导滤波器估计与 STA 的比例关系，保留脉冲数、时间格宽度和刺激方差的尺度因子。",
+      "利用小时间格下的 Poisson 近似估计静态非线性，并分析多个特征、偶对称响应、有色刺激及数据不足如何影响 STA。"
     ],
     "prerequisiteBridge": [
-      "LNP 模型先把 stimulus history vector \\(s_{t}\\in \\mathbb{R}^{P\\times 1}\\) 与 filter \\(K\\in \\mathbb{R}^{P\\times 1}\\) 做 inner product \\(L_{t}=K^\\mathrm{T}s_{t}\\)，再把 \\(L_{t}\\) 经 nonlinearity F 变成 rate。P 不只表示 pixels，还可把 x、y 与多个过去 time lags 展平成一个 index。实验每个 time bin 都提供一列 \\(s_{t}\\)，因此 design matrix \\(S\\in \\mathbb{R}^{P\\times T}\\)。",
-      "least squares 选择 K 使 measured response h 与 \\(S^\\mathrm{T}K\\) 接近。gradient 为 \\(-S(h-S^\\mathrm{T}K)/T\\)，设为零得到 \\(SS^\\mathrm{T}K=Sh\\)；Hessian \\(SS^\\mathrm{T}/T\\) 描述 loss 对 filter direction 的 curvature。某 stimulus direction 几乎没被采样时，对应 curvature 小，filter estimate 对 noise 很敏感。",
-      "white noise 在这里指不同 pixel/time dimensions 近似 zero-mean、uncorrelated 且 equal variance，故 large-sample covariance 接近 \\(\\sigma _{s}^2I\\)。若 bin 足够小，spike count \\(k_{t}\\) 多为 0 或 1，\\(P(k_{t}=1|L_{t})\\approx \\Delta tF(L_{t})\\)。STA 是 spike bins 前 stimulus vectors 的平均，必须先按同一 lags 对齐。"
+      "LNP 模型先将刺激历史向量 \\(s_{t}\\in \\mathbb{R}^{P\\times 1}\\) 与滤波核 \\(K\\in \\mathbb{R}^{P\\times 1}\\) 作内积 \\(L_{t}=K^\\mathrm{T}s_{t}\\)，再通过非线性 F 将 \\(L_{t}\\) 转成放电率。P 可以同时包含像素位置与多个过去时刻，只需将这些维度按固定顺序展开。每个时间格提供一列 \\(s_{t}\\)，构成设计矩阵 \\(S\\in \\mathbb{R}^{P\\times T}\\)。",
+      "最小二乘法选择滤波核 K，使预测 \\(S^\\mathrm{T}K\\) 接近测量响应 h。梯度为 \\(-S(h-S^\\mathrm{T}K)/T\\)，令其为零便得到 \\(SS^\\mathrm{T}K=Sh\\)。Hessian \\(SS^\\mathrm{T}/T\\) 描述损失沿不同滤波器方向变化的曲率。如果某个刺激方向几乎没有被采样，对应曲率就很小，该方向的核估计也容易受噪声影响。",
+      "这里的白噪声要求不同像素和时间维度近似零均值、不相关且方差相等，因此大样本协方差接近 \\(\\sigma _{s}^2I\\)。时间格足够小时，脉冲计数 \\(k_{t}\\) 多为 0 或 1，并满足 \\(P(k_{t}=1|L_{t})\\approx \\Delta tF(L_{t})\\)。脉冲触发平均（STA）对放电前的刺激向量求平均；这些向量必须先按相同的时间延迟对齐。"
     ],
     "modules": [
       {
         "id": "L13-M1",
-        "title": "White-noise system identification 与三种 notation",
+        "title": "用白噪声估计感受野",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -114,62 +114,63 @@
           }
         ],
         "paragraphs": [
-          "system identification 的方向与 forward prediction 相反：forward LNP 给定 K 与 F 预测 spikes；实验现在给 stimulus s 和 spikes k，要反推 K 与 F。标准 protocol 是展示 random checkerboard white noise、记录 neural spikes、对每个 spike 向前回看同一组 time lags，再平均这些 stimulus histories。必须先定义 stimulus coordinate、frame duration 和 neural latency。",
-          "spike-triggered ensemble 是所有“spike 发生前”的 stimulus vectors 集合，STA 是其 mean。若 neuron 是 ON-center RGC，最近 lag 可显示亮 center、暗 surround；更早 lag 的 sign/shape 可不同，形成 biphasic temporal kernel。每个 history 必须相对 spike 对齐，否则 neural latency variation 之外还会人为 smear filter。",
-          "continuous notation 写 \\(L(t)=\\int dx'\\) dy' dt' \\(K(x',y',t')s(x',y',t-t')\\)。离散后，把 (x,y,t') 合成 index p，得到 \\(L_{t}=\\sum _pK_{p}S_{pt}\\)。matrix form 则是 \\(L=S^\\mathrm{T}K\\)。三种表达描述同一 inner product；matrix 形式适合 least squares，continuous 形式更直接显示 spatial location 与 causal lag。",
-          "S 的每列是一段 stimulus history，而不是单一当前 frame；K 的 p entries 按同一 flattening order 排列。若 time lag index 反向，估计 kernel 会在时间上翻转。white-noise protocol 的价值不是图案“看起来随机”，而是使不同 dimensions 的 sample covariance 近似 diagonal 且 scale 相等，从而减少 estimator bias 与不均匀 uncertainty。"
+          "感受野估计将 LNP 的预测方向反过来：已知滤波核和非线性时，可以预测脉冲；实验中则给出刺激和脉冲，反推滤波核与非线性。常见做法是呈现随机棋盘格白噪声、记录放电，再从每次放电向前提取相同延迟范围内的刺激。开始平均之前，必须明确刺激坐标、帧时长和神经响应延迟。",
+          "所有放电前刺激向量构成脉冲触发集合，其均值就是 STA。对于 ON 中心 RGC，临近放电的切片可能呈现亮中心、暗周围，更早切片的符号或形状则可能不同，形成双相时间响应。各次刺激历史需要相对脉冲对齐，否则会人为模糊核的时间结构。",
+          "连续记号写为 \\(L(t)=\\int dx'\\) dy' dt' \\(K(x',y',t')s(x',y',t-t')\\)。将位置与延迟组合为离散索引 p 后，变成 \\(L_{t}=\\sum _pK_{p}S_{pt}\\)；矩阵形式则为 \\(L=S^\\mathrm{T}K\\)。三者描述同一个内积：矩阵形式便于最小二乘计算，连续形式则直接展示空间位置与因果延迟。",
+          "S 的每列是一段刺激历史，不只是当前帧，K 中的元素也必须采用相同的展开顺序。延迟索引反向会使核在时间上翻转。白噪声实验的关键是不同维度的样本协方差近似对角且尺度相等；仅让图案看起来杂乱，并不能保证估计没有偏差或各方向具有相同的不确定度。 因此，刺激设计既影响估计偏差，也决定有限数据能否可靠地区分不同滤波方向。"
         ],
         "keyPoints": [
-          "STA 必须对 spikes 做相同的 stimulus-history alignment，不能只平均 spike frame。",
-          "continuous convolution、pixel sum 与 \\(S^\\mathrm{T}K\\) 是同一计算在不同表示下的形式。",
-          "white noise 的关键是 covariance isotropy，而不是随意生成一张噪声图。"
+          "STA 必须平均相对脉冲对齐的刺激历史，不能只平均放电所在的单帧。",
+          "连续卷积、像素求和与 \\(S^\\mathrm{T}K\\) 是同一计算的不同记法。",
+          "白噪声实验需要近似各向同性的协方差，而非仅仅外观随机的图案。"
         ],
         "derivation": {
-          "title": "把 spatiotemporal convolution 离散为 \\(S^\\mathrm{T}K\\)",
-          "setup": "取 \\(N_{x}\\times N_{y}\\) pixels 与 \\(N_\\tau\\) causal lags，总 dimension \\(P=N_{x}N_{y}N_\\tau\\)；experiment 有 T 个可用 time bins。",
+          "title": "把时空卷积离散为 \\(S^\\mathrm{T}K\\)",
+          "setup": "取 \\(N_{x}\\times N_{y}\\) 像素与 \\(N_\\tau\\) 因果滞后，总维度 \\(P=N_{x}N_{y}N_\\tau\\)；实验有 T 个可用时间格。",
           "steps": [
             {
-              "title": "定义 compound index",
-              "explanation": "为每个 \\((x_{i},y_{j},\\tau _{q})\\) 指定唯一 p，把 \\(K(x_{i},y_{j},\\tau _{q})\\) 记为 \\(K_{p}\\)，把 time t 对应的 past stimulus \\(s(x_{i},y_{j},t-\\tau _{q})\\) 记为 \\(S_{pt}\\)。",
+              "title": "定义复合索引",
+              "explanation": "为每个 \\((x_{i},y_{j},\\tau _{q})\\) 指定唯一 p，把 \\(K(x_{i},y_{j},\\tau _{q})\\) 记为 \\(K_{p}\\)，把时间 t 对应的过去刺激 \\(s(x_{i},y_{j},t-\\tau _{q})\\) 记为 \\(S_{pt}\\)。",
               "latex": "p\\leftrightarrow(i,j,q),\\qquad S_{pt}=s(x_i,y_j,t-\\tau_q)"
             },
             {
-              "title": "把积分换成带网格体积的 sum",
-              "explanation": "空间与时间 discretization 给 \\(\\Delta x\\Delta y\\Delta \\tau\\) factor；可把该 factor 吸收到 \\(K_{p}\\) 中，留下 ordinary dot product。",
+              "title": "把积分换成带网格体积的求和",
+              "explanation": "空间与时间离散化给 \\(\\Delta x\\Delta y\\Delta \\tau\\) 因子；可把该因子吸收到 \\(K_{p}\\) 中，留下 ordinary 内积。",
               "latex": "L_t\\approx\\sum_{p=1}^{P}K_pS_{pt}"
             },
             {
-              "title": "把所有 time bins 堆成 vector",
-              "explanation": "\\(S^\\mathrm{T}\\) 是 T×P，乘 P×1 的 K 得 T×1 的 L，每个 row 恰好复制一个 time-bin inner product。",
+              "title": "把所有时间格堆成向量",
+              "explanation": "\\(S^\\mathrm{T}\\) 是 T×P，乘 P×1 的 K 得 T×1 的 L，每个行恰好复制一个时间-时间格内积。",
               "latex": "\\mathbf L=S^{\\mathsf T}\\mathbf K"
             }
           ],
           "symbolNotes": [
-            "T 在本讲既可表示 sample count，也常被物理时间使用；matrix shape 中是 bins 数，公式解释时应避免混淆。",
-            "K 的 time coordinate 是 look-back lag；\\(\\tau =0\\) 表示当前或最近 bin，正 \\(\\tau\\) 表示更早 stimulus。"
+            "T 在本讲既可表示样本计数，也常被物理时间使用；矩阵尺寸中是时间格数，公式解释时应避免混淆。",
+            "K 的时间坐标是回溯滞后；\\(\\tau =0\\) 表示当前或最近时间格，正 \\(\\tau\\) 表示更早刺激。"
           ],
-          "unitsCheck": "若 continuous K 的单位为 drive/(contrast·area·time)，乘 contrast 与 dx dy \\(d\\tau\\) 后得到 drive；离散 K 若已吸收 grid volume，其 numerical units 随 binning 改变。",
-          "limitCheck": "frame rate 太低会 alias fast temporal structure；history window 太短会截断 kernel，太长则增加 P、降低每一 dimension 的 statistical power。"
+          "unitsCheck": "若连续 K 的单位为驱动/(对比度·面积·时间)，乘对比度与 dx dy \\(d\\tau\\) 后得到驱动；离散 K 若已吸收网格体积，其数值单位随分箱改变。",
+          "limitCheck": "帧发放率太低会混叠快时间结构；历史时间窗太短会截断核，太长则增加 P、降低每一维度的统计功率。"
         },
         "workedExample": {
-          "title": "两 pixel、四 time bins 的 matrix prediction",
-          "problem": "令 \\(S=[[1,-1,1,-1],[1,1,-1,-1]]\\)，\\(K=(2,1)^\\mathrm{T}\\)。计算 \\(L=S^\\mathrm{T}K\\)，并解释每个 entry。",
+          "title": "两像素、四时间格的矩阵预测",
+          "problem": "令 \\(S=[[1,-1,1,-1],[1,1,-1,-1]]\\)，\\(K=(2,1)^\\mathrm{T}\\)。计算 \\(L=S^\\mathrm{T}K\\)，并解释每个条目。",
           "steps": [
-            "t1 stimulus (1,1)，\\(L_{1}=2\\times 1+1\\times 1=3\\)；t2 stimulus (-1,1)，\\(L_{2}=-2+1=-1\\)。",
-            "t3 stimulus (1,-1)，\\(L_{3}=2-1=1\\)；t4 stimulus (-1,-1)，\\(L_{4}=-2-1=-3\\)。",
-            "因此 \\(L=(3,-1,1,-3)^\\mathrm{T}\\)；第一 pixel weight 更大，所以改变第一 coordinate 对 drive 影响更强。"
+            "t1 刺激 (1,1)，\\(L_{1}=2\\times 1+1\\times 1=3\\)；t2 刺激 (-1,1)，\\(L_{2}=-2+1=-1\\)。",
+            "t3 刺激 (1,-1)，\\(L_{3}=2-1=1\\)；t4 刺激 (-1,-1)，\\(L_{4}=-2-1=-3\\)。",
+            "因此 \\(L=(3,-1,1,-3)^\\mathrm{T}\\)；第一像素权重更大，所以改变第一坐标对驱动影响更强。"
           ],
-          "result": "matrix multiplication 同时计算四个 time bins 的 filter projection，并保留每列 stimulus 的配对。",
-          "sanityCheck": "S 是 \\(2\\times 4\\)，\\(S^\\mathrm{T}\\) 是 \\(4\\times 2\\)，乘 \\(2\\times 1\\) K 后必须得到 \\(4\\times 1\\)；若结果仍是 2-dimensional，orientation 已写反。"
+          "result": "矩阵乘法同时计算四个时间格的滤波器投影，并保留每列刺激的配对。",
+          "sanityCheck": "S 是 \\(2\\times 4\\)，\\(S^\\mathrm{T}\\) 是 \\(4\\times 2\\)，乘 \\(2\\times 1\\) K 后必须得到 \\(4\\times 1\\)；若结果仍是 2-维度的，朝向已写反。"
         },
         "pitfalls": [
-          "flatten stimulus 时没有记录 pixel 与 lag order，最后虽得到 vector，却无法把 K 正确 reshape 回 receptive field。",
-          "把 random-looking stimulus 当成 white，未检查 mean、variance、cross-correlation 与 finite-sample covariance。"
+          "展开刺激数据时未记录像素和延迟顺序，导致估计向量无法正确还原为感受野。",
+          "将外观随机的刺激当作白噪声，却不检查均值、方差、互相关和有限样本协方差。"
         ]
       },
       {
         "id": "L13-M2",
-        "title": "Least squares、Hessian 与 white-noise isotropy",
+        "title": "刺激协方差与估计精度",
+        "transition": "刺激历史对齐后，还要判断它是否覆盖了所有待估计方向。最小二乘损失的 Hessian 将这种数据约束写成曲率，解释哪些方向能够估得精确、哪些方向仍易受噪声影响。",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -181,62 +182,63 @@
           }
         ],
         "paragraphs": [
-          "先考虑 linear neuron \\(h_{t}\\approx K^\\mathrm{T}s_{t}\\)，其中 h 可是 measured firing-rate estimate。mean-squared loss 对 T bins 平均 prediction error。\\(\\mathrm{gradient}=0\\) 给 normal equation \\(SS^\\mathrm{T}K=Sh\\)；左侧是 stimulus covariance scale 乘 filter，右侧是 stimulus-response cross-correlation。filter identifiability 由 S 是否覆盖各 directions 决定。",
-          "Hessian \\(H=SS^\\mathrm{T}/T\\) 与 K 无关，因为 model linear、loss quadratic。H 的 eigenvectors 给 loss ellipse principal axes，eigenvalues 给 curvature。large eigenvalue direction 上，K 稍变就明显改变 prediction，minimum 被数据强约束；small eigenvalue direction 上 loss 很平，estimate 容易被 recording noise、finite samples 或 regularization 改变。",
-          "理想 Gaussian white stimulus 的每个 \\(S_{pt}\\) zero mean、variance \\(\\sigma _{s}^2\\)，且不同 p dimensions uncorrelated。对 large T，\\((SS^\\mathrm{T})_{pq}=\\sum _tS_{pt}S_{qt}\\approx T\\sigma _{s}^2\\delta _{pq}\\)。于是 \\(H\\approx \\sigma _{s}^2I\\)，loss contours 近圆，各 filter dimension 的 curvature 相同。",
-          "finite dataset 永远不会精确等于 identity；sample covariance 的 off-diagonal entries 会围绕零波动。若 pixels 的 variance 不同，H 虽 diagonal 也不是 isotropic；若 stimulus colored，H 出现 correlations，raw cross-correlation 会把 true filter 与 stimulus spectrum 混合。此时应显式乘 covariance inverse、whiten stimulus 或用 regularized likelihood fit。"
+          "先考虑线性神经元 \\(h_{t}\\approx K^\\mathrm{T}s_{t}\\)，其中 h 可以是测得的放电率估计。均方损失对 T 个时间格的预测误差取平均；\\(\\mathrm{gradient}=0\\) 给出正规方程 \\(SS^\\mathrm{T}K=Sh\\)。左侧是带尺度的刺激协方差作用于核，右侧是刺激与响应的互相关。数据能否确定各滤波方向，取决于刺激是否充分覆盖了这些方向。",
+          "Hessian \\(H=SS^\\mathrm{T}/T\\) 不依赖 K，这是线性模型与二次损失共同决定的。其特征向量给出损失椭圆的主轴，特征值给出沿各轴的曲率。大特征值方向上的微小核变化就会显著改变预测，因此受到数据的较强约束；小特征值方向的损失较平，估计更容易随记录噪声、有限采样或正则化而改变。",
+          "理想高斯白噪声的各 \\(S_{pt}\\) 均值为零、方差为 \\(\\sigma _{s}^2\\)，不同刺激维度不相关。样本数足够大时，\\((SS^\\mathrm{T})_{pq}=\\sum _tS_{pt}S_{qt}\\approx T\\sigma _{s}^2\\delta _{pq}\\)，于是 \\(H\\approx \\sigma _{s}^2I\\)。各滤波器方向具有近似相同的曲率，损失等高线因而接近圆形。",
+          "有限样本的协方差不会精确等于单位阵的倍数，非对角元素仍会在零附近波动。即使矩阵对角化，不同像素方差不等时也不具备各向同性。有色刺激的维度之间存在相关性，未经校正的互相关会混合真实核与刺激频谱；此时需要协方差校正、刺激白化，或正则化似然拟合。"
         ],
         "keyPoints": [
-          "normal equation 把 filter estimation 写成 covariance inverse 乘 stimulus-response correlation。",
-          "Hessian eigenvalue 衡量某 filter direction 的可辨识度与 loss curvature。",
-          "white-noise isotropy 是 large-sample approximation，colored stimulus 需要 covariance correction。"
+          "正规方程将滤波器估计联系到刺激协方差与刺激—响应互相关。",
+          "Hessian 特征值反映各滤波器方向上的损失曲率和数据约束强度。",
+          "白噪声各向同性是大样本近似；有色刺激需要校正自身相关性。"
         ],
         "derivation": {
-          "title": "Normal equation 与 isotropic Hessian",
+          "title": "正规方程与各向同性 Hessian",
           "setup": "定义 \\(L(K)=(1/2T)||h-S^\\mathrm{T}K||^2\\)，\\(S\\in \\mathbb{R}^{P\\times T}\\)，\\(h\\in \\mathbb{R}^{T\\times 1}\\)。",
           "steps": [
             {
-              "title": "求 gradient",
-              "explanation": "residual \\(r=h-S^\\mathrm{T}K\\)；每个 K direction 对 prediction 的 derivative 由 S 给出，因此 gradient 是 -S times residual。",
+              "title": "求梯度",
+              "explanation": "残差 \\(r=h-S^\\mathrm{T}K\\)；每个 K 方向对预测的导数由 S 给出，因此梯度是 -S times 残差。",
               "latex": "\\nabla_K L=-\\frac1T S(\\mathbf h-S^{\\mathsf T}K)"
             },
             {
-              "title": "求 estimate 与 Hessian",
-              "explanation": "设 \\(\\mathrm{gradient}=0\\) 得 \\(SS^\\mathrm{T}K=Sh\\)；再对 gradient 求 derivative，得到 \\(H=SS^\\mathrm{T}/T\\)。",
+              "title": "求估计与 Hessian",
+              "explanation": "设 \\(\\mathrm{gradient}=0\\) 得 \\(SS^\\mathrm{T}K=Sh\\)；再对梯度求导数，得到 \\(H=SS^\\mathrm{T}/T\\)。",
               "latex": "\\hat K=(SS^{\\mathsf T})^{-1}S\\mathbf h,\\qquad H=\\frac1TSS^{\\mathsf T}"
             },
             {
-              "title": "代入 white covariance",
-              "explanation": "independent equal-variance dimensions 令 off-diagonal sample sums 趋近零、diagonal sums 趋近 \\(T\\sigma _{s}^2\\)，因此 inverse 约为 \\((T\\sigma _{s}^2)^{-1}I\\)。",
+              "title": "代入白噪声协方差",
+              "explanation": "独立相等方差维度令非对角样本求和趋近零、对角求和趋近 \\(T\\sigma _{s}^2\\)，因此逆矩阵约为 \\((T\\sigma _{s}^2)^{-1}I\\)。",
               "latex": "SS^{\\mathsf T}\\approx T\\sigma_s^2I,\\qquad \\hat K\\approx\\frac{1}{T\\sigma_s^2}S\\mathbf h"
             }
           ],
           "symbolNotes": [
-            "H 是 P×P curvature matrix；不是 neural response covariance，也不是 spike-triggered covariance。",
-            "\\(\\delta _{pq}\\) 是 Kronecker delta，\\(p=q\\) 时为 1，否则为 0；它编码 ideal white covariance。"
+            "H 是 P×P 曲率矩阵；不是神经响应协方差，也不是脉冲触发协方差。",
+            "\\(\\delta _{pq}\\) 是 克罗内克符号，\\(p=q\\) 时为 1，否则为 0；它编码理想白噪声协方差。"
           ],
-          "unitsCheck": "\\(SS^\\mathrm{T}\\) 含 stimulus^2，Sh 含 stimulus×response，因此 estimate 含 response/stimulus，与 linear filter gain 一致。",
-          "limitCheck": "\\(T\\le P\\) 或 stimulus dimensions linearly dependent 时 \\(SS^\\mathrm{T}\\) 可能 singular；此时 inverse expression 不可直接使用。"
+          "unitsCheck": "\\(SS^\\mathrm{T}\\) 含刺激^2，Sh 含刺激×响应，因此估计含响应/刺激，与线性滤波器增益一致。",
+          "limitCheck": "\\(T\\le P\\) 或刺激维度线性地依赖的时 \\(SS^\\mathrm{T}\\) 可能奇异；此时逆矩阵表达式不可直接使用。"
         },
         "workedExample": {
-          "title": "White design 恢复已知 filter",
-          "problem": "沿用 \\(S=[[1,-1,1,-1],[1,1,-1,-1]]\\)，true \\(K=(2,1)^\\mathrm{T}\\)，\\(h=S^\\mathrm{T}K=(3,-1,1,-3)^\\mathrm{T}\\)。由 least squares 恢复 K。",
+          "title": "白噪声设计恢复已知滤波器",
+          "problem": "沿用 \\(S=[[1,-1,1,-1],[1,1,-1,-1]]\\)，真实的 \\(K=(2,1)^\\mathrm{T}\\)，\\(h=S^\\mathrm{T}K=(3,-1,1,-3)^\\mathrm{T}\\)。由最小二乘恢复 K。",
           "steps": [
-            "计算 \\(SS^\\mathrm{T}=[[4,0],[0,4]]=4I\\)，说明两个 stimulus dimensions sample covariance isotropic。",
+            "计算 \\(SS^\\mathrm{T}=[[4,0],[0,4]]=4I\\)，说明两个刺激维度样本协方差各向同性。",
             "计算 \\(Sh=(8,4)^\\mathrm{T}\\)；例如第一项为 \\(1\\times 3+(-1)\\times (-1)+1\\times 1+(-1)\\times (-3)=8\\)。",
-            "\\(\\hat{K}=(4I)^{-1}(8,4)^\\mathrm{T}=(2,1)^\\mathrm{T}\\)，恰好恢复 true filter。"
+            "\\(\\hat{K}=(4I)^{-1}(8,4)^\\mathrm{T}=(2,1)^\\mathrm{T}\\)，恰好恢复真实的滤波器。"
           ],
-          "result": "正交、等方差 stimulus 让 covariance inverse 只做统一 rescale，cross-correlation direction 就是 filter direction。",
-          "sanityCheck": "把第二 stimulus row 复制成第一 row 后 \\(SS^\\mathrm{T} \\operatorname{rank} 1\\)，两个 filter weights 只以 sum 影响 prediction，无法分别辨识。"
+          "result": "正交、等方差刺激让协方差逆矩阵只做统一重新缩放，交叉-相关性方向就是滤波器方向。",
+          "sanityCheck": "把第二刺激行复制成第一行后 \\(SS^\\mathrm{T} \\operatorname{rank} 1\\)，两个滤波器权重只以求和影响预测，无法分别辨识。"
         },
         "pitfalls": [
-          "把 circular contour 解释成 filter 本身 circular；它描述 parameter-space curvature，不是 receptive-field spatial shape。",
-          "使用 white-noise 近似时省略 large T、equal variance 与 independence 条件。"
+          "把圆形损失等高线理解为圆形感受野，混淆参数空间曲率与核的空间形状。",
+          "使用白噪声近似时省略样本量足够大、方差相等及维度独立等条件。"
         ]
       },
       {
         "id": "L13-M3",
-        "title": "从 kernel estimate 到 STA、nonlinearity 与 failure diagnostics",
+        "title": "STA 的尺度、非线性与适用范围",
+        "transition": "实验提供的是脉冲计数，而非无噪声放电率。把计数与刺激的互相关改写为 STA，可以追清比例因子；再估计投影与放电概率的关系，便得到 LNP 的静态非线性。",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -248,58 +250,58 @@
           }
         ],
         "paragraphs": [
-          "真实数据测到的是 spike count \\(k_{t}\\)，不是 continuous rate \\(h_{t}\\)。令 bin width \\(\\Delta t\\) 足够小，使 \\(k_{t}\\in {0,1}\\) 大多成立，并定义 rate estimate \\(h_{t}=k_{t}/\\Delta t\\)。于是 Sh=(1/Δt)Σ_{t:k_t=1}\\(s_{t}\\)；这个 sum 是 spike-triggered stimulus vectors 的总和。",
-          "\\(STA=(1/n_{sp})\\sum _{spikes}s_{t}\\)，所以在 white design 下 \\(\\hat{K}\\approx [n_{sp}/(T\\sigma _{s}^2\\Delta t)]STA\\)。STA 与 K 同方向，但 absolute amplitude 同时依 spike count、recording duration、stimulus variance 与 bin width。比较 cells 或 conditions 时若只比较 raw STA amplitude，可能把 firing-rate change 误判成 filter-gain change。",
-          "得到 Khat 后，对每个 time bin 计算 \\(L_{t}=\\hat{K}^\\mathrm{T}s_{t}\\)，按 L 分 bins，估计 empirical \\(P(\\mathrm{spike}|L)\\)。small-bin Poisson 给 \\(P(k=1|L)\\approx \\Delta tF(L)\\)，所以 Fhat(L)=P(spike|L)/Δt。最后必须在 held-out stimulus 上把 Khat、Fhat 与 Poisson stage 组合，比较 predicted 与 observed spikes，而不是只展示 training STA。",
-          "STA 的成功依赖一个 dominant linear dimension、合适 stimulus distribution 与足够 spikes。colored stimulus 会偏置 direction；non-Gaussian input 破坏简单比例；multiple relevant dimensions 被压成一个 average；even nonlinearity \\(F(L)=F(-L)\\) 让 +K 与 -K ensembles 抵消；history dependence 与 adaptation 也会混入 stimulus filter。\\(STA=0\\) 因而不是“无 receptive field”的证据。"
+          "实验记录的是脉冲计数 \\(k_{t}\\)，不是连续放电率 \\(h_{t}\\)。若时间格宽度 \\(\\Delta t\\) 足够小，\\(k_{t}\\in {0,1}\\) 在大多数时间格成立，可以用 \\(h_{t}=k_{t}/\\Delta t\\) 估计放电率。于是 Sh=(1/Δt)Σ_{t:k_t=1}\\(s_{t}\\)，即对各次放电前的刺激向量求和，再除以时间格宽度。",
+          "根据定义 \\(STA=(1/n_{sp})\\sum _{spikes}s_{t}\\)，白噪声设计下有 \\(\\hat{K}\\approx [n_{sp}/(T\\sigma _{s}^2\\Delta t)]STA\\)。STA 与滤波核方向一致，但绝对幅度还取决于脉冲数、记录时长、刺激方差和时间格宽度。比较细胞或实验条件时，未经校正的 STA 幅度变化可能仅来自放电率改变，不能直接归因为滤波增益变化。",
+          "估计滤波核后，为每个时间格计算投影 \\(L_{t}=\\hat{K}^\\mathrm{T}s_{t}\\)，按投影值分组，估计经验概率 \\(P(\\mathrm{spike}|L)\\)。小时间格下的 Poisson 近似给出 \\(P(k=1|L)\\approx \\Delta tF(L)\\)，因此 \\(\\hat{F}(L)=P(\\mathrm{spike}|L)/\\Delta t\\)。最后，将滤波核、非线性与 Poisson 输出组合，在未参与拟合的刺激上比较预测和实际放电，才能检验完整模型。",
+          "STA 有效需要适当的刺激分布、足够多的脉冲，以及一个占主导的线性特征。有色刺激会使方向偏移，非高斯输入会破坏简单比例关系，多个相关特征则会被压缩成一个均值。若非线性满足 \\(F(L)=F(-L)\\)，正负两个方向的刺激会相互抵消。历史依赖和适应也可能混入刺激核，所以 \\(STA=0\\) 不能证明神经元没有感受野。"
         ],
         "keyPoints": [
-          "Khat 与 STA 的比例常数包含 \\(n_{sp}\\)、T、\\(\\sigma _{s}^2\\) 与 \\(\\Delta t\\)，方向关系比 raw amplitude 更稳健。",
-          "nonlinearity 可由 projection-conditioned spike probability 除以 bin width 估计。",
-          "even response、multiple dimensions 与 colored stimulus 都能让 STA 偏差或为零。"
+          "滤波核与 STA 的比例包含 \\(n_{sp}\\)、T、\\(\\sigma _{s}^2\\) 和 \\(\\Delta t\\)；方向关系比未经校正的幅度更可靠。",
+          "按刺激投影估计放电概率，再除以时间格宽度，可以恢复静态非线性。",
+          "偶对称响应、多个相关特征和有色刺激都可能使 STA 偏移或接近零。"
         ],
         "derivation": {
-          "title": "保留 scaling 的 STA proportionality",
-          "setup": "white stimulus 满足 \\(SS^\\mathrm{T}\\approx T\\sigma _{s}^2I\\)；bin count \\(k_{t}\\in {0,1}\\)，rate estimate \\(h_{t}=k_{t}/\\Delta t\\)；共有 \\(n_{sp}\\) 个 spike bins。",
+          "title": "保留缩放的 STA 比例关系",
+          "setup": "white 刺激满足 \\(SS^\\mathrm{T}\\approx T\\sigma _{s}^2I\\)；时间格计数 \\(k_{t}\\in {0,1}\\)，发放率估计 \\(h_{t}=k_{t}/\\Delta t\\)；共有 \\(n_{sp}\\) 个脉冲时间格。",
           "steps": [
             {
-              "title": "把 response cross-correlation 化成 spike sum",
-              "explanation": "\\(k_{t}=0\\) 的 bins 不贡献；\\(k_{t}=1\\) 的 bins 留下 stimulus vector \\(s_{t}\\)，并有 \\(1/\\Delta t\\) scale。",
+              "title": "把响应交叉-相关性化成脉冲求和",
+              "explanation": "\\(k_{t}=0\\) 的时间格不贡献；\\(k_{t}=1\\) 的时间格留下刺激向量 \\(s_{t}\\)，并有 \\(1/\\Delta t\\) 尺度。",
               "latex": "S\\mathbf h=\\frac1{\\Delta t}\\sum_{t:k_t=1}\\mathbf s_t"
             },
             {
-              "title": "引入 STA definition",
-              "explanation": "spike sum 等于 spike count 乘平均 spike-triggered stimulus。",
+              "title": "引入 STA 定义",
+              "explanation": "脉冲求和等于脉冲计数乘平均脉冲触发刺激。",
               "latex": "\\sum_{t:k_t=1}\\mathbf s_t=n_{\\mathrm{sp}}\\,\\mathrm{STA}"
             },
             {
-              "title": "代入 least-squares estimate",
-              "explanation": "covariance inverse 给统一 \\(1/(T\\sigma _{s}^2)\\)，得到 filter 与 STA 的比例常数。",
+              "title": "代入最小二乘估计",
+              "explanation": "协方差逆矩阵给统一 \\(1/(T\\sigma _{s}^2)\\)，得到滤波器与 STA 的比例常数。",
               "latex": "\\hat K\\approx\\frac{n_{\\mathrm{sp}}}{T\\sigma_s^2\\Delta t}\\,\\mathrm{STA}"
             }
           ],
           "symbolNotes": [
-            "\\(n_{sp}/T\\Delta t\\) 是 mean firing rate；因此比例常数也可写成 mean \\(\\mathrm{rate}/\\sigma _{s}^2\\)。",
-            "STA entries 使用 stimulus units；Khat 作为 rate filter 时还需除 stimulus variance，因此 gain units 不相同。"
+            "\\(n_{sp}/T\\Delta t\\) 是均值发放率；因此比例常数也可写成均值 \\(\\mathrm{rate}/\\sigma _{s}^2\\)。",
+            "STA 分量使用刺激单位；估计滤波核作为发放率滤波器时还需除刺激方差，因此增益单位不相同。"
           ],
-          "unitsCheck": "\\(n_{sp}/(T\\Delta t)\\) 是 1/time，除以 \\(\\sigma _{s}^2\\) 再乘 stimulus 得 rate/stimulus，符合 linear rate filter。",
-          "limitCheck": "bin 太大时 \\(k_{t}\\) 可大于 1，Bernoulli simplification 失效；spike count 太少时 STA variance 很大，即使 expectation relation 成立。"
+          "unitsCheck": "\\(n_{sp}/(T\\Delta t)\\) 是 1/时间，除以 \\(\\sigma _{s}^2\\) 再乘刺激得发放率/刺激，符合线性发放率滤波器。",
+          "limitCheck": "时间格太大时 \\(k_{t}\\) 可大于 1，Bernoulli 简化失效；脉冲计数太少时 STA 方差很大，即使期望关系成立。"
         },
         "workedExample": {
-          "title": "Even nonlinearity 让 STA 消失",
-          "problem": "一维 stimulus s 以相同先验概率取 -1、0、+1；neuron 在 \\(s=\\pm 1\\) 时的 spike probability 均为 0.4，在 \\(s=0\\) 时为 0.1。求 spike-triggered mean 与 second moment，并与原 stimulus variance 比较。",
+          "title": "偶对称非线性让 STA 消失",
+          "problem": "一维刺激 s 以相同先验概率取 -1、0、+1；神经元在 \\(s=\\pm 1\\) 时的脉冲概率均为 0.4，在 \\(s=0\\) 时为 0.1。求脉冲触发均值与二阶矩，并与原刺激方差比较。",
           "steps": [
-            "总 spike probability 为 \\((0.4+0.1+0.4)/3=0.3\\)。用 Bayes rule 得 \\(P(s=-1|\\mathrm{spike})=4/9\\)、\\(P(s=0|\\mathrm{spike})=1/9\\)、\\(P(s=+1|\\mathrm{spike})=4/9\\)。",
-            "正负两端的 conditional weight 相同，所以 \\(STA=E[s|\\mathrm{spike}]=(-1)(4/9)+0+(+1)(4/9)=0\\)。",
-            "spike-triggered second moment 为 \\(E[s^2|\\mathrm{spike}]=(4/9)+(4/9)=8/9\\)；因 conditional mean 为零，这也是 spike-triggered variance。",
-            "原 stimulus mean 为零、variance 为 \\(E[s^2]=2/3\\)。spike-triggered variance 增加 \\(8/9-2/3=2/9\\)，揭示 neuron 偏好较大的 |s|。"
+            "总脉冲概率为 \\((0.4+0.1+0.4)/3=0.3\\)。用 Bayes 规则得 \\(P(s=-1|\\mathrm{spike})=4/9\\)、\\(P(s=0|\\mathrm{spike})=1/9\\)、\\(P(s=+1|\\mathrm{spike})=4/9\\)。",
+            "正负两端的条件权重相同，所以 \\(STA=E[s|\\mathrm{spike}]=(-1)(4/9)+0+(+1)(4/9)=0\\)。",
+            "脉冲触发二阶矩为 \\(E[s^2|\\mathrm{spike}]=(4/9)+(4/9)=8/9\\)；因条件均值为零，这也是脉冲触发方差。",
+            "原刺激均值为零、方差为 \\(E[s^2]=2/3\\)。脉冲触发方差增加 \\(8/9-2/3=2/9\\)，揭示神经元偏好较大的 |s|。"
           ],
-          "result": "STA 为零，但 spike-triggered variance 由 2/3 增至 8/9；STC 或 quadratic model 能检测到被正负对称平均抵消的 relevant direction。",
-          "sanityCheck": "三个 conditional probabilities 相加为 1；若把 ±1 的 spike probability 都改成与 \\(s=0\\) 相同，spike-triggered distribution 会退回先验，variance difference 也变为零。"
+          "result": "STA 为零，但脉冲触发方差由 2/3 增至 8/9；STC 或二次模型能检测到被正负对称平均抵消的相关方向。",
+          "sanityCheck": "三个条件概率相加为 1；若把 ±1 的脉冲概率都改成与 \\(s=0\\) 相同，脉冲触发分布会退回先验，方差差分也变为零。"
         },
         "pitfalls": [
-          "比较不同 conditions 的 raw STA amplitude，却没有校正 spike rate、stimulus variance、duration 与 bin width。",
-          "把 \\(STA=0\\) 直接解释为 neuron 不选择 stimulus，忽略 even nonlinearity 和 multiple-feature coding。"
+          "直接比较不同条件下的 STA 幅度，没有校正放电率、刺激方差、记录时长和时间格宽度。",
+          "将 \\(STA=0\\) 解释为神经元不选择刺激，忽略偶对称非线性与多特征编码。"
         ]
       }
     ]
@@ -310,9 +312,9 @@
       "lecture": 13,
       "lectureTitle": "脉冲触发平均与白噪声系统辨识",
       "moduleId": "L13-M3",
-      "title": "LNP forward model 与 STA reverse estimate 构成同一闭环检验",
+      "title": "LNP 前向模型与 STA 反向估计构成同一闭环检验",
       "alt": "流程图显示白噪声刺激历史经线性投影和非线性产生脉冲，再把脉冲前刺激对齐平均得到与滤波器方向平行的 STA。",
-      "caption": "forward LNP 先把 stimulus history 投影到 \\(L=k^{\\mathrm{T}}s\\)，再经 \\(F(L)\\) 给 conditional firing rate 并产生 spikes；reverse analysis 则对每个 spike 前的 stimulus history 对齐平均。对 zero-mean white Gaussian input、单一 relevant dimension 与足够样本，STA 与 k 同方向；colored input、even nonlinearity 或多个 relevant dimensions 会破坏这个简单关系。",
+      "caption": "前向 LNP 先把刺激历史投影到 \\(L=k^{\\mathrm{T}}s\\)，再经 \\(F(L)\\) 给条件发放率并产生脉冲；反向分析则对每个脉冲前的刺激历史对齐平均。对零均值白高斯输入、单一相关的维度与足够样本，STA 与 k 同方向；有色输入、偶对称非线性或多个相关的维度会破坏这个简单关系。",
       "sourceRefs": [
         {
           "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -328,26 +330,26 @@
       "nodes": [
         {
           "id": "stimulus-history",
-          "label": "white-noise\nstimulus history s",
+          "label": "白噪声\n刺激历史 s",
           "x": 11,
           "y": 55
         },
         {
           "id": "linear-projection",
-          "label": "linear projection\n\\(L = k^{\\mathrm{T}}s\\)",
+          "label": "线性投影\n\\(L = k^{\\mathrm{T}}s\\)",
           "x": 37,
           "y": 55
         },
         {
           "id": "spikes",
-          "label": "\\(F(L)\\)+ spike\ngeneration",
+          "label": "\\(F(L)\\)+ 脉冲\n生成",
           "x": 63,
           "y": 55,
           "tone": "accent"
         },
         {
           "id": "sta",
-          "label": "spike-aligned mean\nSTA ∥ k",
+          "label": "脉冲-对齐的均值\nSTA ∥ k",
           "x": 89,
           "y": 55
         }
@@ -356,12 +358,12 @@
         {
           "from": "stimulus-history",
           "to": "linear-projection",
-          "label": "forward"
+          "label": "前向"
         },
         {
           "from": "linear-projection",
           "to": "spikes",
-          "label": "conditional rate"
+          "label": "条件发放率"
         },
         {
           "from": "spikes",
@@ -398,7 +400,7 @@
     "思考题：colored stimulus 下应如何修正？"
   ],
   "synthesis": [
-    "STA 既是 descriptive average，也是在线性、Gaussian white stimulus 与合适 nonlinearity 条件下的 filter estimator。matrix least squares 揭示其来源：white stimulus 使 design covariance 近似 scalar identity，normal equation 因而简化为 stimulus 与 response 的相关。恢复 nonlinearity 后得到可预测新刺激的 LNP model；但多个 relevant dimensions、even-symmetric nonlinearities 或 correlated stimulus 会使 STA 为零或偏差。"
+    "脉冲触发平均既是一个统计描述，也可在特定条件下估计线性滤波器。对白色高斯刺激，设计矩阵的协方差近似为标量乘单位矩阵，最小二乘解因而简化为刺激与响应的相关。再估计非线性函数，便得到可预测新刺激响应的 LNP 模型。多维特征、偶对称非线性或相关刺激都可能使 STA 为零或产生偏差。"
   ],
   "workedExamples": [
     "7.1 STA scale 与方向",
@@ -412,10 +414,10 @@
     {
       "id": "L13-F01",
       "lecture": 13,
-      "name": "pixelized linear drive",
+      "name": "像素化刺激的线性驱动",
       "expression": "L = ST K",
       "latex": "L=S^{\\mathsf{T}}K",
-      "conditions": "S:P×T",
+      "conditions": "S 为 P×T 矩阵",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 2
@@ -423,10 +425,10 @@
     {
       "id": "L13-F02",
       "lecture": 13,
-      "name": "least-squares filter",
+      "name": "最小二乘滤波器",
       "expression": "K̂ = (SS T )−1 Sh",
       "latex": "\\hat{K}=(SS^{\\mathsf{T}})^{-1}Sh",
-      "conditions": "\\(SS^\\mathrm{T}\\) invertible",
+      "conditions": "\\(SS^\\mathrm{T}\\) 可逆",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 3
@@ -434,10 +436,10 @@
     {
       "id": "L13-F03",
       "lecture": 13,
-      "name": "loss Hessian",
+      "name": "损失函数的 Hessian",
       "expression": "H = SS T /T",
       "latex": "H=\\frac{SS^{\\mathsf{T}}}{T}",
-      "conditions": "linear squared loss",
+      "conditions": "线性模型与平方损失",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 4
@@ -445,10 +447,10 @@
     {
       "id": "L13-F04",
       "lecture": 13,
-      "name": "white-noise covariance",
+      "name": "白噪声协方差",
       "expression": "SS T ≈ T σs2 I",
       "latex": "SS^{\\mathsf{T}}\\approx T\\sigma_s^2I",
-      "conditions": "large T、independent equal-variance pixels",
+      "conditions": "T 足够大，像素独立且方差相同",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 4
@@ -456,10 +458,10 @@
     {
       "id": "L13-F05",
       "lecture": 13,
-      "name": "spike-triggered average",
+      "name": "脉冲触发平均",
       "expression": "1 X ST A = st nsp t∈spikes",
       "latex": "\\mathrm{STA}=\\frac{1}{n_{\\mathrm{sp}}}\\sum_{t\\in\\mathrm{spikes}}s_t",
-      "conditions": "aligned stimulus histories",
+      "conditions": "刺激历史已按脉冲时刻对齐",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 1
@@ -467,10 +469,10 @@
     {
       "id": "L13-F06",
       "lecture": 13,
-      "name": "STA/filter relation",
+      "name": "STA 与滤波器的关系",
       "expression": "K̂ ∝ ST A",
       "latex": "\\hat{K}\\propto\\mathrm{STA}",
-      "conditions": "white Gaussian single-filter assumptions",
+      "conditions": "白高斯刺激与单一滤波器假设",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 3
@@ -478,10 +480,10 @@
     {
       "id": "L13-F07",
       "lecture": 13,
-      "name": "small-bin nonlinearity estimate",
+      "name": "小时间窗中的非线性估计",
       "expression": "P (spike|L) ≈ ∆tF (L)",
       "latex": "P(\\mathrm{spike}\\mid L)\\approx\\Delta t\\,F(L)",
-      "conditions": "\\(\\Delta t\\) rate≪1",
+      "conditions": "\\(\\Delta t\\) 乘发放率≪1",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 4
@@ -493,7 +495,7 @@
       "lecture": 13,
       "zh": "系统辨识",
       "en": "system identification",
-      "definition": "由输入和输出数据反推系统模型。",
+      "definition": "根据输入和输出数据推断系统模型。",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 3
@@ -503,7 +505,7 @@
       "lecture": 13,
       "zh": "白噪声",
       "en": "white noise",
-      "definition": "不同 dimensions/time bins 不相关且功率均匀的理想随机刺激。",
+      "definition": "不同维度或时间格不相关、功率谱均匀的理想随机刺激。",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 4
@@ -513,7 +515,7 @@
       "lecture": 13,
       "zh": "脉冲触发集合",
       "en": "spike-triggered ensemble",
-      "definition": "所有 spike 前 stimulus histories 的集合。",
+      "definition": "所有脉冲发生前的刺激历史组成的集合。",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 1
@@ -523,7 +525,7 @@
       "lecture": 13,
       "zh": "脉冲触发平均",
       "en": "spike-triggered average, STA",
-      "definition": "spike-triggered ensemble 的均值。",
+      "definition": "脉冲触发刺激集合的平均值。",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 1
@@ -533,7 +535,7 @@
       "lecture": 13,
       "zh": "设计矩阵",
       "en": "design matrix",
-      "definition": "按 examples/time bins 组织 stimulus vectors 的矩阵。",
+      "definition": "按样本或时间格组织刺激向量的矩阵。",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 2
@@ -541,9 +543,9 @@
     {
       "id": "L13-G06",
       "lecture": 13,
-      "zh": "Hessian",
+      "zh": "Hessian 矩阵",
       "en": "Hessian",
-      "definition": "loss 对参数的二阶导数矩阵。",
+      "definition": "损失函数对参数的二阶导数矩阵。",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 3
@@ -553,7 +555,7 @@
       "lecture": 13,
       "zh": "各向同性",
       "en": "isotropic",
-      "definition": "所有方向 curvature/variance 相同。",
+      "definition": "各方向上的曲率或方差相同的性质。",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 4
@@ -563,7 +565,7 @@
       "lecture": 13,
       "zh": "白化",
       "en": "whitening",
-      "definition": "移除 covariance correlations、使变量近 unit covariance。",
+      "definition": "消除二阶相关，并将协方差变换为近似单位矩阵。",
       "sectionId": "L13-M2",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 3
@@ -573,7 +575,7 @@
       "lecture": 13,
       "zh": "相关刺激",
       "en": "correlated stimulus",
-      "definition": "stimulus dimensions 具有非零 covariance。",
+      "definition": "不同刺激维度之间具有非零协方差。",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 1
@@ -583,21 +585,21 @@
       "lecture": 13,
       "zh": "相关维度",
       "en": "relevant dimension",
-      "definition": "response dependence 的 stimulus projection direction。",
+      "definition": "神经响应所依赖的刺激投影方向。",
       "sectionId": "L13-M1",
       "sourceFile": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
       "sourcePage": 1
     }
   ],
   "commonTraps": [
-    "把 STA 仅当作图片平均，而不说明 time lag alignment。",
-    "matrix orientation 不标，混淆 \\(S^\\mathrm{T}K\\) 与 KS。",
-    "遗漏 white covariance 的 large-sample 与 equal-variance assumptions。",
-    "把 STA amplitude 无条件等同于 physical filter gain。",
-    "\\(STA=0\\) 就断言 neuron 无 receptive field。",
-    "恢复 F 时忘记除以 bin width。",
-    "用 training fit 判断模型，不做 held-out prediction。",
-    "区分 STA 作为 descriptive average、linear-filter estimator 和 LNP model component；三者在特定假设下联系，但不是无条件等价。"
+    "把脉冲触发平均（STA）当成简单的图片平均，忽略刺激与脉冲之间的时间延迟对齐。",
+    "未声明矩阵排列方向，因而混淆 \\(S^\\mathrm{T}K\\) 与 KS。",
+    "使用白刺激协方差近似时，忽略大样本与各维方差相等等假设。",
+    "把 STA 的幅度直接当成物理滤波器增益，未检查刺激方差和非线性带来的比例因子。",
+    "看到 \\(STA=0\\) 就断言神经元没有感受野。",
+    "由分箱计数恢复非线性函数 F 时，忘记除以时间区间宽度。",
+    "只看训练数据的拟合效果，未检查对留出数据的预测。",
+    "把作为统计平均、线性滤波器估计和 LNP 模型组成部分的 STA 无条件等同，忽略三者联系所需的假设。"
   ],
   "errata": [
     {
@@ -609,7 +611,7 @@
       "sourcePage": 4,
       "sectionId": "L13-M2",
       "originalIssue": "这里 的 isotropic Hessian 是 large-sample approximation，不是有限数据精确等式。",
-      "explanation": "若 pixels 的 variance 不同，H 虽 diagonal 也不是 isotropic；若 stimulus colored，H 出现 correlations，raw cross-correlation 会把 true filter 与 stimulus spectrum 混合。",
+      "explanation": "有限样本的协方差不会精确等于单位阵的倍数，非对角元素仍会在零附近波动。",
       "correction": null
     },
     {
@@ -621,7 +623,7 @@
       "sourcePage": 5,
       "sectionId": "L13-M3",
       "originalIssue": "这里 的 proportionality constant 包含 T、stimulus variance、\\(\\Delta t\\) 与 spike count；不能省略后比较绝对 gain。",
-      "explanation": "STA 与 K 同方向，但 absolute amplitude 同时依 spike count、recording duration、stimulus variance 与 bin width。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": "不能省略后比较绝对 gain"
     },
     {
@@ -650,37 +652,37 @@
         }
       ],
       "conceptTags": [
-        "White-noise system identification 与三种 notation"
+        "用白噪声估计感受野"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 spike-triggered ensemble 的每个成员应是一段 stimulus history，而不只是 spike 所在 frame？",
+      "stem": "为什么脉冲触发集合的每个成员应是一段刺激历史，而不只是脉冲所在帧？",
       "choices": [
         {
           "id": "a",
-          "text": "K 与 F 都由同一数据估计，binning 和 flexible curve 可吸收 noise；必须在 held-out stimuli 上先计算 projection，再预测 conditional rate/spikes，才能检验 model 是否捕获可泛化 stimulus-response relation。"
+          "text": "当前帧总含未来刺激的信息，使用历史只是为了把这些未来信号去掉。"
         },
         {
           "id": "b",
-          "text": "沿 ellipse 长轴移动时 loss 增加很少，对应 Hessian small-eigenvalue direction；许多不同 K 在 sampled stimuli 上产生相近 predictions，因此有限噪声可使 minimum 沿该方向大幅漂移。"
+          "text": "历史向量只是把当前帧重复多次来增加样本数，重复越多就越能独立估计每个延迟的作用。"
         },
         {
           "id": "c",
-          "text": "neural response 有 latency 且可能依赖多个过去 lags；只取当前 frame 会丢失 temporal filtering，并把 causal feature 错配到 spike time。history vector 才能同时估计 spatial 与 temporal receptive-field structure。"
+          "text": "响应有延迟且依赖过去刺激；完整刺激历史能保留当前帧遗漏的时间结构。"
         },
         {
           "id": "d",
-          "text": "flatten stimulus 时没有记录 pixel 与 lag order，最后虽得到 vector，却无法把 K 正确 reshape 回 receptive field。"
+          "text": "神经反应只由当前帧决定，使用过去帧的唯一作用是平滑噪声，不会影响核的时间结构。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“从 kernel estimate 到 STA、nonlinearity 与 failure diagnostics”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Least squares、Hessian 与 white-noise isotropy”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：flatten stimulus 时没有记录 pixel 与 lag order，最后虽得到 vector，却无法把 K 正确 reshape 回 receptive field。"
+        "a": "当前帧不必包含未来信息；关键是放电可能由更早的刺激经过时间滤波引起。",
+        "b": "历史应包含各个真实过去帧；复制同一帧不会增加独立信息，也不能恢复时间核。",
+        "d": "神经延迟和多时刻整合本身就是待估计的时间结构，不只是测量噪声。"
       },
-      "explanation": "neural response 有 latency 且可能依赖多个过去 lags；只取当前 frame 会丢失 temporal filtering，并把 causal feature 错配到 spike time。history vector 才能同时估计 spatial 与 temporal receptive-field structure。 标准 protocol 是展示 random checkerboard white noise、记录 neural spikes、对每个 spike 向前回看同一组 time lags，再平均这些 stimulus histories。"
+      "explanation": "神经响应有潜伏期且可能依赖多个过去滞后；只取当前帧会丢失时间滤波，并把因果特征错配到脉冲时刻。历史向量才能同时估计空间与时间感受野结构。 S 的每列是一段刺激历史，不只是当前帧，K 中的元素也必须采用相同的展开顺序。"
     },
     {
       "id": "L13-Q02",
@@ -694,37 +696,37 @@
         }
       ],
       "conceptTags": [
-        "Least squares、Hessian 与 white-noise isotropy"
+        "刺激协方差与估计精度"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 elongated loss contour 表示某些 filter combinations 估计不可靠？",
+      "stem": "为什么细长的损失等高线表示某些滤波器组合估计不可靠？",
       "choices": [
         {
           "id": "a",
-          "text": "neural response 有 latency 且可能依赖多个过去 lags；只取当前 frame 会丢失 temporal filtering，并把 causal feature 错配到 spike time。history vector 才能同时估计 spatial 与 temporal receptive-field structure。"
+          "text": "长轴意味着 Hessian 特征值最大，参数稍有变化就会造成很大损失，因此估计最不可靠。"
         },
         {
           "id": "b",
-          "text": "K 与 F 都由同一数据估计，binning 和 flexible curve 可吸收 noise；必须在 held-out stimuli 上先计算 projection，再预测 conditional rate/spikes，才能检验 model 是否捕获可泛化 stimulus-response relation。"
+          "text": "等高线拉长说明神经元的空间感受野也必然细长，无法用有限像素准确表示。"
         },
         {
           "id": "c",
-          "text": "把 circular contour 解释成 filter 本身 circular；它描述 parameter-space curvature，不是 receptive-field spatial shape。"
+          "text": "长轴上的所有滤波器都给出完全相同的预测和零损失，所以只要存在长轴便一定没有唯一解。"
         },
         {
           "id": "d",
-          "text": "沿 ellipse 长轴移动时 loss 增加很少，对应 Hessian small-eigenvalue direction；许多不同 K 在 sampled stimuli 上产生相近 predictions，因此有限噪声可使 minimum 沿该方向大幅漂移。"
+          "text": "长轴对应较小的损失曲率；多种滤波器在已有刺激上预测相近，噪声容易让估计沿该方向漂移。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“White-noise system identification 与三种 notation”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“从 kernel estimate 到 STA、nonlinearity 与 failure diagnostics”中的另一组变量与条件，不能由题干推出。",
-        "c": "错误在于：把 circular contour 解释成 filter 本身 circular；它描述 parameter-space curvature，不是 receptive-field spatial shape。"
+        "a": "固定损失增量下的长轴对应小曲率，而非大曲率；小曲率表示约束较弱。",
+        "b": "这是参数空间中的损失形状，不是感受野在视野中的几何轮廓。",
+        "c": "小而非零的特征值仍可给出唯一但不稳定的解；只有缺失方向等情况才造成严格不唯一。"
       },
-      "explanation": "沿 ellipse 长轴移动时 loss 增加很少，对应 Hessian small-eigenvalue direction；许多不同 K 在 sampled stimuli 上产生相近 predictions，因此有限噪声可使 minimum 沿该方向大幅漂移。 large eigenvalue direction 上，K 稍变就明显改变 prediction，minimum 被数据强约束；small eigenvalue direction 上 loss 很平，estimate 容易被 recording noise、finite samples 或 regularization 改变。"
+      "explanation": "沿椭圆长轴移动时损失增加很少，对应 Hessian 小特征值方向；许多不同 K 在采样的刺激上产生相近预测，因此有限噪声可使极小值沿该方向大幅漂移。 大特征值方向上的微小核变化就会显著改变预测，因此受到数据的较强约束；小特征值方向的损失较平，估计更容易随记录噪声、有限采样或正则化而改变。"
     },
     {
       "id": "L13-Q03",
@@ -738,37 +740,37 @@
         }
       ],
       "conceptTags": [
-        "从 kernel estimate 到 STA、nonlinearity 与 failure diagnostics"
+        "STA 的尺度、非线性与适用范围"
       ],
       "difficulty": 2,
       "type": "figure",
       "cognitiveLevel": "understand",
-      "stem": "为什么仅在训练数据上画出 Fhat(L) 的平滑上升曲线不足以证明 LNP model 有预测力？",
+      "stem": "为什么仅在训练数据上画出 Fhat(L) 的平滑上升曲线不足以证明 LNP 模型有预测力？",
       "choices": [
         {
           "id": "a",
-          "text": "K 与 F 都由同一数据估计，binning 和 flexible curve 可吸收 noise；必须在 held-out stimuli 上先计算 projection，再预测 conditional rate/spikes，才能检验 model 是否捕获可泛化 stimulus-response relation。"
+          "text": "同一数据拟合的滤波器和曲线可能吸收噪声；应固定模型，在留出刺激上检验放电预测。"
         },
         {
           "id": "b",
-          "text": "neural response 有 latency 且可能依赖多个过去 lags；只取当前 frame 会丢失 temporal filtering，并把 causal feature 错配到 spike time。history vector 才能同时估计 spatial 与 temporal receptive-field structure。"
+          "text": "只要曲线严格单调，任何训练噪声就已被排除，因此无需使用留出数据。"
         },
         {
           "id": "c",
-          "text": "沿 ellipse 长轴移动时 loss 增加很少，对应 Hessian small-eigenvalue direction；许多不同 K 在 sampled stimuli 上产生相近 predictions，因此有限噪声可使 minimum 沿该方向大幅漂移。"
+          "text": "应在测试刺激上重新估计滤波器和非线性，再用同一批测试放电证明模型能泛化。"
         },
         {
           "id": "d",
-          "text": "比较不同 conditions 的 raw STA amplitude，却没有校正 spike rate、stimulus variance、duration 与 bin width。"
+          "text": "只需让预测和观测具有相同平均放电率，就能保证每种刺激的条件响应都被模型正确解释。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“White-noise system identification 与三种 notation”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Least squares、Hessian 与 white-noise isotropy”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：比较不同 conditions 的 raw STA amplitude，却没有校正 spike rate、stimulus variance、duration 与 bin width。"
+        "b": "单调约束仍允许过拟合；平滑或单调不等于能预测新数据。",
+        "c": "重新拟合测试反应已使用待检验答案，不能作为独立预测评估。",
+        "d": "匹配总体均值不能保证刺激特异预测正确；条件反应仍可能系统偏离。"
       },
-      "explanation": "K 与 F 都由同一数据估计，binning 和 flexible curve 可吸收 noise；必须在 held-out stimuli 上先计算 projection，再预测 conditional rate/spikes，才能检验 model 是否捕获可泛化 stimulus-response relation。 最后必须在 held-out stimulus 上把 Khat、Fhat 与 Poisson stage 组合，比较 predicted 与 observed spikes，而不是只展示 training STA。"
+      "explanation": "K 与 F 都由同一数据估计，分箱和灵活的曲线可吸收噪声；必须在留出数据的刺激上先计算投影，再预测条件发放率/脉冲，才能检验模型是否捕获可泛化刺激与响应关系。 最后，将滤波核、非线性与 Poisson 输出组合，在未参与拟合的刺激上比较预测和实际放电，才能检验完整模型。"
     },
     {
       "id": "L13-Q04",
@@ -782,37 +784,37 @@
         }
       ],
       "conceptTags": [
-        "LNP forward model 与 STA reverse estimate 构成同一闭环检验"
+        "LNP 前向模型与 STA 反向估计构成同一闭环检验"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"LNP forward model 与 STA reverse estimate 构成同一闭环检验\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"LNP 前向模型与 STA 反向估计构成同一闭环检验\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "neural response 有 latency 且可能依赖多个过去 lags；只取当前 frame 会丢失 temporal filtering，并把 causal feature 错配到 spike time。history vector 才能同时估计 spatial 与 temporal receptive-field structure。"
+          "text": "从脉冲回看历史意味着未来刺激决定当前放电，STA 因此是一种反因果编码模型。"
         },
         {
           "id": "b",
-          "text": "forward LNP 先把 stimulus history 投影到 \\(L=k^{\\mathrm{T}}s\\)，再经 \\(F(L)\\) 给 conditional firing rate 并产生 spikes；reverse analysis 则对每个 spike 前的 stimulus history 对齐平均。"
+          "text": "正向模型预测放电，STA 平均之前的历史；合适白噪声条件下，非零 STA 可指向滤波器。"
         },
         {
           "id": "c",
-          "text": "沿 ellipse 长轴移动时 loss 增加很少，对应 Hessian small-eigenvalue direction；许多不同 K 在 sampled stimuli 上产生相近 predictions，因此有限噪声可使 minimum 沿该方向大幅漂移。"
+          "text": "图中 STA 与滤波器的关系对所有刺激分布和偶对称非线性都成立，采样充分就一定得到非零 STA。"
         },
         {
           "id": "d",
-          "text": "比较不同 conditions 的 raw STA amplitude，却没有校正 spike rate、stimulus variance、duration 与 bin width。"
+          "text": "得到 STA 后便同时确定了完整非线性和发放噪声，无需再估计条件放电率或检验新刺激。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "图中没有“White-noise system identification 与三种 notation”所需的变量与条件。",
-        "c": "图中没有“Least squares、Hessian 与 white-noise isotropy”所需的变量与条件。",
-        "d": "图中的标注与关系不支持这种读法：比较不同 conditions 的 raw STA amplitude，却没有校正 spike rate、stimulus variance、duration 与 bin width。"
+        "a": "反向分析是估计方法的方向；使用的是放电之前的历史，并不改变生理因果次序。",
+        "c": "有色输入可偏置 STA；偶对称响应可使正负方向抵消，即使样本很多也可为零。",
+        "d": "STA 主要提供方向信息；非线性、幅度约定和预测验证仍需分别处理。"
       },
-      "explanation": "forward LNP 先把 stimulus history 投影到 \\(L=k^{\\mathrm{T}}s\\)，再经 \\(F(L)\\) 给 conditional firing rate 并产生 spikes；reverse analysis 则对每个 spike 前的 stimulus history 对齐平均。对 zero-mean white Gaussian input、单一 relevant dimension 与足够样本，STA 与 k 同方向；colored input、even nonlinearity 或多个 relevant dimensions 会破坏这个简单关系。"
+      "explanation": "前向 LNP 先把刺激历史投影到 \\(L=k^{\\mathrm{T}}s\\)，再经 \\(F(L)\\) 给条件发放率并产生脉冲；反向分析则对每个脉冲前的刺激历史对齐平均。对零均值白高斯输入、单一相关的维度与足够样本，STA 与 k 同方向；有色输入、偶对称非线性或多个相关的维度会破坏这个简单关系。"
     }
   ]
 }

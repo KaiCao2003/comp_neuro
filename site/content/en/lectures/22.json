@@ -232,7 +232,8 @@
         "pitfalls": [
           "Treating a latent factor as a directly measured neuron.",
           "Concluding from diagonal \\(\\Sigma\\) that real neurons are independent; independence applies only to residuals conditional on the latent state."
-        ]
+        ],
+        "transition": "Population trajectories place single-cell tuning in a shared activity space, but projection alone does not separate shared variation from observation noise. The GPFA observation model first specifies how latent factors and residual variability generate neural recordings."
       },
       {
         "id": "l22-m3",
@@ -248,7 +249,7 @@
           }
         ],
         "paragraphs": [
-          "The squared-exponential kernel \\(K(t,t')=\\sigma s^{2}\\) \\(\\exp[-(t-t')^{2}/(2\\tau ^{2})]+\\sigma n^{2}\\delta tt'\\) gives covariance between two times for one factor. \\(\\sigma s^{2}\\) controls smooth signal variance, \\(\\tau\\) controls the correlation-decay time, and \\(\\sigma n^{2}\\) adds independent variability only in the same time bin. Because \\(\\alpha\\) and loading C have a global scale ambiguity, impose \\(\\sigma n^{2}+\\sigma s^{2}=1\\) as a normalization convention. That constraint fixes scale; it is not a new biological law. Nor is this the only GP kernel: for rapid switching or oscillation, Matérn or periodic kernels may better match the hypothesis.",
+          "The squared-exponential kernel \\(K(t,t')=\\sigma_s^2\\exp[-(t-t')^2/(2\\tau^2)]+\\sigma_n^2\\delta_{tt'}\\) gives covariance between two times for one factor. \\(\\sigma_s^{2}\\) controls smooth signal variance, \\(\\tau\\) controls the correlation-decay time, and \\(\\sigma_n^{2}\\) adds independent variability only in the same time bin. Because \\(\\alpha\\) and loading C have a global scale ambiguity, impose \\(\\sigma_n^{2}+\\sigma_s^{2}=1\\) as a normalization convention. That constraint fixes scale; it is not a new biological law. Nor is this the only GP kernel: for rapid switching or oscillation, Matérn or periodic kernels may better match the hypothesis.",
           "Fitting jointly estimates latent trajectories, loadings, baselines, noise, and kernel hyperparameters, commonly by marginal likelihood or an EM-like procedure. Increasing K always increases in-sample flexibility, so choose dimensionality with cross-validation, held-out likelihood, or reconstruction prediction. Training explained variance alone can mistake noise dimensions for meaningful factors.",
           "Read a delayed-reach plot along its timeline. The interval after target onset but before the go cue is the preparatory epoch; movement begins only after go. Preparatory activity for different targets may approach different latent locations without producing obvious movement. After the cue, trajectories depart from those initial states along target-specific movement paths. The plot supports the idea that an initial condition influences later dynamics, but trajectories alone cannot exclude sustained common input.",
           "Trial averaging clarifies preparatory trajectories but conceals single-trial onset jitter and variability. To claim that trajectory geometry predicts behavior, use the pre-go latent state to predict reaction time, directional error, or muscle activity on held-out trials. A post-go divergence may reflect alignment and condition averaging, so compare it with shuffled labels and alternative alignments."
@@ -304,7 +305,8 @@
         "pitfalls": [
           "Mistaking \\(\\tau\\) for the number K of latent factors.",
           "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
-        ]
+        ],
+        "transition": "The observation model relates a latent state to neural activity at one time without specifying relationships across times. A temporal covariance kernel supplies that missing structure and lets us test whether delayed-reach data support the inferred smoothness."
       },
       {
         "id": "l22-m4",
@@ -376,7 +378,8 @@
         "pitfalls": [
           "Incorrectly inferring \\(r=0\\) from \\(Ur=0\\).",
           "Defining and testing the null space on the same training trials, thereby overfitting."
-        ]
+        ],
+        "transition": "Smooth latent trajectories reveal preparatory changes without explaining why preparation need not produce movement. Specifying a readout from neural activity to motor output lets us identify activity directions in its null space."
       },
       {
         "id": "l22-m5",
@@ -444,7 +447,8 @@
         "pitfalls": [
           "Treating aligned latent stability as permanent stability of individual-neuron identity.",
           "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
-        ]
+        ],
+        "transition": "Whether neural activity changes output depends on the readout, making a changed decoder a useful functional intervention. Closed-loop BMI places that readout inside a feedback system and raises the further problem of aligning population coordinates across days."
       }
     ]
   },
@@ -816,27 +820,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The participant changes neural strategy in response to feedback, and the decoder may update online."
+          "text": "Because PCA ranks neural directions using behavioral labels, the percentages agree exactly whenever those labels are noise free."
         },
         {
           "id": "b",
-          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "text": "The only issue is neuron count: recording every cell makes every linear readout preserve variance fractions, forcing both percentages to be 70%."
         },
         {
           "id": "c",
-          "text": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+          "text": "Seventy percent neural variance means the PC contains seventy percent of cells, while behavioral variance counts the remainder."
         },
         {
           "id": "d",
-          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "text": "Behavior depends on its readout: a high-variance neural direction may be ignored while a low-variance direction strongly affects output."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances. A center-out task begins at a central location and reaches toward multiple radial targets, making direction, speed, and time from the go cue well structured. For one neuron, mean directional tuning can be described by \\(r(\\theta )=b+k \\cos(\\theta -\\theta _{\\mathrm{pref}})\\), where \\(\\theta _{\\mathrm{pref}}\\) is preferred direction and k is modulation depth. This formula summarizes a condition average; it does not mean the neuron 'knows' the angle or guarantee that other movement variables have been excluded.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Closed-loop BMI and cross-day latent alignment,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “GP temporal kernels, parameter fitting, and delayed-reach trajectories,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Preparatory activity, linear readouts, and output-null space,” not the relationship asked about here."
+        "a": "PCA ranks neural variance without using behavioral labels. Noise-free labels do not equate the two variance fractions.",
+        "b": "Even with complete observations, a readout can select or weight directions differently and change the composition of output variance.",
+        "c": "A principal component is a direction in recorded activity coordinates; explained variance is not a fraction of neurons."
       }
     },
     {
@@ -865,27 +869,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2."
+          "text": "No. With the loading fixed, the predicted mean changes; observational equivalence requires inverse scaling of that loading column."
         },
         {
           "id": "b",
-          "text": "The participant changes neural strategy in response to feedback, and the decoder may update online."
+          "text": "It is unchanged because latent factors are unobserved, so arbitrarily rescaling them cannot affect the observation distribution."
         },
         {
           "id": "c",
-          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "text": "It remains equivalent if residual covariance doubles, since extra zero-mean noise exactly cancels the doubled factor contribution to the mean."
         },
         {
           "id": "d",
-          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "text": "The corresponding loading column should also double, because scaling both factors in the same direction preserves their product and the mean."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2. A K-dimensional trajectory in latent space is embedded by C into N-dimensional activity space. The column span of C is the shared-activity subspace allowed by the model, while \\(\\Sigma\\) usually absorbs neuron-specific residuals. Shared variation does not require neuron pairs to have identical waveforms: positive and negative loadings allow one factor to produce different amplitudes and directions across cells.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Closed-loop BMI and cross-day latent alignment,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Center-out tuning and low-dimensional population trajectories,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “GP temporal kernels, parameter fitting, and delayed-reach trajectories,” not the relationship asked about here."
+        "b": "Unobserved does not mean causally absent from the model. The factor enters the observation mean through its loading.",
+        "c": "Residual covariance controls variability around the mean; it cannot cancel a systematic change in the predicted mean.",
+        "d": "Doubling both factors multiplies their product by four. Preserving the observation product requires inverse scaling."
       }
     },
     {
@@ -914,27 +918,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The participant changes neural strategy in response to feedback, and the decoder may update online."
+          "text": "The kernel only decorates the plot; it does not affect latent inference, so all apparent smoothness comes from data."
         },
         {
           "id": "b",
-          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "text": "Smoothness partly comes from the prior, so held-out data, alternative kernels, and temporal resolution must test its support."
         },
         {
           "id": "c",
-          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "text": "A differentiable kernel proves identical differentiability in the real population, regardless of sample size or whether observations are held out."
         },
         {
           "id": "d",
-          "text": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+          "text": "The smooth kernel removes all observation noise, so lower training reconstruction error alone rules out oversmoothing or an incorrect time scale."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale. Read a delayed-reach plot along its timeline. The interval after target onset but before the go cue is the preparatory epoch; movement begins only after go. Preparatory activity for different targets may approach different latent locations without producing obvious movement. After the cue, trajectories depart from those initial states along target-specific movement paths. The plot supports the idea that an initial condition influences later dynamics, but trajectories alone cannot exclude sustained common input.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Closed-loop BMI and cross-day latent alignment,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Center-out tuning and low-dimensional population trajectories,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Preparatory activity, linear readouts, and output-null space,” not the relationship asked about here."
+        "a": "The kernel specifies temporal covariance of latent states and therefore affects inference, not just plot appearance.",
+        "c": "A mathematical property of the model prior is not an established biological property; data must distinguish alternative temporal structures.",
+        "d": "Smoothing does not guarantee the true trajectory. Training fit cannot replace held-out prediction and time-scale sensitivity checks."
       }
     },
     {
@@ -963,27 +967,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The participant changes neural strategy in response to feedback, and the decoder may update online."
+          "text": "It must remain null because zero output means that every neuron in the original vector is silent."
         },
         {
           "id": "b",
-          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "text": "It must remain null because neuron count alone determines the null directions, regardless of weight rotations or which muscles are read out."
         },
         {
           "id": "c",
-          "text": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+          "text": "No. Nullness is relative to a readout; the same activity direction can be silent for one output and potent for another."
         },
         {
           "id": "d",
-          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "text": "It must become nonzero: changing any readout entry makes it impossible to share a nonzero null vector with the original matrix."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable. Output-null does not mean computation-null. Activity along a null direction can set a recurrent initial condition, suppress an erroneous movement, or prepare multiple candidates. The same neural vector may also affect unrecorded downstream populations. The course diagram is a linear framework that separates the existence of activity from the existence of current output; it does not justify calling null activity biologically functionless.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Closed-loop BMI and cross-day latent alignment,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Center-out tuning and low-dimensional population trajectories,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “GP temporal kernels, parameter fitting, and delayed-reach trajectories,” not the relationship asked about here."
+        "a": "A nonzero activity vector can cancel under a particular readout. Zero output does not imply a zero neural state.",
+        "b": "Matrix size and rank constrain null-space dimension, but the actual null directions depend on the weights.",
+        "d": "Two different readouts may share null directions. A weight change guarantees neither preservation nor loss of nullness for a given vector."
       }
     },
     {
@@ -1007,27 +1011,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "text": "Feedback cannot change the participant’s fixed neural signal, so every improvement measures only decoder accuracy."
         },
         {
           "id": "b",
-          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "text": "Online updates necessarily worsen the decoder, so improvement can only come from the participant and requires no controls even when both change."
         },
         {
           "id": "c",
-          "text": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+          "text": "Once latent trajectories align across days, every neuron and the participant’s entire strategy are proven fixed, removing the need to assess adaptation."
         },
         {
           "id": "d",
-          "text": "The participant changes neural strategy in response to feedback, and the decoder may update online."
+          "text": "Feedback can change neural strategy while the decoder also adapts; separating their contributions requires controlling one side."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "The participant changes neural strategy in response to feedback, and the decoder may update online. Performance comes from joint adaptation, so one side must be frozen or otherwise controlled to separate the causes. A BMI decoder maps neural features to cursor velocity, position, or a discrete action. During open-loop calibration, the participant observes prescribed movement or attempts an action while the system fits a mapping offline. In closed loop, decoder output immediately changes visual feedback, so participant and decoder coadapt. Closed-loop performance is therefore not a passive measure of a fixed encoding; the brain, decoder, and feedback form a new dynamical system.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Center-out tuning and low-dimensional population trajectories,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “GP temporal kernels, parameter fitting, and delayed-reach trajectories,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Preparatory activity, linear readouts, and output-null space,” not the relationship asked about here."
+        "a": "Closed-loop output becomes new input to the participant, who can learn and adjust; the neural distribution need not remain fixed.",
+        "b": "Online updates can help or harm performance. A single outcome measure cannot uniquely assign contributions when both sides change.",
+        "c": "Latent alignment does not require fixed individual-cell loadings or strategy and does not rule out closed-loop learning."
       }
     },
     {
@@ -1051,27 +1055,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Population neural activity passes through GPFA latent inference, cross-day alignment, and a shared BMI decoder to produce cursor feedback, which then affects subsequent neural activity."
+          "text": "Daily latent coordinates are aligned before shared decoding, and cursor feedback returns to affect subsequent neural activity."
         },
         {
           "id": "b",
-          "text": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "text": "Alignment merely overlays plots after feedback and never changes the coordinates given to the shared decoder."
         },
         {
           "id": "c",
-          "text": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "text": "A shared decoder rules out participant adaptation; the feedback arrow merely displays output and later activity must retain the open-loop calibration distribution."
         },
         {
           "id": "d",
-          "text": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+          "text": "A transferable cross-day map requires every neuron’s loading to remain permanently fixed; changing one loading makes stable latent decoding impossible."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Observed activity is first compressed by GPFA into daily latent coordinates, then \\(A_{d}\\) aligns those coordinates to a shared space and passes them to shared decoder B. Decoder output changes cursor feedback, which in turn changes subsequent neural activity. Cross-day stability therefore means that a low-dimensional mapping is transferable; it does not require each neuron's loading to remain fixed.",
       "wrongChoiceExplanations": {
-        "b": "The diagram does not show the variables and conditions discussed in “Center-out tuning and low-dimensional population trajectories.”",
-        "c": "The diagram does not show the variables and conditions discussed in “GP temporal kernels, parameter fitting, and delayed-reach trajectories.”",
-        "d": "The diagram does not show the variables and conditions discussed in “Preparatory activity, linear readouts, and output-null space.”"
+        "b": "The alignment map sits between latent inference and the shared decoder and therefore changes the decoder’s input coordinates.",
+        "c": "Feedback can alter strategy and neural distributions. Shared parameters do not make the closed-loop system passive or open loop.",
+        "d": "Population structure can remain alignable despite individual loading changes; stable latent decoding does not require fixed single-cell identity."
       }
     }
   ]

@@ -169,6 +169,7 @@
       {
         "id": "L10-M2",
         "title": "Covariance Geometry, the PSD Proof, and Hebbian Eigenmode Blow-Up",
+        "transition": "Centering activity lets a synaptic rule distinguish shared increases from opposite fluctuations. Averaging over many inputs exposes the covariance matrix, which determines which weight directions grow fastest and whether that growth can stop on its own.",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -183,7 +184,7 @@
           "The expected dynamics \\(\\tau _{w} E[dw/dt]=Cw\\) form a linear dynamical system. An eigenvector \\(v_{k}\\) of C satisfies \\(Cv_{k}=\\lambda _{k}v_{k}\\), so if w lies along \\(v_{k}\\), the update remains in that direction and changes only its magnitude. For a symmetric covariance matrix, the eigenvectors can be chosen as an orthogonal basis, allowing any initial w to be written as \\(\\sum _k a_{k}v_{k}\\).",
           "Covariance is symmetric because \\(C_{ij}=E[(x_{i}-\\mu _{i})(x_{j}-\\mu _{j})]\\), and exchanging the two scalar factors leaves their product unchanged. It is also positive semidefinite (PSD): for every v, the quadratic form \\(v^\\mathrm{T}Cv\\) is the expected square of the projection \\(v^\\mathrm{T}(x-\\mu )\\). PSD does not require every off-diagonal entry to be positive. Anticorrelated variables may have negative covariance while the full quadratic form remains nonnegative.",
           "In the eigenbasis, each coefficient obeys \\(\\tau _{w} da_{k}/dt=\\lambda _{k}a_{k}\\), with solution \\(a_{k}(t)=a_{k}(0)e^{\\lambda _{k}t/\\tau _{w}}\\). The mode with the largest \\(\\lambda\\) grows faster than the others, so the normalized direction approaches the principal eigenvector. This produces the formal link to PCA while exposing the defect of basic Hebbian learning: because PSD eigenvalues are nonnegative, no existing component is actively reduced by these expected dynamics.",
-          "A direction approaching PC1 is not the same as a weight vector converging to a stable PC1 solution. Under the basic rule the norm keeps increasing until the assumptions of a linear neuron, stationary statistics, and a fixed learning rate fail. A stable PCA-like solution can be discussed only after normalization or competition controls magnitude. A nonlinear output, nonstationary input, or several similar eigenvalues can alter both convergence and the resulting direction."
+          "A direction approaching the first principal component is not the same as a weight vector converging to a stable the first principal component solution. Under the basic rule the norm keeps increasing until the assumptions of a linear neuron, stationary statistics, and a fixed learning rate fail. A stable PCA-like solution can be discussed only after normalization or competition controls magnitude. A nonlinear output, nonstationary input, or several similar eigenvalues can alter both convergence and the resulting direction."
         ],
         "keyPoints": [
           "The central evidence that covariance is symmetric PSD is \\(v^\\mathrm{T}Cv=E[(v^\\mathrm{T}(x-\\mu ))^2]\\ge 0\\).",
@@ -236,6 +237,7 @@
       {
         "id": "L10-M3",
         "title": "Stabilizing Rules and Third-Factor Learning",
+        "transition": "Growth toward a principal component does not make the weights settle at a finite size. Normalization, Oja's decay term, and BCM's sliding threshold supply different forms of amplitude control; task errors or rewards require learning signals beyond activity correlations.",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -519,7 +521,7 @@
     {
       "id": "L10-G04",
       "lecture": 10,
-      "zh": "Hebbian rule",
+      "zh": "赫布规则",
       "en": "Hebbian learning",
       "definition": "A class of rules in which coordinated activity drives changes in connectivity.",
       "sectionId": "L10-M2",
@@ -662,27 +664,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The third factor may encode reward, reward-prediction error, an error signal, context, or another neuromodulatory gate."
+          "text": "STDP depends only on presynaptic firing rate, whereas a covariance rule must measure both presynaptic and postsynaptic activity."
         },
         {
           "id": "b",
-          "text": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately."
+          "text": "The rules differ only in time units, so converting milliseconds to seconds makes any STDP window exactly equivalent to a covariance rule."
         },
         {
           "id": "c",
-          "text": "Treating the NMDA–Ca2+ sequence as the sole mechanism at every synapse while ignoring neuromodulation, dendritic voltage, and burst context."
+          "text": "STDP can depress synapses, whereas centered covariance rules can only strengthen them."
         },
         {
           "id": "d",
-          "text": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window."
+          "text": "STDP retains spike timing; covariance rules average centered activity. Their connection requires statistical assumptions."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window. They can be related under specific statistical and timescale assumptions, but they use different state variables, experimental protocols, and levels of mechanistic interpretation. Hebb's original proposal links coincident activity to stronger connectivity. Experimentally, high-frequency stimulation of the CA3-to-CA1 pathway can induce long-term potentiation (LTP), whereas a low-frequency protocol can induce long-term depression (LTD). Both describe persistent changes in synaptic efficacy after induction. Neither is the same as transient facilitation, and a single response curve cannot establish one unique molecular mechanism.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Stabilizing Rules and Third-Factor Learning,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Covariance Geometry, the PSD Proof, and Hebbian Eigenmode Blow-Up,” not the relationship asked about here.",
-        "c": "The error is: Treating the NMDA–Ca2+ sequence as the sole mechanism at every synapse while ignoring neuromodulation, dendritic voltage, and burst context."
+        "a": "The STDP time difference involves both spikes, not presynaptic rate alone.",
+        "b": "Unit conversion does not restore discarded timing. Equivalence also depends on spike statistics and timescales.",
+        "c": "Products of centered activities can be negative, allowing covariance rules to produce depression."
       }
     },
     {
@@ -711,27 +713,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately."
+          "text": "PSD requires nonnegative variance for every linear combination, not nonnegative covariance for every pair of variables."
         },
         {
           "id": "b",
-          "text": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window."
+          "text": "Symmetry alone makes every eigenvalue nonnegative, so negative off-diagonal entries cannot create any problem for a symmetric matrix."
         },
         {
           "id": "c",
-          "text": "The third factor may encode reward, reward-prediction error, an error signal, context, or another neuromodulatory gate."
+          "text": "A negative off-diagonal entry cancels a positive entry at its symmetric position, leaving every projected variance unchanged."
         },
         {
           "id": "d",
-          "text": "Interpreting an eigenvector as one particular neuron or synapse; it is a direction in the full input or weight space."
+          "text": "Negative covariance is only sampling error and disappears in the population matrix."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately. Two variables can be anticorrelated, giving \\(C_{ij}<0\\), while every linear combination still has a variance equal to an expected square. Covariance is symmetric because \\(C_{ij}=E[(x_{i}-\\mu _{i})(x_{j}-\\mu _{j})]\\), and exchanging the two scalar factors leaves their product unchanged. It is also positive semidefinite (PSD): for every v, the quadratic form \\(v^\\mathrm{T}Cv\\) is the expected square of the projection \\(v^\\mathrm{T}(x-\\mu )\\). PSD does not require every off-diagonal entry to be positive. Anticorrelated variables may have negative covariance while the full quadratic form remains nonnegative.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “From Synaptic Timing and Receptor Mechanisms to a Firing-Rate Hebbian Rule,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Stabilizing Rules and Third-Factor Learning,” not the relationship asked about here.",
-        "d": "The error is: Interpreting an eigenvector as one particular neuron or synapse; it is a direction in the full input or weight space."
+        "b": "A symmetric matrix can have negative eigenvalues; PSD additionally requires nonnegative quadratic forms.",
+        "c": "Symmetric covariance entries are equal, not opposite, and they affect projected variance.",
+        "d": "Population variables can be anticorrelated while their covariance matrix remains PSD."
       }
     },
     {
@@ -760,27 +762,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window."
+          "text": "Dopamine concentration simply equals reward magnitude, so synapses need not distinguish expected rewards from unexpected rewards during learning."
         },
         {
           "id": "b",
-          "text": "The third factor may encode reward, reward-prediction error, an error signal, context, or another neuromodulatory gate."
+          "text": "The third factor needs a defined signal and timing relative to local eligibility; dopamine is one candidate implementation."
         },
         {
           "id": "c",
-          "text": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately."
+          "text": "Dopamine release supplies every synapse with its exact task gradient, without local activity or eligibility traces."
         },
         {
           "id": "d",
-          "text": "Treating synaptic scaling, Oja's rule, and BCM as interchangeable names for normalization, despite their different measured variables and feedback locations."
+          "text": "Measuring three signals is sufficient; their relative timing cannot affect learning."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "The third factor may encode reward, reward-prediction error, an error signal, context, or another neuromodulatory gate. Its timing, receptors, eligibility trace, and specificity for the target weight all affect learning, so dopamine is only one candidate implementation in some systems. The BCM rule changes the sign of plasticity using a postsynaptic sliding threshold, for example \\(dw_{i}/dt\\propto h x_{i}(h-\\theta )\\), while \\(\\theta\\) adapts to recent \\(h^2\\). With \\(h<\\theta\\), the same presynaptic activity tends toward LTD; with \\(h>\\theta\\), it tends toward LTP. Sustained higher activity raises \\(\\theta\\) and makes potentiation harder to trigger. Unlike Oja's explicit weight decay, BCM creates competition and stability through an activity-dependent sign switch.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “From Synaptic Timing and Receptor Mechanisms to a Firing-Rate Hebbian Rule,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Covariance Geometry, the PSD Proof, and Hebbian Eigenmode Blow-Up,” not the relationship asked about here.",
-        "d": "The error is: Treating synaptic scaling, Oja's rule, and BCM as interchangeable names for normalization, despite their different measured variables and feedback locations."
+        "a": "Reward and reward-prediction error differ; the proposed signal must be specified and tested.",
+        "c": "A broad modulatory signal alone cannot specify each connection's gradient; local eligibility determines which synapses can change.",
+        "d": "Temporal overlap between modulation and eligibility affects the update."
       }
     },
     {
@@ -809,27 +811,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window."
+          "text": "The decay term removes high-variance directions, making the weights align with the smallest covariance eigenvalue."
         },
         {
           "id": "b",
-          "text": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately."
+          "text": "Keeping only the Hebbian branch would yield the same bounded weights, because positive semidefinite covariance automatically stops their growth."
         },
         {
           "id": "c",
-          "text": "A flow diagram in which centered input produces a linear output, a Hebbian growth term combines with Oja normalization to update weights, and the result is a bounded principal covariance mode."
+          "text": "Hebbian growth selects statistical directions; output-dependent decay controls the norm under suitable input and step-size conditions."
         },
         {
           "id": "d",
-          "text": "Treating synaptic scaling, Oja's rule, and BCM as interchangeable names for normalization, despite their different measured variables and feedback locations."
+          "text": "The diagram guarantees convergence to the same principal component for every learning rate and for changing input statistics, without further conditions."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "For centered linear input, the Oja update combines the Hebbian term h x and weight-dependent decay \\(-h^{2}w\\) in one local rule. The first rotates w toward high-variance directions of the input covariance, while the second strengthens as output grows, allowing the direction to approach the principal eigenvector without unbounded norm growth. This conclusion assumes stationary input, a suitably small learning rate, and a nondegenerate largest eigenvalue.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “From Synaptic Timing and Receptor Mechanisms to a Firing-Rate Hebbian Rule.”",
-        "b": "The diagram does not show the variables and conditions discussed in “Covariance Geometry, the PSD Proof, and Hebbian Eigenmode Blow-Up.”",
-        "d": "The error is: Treating synaptic scaling, Oja's rule, and BCM as interchangeable names for normalization, despite their different measured variables and feedback locations."
+        "a": "Hebbian growth favors the largest-variance direction; decay controls magnitude rather than selecting the smallest component.",
+        "b": "Nonnegative covariance eigenvalues can sustain growth; removing stabilization does not guarantee bounded weights.",
+        "d": "Large steps and changing input statistics can violate the stated convergence conditions."
       }
     }
   ]

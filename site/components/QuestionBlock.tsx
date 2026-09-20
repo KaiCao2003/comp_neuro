@@ -7,11 +7,6 @@ import { recordQuestionAttempt, recordQuestionExposure, seededShuffle } from '@/
 import type { Question } from '@/lib/types';
 import { ScientificText } from './ScientificText';
 
-const questionTypeLabel: Record<Locale, Record<Question['type'], string>> = {
-  zh: { concept: '概念', equation: '公式', calculation: '计算', figure: '图示', code: '代码', assumption: '假设', transfer: '迁移', comparison: '比较', debug: '调试', cross_lecture: '跨讲' },
-  en: { concept: 'Concept', equation: 'Equation', calculation: 'Calculation', figure: 'Figure', code: 'Code', assumption: 'Assumption', transfer: 'Transfer', comparison: 'Comparison', debug: 'Debugging', cross_lecture: 'Cross-lecture' },
-};
-
 export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = true, onSubmit }: { question: Question; seed: string; locale?: Locale; showSourceLink?: boolean; onSubmit?: (correct: boolean) => void }) {
   const blockRef = useRef<HTMLElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
@@ -57,7 +52,7 @@ export function QuestionBlock({ question, seed, locale = 'zh', showSourceLink = 
 
   return (
     <aside className="question-block" aria-labelledby={`${question.id}-stem`} ref={blockRef}>
-      <p className="exercise-label">{locale === 'zh' ? '练习' : 'Practice'} · {questionTypeLabel[locale][question.type]} · {locale === 'zh' ? '难度' : 'Difficulty'} {question.difficulty}</p>
+      <p className="exercise-label">{locale === 'zh' ? '练习' : 'Practice'}</p>
       <p className="question-stem" id={`${question.id}-stem`}><ScientificText text={question.stem} /></p>
       <fieldset disabled={submitted} ref={fieldsetRef}>
         <legend className="sr-only">{locale === 'zh' ? '选择一个答案' : 'Choose one answer'}</legend>

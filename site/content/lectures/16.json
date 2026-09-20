@@ -1,7 +1,7 @@
 {
   "lecture": 16,
   "slug": "16",
-  "zhTitle": "适应、自然场景统计与 Fourier 分析",
+  "zhTitle": "视觉适应、自然图像与傅里叶分析",
   "enTitle": "Adaptation, Natural Scene Statistics, and Fourier Analysis",
   "companionFile": "NEUROSCI366_Lecture16_Adaptation_Natural_Scene_Fourier_Companion.pdf",
   "companionPages": 21,
@@ -78,20 +78,20 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能从输入信号与噪声的相对强度出发，解释高 SNR 时去相关滤波和低 SNR 时空间平均为何对应不同目标。",
-      "能把平移不变的图像统计写成只依赖位移的相关函数，并说明复指数为何是卷积算子的自然基底。",
-      "能逐步推出卷积定理与输出功率谱公式，并由自然图像近似的 \\(1/|\\xi |^{2}\\) 功率谱得到 whitening 滤波器的频率趋势。",
-      "能设计跨光照或跨刺激统计的 LNP 比较，区分线性滤波器改变、静态非线性改变和单纯响应尺度改变。"
+      "根据信号与噪声的相对强度，解释高信噪比下的去相关和低信噪比下的空间平均。",
+      "将平移不变的图像统计写成只依赖位移的相关函数，说明复指数为何适合分析卷积。",
+      "推导卷积定理与输出功率谱，并从自然图像近似的 \\(1/|\\xi |^{2}\\) 功率谱得到白化滤波器的频率趋势。",
+      "设计不同光照或刺激统计下的 LNP 比较，区分滤波器变化、静态非线性变化与单纯的响应缩放。"
     ],
     "prerequisiteBridge": [
-      "先把 SNR 当成“可预测的信号变化”与“不可预测噪声变化”的比，而不是一张图像看起来清楚与否。若四个相邻感受器接收近似相同的慢变信号，每个感受器又带有独立零均值噪声，把四者取平均会保留共同信号，却把噪声标准差缩小到原来的一半。反过来，高空间频率处若真实结构足够强，过度平均会连结构一起抹去。因此滤波器是否该平滑，必须同时问输入结构和噪声分别占多少。",
-      "Fourier 表示并没有引入新的物理刺激，它只是把同一图像改写成不同频率、方向和相位的波相加。Euler 关系 \\(e^{i\\theta }=\\cos\\theta +i \\sin\\theta\\) 把正弦与余弦合并为一个复指数；计算中出现的虚数是记账工具，真实图像最终仍为实数。二维频率向量 \\(\\xi\\) 指向亮度变化最快的方向，而条纹本身与 \\(\\xi\\) 垂直；\\(|\\xi |\\) 越大，单位距离内振荡次数越多。这个方向关系是后面读 power spectrum 图与感受野频率响应图的基础。",
-      "回忆 LNP 模型的三步：刺激先与时空滤波器做内积或卷积，得到线性驱动；驱动再经过静态非线性，得到瞬时发放率；最后由随机发放过程产生 spike。比较两个适应条件时，如果只比较平均 firing rate，就无法判断是滤波器、非线性增益还是基线发生变化。需要在每个条件下使用可控刺激独立估计线性核与输入输出曲线，并用保留数据检验预测，这样才把“适应”变成可反驳的参数变化陈述。"
+      "信噪比（SNR）比较信号变化与噪声变化的强度。若四个相邻感受器接收近似相同的慢变信号，并各自带有独立零均值噪声，取平均会保留共同信号，将噪声标准差降为一半。但真实高频结构也会被平均所削弱。因此，滤波器是否应当平滑输入，取决于各空间尺度上信号和噪声分别有多强。",
+      "傅里叶表示将同一图像分解为不同频率、方向和相位的波。Euler 关系 \\(e^{i\\theta }=\\cos\\theta +i \\sin\\theta\\) 将正弦与余弦合成复指数；虚数用于计算，最终图像仍为实数。二维频率向量 \\(\\xi\\) 指向亮度变化最快的方向，条纹延伸方向与 \\(\\xi\\) 垂直；\\(|\\xi |\\) 越大，单位距离内的振荡越密。这一区别决定了频谱图与感受野频率响应应如何解读。",
+      "LNP 模型先用时空滤波器计算线性驱动，经静态非线性得到瞬时放电率，再产生随机脉冲。比较适应条件时，仅看平均放电率无法区分滤波器、非线性增益或基线的变化。应在各条件下分别估计线性核和输入输出曲线，并用未参与拟合的数据检验预测，才能判断究竟哪些参数发生了改变。 空间平均与相邻位置相减会保留不同图像结构。前者强调缓慢变化，后者强调局部差异；究竟哪种更有效，要看这些结构中的可靠信号与噪声各有多少。"
     ],
     "modules": [
       {
         "id": "l16-m1",
-        "title": "SNR 决定滤波目标：去冗余还是先降噪",
+        "title": "信噪比如何决定滤波方式",
         "sourceRefs": [
           {
             "file": "Lecture16-Adaptation.pdf",
@@ -99,15 +99,15 @@
           }
         ],
         "paragraphs": [
-          "先把滤波器形状放在 SNR 轴上理解。高 SNR 表示输入中的细节相对于内部与光子噪声足够可靠，此时相邻像素往往高度相关，若原样传递会让有限的输出动态范围重复编码相似信息。中心兴奋、周围抑制的差分核会削弱共同的慢变分量并保留边缘，使输出之间的相关性下降。这里的“强 surround”是规范性预测：在给定统计与成本假设下，它说明什么滤波较有效率，并不单独证明某个突触回路怎样实现。",
-          "低 SNR 时，差分运算会遇到另一种问题：两个通道相减不仅相减共同信号，也把各自独立的噪声带进结果。若真实高频信号已经淹没在噪声里，继续放大高频只会浪费发放范围。空间 pooling 把多个近邻测量求和或平均，对于跨像素共享的低频结构是相干相加，对于彼此独立的噪声则按方差相加，所以输出 SNR 上升。此时较宽、较同号的感受野比尖锐 center-surround 更有用。",
-          "中间 SNR 不是在两个标签间硬切换，而是连续权衡。本节需要区分两种 convention：幅度 \\(SNR_{\\mathrm{amp}}=S/\\sigma\\)，功率 \\(SNR_{\\mathrm{power}}=P_{s}/P_{n}\\)；在同一线性测量与带宽下 \\(SNR_{\\mathrm{power}}=SNR_{\\mathrm{amp}}^{2}\\)。下面的 pooling 推导使用 amplitude SNR，所以平均 n 个独立噪声测量后提高 \\(\\sqrt n\\)；频谱讨论使用 power ratio \\(P_{s}(\\xi )/P_{n}(\\xi )\\)。该比值大时，滤波器可以投入增益来校正输入冗余，比值小时则应收缩。不同空间频率的 SNR 不同，因此“光更暗”可能同时扩大空间 pooling、削弱 surround，并改变总体增益，而不只是给整个滤波器乘一个数。",
-          "这里的图应按条件预测来读：先确认横轴或曲线表示 SNR，而不是时间；再比较 center、surround 的相对面积和宽度；最后写出可测量结果，例如低光下 estimated RF 的高频增益下降、空间范围扩大。若实验只观察到 firing rate 下降，不能直接推出滤波器已经变宽，因为同样现象也可能来自非线性阈值上移或可用 spikes 减少。"
+          "高信噪比下，输入细节相对内部噪声与光子噪声足够可靠。相邻像素通常高度相关，原样传递会让有限的输出动态范围重复表示相似信息。中心兴奋、周围抑制的差分核削弱共同的慢变成分、保留边缘，从而减少输出相关性。在这里，较强的周围抑制是给定统计与代价下的最优滤波预测，尚不能说明具体突触回路如何实现它。",
+          "低信噪比下，两个通道相减也会将各自的独立噪声带入结果。如果真实高频信号已淹没在噪声中，继续增强高频只会占用放电范围。空间汇聚对近邻测量求和或平均：共同信号相干相加，独立噪声则按方差相加，因此可以提高信噪比。此时，较宽且同号的感受野可能比尖锐的中心—周围结构更有效。",
+          "两种策略之间是连续权衡。需先区分幅度信噪比 \\(SNR_{\\mathrm{amp}}=S/\\sigma\\) 与功率信噪比 \\(SNR_{\\mathrm{power}}=P_{s}/P_{n}\\)；对于同一线性测量和带宽，\\(SNR_{\\mathrm{power}}=SNR_{\\mathrm{amp}}^{2}\\)。下面的空间平均推导使用幅度信噪比，平均 n 个独立噪声测量可提高 \\(\\sqrt n\\)；频谱分析则采用功率比 \\(P_{s}(\\xi )/P_{n}(\\xi )\\)。这一比值较大时，可以增加增益以校正冗余；较小时应收缩增益。因此，光照变暗可能同时扩大汇聚范围、削弱周围抑制并改变总增益，而非仅将整个核等比例缩小。",
+          "比较不同信噪比下的核，应同时看中心和周围的面积、宽度与积分强度。模型预测，低光照下估计感受野的高频增益可能下降，空间范围可能扩大。仅观察到平均放电率下降还不够，因为非线性阈值上移或可用脉冲数减少也可能产生相似现象。"
         ],
         "keyPoints": [
-          "高 SNR 下，可靠的高频信息允许 center-surround 通过差分减少相邻通道冗余。",
-          "低 SNR 下，空间平均保留共同信号并降低独立噪声标准差，代价是空间分辨率下降。",
-          "适应应描述为频率依赖的 filter 与 nonlinearity 变化，而不只是平均发放率变化。"
+          "高信噪比下，中心—周围差分可减少相邻通道冗余，同时保留可靠的高频结构。",
+          "低信噪比下，空间平均保留共同信号并降低独立噪声，代价是空间分辨率下降。",
+          "适应需要由频率相关的滤波与非线性变化来描述，不能只用平均放电率变化代替。"
         ],
         "derivation": {
           "title": "n 个相邻测量取平均时噪声怎样缩小",
@@ -120,7 +120,7 @@
             },
             {
               "title": "计算平均噪声方差",
-              "explanation": "独立性使交叉 covariance 为零，所以和的方差等于各方差之和；外面的 1/n 在方差中变成 \\(1/n^{2}\\)。",
+              "explanation": "独立性使交叉协方差为零，所以和的方差等于各方差之和；外面的 1/n 在方差中变成 \\(1/n^{2}\\)。",
               "latex": "\\operatorname{Var}\\!\\left(\\frac{1}{n}\\sum_j\\epsilon_j\\right)=\\frac{1}{n^2}n\\sigma^2=\\frac{\\sigma^2}{n}"
             },
             {
@@ -131,7 +131,7 @@
           ],
           "symbolNotes": [
             "独立噪声是假设；若噪声正相关，平均带来的方差下降会小于 1/n。",
-            "局部共同信号假设只适合空间变化慢于 pooling 范围的成分，细边缘会被平均削弱。"
+            "局部共同信号假设只适合空间变化慢于汇聚范围的成分，细边缘会被平均削弱。"
           ],
           "unitsCheck": "x、s、\\(\\epsilon\\) 与 y 具有相同的亮度或电压单位；n 和 SNR 是无量纲数，方差单位是原单位的平方。",
           "limitCheck": "\\(n=1\\) 时噪声不变；n 增大时独立噪声趋小，但若信号在窗口内变化，偏差会同时增大，不能靠无限扩大窗口获得无限性能。"
@@ -148,13 +148,14 @@
           "sanityCheck": "若两通道噪声完全相同而非独立，差分噪声会抵消；结果说明必须先说明噪声相关结构。"
         },
         "pitfalls": [
-          "把高 SNR 等同于高平均亮度；SNR 还取决于频率、内部噪声和刺激对比度。",
-          "只比较 receptive-field 峰值，不比较中心与周围的积分、宽度和估计不确定度。"
+          "把高信噪比等同于高平均亮度，忽略空间频率、内部噪声和刺激对比度。",
+          "只比较感受野峰值，不比较中心与周围的积分、宽度和估计不确定度。"
         ]
       },
       {
         "id": "l16-m2",
-        "title": "从平移不变统计到 Fourier 对角化",
+        "title": "平移不变统计与傅里叶分解",
+        "transition": "各空间频率的信号可靠性不同，因此适合的增益也不同。若图像统计近似平移不变，傅里叶模式能把空间滤波分解成各频率上的增益与相位变化。",
         "sourceRefs": [
           {
             "file": "Lecture16-Adaptation.pdf",
@@ -166,22 +167,22 @@
           }
         ],
         "paragraphs": [
-          "先描述自然场景的平移统计：若取许多图像或足够大的平稳图像，两个位置的相关性主要由它们的位移 \\(\\Delta x\\) 决定，而不由绝对坐标决定，可写 \\(C(x,x')=C(x-x')\\)。这不是声称每张照片处处相同，而是统计集合在平移后保持同样规律。这样的 covariance matrix 具有重复的位移结构，复指数模式在卷积或相关运算后只改变复数幅值，不改变频率，因此成为自然基底。",
-          "二维 Fourier 分量 \\(e^{i\\xi \\cdot x}\\) 同时编码频率方向与相位。点积 \\(\\xi \\cdot x\\) 把二维位置投影到频率向量上；沿 \\(\\xi\\) 方向走，phase 改变最快，沿垂直方向走，phase 不变，所以看到的亮暗条纹与 \\(\\xi\\) 垂直。一个实图像需要成对的 \\(+\\xi\\) 与 \\(-\\xi\\) 分量，使虚部相消。读频谱时中心附近代表慢变化，离中心越远代表更细的空间结构。",
-          "卷积定理把 \\(y(x)=\\int K(x-x')s(x')dx'\\) 转成 \\(\\hat{y}(\\xi )=\\hat{K}(\\xi )\\hat{s}(\\xi )\\)。关键不是背结果，而是把 Fourier integral 写开、交换积分顺序，再用 \\(u=x-x'\\) 换元。换元后指数 \\(e^{-i\\xi \\cdot (u+x')}\\) 分成只含 u 和只含 x' 的两个因子，于是两个积分分别成为 \\(\\hat{K}\\) 与 ŝ。每个 \\(\\xi\\) 都能独立相乘，原本巨大的平移不变线性算子就被对角化。",
-          "\\(\\hat{K}(\\xi )\\) 一般是复数。它的模 \\(|\\hat{K}|\\) 是该频率的增益，argument 是 phase shift。对称 center-surround 核常有近似零相位或 \\(\\pi\\) 相位，所以重点常落在幅频响应；若感受野不对称或包含时间延迟，相位同样携带信息。把 receptive field 只画成空间小图而不看频率响应，会难以直接判断它更偏好缓慢梯度、边缘还是某个带通范围。"
+          "对许多图像或足够大的平稳图像求统计时，两点相关性可能主要依赖位移 \\(\\Delta x\\)，即 \\(C(x,x')=C(x-x')\\)。这表示图像集合在平移后具有相同统计规律，并非每张照片处处相同。相应协方差具有重复的位移结构，复指数经过卷积或相关运算后只改变复数幅值而不改变频率，因此适合作为分析基底。",
+          "二维傅里叶分量 \\(e^{i\\xi \\cdot x}\\) 同时包含频率方向与相位。\\(\\xi \\cdot x\\) 将位置投影到频率向量上；沿 \\(\\xi\\) 移动时相位变化最快，沿垂直方向移动时相位不变，所以亮暗条纹与 \\(\\xi\\) 垂直。实图像的 \\(+\\xi\\) 与 \\(-\\xi\\) 分量成对出现，使虚部抵消。频谱中心附近表示慢变化，远离中心的部分表示更细的空间结构。",
+          "卷积定理将 \\(y(x)=\\int K(x-x')s(x')dx'\\) 转为 \\(\\hat{y}(\\xi )=\\hat{K}(\\xi )\\hat{s}(\\xi )\\)。推导时，先展开傅里叶积分、交换积分顺序，再令 \\(u=x-x'\\)。指数 \\(e^{-i\\xi \\cdot (u+x')}\\) 随之分成分别只含 u 与 x' 的两个因子，两个积分分别给出 \\(\\hat{K}\\) 与 ŝ。不同 \\(\\xi\\) 可以独立相乘，因此原本耦合许多位置的平移不变线性算子被对角化。",
+          "\\(\\hat{K}(\\xi )\\) 通常为复数，其模 \\(|\\hat{K}|\\) 表示该频率的增益，相角表示相位变化。对称中心—周围核常具有近似零相位或 \\(\\pi\\) 相位；不对称核或带有时间延迟的感受野则需要同时分析相位。空间图展示权重分布，频率响应则直接说明它更偏好缓慢梯度、边缘还是特定频段。"
         ],
         "keyPoints": [
-          "平移不变 covariance 只依赖位置差，使 Fourier modes 成为彼此不混合的统计方向。",
-          "频率向量 \\(\\xi\\) 与图像条纹方向垂直，\\(|\\xi |\\) 控制空间振荡速度。",
-          "卷积在 Fourier 域变成逐频率复数乘法，模控制增益，相角控制位移。"
+          "平移不变协方差只依赖位置差，傅里叶模式因此可以分别分析。",
+          "频率向量 \\(\\xi\\) 垂直于条纹方向，\\(|\\xi |\\) 控制单位距离内的振荡密度。",
+          "卷积在傅里叶域变为逐频率的复数乘法，模控制增益，相角控制相位变化。"
         ],
         "derivation": {
           "title": "逐项推出卷积定理",
-          "setup": "定义 \\(y(x)=\\int K(x-x')s(x')dx'\\)，并采用 \\(\\hat{f}(\\xi )=\\int f(x)e^{-i\\xi \\cdot x}dx\\) 的 Fourier convention。",
+          "setup": "定义 \\(y(x)=\\int K(x-x')s(x')dx'\\)，并采用 \\(\\hat{f}(\\xi )=\\int f(x)e^{-i\\xi \\cdot x}dx\\) 的 Fourier 约定。",
           "steps": [
             {
-              "title": "把卷积代入输出的 Fourier transform",
+              "title": "把卷积代入输出的 Fourier 变换",
               "explanation": "将 y 的积分表达式放进 ŷ，并把对 x 与 x' 的积分写在同一式中。",
               "latex": "\\hat y(\\xi)=\\int\\!\\int K(x-x')s(x')e^{-i\\xi\\cdot x}\\,dx'\\,dx"
             },
@@ -191,37 +192,38 @@
               "latex": "e^{-i\\xi\\cdot x}=e^{-i\\xi\\cdot u}e^{-i\\xi\\cdot x'}"
             },
             {
-              "title": "识别两个 Fourier transforms",
+              "title": "识别两个 Fourier 变换",
               "explanation": "含 u 的积分正是 \\(\\hat{K}(\\xi )\\)，含 x' 的积分正是 \\(\\hat{s}(\\xi )\\)，两者相乘得到输出频率分量。",
               "latex": "\\hat y(\\xi)=\\left[\\int K(u)e^{-i\\xi\\cdot u}du\\right]\\left[\\int s(x')e^{-i\\xi\\cdot x'}dx'\\right]=\\hat K(\\xi)\\hat s(\\xi)"
             }
           ],
           "symbolNotes": [
-            "\\(\\xi\\) 的单位是 radians per degree 或 radians per distance；若采用 cycles per degree，Fourier 指数中会出现 \\(2\\pi\\)。",
+            "\\(\\xi\\) 的单位是弧度每 degree 或弧度每距离；若采用每视角度的周期数，Fourier 指数中会出现 \\(2\\pi\\)。",
             "卷积核写 \\(K(x-x')\\) 表示从输入位置 x' 到输出位置 x 的权重只依赖相对位移，这是平移不变假设。"
           ],
-          "unitsCheck": "若空间积分 dx' 有面积单位，为使 y 与 s 同单位，K 必须带 inverse-area；Fourier transform 的尺度单位取决于所用 convention，但等式两边一致。",
-          "limitCheck": "K 为 delta function 时 \\(\\hat{K}=1\\)，所有频率原样通过；K 为很宽的平均核时，\\(\\hat{K}\\) 集中在低频，符合平滑直觉。"
+          "unitsCheck": "若空间积分 dx' 有面积单位，为使 y 与 s 同单位，K 必须带逆矩阵脑区；Fourier 变换的尺度单位取决于所用约定，但等式两边一致。",
+          "limitCheck": "K 为 delta 函数时 \\(\\hat{K}=1\\)，所有频率原样通过；K 为很宽的平均核时，\\(\\hat{K}\\) 集中在低频，符合平滑直觉。"
         },
         "workedExample": {
-          "title": "一个 sinusoid 通过具有幅值与相位的滤波器",
-          "problem": "输入 \\(s(x)=3\\cos(2x)\\)。滤波器在 \\(\\xi =2\\) 处的响应为 \\(\\hat{K}(2)=0.5e^{-i\\pi /4}\\)，求输出 sinusoid 的幅值与 phase shift。",
+          "title": "一个正弦波通过具有幅值与相位的滤波器",
+          "problem": "输入 \\(s(x)=3\\cos(2x)\\)。滤波器在 \\(\\xi =2\\) 处的响应为 \\(\\hat{K}(2)=0.5e^{-i\\pi /4}\\)，求输出正弦波的幅值与相位转移。",
           "steps": [
             "输入只含 \\(\\xi =+2\\) 和 \\(\\xi =-2\\) 的共轭频率对，实空间幅值为 3。",
             "每个频率分量乘以 \\(\\hat{K}\\)；模 0.5 把幅值从 3 缩到 1.5。",
-            "相角 \\(-\\pi /4\\) 给正频率分量增加 \\(-\\pi /4\\) phase，因此输出可写 \\(y(x)=1.5\\cos(2x-\\pi /4)\\)。"
+            "相角 \\(-\\pi /4\\) 给正频率分量增加 \\(-\\pi /4\\) 相位，因此输出可写 \\(y(x)=1.5\\cos(2x-\\pi /4)\\)。"
           ],
           "result": "滤波后频率仍为 2，幅值为 1.5，相位向负方向移动 \\(\\pi /4\\)。",
-          "sanityCheck": "线性平移不变滤波不会把单一 sinusoid 变成新频率；若计算出现 \\(\\xi =4\\)，说明把乘法误当成了非线性平方。"
+          "sanityCheck": "线性平移不变滤波不会把单一正弦波变成新频率；若计算出现 \\(\\xi =4\\)，说明把乘法误当成了非线性平方。"
         },
         "pitfalls": [
-          "把频率向量方向画成条纹延伸方向，导致 orientation 解读旋转九十度。",
-          "只使用 \\(|\\hat{K}|\\) 而忽略 phase；不对称空间核与时空核的 phase 会影响定位和延迟。"
+          "将频率向量画成条纹延伸方向，使方向解读相差九十度。",
+          "只看 \\(|\\hat{K}|\\) 而忽略相位，漏掉不对称空间核或时空核所包含的定位与延迟信息。"
         ]
       },
       {
         "id": "l16-m3",
-        "title": "自然图像功率谱、whitening 与可检验的适应",
+        "title": "自然图像频谱与滤波适应",
+        "transition": "卷积定理给出了各频率的功率变化。结合自然图像功率谱，可以推导理想白化增益，再说明噪声为何限制高频增强，以及怎样通过跨条件预测检验滤波适应。",
         "sourceRefs": [
           {
             "file": "Lecture16-Adaptation.pdf",
@@ -233,19 +235,19 @@
           }
         ],
         "paragraphs": [
-          "把自然图像的 ensemble power spectrum 近似写成 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)：低频上的亮度缓变通常比高频细节有更大方差。线性滤波后，输出频率系数为 \\(\\hat{K}\\hat{s}\\)，因此输出功率为 \\(|\\hat{K}|^{2}P_{\\mathrm{in}}\\)。若目标是在无噪声、无增益上限的理想模型中让各频率输出方差相同，就令 \\(|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 为常数，从而得到 \\(|\\hat{K}|\\propto |\\xi |\\)。空间中这表现为抑制低频、相对增强边缘的差分结构。",
-          "理想 whitening 不能直接延伸到任意高频。眼球光学与 photoreceptor integration 本身压低极高频，使可用 signal power 下降；输出噪声若在频率间近似平坦，盲目采用 \\(|\\xi |\\) 增益会把最高频噪声大量放大。有效滤波器因而常在可靠的中频段上升，到 noise-dominated 区域再次下降，形成带通。随着亮度下降，可靠频段收窄，最优滤波从较强 center-surround 向更平滑的 pooling 移动。",
-          "把预测落到 LNP measurement。应在高、低光照或不同 spatial correlation 条件下分别呈现足够丰富的刺激，估计 filter \\(k_{c}\\)，再估计条件专属 nonlinearity \\(f_{c}\\)。比较 filter 时先固定规范化，例如令 \\(||k_{c}||=1\\) 并把符号按主要 lobe 对齐，否则 k 乘常数、f 的横轴除同一常数会产生相同预测。随后比较 spatial profile、Fourier gain、中心周围积分比以及 cross-condition prediction。",
-          "强证据来自可区分的反事实：若只变 nonlinearity，用条件 A 的 filter 配合条件 B 的 nonlinearity 应接近 B 的数据；若 filter 真正改变，这种交换会系统性漏掉某些 stimulus directions。还要用相同 spike 数或 bootstrap confidence interval 处理低光下估计更噪的问题。适应结论应报告参数变化及其预测改进，而不是把两张看似不同的核图当作完成证明。"
+          "自然图像集合的功率谱常近似满足 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)，即低频缓变通常比高频细节具有更大方差。滤波后的频率系数为 \\(\\hat{K}\\hat{s}\\)，输出功率为 \\(|\\hat{K}|^{2}P_{\\mathrm{in}}\\)。在无噪声、无增益上限的理想情形下，要让各频率输出方差相等，应令 \\(|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 为常数，得到 \\(|\\hat{K}|\\propto |\\xi |\\)。这对应抑制低频、相对增强边缘的差分滤波。",
+          "理想白化增益不能无限延伸到高频。眼球光学与光感受器的积分作用压低极高频信号，使可用功率下降。在存在噪声时，盲目沿用 \\(|\\xi |\\) 增益会使最高频通道承载大量噪声。有效滤波通常在可靠中频段增强，在噪声占主导的区域回落，形成带通。亮度下降后，可靠频段收窄，最优滤波也会从较强的中心—周围差分趋向较平滑的空间汇聚。",
+          "实验可在不同光照或空间相关条件下呈现充分丰富的刺激，分别估计核 \\(k_{c}\\) 与该条件下的非线性 \\(f_{c}\\)。比较之前要固定尺度，例如令 \\(||k_{c}||=1\\)，再根据主区域对齐符号；否则将核乘一个常数，并相应改变非线性横轴，仍可得到相同预测。此后再比较空间形状、频率增益、中心与周围的积分比，以及跨条件预测。",
+          "参数交换可以区分不同解释。如果只改变非线性，用条件 A 的核配合条件 B 的非线性，应能接近 B 的响应；如果核本身改变，这一组合就会系统性漏掉某些刺激方向。低光下的估计通常更噪，还需匹配脉冲数或使用自助法置信区间。滤波适应的证据应包括参数变化及其预测收益，而不只是两张外观不同的核图。"
         ],
         "keyPoints": [
-          "线性滤波使输出功率谱满足 \\(P_{\\mathrm{out}}(\\xi )=|\\hat{K}(\\xi )|^{2}P_{\\mathrm{in}}(\\xi )\\)。",
-          "\\(P_{\\mathrm{in}}\\propto 1/|\\xi |^{2}\\) 的无噪声 whitening 解给出 \\(|\\hat{K}|\\propto |\\xi |\\)，但光学与噪声使真实解在高频回落。",
-          "跨条件 LNP 比较必须固定 filter scale、独立估计 nonlinearity，并用 held-out prediction 检验参数交换。"
+          "线性滤波后的功率谱满足 \\(P_{\\mathrm{out}}(\\xi )=|\\hat{K}(\\xi )|^{2}P_{\\mathrm{in}}(\\xi )\\)。",
+          "\\(P_{\\mathrm{in}}\\propto 1/|\\xi |^{2}\\) 对应的无噪声白化解为 \\(|\\hat{K}|\\propto |\\xi |\\)，光学限制和噪声则使真实滤波在高频回落。",
+          "跨条件比较需要固定核的尺度，独立估计非线性，再用保留数据检验参数交换。"
         ],
         "derivation": {
-          "title": "由输入功率谱推出 whitening 增益",
-          "setup": "对每个频率 \\(\\xi\\)，输出 coefficient \\(\\hat{y}=\\hat{K}\\hat{s}\\)。定义功率为复数 coefficient 的期望平方模 \\(P(\\xi )=E[|\\hat{s}(\\xi )|^{2}]\\)。",
+          "title": "由输入功率谱推出白化增益",
+          "setup": "对每个频率 \\(\\xi\\)，输出系数 \\(\\hat{y}=\\hat{K}\\hat{s}\\)。定义功率为复数系数的期望平方模 \\(P(\\xi )=E[|\\hat{s}(\\xi )|^{2}]\\)。",
           "steps": [
             {
               "title": "计算输出功率",
@@ -253,37 +255,37 @@
               "latex": "P_{\\mathrm{out}}(\\xi)=E[|\\hat K\\hat s|^2]=|\\hat K(\\xi)|^2P_{\\mathrm{in}}(\\xi)"
             },
             {
-              "title": "写出 whitening 条件",
-              "explanation": "各频率输出方差相同，记为常数 c；解出所需的 squared gain。",
+              "title": "写出白化条件",
+              "explanation": "各频率输出方差相同，记为常数 c；解出所需的平方增益。",
               "latex": "|\\hat K(\\xi)|^2=\\frac{c}{P_{\\mathrm{in}}(\\xi)}"
             },
             {
               "title": "代入自然图像近似",
-              "explanation": "若 \\(P_{\\mathrm{in}}=a/|\\xi |^{2}\\)，则 squared gain=\\(c|\\xi |^{2}/a\\)，取非负幅值平方根得到线性随 \\(|\\xi |\\) 上升。",
+              "explanation": "若 \\(P_{\\mathrm{in}}=a/|\\xi |^{2}\\)，则平方增益=\\(c|\\xi |^{2}/a\\)，取非负幅值平方根得到线性随 \\(|\\xi |\\) 上升。",
               "latex": "|\\hat K(\\xi)|=\\sqrt{\\frac{c}{a}}\\,|\\xi|"
             }
           ],
           "symbolNotes": [
-            "\\(P_{\\mathrm{in}}\\) 是 ensemble average power，不是某一张图在每个频率上的固定值。",
-            "whitening 只规定 \\(|\\hat{K}|\\)，不规定 phase；空间局部性、causality 等条件还会限制可实现的 K。"
+            "\\(P_{\\mathrm{in}}\\) 是细胞群平均功率，不是某一张图在每个频率上的固定值。",
+            "白化只规定 \\(|\\hat{K}|\\)，不规定相位；空间局部性、因果性等条件还会限制可实现的 K。"
           ],
           "unitsCheck": "若输入与输出采用同一信号单位，\\(|\\hat{K}|\\) 可视作无量纲增益；P 的单位是 \\(\\mathrm{signal}^{2}\\)，常数 c 与 \\(P_{\\mathrm{out}}\\) 同单位。",
-          "limitCheck": "\\(|\\xi |\\to 0\\) 时理想增益趋零，表示去除 global mean；\\(|\\xi |\\to \\infty\\) 时公式发散，暴露了无噪声和无限带宽假设，真实系统必须正则化。"
+          "limitCheck": "\\(|\\xi |\\to 0\\) 时理想增益趋零，表示去除全局均值；\\(|\\xi |\\to \\infty\\) 时公式发散，暴露了无噪声和无限带宽假设，真实系统必须正则化。"
         },
         "workedExample": {
-          "title": "两个频率的 whitening 与噪声代价",
-          "problem": "设 \\(P_{\\mathrm{in}}(1)=16\\)、\\(P_{\\mathrm{in}}(4)=1\\)，希望两者输出 signal power 都为 4。求两个增益；若两频率的输入后噪声 power 都为 1，再算输出噪声 power。",
+          "title": "两个频率的白化与噪声代价",
+          "problem": "设 \\(P_{\\mathrm{in}}(1)=16\\)、\\(P_{\\mathrm{in}}(4)=1\\)，希望两者输出信号功率都为 4。求两个增益；若两频率的输入后噪声功率都为 1，再算输出噪声功率。",
           "steps": [
             "由 \\(|K|^{2}P_{\\mathrm{in}}=4\\)，低频增益 \\(|K(1)|=\\sqrt{4/16}=0.5\\)。",
             "高频增益 \\(|K(4)|=\\sqrt{4/1}=2\\)，这与频率相差四倍、增益相差四倍一致。",
-            "噪声也乘 squared gain，所以低频输出噪声为 0.25，高频输出噪声为 4；高频 signal 虽被拉平，SNR 仍更差。"
+            "噪声也乘平方增益，所以低频输出噪声为 0.25，高频输出噪声为 4；高频信号虽被拉平，SNR 仍更差。"
           ],
-          "result": "纯 whitening 给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明 noise-aware 解要压低高频。",
-          "sanityCheck": "把增益代回 signal power：\\(0.5^{2}\\times 16=4\\)，\\(2^{2}\\times 1=4\\)；两项确实相等。"
+          "result": "纯白化给出增益 0.5 与 2，但后者把相同输入噪声放大到前者的 16 倍功率，说明考虑噪声的解要压低高频。",
+          "sanityCheck": "把增益代回信号功率：\\(0.5^{2}\\times 16=4\\)，\\(2^{2}\\times 1=4\\)；两项确实相等。"
         },
         "pitfalls": [
-          "把 \\(1/|\\xi |^{2}\\) 当成每张自然图像都严格服从的定律；它是数据集合上的近似趋势。",
-          "在低 spike 条件下直接比较噪声很大的 filter 图，不用重采样误差与 held-out prediction 排除估计方差。"
+          "将 \\(1/|\\xi |^{2}\\) 当作每张自然图像严格遵循的定律，忽略它只是图像集合的近似统计趋势。",
+          "直接比较低脉冲数条件下的核图，没有通过重采样误差和保留数据预测排除估计方差。"
         ]
       }
     ]
@@ -292,11 +294,11 @@
     {
       "id": "L16-FIG-A1",
       "lecture": 16,
-      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "lectureTitle": "视觉适应、自然图像与傅里叶分析",
       "moduleId": "l16-m3",
-      "title": "自然图像 whitening 的理想高频增益会被噪声截断",
-      "alt": "归一化空间频率响应图比较理想线性上升的 whitening 增益、考虑噪声后的带通增益和低信噪比下更窄的低频响应。",
-      "caption": "若自然图像功率近似 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)，且暂时忽略 noise 与 gain limits，使 \\(P_{\\mathrm{out}}=|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 平坦需要 \\(|\\hat{K}|\\propto |\\xi |\\)。真实 optics 会压低极高频 signal，而近似平坦的 output noise 不会随之消失，因此 noise-aware filter 在高频回落；SNR 再降低时，可靠频带进一步收窄并更偏向 pooling。三条曲线均为归一化理论示意，不表示经验测量值。",
+      "title": "自然图像白化的理想高频增益会被噪声截断",
+      "alt": "归一化空间频率响应图比较理想线性上升的白化增益、考虑噪声后的带通增益和低信噪比下更窄的低频响应。",
+      "caption": "若自然图像功率近似 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)，且暂时忽略噪声与增益限制，使 \\(P_{\\mathrm{out}}=|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 平坦需要 \\(|\\hat{K}|\\propto |\\xi |\\)。真实光学会压低极高频信号，而近似平坦的输出噪声不会随之消失，因此考虑噪声的滤波器在高频回落；SNR 再降低时，可靠频带进一步收窄并更偏向池化。三条曲线均为归一化理论示意，不表示经验测量值。",
       "sourceRefs": [
         {
           "file": "Lecture16-Adaptation.pdf",
@@ -309,11 +311,11 @@
       ],
       "schematic": true,
       "kind": "plot",
-      "xLabel": "spatial frequency \\(|\\xi |\\)（归一化）",
-      "yLabel": "filter gain \\(|\\hat{K}(\\xi )|\\)（归一化）",
+      "xLabel": "空间频率 \\(|\\xi |\\)（归一化）",
+      "yLabel": "滤波器增益 \\(|\\hat{K}(\\xi )|\\)（归一化）",
       "curves": [
         {
-          "label": "ideal whitening",
+          "label": "ideal 白化",
           "points": [
             [
               0,
@@ -343,7 +345,7 @@
           "dashed": true
         },
         {
-          "label": "noise-aware",
+          "label": "考虑噪声的",
           "points": [
             [
               0,
@@ -417,7 +419,7 @@
         {
           "x": 75,
           "y": 58,
-          "label": "noise-dominated roll-off"
+          "label": "噪声主导的衰减"
         }
       ]
     }
@@ -449,7 +451,7 @@
     "思考题：convolution 在 Fourier domain 变成什么？"
   ],
   "synthesis": [
-    "Atick-Redlich theory 的关键预测不是固定 filter， 而是 filter 随 SNR 改变：高 SNR 可强 decorrelate， 低 SNR 更应 spatial average/denoise。自然场景近似 translation invariant，使 covariance 只依 displacement，Fourier modes 因而对角化 convolution/covariance。natural-image power 近似随 spatial frequency 平方反比下降；perfect whitening 倾向 boost high frequencies，但 optics/photoreceptors 与 noise 会抑制过高频率。"
+    "Atick–Redlich 理论预测滤波器应随信噪比改变：信号可靠时可增强去相关，噪声较强时则应更多地做空间平均。自然图像近似平移不变，使协方差主要取决于位移，傅里叶基因此能对角化相应算子。自然图像的功率通常随空间频率的平方反比下降；完全白化会增强高频，但光学模糊和噪声限制了这种增强。"
   ],
   "workedExamples": [
     "7.1 frequency-domain RF prediction",
@@ -463,10 +465,10 @@
     {
       "id": "L16-F01",
       "lecture": 16,
-      "name": "signal-to-noise ratio",
+      "name": "信噪比",
       "expression": "SN R = S/N",
       "latex": "\\mathrm{SNR}=\\frac{S}{N}",
-      "conditions": "同一 frequency/measurement convention",
+      "conditions": "频率定义与测量约定一致",
       "sectionId": "l16-m3",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 5
@@ -474,10 +476,10 @@
     {
       "id": "L16-F02",
       "lecture": 16,
-      "name": "translation-invariant covariance",
+      "name": "平移不变的协方差",
       "expression": "C(ρ1, ρ2 ) = C(ρ1 − ρ2 )",
       "latex": "C(\\boldsymbol{\\rho}_1,\\boldsymbol{\\rho}_2)=C(\\boldsymbol{\\rho}_1-\\boldsymbol{\\rho}_2)",
-      "conditions": "stationary field",
+      "conditions": "随机场平稳",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2
@@ -485,10 +487,10 @@
     {
       "id": "L16-F03",
       "lecture": 16,
-      "name": "Fourier transform",
+      "name": "傅里叶变换",
       "expression": "ŝ(ξ) = e−i2πξ·x s(x)dx",
       "latex": "\\hat{s}(\\boldsymbol{\\xi})=\\int e^{-i2\\pi\\boldsymbol{\\xi}\\cdot\\mathbf{x}}s(\\mathbf{x})\\,d\\mathbf{x}",
-      "conditions": "chosen normalization",
+      "conditions": "明确归一化方式",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2
@@ -496,10 +498,10 @@
     {
       "id": "L16-F04",
       "lecture": 16,
-      "name": "Euler identity",
+      "name": "欧拉恒等式",
       "expression": "eiθ = cos θ + i sin θ",
       "latex": "e^{i\\theta}=\\cos\\theta+i\\sin\\theta",
-      "conditions": "complex representation",
+      "conditions": "采用复数表示",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2
@@ -507,10 +509,10 @@
     {
       "id": "L16-F05",
       "lecture": 16,
-      "name": "convolution theorem",
+      "name": "卷积定理",
       "expression": "\\ K ∗ s = K̂ ŝ",
       "latex": "\\widehat{K\\ast s}=\\hat{K}\\,\\hat{s}",
-      "conditions": "linear shift-invariant filtering",
+      "conditions": "线性且平移不变的滤波",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 3
@@ -518,10 +520,10 @@
     {
       "id": "L16-F06",
       "lecture": 16,
-      "name": "power spectrum",
+      "name": "功率谱",
       "expression": "P (ξ) = E[|ŝ(ξ)|2 ]",
       "latex": "P(\\boldsymbol{\\xi})=\\mathbb{E}[|\\hat{s}(\\boldsymbol{\\xi})|^2]",
-      "conditions": "ensemble/time average",
+      "conditions": "取集合平均或时间平均",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 3
@@ -529,10 +531,10 @@
     {
       "id": "L16-F07",
       "lecture": 16,
-      "name": "perfect whitening magnitude",
+      "name": "完全白化的幅度响应",
       "expression": "−1/2 |K̂| ∝ Pin",
       "latex": "|\\hat{K}(\\boldsymbol{\\xi})|\\propto P_{\\mathrm{in}}(\\boldsymbol{\\xi})^{-1/2}",
-      "conditions": "no additional noise/cost",
+      "conditions": "未加入额外噪声与代价约束",
       "sectionId": "l16-m3",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 4
@@ -544,7 +546,7 @@
       "lecture": 16,
       "zh": "适应",
       "en": "adaptation",
-      "definition": "response/model parameters 随 stimulus statistics 或 state 改变。",
+      "definition": "响应或模型参数随刺激统计、内部状态而变化。",
       "sectionId": "l16-m3",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 5
@@ -554,7 +556,7 @@
       "lecture": 16,
       "zh": "信噪比",
       "en": "signal-to-noise ratio, SNR",
-      "definition": "signal magnitude/power 相对 noise 的比。",
+      "definition": "信号幅度或功率相对于噪声的比值。",
       "sectionId": "l16-m3",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 4
@@ -564,7 +566,7 @@
       "lecture": 16,
       "zh": "平移不变性",
       "en": "translation invariance",
-      "definition": "统计或算子不依 absolute position。",
+      "definition": "统计规律或算子不依赖绝对位置的性质。",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2
@@ -574,7 +576,7 @@
       "lecture": 16,
       "zh": "空间频率",
       "en": "spatial frequency",
-      "definition": "单位距离内 sinusoidal cycles；向量还编码方向。",
+      "definition": "单位距离内的正弦周期数；空间频率向量还表示方向。",
       "sectionId": "l16-m1",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 1
@@ -584,7 +586,7 @@
       "lecture": 16,
       "zh": "Fourier 变换",
       "en": "Fourier transform",
-      "definition": "在位置与 frequency 表示之间转换。",
+      "definition": "在位置表示与频率表示之间转换的运算。",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2
@@ -594,7 +596,7 @@
       "lecture": 16,
       "zh": "复指数",
       "en": "complex exponential",
-      "definition": "统一表示 sine/cosine amplitude 与 phase。",
+      "definition": "统一表示正弦、余弦振幅与相位的形式。",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2
@@ -604,7 +606,7 @@
       "lecture": 16,
       "zh": "功率谱",
       "en": "power spectrum",
-      "definition": "各 frequency component 的平均 squared amplitude。",
+      "definition": "各频率分量的平均振幅平方。",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 3
@@ -614,7 +616,7 @@
       "lecture": 16,
       "zh": "白化",
       "en": "whitening",
-      "definition": "使 output spectrum/covariance 近 flat/identity。",
+      "definition": "使输出功率谱近似平坦，或使协方差近似单位矩阵。",
       "sectionId": "l16-m2",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 3
@@ -624,7 +626,7 @@
       "lecture": 16,
       "zh": "低通",
       "en": "low-pass",
-      "definition": "保留低频、抑制高频。",
+      "definition": "保留低频分量、抑制高频分量的滤波方式。",
       "sectionId": "l16-m3",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 4
@@ -634,27 +636,27 @@
       "lecture": 16,
       "zh": "混叠",
       "en": "aliasing",
-      "definition": "sampling 不足使高频伪装成低频。",
+      "definition": "采样不足使高频信号表现成低频信号的现象。",
       "sectionId": "l16-m3",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 5
     }
   ],
   "commonTraps": [
-    "把 Fourier transform 当作无物理意义的公式表。",
-    "混淆 spatial frequency magnitude、orientation 与 phase。",
-    "认为 complex numbers 引入额外生物变量；它只是表示工具。",
-    "convolution theorem 忽略 normalization/sign convention。",
-    "把 \\(1/|\\xi |^{2}\\) 当作每张图像的精确 law。",
-    "perfect whitening 无限 boost high frequencies，忽略 optics/noise。",
-    "适应实验只比较 firing rate，不比较 filter/nonlinearity。",
-    "需避免把 Fourier transform 教成纯公式表。需要始终回答 spatial frequency 对图像和 receptive field 的物理含义，以及 amplitude/phase 分别表示什么。"
+    "只把傅里叶变换当作公式运算，忽略频率分量对应的图像结构。",
+    "混淆空间频率大小、朝向与相位。",
+    "认为复数表示引入了额外生物变量，忽略它只是表达振幅与相位的数学工具。",
+    "使用卷积定理时未统一归一化和符号约定。",
+    "把 \\(1/|\\xi |^{2}\\) 当成每一张自然图像都严格满足的规律。",
+    "通过完全白化无限增强高频，忽略光学模糊与测量噪声的限制。",
+    "比较适应前后反应时只看发放率，未检查滤波器和非线性函数是否改变。",
+    "能计算频谱，却无法解释空间频率与感受野结构的关系，也未区分振幅和相位各自携带的信息。"
   ],
   "errata": [
     {
       "id": "L16-E01",
       "lecture": 16,
-      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "lectureTitle": "视觉适应、自然图像与傅里叶分析",
       "kind": "uncertainty",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 2,
@@ -666,7 +668,7 @@
     {
       "id": "L16-E02",
       "lecture": 16,
-      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "lectureTitle": "视觉适应、自然图像与傅里叶分析",
       "kind": "caution",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 4,
@@ -678,13 +680,13 @@
     {
       "id": "L16-E03",
       "lecture": 16,
-      "lectureTitle": "适应、自然场景统计与 Fourier 分析",
+      "lectureTitle": "视觉适应、自然图像与傅里叶分析",
       "kind": "caution",
       "sourceFile": "Lecture16-Adaptation.pdf",
       "sourcePage": 5,
       "sectionId": "l16-m3",
       "originalIssue": "这里 仅概述 LNP adaptation measurement；完整实验需 held-out model comparison。",
-      "explanation": "把预测落到 LNP measurement。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     }
   ],
@@ -701,37 +703,37 @@
         }
       ],
       "conceptTags": [
-        "SNR 决定滤波目标：去冗余还是先降噪"
+        "信噪比如何决定滤波方式"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么低光下观察到 surround 变弱，不能简写成视觉系统\"不再关心边缘\"？",
+      "stem": "为什么低光下观察到周围变弱，不能简写成视觉系统\"不再关心边缘\"？",
       "choices": [
         {
           "id": "a",
-          "text": "每个输入 mode \\(e^{i\\xi \\cdot x}\\) 经过卷积后仍是同一个 \\(\\xi\\)，只乘一个复数 \\(\\hat{K}(\\xi )\\)，不同 \\(\\xi\\) 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+          "text": "周围变弱证明动物的任务目标已经永久改变，以后在亮光中也不会再利用边缘。"
         },
         {
           "id": "b",
-          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+          "text": "高频证据更不可靠，弱化差分能减少噪声影响；这以分辨率换稳定性，不是放弃边缘。"
         },
         {
           "id": "c",
-          "text": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+          "text": "低光让所有高频信号完全消失，因此只需删除高频通道，任何残余对比信息都不再值得保留。"
         },
         {
           "id": "d",
-          "text": "把高 SNR 等同于高平均亮度；SNR 还取决于频率、内部噪声和刺激对比度。"
+          "text": "弱周围只会提高每个像素的精度，不可能牺牲空间分辨率。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“从平移不变统计到 Fourier 对角化”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“自然图像功率谱、whitening 与可检验的适应”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把高 SNR 等同于高平均亮度；SNR 还取决于频率、内部噪声和刺激对比度。"
+        "a": "适应反映当前噪声与信号条件的权衡，不能由此推出永久的任务偏好改变。",
+        "c": "可靠性通常随频率连续变化，并非所有高频信息在同一阈值上全部消失。",
+        "d": "扩大池化可降低独立噪声，却也会平滑细节并降低空间分辨率。"
       },
-      "explanation": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。 这里的图应按条件预测来读：先确认横轴或曲线表示 SNR，而不是时间；再比较 center、surround 的相对面积和宽度；最后写出可测量结果，例如低光下 estimated RF 的高频增益下降、空间范围扩大。"
+      "explanation": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。 中心兴奋、周围抑制的差分核削弱共同的慢变成分、保留边缘，从而减少输出相关性。"
     },
     {
       "id": "L16-Q02",
@@ -745,37 +747,37 @@
         }
       ],
       "conceptTags": [
-        "从平移不变统计到 Fourier 对角化"
+        "平移不变统计与傅里叶分解"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么说 Fourier modes 把平移不变线性滤波器\"对角化\"？",
+      "stem": "为什么说 Fourier 模态把平移不变线性滤波器\"对角化\"？",
       "choices": [
         {
           "id": "a",
-          "text": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+          "text": "对角化表示把所有输入频率变成同一个输出频率，因此不同模式之间的区别消失。"
         },
         {
           "id": "b",
-          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+          "text": "Fourier 变换会让任何依赖绝对位置的滤波器都变成对角矩阵，所以无需平移不变这一条件。"
         },
         {
           "id": "c",
-          "text": "每个输入 mode \\(e^{i\\xi \\cdot x}\\) 经过卷积后仍是同一个 \\(\\xi\\)，只乘一个复数 \\(\\hat{K}(\\xi )\\)，不同 \\(\\xi\\) 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+          "text": "卷积不混合 Fourier 模式，只改变各自复数幅值，因而可逐频率表示增益。"
         },
         {
           "id": "d",
-          "text": "把频率向量方向画成条纹延伸方向，导致 orientation 解读旋转九十度。"
+          "text": "只要输入图像是实数，每个 Fourier 增益就必定为正实数，没有相位变化。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“自然图像功率谱、whitening 与可检验的适应”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“SNR 决定滤波目标：去冗余还是先降噪”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把频率向量方向画成条纹延伸方向，导致 orientation 解读旋转九十度。"
+        "a": "各模式保留原频率；被简化的是模式之间的耦合，不是抹去频率标签。",
+        "b": "位置依赖的线性滤波可混合频率；这里的对角结构依赖卷积或平移不变性。",
+        "d": "实核可有复数频率响应；共轭对称保证实输出，不意味着每个增益均为正实数。"
       },
-      "explanation": "每个输入 mode \\(e^{i\\xi \\cdot x}\\) 经过卷积后仍是同一个 \\(\\xi\\)，只乘一个复数 \\(\\hat{K}(\\xi )\\)，不同 \\(\\xi\\) 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。 每个 \\(\\xi\\) 都能独立相乘，原本巨大的平移不变线性算子就被对角化。 卷积定理把 \\(y(x)=\\int K(x-x')s(x')dx'\\) 转成 \\(\\hat{y}(\\xi )=\\hat{K}(\\xi )\\hat{s}(\\xi )\\)。关键不是背结果，而是把 Fourier integral 写开、交换积分顺序，再用 \\(u=x-x'\\) 换元。换元后指数 \\(e^{-i\\xi \\cdot (u+x')}\\) 分成只含 u 和只含 x' 的两个因子，于是两个积分分别成为 \\(\\hat{K}\\) 与 ŝ。每个 \\(\\xi\\) 都能独立相乘，原本巨大的平移不变线性算子就被对角化。"
+      "explanation": "每个输入模态 \\(e^{i\\xi \\cdot x}\\) 经过卷积后仍是同一个 \\(\\xi\\)，只乘一个复数 \\(\\hat{K}(\\xi )\\)，不同 \\(\\xi\\) 不互相混合；这等价于在该基底中算子由逐模态的对角增益表示。 不同 \\(\\xi\\) 可以独立相乘，因此原本耦合许多位置的平移不变线性算子被对角化。"
     },
     {
       "id": "L16-Q03",
@@ -789,37 +791,37 @@
         }
       ],
       "conceptTags": [
-        "自然图像功率谱、whitening 与可检验的适应"
+        "自然图像频谱与滤波适应"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "跨两个适应条件比较 LNP filter 时，为什么必须先固定 filter 的尺度规范？",
+      "stem": "跨两个适应条件比较 LNP 滤波器时，为什么必须先固定滤波器的尺度规范？",
       "choices": [
         {
           "id": "a",
-          "text": "每个输入 mode \\(e^{i\\xi \\cdot x}\\) 经过卷积后仍是同一个 \\(\\xi\\)，只乘一个复数 \\(\\hat{K}(\\xi )\\)，不同 \\(\\xi\\) 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+          "text": "任何滤波器幅度差都代表感受野真正改变，因为非线性只能改变输出基线，无法补偿输入尺度。"
         },
         {
           "id": "b",
-          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+          "text": "固定范数之后，两个条件的滤波方向和非线性也必定相同，因此无需继续检验条件差异。"
         },
         {
           "id": "c",
-          "text": "把 \\(1/|\\xi |^{2}\\) 当成每张自然图像都严格服从的定律；它是数据集合上的近似趋势。"
+          "text": "归一化只用于降低数值溢出风险；样本足够多时，数据会自动唯一确定滤波器与非线性的各自尺度。"
         },
         {
           "id": "d",
-          "text": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。"
+          "text": "滤波器缩放可被非线性的相应重参数化抵消；若不固定规范，同一预测也可显示不同滤波增益。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“从平移不变统计到 Fourier 对角化”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“SNR 决定滤波目标：去冗余还是先降噪”中的另一组变量与条件，不能由题干推出。",
-        "c": "错误在于：把 \\(1/|\\xi |^{2}\\) 当成每张自然图像都严格服从的定律；它是数据集合上的近似趋势。"
+        "a": "非线性的输入尺度也可改变，从而抵消滤波投影的整体缩放。",
+        "b": "固定范数只消除一种参数化自由度，方向、形状及非线性仍可随条件改变。",
+        "c": "尺度不唯一来自模型结构，增加样本不会自动打破这种等价参数化。"
       },
-      "explanation": "因为把 k 乘常数 a、再把 nonlinearity 的横轴除以 a，会给出完全相同的 firing prediction；不固定 ||k|| 或另一规范时，所谓 gain change 可能只是参数化不唯一。 比较 filter 时先固定规范化，例如令 \\(||k_{c}||=1\\) 并把符号按主要 lobe 对齐，否则 k 乘常数、f 的横轴除同一常数会产生相同预测。"
+      "explanation": "因为把 k 乘常数 a、再把非线性的横轴除以 a，会给出完全相同的放电预测；不固定 ||k|| 或另一规范时，所谓增益变化可能只是参数化不唯一。 比较之前要固定尺度，例如令 \\(||k_{c}||=1\\)，再根据主区域对齐符号；否则将核乘一个常数，并相应改变非线性横轴，仍可得到相同预测。"
     },
     {
       "id": "L16-Q04",
@@ -833,37 +835,37 @@
         }
       ],
       "conceptTags": [
-        "自然图像 whitening 的理想高频增益会被噪声截断"
+        "自然图像白化的理想高频增益会被噪声截断"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"自然图像 whitening 的理想高频增益会被噪声截断\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"自然图像白化的理想高频增益会被噪声截断\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "若自然图像功率近似 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)，且暂时忽略 noise 与 gain limits，使 \\(P_{\\mathrm{out}}=|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 平坦需要 \\(|\\hat{K}|\\propto |\\xi |\\)。"
+          "text": "理想增益随频率升高，噪声约束使高频回落；SNR 更低时，可靠频带进一步收窄。"
         },
         {
           "id": "b",
-          "text": "每个输入 mode \\(e^{i\\xi \\cdot x}\\) 经过卷积后仍是同一个 \\(\\xi\\)，只乘一个复数 \\(\\hat{K}(\\xi )\\)，不同 \\(\\xi\\) 不互相混合；这等价于在该基底中算子由逐 mode 的 diagonal gains 表示。"
+          "text": "图中高频增益回落说明自然图像没有高频内容，与噪声或光学限制无关。"
         },
         {
           "id": "c",
-          "text": "边缘仍可能与行为相关；变化反映当前高频证据相对噪声不可靠，强差分会放大噪声。系统暂时牺牲分辨率换取更稳定估计，并不等于目标类别永久改变。"
+          "text": "三条曲线是同一神经元依次测得的真实时间轨迹，横轴增加表示适应发生得更久。"
         },
         {
           "id": "d",
-          "text": "把 \\(1/|\\xi |^{2}\\) 当成每张自然图像都严格服从的定律；它是数据集合上的近似趋势。"
+          "text": "低 SNR 曲线说明越暗越应无上限放大最高频率，才能精确重建所有边缘而不增加任何噪声代价。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "图中没有“从平移不变统计到 Fourier 对角化”所需的变量与条件。",
-        "c": "图中没有“SNR 决定滤波目标：去冗余还是先降噪”所需的变量与条件。",
-        "d": "图中的标注与关系不支持这种读法：把 \\(1/|\\xi |^{2}\\) 当成每张自然图像都严格服从的定律；它是数据集合上的近似趋势。"
+        "b": "高频信号可以存在但不可靠；回落反映信号、噪声及光学限制的权衡。",
+        "c": "横轴为空间频率，曲线是不同假设下的归一化理论示意，并非时间测量。",
+        "d": "噪声占优的频率不适合无界放大；较低 SNR 反而倾向更窄频带和池化。"
       },
-      "explanation": "若自然图像功率近似 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)，且暂时忽略 noise 与 gain limits，使 \\(P_{\\mathrm{out}}=|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 平坦需要 \\(|\\hat{K}|\\propto |\\xi |\\)。真实 optics 会压低极高频 signal，而近似平坦的 output noise 不会随之消失，因此 noise-aware filter 在高频回落；SNR 再降低时，可靠频带进一步收窄并更偏向 pooling。三条曲线均为归一化理论示意，不表示经验测量值。"
+      "explanation": "若自然图像功率近似 \\(P_{\\mathrm{in}}(\\xi )\\propto 1/|\\xi |^{2}\\)，且暂时忽略噪声与增益限制，使 \\(P_{\\mathrm{out}}=|\\hat{K}|^{2}P_{\\mathrm{in}}\\) 平坦需要 \\(|\\hat{K}|\\propto |\\xi |\\)。真实光学会压低极高频信号，而近似平坦的输出噪声不会随之消失，因此考虑噪声的滤波器在高频回落；SNR 再降低时，可靠频带进一步收窄并更偏向池化。三条曲线均为归一化理论示意，不表示经验测量值。"
     }
   ]
 }

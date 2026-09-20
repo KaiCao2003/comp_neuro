@@ -110,8 +110,8 @@
         ],
         "paragraphs": [
           "The Hebbian assembly hypothesis proposes that cells jointly active in an experience develop stronger mutual connections. Encoding changes the connections, a partial cue reactivates some members, and recurrent excitation recruits the missing members to complete the pattern. An engram is a cellular ensemble causally involved in memory storage and expression; activation correlation alone is insufficient for that label.",
-          "The Hopfield abstraction represents an assembly by binary pattern \\(\\xi\\) and sets \\(W_{ij}=(1/N)\\sum \\mu \\xi _{i}^{\\mu }\\xi _{j}^{\\mu }\\), with \\(W_{ii}=0\\). Same-sign pairs receive positive weights and opposite-sign pairs negative weights. Real synapses obey Dale's law and constraints from sparse connectivity and spiking; the classic dense matrix first illustrates a computational principle.",
-          "Retrieval cue \\(S(0)\\) has overlap \\(m=(1/N)\\sum i\\xi iS_{i}\\) with the target pattern. \\(m=1\\) is an exact match, \\(m=0\\) is uncorrelated on average, and \\(m=-1\\) is the global antipattern. If the cue lies in the target basin, asynchronous dynamics correct errors progressively. Basin size measures tolerated corruption, not merely whether the fixed point exists.",
+          "The Hopfield abstraction represents an assembly by binary pattern \\(\\xi\\) and sets \\(W_{ij}=(1/N)\\sum_{\\mu} \\xi _{i}^{\\mu }\\xi _{j}^{\\mu }\\), with \\(W_{ii}=0\\). Same-sign pairs receive positive weights and opposite-sign pairs negative weights. Real synapses obey Dale's law and constraints from sparse connectivity and spiking; the classic dense matrix first illustrates a computational principle.",
+          "Retrieval cue \\(S(0)\\) has overlap \\(m=(1/N)\\sum_{i}\\xi_{i}S_{i}\\) with the target pattern. \\(m=1\\) is an exact match, \\(m=0\\) is uncorrelated on average, and \\(m=-1\\) is the global antipattern. If the cue lies in the target basin, asynchronous dynamics correct errors progressively. Basin size measures tolerated corruption, not merely whether the fixed point exists.",
           "A causal engram experiment must test sufficiency and necessity separately: does artificial activation of a tagged ensemble trigger memory-like behavior, and does its suppression selectively impair retrieval? Even if both hold, binary Hopfield units and Hebbian weights remain a model mapping; behavior does not identify the exact W directly."
         ],
         "keyPoints": [
@@ -223,7 +223,8 @@
         "pitfalls": [
           "Updating all units at once from the old state and calling it asynchronous.",
           "Ignoring the tie convention at \\(h=0\\)."
-        ]
+        ],
+        "transition": "Assemblies and overlap define the goal of pattern completion without specifying how a cue evolves into a retrieved state. Asynchronous single-unit updates turn retrieval into a traceable process in which update order and stopping criteria are part of the model."
       },
       {
         "id": "l26-m3",
@@ -291,7 +292,8 @@
         "pitfalls": [
           "Omitting the energy factor 1/2 and then double-counting pairs.",
           "Automatically calling every local minimum a stored pattern."
-        ]
+        ],
+        "transition": "A local update rule specifies each step without proving that repeated updates settle. Energy changes under symmetric weights provide that test, and the single-pattern case first lets us verify the intended stored attractor."
       },
       {
         "id": "l26-m4",
@@ -357,7 +359,8 @@
         "pitfalls": [
           "Mistaking a near-zero mean crosstalk for zero crosstalk in every instance.",
           "Using a spurious attractor to explain every human false memory directly."
-        ]
+        ],
+        "transition": "Energy descent moves the network toward stability without guaranteeing the desired memory. With several stored patterns, decomposing the local field into target signal and crosstalk explains how erroneous bits and spurious mixtures can arise."
       },
       {
         "id": "l26-m5",
@@ -370,7 +373,7 @@
         ],
         "paragraphs": [
           "For independent unbiased patterns, one nontarget overlap \\(\\sum _j\\xi _{j}^{\\mu }\\xi _{j}^{1}\\) has \\(\\operatorname{mean} 0\\) and variance approximately N. After multiplication by 1/N, one pattern contributes field variance of about 1/N. Summing P-1 nearly independent terms gives crosstalk variance \\((P-1)/N\\approx \\alpha\\). This motivates a Gaussian-noise approximation through the central limit theorem.",
-          "A target bit is stable when \\(\\xi _{i}^{1}h_{i}>0\\): unit-aligned signal 1 plus noise remains positive. If \\(\\mathrm{noise}\\approx N(0,\\alpha )\\), the single-step error is approximately \\(\\Phi (-1/\\sqrt \\alpha )\\) and rises with \\(\\alpha\\). Unit errors feed back into the fields, so full self-consistency gives the classic dense-model retrieval threshold \\(\\alpha c\\) of about 0.138 rather than the simple single-step tail alone.",
+          "A target bit is stable when \\(\\xi _{i}^{1}h_{i}>0\\): unit-aligned signal 1 plus noise remains positive. If \\(\\mathrm{noise}\\approx N(0,\\alpha )\\), the single-step error is approximately \\(\\Phi (-1/\\sqrt \\alpha )\\) and rises with \\(\\alpha\\). Unit errors feed back into the fields, so full self-consistency gives the classic dense-model retrieval threshold \\(\\alpha_c\\) of about 0.138 rather than the simple single-step tail alone.",
           "P can grow linearly with N, but 'capacity=Pmax' depends on the retrieval criterion, acceptable error, and basin size. The value 0.138 assumes symmetric dense connectivity, unbiased independent random ±1 patterns, Hebbian weights, and classic dynamics. Sparse codes, correlated patterns, alternative rules, or finite N change the number.",
           "A spin-glass regime still has many stable states but little overlap with any stored pattern; the network converges without retrieving. Checking energy convergence alone misclassifies success. Also measure target overlap, bit error, basin volume, and trial-to-trial outcomes."
         ],
@@ -425,7 +428,8 @@
         "pitfalls": [
           "Treating 0.138 as the capacity ratio of every biological memory.",
           "Passing off a one-step Gaussian tail calculation as the full critical derivation."
-        ]
+        ],
+        "transition": "The crosstalk decomposition identifies interference from other memories; capacity also requires knowing how that interference grows with load. Estimating its variance for independent unbiased patterns motivates a Gaussian approximation while separating one-step errors from a full retrieval threshold."
       },
       {
         "id": "l26-m6",
@@ -493,7 +497,8 @@
         "pitfalls": [
           "Applying the dense sign rule unchanged to a sparse 0/1 code.",
           "Claiming higher sparse capacity without stating the units of comparison."
-        ]
+        ],
+        "transition": "Classic capacity analysis assumes dense unbiased binary patterns and cannot be transferred directly to sparse ensembles. Sparse coding requires revisiting mean bias, activity control, and stochastic updates, then comparing capacity using consistent error criteria."
       }
     ]
   },
@@ -504,7 +509,7 @@
       "moduleId": "l26-m4",
       "title": "Hopfield basins: descent does not guarantee correct recall",
       "alt": "A cue near the target descends to the stored pattern under asynchronous updates, whereas an ambiguous cue lowers energy as well but descends to a spurious minimum",
-      "caption": "With symmetric weights, a zero diagonal, and asynchronous updates, both paths make E nonincreasing, but the cue's basin determines the endpoint. A cue near the target can complete to \\(\\xi ^{\\mu }\\), whereas crosstalk may draw an ambiguous cue into a mixture. Low energy therefore guarantees stability, not correct recall.",
+      "caption": "With symmetric weights, a zero diagonal, and asynchronous updates, both paths make E nonincreasing, but the cue's basin determines the endpoint. A cue near the target can complete to \\(\\xi ^{\\mu }\\), whereas crosstalk may draw an ambiguous cue into a mixture. Energy descent, reaching a fixed point, and correct recall are distinct: low energy alone does not imply that the state is already stable, and a fixed point may encode a spurious memory.",
       "sourceRefs": [
         {
           "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -784,7 +789,7 @@
       "lecture": 26,
       "zh": "Ising 能量",
       "en": "Ising energy",
-      "definition": "A Lyapunov function for a symmetric binary network.",
+      "definition": "An energy function used to analyze asynchronous dynamics in a symmetric binary network.",
       "sectionId": "l26-m3",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 3
@@ -910,27 +915,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "Positive overlap places a cue in the target basin by definition and guarantees success under every update order."
         },
         {
           "id": "b",
-          "text": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "text": "Overlap is the network's energy, so a positive value makes the target the unique global minimum."
         },
         {
           "id": "c",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "Initial overlap depends only on how many patterns were stored and is completely independent of which cue bits were altered before retrieval."
         },
         {
           "id": "d",
-          "text": "It measures only similarity at the start. The basin also depends on memory load, the particular crosstalk, update order, and network parameters."
+          "text": "Positive overlap indicates initial similarity to the target; retrieval still depends on the basin, crosstalk, and network conditions."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "It measures only similarity at the start. The basin also depends on memory load, the particular crosstalk, update order, and network parameters. The Hebbian assembly hypothesis proposes that cells jointly active in an experience develop stronger mutual connections. Encoding changes the connections, a partial cue reactivates some members, and recurrent excitation recruits the missing members to complete the pattern. An engram is a cellular ensemble causally involved in memory storage and expression; activation correlation alone is insufficient for that label.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Sparse stochastic associative memory and global inhibition,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Spurious mixtures and the signal-plus-crosstalk decomposition,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Gaussian crosstalk, loading, and classic capacity,” not the relationship asked about here."
+        "a": "Overlap measures similarity, whereas a basin is determined by the full dynamics.",
+        "b": "Overlap and energy are different quantities; positive overlap does not exclude other attractors.",
+        "c": "Overlap directly compares the current cue with the target and changes with its particular errors."
       }
     },
     {
@@ -954,27 +959,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "After an early unit is updated, later unit changes can alter its local field, so another complete sweep without changes is required."
+          "text": "Later updates can change the local fields of units updated earlier; another full sweep must check whether any state still changes."
         },
         {
           "id": "b",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "Updating a unit permanently fixes its local field, so later changes in its neighbors cannot affect it."
         },
         {
           "id": "c",
-          "text": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "text": "A random update order guarantees that one sweep reaches the unique fixed point shared by every possible order."
         },
         {
           "id": "d",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "Any energy decrease after one sweep proves that all units will remain unchanged thereafter, making further local-field checks unnecessary."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "After an early unit is updated, later unit changes can alter its local field, so another complete sweep without changes is required. One sweep commonly means an average of N updates and does not imply convergence. Stop only after a full check finds no unit that would change or when both state and energy reach a fixed point. A finite deterministic asynchronous system under strict energy descent cannot visit new states forever, although arbitrary flipping on zero-field ties can create degeneracy.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Sparse stochastic associative memory and global inhibition,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Spurious mixtures and the signal-plus-crosstalk decomposition,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Gaussian crosstalk, loading, and classic capacity,” not the relationship asked about here."
+        "b": "A local field depends on the current states of other units and can change when they update.",
+        "c": "Random ordering guarantees neither one-sweep convergence nor a unique fixed point.",
+        "d": "Energy may decrease during convergence; that alone does not establish a fixed point."
       }
     },
     {
@@ -998,27 +1003,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "Asymmetry only changes energy units, leaving every step of the original proof valid."
         },
         {
           "id": "b",
-          "text": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating."
+          "text": "Asymmetric weights prevent the paired terms from yielding the update’s local field, invalidating the descent proof."
         },
         {
           "id": "c",
-          "text": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "text": "Asymmetry guarantees that every update raises energy, so all asymmetric networks must oscillate forever and can never reach any fixed state."
         },
         {
           "id": "d",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "Asynchronous updates automatically turn any asymmetric matrix into an equivalent symmetric one."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating. Nonincreasing energy guarantees arrival at some local minimum, not the global minimum or target memory. A noisy cue may cross a basin boundary and reach a spurious state. Symmetric W is central to the proof. Asymmetric plasticity or delays can generate cycles, chaos, or sequential dynamics, so the same Lyapunov function cannot still be used to claim convergence.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Sparse stochastic associative memory and global inhibition,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Spurious mixtures and the signal-plus-crosstalk decomposition,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Gaussian crosstalk, loading, and classic capacity,” not the relationship asked about here."
+        "a": "Symmetry combines the pair terms in the energy difference; it is not a choice of units.",
+        "c": "Losing a descent guarantee does not prove energy always rises or that every such network fails to converge.",
+        "d": "The update schedule does not change the weight matrix's symmetry."
       }
     },
     {
@@ -1042,27 +1047,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "Any state below the initial cue's energy should be redefined as that cue's correct memory."
         },
         {
           "id": "b",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "Low mixture energy proves the complete mixture was presented as a training sample and could not have emerged from interactions among other stored patterns."
         },
         {
           "id": "c",
-          "text": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "text": "Energy describes dynamical stability, while correctness is defined by the stored target; a stable mixture may still be the wrong pattern."
         },
         {
           "id": "d",
-          "text": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating."
+          "text": "The energy function carries explicit target labels and automatically rejects all unassigned stable states."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories. Basin boundaries shrink as P increases. A cue can have its highest overlap with the target and still flow to a mixture because all stored patterns jointly shape the energy landscape. Any analogy to experimental 'memory blending' is only a hypothesis; real memory distortion also depends on semantic inference, overlap during encoding, and systems consolidation.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Sparse stochastic associative memory and global inhibition,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Gaussian crosstalk, loading, and classic capacity,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Energy descent and the \\(P=1\\) stored attractor,” not the relationship asked about here."
+        "a": "Energy descent relative to the starting state cannot replace a check of target identity.",
+        "b": "Crosstalk among stored patterns can create mixture attractors that were never stored individually.",
+        "d": "The standard energy has no separate semantic label that identifies the intended target."
       }
     },
     {
@@ -1086,27 +1091,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "Below critical load, every possible cue belongs to the desired basin, including cues identical to other stored memories."
         },
         {
           "id": "b",
-          "text": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "text": "The value 0.138 is an exact guarantee for any finite network, coding scheme, and tolerated retrieval error."
         },
         {
           "id": "c",
-          "text": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating."
+          "text": "Once energy stops decreasing, the specified memory has necessarily been retrieved, so comparing the final state with the intended pattern is redundant."
         },
         {
           "id": "d",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "The critical load is an asymptotic result under specific assumptions; finite networks, cue quality, and basin differences can cause failure."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail. For independent unbiased patterns, one nontarget overlap \\(\\sum _j\\xi _{j}^{\\mu }\\xi _{j}^{1}\\) has \\(\\operatorname{mean} 0\\) and variance approximately N. After multiplication by 1/N, one pattern contributes field variance of about 1/N. Summing P-1 nearly independent terms gives crosstalk variance \\((P-1)/N\\approx \\alpha\\). This motivates a Gaussian-noise approximation through the central limit theorem.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Sparse stochastic associative memory and global inhibition,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Spurious mixtures and the signal-plus-crosstalk decomposition,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Energy descent and the \\(P=1\\) stored attractor,” not the relationship asked about here."
+        "a": "Capacity does not guarantee retrieval of a specified target from every possible cue.",
+        "b": "The classical value depends on pattern statistics, the large-network limit, and the retrieval criterion.",
+        "c": "Convergence to an incorrect or spurious attractor also stops updates; target identity must be checked separately."
       }
     },
     {
@@ -1130,27 +1135,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "Uncentered coactivity adds only positive terms without negative cancellation from inactivity, potentially driving excessive activity."
         },
         {
           "id": "b",
-          "text": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "text": "Zeros in 0/1 patterns automatically create negative weights that cancel every positive coactivity term."
         },
         {
           "id": "c",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "Sufficiently sparse patterns make every weight's mean exactly zero, so neither centering nor threshold control can ever be needed for stable activity."
         },
         {
           "id": "d",
-          "text": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating."
+          "text": "The positive bias arises because the Hebbian rule counts only shared silence and ignores coactivity."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity. Place global inhibition directly in every weight by subtracting \\(\\gamma /(aN)\\) after the centered Hebbian term. In the local field, this uniform negative term becomes \\(-(\\gamma /(aN))\\sum _jS_{j}\\), so a larger active population imposes stronger inhibition on every unit. Together with stochastic threshold u, it constrains total activity near aN. It is not one particular inhibitory neuron; rewriting it as an adaptive threshold requires an explicit mapping to population activity.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Spurious mixtures and the signal-plus-crosstalk decomposition,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Gaussian crosstalk, loading, and classic capacity,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Energy descent and the \\(P=1\\) stored attractor,” not the relationship asked about here."
+        "b": "A product containing zero is zero, not a negative contribution.",
+        "c": "Sparsity does not imply zero mean; uncentered coactivity can retain a positive bias.",
+        "d": "The positive contributions in the uncentered 0/1 outer product come from coactivity."
       }
     },
     {
@@ -1174,27 +1179,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "text": "The path to the spurious attractor must contain an energy increase, or an incorrect memory would be unreachable."
         },
         {
           "id": "b",
-          "text": "A cue near the target descends to the stored pattern under asynchronous updates, whereas an ambiguous cue lowers energy as well but descends to a spurious minimum"
+          "text": "Both paths can lower energy yet enter target and spurious basins respectively; dynamical convergence is therefore distinct from correct recall."
         },
         {
           "id": "c",
-          "text": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "text": "Because both paths use the same symmetric weights, every initial cue must end at one unique stored pattern, regardless of its similarity to other memories."
         },
         {
           "id": "d",
-          "text": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating."
+          "text": "Minimum energy automatically identifies the requested target, making a stable mixture a correct recall."
         }
       ],
       "correctChoiceId": "b",
-      "explanation": "With symmetric weights, a zero diagonal, and asynchronous updates, both paths make E nonincreasing, but the cue's basin determines the endpoint. A cue near the target can complete to \\(\\xi ^{\\mu }\\), whereas crosstalk may draw an ambiguous cue into a mixture. Low energy therefore guarantees stability, not correct recall.",
+      "explanation": "With symmetric weights, a zero diagonal, and asynchronous updates, both paths make E nonincreasing, but the cue's basin determines the endpoint. A cue near the target can complete to \\(\\xi ^{\\mu }\\), whereas crosstalk may draw an ambiguous cue into a mixture. Energy descent, reaching a fixed point, and correct recall are distinct: low energy alone does not imply that the state is already stable, and a fixed point may encode a spurious memory.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Sparse stochastic associative memory and global inhibition.”",
-        "c": "The diagram does not show the variables and conditions discussed in “Gaussian crosstalk, loading, and classic capacity.”",
-        "d": "The diagram does not show the variables and conditions discussed in “Energy descent and the \\(P=1\\) stored attractor.”"
+        "a": "Under symmetric asynchronous dynamics, a wrong attractor can also be reached without increasing energy.",
+        "c": "One network can have several basins, and the initial cue influences the final state.",
+        "d": "Energy does not contain an independent label for the requested target identity."
       }
     }
   ]

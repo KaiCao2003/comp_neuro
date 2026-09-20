@@ -1,7 +1,7 @@
 {
   "lecture": 7,
   "slug": "07",
-  "zhTitle": "神经编码 II：群体解码、Fisher 信息与 Bayesian 解码",
+  "zhTitle": "群体编码、Fisher 信息与贝叶斯解码",
   "enTitle": "Neural Coding II: Population Decoding, Fisher Information, and Bayes",
   "companionFile": "NEUROSCI366_Lecture07_Neural_Coding2_Population_Fisher_Bayes_Companion.pdf",
   "companionPages": 24,
@@ -181,6 +181,7 @@
       {
         "id": "L07-M2",
         "title": "The CRLB, noise correlations, and information limits",
+        "transition": "Information adds across an independent Poisson population, so more neurons or longer observation can improve asymptotic precision. We now separate two questions: what Fisher information actually guarantees about an estimator, and when shared noise invalidates the independent-sum argument.",
         "sourceRefs": [
           {
             "file": "Lecture7-NeuralCoding2.pdf",
@@ -265,6 +266,7 @@
       {
         "id": "L07-M3",
         "title": "Biased decoding, bias–variance tradeoffs, and Bayesian priors",
+        "transition": "The variance bound above assumes an unbiased estimator, whereas real decoding often contracts estimates toward common stimuli. Assessing that readout requires both bias and variance, which prepares us to ask why a prior can reduce average error while producing systematic shifts for particular stimuli.",
         "sourceRefs": [
           {
             "file": "Lecture7-NeuralCoding2.pdf",
@@ -716,27 +718,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The Poisson information term is \\((f')^{2}/f\\)."
+          "text": "Local Poisson information depends on squared tuning slope divided by mean rate; the peak can have zero slope, so high firing alone does not guarantee high information."
         },
         {
           "id": "b",
-          "text": "Reliable data produce a sharp likelihood whose relative variation in the posterior product greatly exceeds that of a smooth prior."
+          "text": "The peak has the largest Poisson variance; because information depends only on noise magnitude, every lower-rate location must carry more information than the peak."
         },
         {
           "id": "c",
-          "text": "Simple pooling uses only one projection of response space and may discard other decodable directions."
+          "text": "The peak stimulus has the highest prior probability, so the prior maps all responses to one stimulus; concentrated prior mass, rather than tuning slope, reduces Fisher information."
         },
         {
           "id": "d",
-          "text": "Equating information with total spike count and ignoring tuning slope."
+          "text": "Although slope is zero at the peak, its second derivative directly replaces squared slope; a sufficiently sharp peak must therefore maximize this first-order local information."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "The Poisson information term is \\((f')^{2}/f\\). Although f is large at the peak, the slope f' is generally zero, so the mean barely changes under an infinitesimal stimulus change and local information may be zero. A single bell-shaped tuning curve can give the same firing rate on either side of its peak, so count \\(k_{i}\\) may have equal likelihood under directions \\(\\alpha\\) and \\(\\beta\\). Neuron i in a population has preferred direction \\(\\theta _{i}\\) and tuning \\(f_{i}(\\theta )=f(\\theta -\\theta _{i})\\). Although the two stimuli are degenerate for one neuron, they produce different count patterns across other neurons. The joint probability compares the entire pattern, allowing distributed preferences to resolve a single neuron's ambiguity.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Biased decoding, bias–variance tradeoffs, and Bayesian priors,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “The CRLB, noise correlations, and information limits,” not the relationship asked about here.",
-        "d": "The error is: Equating information with total spike count and ignoring tuning slope."
+        "b": "Information depends on both stimulus-dependent mean slope and noise. A lower rate with little stimulus sensitivity is not automatically more informative.",
+        "c": "This Fisher information is determined by the conditional response distribution. A tuning peak is not a peak in the stimulus prior.",
+        "d": "The stated Poisson Fisher expression uses the first derivative. Curvature cannot directly replace it, even though finite stimulus changes may still be distinguishable."
       }
     },
     {
@@ -770,27 +772,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Reliable data produce a sharp likelihood whose relative variation in the posterior product greatly exceeds that of a smooth prior."
+          "text": "Any pool that includes every neuron retains all population information; saturation must therefore reflect a Fisher information limit rather than the readout."
         },
         {
           "id": "b",
-          "text": "Simple pooling uses only one projection of response space and may discard other decodable directions."
+          "text": "Pooling may discard useful response directions; identifying a population information limit requires the full covariance and signal-change direction or a stronger decoder."
         },
         {
           "id": "c",
-          "text": "The Poisson information term is \\((f')^{2}/f\\)."
+          "text": "Fisher information depends only on neuron count, not correlations; pooling saturation merely indicates too few neurons, and adding similar cells must eliminate the error."
         },
         {
           "id": "d",
-          "text": "Calling every nonzero correlation an information-limiting correlation."
+          "text": "Averaging positive and negative noise makes pooling optimal; the full covariance can only change units and cannot reveal another decodable direction after pooling saturates."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "Simple pooling uses only one projection of response space and may discard other decodable directions. To determine whether the population itself is information-limited, analyze the full covariance and mean derivative or compare stronger decoders. First distinguish two kinds of “correlation.” Signal correlation compares conditional means or tuning shapes across stimuli. Noise correlation fixes the stimulus and compares trial-wise deviations from each neuron's conditional mean. Only the latter enters the present pooling variance. Suppose the \\(N_{R}\\) residuals in a right-choice pool each have variance \\(\\sigma _{R}^{2}\\) and every distinct pair has correlation \\(c_{R}\\). The variance of the pool average R is \\(c_{R}\\sigma _{R}^{2}+(1-c_{R})\\sigma _{R}^{2}/N_{R}\\). The independent component disappears as \\(N_{R}\\) grows, but the shared residual remains.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Biased decoding, bias–variance tradeoffs, and Bayesian priors,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Population decoding and the N and T scaling of Fisher information,” not the relationship asked about here.",
-        "d": "The error is: Calling every nonzero correlation an information-limiting correlation."
+        "a": "Including every neuron does not preserve every response direction. Compressing a vector into one pooled value can discard stimulus information.",
+        "c": "Information depends on tuning and noise structure. Shared noise aligned with signal can prevent unlimited precision gains from adding similar neurons.",
+        "d": "Covariance specifies noise in different directions. Simple averaging need not weight signal and noise directions optimally."
       }
     },
     {
@@ -814,27 +816,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Simple pooling uses only one projection of response space and may discard other decodable directions."
+          "text": "Reliable data automatically remove the prior from Bayes’ rule; even a zero prior near the likelihood peak must produce the normalized likelihood as posterior."
         },
         {
           "id": "b",
-          "text": "The Poisson information term is \\((f')^{2}/f\\)."
+          "text": "Normalization cancels every stimulus-dependent prior difference; once the denominator is computed, reliable and unreliable data both yield the same prior-free posterior."
         },
         {
           "id": "c",
-          "text": "Reliable data produce a sharp likelihood whose relative variation in the posterior product greatly exceeds that of a smooth prior."
+          "text": "Reliable data sharpen likelihood; with a smooth nonzero prior nearby, the posterior concentrates near the likelihood peak and receives only a small prior correction."
         },
         {
           "id": "d",
-          "text": "Comparing only estimator variance and failing to calculate squared bias."
+          "text": "Reliable data flatten the likelihood and reduce its conflict with the prior; the prior retains its shape but consequently pulls the final estimate less strongly."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "Reliable data produce a sharp likelihood whose relative variation in the posterior product greatly exceeds that of a smooth prior. After normalization, probability concentrates near the likelihood peak, and the prior makes only a small correction. The biased Cramér–Rao bound is \\(\\operatorname{Var}(\\hat{s})\\ge [1+b'(s)]^{2}/J(s)\\). If the estimator's mean response changes more slowly than the true stimulus, b' is negative and the variance bound may lie below the unbiased value 1/J; squared bias is the price. This bound still requires regularity conditions and is not a prescription for choosing a bias function. Compare full MSE or a task-relevant loss.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “The CRLB, noise correlations, and information limits,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Population decoding and the N and T scaling of Fisher information,” not the relationship asked about here.",
-        "d": "The error is: Comparing only estimator variance and failing to calculate squared bias."
+        "a": "The prior still multiplies the likelihood. Zero prior mass remains zero posterior mass, so reduced prior influence requires appropriate prior conditions.",
+        "b": "Normalization divides by one common constant and preserves relative weights. It does not remove stimulus-dependent prior effects.",
+        "d": "Reliable data generally sharpen rather than flatten likelihood. A flatter likelihood would leave more posterior influence to the prior."
       }
     },
     {
@@ -863,27 +865,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Reliable data produce a sharp likelihood whose relative variation in the posterior product greatly exceeds that of a smooth prior."
+          "text": "The doubled height of the longer-duration curve means twice the improvement in error standard deviation; doubling time therefore directly halves standard deviation."
         },
         {
           "id": "b",
-          "text": "Simple pooling uses only one projection of response space and may discard other decodable directions."
+          "text": "The straight lines show that adding neurons always increases information indefinitely; common noise aligned with signal does not require changing the linear extrapolation."
         },
         {
           "id": "c",
-          "text": "Equating information with total spike count and ignoring tuning slope."
+          "text": "Longer observation merely recounts the same evidence and cannot add information; the different slopes must therefore arise from different neuronal tuning curves."
         },
         {
           "id": "d",
-          "text": "Normalized diagram showing Fisher information increasing linearly with neuron count at two observation durations"
+          "text": "With fixed tuning and conditional independence, doubling observation time doubles population information; asymptotic error standard deviation falls, but does not halve."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "For uniform tuning and conditional independence, \\(J\\approx NTj_{f}\\). Thus, with tuning shape fixed, doubling either neuron count N or observation time T doubles information, whereas asymptotic error standard deviation shrinks only as \\(1/\\sqrt{NT}\\).",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Biased decoding, bias–variance tradeoffs, and Bayesian priors.”",
-        "b": "The diagram does not show the variables and conditions discussed in “The CRLB, noise correlations, and information limits.”",
-        "c": "The error is: Equating information with total spike count and ignoring tuning slope."
+        "a": "Inverse information governs asymptotic variance, not standard deviation. Doubling information reduces standard deviation only by a factor of the square root of two.",
+        "b": "This scaling assumes conditional independence. Shared noise aligned with signal can invalidate additive information and impose information limits.",
+        "c": "Under the stationary Poisson model, nonoverlapping time intervals supply additional independent event evidence. Information can grow with time even with fixed tuning."
       }
     }
   ]

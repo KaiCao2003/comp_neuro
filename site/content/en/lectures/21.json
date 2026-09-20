@@ -1,7 +1,7 @@
 {
   "lecture": 21,
   "slug": "21",
-  "zhTitle": "眼动积分器、参数退化与 sloppy models",
+  "zhTitle": "眼动积分器与参数可辨识性",
   "enTitle": "Oculomotor Integrator, Degeneracy, and Sloppy Models",
   "companionFile": "NEUROSCI366_Lecture21_Oculomotor_Integrator_Sloppiness_Companion.pdf",
   "companionPages": 21,
@@ -225,7 +225,8 @@
         "pitfalls": [
           "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation.",
           "Checking \\(\\det(I-W)=0\\) without checking \\(\\lambda _{2}\\), input projection, and readout."
-        ]
+        ],
+        "transition": "Holding eye position requires a state to outlast the velocity command, but correlated tuning curves do not specify the needed connections. A general bilateral weight matrix lets us solve for the mode that cancels leak and check the stability of the remaining mode."
       },
       {
         "id": "l21-m3",
@@ -294,7 +295,8 @@
         "pitfalls": [
           "Treating parameter variability and observation noise as the same source.",
           "Applying \\(YX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\) without stating sample orientation and obtaining incompatible shapes."
-        ]
+        ],
+        "transition": "The perfect-integration condition permits compensating weight combinations, so one function need not identify one parameter set. Fitting nonlinear neurons to tuning data first requires converting target rates into required inputs and identifying which unknowns remain linear weights."
       },
       {
         "id": "l21-m4",
@@ -306,8 +308,8 @@
           }
         ],
         "paragraphs": [
-          "With samples as columns, write the loss \\(L(W)=1/2||Y-WX||_F^{2}\\). The Frobenius norm sums squared residuals across all outputs and samples. Output rows are independent, so begin with one weight row w and target row y: \\(L(w)=1/2(y-wX)(y-wX)^\\mathrm{T}\\). Expanding gives the constant \\(yy^\\mathrm{T}\\), the linear term \\(-yX^\\mathrm{T}w^\\mathrm{T}\\), and the quadratic term wXX^\\(Tw^\\mathrm{T}\\).",
-          "Differentiating with respect to w gives gradient \\((wX-y)X^\\mathrm{T}\\). Setting it to zero gives the normal equation wXX^\\(T=yX^\\mathrm{T}\\). If \\(XX^\\mathrm{T}\\) is invertible, \\(\\hat{w}=yX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\); stacking all rows gives \\(\\hat{W}=YX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\). If features are collinear, \\(XX^\\mathrm{T}\\) is singular and requires a pseudoinverse, regularization, or redesigned samples.",
+          "With samples as columns, write the loss \\(L(W)=1/2||Y-WX||_F^{2}\\). The Frobenius norm sums squared residuals across all outputs and samples. Output rows are independent, so begin with one weight row w and target row y: \\(L(w)=1/2(y-wX)(y-wX)^\\mathrm{T}\\). Expanding gives the constant \\(\\tfrac12 yy^\\mathrm{T}\\), the linear term \\(-yX^\\mathrm{T}w^\\mathrm{T}\\), and the quadratic term \\(\\tfrac12 wXX^\\mathrm{T}w^\\mathrm{T}\\).",
+          "Differentiating with respect to w gives gradient \\((wX-y)X^\\mathrm{T}\\). Setting it to zero gives the normal equation \\(wXX^\\mathrm{T}=yX^\\mathrm{T}\\). If \\(XX^\\mathrm{T}\\) is invertible, \\(\\hat{w}=yX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\); stacking all rows gives \\(\\hat{W}=YX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\). If features are collinear, \\(XX^\\mathrm{T}\\) is singular and requires a pseudoinverse, regularization, or redesigned samples.",
           "Near the optimum, let \\(\\Delta w=w-\\hat{w}\\). The normal equation eliminates the cross term, leaving \\(L=L\\min+1/2 \\Delta w H \\Delta w^\\mathrm{T}\\) with \\(H=XX^\\mathrm{T}\\). The same feature Hessian applies row by row to the full W, or appears in blocks after vectorizing the parameters. H depends only on design features for this local curvature; changing the noise model or constraints changes the effective Hessian.",
           "This connects fitting with experimental design. If one feature combination barely changes across positions, X contains little information along that direction and H has a small eigenvalue. Conditions that selectively activate that combination can increase curvature and tighten parameter uncertainty. Sloppiness need not be accepted passively; perturbations and improved sampling can reduce it."
         ],
@@ -363,7 +365,8 @@
         "pitfalls": [
           "Treating existence of a closed-form inverse as proof that the biological parameters are unique.",
           "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
-        ]
+        ],
+        "transition": "Once cellular and synaptic nonlinearities are fixed, known features and target inputs define a linear weight-fitting problem. Least squares supplies a solution, while its Hessian measures how strongly those features constrain different parameter changes."
       },
       {
         "id": "l21-m5",
@@ -430,7 +433,8 @@
         "pitfalls": [
           "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences.",
           "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
-        ]
+        ],
+        "transition": "A single optimal weight matrix does not reveal how many nearby models fit adequately. Resolving the Hessian into parameter directions separates steep from shallow loss changes and supports an ensemble representation of what the data leave uncertain."
       }
     ]
   },
@@ -441,7 +445,7 @@
       "moduleId": "l21-m2",
       "title": "Three fates of an eigenvalue-one integrator",
       "alt": "After the command ends, a mode whose eigenvalue is less than one decays, a mode equal to one persists, and a mode greater than one grows.",
-      "caption": "After input is removed, the fate of the same initial mode amplitude depends only on \\(1-\\lambda\\): when \\(\\lambda <1\\) it leaks; when \\(\\lambda =1\\) the restoring coefficient in the derivative vanishes and memory persists; when \\(\\lambda >1 a\\) small deviation grows. Thus \\(\\det(I-W)=0\\) guarantees only an integrating mode, and the stability of all remaining modes must still be checked.",
+      "caption": "After input is removed, the fate of the same initial mode amplitude depends only on \\(1-\\lambda\\): when \\(\\lambda <1\\) it leaks; when \\(\\lambda =1\\) the restoring coefficient in the derivative vanishes and memory persists; when \\(\\lambda >1\\) a small deviation grows. Thus \\(\\det(I-W)=0\\) guarantees only an integrating mode, and the stability of all remaining modes must still be checked.",
       "sourceRefs": [
         {
           "file": "Lecture21-OculomotorIntegrator.pdf",
@@ -700,7 +704,7 @@
     {
       "id": "L21-G05",
       "lecture": 21,
-      "zh": "Hessian",
+      "zh": "Hessian 矩阵",
       "en": "Hessian",
       "definition": "The local curvature matrix of loss with respect to parameters.",
       "sectionId": "l21-m4",
@@ -818,27 +822,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+          "text": "It is perfect integration because reaching any nonzero state is sufficient, regardless of whether the state later decays."
         },
         {
           "id": "b",
-          "text": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "text": "It cannot be integration at all: any finite drift time proves the network never accumulated the velocity command, even approximately over short intervals."
         },
         {
           "id": "c",
-          "text": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift."
+          "text": "It is a leaky integrator: short observations may look persistent, but a longer delay reveals the finite drift time scale."
         },
         {
           "id": "d",
-          "text": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "text": "Five seconds is a fixed latency: the position remains exactly unchanged for that interval and then jumps instantly to center."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift. Moving the eye requires phasic motor drive to generate velocity and tonic drive to oppose orbital restoring forces and hold the new position. The course abstracts the distributed brainstem and cerebellar network as a neural integrator: its input is the eye-velocity command \\(v(t)\\), and its output state approximates \\(x(t)=x(0)+\\int v(t')dt'\\). Ideally, x retains its latest value when v returns to zero; if the network leaks, position slowly drifts back toward center.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Least squares, the closed-form solution, and the Hessian,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Biological variability and reparameterizing a nonlinear circuit fit,” not the relationship asked about here."
+        "a": "Perfect integration retains the state after input ends. Measurable decay indicates a remaining leak toward center.",
+        "b": "Integration can be leaky. The state can accumulate input while older contributions decay with a finite time constant.",
+        "d": "A time constant sets the scale of continuous exponential decay, not a deadline followed by an abrupt jump."
       }
     },
     {
@@ -862,27 +866,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+          "text": "The whole network remains stable because an eigenvalue of one automatically projects all other modes onto the memory direction."
         },
         {
           "id": "b",
-          "text": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "text": "The transverse mode decays faster because larger connectivity eigenvalues strengthen the restoring force, returning every deviation to the memory axis."
         },
         {
           "id": "c",
-          "text": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "text": "Both modes immediately become oscillatory because a second eigenvalue above one necessarily creates an imaginary pair."
         },
         {
           "id": "d",
-          "text": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator."
+          "text": "The integrating mode remains, but the transverse mode amplifies small errors, so the whole network is not a stable integrator."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator. Expanding gives \\(\\det(I-W)=(1-W_{11})(1-W_{22})-W_{12}W_{21}=0\\). If \\(W_{12}\\ne 0\\), solve \\(W_{21}=(1-W_{11})(1-W_{22})/W_{12}\\). Once three weights are chosen, the fourth compensates; increasing a self-weight can be offset by changing cross-coupling while preserving \\(\\lambda =1\\). This is a many-to-one functional mapping: different parameter points share the same integrator eigenvalue.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Least squares, the closed-form solution, and the Hessian,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Biological variability and reparameterizing a nonlinear circuit fit,” not the relationship asked about here."
+        "a": "Canceling leak in one mode does not eliminate other eigendirections. Transverse stability must be checked separately.",
+        "b": "The full growth rate subtracts the intrinsic leak from the connectivity eigenvalue. Exceeding one makes that rate positive.",
+        "c": "A real eigenvalue above one indicates growth along that direction; it does not create an imaginary part or make another mode oscillate."
       }
     },
     {
@@ -906,27 +910,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "text": "The fixed nonlinearities transform known data; unknown weights then combine those features linearly without linearizing the whole response."
         },
         {
           "id": "b",
-          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+          "text": "Fixing the nonlinearities means replacing every activation function with the identity and discarding all thresholds and saturation."
         },
         {
           "id": "c",
-          "text": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "text": "All parameters of any nonlinear network can be fitted linearly; enough recordings automatically separate unknown activation curves from unique weights."
         },
         {
           "id": "d",
-          "text": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator."
+          "text": "The fit necessarily uses a first-order Taylor expansion at one stimulus and is valid only for infinitesimal changes around it."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear. With the nonlinear functions fixed, the prediction is \\(\\hat{Y}_{i\\mu }=\\sum _j W_{ij} X_{j}\\mu\\), linear in the unknown weights Wij and bias. Each output neuron i can fit one row of weights independently. If M sample positions are columns, X has shape D×M, Y is N×M, W is N×D, and \\(\\hat{Y}=WX\\) is dimensionally consistent. State this orientation explicitly, because placing samples in rows yields a transposed formula.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Least squares, the closed-form solution, and the Hessian,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “General \\(2\\times 2\\) weights, eigenvalue one, and a compensating family,” not the relationship asked about here."
+        "b": "Fixed means known, not removed. Inverse response and synaptic transformations still enter the features and targets.",
+        "c": "The linear weight problem requires the relevant nonlinearities to be fixed and usable in the transformation. Identifiability still requires separate checks.",
+        "d": "Here linearity concerns how weights enter, not necessarily a local Taylor approximation. Known nonlinear transformations can be evaluated directly."
       }
     },
     {
@@ -950,27 +954,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+          "text": "Ridge decreases Hessian eigenvalues, making flat directions flatter and thereby stabilizing the inverse."
         },
         {
           "id": "b",
-          "text": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "text": "Ridge adds a scaled identity to the Hessian, shifting its eigenvalues upward without supplying new observations."
         },
         {
           "id": "c",
-          "text": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "text": "The Hessian is unchanged: the penalty only shifts observed targets and cannot affect curvature, parameter bias, or numerical conditioning."
         },
         {
           "id": "d",
-          "text": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator."
+          "text": "The penalty is equivalent to collecting independent neural observations; larger eigenvalues prove new experimental evidence for each parameter."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data. This connects fitting with experimental design. If one feature combination barely changes across positions, X contains little information along that direction and H has a small eigenvalue. Conditions that selectively activate that combination can increase curvature and tighten parameter uncertainty. Sloppiness need not be accepted passively; perturbations and improved sampling can reduce it.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Biological variability and reparameterizing a nonlinear circuit fit,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “General \\(2\\times 2\\) weights, eigenvalue one, and a compensating family,” not the relationship asked about here."
+        "a": "A positive quadratic penalty adds positive curvature rather than subtracting it, moving small eigenvalues away from zero.",
+        "c": "A quadratic penalty on weights directly contributes second derivatives and shrinks the estimate toward zero.",
+        "d": "The extra curvature comes from the chosen penalty, not new measurements; regularization is not additional experimental evidence."
       }
     },
     {
@@ -994,27 +998,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "text": "A sloppy eigenvector must contain only one synapse, which can therefore be deleted without changing any model prediction."
         },
         {
           "id": "b",
-          "text": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "text": "Low curvature establishes irrelevance under every possible stimulus, behavior, and parameter scaling, eliminating the need for perturbation tests."
         },
         {
           "id": "c",
-          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+          "text": "Sloppiness is low curvature of a parameter combination under this loss; that direction may still affect unmeasured behavior."
         },
         {
           "id": "d",
-          "text": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator."
+          "text": "Sloppiness necessarily means more neural noise, because parameter-Hessian eigenvalues are the eigenvalues of activity covariance."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it. The combination may still be crucial for an unmeasured behavior, a perturbation response, or biological viability. A Hessian is symmetric positive-semidefinite, so \\(H=VDV^\\mathrm{T}\\), where columns \\(v_{k}\\) are orthonormal parameter directions and D contains \\(\\lambda _{k}\\ge 0\\). Let \\(z=V^\\mathrm{T}(w-\\hat{w})\\); then the quadratic loss increase is \\(\\Delta L=1/2\\sum \\lambda _{k} z_{k}^{2}\\). A large \\(\\lambda _{k}\\) gives a large loss for the same displacement and defines a stiff direction. A small \\(\\lambda _{k}\\) permits farther movement within the adequate-fit contour and defines a sloppy direction.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Least squares, the closed-form solution, and the Hessian,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Biological variability and reparameterizing a nonlinear circuit fit,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “General \\(2\\times 2\\) weights, eigenvalue one, and a compensating family,” not the relationship asked about here."
+        "a": "A Hessian direction usually combines parameters. Insensitivity in current data does not establish invariance of every prediction.",
+        "b": "Curvature depends on data, loss, and parameter scaling. New conditions can constrain a previously sloppy combination.",
+        "d": "Loss curvature in parameter space and covariance in neural activity space are different objects and cannot be equated."
       }
     },
     {
@@ -1038,27 +1042,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it."
+          "text": "The curves differ only in initial amplitude; once input ends, every mode of a linear network must decay with the same time constant."
         },
         {
           "id": "b",
-          "text": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "text": "An eigenvalue above one produces stronger restoring force, so the growing curve should decay fastest and only values below one amplify errors."
         },
         {
           "id": "c",
-          "text": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "text": "The persistent middle curve proves stability of the entire network under every perturbation, eliminating any need to check other eigenvalues or transverse modes."
         },
         {
           "id": "d",
-          "text": "After the command ends, a mode whose eigenvalue is less than one decays, a mode equal to one persists, and a mode greater than one grows."
+          "text": "After input ends, the mode decays, persists, or grows according to its eigenvalue; one integrating mode does not stabilize every other direction."
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "After input is removed, the fate of the same initial mode amplitude depends only on \\(1-\\lambda\\): when \\(\\lambda <1\\) it leaks; when \\(\\lambda =1\\) the restoring coefficient in the derivative vanishes and memory persists; when \\(\\lambda >1 a\\) small deviation grows. Thus \\(\\det(I-W)=0\\) guarantees only an integrating mode, and the stability of all remaining modes must still be checked.",
+      "explanation": "After input is removed, the fate of the same initial mode amplitude depends only on \\(1-\\lambda\\): when \\(\\lambda <1\\) it leaks; when \\(\\lambda =1\\) the restoring coefficient in the derivative vanishes and memory persists; when \\(\\lambda >1\\) a small deviation grows. Thus \\(\\det(I-W)=0\\) guarantees only an integrating mode, and the stability of all remaining modes must still be checked.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “The Hessian eigenbasis, stiff/sloppy directions, and model ensembles.”",
-        "b": "The diagram does not show the variables and conditions discussed in “Least squares, the closed-form solution, and the Hessian.”",
-        "c": "The diagram does not show the variables and conditions discussed in “Biological variability and reparameterizing a nonlinear circuit fit.”"
+        "a": "The connectivity eigenvalue relative to leak differs across the curves, changing growth rates; initial amplitude is not the sole difference.",
+        "b": "This reverses the sign: above one, recurrent feedback exceeds leak and the full mode has a positive growth rate.",
+        "c": "Persistence of one mode only establishes absence of leak in that direction; other directions can still decay or grow."
       }
     }
   ]

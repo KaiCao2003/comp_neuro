@@ -86,19 +86,19 @@
     "objectives": [
       "区分单神经元方向调谐、群体低维轨迹与潜在动力学三种描述层级，并说明它们可以同时成立。",
       "从高维神经活动到低维因子，逐项解释 GPFA 的观测模型、时间协方差、矩阵形状与不可辨识性。",
-      "用 delayed-reach 时间线解释准备态如何进入 movement-potent 与 output-null 子空间，而不把相关图形误写成因果结论。",
-      "手算线性 readout 的零空间、rank-nullity 与简单 decoder，并把结果用于 BMI 闭环和跨日对齐。",
-      "把 PCA/GPFA、linear readout、closed-loop feedback 与跨日 alignment 串成一个可检验的 BMI 分析流程。"
+      "用 delayed-reach 时间线解释准备态如何进入运动有效空间与输出零空间子空间，而不把相关图形误写成因果结论。",
+      "手算线性读出的零空间、秩与零度关系与简单解码器，并把结果用于 BMI 闭环和跨日对齐。",
+      "把 PCA/GPFA、线性读出、闭环反馈与跨日对齐串成一个可检验的 BMI 分析流程。"
     ],
     "prerequisiteBridge": [
-      "先把一次群体记录写成向量：若同时记录 N 个神经元，某时刻的 firing rates 是 N 维向量 r。实验画出的每个点不是一个神经元，而是整个群体在某时刻的状态。PCA 或 factor model 试图用 K 个坐标描述这些点，其中 K 小于 N。低维并不表示只记录到少数神经元，而表示许多神经元的变化受少数共同变量约束。",
-      "线性映射 \\(C\\alpha +d\\) 的含义可用二维影子理解：\\(\\alpha\\) 是 K 维 latent coordinate，C 的每一列说明一个 latent factor 在 N 个神经元上留下怎样的 activity pattern，d 是平均偏置。矩阵形状必须满足 C 为 N×K，\\(\\alpha\\) 为 K×1，结果为 N×1。加入 \\(\\Sigma\\) 后，模型承认同一 latent state 下观测仍会有 trial noise 与未建模波动。",
-      "Gaussian process 不是“活动呈高斯形状”，而是给一个随时间变化的 latent function 指定任意两时刻的共同分布。kernel \\(K(t,t')\\) 决定相隔多久的两点仍相似。平方指数核中的 \\(\\tau\\) 是平滑时间尺度；\\(\\tau\\) 越大，latent trajectory 变化越慢。理解这一点后，才能把平滑 trajectory、准备态、线性 readout 与闭环 decoder 分开讨论。"
+      "同时记录 N 个神经元时，一次群体观测可写成 N 维发放率向量 r。轨迹上的每个点表示整个群体在一个时刻的状态，并非单个神经元。PCA 或因子模型尝试用少于 N 个的 K 个坐标描述这些点。低维意味着许多神经元的变化受少数共同变量约束，并不意味着只有少数神经元参与。",
+      "在线性映射 \\(C\\alpha +d\\) 中，\\(\\alpha\\) 是 K 维潜在坐标，C 的每一列描述一个潜在因子在 N 个神经元上产生的活动模式，d 是平均偏置。矩阵形状必须相容：C 为 N×K，\\(\\alpha\\) 为 K×1，输出为 N×1。加入协方差 \\(\\Sigma\\) 后，模型还容许同一潜在状态下存在试次噪声和未建模波动。",
+      "高斯过程并不要求活动曲线呈高斯形状，而是规定潜在函数在任意多个时刻的联合分布。核函数 \\(K(t,t')\\) 描述两个时刻之间的协方差。平方指数核中的 \\(\\tau\\) 决定平滑时间尺度；\\(\\tau\\) 越大，潜在轨迹变化越慢。时间平滑、准备活动、行为读出和闭环解码分别对应不同的模型假设。 潜在坐标的方向与尺度通常带有约定。比较不同日期或任务之前，需要固定这些约定，或者先对齐子空间，再判断观察到的变化是否具有生物意义。"
     ],
     "modules": [
       {
         "id": "l22-m1",
-        "title": "Center-out 调谐与低维群体轨迹",
+        "title": "方向调谐与群体轨迹",
         "sourceRefs": [
           {
             "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -110,19 +110,19 @@
           }
         ],
         "paragraphs": [
-          "center-out task 从中心起点向多个径向 targets 伸手，因而 direction、speed、time-from-go 等变量结构清楚。对单神经元可用 \\(r(\\theta )=b+k \\cos(\\theta -\\theta _{\\mathrm{pref}})\\) 描述平均方向调谐；\\(\\theta _{\\mathrm{pref}}\\) 是 preferred direction，k 是 modulation depth。这个式子压缩了条件平均，不说明神经元“知道”角度，也不保证其他运动变量已被排除。",
-          "把同一时刻所有神经元 rates 堆成 \\(r(t)\\)，每个 reach condition 就形成一条 N 维 trajectory。若大量 variance 落在少数 PCs 上，表示轨迹接近低维子空间。单神经元曲线是高维 trajectory 在一个坐标轴上的影子；许多带相位差的影子可来自一个旋转或弯曲的群体轨迹，因此 tuning 与 dynamics 不是互相排斥的观察。",
-          "PCA 只按 variance 排序，不知道哪一维驱动 muscles。低 variance dimension 可能携带细小但行为关键的 output，尤其当 readout 对该方向 gain 很高。反过来，大 variance dimension 也可能属于 output-null preparation。判断“有用”需要同时查看 neural covariance 与 behavioral readout，而不能用 explained variance 单独裁决。",
-          "教学图中的二维 loops 或 clusters 是 projection；重叠可能由截断造成，分离也可能被 normalization 放大。比较这类轨迹时，要记录时间轴、condition colors、是否 trial-averaged、PC 是否在全条件共同拟合。若每个 condition 各自拟合 PCA，轨迹间几何将失去统一坐标，不能用于比较 target-specific preparation。"
+          "中心向外伸手任务要求从中心起点移向不同径向目标，便于区分方向、速度和启动后的时间。单神经元的平均方向调谐可写为 \\(r(\\theta )=b+k \\cos(\\theta -\\theta _{\\mathrm{pref}})\\)，其中 \\(\\theta _{\\mathrm{pref}}\\) 是偏好方向，k 是调制幅度。这个关系概括条件平均，并不表示神经元直接“知道”角度，也不能保证排除了其他运动变量。",
+          "将同一时刻全部神经元的发放率组成 \\(r(t)\\)，每种伸手条件就对应一条 N 维轨迹。大量方差集中在少数主成分时，轨迹接近低维子空间。单神经元曲线是群体轨迹在某一坐标轴上的投影；不同相位的单细胞响应可能来自同一条旋转或弯曲轨迹。因此，调谐与动力学可以是同一活动的不同描述。",
+          "PCA 按方差排序，却不指定哪个方向驱动肌肉。低方差方向若具有很高的读出增益，仍可能产生关键行为输出；高方差方向也可能用于不产生当前输出的运动准备。判断功能作用，需要同时考察神经协方差和行为读出，不能只凭方差解释率。",
+          "二维环形或簇状图只是投影：重叠可能来自维度截断，分离也可能被归一化放大。比较轨迹时应说明时间轴、条件颜色、是否做试次平均，以及主成分是否共同拟合。各条件分别拟合 PCA 会失去统一坐标，无法直接比较不同目标的准备状态。"
         ],
         "keyPoints": [
-          "方向调谐是条件平均的统计描述，不等于唯一神经编码。",
-          "单细胞 tuning 可以是低维群体 trajectory 的坐标投影。",
-          "PCA variance 与 motor potency 是不同判据。"
+          "方向调谐描述条件平均，不等于唯一的神经编码。",
+          "单细胞调谐可以是低维群体轨迹的坐标投影。",
+          "活动方差与运动输出作用是不同判据。"
         ],
         "derivation": {
           "title": "方向调谐作为二维运动向量的线性投影",
-          "setup": "把二维 reach direction 写成单位向量，并令神经元对两个坐标线性敏感。",
+          "setup": "把二维 reach 方向写成单位向量，并令神经元对两个坐标线性敏感。",
           "steps": [
             {
               "title": "写方向向量",
@@ -131,7 +131,7 @@
             },
             {
               "title": "写敏感方向",
-              "explanation": "preferred direction 也写成单位向量，modulation gain 为 k。",
+              "explanation": "偏好的方向也写成单位向量，调节增益为 k。",
               "latex": "\\mathbf q=k\\begin{bmatrix}\\cos\\theta_{\\mathrm{pref}}\\\\\\sin\\theta_{\\mathrm{pref}}\\end{bmatrix}"
             },
             {
@@ -144,28 +144,28 @@
             "r 与 b 用 Hz；k 是 Hz 的调制幅度。",
             "\\(\\theta\\) 与 \\(\\theta _{\\mathrm{pref}}\\) 必须用同一种角度单位，代入三角函数通常视为弧度。"
           ],
-          "unitsCheck": "点积中的方向向量无量纲，乘 k 后为 Hz，与 baseline b 可相加。",
-          "limitCheck": "\\(k=0\\) 时所有方向均为 b；\\(\\theta =\\theta _{\\mathrm{pref}}\\) 时 rate 达到 b+k，\\(\\theta\\) 相反时为 b-k。"
+          "unitsCheck": "点积中的方向向量无量纲，乘 k 后为 Hz，与基线 b 可相加。",
+          "limitCheck": "\\(k=0\\) 时所有方向均为 b；\\(\\theta =\\theta _{\\mathrm{pref}}\\) 时发放率达到 b+k，\\(\\theta\\) 相反时为 b-k。"
         },
         "workedExample": {
           "title": "手算四方向调谐",
-          "problem": "某神经元 \\(b=20 \\mathrm{Hz}\\)、\\(k=8 \\mathrm{Hz}\\)、\\(\\theta _{\\mathrm{pref}}=0\\)。求 \\(\\theta =0\\)、\\(\\pi /2\\)、\\(\\pi\\)、\\(3\\pi /2\\) 的预测 rate。",
+          "problem": "某神经元 \\(b=20 \\mathrm{Hz}\\)、\\(k=8 \\mathrm{Hz}\\)、\\(\\theta _{\\mathrm{pref}}=0\\)。求 \\(\\theta =0\\)、\\(\\pi /2\\)、\\(\\pi\\)、\\(3\\pi /2\\) 的预测发放率。",
           "steps": [
             "代入 \\(\\theta =0\\)，\\(\\cos 0=1\\)，得到 28 Hz。",
             "代入 \\(\\pi /2\\) 与 \\(3\\pi /2\\)，cos 为 0，均得到 20 Hz。",
             "代入 \\(\\pi\\)，cos\\(\\pi =-1\\)，得到 12 Hz。"
           ],
-          "result": "四个 rates 依次为 28、20、12、20 Hz。",
-          "sanityCheck": "最大值与最小值关于 baseline 20 Hz 对称，平均仍为 20 Hz。"
+          "result": "四个发放率依次为 28、20、12、20 Hz。",
+          "sanityCheck": "最大值与最小值关于基线 20 Hz 对称，平均仍为 20 Hz。"
         },
         "pitfalls": [
-          "把 cosine fit 的 preferred direction 当作固定不变的因果标签。",
-          "把 trial-averaged projection 的平滑性误当成单 trial 无噪声。"
+          "将余弦拟合的偏好方向当作固定不变的因果标签。",
+          "把试次平均后的平滑投影，当成单次活动没有噪声。"
         ]
       },
       {
         "id": "l22-m2",
-        "title": "Latent space、activity space 与 GPFA 观测模型",
+        "title": "GPFA 如何连接潜在状态与神经活动",
         "sourceRefs": [
           {
             "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -177,67 +177,68 @@
           }
         ],
         "paragraphs": [
-          "令 \\(r_{t}\\) 为 N 个神经元在 time bin t 的观测向量，\\(\\alpha _{t}\\) 为 K 个 latent factors。观测模型 \\(r_{t}|\\alpha _{t}\\) 服从均值 \\(C\\alpha _{t}+d\\)、协方差 \\(\\Sigma\\) 的多元高斯。C 的 rows 对应 neurons，columns 对应 factors；d 是每个神经元的 baseline。若使用 spike counts，Gaussian 是近似，bin width 太小或 rates 太低时 Poisson observation model 可能更合适。",
-          "latent space 中一条 K 维 trajectory 经 C 嵌入 N 维 activity space。C 的 column span 是模型允许的共享活动子空间；\\(\\Sigma\\) 通常承接 neuron-specific residual。共同变化并不要求 neuron pairs 具有相同 waveform，因为 C 的正负 loading 会让同一 factor 在不同 cells 上产生不同幅度和方向。",
-          "只看条件观测均值时存在坐标重参数化：对任意可逆 K×K 矩阵 A，可令 \\(\\alpha '=A\\alpha\\)、\\(C'=CA^{-1}\\)，于是 \\(C'\\alpha '=C\\alpha\\)。但这只证明 conditional mean 不变；若要保持完整 GPFA marginal likelihood，还必须把 latent prior covariance 同步变成 \\(A K A^\\mathrm{T}\\)。标准 GPFA 通常要求 factors 相互独立且可有不同 temporal kernels，任意旋转一般会引入 factor 间 covariance，因此不再属于同一模型族。符号翻转、factor permutation 与配套 scale change 是常见 ambiguity；更一般的旋转等价需要 identical kernels 或允许 correlated prior 等额外条件。",
-          "GP prior 给 \\(\\alpha\\) 的时间结构，观测模型给 r 与 \\(\\alpha\\) 的空间关系。两者分工不能倒置：C 不负责平滑时间，kernel 不直接说明每个神经元的 loading。\\(\\Sigma\\) 若取 diagonal，表示给定 latent 后 residual neurons 条件独立；若数据仍有强 residual correlations，K 太小、kernel 不合适或 noise model 过简都可能是原因。"
+          "令 \\(r_{t}\\) 表示时间窗 t 内 N 个神经元的观测，\\(\\alpha _{t}\\) 表示 K 个潜在因子。条件分布 \\(r_{t}|\\alpha _{t}\\) 是均值为 \\(C\\alpha _{t}+d\\)、协方差为 \\(\\Sigma\\) 的多元高斯分布。C 的行对应神经元，列对应因子，d 是各神经元的基线。若观测为脉冲计数，高斯分布只是一种近似；时间窗过小或发放过低时，泊松观测模型可能更合适。",
+          "潜在空间中的 K 维轨迹经 C 映射到 N 维神经活动空间。C 的列张成共享活动子空间，\\(\\Sigma\\) 通常描述各神经元的残差。同一个因子可通过正负载荷，在不同细胞上产生不同幅度和方向的变化，因此共享因子并不要求细胞波形相同。",
+          "只看观测均值时，潜在坐标可以重参数化。对任意可逆 K×K 矩阵 A，令 \\(\\alpha '=A\\alpha\\)、\\(C'=CA^{-1}\\)，就有 \\(C'\\alpha '=C\\alpha\\)。要进一步保持完整 GPFA 的边缘似然，还必须同时将潜在先验协方差变为 \\(A K A^\\mathrm{T}\\)。标准 GPFA 通常假定因子独立，并允许各自具有不同时间核；任意旋转会引入因子间协方差，因而一般不再属于原模型族。符号翻转、因子重排和配套的尺度变化是常见歧义；更一般的旋转等价还需相同核或允许相关先验等条件。",
+          "高斯过程先验规定 \\(\\alpha\\) 的时间结构，观测模型规定神经记录 r 与 \\(\\alpha\\) 的空间关系。C 决定载荷而非时间平滑，时间核也不直接决定各细胞载荷。若 \\(\\Sigma\\) 为对角矩阵，则给定潜在状态后，各神经元残差条件独立。明显的残差相关可能提示因子过少、时间核不合适或噪声模型过于简单。"
         ],
         "keyPoints": [
-          "C 为 N×K，连接 latent 与神经活动空间。",
-          "\\(\\Sigma\\) 描述给定 latent 后的残差，不等于原始数据 covariance。",
-          "conditional observation coordinates 可重参数化；完整 GPFA 是否等价还取决于 latent prior。"
+          "C 为 N×K，连接潜在空间与神经活动空间。",
+          "\\(\\Sigma\\) 是给定潜在状态后的残差协方差，而非原始数据协方差。",
+          "观测均值可通过坐标重参数化保持不变；完整模型是否等价还取决于潜在先验。"
         ],
         "derivation": {
           "title": "观测模型的形状与条件均值重参数化",
-          "setup": "先检查每个向量形状，再证明 latent 重参数化不改变 conditional mean；这一步不自动证明完整 GP prior 或 marginal likelihood 不变。",
+          "setup": "先检查每个向量形状，再证明潜在重参数化不改变条件均值；这一步不自动证明完整 GP 先验或边缘似然不变。",
           "steps": [
             {
               "title": "列出形状",
-              "explanation": "N 个 neurons、K 个 factors 时，矩阵乘法输出 N 维。",
+              "explanation": "N 个神经元、K 个因子时，矩阵乘法输出 N 维。",
               "latex": "C\\in\\mathbb R^{N\\times K},\\quad\\boldsymbol\\alpha_t\\in\\mathbb R^K,\\quad\\mathbf d\\in\\mathbb R^N"
             },
             {
               "title": "写条件均值",
-              "explanation": "观测高斯的中心位于 activity space。",
+              "explanation": "观测高斯的中心位于活动空间。",
               "latex": "\\mathbb E[\\mathbf r_t\\mid\\boldsymbol\\alpha_t]=C\\boldsymbol\\alpha_t+\\mathbf d"
             },
             {
               "title": "做可逆变换",
-              "explanation": "令新的 latent 坐标为 \\(A\\alpha\\)，并相应反向改变 loading。",
+              "explanation": "令新的潜在坐标为 \\(A\\alpha\\)，并相应反向改变负载。",
               "latex": "\\boldsymbol\\alpha_t^{\\prime}=A\\boldsymbol\\alpha_t,\\qquad C^{\\prime}=CA^{-1}"
             },
             {
               "title": "验证预测不变",
-              "explanation": "相乘后 \\(A^{-1}A\\) 抵消，因此两套坐标给出相同 conditional mean；完整模型还要另行检查 transformed prior covariance。",
+              "explanation": "相乘后 \\(A^{-1}A\\) 抵消，因此两套坐标给出相同条件均值；完整模型还要另行检查变换后的先验协方差。",
               "latex": "C^{\\prime}\\boldsymbol\\alpha_t^{\\prime}=CA^{-1}A\\boldsymbol\\alpha_t=C\\boldsymbol\\alpha_t"
             }
           ],
           "symbolNotes": [
-            "N 是 neuron 数，K 是 latent 维数，通常 \\(K<N\\)。",
-            "\\(\\Sigma\\) 为 N×N covariance，diagonal elements 是 residual variances；latent prior covariance 若随 A 变换，一般不再保持 factor-wise diagonal structure。"
+            "N 是神经元数，K 是潜在维数，通常 \\(K<N\\)。",
+            "\\(\\Sigma\\) 为 N×N 协方差，对角元素是残差方差；潜在先验协方差若随 A 变换，一般不再保持逐因子对角结构。"
           ],
-          "unitsCheck": "\\(C\\alpha\\) 与 d 都必须使用 r 的单位；若 \\(\\alpha\\) 无量纲，C 的元素沿用 rate 或 count 单位。\\(\\Sigma\\) 使用观测单位的平方。",
-          "limitCheck": "\\(K=N\\) 且 C 可逆时不再是降维；若所有 latent factors 共用相同 kernel，orthogonal rotation 可保留 prior 形式，kernels 不同时则通常不可任意旋转。"
+          "unitsCheck": "\\(C\\alpha\\) 与 d 都必须使用 r 的单位；若 \\(\\alpha\\) 无量纲，C 的元素沿用发放率或计数单位。\\(\\Sigma\\) 使用观测单位的平方。",
+          "limitCheck": "\\(K=N\\) 且 C 可逆时不再是降维；若所有潜在因子共用相同核，正交旋转可保留先验形式，核函数不同时则通常不可任意旋转。"
         },
         "workedExample": {
           "title": "两神经元单因子重构",
-          "problem": "\\(C=(2,-1)^\\mathrm{T} \\mathrm{Hz}\\)、\\(d=(10,20)^\\mathrm{T} \\mathrm{Hz}\\)，某时刻 \\(\\alpha =3\\)。求预测 rates。",
+          "problem": "\\(C=(2,-1)^\\mathrm{T} \\mathrm{Hz}\\)、\\(d=(10,20)^\\mathrm{T} \\mathrm{Hz}\\)，某时刻 \\(\\alpha =3\\)。求预测发放率。",
           "steps": [
             "第一神经元均值为 \\(2\\times 3+10=16 \\mathrm{Hz}\\)。",
             "第二神经元均值为 \\(-1\\times 3+20=17 \\mathrm{Hz}\\)。",
-            "负 loading 表示 latent 增大时第二神经元低于 baseline，并不表示 firing rate 为负。"
+            "负负载表示潜在增大时第二神经元低于基线，并不表示发放率为负。"
           ],
           "result": "预测均值是 \\((16,17)^\\mathrm{T} \\mathrm{Hz}\\)。",
-          "sanityCheck": "把 \\(\\alpha\\) 改为 0 时应回到 baseline \\((10,20)^\\mathrm{T} \\mathrm{Hz}\\)。"
+          "sanityCheck": "把 \\(\\alpha\\) 改为 0 时应回到基线 \\((10,20)^\\mathrm{T} \\mathrm{Hz}\\)。"
         },
         "pitfalls": [
-          "把 latent factor 当作直接测量到的神经元。",
-          "看到 diagonal \\(\\Sigma\\) 就断言真实 neurons 独立；独立性只在给定 latent 的残差层成立。"
-        ]
+          "把潜在因子当作直接记录到的神经元。",
+          "由对角 \\(\\Sigma\\) 推断真实神经元相互独立，忽略这是给定潜在状态后的残差假设。"
+        ],
+        "transition": "群体投影展示了共同变化，但尚未区分共享活动和观测噪声。高斯过程因子分析（GPFA）用观测模型明确这两部分的关系。"
       },
       {
         "id": "l22-m3",
-        "title": "GP 时间核、参数拟合与 delayed-reach 轨迹",
+        "title": "时间核与延迟伸手轨迹",
         "sourceRefs": [
           {
             "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -249,67 +250,68 @@
           }
         ],
         "paragraphs": [
-          "平方指数 kernel \\(K(t,t')=\\sigma s^{2}\\) \\(\\exp[-(t-t')^{2}/(2\\tau ^{2})]+\\sigma n^{2}\\delta tt'\\) 给同一 factor 在两时刻的 covariance。\\(\\sigma s^{2}\\) 控制平滑 signal variance，\\(\\tau\\) 控制 correlation 衰减时间，\\(\\sigma n^{2}\\) 只在相同 time bin 加入独立波动。由于 \\(\\alpha\\) 与 loading C 存在整体 scale ambiguity，采用 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 作为归一化约定；这个约束固定尺度，不是新的生物定律。该 kernel 也不是 GP 的唯一形式；有快速切换或振荡时，Matérn 或 periodic kernels 可能更贴近假设。",
-          "fitting 同时估计 latent trajectories、loadings、baselines、noise 与 kernel hyperparameters，通常以 marginal likelihood 或 EM 类 procedure 完成。增加 K 总会提高 in-sample flexibility，因此维数应由 cross-validation、held-out likelihood 或 reconstruction prediction 选择。只看训练 explained variance 会把 noise dimensions 当作有意义 factors。",
-          "delayed reach 要沿时间线读图：target 出现后、go cue 前是 preparatory epoch；go 后才进入 movement epoch。不同 targets 的 preparation 可走向不同 latent locations，却不产生明显运动。go cue 后 trajectories 从这些初态进入 target-specific movement paths。图形支持“initial condition influences subsequent dynamics”，但单靠轨迹不能排除共同输入持续驱动。",
-          "trial averaging 会使准备轨迹更清楚，却掩盖单 trial onset jitter 与 variability。若声称 trajectory geometry 预测 behavior，应在留出 trials 上用 pre-go latent state 预测 reaction time、direction error 或 muscle activity。仅仅在 go cue 对齐后看到分叉，可能是对齐和条件平均的结果，必须与 shuffled labels 和 alternative alignments 比较。"
+          "平方指数核 \\(K(t,t')=\\sigma_s^2\\exp[-(t-t')^2/(2\\tau^2)]+\\sigma_n^2\\delta_{tt'}\\) 描述同一因子在两个时刻的协方差。\\(\\sigma_s^{2}\\) 控制平滑信号的方差，\\(\\tau\\) 控制相关衰减的时间尺度，\\(\\sigma_n^{2}\\) 只在同一时间窗加入独立波动。由于潜在状态 \\(\\alpha\\) 与载荷 C 存在整体尺度歧义，可以采用 \\(\\sigma_n^{2}+\\sigma_s^{2}=1\\) 固定尺度；它是归一化约定，而非生物定律。平方指数核也不是唯一选择，快速切换或周期变化可考虑 Matérn 核或周期核。",
+          "拟合需要同时估计潜在轨迹、载荷、基线、噪声和核的超参数，通常使用边缘似然或 EM 类方法。增加因子数总能提高训练集上的灵活性，因此应通过交叉验证、留出似然或重构预测选维。只看训练方差解释率，可能将噪声方向误判为有意义的因子。",
+          "延迟伸手任务中，目标出现到启动提示之间是准备期，提示后才进入运动期。不同目标可使准备活动到达不同潜在位置，却不产生明显运动；提示后，轨迹再从这些初态进入各自的运动路径。这支持初始条件影响后续动力学的解释，但轨迹本身不能排除持续共同输入的驱动。",
+          "试次平均能凸显准备轨迹，也会隐藏单次起始时刻的抖动和活动差异。若要检验轨迹是否预测行为，应在留出试次上，用提示前的潜在状态预测反应时、方向误差或肌肉活动。提示对齐后出现分叉，也可能来自对齐和条件平均，需要与标签打乱和其他对齐方式比较。"
         ],
         "keyPoints": [
-          "\\(\\tau\\) 是 temporal correlation scale，不是 trial duration。",
-          "kernel family 是建模假设，需用留出数据检验。",
-          "delayed-reach 轨迹的时间段必须由 target、go 与 movement events 分界。"
+          "\\(\\tau\\) 是时间相关尺度，不是试次持续时间。",
+          "时间核是建模假设，应通过留出数据检验。",
+          "准备期与运动期应依据目标、启动提示和运动事件区分。"
         ],
         "derivation": {
           "title": "平方指数核的两个极限",
-          "setup": "固定时间差 \\(\\Delta t\\)，比较 \\(\\tau\\) 远大于和远小于该差值时的 covariance。",
+          "setup": "固定时间差 \\(\\Delta t\\)，比较 \\(\\tau\\) 远大于和远小于该差值时的协方差。",
           "steps": [
             {
               "title": "改写时间差",
-              "explanation": "令 \\(\\Delta t=t-t'\\)，先看非同一 time bin，因而 Kronecker delta 为零。",
+              "explanation": "令 \\(\\Delta t=t-t'\\)，先看非同一时间格，因而 克罗内克符号 为零。",
               "latex": "K(\\Delta t)=\\sigma_s^2\\exp\\!\\left(-\\frac{\\Delta t^2}{2\\tau^2}\\right)"
             },
             {
               "title": "取长时间尺度极限",
-              "explanation": "\\(\\tau\\) 远大于 \\(|\\Delta t|\\) 时 exponent 接近零。",
+              "explanation": "\\(\\tau\\) 远大于 \\(|\\Delta t|\\) 时指数接近零。",
               "latex": "\\lim_{\\tau\\to\\infty}K(\\Delta t)=\\sigma_s^2"
             },
             {
               "title": "取短时间尺度极限",
-              "explanation": "对固定非零 \\(\\Delta t\\)，\\(\\tau\\) 趋近零时 exponent 趋向负无穷。",
+              "explanation": "对固定非零 \\(\\Delta t\\)，\\(\\tau\\) 趋近零时指数趋向负无穷。",
               "latex": "\\lim_{\\tau\\to0^+}K(\\Delta t)=0\\quad(\\Delta t\\ne0)"
             },
             {
               "title": "加入同点噪声",
-              "explanation": "\\(t=t'\\) 时 signal variance 与 diagonal noise variance 相加。",
+              "explanation": "\\(t=t'\\) 时信号方差与对角噪声方差相加。",
               "latex": "K(t,t)=\\sigma_s^2+\\sigma_n^2"
             }
           ],
           "symbolNotes": [
-            "\\(\\sigma s^{2}\\) 与 \\(\\sigma n^{2}\\) 是 latent amplitude 的平方单位；约束 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 固定该 factor 的任意整体尺度。",
-            "\\(\\tau\\) 与 t 使用同一时间单位；\\(\\delta tt'\\) 是离散 time-bin indicator。"
+            "\\(\\sigma s^{2}\\) 与 \\(\\sigma n^{2}\\) 是潜在振幅的平方单位；约束 \\(\\sigma n^{2}+\\sigma s^{2}=1\\) 固定该因子的任意整体尺度。",
+            "\\(\\tau\\) 与 t 使用同一时间单位；\\(\\delta tt'\\) 是离散时间-时间格指示变量。"
           ],
-          "unitsCheck": "指数的分子和分母都是时间平方，因此无量纲；K 保留 latent variance 单位。",
-          "limitCheck": "\\(\\tau \\to \\infty\\) 时在有限窗口内 factor 接近常量；\\(\\tau \\to 0\\) 时跨 bin covariance 消失，平滑先验退化。"
+          "unitsCheck": "指数的分子和分母都是时间平方，因此无量纲；K 保留潜在方差单位。",
+          "limitCheck": "\\(\\tau \\to \\infty\\) 时在有限窗口内因子接近常量；\\(\\tau \\to 0\\) 时跨时间格协方差消失，平滑先验退化。"
         },
         "workedExample": {
           "title": "比较两个时间间隔的相关强度",
-          "problem": "忽略 \\(\\sigma n\\)，令 \\(\\sigma s^{2}=1\\)、\\(\\tau =100 \\mathrm{ms}\\)。计算 \\(\\Delta t=100 \\mathrm{ms}\\) 与 200 ms 时的 covariance 近似值。",
+          "problem": "忽略 \\(\\sigma n\\)，令 \\(\\sigma s^{2}=1\\)、\\(\\tau =100 \\mathrm{ms}\\)。计算 \\(\\Delta t=100 \\mathrm{ms}\\) 与 200 ms 时的协方差近似值。",
           "steps": [
-            "\\(\\Delta t=100\\) 时 exponent=-1/2，\\(K=e^{-1/2}\\approx 0.607\\)。",
-            "\\(\\Delta t=200\\) 时 exponent=\\(-4/2=-2\\)，\\(K=e^{-2}\\approx 0.135\\)。",
-            "第二个间隔加倍，但 covariance 下降超过四倍，来自 squared distance。"
+            "\\(\\Delta t=100\\) 时指数=-1/2，\\(K=e^{-1/2}\\approx 0.607\\)。",
+            "\\(\\Delta t=200\\) 时指数=\\(-4/2=-2\\)，\\(K=e^{-2}\\approx 0.135\\)。",
+            "第二个间隔加倍，但协方差下降超过四倍，来自平方距离。"
           ],
           "result": "两者约为 0.607 与 0.135。",
-          "sanityCheck": "\\(\\Delta t=0\\) 时应为 1；随着 \\(|\\Delta t|\\) 增加，kernel 单调下降。"
+          "sanityCheck": "\\(\\Delta t=0\\) 时应为 1；随着 \\(|\\Delta t|\\) 增加，核单调下降。"
         },
         "pitfalls": [
-          "把 \\(\\tau\\) 当成 latent 数量 K。",
-          "把 go 后分叉直接解释成 recurrent causality，不检验持续输入模型。"
-        ]
+          "将 \\(\\tau\\) 与潜在因子数 K 混淆。",
+          "将提示后的轨迹分叉直接解释为递归因果作用，未比较持续输入模型。"
+        ],
+        "transition": "观测模型规定单个时刻的映射，时间核再连接相邻时刻。轨迹的平滑程度也需要由留出数据检验。"
       },
       {
         "id": "l22-m4",
-        "title": "Preparatory activity、linear readout 与 output-null space",
+        "title": "运动准备与输出零空间",
         "sourceRefs": [
           {
             "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -321,67 +323,68 @@
           }
         ],
         "paragraphs": [
-          "局部线性 readout 写成 \\(m=Ur\\)，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。把 U 写成 N×M 会与 \\(m=Ur\\) 的矩阵乘法不相容，所以直接采用 M×N。若某个非零 r 满足 \\(Ur=0\\)，它位于 U 的 null space，并不意味着 neurons 静默。准备活动可以沿 null directions 改变 network state，而在该近似下不改变 output；go cue 后 state 转入 potent directions，readout 才非零。",
-          "rank-nullity 给 dim Null\\((U)=N-\\operatorname{rank}(U)\\)。只有 U 具有 full row \\(\\operatorname{rank} M\\) 时，它才简化成 N-M；若 \\(\\operatorname{rank}(U)<M\\)，零空间会更大。当记录维数远大于 motor output 维数时，理论上可有很大的 null space。但实际 recorded r 只采样 neurons，真实 downstream mapping 也可能 nonlinear、state-dependent 或延迟，所以根据一个 fitted U 得到的 null space 是模型相对概念，不是解剖上绝对无输出的通路。",
-          "分解 r=rpotent+rnull 可用 U 的 singular value decomposition。row space directions 改变 output，orthogonal complement 属于 null space。检验准备活动是否 output-null，应在独立 trials 拟合 U，测 pre-go projections，并检查 EMG 或 kinematics；若在同一数据上挑方向再报告零输出，会产生 circular analysis。",
-          "output-null 不等于 computation-null。沿 null direction 的活动可设定 recurrent initial condition、抑制错误动作或准备多个候选。相同神经向量也可能通过未记录 downstream populations 产生效果。课程图提供的是 linear framework：它把“活动存在”和“当前输出存在”分开，而不许可把 null activity 称为生物上无功能。"
+          "局部线性读出写为 \\(m=Ur\\)。r 是 N 维神经状态，m 是 M 维运动命令，因此 U 必须为 M×N，才能满足 \\(m=Ur\\) 的矩阵乘法。非零状态若满足 \\(Ur=0\\)，便位于 U 的零空间，但神经元并未静默。准备活动可沿这些方向改变内部状态，而不改变当前线性输出；启动提示后进入有输出效应的方向，读出才会改变。",
+          "秩—零度关系给出零空间维数 \\((U)=N-\\operatorname{rank}(U)\\)。仅在 U 具有满行秩 \\(\\operatorname{rank} M\\) 时，维数才等于 N-M；若 \\(\\operatorname{rank}(U)<M\\)，零空间更大。记录维数远大于输出维数时，模型可容许较大的零空间。但记录只覆盖部分细胞，真实下游映射也可能非线性、随状态改变或存在延迟，因此拟合得到的零空间是相对于模型定义的。",
+          "利用 U 的奇异值分解，可将活动拆成有输出分量和零空间分量。行空间方向改变输出，其正交补属于零空间。应在独立试次上拟合读出，再测提示前的投影，并结合肌电或运动学检验。若在同一数据中挑选方向，又用该数据证明没有输出，会产生循环分析。",
+          "不改变当前输出，并不代表不参与计算。零空间活动可以设置递归初态、抑制错误动作或准备多个候选，也可能通过未记录的下游群体发挥作用。线性框架区分了神经活动与当前读出，不能据此将零空间活动解释为无功能。"
         ],
         "keyPoints": [
-          "\\(Ur=0\\) 可以有 \\(r\\ne 0\\)。",
-          "null space 大小由输入维数与 rank 决定。",
-          "output-null 是相对于指定 readout U 的模型陈述。"
+          "\\(Ur=0\\) 与 \\(r\\ne 0\\) 可以同时成立。",
+          "零空间维数由输入维数和矩阵秩决定。",
+          "输出零空间始终相对于指定的读出矩阵 U。"
         ],
         "derivation": {
-          "title": "rank-nullity 与 potent/null 分解",
-          "setup": "对 M×N readout U，用线性代数说明非零准备态如何不产生输出。",
+          "title": "秩-零度与有效空间与零空间分解",
+          "setup": "对 M×N 读出 U，用线性代数说明非零准备态如何不产生输出。",
           "steps": [
             {
-              "title": "写 readout",
-              "explanation": "输出由 neural state 的线性组合给出。",
+              "title": "写读出",
+              "explanation": "输出由神经状态的线性组合给出。",
               "latex": "\\mathbf m=U\\mathbf r,\\qquad U\\in\\mathbb R^{M\\times N}"
             },
             {
               "title": "定义零空间",
-              "explanation": "所有映射为零的输入向量构成 linear subspace。",
+              "explanation": "所有映射为零的输入向量构成线性子空间。",
               "latex": "\\operatorname{Null}(U)=\\{\\mathbf r:U\\mathbf r=\\mathbf0\\}"
             },
             {
               "title": "计算维数",
-              "explanation": "rank-nullity 把可见输出方向与不可见输入方向加总为 N。",
+              "explanation": "秩-零度把可见输出方向与不可见输入方向加总为 N。",
               "latex": "\\dim\\operatorname{Null}(U)=N-\\operatorname{rank}(U)"
             },
             {
               "title": "验证分解",
-              "explanation": "若 rnull 在零空间，则它不改变由 potent component 决定的输出。",
+              "explanation": "若 rnull 在零空间，则它不改变由 有效分量决定的输出。",
               "latex": "U(\\mathbf r_{\\mathrm{potent}}+\\mathbf r_{\\mathrm{null}})=U\\mathbf r_{\\mathrm{potent}}"
             }
           ],
           "symbolNotes": [
-            "M 是 output coordinates 数，N 是 neural coordinates 数。",
+            "M 是输出坐标数，N 是神经坐标数。",
             "\\(\\operatorname{rank}(U)\\) 不超过 \\(\\min(M,N)\\)；所有向量需在同一中心化约定下。"
           ],
-          "unitsCheck": "若 r 用 Hz、m 用 command units，则 U 的单位是 command units/Hz；零向量有相应输出单位。",
-          "limitCheck": "U full column rank 且 \\(N\\le M\\) 时 null space 只有零向量；N≫M 时 null space 至少有 N-M 维。"
+          "unitsCheck": "若 r 用 Hz、m 用指令单位，则 U 的单位是指令单位/Hz；零向量有相应输出单位。",
+          "limitCheck": "U 完整列秩且 \\(N\\le M\\) 时零空间只有零向量；N≫M 时零空间至少有 N-M 维。"
         },
         "workedExample": {
-          "title": "手算一个 output-null vector",
-          "problem": "令 \\(U=[1,2]\\)，\\(r=(2,-1)^\\mathrm{T}\\)。求 m，并给出一个 potent vector。",
+          "title": "手算一个输出零空间向量",
+          "problem": "令 \\(U=[1,2]\\)，\\(r=(2,-1)^\\mathrm{T}\\)。求 m，并给出一个 有效空间中的向量。",
           "steps": [
-            "\\(m=1\\times 2+2\\times (-1)=0\\)，所以 r 是非零 null vector。",
+            "\\(m=1\\times 2+2\\times (-1)=0\\)，所以 r 是非零零向量。",
             "选 rpotent=\\((1,0)^\\mathrm{T}\\)，则 \\(m=1\\)。",
             "把两者相加得 \\((3,-1)^\\mathrm{T}\\)，输出仍为 \\(3+2\\times (-1)=1\\)。"
           ],
-          "result": "null component 改变 neural state，却没有改变原 potent output 1。",
-          "sanityCheck": "U 的 null vector方向与 row vector (1,2) 点积为零，几何上相互正交。"
+          "result": "零分量改变神经状态，却没有改变原 有效输出 1。",
+          "sanityCheck": "U 的零向量方向与行向量 (1,2) 点积为零，几何上相互正交。"
         },
         "pitfalls": [
-          "把 \\(Ur=0\\) 错写成 \\(r=0\\)。",
-          "在训练同一 trials 上定义和检验 null space，造成过拟合。"
-        ]
+          "由 \\(Ur=0\\) 错误推断 \\(r=0\\)。",
+          "在同一批训练试次上定义并检验零空间，造成过拟合。"
+        ],
+        "transition": "准备期活动变化却未产生运动，可能与读出方向有关。指定神经活动到运动输出的映射后，才能定义哪些方向不改变当前输出。"
       },
       {
         "id": "l22-m5",
-        "title": "闭环 BMI 与跨日 latent alignment",
+        "title": "闭环脑机接口与跨日对齐",
         "sourceRefs": [
           {
             "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -389,63 +392,64 @@
           }
         ],
         "paragraphs": [
-          "BMI decoder 将 neural features 映成 cursor velocity、position 或 discrete action。open-loop calibration 中，participant 看预定 movement 或尝试动作，系统离线拟合 mapping；closed-loop 时 decoder output 立刻改变视觉反馈，participant 与 decoder 共同适应。因此闭环表现不是固定编码质量的被动读数，而是 brain、decoder 与 feedback 构成的新 dynamical system。",
-          "若第 d 天观测 \\(r_{d}=C_{d}\\alpha +d_{d}+\\mathrm{noise}\\)，不同电极采样会改变 \\(C_{d}\\)，却可能保留相似 latent dynamics。跨日方法先估 daily subspaces，再找 alignment \\(A_{d}\\)，使不同天的 \\(\\alpha\\) coordinates 可比较，最后在 aligned latent 上用 \\(\\hat{v}=B\\alpha\\)。这里的稳定性是“存在可转移的低维关系”，不是要求每个 neuron 的 loading 不变。",
-          "alignment 也可能制造虚假稳定：若使用当天 behavior labels 旋转 latent space，随后在同一天测试 decoder，会泄漏答案。严格评估应只用 calibration data 估 \\(A_{d}\\) 和 B，再在 held-out blocks 或 future days 测试；还要与不对齐、随机对齐、直接 neuron-space decoder 比较，并报告 adaptation time 与 failure days。",
-          "这些概念可以串成一条闭环：PCA/GPFA 提供 shared subspace，linear readout 提供行为 mapping，closed-loop feedback 改变数据分布，alignment 处理 coordinate drift。每一步都有假设，不能把“latent 较稳定”扩写成单神经元表征永久不变。"
+          "脑机接口（BMI）将神经特征解码为光标速度、位置或离散动作。开环校准时，参与者观看预设运动或尝试动作，系统离线拟合映射；闭环时，解码输出立即改变视觉反馈，参与者与解码器共同适应。因此，闭环表现来自大脑、解码器和反馈构成的联合动力学系统，并非固定编码质量的被动读数。",
+          "若第 d 天的观测为 \\(r_{d}=C_{d}\\alpha +d_{d}+\\mathrm{noise}\\)，电极采样变化会改变 \\(C_{d}\\)，但潜在动力学仍可能相似。跨日方法先估计各日子空间，再寻找对齐映射 \\(A_{d}\\)，使不同日期的 \\(\\alpha\\) 可比较，最后在对齐后的潜在状态上使用 \\(\\hat{v}=B\\alpha\\)。这里的稳定性指低维关系可以迁移，不要求每个神经元的载荷保持不变。",
+          "对齐也可能制造虚假稳定。若用测试当天的行为标签旋转潜在空间，再在同一数据中测试解码，就泄漏了答案。应仅用校准数据估计 \\(A_{d}\\) 和 B，再在留出数据块或后续日期测试，并与不对齐、随机对齐和直接神经元空间解码比较，同时报告适应时间及失败日期。",
+          "PCA 或 GPFA 提取共享子空间，线性读出将其映射到行为，闭环反馈改变随后收集的数据分布，跨日对齐再处理坐标漂移。各步骤都含有假设，因此潜在关系较稳定不能直接推出单神经元表征永久不变。"
         ],
         "keyPoints": [
-          "闭环 BMI 是 brain-decoder-feedback 联合系统。",
-          "跨日 alignment 对齐群体坐标，而非强求单元身份稳定。",
-          "future-day 留出检验可防止用 behavior labels 泄漏对齐结果。"
+          "闭环 BMI 是大脑、解码器和反馈的联合系统。",
+          "跨日对齐调整群体坐标，并非要求单元身份不变。",
+          "在后续日期留出测试，可减少行为标签参与对齐造成的信息泄漏。"
         ],
         "derivation": {
-          "title": "跨日 latent decoder 的映射链",
-          "setup": "把每一天的观测先投到日内 latent，再对齐到参考坐标并解码。",
+          "title": "跨日潜在解码器的映射链",
+          "setup": "把每一天的观测先投到日内潜在，再对齐到参考坐标并解码。",
           "steps": [
             {
               "title": "写每日观测",
-              "explanation": "电极采样变化体现在 daily loading 与 baseline。",
+              "explanation": "电极采样变化体现在每日负载与基线。",
               "latex": "\\mathbf r_d=C_d\\boldsymbol\\alpha_d+\\mathbf d_d+\\boldsymbol\\eta_d"
             },
             {
               "title": "对齐坐标",
-              "explanation": "用 \\(A_{d}\\) 将第 d 天 latent 映到 reference latent space。",
+              "explanation": "用 \\(A_{d}\\) 将第 d 天潜在映到参考潜在空间。",
               "latex": "\\widetilde{\\boldsymbol\\alpha}_d=A_d\\boldsymbol\\alpha_d"
             },
             {
-              "title": "应用共享 decoder",
+              "title": "应用共享解码器",
               "explanation": "行为预测在对齐坐标中使用同一 B。",
               "latex": "\\widehat{\\mathbf v}_d=B\\widetilde{\\boldsymbol\\alpha}_d"
             },
             {
               "title": "定义留出误差",
-              "explanation": "在未参与对齐和拟合的 time bins 上比较真实与预测 velocity。",
+              "explanation": "在未参与对齐和拟合的时间格上比较真实与预测速度。",
               "latex": "E_d=\\frac{1}{T_{\\mathrm{test}}}\\sum_t\\lVert\\mathbf v_{d,t}-\\widehat{\\mathbf v}_{d,t}\\rVert_2^2"
             }
           ],
           "symbolNotes": [
-            "\\(C_{d}\\) 是 neurons×latents，\\(A_{d}\\) 是 latents×latents，B 是 outputs×latents。",
-            "不同天 neuron 数可变，但对齐后的 latent dimension 必须一致。"
+            "\\(C_{d}\\) 是神经元×潜变量，\\(A_{d}\\) 是潜变量×潜变量，B 是输出×潜变量。",
+            "不同天神经元数可变，但对齐后的潜在维度必须一致。"
           ],
-          "unitsCheck": "若 velocity 用 cm/s、latent 无量纲，B 用 cm/s；squared error 用 \\(\\mathrm{cm}^{2}/s^{2}\\)。",
-          "limitCheck": "\\(A_{d}=I\\) 表示无需旋转；若 latent subspaces 完全不重叠，线性 alignment 不应被期待恢复准确 decoder。"
+          "unitsCheck": "若速度用 cm/s、潜在无量纲，B 用 cm/s；平方误差用 \\(\\mathrm{cm}^{2}/s^{2}\\)。",
+          "limitCheck": "\\(A_{d}=I\\) 表示无需旋转；若潜在子空间完全不重叠，线性对齐不应被期待恢复准确解码器。"
         },
         "workedExample": {
-          "title": "二维 latent 的轴交换",
-          "problem": "第 2 天 latent 坐标相对第 1 天交换：\\(\\alpha _{2}=(3,1)^\\mathrm{T}\\)，而参考顺序应为 \\((1,3)^\\mathrm{T}\\)。给出 alignment 并计算 \\(B=[2,-1]\\) 的预测。",
+          "title": "二维潜在的轴交换",
+          "problem": "第 2 天潜在坐标相对第 1 天交换：\\(\\alpha _{2}=(3,1)^\\mathrm{T}\\)，而参考顺序应为 \\((1,3)^\\mathrm{T}\\)。给出对齐并计算 \\(B=[2,-1]\\) 的预测。",
           "steps": [
             "用 \\(A=[[0,1],[1,0]]\\) 交换两坐标，得到 \\(\\widetilde{\\alpha }=(1,3)^\\mathrm{T}\\)。",
             "应用 B，\\(\\hat{v}=2\\times 1-1\\times 3=-1\\)。",
-            "若不对齐会得到 \\(2\\times 3-1\\times 1=5\\)，说明坐标约定改变可严重破坏 decoder。"
+            "若不对齐会得到 \\(2\\times 3-1\\times 1=5\\)，说明坐标约定改变可严重破坏解码器。"
           ],
           "result": "对齐后预测 -1；未对齐预测 5。",
-          "sanityCheck": "A 是 permutation matrix，\\(A^\\mathrm{T} A=I\\)，不改变 latent vector 长度。"
+          "sanityCheck": "A 是置换矩阵，\\(A^\\mathrm{T} A=I\\)，不改变潜在向量长度。"
         },
         "pitfalls": [
-          "把 aligned latent stability 误解为单神经元 identity 永久稳定。",
-          "先用 test-day behavior 选择 alignment，再把同一数据报告为跨日泛化。"
-        ]
+          "将对齐后潜在关系的稳定，误解为单神经元身份永久稳定。",
+          "用测试日行为选择对齐方式，再将同一数据报告为跨日泛化。"
+        ],
+        "transition": "改变解码器会改变活动对输出的作用。闭环脑机接口将读出置于反馈系统中，也提出了跨日记录变化后的坐标对齐问题。"
       }
     ]
   },
@@ -454,9 +458,9 @@
       "id": "L22-FIG-A1",
       "lecture": 22,
       "moduleId": "l22-m5",
-      "title": "从 population activity 到闭环 BMI",
-      "alt": "神经群体活动经过 GPFA latent inference、跨日对齐和共享 BMI decoder 产生 cursor feedback，再反馈到新的神经活动",
-      "caption": "观测活动先被 GPFA 压到 daily latent coordinates，再由 \\(A_{d}\\) 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。因而跨日稳定指低维映射可转移，不要求单个 neuron 的 loading 不变。",
+      "title": "从群体活动到闭环 BMI",
+      "alt": "神经群体活动经过 GPFA 潜变量推断、跨日对齐和共享 BMI 解码器产生光标反馈，再反馈到新的神经活动",
+      "caption": "观测活动先被 GPFA 压到每日潜在坐标，再由 \\(A_{d}\\) 对齐到共同空间并交给共享解码器 B；解码器输出改变光标反馈，反馈又会改变后续神经活动。因而跨日稳定指低维映射可转移，不要求单个神经元的载荷不变。",
       "sourceRefs": [
         {
           "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -472,33 +476,33 @@
       "nodes": [
         {
           "id": "activity",
-          "label": "spikes / rates\n\\(r_{d}(t)\\)",
+          "label": "脉冲 / 发放率\n\\(r_{d}(t)\\)",
           "x": 8,
           "y": 65
         },
         {
           "id": "latent",
-          "label": "GPFA latent\n\\(\\alpha _{d}(t)\\)",
+          "label": "GPFA 潜在\n\\(\\alpha _{d}(t)\\)",
           "x": 36,
           "y": 65,
           "tone": "accent"
         },
         {
           "id": "aligned",
-          "label": "cross-day\n\\(A_{d}\\) \\(\\alpha _{d}\\)",
+          "label": "跨日\n\\(A_{d}\\) \\(\\alpha _{d}\\)",
           "x": 64,
           "y": 65
         },
         {
           "id": "decoder",
-          "label": "BMI decoder\nB \\(\\widetilde{\\alpha }_d\\)",
+          "label": "BMI 解码器\nB \\(\\widetilde{\\alpha }_d\\)",
           "x": 92,
           "y": 65,
           "tone": "accent"
         },
         {
           "id": "feedback",
-          "label": "cursor +\nfeedback",
+          "label": "光标 +\n反馈",
           "x": 92,
           "y": 20
         }
@@ -522,12 +526,12 @@
         {
           "from": "decoder",
           "to": "feedback",
-          "label": "action"
+          "label": "动作"
         },
         {
           "from": "feedback",
           "to": "activity",
-          "label": "closed loop",
+          "label": "闭环",
           "dashed": true
         }
       ],
@@ -562,7 +566,7 @@
     "思考题：\\(Ur=0\\) 是否说明无 neural activity？"
   ],
   "synthesis": [
-    "direction tuning 是 motor cortex 的经典描述，但现代 population view 关注 low-dimensional trajectories 是否生成 movement dynamics。GPFA 用 Gaussian observation model 把 smooth latent factors 嵌入 noisy neural activity，显式建模 time covariance。preparatory state 可沿 muscle readout U 的 null space 变化而不产生 movement；BMI 则把 neural/latent state 解码为 device commands，并利用 feedback 与跨日 latent alignment 提高稳定性。"
+    "方向调谐描述单个神经元如何随运动条件改变，群体动力学则研究低维活动轨迹如何组织运动。GPFA 用高斯观测模型和时间协方差，把平滑潜变量与观测噪声分开。准备期活动可以沿肌肉读出矩阵 U 的零空间变化，而不立即产生运动；脑机接口再将神经活动或潜变量转成设备指令，并通过反馈与跨日对齐改善控制。"
   ],
   "workedExamples": [
     "8.1 GPFA shape check",
@@ -576,10 +580,10 @@
     {
       "id": "L22-F01",
       "lecture": 22,
-      "name": "GPFA observation model",
+      "name": "GPFA 观测模型",
       "expression": "rt |αt ∼ N (Cαt + d, Σ)",
       "latex": "\\mathbf r_t\\mid\\boldsymbol{\\alpha}_t\\sim\\mathcal N(C\\boldsymbol{\\alpha}_t+\\mathbf d,\\Sigma)",
-      "conditions": "Gaussian approximation",
+      "conditions": "采用高斯近似",
       "sectionId": "l22-m2",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 2
@@ -587,10 +591,10 @@
     {
       "id": "L22-F02",
       "lecture": 22,
-      "name": "GP temporal covariance",
+      "name": "高斯过程的时间协方差",
       "expression": "′ 2 K(t, t′ ) = σs2 e−(t−t ) /(2τ ) + σn2 δtt′ 2",
       "latex": "K(t,t')=\\sigma_s^2\\exp\\!\\left[-\\frac{(t-t')^2}{2\\tau^2}\\right]+\\sigma_n^2\\delta_{tt'}",
-      "conditions": "stationary smooth kernel",
+      "conditions": "平稳且平滑的核函数",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -598,10 +602,10 @@
     {
       "id": "L22-F03",
       "lecture": 22,
-      "name": "linear motor readout",
+      "name": "线性运动读出",
       "expression": "m = Ur",
       "latex": "\\mathbf m=U\\mathbf r",
-      "conditions": "local approximation",
+      "conditions": "采用局部近似",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -609,10 +613,10 @@
     {
       "id": "L22-F04",
       "lecture": 22,
-      "name": "output-null space",
+      "name": "输出零空间",
       "expression": "Null(U ) = {r: U r = 0}",
       "latex": "\\operatorname{Null}(U)=\\{\\mathbf r:U\\mathbf r=0\\}",
-      "conditions": "linear algebra",
+      "conditions": "线性代数关系",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -620,10 +624,10 @@
     {
       "id": "L22-F05",
       "lecture": 22,
-      "name": "rank-nullity",
+      "name": "秩—零度定理",
       "expression": "dim N ull(U ) = N − rank(U )",
       "latex": "\\dim\\operatorname{Null}(U)=N-\\operatorname{rank}(U)",
-      "conditions": "U:M×N",
+      "conditions": "U 为 M×N 矩阵",
       "sectionId": "l22-m5",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 5
@@ -631,10 +635,10 @@
     {
       "id": "L22-F06",
       "lecture": 22,
-      "name": "latent decoder",
+      "name": "潜变量解码器",
       "expression": "v̂ = Bα",
       "latex": "\\widehat{\\mathbf v}=B\\boldsymbol{\\alpha}",
-      "conditions": "aligned latent coordinates",
+      "conditions": "潜在坐标已对齐",
       "sectionId": "l22-m2",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 2
@@ -646,7 +650,7 @@
       "lecture": 22,
       "zh": "中心向外任务",
       "en": "center-out reach task",
-      "definition": "从中心到多个 radial targets 的 reaching paradigm。",
+      "definition": "从中心位置伸手到周围多个放射状目标的任务。",
       "sectionId": "l22-m1",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 1
@@ -656,7 +660,7 @@
       "lecture": 22,
       "zh": "方向调谐",
       "en": "direction tuning",
-      "definition": "response mean 随 reach direction 变化。",
+      "definition": "平均响应随伸手方向变化的性质。",
       "sectionId": "l22-m1",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 1
@@ -666,7 +670,7 @@
       "lecture": 22,
       "zh": "潜在因子",
       "en": "latent factor",
-      "definition": "解释 shared population variability 的低维隐藏变量。",
+      "definition": "解释群体共享变异的低维隐藏变量。",
       "sectionId": "l22-m5",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 5
@@ -676,7 +680,7 @@
       "lecture": 22,
       "zh": "嵌入",
       "en": "embedding",
-      "definition": "从 latent coordinates 映射到 high-dimensional activity。",
+      "definition": "从潜在坐标到高维神经活动的映射。",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -686,7 +690,7 @@
       "lecture": 22,
       "zh": "高斯过程因子分析",
       "en": "Gaussian-process factor analysis, GPFA",
-      "definition": "带 temporal Gaussian-process prior 的 latent factor model。",
+      "definition": "为潜在因子加入时间高斯过程先验的模型。",
       "sectionId": "l22-m2",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 2
@@ -696,7 +700,7 @@
       "lecture": 22,
       "zh": "准备活动",
       "en": "preparatory activity",
-      "definition": "movement 前 target-dependent population state。",
+      "definition": "运动开始前，随目标变化的群体状态。",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -706,7 +710,7 @@
       "lecture": 22,
       "zh": "输出零空间",
       "en": "output-null space",
-      "definition": "不改变当前 readout 的 neural directions。",
+      "definition": "不会改变当前读出结果的神经活动方向。",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -716,7 +720,7 @@
       "lecture": 22,
       "zh": "输出有效空间",
       "en": "output-potent space",
-      "definition": "会改变 muscle/device output 的 directions。",
+      "definition": "会改变肌肉或设备输出的神经活动方向。",
       "sectionId": "l22-m2",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 2
@@ -726,7 +730,7 @@
       "lecture": 22,
       "zh": "脑机接口",
       "en": "brain-machine interface, BMI",
-      "definition": "由 neural activity 控制 external device 的系统。",
+      "definition": "利用神经活动控制外部设备的系统。",
       "sectionId": "l22-m4",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 4
@@ -736,21 +740,21 @@
       "lecture": 22,
       "zh": "闭环控制",
       "en": "closed-loop control",
-      "definition": "包含 sensory/device feedback 的在线控制。",
+      "definition": "包含感觉或设备反馈的实时控制。",
       "sectionId": "l22-m5",
       "sourceFile": "Lecture22-MotorCortex-UPDATE.pdf",
       "sourcePage": 5
     }
   ],
   "commonTraps": [
-    "把 single-neuron tuning curve 与 latent trajectory 混为一谈。",
-    "PCA components、GPFA factors、dynamical modes 与 decoder axes 互换使用。",
-    "K low-dimensional 就认为只有 K neurons 重要。",
-    "忽略 \\(C-\\alpha \\) scale/rotation non-identifiability。",
-    "\\(Ur=0\\) 就认为 \\(r=0\\)。",
-    "feedforward BMI 忽略 user feedback/learning。",
-    "把 latent cross-day stability 写成绝对不变。",
-    "需要明确区分 tuning curve、principal components、latent factors、 dynamical modes 和 decoder axes；这些概念可相关但不可互换。"
+    "把单神经元调谐曲线与群体潜变量轨迹混为一谈。",
+    "将 PCA 主成分、GPFA 因子、动力学模态与解码轴互换使用。",
+    "发现 K 维潜在结构，就认为只有 K 个神经元重要。",
+    "忽略 \\(C-\\alpha\\) 的尺度与旋转不可辨识性。",
+    "由 \\(Ur=0\\) 就推出 \\(r=0\\)，忽略非零活动也可能位于读出的零空间。",
+    "将脑机接口当成纯前馈映射，忽略用户反馈与学习。",
+    "把潜变量跨日相对稳定写成绝对不变。",
+    "由调谐曲线、主成分、潜在因子、动力学模态或解码轴之间存在联系，就认为它们具有相同定义。"
   ],
   "errata": [
     {
@@ -774,7 +778,7 @@
       "sourcePage": 3,
       "sectionId": "l22-m3",
       "originalIssue": "这里 的 GP covariance 是一种 smooth kernel choice，不是唯一 Gaussian-process kernel。",
-      "explanation": "该 kernel 也不是 GP 的唯一形式；有快速切换或振荡时，Matérn 或 periodic kernels 可能更贴近假设。",
+      "explanation": "平方指数核也不是唯一选择，快速切换或周期变化可考虑 Matérn 核或周期核。",
       "correction": null
     },
     {
@@ -786,7 +790,7 @@
       "sourcePage": 4,
       "sectionId": "l22-m4",
       "originalIssue": "这里 的 output-null interpretation 是 linear readout framework，真实 motor output 可更复杂。",
-      "explanation": "局部线性 readout 写成 \\(m=Ur\\)，其中 r 是 N 维 neural state，m 是 M 维 motor command，因此 U 必须是 M×N。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     }
   ],
@@ -803,37 +807,37 @@
         }
       ],
       "conceptTags": [
-        "Center-out 调谐与低维群体轨迹"
+        "方向调谐与群体轨迹"
       ],
       "difficulty": 2,
-      "type": "calculation",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么一个 PC 解释 70% neural variance 仍不能保证它解释 70% behavior variance？",
+      "stem": "为什么一个 PC 解释 70% 神经方差仍不能保证它解释 70% 行为方差？",
       "choices": [
         {
           "id": "a",
-          "text": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
+          "text": "PCA 已按行为标签排序；两个比例不相等只能来自标签测量误差。"
         },
         {
           "id": "b",
-          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+          "text": "唯一差别来自神经元数量；只要记录全部细胞，任何线性读出都会保留原来的方差比例，二者必然都是 70%。"
         },
         {
           "id": "c",
-          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+          "text": "70% 神经方差表示这个 PC 来自 70% 的细胞，而行为方差只统计另外 30% 的细胞。"
         },
         {
           "id": "d",
-          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+          "text": "行为还取决于独立的读出映射；高活动方差方向可被忽略，低方差方向也可显著影响输出。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“闭环 BMI 与跨日 latent alignment”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Preparatory activity、linear readout 与 output-null space”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“GP 时间核、参数拟合与 delayed-reach 轨迹”中的另一组变量与条件，不能由题干推出。"
+        "a": "PCA 按神经活动方差排序，不使用行为标签；无噪声标签也不能建立两个方差比例的恒等关系。",
+        "b": "即使完整观测，读出仍可选择或加权特定方向，改变输出方差构成。",
+        "c": "主成分是所有记录坐标的方向；方差比例不是细胞数量比例。"
       },
-      "explanation": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。 判断\"有用\"需要同时查看 neural covariance 与 behavioral readout，而不能用 explained variance 单独裁决。"
+      "explanation": "行为由另一个读出映射决定；读出可忽略高方差方向或放大小方差方向，所以两种方差没有固定比例。 低方差方向若具有很高的读出增益，仍可能产生关键行为输出；高方差方向也可能用于不产生当前输出的运动准备。"
     },
     {
       "id": "L22-Q02",
@@ -847,37 +851,37 @@
         }
       ],
       "conceptTags": [
-        "Latent space、activity space 与 GPFA 观测模型"
+        "GPFA 如何连接潜在状态与神经活动"
       ],
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "若把一个 latent factor 全部乘 2，却不改变 C，还是同一个 GPFA 模型吗？",
+      "stem": "若把一个潜在因子全部乘 2，却不改变 C，还是同一个 GPFA 模型吗？",
       "choices": [
         {
           "id": "a",
-          "text": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。"
+          "text": "不是；保持载荷不变会改变预测均值，观测层的等价重参数化需把对应载荷列反向缩放。"
         },
         {
           "id": "b",
-          "text": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
+          "text": "潜在因子不可直接观测，因此任意缩放都不可能影响观测分布。"
         },
         {
           "id": "c",
-          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+          "text": "仍等价，只需同时把残差协方差加倍；增加零均值噪声就能准确抵消均值中因子幅度的加倍。"
         },
         {
           "id": "d",
-          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+          "text": "应把对应载荷列也乘以 2；潜在因子与载荷同向缩放会保持它们乘积以及观测均值不变。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“闭环 BMI 与跨日 latent alignment”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Center-out 调谐与低维群体轨迹”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Preparatory activity、linear readout 与 output-null space”中的另一组变量与条件，不能由题干推出。"
+        "b": "未观测不等于无作用；因子经载荷进入均值，保持载荷时缩放会改变该均值。",
+        "c": "残差协方差控制围绕均值的变异，不能抵消预测均值的系统变化。",
+        "d": "两个因子都加倍使乘积增为四倍；保持观测乘积需反向缩放。"
       },
-      "explanation": "不是；预测均值会改变。只有同时把 C 对应 column 除以 2，才形成等价的坐标重参数化。 只看条件观测均值时存在坐标重参数化：对任意可逆 K×K 矩阵 A，可令 \\(\\alpha '=A\\alpha\\)、\\(C'=CA^{-1}\\)，于是 \\(C'\\alpha '=C\\alpha\\)。"
+      "explanation": "不是；预测均值会改变。只有同时把 C 对应列除以 2，才形成等价的坐标重参数化。 只看观测均值时，潜在坐标可以重参数化。 只看观测均值时，潜在坐标可以重参数化。对任意可逆 K×K 矩阵 A，令 \\(\\alpha '=A\\alpha\\)、\\(C'=CA^{-1}\\)，就有 \\(C'\\alpha '=C\\alpha\\)。要进一步保持完整 GPFA 的边缘似然，还必须同时将潜在先验协方差变为 \\(A K A^\\mathrm{T}\\)。标准 GPFA 通常假定因子独立，并允许各自具有不同时间核；任意旋转会引入因子间协方差，因而一般不再属于原模型族。符号翻转、因子重排和配套的尺度变化是常见歧义；更一般的旋转等价还需相同核或允许相关先验等条件。"
     },
     {
       "id": "L22-Q03",
@@ -891,37 +895,37 @@
         }
       ],
       "conceptTags": [
-        "GP 时间核、参数拟合与 delayed-reach 轨迹"
+        "时间核与延迟伸手轨迹"
       ],
       "difficulty": 2,
       "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "为何平滑 kernel 不能证明真实 cortex trajectory 本来就平滑？",
+      "stem": "为何平滑核函数不能证明真实皮层轨迹本来就平滑？",
       "choices": [
         {
           "id": "a",
-          "text": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
+          "text": "核只是绘图装饰，不参与潜在状态估计，因此任何被画得平滑的轨迹都完全由原始数据决定。"
         },
         {
           "id": "b",
-          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+          "text": "平滑性部分来自先验；应比较独立数据、其他核和时间分辨率，检验这种时间尺度是否有数据支持。"
         },
         {
           "id": "c",
-          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+          "text": "只要核函数可微，就证明真实神经群体也服从同样的微分性质；样本量或是否留出数据都不会改变这个结论。"
         },
         {
           "id": "d",
-          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+          "text": "平滑核已把观测噪声完全删除，因此只需观察训练重构误差下降就能排除过平滑或错误时间尺度。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“闭环 BMI 与跨日 latent alignment”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Center-out 调谐与低维群体轨迹”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Preparatory activity、linear readout 与 output-null space”中的另一组变量与条件，不能由题干推出。"
+        "a": "核规定潜在状态跨时间的协方差，会影响推断结果，不只是线条的外观。",
+        "c": "模型先验中的数学性质不是生物事实；数据需能区分替代的时间结构。",
+        "d": "平滑并不保证恢复真轨迹；训练拟合不能替代留出预测和时间尺度敏感性检验。"
       },
-      "explanation": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。 若声称 trajectory geometry 预测 behavior，应在留出 trials 上用 pre-go latent state 预测 reaction time、direction error 或 muscle activity。"
+      "explanation": "平滑性部分来自先验；必须用留出数据、不同核函数和时间分辨率比较，才能判断数据是否支持该时间尺度。 \\(\\sigma_s^{2}\\) 控制平滑信号的方差，\\(\\tau\\) 控制相关衰减的时间尺度，\\(\\sigma_n^{2}\\) 只在同一时间窗加入独立波动。"
     },
     {
       "id": "L22-Q04",
@@ -935,37 +939,37 @@
         }
       ],
       "conceptTags": [
-        "Preparatory activity、linear readout 与 output-null space"
+        "运动准备与输出零空间"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "若换一个 downstream readout \\(U'\\)，原来的 output-null vector 是否一定仍为 null？",
+      "stem": "若换一个下游读出 \\(U'\\)，原来的输出零空间向量是否一定仍处于零空间？",
       "choices": [
         {
           "id": "a",
-          "text": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
+          "text": "一定保持；原输出为零就说明每个神经元都沉默，换读出也一样。"
         },
         {
           "id": "b",
-          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+          "text": "一定保持；零空间只由神经元总数决定，读出权重无论如何旋转或选择不同肌肉都不会改变其中的方向。"
         },
         {
           "id": "c",
-          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+          "text": "不一定；零空间属于特定读出，同一活动方向对原输出无效，却可能驱动新的输出。"
         },
         {
           "id": "d",
-          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+          "text": "一定变成非零输出；只要读出矩阵有任意一个元素改变，就不可能与原零空间共享任何非零向量。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“闭环 BMI 与跨日 latent alignment”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Center-out 调谐与低维群体轨迹”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“GP 时间核、参数拟合与 delayed-reach 轨迹”中的另一组变量与条件，不能由题干推出。"
+        "a": "非零活动向量也可在特定读出下相互抵消；零输出不推出零神经状态。",
+        "b": "维数受矩阵大小与秩约束，但具体零方向依赖权重；不同读出可有不同零空间。",
+        "d": "新旧读出可能仍共享部分零空间；改变权重既不保证保留，也不保证消除该向量的零性。"
       },
-      "explanation": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。 但实际 recorded r 只采样 neurons，真实 downstream mapping 也可能 nonlinear、state-dependent 或延迟，所以根据一个 fitted U 得到的 null space 是模型相对概念，不是解剖上绝对无输出的通路。"
+      "explanation": "不一定。零空间依赖具体读出；同一神经方向对某个输出无效，却可能影响另一个肌群或认知变量。 行空间方向改变输出，其正交补属于零空间。 利用 U 的奇异值分解，可将活动拆成有输出分量和零空间分量。行空间方向改变输出，其正交补属于零空间。应在独立试次上拟合读出，再测提示前的投影，并结合肌电或运动学检验。若在同一数据中挑选方向，又用该数据证明没有输出，会产生循环分析。"
     },
     {
       "id": "L22-Q05",
@@ -979,37 +983,37 @@
         }
       ],
       "conceptTags": [
-        "闭环 BMI 与跨日 latent alignment"
+        "闭环脑机接口与跨日对齐"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 closed-loop 表现提高不能全部归因于 decoder 参数更准确？",
+      "stem": "为什么闭环表现提高不能全部归因于解码器参数更准确？",
       "choices": [
         {
           "id": "a",
-          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+          "text": "参与者只能产生固定信号，反馈不影响后续活动，所以改善都来自解码器。"
         },
         {
           "id": "b",
-          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+          "text": "在线更新必然让解码器变差，因此改善只能来自参与者；即使双方同时变化，也可不设控制而唯一分解各自作用。"
         },
         {
           "id": "c",
-          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+          "text": "只要跨日潜在轨迹已对齐，就证明每个神经元和整个参与者策略都恒定，不再需要检查闭环适应。"
         },
         {
           "id": "d",
-          "text": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。"
+          "text": "反馈会改变参与者的神经策略，解码器也可在线适应；需要固定或控制其中一侧才能分离贡献。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Center-out 调谐与低维群体轨迹”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Preparatory activity、linear readout 与 output-null space”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“GP 时间核、参数拟合与 delayed-reach 轨迹”中的另一组变量与条件，不能由题干推出。"
+        "a": "闭环输出会成为新的输入，参与者可以学习和调整；神经数据分布并非必然固定。",
+        "b": "在线更新可改善或损害性能；双侧共同变化时，单一行为指标不能唯一分配贡献。",
+        "c": "潜在坐标可对齐并不要求单细胞载荷或策略不变，跨日对齐不能排除闭环学习。"
       },
-      "explanation": "participant 会依据反馈改变 neural strategy，decoder也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。 open-loop calibration 中，participant 看预定 movement 或尝试动作，系统离线拟合 mapping；closed-loop 时 decoder output 立刻改变视觉反馈，participant 与 decoder 共同适应。"
+      "explanation": "参与者会依据反馈改变神经策略，解码器也可能在线更新；性能来自联合适应，需冻结其中一方或设计对照才可分因。 开环校准时，参与者观看预设运动或尝试动作，系统离线拟合映射；闭环时，解码输出立即改变视觉反馈，参与者与解码器共同适应。"
     },
     {
       "id": "L22-Q06",
@@ -1023,37 +1027,37 @@
         }
       ],
       "conceptTags": [
-        "从 population activity 到闭环 BMI"
+        "从群体活动到闭环 BMI"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"从 population activity 到闭环 BMI\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"从群体活动到闭环 BMI\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "观测活动先被 GPFA 压到 daily latent coordinates，再由 \\(A_{d}\\) 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。"
+          "text": "每日潜在坐标先对齐再交给共享解码器；光标反馈返回参与者，继续影响后续神经活动。"
         },
         {
           "id": "b",
-          "text": "behavior 由另一个 readout 映射决定；readout 可忽略高方差方向或放大小方差方向，所以两种 variance 没有固定比例。"
+          "text": "对齐只在反馈结束后把图画重叠，不会影响共享解码器实际接收的坐标。"
         },
         {
           "id": "c",
-          "text": "不一定。零空间依赖具体 readout；同一 neural direction 对某个输出无效，却可能影响另一个肌群或认知变量。"
+          "text": "共享解码器已经排除了参与者适应；反馈箭头只是显示结果，后续神经活动必定和开环校准时保持完全相同的分布。"
         },
         {
           "id": "d",
-          "text": "平滑性部分来自 prior；必须用留出数据、不同 kernel 和时间分辨率比较，才能判断数据是否支持该时间尺度。"
+          "text": "跨日映射可用，说明每个神经元的载荷都必须永久不变；只要有一个载荷变化，就不可能获得稳定的潜在读出。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "图中没有“Center-out 调谐与低维群体轨迹”所需的变量与条件。",
-        "c": "图中没有“Preparatory activity、linear readout 与 output-null space”所需的变量与条件。",
-        "d": "图中没有“GP 时间核、参数拟合与 delayed-reach 轨迹”所需的变量与条件。"
+        "b": "图中的对齐映射位于潜在推断与共享解码之间，是解码输入的一部分。",
+        "c": "反馈可改变参与者策略和活动分布；共享参数不把闭环系统变成被动开环系统。",
+        "d": "群体潜在结构可在个别载荷变化时仍被对齐，稳定低维读出不等于固定单细胞身份。"
       },
-      "explanation": "观测活动先被 GPFA 压到 daily latent coordinates，再由 \\(A_{d}\\) 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。因而跨日稳定指低维映射可转移，不要求单个 neuron 的 loading 不变。"
+      "explanation": "观测活动先被 GPFA 压到每日潜在坐标，再由 \\(A_{d}\\) 对齐到共同空间并交给共享解码器 B；解码器输出改变光标反馈，反馈又会改变后续神经活动。因而跨日稳定指低维映射可转移，不要求单个神经元的载荷不变。"
     }
   ]
 }

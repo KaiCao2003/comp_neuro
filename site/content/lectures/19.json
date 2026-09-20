@@ -94,21 +94,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "从 two-neuron recurrent equation 出发，手算 common mode 与 difference mode 的特征值、规范化特征向量和输入坐标。",
-      "利用 mode time constant 判断稳定、泄漏积分、完美积分与不稳定增长，并把 mode 坐标重新解释成神经活动空间中的轨迹。",
-      "从中心化数据的投影方差推导 PCA，完成 top-K 投影、重构、方差解释率和维度截断的数值计算。",
-      "严格区分 recurrent weight matrix 的动力学模态与 covariance matrix 的主成分，并说明二者何时可能接近、何时没有理由一致。",
-      "用 eigenvalue cliff、累计解释方差与 held-out performance 比较三种维度选择标准。"
+      "从双神经元循环连接的方程出发，手算共模与差分模态的特征值、规范化特征向量和输入坐标。",
+      "利用模态时间常数判断稳定、泄漏积分、完美积分与不稳定增长，并把模态坐标重新解释成神经活动空间中的轨迹。",
+      "从中心化数据的投影方差推导 PCA，完成前 K 个主成分投影、重构、方差解释率和维度截断的数值计算。",
+      "严格区分循环连接的权重矩阵的动力学模态与协方差矩阵的主成分，并说明二者何时可能接近、何时没有理由一致。",
+      "用特征值陡降、累计解释方差与留出数据的表现比较三种维度选择标准。"
     ],
     "prerequisiteBridge": [
-      "先把向量看成“若干个带顺序的数”。两个神经元在某一时刻的 firing-rate deviations 可以写成 \\(h=(h_{1},h_{2})^\\mathrm{T}\\)；矩阵 W 规定每个神经元怎样接收另一个神经元的反馈。若 \\(Wv=\\lambda v\\)，那么沿 v 方向的活动经过一次 recurrent mapping 只会被乘上 \\(\\lambda\\)，因此 v 是网络特别自然的变化方向。这里需要的矩阵知识只包括二乘二行列式、联立一次方程、向量长度和点积。",
-      "动力学方程 \\(\\tau dh/dt=-h+Wh+I\\) 同时含 intrinsic leak、recurrent feedback 与 external input。将 h 写在 W 的 eigenvector basis 中后，耦合方程分成互不混合的一维方程。对 \\(\\tau d\\alpha /dt=-(1-\\lambda )\\alpha +\\beta\\)，输入撤掉后的解是指数衰减；有效时间常数 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda )\\)。\\(\\lambda\\) 越接近 1，衰减越慢；\\(\\lambda =1\\) 时该线性 mode 保持已积累的状态。",
-      "PCA 解决的是另一个问题：给定很多时刻或 trials 的 population vectors，找一个单位方向 v，使中心化数据投影 \\(v^\\mathrm{T}(h-\\bar{h})\\) 的 variance 最大。它使用数据的 covariance C，而不是直接使用 W。判断 eigenvectors 的含义前，先问矩阵来自模型还是来自数据；这一步能避免把 dynamical mode、principal component 和 causal circuit direction 混成一个概念。"
+      "两个神经元某一时刻的发放率偏差可写成向量 \\(h=(h_{1},h_{2})^\\mathrm{T}\\)；连接矩阵 W 决定它们怎样相互反馈。若 \\(Wv=\\lambda v\\)，沿 v 方向的活动经一次递归映射后只改变大小，乘上 \\(\\lambda\\)，而不改变方向。这样的特征向量提供了分析网络的自然坐标。下面的推导只需用到二阶行列式、联立方程、向量长度和点积。",
+      "动力学方程 \\(\\tau dh/dt=-h+Wh+I\\) 包含自身漏电、递归反馈和外部输入。把 h 写在 W 的特征向量基底中，耦合系统就可分解为独立的一维方程。对于 \\(\\tau d\\alpha /dt=-(1-\\lambda )\\alpha +\\beta\\)，稳定模态在输入撤去后指数衰减，有效时间常数为 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda )\\)。\\(\\lambda\\) 从下方接近 1 时，衰减越来越慢；\\(\\lambda =1\\) 时，线性模态保持已经积累的状态。",
+      "主成分分析（PCA）从数据出发：给定多个时刻或试次的群体活动，寻找一个单位方向 v，使中心化投影 \\(v^\\mathrm{T}(h-\\bar{h})\\) 的方差最大。它分解的是数据协方差 C，而非连接矩阵 W。因此，解释一个特征向量之前，必须先确定矩阵来自网络模型还是实验记录。动力学模态、主成分和具有因果作用的回路方向不能直接等同。"
     ],
     "modules": [
       {
         "id": "l19-m1",
-        "title": "对称双神经元网络：从耦合方程找到自然坐标",
+        "title": "对称双神经元网络的自然坐标",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -120,23 +120,23 @@
           }
         ],
         "paragraphs": [
-          "考虑 \\(W=[[0,w_{0}],[w_{0},0]]\\)，并把两个 rate variables 写入 \\(\\tau dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) 与 \\(\\tau dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\)。对角线为零表示此教学例中不设 self-coupling，两个 off-diagonal 元素相同表示 reciprocal coupling 对称。这个对称性提示我们尝试 \\(h_{1}=h_{2}\\) 与 \\(h_{1}=-h_{2}\\) 两类 pattern，因为交换两个 neurons 后它们分别保持不变或只改变符号。",
-          "求 eigenvalue 时令 \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}=0\\)，因此 \\(\\lambda _{+}=w_{0}\\)、\\(\\lambda _{-}=-w_{0}\\)。把 \\(\\lambda _{+}\\) 代回第一行得到 \\(h_{2}=h_{1}\\)，所以 common eigenvector 可取 \\((1,1)^\\mathrm{T}\\)；把 \\(\\lambda _{-}\\) 代回得到 \\(h_{2}=-h_{1}\\)，所以 difference eigenvector 可取 \\((1,-1)^\\mathrm{T}\\)。除以 \\(\\sqrt 2\\) 后两向量长度为一、点积为零，组成 orthonormal basis V。规范化并不改变方向，却使坐标值可以直接用 dot product 计算。",
-          "新的 coordinates 是 \\(\\alpha =V^\\mathrm{T} h\\)，即 \\(\\alpha _{+}=(h_{1}+h_{2})/\\sqrt 2\\)、\\(\\alpha _{-}=(h_{1}-h_{2})/\\sqrt 2\\)。相同操作作用于 input 得 \\(\\beta _{+}=(I_{1}+I_{2})/\\sqrt 2\\)、\\(\\beta _{-}=(I_{1}-I_{2})/\\sqrt 2\\)。将 \\(h=V\\alpha\\) 代回原方程并左乘 \\(V^\\mathrm{T}\\)，得到 \\(\\tau d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}+\\beta _{+}\\) 与 \\(\\tau d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}+\\beta _{-}\\)。现在每个方程只含自己的 coordinate，说明 basis change 真正完成了 decoupling。",
-          "这两个 modes 都是 population patterns，而不是分别属于 neuron 1 与 neuron 2。common mode 增加时两个 neurons 同向变化；difference mode 增加时一个升、一个降。若网络不对称，eigenvectors 往往不再正交，\\(V^{-1}\\) 也不等于 \\(V^\\mathrm{T}\\)；此时仍可做 mode decomposition，但坐标变换和几何解释必须使用一般 inverse，不能照搬这里的正交公式。"
+          "考虑对称连接矩阵 \\(W=[[0,w_{0}],[w_{0},0]]\\)，两个神经元的发放率满足 \\(\\tau dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) 和 \\(\\tau dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\)。对角线为零表示没有自连接，两个非对角元素相同表示相互连接对称。因此可以尝试同向变化 \\(h_{1}=h_{2}\\) 和反向变化 \\(h_{1}=-h_{2}\\) 两种活动模式：交换两个神经元后，前者保持不变，后者只改变符号。",
+          "令 \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}=0\\)，得到特征值 \\(\\lambda _{+}=w_{0}\\)、\\(\\lambda _{-}=-w_{0}\\)。将 \\(\\lambda _{+}\\) 代回第一行，得到 \\(h_{2}=h_{1}\\)，共同模态的特征向量可取 \\((1,1)^\\mathrm{T}\\)；将 \\(\\lambda _{-}\\) 代回，得到 \\(h_{2}=-h_{1}\\)，差分模态的特征向量可取 \\((1,-1)^\\mathrm{T}\\)。两向量除以 \\(\\sqrt 2\\) 后，长度为 1、点积为零，组成标准正交基 V。归一化不改变方向，却使坐标可直接由点积计算。",
+          "新坐标为 \\(\\alpha =V^\\mathrm{T} h\\)，也就是 \\(\\alpha _{+}=(h_{1}+h_{2})/\\sqrt 2\\)、\\(\\alpha _{-}=(h_{1}-h_{2})/\\sqrt 2\\)。对输入作相同变换，得到 \\(\\beta _{+}=(I_{1}+I_{2})/\\sqrt 2\\)、\\(\\beta _{-}=(I_{1}-I_{2})/\\sqrt 2\\)。将 \\(h=V\\alpha\\) 代回原方程并左乘 \\(V^\\mathrm{T}\\)，得到 \\(\\tau d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}+\\beta _{+}\\) 和 \\(\\tau d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}+\\beta _{-}\\)。每个方程只含自己的模态坐标，原来的耦合系统因而被分解为两个独立的一维系统。",
+          "两个模态都描述群体活动，而非分别对应一个神经元。共同模态增大时，两者同向变化；差分模态增大时，一个升高、另一个降低。非对称网络的特征向量通常不正交，\\(V^{-1}\\) 也不等于 \\(V^\\mathrm{T}\\)。此时模态分解必须使用一般逆矩阵，不能直接套用正交变换的几何解释。"
         ],
         "keyPoints": [
-          "\\(\\lambda _{+}=w_{0}\\) 对应规范化 common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\)。",
-          "\\(\\lambda _{-}=-w_{0}\\) 对应规范化 difference vector \\((1,-1)^\\mathrm{T}/\\sqrt 2\\)。",
-          "activity 与 input 都要用同一个 basis 变换；\\(\\alpha =V^\\mathrm{T}h\\)、\\(\\beta =V^\\mathrm{T}I\\)。",
-          "W 的 eigenvectors 描述模型动力学方向，不等同于由数据 covariance 得到的 PCs。"
+          "\\(\\lambda _{+}=w_{0}\\) 对应归一化的共同模态向量 \\((1,1)^\\mathrm{T}/\\sqrt 2\\)。",
+          "\\(\\lambda _{-}=-w_{0}\\) 对应归一化的差分模态向量 \\((1,-1)^\\mathrm{T}/\\sqrt 2\\)。",
+          "活动与输入必须使用同一基底变换：\\(\\alpha =V^\\mathrm{T}h\\)、\\(\\beta =V^\\mathrm{T}I\\)。",
+          "W 的特征向量描述模型的动力学方向；主成分来自数据的协方差。"
         ],
         "derivation": {
-          "title": "完整求解 common/difference eigensystem",
-          "setup": "从 \\(Wv=\\lambda v\\) 与 \\(\\det(W-\\lambda I)=0\\) 出发，不预先猜答案；最后把两个 eigenvectors 规范化并组成 V。",
+          "title": "完整求解共同/差分特征系统",
+          "setup": "从 \\(Wv=\\lambda v\\) 与 \\(\\det(W-\\lambda I)=0\\) 出发，不预先猜答案；最后把两个特征向量规范化并组成 V。",
           "steps": [
             {
-              "title": "写 characteristic equation",
+              "title": "写特征方程",
               "explanation": "\\(W-\\lambda I=[[-\\lambda,w_{0}],[w_{0},-\\lambda ]]\\)，二乘二行列式为 \\((-\\lambda )(-\\lambda )-w_{0}^{2}\\)。",
               "latex": "\\det(W-\\lambda I)=\\lambda^2-w_0^2=0"
             },
@@ -147,7 +147,7 @@
             },
             {
               "title": "构造坐标变换",
-              "explanation": "把 eigenvectors 作为 V 的 columns。因为它们正交且单位长度，\\(V^{-1}=V^\\mathrm{T}\\)。",
+              "explanation": "把特征向量作为 V 的列。因为它们正交且单位长度，\\(V^{-1}=V^\\mathrm{T}\\)。",
               "latex": "V=\\frac1{\\sqrt2}\\begin{bmatrix}1&1\\\\1&-1\\end{bmatrix},\\quad \\boldsymbol{\\alpha}=V^{\\mathsf T}\\mathbf h"
             },
             {
@@ -157,31 +157,31 @@
             }
           ],
           "symbolNotes": [
-            "h、I、\\(\\alpha\\)、\\(\\beta\\) 都是 \\(2\\times 1\\) vectors；W 与 V 是 \\(2\\times 2\\) matrices。",
-            "w0 与 eigenvalues 是无量纲 feedback gains；\\(\\tau\\) 才具有时间单位。"
+            "h、I、\\(\\alpha\\)、\\(\\beta\\) 都是 \\(2\\times 1\\) 向量；W 与 V 是 \\(2\\times 2\\) 矩阵。",
+            "w0 与特征值是无量纲反馈增益；\\(\\tau\\) 才具有时间单位。"
           ],
-          "unitsCheck": "\\(V^\\mathrm{T}h\\) 的 shape 是 \\((2\\times 2)(2\\times 1)=2\\times 1\\)；mode ODE 每一项都具有 rate-coordinate 的单位。",
-          "limitCheck": "\\(w_{0}=0\\) 时两个原 neurons 不耦合，两个 basis directions 具有相同衰减率；这时 eigenbasis 不唯一，common/difference 仍可用但不再是唯一选择。"
+          "unitsCheck": "\\(V^\\mathrm{T}h\\) 的尺寸是 \\((2\\times 2)(2\\times 1)=2\\times 1\\)；模态 ODE 每一项都具有发放率坐标的单位。",
+          "limitCheck": "\\(w_{0}=0\\) 时两个原神经元不耦合，两个基底方向具有相同衰减率；这时特征基底不唯一，共同/差分仍可用但不再是唯一选择。"
         },
         "workedExample": {
-          "title": "把一次 population state 变到 mode coordinates",
+          "title": "把一次群体状态变到模态坐标",
           "problem": "给定 \\(h=(3,1)^\\mathrm{T}\\)、\\(I=(2,2)^\\mathrm{T}\\)，计算 \\(\\alpha\\)、\\(\\beta\\)，并验证从 \\(\\alpha\\) 可以无损重构 h。",
           "steps": [
             "计算 \\(\\alpha _{+}=(3+1)/\\sqrt 2=2\\sqrt 2\\)，\\(\\alpha _{-}=(3-1)/\\sqrt 2=\\sqrt 2\\)。",
-            "计算 \\(\\beta _{+}=(2+2)/\\sqrt 2=2\\sqrt 2\\)，\\(\\beta _{-}=(2-2)/\\sqrt 2=0\\)，因此输入只驱动 common mode。",
+            "计算 \\(\\beta _{+}=(2+2)/\\sqrt 2=2\\sqrt 2\\)，\\(\\beta _{-}=(2-2)/\\sqrt 2=0\\)，因此输入只驱动共同模态。",
             "重构 \\(\\alpha +\\xi _{+}+\\alpha -\\xi _{-}\\)：第一分量为 \\((2\\sqrt 2+\\sqrt 2)/\\sqrt 2=3\\)，第二分量为 \\((2\\sqrt 2-\\sqrt 2)/\\sqrt 2=1\\)。"
           ],
-          "result": "mode coordinates 为 \\(\\alpha =(2\\sqrt 2,\\sqrt 2)^\\mathrm{T}\\)，input coordinates 为 \\(\\beta =(2\\sqrt 2,0)^\\mathrm{T}\\)，重构精确返回 \\((3,1)^\\mathrm{T}\\)。",
+          "result": "模态坐标为 \\(\\alpha =(2\\sqrt 2,\\sqrt 2)^\\mathrm{T}\\)，输入坐标为 \\(\\beta =(2\\sqrt 2,0)^\\mathrm{T}\\)，重构精确返回 \\((3,1)^\\mathrm{T}\\)。",
           "sanityCheck": "两坐标平方和为 \\(8+2=10\\)，而原向量平方和为 \\(3^{2}+1^{2}=10\\)；正交变换保持长度，可作为算术检查。"
         },
         "pitfalls": [
-          "把 \\(1/\\sqrt 2\\) 漏掉会使坐标和重构的尺度不一致。",
-          "把 common/difference modes 说成两个单独 neurons，忽略每个 mode 都由两个 neurons 共同组成。"
+          "漏掉 \\(1/\\sqrt 2\\) 会使坐标与重构的尺度不一致。",
+          "把共同模态和差分模态分别归给两个神经元，忽略每个模态都由两者共同组成。"
         ]
       },
       {
         "id": "l19-m2",
-        "title": "耦合强度决定时间常数、积分与稳定性",
+        "title": "耦合如何改变时间常数与稳定性",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -193,20 +193,20 @@
           }
         ],
         "paragraphs": [
-          "mode 方程的齐次部分分别是 \\(\\tau d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) 与 \\(\\tau d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\)。和标准形式 \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) 比较，得到 \\(\\tau _{+}=\\tau /(1-w_{0})\\)、\\(\\tau _{-}=\\tau /(1+w_{0})\\)。若把该式写成 \\(1/(1\\mp w_{0})\\)，只有在预先把 \\(\\tau\\) 归一化为 1 时才成立，否则会丢失时间单位。因此量纲完整的写法是 \\(\\tau /(1\\mp w_{0})\\)。正 coupling 对共同变化提供 positive feedback，抵消一部分 intrinsic leak；对相反变化却提供 restoring feedback，因为 neuron 1 上升会推动 neuron 2 上升，从而削弱两者之差。",
-          "当 \\(|w_{0}|<1\\) 时，1-w0 与 1+w0 都为正，两 modes 都会在撤掉 input 后指数衰减。w0 接近 1 时 \\(\\tau _{+}\\) 很长，common coordinate 成为 leaky integrator；\\(w_{0}=1\\) 时 common 方程失去 leak，持续输入被积分，输入撤掉后已积累的 \\(\\alpha _{+}\\) 保持。w0 接近 -1 时同样逻辑转到 difference mode。等号边界是 perfect integrator，不应笼统写进普通 leaky regime。",
-          "若 \\(|w_{0}|>1\\)，至少一个 coefficient 变为负。例如 \\(w_{0}=1.2\\) 时 common 方程为 \\(\\tau d\\alpha _{+}/dt=+0.2\\alpha _{+}\\)，微小扰动会指数增长。数学上的不稳定不等于 firing rate 真能无限上升；真实 neuron 的 saturation、threshold 与 inhibition 会改变高振幅行为，但线性分析仍指出固定点附近存在离开的方向。",
-          "activity-space sketches 可这样读：在 h1-h2 平面中，common axis 是斜率 +1 的线，difference axis 是斜率 -1 的线。若 \\(\\tau _{-}\\) 远小于 \\(\\tau _{+}\\)，任意初始点先快速消掉 difference component，轨迹靠近 common axis，再沿该轴慢慢移动。图上的轴是 eigenvector directions；轨迹的快慢来自 eigenvalues 与 \\(\\tau\\)，而不是由线条长短决定。"
+          "两个模态方程的齐次部分为 \\(\\tau d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) 和 \\(\\tau d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\)。与标准形式 \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) 比较，得到 \\(\\tau _{+}=\\tau /(1-w_{0})\\)、\\(\\tau _{-}=\\tau /(1+w_{0})\\)。写成 \\(1/(1\\mp w_{0})\\) 只适用于预先将 \\(\\tau\\) 归一化为 1 的情况；保留时间单位时应写成 \\(\\tau /(1\\mp w_{0})\\)。正耦合为共同变化提供正反馈，抵消部分漏电；它却会减小两者的差异，因为一个神经元升高时也会推动另一个升高。",
+          "当 \\(|w_{0}|<1\\) 时，两个漏电系数 1-w0 与 1+w0 均为正，输入撤去后两个模态都指数衰减。耦合强度从下方接近 1 时，\\(\\tau _{+}\\) 很长，共同模态成为漏积分器；\\(w_{0}=1\\) 时，该模态不再漏电，持续输入被积分，输入撤去后积累的 \\(\\alpha _{+}\\) 保持不变。耦合强度接近 -1 时，对应的慢模态变为差分模态。等号处是完美积分边界，应与普通漏积分状态区分。",
+          "若 \\(|w_{0}|>1\\)，至少一个模态的恢复系数变负。例如 \\(w_{0}=1.2\\) 时，共同模态满足 \\(\\tau d\\alpha _{+}/dt=+0.2\\alpha _{+}\\)，微小扰动会指数增长。这并不表示真实发放率可以无限增大：饱和、阈值和抑制会改变大振幅行为。线性分析指出的是固定点附近存在不稳定方向。",
+          "在两个神经元的活动平面中，共同轴的斜率为 +1，差分轴的斜率为 -1。若 \\(\\tau _{-}\\) 远小于 \\(\\tau _{+}\\)，轨迹先快速消除差分分量，靠近共同轴，再沿共同轴缓慢移动。轴的方向来自特征向量，移动速度来自特征值和 \\(\\tau\\)，并非图上线段的长短。"
         ],
         "keyPoints": [
-          "\\(\\tau _{+}=\\tau /(1-w_{0})\\)，\\(\\tau _{-}=\\tau /(1+w_{0})\\)，两个符号不能合并成同一分母。",
-          "\\(|w_{0}|<1\\) 才保证两 modes 都稳定；\\(w_{0}=\\pm 1\\) 分别产生一个 perfect integrator。",
-          "\\(|w_{0}|>1\\) 表示线性固定点至少沿一个 mode 不稳定。",
-          "activity-space 轨迹可分成沿 eigenvectors 的独立指数分量。"
+          "\\(\\tau _{+}=\\tau /(1-w_{0})\\)，\\(\\tau _{-}=\\tau /(1+w_{0})\\)；两个模态的分母符号不同。",
+          "\\(|w_{0}|<1\\) 保证两个模态稳定；\\(w_{0}=\\pm 1\\) 分别产生一个完美积分模态。",
+          "\\(|w_{0}|>1\\) 表示线性固定点至少沿一个模态不稳定。",
+          "活动轨迹可分解为沿特征向量演化的独立指数分量。"
         ],
         "derivation": {
-          "title": "从 mode coefficient 读出有效时间常数",
-          "setup": "把每个 mode 方程改写成标准一阶 relaxation equation，再逐区间判断 coefficient 的符号。",
+          "title": "从模态系数读出有效时间常数",
+          "setup": "把每个模态方程改写成标准一阶弛豫方程，再逐区间判断系数的符号。",
           "steps": [
             {
               "title": "隔离标准衰减率",
@@ -215,7 +215,7 @@
             },
             {
               "title": "取倒数得到时间常数",
-              "explanation": "指数解的 decay rate 是 \\((1-w_{0})/\\tau\\)，所以 time constant 是它的倒数；difference mode 同理。",
+              "explanation": "指数解的衰减发放率是 \\((1-w_{0})/\\tau\\)，所以时间常数是它的倒数；差分模态同理。",
               "latex": "\\tau_+=\\frac{\\tau}{1-w_0},\\qquad \\tau_-=\\frac{\\tau}{1+w_0}"
             },
             {
@@ -225,36 +225,37 @@
             },
             {
               "title": "加入常量输入",
-              "explanation": "稳定条件下 fixed point 由导数设为零得到 \\(\\alpha _{+}*=\\beta _{+}/(1-w_{0})\\)，显示接近临界时 gain 也增大。",
+              "explanation": "稳定条件下固定点由导数设为零得到 \\(\\alpha _{+}*=\\beta _{+}/(1-w_{0})\\)，显示接近临界时增益也增大。",
               "latex": "\\alpha_+^*=\\frac{\\beta_+}{1-w_0}"
             }
           ],
           "symbolNotes": [
-            "\\(\\alpha \\pm\\) 与 \\(\\beta \\pm\\) 是 rate-coordinate；若 input 原本是 current，还需先明确模型中 I 是否已换算为 rate drive。",
+            "\\(\\alpha \\pm\\) 与 \\(\\beta \\pm\\) 是发放率坐标；若输入原本是电流，还需先明确模型中 I 是否已换算为发放率驱动。",
             "\\(\\tau \\pm\\) 具有时间单位，w0 与 \\(1\\pm w_{0}\\) 无量纲。"
           ],
           "unitsCheck": "分母是无量纲数，所以 \\(\\tau /(1\\mp w_{0})\\) 保留 \\(\\tau\\) 的时间单位；若计算得到无单位的“时间常数”，说明漏写了 \\(\\tau\\)。",
-          "limitCheck": "w0→1^- 时 \\(\\tau +\\to \\infty\\)；越过 1 后公式给负数，它不再表示负的物理时间，而是提示 exponent 改为增长。"
+          "limitCheck": "w0→1^- 时 \\(\\tau +\\to \\infty\\)；越过 1 后公式给负数，它不再表示负的物理时间，而是提示指数改为增长。"
         },
         "workedExample": {
-          "title": "比较两个 mode 的速度",
-          "problem": "设单细胞时间常数 \\(\\tau =20 \\mathrm{ms}\\)、\\(w_{0}=0.8\\)、撤掉输入，计算两个 mode 时间常数并预测 100 ms 后剩余比例。",
+          "title": "比较两个模态的速度",
+          "problem": "设单细胞时间常数 \\(\\tau =20 \\mathrm{ms}\\)、\\(w_{0}=0.8\\)、撤掉输入，计算两个模态时间常数并预测 100 ms 后剩余比例。",
           "steps": [
             "\\(\\tau _{+}=20/(1-0.8)=100 \\mathrm{ms}\\)；\\(\\tau _{-}=20/(1+0.8)=11.11 \\mathrm{ms}\\)。",
-            "100 ms 后 common amplitude 比例 \\(e^{-100/100}=e^{-1}\\approx 0.368\\)。",
-            "difference amplitude 比例 \\(e^{-100/11.11}=e^{-9}\\approx 0.000123\\)，因此它几乎完全消失。"
+            "100 ms 后共同振幅比例 \\(e^{-100/100}=e^{-1}\\approx 0.368\\)。",
+            "差分振幅比例 \\(e^{-100/11.11}=e^{-9}\\approx 0.000123\\)，因此它几乎完全消失。"
           ],
-          "result": "100 ms 时 state 几乎只剩 common component，尽管两个 neurons 都仍可有非零活动。",
-          "sanityCheck": "把 w0 设为 0 时两时间常数都应回到 20 ms；本例结果一长一短，符合正 reciprocal feedback 的方向。"
+          "result": "100 ms 时状态几乎只剩共同分量，尽管两个神经元都仍可有非零活动。",
+          "sanityCheck": "把 w0 设为 0 时两时间常数都应回到 20 ms；本例结果一长一短，符合正倒数反馈的方向。"
         },
         "pitfalls": [
-          "只看 W 的 eigenvalue 正负而忘记 full ODE 还含 -h，会错误判断稳定性。",
-          "把 \\(\\tau /(1-w_{0})\\) 同时用于两个 modes，会漏掉 difference eigenvalue 的负号。"
-        ]
+          "只看 W 的特征值正负，忽略完整微分方程还包含自身漏电项。",
+          "将 \\(\\tau /(1-w_{0})\\) 同时用于两个模态，遗漏差分模态特征值的负号。"
+        ],
+        "transition": "共同模态和差分模态已将方程解耦。各模态的反馈与自身漏电相加，决定活动会衰减、保持，还是不稳定地增长。"
       },
       {
         "id": "l19-m3",
-        "title": "同一条轨迹的 activity-space 与 mode-space 表示",
+        "title": "从神经元坐标到模态坐标",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -266,68 +267,69 @@
           }
         ],
         "paragraphs": [
-          "activity space 用坐标 (h1,h2) 描述每个时刻两个 neurons 的状态；mode space 用坐标 \\((\\alpha _{+},\\alpha _{-})\\) 描述同一个点。二者由可逆矩阵 V 连接，所以不是两套不同数据。activity space 适合直接对应记录到的 firing rates，mode space 适合看动力学，因为每个 \\(\\alpha\\) coordinate 依自己的时间常数演化。换坐标不会删除 information，只有随后主动丢弃某些 coordinates 才构成降维。",
-          "任意 state 都可写成 \\(h(t)=\\alpha +(t)\\xi _{+}+\\alpha -(t)\\xi _{-}\\)。若 \\(\\tau _{-}\\)远小于 \\(\\tau _{+}\\)且 delay 中没有持续 difference input，\\(\\alpha -(t)\\) 会比 \\(\\alpha +(t)\\) 快得多地衰减。经过几个 \\(\\tau _{-}\\) 后，\\(h(t)\\approx \\alpha +(t)\\xi _{+}\\)，所有后续状态都靠近 common axis。这里的“一维”表示 trajectory 所需的主要自由 coordinate 只有 \\(\\alpha _{+}\\)，并不是只有一个 neuron 参与。",
-          "近似程度可以用残差能量衡量。由于 basis orthonormal，\\(||h||^{2}=\\alpha +^{2}+\\alpha -^{2}\\)；若丢弃 difference mode，reconstruction error squared 恰为 \\(\\alpha -^{2}\\)。因此可以规定一个 tolerance，例如 \\(\\alpha -^{2}/(\\alpha +^{2}+\\alpha -^{2})<0.05\\) 时称 95% state energy 位于 common mode。这个 criterion 是分析者设定的，不是从图上自动出现的绝对界线。",
-          "该逻辑也揭示低维结论的条件：如果 input 在每个时刻都强烈驱动 \\(\\beta _{-}\\)，或者 trials 包含不同 fast transients，difference coordinate 不会保持接近零；若 nonlinear dynamics 随 state 改变 directions，也不能用一个固定 V 描述全程。近一维是特定数据分布与时间窗口的性质，不是网络永远只能访问一条直线。"
+          "神经活动空间以两个神经元的状态为坐标，模态空间则以 \\((\\alpha _{+},\\alpha _{-})\\) 为坐标。两者由可逆矩阵 V 连接，描述同一组数据。前者便于对应记录到的发放率，后者便于分析动力学，因为每个 \\(\\alpha\\) 坐标按各自的时间常数演化。换坐标本身不丢失信息；只有舍弃部分坐标才构成降维。",
+          "任意状态均可写成 \\(h(t)=\\alpha +(t)\\xi _{+}+\\alpha -(t)\\xi _{-}\\)。若 \\(\\tau _{-}\\) 远小于 \\(\\tau _{+}\\)，且延迟期没有持续的差分输入，\\(\\alpha -(t)\\) 就比 \\(\\alpha +(t)\\) 衰减得快。经过几个 \\(\\tau _{-}\\) 后，\\(h(t)\\approx \\alpha +(t)\\xi _{+}\\)，轨迹接近共同轴。此处的一维是指主要自由坐标只剩 \\(\\alpha _{+}\\)，并不表示只有一个神经元参与。",
+          "正交基使近似误差可以直接量化：\\(||h||^{2}=\\alpha +^{2}+\\alpha -^{2}\\)。舍弃差分模态后，重构误差的平方恰为 \\(\\alpha -^{2}\\)。例如，以 \\(\\alpha -^{2}/(\\alpha +^{2}+\\alpha -^{2})<0.05\\) 为容差，就表示 95% 以上的状态能量位于共同模态。这是分析者选定的标准，而非从图形中自动得到的绝对界线。",
+          "近一维结论依赖输入和时间窗口。如果输入持续强烈驱动 \\(\\beta _{-}\\)，或者不同试次包含明显的快速瞬态，差分坐标就未必接近零。若非线性动力学还使方向随状态改变，也不能用固定的 V 描述全程。低维近似是特定数据分布的性质，并非网络永远只能沿一条直线活动。"
         ],
         "keyPoints": [
-          "activity coordinates 与 mode coordinates 是同一 state 的两种可逆表示。",
-          "fast mode 衰减后，slow mode 支配轨迹，形成 approximate low dimensionality。",
-          "丢弃 mode 后的误差可用被丢弃 coordinate 的平方量化。",
-          "持续输入、transients 或 nonlinear curved manifold 会破坏固定直线近似。"
+          "神经元坐标与模态坐标是同一状态的两种可逆表示。",
+          "快模态衰减后，慢模态支配轨迹，可形成近似低维结构。",
+          "丢弃模态的误差可由相应坐标的平方量化。",
+          "持续输入、瞬态响应和弯曲的非线性流形都可能破坏直线近似。"
         ],
         "derivation": {
           "title": "快模态消失为何产生近一维轨迹",
-          "setup": "假设撤掉输入且两个 modes 稳定，比较它们随时间的相对大小。",
+          "setup": "假设撤掉输入且两个模态稳定，比较它们随时间的相对大小。",
           "steps": [
             {
               "title": "写两个指数解",
-              "explanation": "每个 decoupled mode 按自己的 time constant 衰减。",
+              "explanation": "每个解耦的模态按自己的时间常数衰减。",
               "latex": "\\alpha_\\pm(t)=\\alpha_\\pm(0)e^{-t/\\tau_\\pm}"
             },
             {
-              "title": "写 state reconstruction",
-              "explanation": "把两个 scalar coordinates 乘各自 basis direction后相加。",
+              "title": "写状态重构",
+              "explanation": "把两个标量坐标乘各自基底方向后相加。",
               "latex": "\\mathbf h(t)=\\alpha_+(t)\\boldsymbol\\xi_++\\alpha_-(t)\\boldsymbol\\xi_-"
             },
             {
               "title": "比较相对幅度",
-              "explanation": "若 \\(\\tau -<\\tau _{+}\\)，则 \\(|\\alpha _{-}/\\alpha +|\\) 含 exponent \\(-t(1/\\tau _{-}-1/\\tau _{+})\\) 并随时间下降。",
+              "explanation": "若 \\(\\tau -<\\tau _{+}\\)，则 \\(|\\alpha _{-}/\\alpha +|\\) 含指数 \\(-t(1/\\tau _{-}-1/\\tau _{+})\\) 并随时间下降。",
               "latex": "\\left|\\frac{\\alpha_-(t)}{\\alpha_+(t)}\\right|=\\left|\\frac{\\alpha_-(0)}{\\alpha_+(0)}\\right|e^{-t(1/\\tau_- -1/\\tau_+)}"
             },
             {
               "title": "得到一维近似",
-              "explanation": "当该 ratio 小于预定 tolerance 时，忽略 \\(\\alpha _{-}\\) 所造成的 relative error 很小。",
+              "explanation": "当该比例小于预定容限时，忽略 \\(\\alpha _{-}\\) 所造成的相对误差很小。",
               "latex": "\\mathbf h(t)\\approx\\alpha_+(t)\\boldsymbol\\xi_+"
             }
           ],
           "symbolNotes": [
-            "relative ratio 无单位；它比较两个在同一 orthonormal basis 下的 coordinates。",
-            "若 \\(\\alpha +(0)=0\\)，不能用 ratio 判定，应直接使用 residual-energy fraction。"
+            "相对比例无单位；它比较两个在同一正交归一基底下的坐标。",
+            "若 \\(\\alpha +(0)=0\\)，不能用比例判定，应直接使用残差能量比例。"
           ],
           "unitsCheck": "\\(\\alpha \\pm\\) 与 h 有相同单位，\\(\\xi \\pm\\) 无量纲；重构相加的两项单位一致。",
-          "limitCheck": "若 \\(\\tau _{-}=\\tau _{+}\\)，两 modes 以同样比例衰减，初始二维结构不会因时间尺度分离而自动变成一维。"
+          "limitCheck": "若 \\(\\tau _{-}=\\tau _{+}\\)，两模态以同样比例衰减，初始二维结构不会因时间尺度分离而自动变成一维。"
         },
         "workedExample": {
           "title": "计算进入低维流形需要多久",
-          "problem": "设 \\(\\alpha +(0)=4\\)、\\(\\alpha -(0)=2\\)、\\(\\tau _{+}=200 \\mathrm{ms}\\)、\\(\\tau _{-}=20 \\mathrm{ms}\\)。求 100 ms 后两 amplitudes 与 difference energy fraction。",
+          "problem": "设 \\(\\alpha +(0)=4\\)、\\(\\alpha -(0)=2\\)、\\(\\tau _{+}=200 \\mathrm{ms}\\)、\\(\\tau _{-}=20 \\mathrm{ms}\\)。求 100 ms 后两振幅与差分能量比例。",
           "steps": [
             "\\(\\alpha +(100)=4e^{-0.5}\\approx 2.426\\)。",
             "\\(\\alpha -(100)=2e^{-5}\\approx 0.0135\\)。",
-            "difference fraction=\\(0.0135^{2}/(2.426^{2}+0.0135^{2})\\approx 0.000031\\)，即约 0.0031%。"
+            "差分比例=\\(0.0135^{2}/(2.426^{2}+0.0135^{2})\\approx 0.000031\\)，即约 0.0031%。"
           ],
-          "result": "100 ms 后 state 在能量意义上远超过 99.9% 位于 common axis，可安全作一维近似。",
-          "sanityCheck": "若误把 20 ms 与 200 ms 交换，fast/slow 结论会反转；先核对哪个 denominator 更接近零。"
+          "result": "100 ms 后状态在能量意义上远超过 99.9% 位于共同轴，可安全作一维近似。",
+          "sanityCheck": "若误把 20 ms 与 200 ms 交换，快/慢结论会反转；先核对哪个分母更接近零。"
         },
         "pitfalls": [
-          "把 coordinate transformation 本身称为降维；真正降维发生在丢弃 coordinate 时。",
-          "把低维解释为少数 neurons active，而不是多数 neurons 按少数 population patterns 协同变化。"
-        ]
+          "将可逆坐标变换本身称为降维，而没有说明舍弃了哪些坐标。",
+          "把低维理解为少数神经元活跃，忽略多个神经元可以按少数群体模式共同变化。"
+        ],
+        "transition": "快模态先衰减、慢模态后衰减，解释了轨迹为何逐渐靠近一条直线。比较两套坐标，还能看清换坐标与丢弃信息之间的区别。"
       },
       {
         "id": "l19-m4",
-        "title": "PCA：从投影方差到 covariance eigenvector",
+        "title": "PCA：使投影方差最大的方向",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -339,24 +341,24 @@
           }
         ],
         "paragraphs": [
-          "现在不假定知道 W，只观察 T 个 population vectors \\(h_{t}\\in \\mathbb{R}^N\\)。先计算 \\(\\operatorname{mean} \\bar{h}\\)，再定义 \\(\\delta h_{t}=h_{t}-\\bar{h}\\)。covariance \\(C=(1/T)\\sum _t \\delta h_{t}\\delta h_{t}^\\mathrm{T}\\) 是 N×N symmetric positive-semidefinite matrix；\\(C_{ij}\\) 描述 neuron i 与 j 的 centered cofluctuation。选择一个单位方向 v 后，每个 sample 的 scalar projection 是 \\(p_{t}=v^\\mathrm{T}\\delta h_{t}\\)。",
-          "projection variance 为 \\((1/T)\\sum p_{t}^{2}=(1/T)\\sum v^\\mathrm{T}\\delta h_{t}\\delta h_{t}^\\mathrm{T}v=v^\\mathrm{T}Cv\\)。若不限制 ||v||，把 v 任意放大就能让 variance 任意大，所以必须加入 \\(v^\\mathrm{T}v=1\\)。用 Lagrange multiplier 最大化 \\(v^\\mathrm{T}Cv-\\lambda (v^\\mathrm{T}v-1)\\)，对 v 的每个分量求导得到 \\(2Cv-2\\lambda v=0\\)，即 \\(Cv=\\lambda v\\)。候选方向因此是 covariance eigenvectors。",
-          "在 eigenvector direction \\(v_{k}\\) 上，projected variance 正好等于 \\(\\lambda _{k}\\)，因为 \\(v_{k}^\\mathrm{T}Cv_{k}=v_{k}^\\mathrm{T}(\\lambda _{k}v_{k})=\\lambda _{k}\\)。选择最大 eigenvalue 对应的 \\(v_{1}\\) 就得到 PC1。这个推导只说它最大化数据 variance；若 task-relevant signal 很小却稳定，或 measurement artifact variance 很大，PC1 不一定最适合 decoding，更不自动成为 circuit 的 causal direction。",
-          "W modes 与 C PCs 只有在额外条件下才可能对齐。例如 linear network 被 isotropic noise 驱动、进入 stationary state，且 W normal 或 symmetric 时，slow dynamical modes 常积累较大 variance；但 structured inputs、unequal noise、trial conditions 与 nonlinear observations 都会旋转 covariance。看到相似 axes 可以形成 hypothesis，不能把统计共线当作已经识别 recurrent weights。"
+          "现在不假定已知 W，只观察 T 个群体活动向量 \\(h_{t}\\in \\mathbb{R}^N\\)。先计算均值 \\(\\operatorname{mean} \\bar{h}\\)，再中心化为 \\(\\delta h_{t}=h_{t}-\\bar{h}\\)。协方差 \\(C=(1/T)\\sum _t \\delta h_{t}\\delta h_{t}^\\mathrm{T}\\) 是 N×N 对称半正定矩阵，\\(C_{ij}\\) 描述两个神经元相对均值的共同波动。选择单位方向 v 后，每个样本的标量投影为 \\(p_{t}=v^\\mathrm{T}\\delta h_{t}\\)。",
+          "投影方差为 \\((1/T)\\sum p_{t}^{2}=(1/T)\\sum v^\\mathrm{T}\\delta h_{t}\\delta h_{t}^\\mathrm{T}v=v^\\mathrm{T}Cv\\)。若不限制 v 的长度，只需放大 v 就能让方差任意增大，因此必须要求 \\(v^\\mathrm{T}v=1\\)。引入拉格朗日乘子，最大化 \\(v^\\mathrm{T}Cv-\\lambda (v^\\mathrm{T}v-1)\\)。对 v 的各分量求导，得到 \\(2Cv-2\\lambda v=0\\)，即 \\(Cv=\\lambda v\\)，所以候选方向是协方差矩阵的特征向量。",
+          "沿特征向量 \\(v_{k}\\) 的投影方差等于 \\(\\lambda _{k}\\)，因为 \\(v_{k}^\\mathrm{T}Cv_{k}=v_{k}^\\mathrm{T}(\\lambda _{k}v_{k})=\\lambda _{k}\\)。最大特征值对应的 \\(v_{1}\\) 就是第一主成分。它最大化的是观测方差：若任务信号较弱但稳定，或者测量伪迹的方差很大，第一主成分就未必最适合行为解码，更不能直接视为回路的因果方向。",
+          "连接模态与协方差主成分只在额外条件下才可能对齐。例如，线性网络受各向同性噪声驱动并达到平稳状态，且 W 正规或对称时，慢模态常积累较大方差。结构化输入、不等噪声、试次条件和非线性观测都可能改变协方差方向。方向相似可以提出假说，却不足以识别递归连接。"
         ],
         "keyPoints": [
-          "PCA 必须作用于 centered activity；\\(C=E[\\delta h\\delta h^\\mathrm{T}]\\)。",
-          "unit-norm 约束下 projected variance 是 \\(v^\\mathrm{T}Cv\\)。",
-          "stationary point 满足 \\(Cv=\\lambda v\\)，最大 \\(\\lambda\\) 的 eigenvector 是 PC1。",
-          "最大 variance 不等于最大 causal relevance 或 behavioral relevance。"
+          "PCA 应作用于中心化活动：\\(C=E[\\delta h\\delta h^\\mathrm{T}]\\)。",
+          "单位长度约束下，投影方差为 \\(v^\\mathrm{T}Cv\\)。",
+          "驻点满足 \\(Cv=\\lambda v\\)，最大 \\(\\lambda\\) 对应第一主成分。",
+          "最大方差不等于最大的因果作用或行为相关性。"
         ],
         "derivation": {
-          "title": "Rayleigh quotient 推导 PC1",
-          "setup": "对 centered samples 的一维投影求 variance，并在单位长度约束下做 constrained maximization。",
+          "title": "Rayleigh 商推导 PC1",
+          "setup": "对中心化后的样本的一维投影求方差，并在单位长度约束下做有约束的最大化。",
           "steps": [
             {
-              "title": "展开投影 variance",
-              "explanation": "\\(p=v^\\mathrm{T}\\delta h\\) 是 scalar，\\(p^{2}=v^\\mathrm{T}\\delta h\\delta h^\\mathrm{T}v\\)；对 samples 平均得到 \\(v^\\mathrm{T}Cv\\)。",
+              "title": "展开投影方差",
+              "explanation": "\\(p=v^\\mathrm{T}\\delta h\\) 是标量，\\(p^{2}=v^\\mathrm{T}\\delta h\\delta h^\\mathrm{T}v\\)；对样本平均得到 \\(v^\\mathrm{T}Cv\\)。",
               "latex": "\\operatorname{Var}(p)=\\mathbf v^{\\mathsf T}C\\mathbf v"
             },
             {
@@ -366,41 +368,42 @@
             },
             {
               "title": "对 v 求导",
-              "explanation": "C symmetric，因此 gradient 为 2Cv；令 gradient 为零得到 eigenproblem。",
+              "explanation": "C 对称，因此梯度为 2Cv；令梯度为零得到特征值问题。",
               "latex": "C\\mathbf v=\\lambda\\mathbf v"
             },
             {
               "title": "选择最大候选",
-              "explanation": "在 normalized eigenvector \\(v_{k}\\) 上 objective 等于 \\(\\lambda _{k}\\)，所以取最大 eigenvalue。",
+              "explanation": "在归一化的特征向量 \\(v_{k}\\) 上目标等于 \\(\\lambda _{k}\\)，所以取最大特征值。",
               "latex": "\\mathbf v_1=\\operatorname*{arg\\,max}_{\\|\\mathbf v\\|=1}\\mathbf v^{\\mathsf T}C\\mathbf v"
             }
           ],
           "symbolNotes": [
-            "\\(\\delta h\\) 与 v 是 N×1；C 是 N×N；p 与 \\(\\lambda\\) 是 scalar。",
-            "若 C 用 1/(T-1) 而不是 1/T，eigenvectors 不变，eigenvalues 只按共同常数缩放。"
+            "\\(\\delta h\\) 与 v 是 N×1；C 是 N×N；p 与 \\(\\lambda\\) 是标量。",
+            "若 C 用 1/(T-1) 而不是 1/T，特征向量不变，特征值只按共同常数缩放。"
           ],
-          "unitsCheck": "若 h 是 firing rate，C 和 \\(\\lambda\\) 的单位是 \\(\\mathrm{rate}^{2}\\)；v 无量纲，projection p 保留 rate 单位。",
-          "limitCheck": "若所有 samples 完全相同，中心化后 \\(C=0\\)，所有 directions variance 都为零，PC directions 不唯一。"
+          "unitsCheck": "若 h 是发放率，C 和 \\(\\lambda\\) 的单位是 \\(\\mathrm{rate}^{2}\\)；v 无量纲，投影 p 保留发放率单位。",
+          "limitCheck": "若所有样本完全相同，中心化后 \\(C=0\\)，所有方向方差都为零，PC 方向不唯一。"
         },
         "workedExample": {
-          "title": "手算二维 covariance 的 PC",
-          "problem": "给定 \\(C=[[5,4],[4,5]]\\)，求两个 eigenvectors、eigenvalues，并解释 data cloud 的长轴。",
+          "title": "手算二维协方差的 PC",
+          "problem": "给定 \\(C=[[5,4],[4,5]]\\)，求两个特征向量、特征值，并解释数据点云的长轴。",
           "steps": [
-            "对 common vector \\((1,1)^\\mathrm{T}\\)，\\(C(1,1)^\\mathrm{T}=(9,9)^\\mathrm{T}\\)，所以 eigenvalue 9。",
-            "对 difference vector \\((1,-1)^\\mathrm{T}\\)，\\(C(1,-1)^\\mathrm{T}=(1,-1)^\\mathrm{T}\\)，所以 eigenvalue 1。",
-            "规范化后 PC1=\\((1,1)^\\mathrm{T}/\\sqrt 2\\)、PC2=\\((1,-1)^\\mathrm{T}/\\sqrt 2\\)；PC1 variance 是 PC2 的 9 倍。"
+            "对共同向量 \\((1,1)^\\mathrm{T}\\)，\\(C(1,1)^\\mathrm{T}=(9,9)^\\mathrm{T}\\)，所以特征值 9。",
+            "对差分向量 \\((1,-1)^\\mathrm{T}\\)，\\(C(1,-1)^\\mathrm{T}=(1,-1)^\\mathrm{T}\\)，所以特征值 1。",
+            "规范化后 PC1=\\((1,1)^\\mathrm{T}/\\sqrt 2\\)、PC2=\\((1,-1)^\\mathrm{T}/\\sqrt 2\\)；PC1 方差是 PC2 的 9 倍。"
           ],
-          "result": "data cloud 的主要 elongation 沿 h1 与 h2 同向变化的 common axis，保留 PC1 可解释 \\(9/(9+1)=90\\)% variance。",
-          "sanityCheck": "C 的 trace 为 10，等于 eigenvalue \\(\\operatorname{sum} 9+1\\)；可用来检查 eigenvalue 算术。"
+          "result": "数据点云的主要延长沿 h1 与 h2 同向变化的共同轴，保留 PC1 可解释 \\(9/(9+1)=90\\)% 方差。",
+          "sanityCheck": "C 的痕迹为 10，等于特征值 \\(\\operatorname{sum} 9+1\\)；可用来检查特征值算术。"
         },
         "pitfalls": [
-          "把 covariance eigenvectors 直接称为 recurrent modes。",
-          "为了得到更大 variance 而忘记限制 \\(||v||=1\\)，使优化问题没有上界。"
-        ]
+          "将协方差矩阵的特征向量直接称为递归网络模态。",
+          "遗漏 \\(||v||=1\\) 约束，导致投影方差的优化没有上界。"
+        ],
+        "transition": "动力学模态来自已知的连接矩阵。连接未知时，可以改从群体活动的协方差寻找高方差方向；PCA 描述这些统计方向。"
       },
       {
         "id": "l19-m5",
-        "title": "Top-K PCA、正交投影与可逆到近似的分界",
+        "title": "保留主成分：投影、重构与误差",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -412,68 +415,69 @@
           }
         ],
         "paragraphs": [
-          "将 covariance eigenvalues 排为 \\(\\lambda _{1}\\ge \\lambda _{2}\\ge \\cdots \\ge \\lambda _{N}\\)，对应 orthonormal eigenvectors v1,...,vN。第一个 PC 取 v1；第二个 PC 必须与 v1 orthogonal，并在剩余 subspace 最大化 variance，因此取 v2。持续该过程得到 \\(V_{K}=[v_{1},\\cdots,vK]\\)，这是 N×K matrix。单个 centered sample 的 score vector \\(p=V_{K}^\\mathrm{T}(h-\\bar{h})\\) 具有 K 个 coordinates。",
-          "若保留全部 N 个 components，V 是 orthogonal square matrix，\\(h=\\bar{h}+VV^\\mathrm{T}(h-\\bar{h})\\)，变换可逆且没有 information loss。只保留 \\(K<N\\) 时，reconstruction \\(\\hat{h}=\\bar{h}+V_{\\mathrm{KV},K}^\\mathrm{T}(h-\\bar{h})\\) 是 sample 在 top-K subspace 的 orthogonal projection。discarded residual \\(e=(I-V_{\\mathrm{KV},K}^\\mathrm{T})(h-\\bar{h})\\) 与 retained subspace orthogonal。",
-          "平均 squared reconstruction error 等于被丢弃 eigenvalues 的和 \\(\\sum _{k>K}\\lambda _{k}\\)；这是 PCA 在所有 K-dimensional linear subspaces 中最小化 squared reconstruction error 的意义。把重构称为 denoised 还需额外假设：noise 主要占据 low-variance directions，而 signal 位于 high-variance directions。若稀有但重要的 movement command 位于低 variance axis，PCA 会把它当成 residual。",
-          "实际算法包含五步：按 neurons 维度中心化；计算 N×N covariance 或对 data matrix 做 SVD；排序 eigenpairs；投影得到 scores；根据任务重构或分析。训练与测试数据必须使用训练集 mean 和 PCs，不能分别重算后直接比较 coordinates，否则跨条件差异可能只是 basis 改变。"
+          "将协方差特征值排序为 \\(\\lambda _{1}\\ge \\lambda _{2}\\ge \\cdots \\ge \\lambda _{N}\\)，对应一组标准正交特征向量。第一主成分取最大特征值的方向；第二主成分与其正交，并在剩余子空间中使方差最大。依次取前 K 个方向，组成 N×K 矩阵 \\(V_{K}=[v_{1},\\cdots,vK]\\)。中心化样本的得分向量 \\(p=V_{K}^\\mathrm{T}(h-\\bar{h})\\) 因而含有 K 个坐标。",
+          "保留全部 N 个主成分时，V 是正交方阵，\\(h=\\bar{h}+VV^\\mathrm{T}(h-\\bar{h})\\)，变换可逆且不丢失信息。仅保留 \\(K<N\\) 时，重构 \\(\\hat{h}=\\bar{h}+V_{K}V_{K}^\\mathrm{T}(h-\\bar{h})\\) 是样本在前 K 个主成分张成子空间中的正交投影。残差 \\(e=(I-V_{K}V_{K}^\\mathrm{T})(h-\\bar{h})\\) 与保留的子空间正交。",
+          "平均平方重构误差等于被舍弃特征值的总和 \\(\\sum _{k>K}\\lambda _{k}\\)。PCA 在所有 K 维线性子空间中使这一误差最小，但称其为去噪还需要额外假设：信号主要位于高方差方向，噪声主要位于低方差方向。若稀有但关键的运动命令恰好位于低方差方向，PCA 也可能将它舍弃。",
+          "实际计算依次进行：逐神经元中心化；计算 N×N 协方差矩阵或对数据矩阵做奇异值分解；排序特征值与特征向量；投影得到低维坐标；按任务需要重构或分析。测试数据必须使用训练集的均值和主成分，不能分别拟合后直接比较坐标，否则所谓跨条件差异可能只是基底发生了变化。"
         ],
         "keyPoints": [
-          "\\(V_{K}\\) 是 N×K，scores 是 K×1，reconstruction 回到 N×1 neuron space。",
-          "完整 orthogonal basis 变换无损；\\(K<N\\) 的 projection 才丢弃 dimensions。",
-          "PCA 的 residual error 等于 discarded eigenvalue sum。",
-          "“denoising”需要 signal-high-variance、noise-low-variance 假设，不能只凭算法命名。"
+          "\\(V_{K}\\) 为 N×K，得分为 K×1，重构回到 N×1 的神经活动空间。",
+          "完整正交变换不丢失信息；\\(K<N\\) 的投影才舍弃维度。",
+          "平均残差平方等于被舍弃特征值的总和。",
+          "将 PCA 解释为去噪，需要验证信号与噪声在方差方向上的分布。"
         ],
         "derivation": {
-          "title": "Top-K reconstruction 与误差",
-          "setup": "利用 orthonormal PCs 将 centered state 分解，并明确 retained 与 discarded 部分。",
+          "title": "前 K 个主成分重构与误差",
+          "setup": "利用正交归一主成分将中心化后的状态分解，并明确保留的与舍弃的部分。",
           "steps": [
             {
-              "title": "计算 scores",
-              "explanation": "每个 score 是 sample 在对应 unit PC 上的 dot product。",
+              "title": "计算得分",
+              "explanation": "每个得分是样本在对应单位主成分上的内积。",
               "latex": "p_k=\\mathbf v_k^{\\mathsf T}(\\mathbf h-\\bar{\\mathbf h})"
             },
             {
               "title": "保留前 K 项",
-              "explanation": "将前 K 个 scalar scores 乘回 basis vectors。",
+              "explanation": "将前 K 个标量得分乘回基底向量。",
               "latex": "\\widehat{\\mathbf h}=\\bar{\\mathbf h}+\\sum_{k=1}^{K}p_k\\mathbf v_k"
             },
             {
-              "title": "写 residual",
-              "explanation": "完整展开减去 retained terms，剩余只含 \\(k>K\\) coordinates。",
+              "title": "写残差",
+              "explanation": "完整展开减去保留的项，剩余只含 \\(k>K\\) 坐标。",
               "latex": "\\mathbf e=\\sum_{k=K+1}^{N}p_k\\mathbf v_k"
             },
             {
-              "title": "对 residual energy 平均",
-              "explanation": "正交性消去 cross terms，\\(E[p_{k}^{2}]=\\lambda _{k}\\)。",
+              "title": "对残差能量平均",
+              "explanation": "正交性消去交叉项，\\(E[p_{k}^{2}]=\\lambda _{k}\\)。",
               "latex": "\\mathbb E\\|\\mathbf e\\|^2=\\sum_{k=K+1}^{N}\\lambda_k"
             }
           ],
           "symbolNotes": [
-            "\\(V_{K}\\) columns 为 N-dimensional unit vectors；p 是 K-dimensional score vector。",
-            "\\(\\hat{h}\\) 与 h 使用同一 firing-rate units；\\(\\lambda _{k}\\) 与 squared error 都是 \\(\\mathrm{rate}^{2}\\)。"
+            "\\(V_{K}\\) 列为 N-维度的单位向量；p 是 K-维度的得分向量。",
+            "\\(\\hat{h}\\) 与 h 使用同一发放率单位；\\(\\lambda _{k}\\) 与平方误差都是 \\(\\mathrm{rate}^{2}\\)。"
           ],
-          "unitsCheck": "\\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 的 shape 是 N×N，可作用于 N×1 centered activity；\\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\)，但 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 一般不等于 \\(I_{N}\\)。",
-          "limitCheck": "\\(K=N\\) 时 residual 与 error 都为零；\\(K=0\\) 时 reconstruction 只剩 mean，error 等于 total variance。"
+          "unitsCheck": "\\(V_{K}V_{K}^\\mathrm{T}\\) 的尺寸是 N×N，可作用于 N×1 中心化后的活动；\\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\)，但 \\(V_{K}V_{K}^\\mathrm{T}\\) 一般不等于 \\(I_{N}\\)。",
+          "limitCheck": "\\(K=N\\) 时残差与误差都为零；\\(K=0\\) 时重构只剩均值，误差等于总方差。"
         },
         "workedExample": {
-          "title": "三维 state 的 top-2 重构",
-          "problem": "设 \\(\\operatorname{mean}=0\\)，PCs 恰为坐标轴 \\(v_{1}=(1,0,0)\\)、\\(v_{2}=(0,1,0)\\)、\\(v_{3}=(0,0,1)\\)，sample \\(h=(4,2,1)\\)。保留 \\(K=2\\)。",
+          "title": "三维状态的前 2 个主成分重构",
+          "problem": "设 \\(\\operatorname{mean}=0\\)，主成分恰为坐标轴 \\(v_{1}=(1,0,0)\\)、\\(v_{2}=(0,1,0)\\)、\\(v_{3}=(0,0,1)\\)，样本 \\(h=(4,2,1)\\)。保留 \\(K=2\\)。",
           "steps": [
-            "scores 为 \\(p_{1}=4\\)、\\(p_{2}=2\\)、\\(p_{3}=1\\)。",
+            "得分为 \\(p_{1}=4\\)、\\(p_{2}=2\\)、\\(p_{3}=1\\)。",
             "保留前两项得到 \\(\\hat{h}=4v_{1}+2v_{2}=(4,2,0)\\)。",
-            "\\(\\mathrm{residual}=h-\\hat{h}=(0,0,1)\\)，squared error 为 1。"
+            "\\(\\mathrm{residual}=h-\\hat{h}=(0,0,1)\\)，平方误差为 1。"
           ],
-          "result": "top-2 重构保留前两 coordinates，丢弃第三个 component；是否可称 denoising 取决于第三轴是否主要是 noise。",
-          "sanityCheck": "原 state squared norm 为 21，重构为 20，残差为 1，满足 orthogonal Pythagorean decomposition \\(21=20+1\\)。"
+          "result": "前 2 个主成分重构保留前两坐标，丢弃第三个分量；是否可称去噪取决于第三轴是否主要是噪声。",
+          "sanityCheck": "原状态平方范数为 21，重构为 20，残差为 1，满足正交 Pythagorean 分解 \\(21=20+1\\)。"
         },
         "pitfalls": [
-          "在每个 condition 分别拟合 PCA 后直接比较 PC1 coordinates，忽略 axes 可能旋转。",
-          "看到 reconstruction 更平滑就断定删掉的是 noise，没有用行为或 held-out prediction 验证。"
-        ]
+          "在各条件中分别拟合 PCA 后直接比较第一主成分坐标，忽略坐标轴可能旋转。",
+          "仅因重构更平滑就断定去除了噪声，没有用行为数据或留出预测验证。"
+        ],
+        "transition": "一条主成分未必足以描述群体活动。依次保留彼此正交的方向，可以同时计算低维坐标、重构结果和舍弃信息造成的误差。"
       },
       {
         "id": "l19-m6",
-        "title": "用 eigenvalue cliff 与累计方差选择维度",
+        "title": "如何选择保留维数",
         "sourceRefs": [
           {
             "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -481,64 +485,65 @@
           }
         ],
         "paragraphs": [
-          "scree plot 将排序后的 \\(\\lambda _{k}\\) 对 component index k 作图；若前几个 eigenvalues 大、随后突然进入平缓尾部，转折常称 eigenvalue cliff 或 elbow。直觉是 cliff 前的 directions 捕获较强 coordinated variation，cliff 后每个 direction 只增加少量 variance。但真实 spectra 常连续下降，elbow 位置可能依读图者而异。",
-          "累计方差解释率 \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) 单调增加，从 \\(F(0)=0\\) 到 \\(F(N)=1\\)。累计方差的分子必须是 \\(\\sum _{j=1}^K\\lambda _{j}\\)，并除以总方差 \\(\\sum _{j=1}^N\\lambda _{j}\\)；若只写 \\(\\lambda _{i}\\) 或漏掉分母，表达式就不再是累计解释率。设定 80%、90% 或 95% threshold 可得到可重复的规则，却不保证它对具体 scientific question 最优。高 measurement noise 会抬高尾部，condition means 会制造大 PCs，trial averaging 也会改变 spectrum；所以报告 K 时应同时报告 preprocessing 与 criterion。",
-          "更稳妥的维度选择应结合 held-out data。可以在训练 trials 上拟合 PCs，在测试 trials 上比较 reconstruction error；也可以比较 behavioral decoding、likelihood 或 downstream model performance 随 K 的变化。若增加某个低-variance component 显著改善 held-out behavior prediction，它虽在 scree plot 尾部，仍可能值得保留。PCA dimension 是 data-and-purpose dependent quantity。",
-          "最后要把三种“维度”分开：W 的 slow dynamical modes 数量来自模型稳定性；PCA dimension 来自 observed covariance spectrum；task dimension 来自 behaviorally relevant variables。它们可在设计良好的实验中互相约束，却没有一般恒等关系。"
+          "碎石图将排序后的 \\(\\lambda _{k}\\) 画在主成分序号上。若前几个特征值很大，随后进入平缓尾部，转折处常称为陡降点或肘点：前面的方向捕获较强共同变化，后面每个方向只增加少量方差。但真实特征值谱往往连续下降，肘点未必唯一。",
+          "累计方差解释率 \\(F(K)=\\sum _{k=1}^K\\lambda _{k}/\\sum _{j=1}^N\\lambda _{j}\\) 单调增加，从 \\(F(0)=0\\) 到 \\(F(N)=1\\)。分子应累加保留方向的特征值 \\(\\sum _{j=1}^K\\lambda _{j}\\)，分母是总方差 \\(\\sum _{j=1}^N\\lambda _{j}\\)；单个 \\(\\lambda _{i}\\) 或没有分母的和都不表示累计解释率。80%、90% 或 95% 的阈值给出可重复的规则，却未必适合具体科学问题。测量噪声抬高尾部，条件均值可能制造大主成分，试次平均也会改变谱形，因此报告维数时还需说明预处理和选择标准。",
+          "留出数据可以补充维数选择的证据。在训练试次拟合主成分后，可比较测试试次的重构误差，也可比较不同维数下的行为解码、似然或下游模型表现。某个低方差方向若显著改善留出行为预测，即使处于碎石图尾部也值得保留。所需维数取决于数据和分析目的。",
+          "三种维数应分别解释：连接矩阵中慢动力学模态的数量来自稳定性分析；PCA 维数来自观测协方差谱；任务维数来自与行为有关的变量。实验可以检验它们之间的联系，却不能预先假定三者相等。"
         ],
         "keyPoints": [
-          "scree elbow 是启发式，通常没有唯一位置。",
-          "累计方差 \\(F(K)\\) 是排序 eigenvalues 的部分和除以总和。",
-          "维度选择应报告 preprocessing、threshold 与 held-out criterion。",
-          "PCA dimension、dynamical dimension 与 task dimension 不应混用。"
+          "碎石图肘点是一种启发式，通常没有唯一位置。",
+          "累计方差 \\(F(K)\\) 是部分特征值之和除以总和。",
+          "应报告预处理、阈值和留出检验标准。",
+          "PCA 维数、动力学维数和任务维数不可混用。"
         ],
         "derivation": {
-          "title": "累计方差与 residual error 的互补关系",
-          "setup": "用 eigenvalue sum 同时表达 retained variance 与 discarded reconstruction error。",
+          "title": "累计方差与残差误差的互补关系",
+          "setup": "用特征值求和同时表达保留的方差与舍弃的重构误差。",
           "steps": [
             {
-              "title": "定义 total variance",
-              "explanation": "covariance trace 等于所有 eigenvalues 的和。",
+              "title": "定义总方差",
+              "explanation": "协方差痕迹等于所有特征值的和。",
               "latex": "\\operatorname{tr}(C)=\\sum_{j=1}^{N}\\lambda_j"
             },
             {
-              "title": "计算 retained fraction",
-              "explanation": "top-K coordinates 平均携带的 squared amplitude 是前 K 个 eigenvalues 之和。",
+              "title": "计算保留的比例",
+              "explanation": "前 K 个主成分坐标平均携带的平方振幅是前 K 个特征值之和。",
               "latex": "F(K)=\\frac{\\sum_{k=1}^{K}\\lambda_k}{\\sum_{j=1}^{N}\\lambda_j}"
             },
             {
-              "title": "计算 discarded fraction",
+              "title": "计算舍弃的比例",
               "explanation": "由于完整比例为 1，未保留部分是 \\(1-F(K)\\)。",
               "latex": "1-F(K)=\\frac{\\sum_{k=K+1}^{N}\\lambda_k}{\\sum_{j=1}^{N}\\lambda_j}"
             },
             {
               "title": "连接重构误差",
-              "explanation": "normalized mean squared PCA residual 正好等于 discarded variance fraction。",
+              "explanation": "归一化的均值平方 PCA 残差正好等于舍弃的方差比例。",
               "latex": "\\frac{\\mathbb E\\|\\mathbf h-\\widehat{\\mathbf h}_K\\|^2}{\\operatorname{tr}(C)}=1-F(K)"
             }
           ],
           "symbolNotes": [
-            "所有 \\(\\lambda _{k}\\ge 0\\)，因为 covariance positive semidefinite。",
+            "所有 \\(\\lambda _{k}\\ge 0\\)，因为协方差正半正定。",
             "\\(F(K)\\) 无量纲且位于 0 到 1；若用百分比需乘 100%。"
           ],
-          "unitsCheck": "分子和分母都是 \\(\\mathrm{rate}^{2}\\)，因此相除后无单位；K 是 integer index，不是连续参数。",
-          "limitCheck": "若 \\(\\lambda _{1}=\\cdots =\\lambda _{N}\\)，spectrum 没有 cliff，\\(F(K)=K/N\\)；任何低维 cutoff 都来自外部容忍度，而非数据中的自然转折。"
+          "unitsCheck": "分子和分母都是 \\(\\mathrm{rate}^{2}\\)，因此相除后无单位；K 是整数索引，不是连续参数。",
+          "limitCheck": "若 \\(\\lambda _{1}=\\cdots =\\lambda _{N}\\)，谱没有陡降，\\(F(K)=K/N\\)；任何低维截断点都来自外部容忍度，而非数据中的自然转折。"
         },
         "workedExample": {
-          "title": "两个 cutoff 给出不同 K",
-          "problem": "eigenvalues 为 \\([9,3,1,1]\\)。分别用 80% 与 95% cumulative variance threshold 选择最小 K。",
+          "title": "两个截断点给出不同 K",
+          "problem": "特征值为 \\([9,3,1,1]\\)。分别用 80% 与 95% 累积方差阈值选择最小 K。",
           "steps": [
-            "total \\(\\mathrm{variance}=14\\)；\\(F(1)=9/14\\approx 64.3\\)%。",
-            "\\(F(2)=12/14\\approx 85.7\\)%，所以 80% threshold 选择 \\(K=2\\)。",
-            "\\(F(3)=13/14\\approx 92.9\\)%，\\(F(4)=100\\)%，所以 95% threshold 选择 \\(K=4\\)。"
+            "总 \\(\\mathrm{variance}=14\\)；\\(F(1)=9/14\\approx 64.3\\)%。",
+            "\\(F(2)=12/14\\approx 85.7\\)%，所以 80% 阈值选择 \\(K=2\\)。",
+            "\\(F(3)=13/14\\approx 92.9\\)%，\\(F(4)=100\\)%，所以 95% 阈值选择 \\(K=4\\)。"
           ],
-          "result": "同一数据仅因 threshold 不同就得到 \\(K=2\\) 或 \\(K=4\\)，说明 cutoff 是分析决定，必须明确报告。",
+          "result": "同一数据仅因阈值不同就得到 \\(K=2\\) 或 \\(K=4\\)，说明截断点是分析决定，必须明确报告。",
           "sanityCheck": "累计值应单调不降并在 \\(K=N\\) 时等于 1；若没有满足这两点，通常是排序或分母计算错误。"
         },
         "pitfalls": [
-          "把手画的 elbow 当作唯一真实 neural dimension。",
-          "只报告累计方差 threshold，不报告 centering、trial averaging、noise 与 held-out validation。"
-        ]
+          "将手工选出的肘点当作唯一真实的神经维数。",
+          "只报告方差阈值，省略中心化、试次平均、噪声处理与留出验证。"
+        ],
+        "transition": "保留维数决定了重构会舍弃多少方差。特征值谱和累计方差提供选择依据，行为信息是否保留则需要另行检验。"
       }
     ]
   },
@@ -547,9 +552,9 @@
       "id": "L19-FIG-A1",
       "lecture": 19,
       "moduleId": "l19-m6",
-      "title": "Scree cliff 与累计方差",
-      "alt": "归一化 scree 曲线快速下降后进入平缓尾部，累计方差曲线则逐渐接近百分之百",
-      "caption": "按主成分顺序比较两条曲线：单个 eigenvalue 在 cliff 后只贡献少量新增方差，而累计方差仍单调增加。拐点提供候选维度，不等于自动给出唯一的截断位置；图中坐标仅表达这里的归一化关系，不是经验数据。",
+      "title": "碎石图与累计解释方差",
+      "alt": "归一化碎石图曲线快速下降后进入平缓尾部，累计方差曲线则逐渐接近百分之百",
+      "caption": "按主成分顺序比较两条曲线：单个特征值在陡降后只贡献少量新增方差，而累计方差仍单调增加。拐点提供候选维度，不等于自动给出唯一的截断位置；图中坐标仅表达这里的归一化关系，不是经验数据。",
       "sourceRefs": [
         {
           "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -562,7 +567,7 @@
       "yLabel": "归一化方差 / 累计比例",
       "curves": [
         {
-          "label": "eigenvalue \\(\\lambda _{k}\\)",
+          "label": "特征值 \\(\\lambda _{k}\\)",
           "points": [
             [
               5,
@@ -634,7 +639,7 @@
         {
           "x": 38,
           "y": 20,
-          "label": "cliff 后边际收益变小"
+          "label": "陡降后边际收益变小"
         }
       ],
       "lectureTitle": "群体活动与主成分分析"
@@ -666,7 +671,7 @@
     "思考题：PCA 前为什么 center？"
   ],
   "synthesis": [
-    "对称 two-neuron network 的 common 与 difference eigenmodes 可以完全手算：一个 mode 的反馈为 +w0，另一个为 −w0。若 difference mode 快速衰减，neural trajectory 便落到 common-mode line，产生 approximate one-dimensional dynamics。PCA 不需要知道 W，只从 centered activity covariance 找最大 projected variance；因此 W 的 dynamical eigenvectors 与 C 的 principal components 可能相关但一般不相同。"
+    "对称双神经元网络可分成共同活动与差异活动两个模态，反馈分别为 +w0 和 −w0。若差异模态很快衰减，群体轨迹就会接近共同模态所在的直线。PCA 则从中心化活动的协方差出发，寻找投影方差最大的方向，无需预先知道连接矩阵。因此动力学模态与主成分可能相关，但一般并不相同。"
   ],
   "workedExamples": [
     "8.1 two-neuron transform",
@@ -680,10 +685,10 @@
     {
       "id": "L19-F01",
       "lecture": 19,
-      "name": "common/difference modes",
+      "name": "共同模态与差异模态",
       "expression": "ξ± = (1, ±1)T / 2",
       "latex": "\\boldsymbol{\\xi}_{\\pm}=\\frac{1}{\\sqrt{2}}(1,\\pm 1)^{\\mathsf T}",
-      "conditions": "symmetric two-neuron W",
+      "conditions": "双神经元连接矩阵 W 对称",
       "sectionId": "l19-m1",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1
@@ -691,7 +696,7 @@
     {
       "id": "L19-F02",
       "lecture": 19,
-      "name": "orthonormal mode coordinates",
+      "name": "正交归一的模态坐标",
       "expression": "α = V Th",
       "latex": "\\boldsymbol{\\alpha}=V^{\\mathsf T}\\mathbf{h}",
       "conditions": "\\(V^\\mathrm{T}V=I\\)",
@@ -702,10 +707,10 @@
     {
       "id": "L19-F03",
       "lecture": 19,
-      "name": "mode time constants",
+      "name": "模态时间常数",
       "expression": "τ± = τ /(1 ∓ w0 )",
       "latex": "\\tau_{\\pm}=\\frac{\\tau}{1\\mp w_0}",
-      "conditions": "\\(|w_{0}|<1\\) for both stable",
+      "conditions": "\\(|w_{0}|<1\\) 时两模态均稳定",
       "sectionId": "l19-m2",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 2
@@ -713,10 +718,10 @@
     {
       "id": "L19-F04",
       "lecture": 19,
-      "name": "activity covariance",
+      "name": "活动协方差",
       "expression": "C = E[δhδhT ]",
       "latex": "C=\\mathbb{E}\\!\\left[\\delta\\mathbf{h}\\,\\delta\\mathbf{h}^{\\mathsf T}\\right]",
-      "conditions": "centered data",
+      "conditions": "数据已中心化",
       "sectionId": "l19-m4",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 4
@@ -724,10 +729,10 @@
     {
       "id": "L19-F05",
       "lecture": 19,
-      "name": "PC1",
+      "name": "第 1 主成分",
       "expression": "v1 = arg max v T Cv ∥v∥=1",
       "latex": "\\mathbf{v}_1=\\underset{\\lVert\\mathbf{v}\\rVert=1}{\\operatorname{arg\\,max}}\\;\\mathbf{v}^{\\mathsf T}C\\mathbf{v}",
-      "conditions": "C symmetric PSD",
+      "conditions": "C 为对称半正定矩阵",
       "sectionId": "l19-m1",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1
@@ -735,10 +740,10 @@
     {
       "id": "L19-F06",
       "lecture": 19,
-      "name": "PC score/projection",
+      "name": "主成分得分与投影",
       "expression": "pk = vkT (h − h̄)",
       "latex": "p_k=\\mathbf{v}_k^{\\mathsf T}(\\mathbf{h}-\\bar{\\mathbf{h}})",
-      "conditions": "orthonormal PCs",
+      "conditions": "主成分正交归一",
       "sectionId": "l19-m4",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 4
@@ -746,10 +751,10 @@
     {
       "id": "L19-F07",
       "lecture": 19,
-      "name": "cumulative variance explained",
+      "name": "累计解释方差",
       "expression": "∑ ∑ VarFrac(K) = λk / λj k≤K j",
       "latex": "\\operatorname{VarFrac}(K)=\\frac{\\sum_{k=1}^{K}\\lambda_k}{\\sum_j\\lambda_j}",
-      "conditions": "eigenvalues sorted",
+      "conditions": "特征值已按大小排序",
       "sectionId": "l19-m6",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 6
@@ -761,7 +766,7 @@
       "lecture": 19,
       "zh": "共同模态",
       "en": "common mode",
-      "definition": "两个 neurons 同向变化的 eigenmode。",
+      "definition": "两个神经元沿同一方向变化的特征模态。",
       "sectionId": "l19-m1",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1
@@ -771,7 +776,7 @@
       "lecture": 19,
       "zh": "差分模态",
       "en": "difference mode",
-      "definition": "两个 neurons 反向变化的 eigenmode。",
+      "definition": "两个神经元沿相反方向变化的特征模态。",
       "sectionId": "l19-m1",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1
@@ -781,7 +786,7 @@
       "lecture": 19,
       "zh": "神经活动空间",
       "en": "neural activity space",
-      "definition": "以各 neuron activity 为坐标的空间。",
+      "definition": "以各神经元活动为坐标的空间。",
       "sectionId": "l19-m2",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 2
@@ -791,7 +796,7 @@
       "lecture": 19,
       "zh": "模态空间",
       "en": "mode space",
-      "definition": "以 dynamical eigenmode amplitudes 为坐标。",
+      "definition": "以各动力学特征模态的振幅为坐标的空间。",
       "sectionId": "l19-m2",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 2
@@ -801,7 +806,7 @@
       "lecture": 19,
       "zh": "主成分分析",
       "en": "principal component analysis, PCA",
-      "definition": "按 covariance variance 排序的线性正交降维方法。",
+      "definition": "按协方差的解释方差排序，进行线性正交降维的方法。",
       "sectionId": "l19-m4",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 4
@@ -811,7 +816,7 @@
       "lecture": 19,
       "zh": "主成分",
       "en": "principal component",
-      "definition": "covariance eigenvector 与对应 score。",
+      "definition": "协方差矩阵的特征向量，以及样本在该方向上的得分。",
       "sectionId": "l19-m4",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 4
@@ -821,7 +826,7 @@
       "lecture": 19,
       "zh": "投影",
       "en": "projection",
-      "definition": "取 vector 在某 basis direction 上的 component。",
+      "definition": "取得向量在某个基底方向上的分量。",
       "sectionId": "l19-m3",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 3
@@ -831,7 +836,7 @@
       "lecture": 19,
       "zh": "重构",
       "en": "reconstruction",
-      "definition": "由保留 components 近似恢复原 data。",
+      "definition": "利用保留的分量近似恢复原始数据。",
       "sectionId": "l19-m1",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 1
@@ -841,7 +846,7 @@
       "lecture": 19,
       "zh": "碎石图",
       "en": "scree plot",
-      "definition": "eigenvalue 随 component index 的曲线。",
+      "definition": "特征值随主成分序号变化的曲线。",
       "sectionId": "l19-m4",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 4
@@ -851,21 +856,21 @@
       "lecture": 19,
       "zh": "方差解释率",
       "en": "variance explained",
-      "definition": "保留 eigenvalues 占总和的比例。",
+      "definition": "保留特征值之和占全部特征值之和的比例。",
       "sectionId": "l19-m6",
       "sourceFile": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
       "sourcePage": 6
     }
   ],
   "commonTraps": [
-    "把 W eigenvectors 与 covariance PCs 无条件等同。",
-    "common/difference mode normalization 漏掉 \\(1/\\sqrt 2\\)。",
-    "mode time constants 的 ± sign 写错。",
-    "低维 trajectory 误解为只有少数 neurons active。",
-    "PCA 前不 center data。",
-    "把 variance 最大当作 causal/behavioral relevance 最大。",
-    "把 eigenvalue cliff 当作客观唯一 dimension cutoff。",
-    "需避免把 PCA 说成自动发现 causal dynamics；它只按 variance 排序，可能混合 signal、noise、condition structure。"
+    "把连接矩阵 W 的特征向量无条件等同于活动协方差的主成分。",
+    "定义共同与差异模态时，遗漏归一化因子 \\(1/\\sqrt 2\\)。",
+    "计算模态时间常数时写错 ± 号，将共同模态与差异模态对调。",
+    "把低维活动轨迹理解为只有少数神经元活跃。",
+    "做 PCA 前未对数据中心化。",
+    "把方差最大的方向当成因果作用或行为相关性最大的方向。",
+    "把协方差特征值的陡降当成唯一客观的维数截断标准。",
+    "认为 PCA 会自动发现因果动力学，忽略按方差排序可能混合信号、噪声与实验条件差异。"
   ],
   "errata": [
     {
@@ -901,7 +906,7 @@
       "sourcePage": 5,
       "sectionId": "l19-m5",
       "originalIssue": "PCA 的'denoised' reconstruction 需要低-variance dimensions 主要为 noise 的额外假设。",
-      "explanation": "把重构称为 denoised 还需额外假设：noise 主要占据 low-variance directions，而 signal 位于 high-variance directions。",
+      "explanation": "PCA 在所有 K 维线性子空间中使这一误差最小，但称其为去噪还需要额外假设：信号主要位于高方差方向，噪声主要位于低方差方向。",
       "correction": "PCA 的'denoised' reconstruction 需要低-variance dimensions 主要为 noise 的额外假设"
     }
   ],
@@ -918,37 +923,37 @@
         }
       ],
       "conceptTags": [
-        "对称双神经元网络：从耦合方程找到自然坐标"
+        "对称双神经元网络的自然坐标"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "若 \\(I_{1}=1\\)、\\(I_{2}=-1\\)，哪个 mode 被直接驱动？",
+      "stem": "若 \\(I_{1}=1\\)、\\(I_{2}=-1\\)，哪个模态被直接驱动？",
       "choices": [
         {
           "id": "a",
-          "text": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\)，\\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\)，所以只有 difference mode 被直接驱动；两个 neurons 会趋向相反方向变化。"
+          "text": "只有差分模态被驱动；两个输入在共模中抵消，在差分方向则相互增强。"
         },
         {
           "id": "b",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "只有共模被驱动，因为两个输入的绝对值相同，\\(\\beta _{+}=\\sqrt 2\\)。"
         },
         {
           "id": "c",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "两个模态都没有驱动，因为总输入为零，所以整个输入向量为零。"
         },
         {
           "id": "d",
-          "text": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。"
+          "text": "两个模态获得相等的非零驱动，因为每个神经元都收到一个单位大小的输入。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Top-K PCA、正交投影与可逆到近似的分界”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“耦合强度决定时间常数、积分与稳定性”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“用 eigenvalue cliff 与累计方差选择维度”中的另一组变量与条件，不能由题干推出。"
+        "b": "共模投影使用带符号的和，\\(\\beta _{+}=(1+(-1))/\\sqrt 2=0\\)；不能先取绝对值。",
+        "c": "总输入为零只消去共模。两个分量不为零且方向相反，仍对差分模态产生非零投影。",
+        "d": "模态是两个神经元的联合方向。必须分别计算输入在共同方向和差分方向上的投影，不能按单个神经元的输入大小分配。"
       },
-      "explanation": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\)，\\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\)，所以只有 difference mode 被直接驱动；两个 neurons 会趋向相反方向变化。 common mode 增加时两个 neurons 同向变化；difference mode 增加时一个升、一个降。"
+      "explanation": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\)，\\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\)，所以只有差分模态被直接驱动；两个神经元会趋向相反方向变化。 考虑对称连接矩阵 \\(W=[[0,w_{0}],[w_{0},0]]\\)，两个神经元的发放率满足 \\(\\tau dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) 和 \\(\\tau dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\)。"
     },
     {
       "id": "L19-Q02",
@@ -962,37 +967,37 @@
         }
       ],
       "conceptTags": [
-        "耦合强度决定时间常数、积分与稳定性"
+        "耦合如何改变时间常数与稳定性"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "calculation",
       "cognitiveLevel": "understand",
-      "stem": "\\(w_{0}=-0.9\\) 时哪个 mode 最慢，时间常数是多少个 \\(\\tau\\)？",
+      "stem": "\\(w_{0}=-0.9\\) 时哪个模态最慢，时间常数是多少个 \\(\\tau\\)？",
       "choices": [
         {
           "id": "a",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "共模最慢，时间常数为 \\(10\\tau\\)；差分模态约为 \\(0.526\\tau\\)。"
         },
         {
           "id": "b",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "差分模态最慢，时间常数为 \\(10\\tau\\)，输入撤掉后仍会稳定地衰减到零点。"
         },
         {
           "id": "c",
-          "text": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。"
+          "text": "两个模态都有 \\(10\\tau\\) 的时间常数，因为它们共享同一个耦合强度。"
         },
         {
           "id": "d",
-          "text": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一 mean outer-product 项；最大的 direction 可能只表示平均 firing pattern，而不是 trial 或 time fluctuations。"
+          "text": "差分模态的时间常数为 \\(-10\\tau\\)，所以它指数增长，不能谈最慢衰减。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Top-K PCA、正交投影与可逆到近似的分界”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“用 eigenvalue cliff 与累计方差选择维度”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“PCA：从投影方差到 covariance eigenvector”中的另一组变量与条件，不能由题干推出。"
+        "a": "负耦合减慢差分方向。共模的分母为 \\(1-w_{0}=1.9\\)，差分模态的分母为 \\(1+w_{0}=0.1\\)。",
+        "c": "两个模态对应相反的耦合特征值，因此时间常数分别为 \\(\\tau/(1-w_{0})\\) 与 \\(\\tau/(1+w_{0})\\)，并不相同。",
+        "d": "此时 \\(1+w_{0}=0.1>0\\)，差分模态的时间常数为正。\\(|w_{0}|<1\\) 时两个模态都稳定。"
       },
-      "explanation": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。 正 coupling 对共同变化提供 positive feedback，抵消一部分 intrinsic leak；对相反变化却提供 restoring feedback，因为 neuron 1 上升会推动 neuron 2 上升，从而削弱两者之差。"
+      "explanation": "差分模态最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；共模为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负耦合接近 -1 时保存相反变化模式。 耦合强度接近 -1 时，对应的慢模态变为差分模态。"
     },
     {
       "id": "L19-Q03",
@@ -1006,37 +1011,37 @@
         }
       ],
       "conceptTags": [
-        "同一条轨迹的 activity-space 与 mode-space 表示"
+        "从神经元坐标到模态坐标"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
       "stem": "若每个时刻都有 \\(\\beta _{-}=1\\) 的常量输入，\\(\\alpha _{-}\\) 是否一定趋于零？",
       "choices": [
         {
           "id": "a",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "一定趋于零；稳定性意味着无论持续输入是什么，每个模态最终都回到坐标原点。"
         },
         {
           "id": "b",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "仍然趋于零，因为常量输入的导数为零，所以它会从一阶状态方程中消失。"
         },
         {
           "id": "c",
-          "text": "不一定。稳定 difference mode 会趋于非零 fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\)，所以 trajectory 可保持偏离 common axis；低维结论依赖输入结构。"
+          "text": "不一定；持续驱动使稳定差分模态趋向非零固定点，原点不再是吸引位置。"
         },
         {
           "id": "d",
-          "text": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。"
+          "text": "不会趋于零，但只要输入恒定，差分模态就必须线性增长而不能达到固定点。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Top-K PCA、正交投影与可逆到近似的分界”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“耦合强度决定时间常数、积分与稳定性”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“用 eigenvalue cliff 与累计方差选择维度”中的另一组变量与条件，不能由题干推出。"
+        "a": "稳定性意味着偏差趋向输入决定的固定点。持续的非零差分输入通常把固定点移离原点。",
+        "b": "状态方程包含输入本身而非输入导数。常量驱动持续参与稳态平衡，不能因导数为零而删去。",
+        "d": "稳定差分模态保留回复项，能够平衡恒定输入并达到非零固定点；只有无回复项的积分模式才会在恒定输入下线性增长。"
       },
-      "explanation": "不一定。稳定 difference mode 会趋于非零 fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\)，所以 trajectory 可保持偏离 common axis；低维结论依赖输入结构。 该逻辑也揭示低维结论的条件：如果 input 在每个时刻都强烈驱动 \\(\\beta _{-}\\)，或者 trials 包含不同 fast transients，difference coordinate 不会保持接近零；若 nonlinear dynamics 随 state 改变 directions，也不能用一个固定 V 描述全程。"
+      "explanation": "不一定。稳定差分模态会趋于非零固定点 \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\)，所以轨迹可保持偏离共模轴；低维结论依赖输入结构。 近一维结论依赖输入和时间窗口。 如果输入持续强烈驱动 \\(\\beta _{-}\\)，或者不同试次包含明显的快速瞬态，差分坐标就未必接近零。"
     },
     {
       "id": "L19-Q04",
@@ -1050,37 +1055,37 @@
         }
       ],
       "conceptTags": [
-        "PCA：从投影方差到 covariance eigenvector"
+        "PCA：使投影方差最大的方向"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "concept",
       "cognitiveLevel": "understand",
       "stem": "若没有中心化就直接计算 \\(E[hh^\\mathrm{T}]\\)，主要可能混入什么？",
       "choices": [
         {
           "id": "a",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "不会混入额外项；取期望已经自动去除了均值，所以二阶矩总是等于协方差。"
         },
         {
           "id": "b",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "只会多出与单位矩阵成比例的常数，因此特征向量一定保持不变。"
         },
         {
           "id": "c",
-          "text": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。"
+          "text": "主要混入循环连接矩阵的特征值，所以第一主成分自动等于最慢动力学模式。"
         },
         {
           "id": "d",
-          "text": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一 mean outer-product 项；最大的 direction 可能只表示平均 firing pattern，而不是 trial 或 time fluctuations。"
+          "text": "未中心化的二阶矩含均值外积；主成分可能反映平均发放而非波动。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Top-K PCA、正交投影与可逆到近似的分界”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“耦合强度决定时间常数、积分与稳定性”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“用 eigenvalue cliff 与累计方差选择维度”中的另一组变量与条件，不能由题干推出。"
+        "a": "取期望不会自动中心化；\\(E[hh^\\mathrm{T}]=C+\\bar{h}\\bar{h}^\\mathrm{T}\\)。只有均值为零时二者才相同。",
+        "b": "均值的外积通常是有方向的秩一项，不是各向同性单位矩阵项，因此可改变最大的特征方向。",
+        "c": "未中心化增加的是活动均值的外积。活动统计与递归动力学的特征向量并不自动相同，还取决于输入与噪声等条件。"
       },
-      "explanation": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一 mean outer-product 项；最大的 direction 可能只表示平均 firing pattern，而不是 trial 或 time fluctuations。 先计算 \\(\\operatorname{mean} \\bar{h}\\)，再定义 \\(\\delta h_{t}=h_{t}-\\bar{h}\\)。 现在不假定知道 W，只观察 T 个 population vectors \\(h_{t}\\in \\mathbb{R}^N\\)。先计算 \\(\\operatorname{mean} \\bar{h}\\)，再定义 \\(\\delta h_{t}=h_{t}-\\bar{h}\\)。covariance \\(C=(1/T)\\sum _t \\delta h_{t}\\delta h_{t}^\\mathrm{T}\\) 是 N×N symmetric positive-semidefinite matrix；\\(C_{ij}\\) 描述 neuron i 与 j 的 centered cofluctuation。选择一个单位方向 v 后，每个 sample 的 scalar projection 是 \\(p_{t}=v^\\mathrm{T}\\delta h_{t}\\)。"
+      "explanation": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一均值外积项；最大的方向可能只表示平均发放模式，而不是试次或时间波动。 先计算均值 \\(\\operatorname{mean} \\bar{h}\\)，再中心化为 \\(\\delta h_{t}=h_{t}-\\bar{h}\\)。"
     },
     {
       "id": "L19-Q05",
@@ -1094,37 +1099,37 @@
         }
       ],
       "conceptTags": [
-        "Top-K PCA、正交投影与可逆到近似的分界"
+        "保留主成分：投影、重构与误差"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 \\(V_{K}^\\mathrm{T}V_{K}=I\\) 不能推出 \\(V_{\\mathrm{KV},K}^\\mathrm{T}=I\\)？",
+      "stem": "为什么 \\(V_{K}^\\mathrm{T}V_{K}=I\\) 不能推出 \\(V_{K}V_{K}^\\mathrm{T}=I\\)？",
       "choices": [
         {
           "id": "a",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "前者是低维坐标的恒等矩阵；后者只是原空间的子空间投影，不能恢复被丢弃方向。"
         },
         {
           "id": "b",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "既然列向量正交，\\(V_{K}\\) 就一定是方阵，因此乘法顺序可以交换。"
         },
         {
           "id": "c",
-          "text": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。"
+          "text": "\\(V_{K}V_{K}^\\mathrm{T}\\) 是 N 维空间的单位矩阵；丢掉的分量会由转置操作自动恢复。"
         },
         {
           "id": "d",
-          "text": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一 mean outer-product 项；最大的 direction 可能只表示平均 firing pattern，而不是 trial 或 time fluctuations。"
+          "text": "两个乘积都只是缩放系数 \\(K/N\\) 乘以单位矩阵，因此都不包含方向信息。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“耦合强度决定时间常数、积分与稳定性”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“用 eigenvalue cliff 与累计方差选择维度”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“PCA：从投影方差到 covariance eigenvector”中的另一组变量与条件，不能由题干推出。"
+        "b": "\\(K<N\\) 时 \\(V_{K}\\) 是 \\(N\\times K\\) 矩阵。列正交不能增加缺失的列，也不能把它变成方阵。",
+        "c": "转置把保留的坐标映回原空间，不会恢复被丢弃的分量。正交补方向被投影为零，故乘积不是整个 N-空间的恒等算子。",
+        "d": "正交投影保留子空间内的向量，并消去正交补向量。它对不同方向作用不同，不能一般写成统一的缩放系数。"
       },
-      "explanation": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。 若保留全部 N 个 components，V 是 orthogonal square matrix，\\(h=\\bar{h}+VV^\\mathrm{T}(h-\\bar{h})\\)，变换可逆且没有 information loss。"
+      "explanation": "当 \\(K<N\\) 时，\\(V_{K}\\) 是矩形矩阵。\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K 维坐标空间中的单位矩阵；\\(V_{K}V_{K}^\\mathrm{T}\\) 则在 N 维空间中只保留选定的 K 维子空间，是投影算子。 仅保留 \\(K<N\\) 时，重构 \\(\\hat{h}=\\bar{h}+V_{K}V_{K}^\\mathrm{T}(h-\\bar{h})\\) 是样本在前 K 个主成分张成子空间中的正交投影。"
     },
     {
       "id": "L19-Q06",
@@ -1138,37 +1143,37 @@
         }
       ],
       "conceptTags": [
-        "用 eigenvalue cliff 与累计方差选择维度"
+        "如何选择保留维数"
       ],
       "difficulty": 2,
-      "type": "calculation",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么\"95% variance explained\"不能保证保存 95% behavior information？",
+      "stem": "为什么\"解释了 95% 方差\"不能保证保存 95% 行为信息？",
       "choices": [
         {
           "id": "a",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "可以保证，因为 PCA 按行为预测能力排序；前几个主成分必然最能区分行为条件。"
         },
         {
           "id": "b",
-          "text": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。"
+          "text": "活动方差衡量波动幅度；行为信息还依赖条件分布与读出，低方差方向也可能重要。"
         },
         {
           "id": "c",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "可以保证，因为剩余 5% 方差必然来自测量噪声，不能包含任何任务相关信号。"
         },
         {
           "id": "d",
-          "text": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一 mean outer-product 项；最大的 direction 可能只表示平均 firing pattern，而不是 trial 或 time fluctuations。"
+          "text": "不能保证，唯一原因是 95% 方差只表示保留了 95% 的神经元，尚未计入剩下的神经元。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Top-K PCA、正交投影与可逆到近似的分界”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“耦合强度决定时间常数、积分与稳定性”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“PCA：从投影方差到 covariance eigenvector”中的另一组变量与条件，不能由题干推出。"
+        "a": "PCA 的排序目标是活动方差，没有使用行为标签。高方差方向可能与行为无关，低方差方向也可能包含稳定的行为信号。",
+        "c": "方差比例本身不能区分信号与噪声。是否保留行为信息需要行为读出、条件分布或独立预测验证。",
+        "d": "PCA 截断选择的是群体活动方向，不是保留某一百分比的神经元。方差与行为信息的差别来自统计目标和读出关系。"
       },
-      "explanation": "variance 衡量 activity amplitude，而 behavior information 取决于 condition distributions 与 decoder；低 variance direction 也可能稳定地区分 choices，因此两种百分比没有一般等价关系。 若增加某个低-variance component 显著改善 held-out behavior prediction，它虽在 scree plot 尾部，仍可能值得保留。"
+      "explanation": "方差衡量活动振幅，而行为信息取决于条件分布与解码器；低方差方向也可能稳定地区分选择，因此两种百分比没有一般等价关系。 某个低方差方向若显著改善留出行为预测，即使处于碎石图尾部也值得保留。"
     },
     {
       "id": "L19-Q07",
@@ -1182,37 +1187,37 @@
         }
       ],
       "conceptTags": [
-        "Scree cliff 与累计方差"
+        "碎石图与累计解释方差"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Scree cliff 与累计方差\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"碎石图与累计解释方差\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "当 \\(K<N\\) 时 \\(V_{K}\\) 不是 square matrix；\\(V_{K}^\\mathrm{T}V_{K}\\) 是 K-space identity，而 \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) 是投影到 K-dimensional subspace 的 N-space projector。"
+          "text": "陡降后每个特征值变小，因此累计方差曲线也应转向下降。"
         },
         {
           "id": "b",
-          "text": "difference mode 最慢，因为 \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\)；common mode 为 \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\)。负 coupling 接近 -1 时保存相反变化 pattern。"
+          "text": "陡降后的尾部接近平坦，表示那些主成分各自解释完全相同且为零的方差，可以无损删除。"
         },
         {
           "id": "c",
-          "text": "按主成分顺序比较两条曲线：单个 eigenvalue 在 cliff 后只贡献少量新增方差，而累计方差仍单调增加。"
+          "text": "拐点后单个特征值较小，累计方差仍增加；拐点只提示候选维度。"
         },
         {
           "id": "d",
-          "text": "会混入 \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) 这一 mean outer-product 项；最大的 direction 可能只表示平均 firing pattern，而不是 trial 或 time fluctuations。"
+          "text": "陡降的位置唯一确定了真实神经维度，并保证该截断保留全部行为信息。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "图中没有“Top-K PCA、正交投影与可逆到近似的分界”所需的变量与条件。",
-        "b": "图中没有“耦合强度决定时间常数、积分与稳定性”所需的变量与条件。",
-        "d": "图中没有“PCA：从投影方差到 covariance eigenvector”所需的变量与条件。"
+        "a": "累计方差是非负特征值的归一化部分和。小特征值使新增比例变小，但不会让已经累计的方差减少。",
+        "b": "尾部平坦只表示相邻特征值相近且较小，不表示全部为零；删除非零特征值对应的方向仍有重构误差。",
+        "d": "拐点只是候选截断依据；维度选择还受噪声、预处理和目标影响，活动方差也不保证行为信息保留。"
       },
-      "explanation": "按主成分顺序比较两条曲线：单个 eigenvalue 在 cliff 后只贡献少量新增方差，而累计方差仍单调增加。拐点提供候选维度，不等于自动给出唯一的截断位置；图中坐标仅表达这里的归一化关系，不是经验数据。"
+      "explanation": "按主成分顺序比较两条曲线：单个特征值在陡降后只贡献少量新增方差，而累计方差仍单调增加。拐点提供候选维度，不等于自动给出唯一的截断位置；图中坐标仅表达这里的归一化关系，不是经验数据。"
     }
   ]
 }

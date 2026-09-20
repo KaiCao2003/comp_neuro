@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能准确区分 Barlow 的三项 hypothesis，并把 efficient coding 解释为受 noise 与 resource constraints 限制的 normative proposal。",
-      "能从独立事件信息可加的要求解释 surprise=\\(-\\log p\\)，并计算 entropy、conditional entropy 与 mutual information。",
-      "能推导 mutual information 的 joint-distribution form，说明 independence 时 \\(I=0\\)，并解释 differential entropy 可为负且依坐标单位。",
-      "能从 \\(x=s+\\eta _{x}\\)、\\(y=Ax+\\eta _{y}\\) 推导 input/output covariance，区分 signal、input noise 与 output noise 在 encoder 中的位置。",
-      "能解释 Gaussian MI determinant、fixed-information constraint、channel capacity、decorrelation 与 orthogonal nonuniqueness，并说明额外 symmetry 如何选择 center-surround。"
+      "区分 Barlow 的三项假说，将高效编码解释为受噪声与资源约束的最优化理论。",
+      "从独立事件的信息可加性说明惊奇度 \\(-\\log p\\) 的来源，并计算熵、条件熵和互信息。",
+      "推导互信息的联合分布表达式，说明独立时 \\(I=0\\)，以及微分熵为何可以为负并随坐标单位改变。",
+      "从 \\(x=s+\\eta _{x}\\)、\\(y=Ax+\\eta _{y}\\) 推导输入和输出协方差，区分信号、输入噪声和输出噪声所处的位置。",
+      "解释高斯互信息的行列式形式、信息约束、信道容量及去相关的不唯一性，说明哪些额外条件可选出中心—周围结构。"
     ],
     "prerequisiteBridge": [
-      "概率 \\(p(x)\\) 介于 0 与 1；\\(\\log_{b}\\) 把 multiplication 变成 addition：log_b(pq)=log_bp+log_bq。expectation 是按 probability 加权的平均。离散 random variable X 的 distribution 给每个 outcome 一个 probability；joint \\(p(x,y)\\) 与 conditional \\(p(y|x)=p(x,y)/p(x)\\) 描述两个 variables 的关系。",
-      "covariance matrix \\(C=E[(x-E[x])(x-E[x])^\\mathrm{T}]\\) 描述 multivariate spread。linear transform \\(y=Ax\\) 使 covariance 变为 \\(ACA^\\mathrm{T}\\)；independent additive noise covariance 可相加。determinant 对 Gaussian distribution 可理解为 covariance ellipsoid volume scale，log determinant 因而测量多维 uncertainty 的变化。",
-      "normative model 问“在明确 objective 与 constraints 下，什么 code 最优”，并不自动说明 evolution、development 或 synaptic mechanism 如何得到它。efficient coding 同时面对 input redundancy、input noise、output noise 与 finite firing/channel cost；只追求 output decorrelation 可能把 noise 一并放大。"
+      "概率 \\(p(x)\\) 介于 0 与 1。对数 \\(\\log_{b}\\) 将乘积转成和：log_b(pq)=log_bp+log_bq。期望就是按概率加权的平均。离散随机变量的分布为各结果分配概率，联合分布 \\(p(x,y)\\) 与条件分布 \\(p(y|x)=p(x,y)/p(x)\\) 则描述两个变量的关系。",
+      "协方差矩阵 \\(C=E[(x-E[x])(x-E[x])^\\mathrm{T}]\\) 描述多维随机变量的离散程度。线性变换 \\(y=Ax\\) 后，协方差变为 \\(ACA^\\mathrm{T}\\)；独立加性噪声的协方差可以直接相加。对于高斯分布，行列式反映协方差椭球的体积尺度，其对数因而可以描述多维不确定性的变化。",
+      "规范性模型研究给定目标和约束下什么编码最优，并不直接解释进化、发育或突触机制如何实现它。高效编码同时受到输入冗余、输入噪声、输出噪声和有限通道代价的约束。若只追求输出去相关，也可能将噪声一同放大。 例如，相同平均发放率并不保证相同信息量：响应可能只是重复同一种结果，也可能可靠地区分不同刺激。分析信息量时必须同时说明刺激分布、条件响应分布以及噪声来源，随后才能比较不同编码方式。"
     ],
     "modules": [
       {
         "id": "L15-M1",
-        "title": "Barlow hypothesis 与 information-theory 基础",
+        "title": "Barlow 假说、熵与互信息",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -118,62 +118,63 @@
           }
         ],
         "paragraphs": [
-          "Barlow 的框架包含三项想法：检测具有关键意义的“passwords”；为其他 nervous-system regions 过滤 signals；重新编码 sensory messages 以减少 redundancy。下面集中讨论第三项。efficient coding 解释为什么一种 code 在给定 input statistics、noise 与 cost 下有优势，是 normative hypothesis；同一 receptive field 仍可能有 developmental、biophysical 或 task-specific explanations。",
-          "single outcome 的 surprise 应在 probability 越小时越大，并且 independent events 的 joint surprise 相加。因为 independent joint probability 是 pq，满足 \\(S(pq)=S(p)+S(q)\\) 的连续单调形式是 \\(S(p)=-\\log_{bp}\\)。base 2 给 bits，base e 给 nats；probability 1 的 event surprise 为零。",
-          "entropy \\(H(X)=E[-\\log p(X)]\\) 是 observation 前的 expected surprise。conditional entropy \\(H(Y|X)\\) 对每个 x 下残余 uncertainty 平均。mutual information \\(I(X;Y)=H(Y)-H(Y|X)\\) 测量知道 X 后平均减少的 Y uncertainty，也等于 \\(\\sum p(x,y)\\log[p(x,y)/(p(x)p(y))]\\)。它检测所有 statistical dependence，不只 linear correlation。",
-          "若 X,Y independent，joint ratio 为 1，\\(\\log 1=0\\)，所以 \\(I=0\\)；在 standard discrete/continuous definitions 下 converse 也成立 almost everywhere。continuous variable 用 density \\(f(x)\\) 定义 differential entropy \\(h=-\\int f \\log f\\)，它可为负且随 measurement units 改变。mutual information 是 entropy difference，coordinate scaling terms 抵消，因此比单独 differential entropy 更稳定。"
+          "Barlow 提出过三类想法：检测具有关键意义的特定模式，为神经系统其他部分筛选信号，以及通过重新编码感觉信息减少冗余。本讲讨论第三项。高效编码考察特定输入统计、噪声和代价下哪种编码更有优势；它是一种规范性解释。同样的感受野仍可能有发育、生物物理或任务需求方面的其他解释。",
+          "单个结果越罕见，带来的惊奇度应越大；两个独立事件同时发生时，惊奇度应相加。独立事件的联合概率为 pq，因此满足 \\(S(pq)=S(p)+S(q)\\) 的连续单调形式是 \\(S(p)=-\\log_b p\\)。以 2 为底时单位为比特，以 e 为底时单位为奈特；概率为 1 的事件不带来惊奇。",
+          "熵 \\(H(X)=E[-\\log p(X)]\\) 是观测前对惊奇度的期望。条件熵 \\(H(Y|X)\\) 则对已知各个 x 后剩余的不确定性取平均。互信息 \\(I(X;Y)=H(Y)-H(Y|X)\\) 衡量得知 X 后平均减少了多少关于 Y 的不确定性，也可写成 \\(\\sum p(x,y)\\log[p(x,y)/(p(x)p(y))]\\)。它能够反映非线性依赖，不只衡量线性相关。",
+          "若 X 与 Y 独立，联合分布与边缘分布乘积的比值为 1，由 \\(\\log 1=0\\) 得到 \\(I=0\\)；在通常定义下，其逆命题也在几乎处处的意义上成立。连续变量使用密度 \\(f(x)\\) 定义微分熵 \\(h=-\\int f \\log f\\)，后者可以为负，也随测量单位改变。互信息中的尺度项会在熵之差中抵消，因此不会随这种坐标缩放而改变。"
         ],
         "keyPoints": [
-          "efficient coding 是有 constraints 的最优化解释，不是 sensory system 每个 feature 的唯一机制。",
-          "surprise 的 log 形式来自 independent probabilities 相乘而 information 相加。",
-          "entropy 是平均 uncertainty，MI 是一变量对另一变量 uncertainty 的平均减少。"
+          "高效编码是在约束下的最优化解释，不能单独证明感觉系统各特征的产生机制。",
+          "惊奇度采用对数形式，是为了使独立事件的概率相乘时，信息量能够相加。",
+          "熵描述平均不确定性，互信息描述获知一个变量后另一变量不确定性的平均减少。"
         ],
         "derivation": {
-          "title": "Mutual information 的等价形式与 independence",
-          "setup": "考虑 discrete X,Y，所有使用的 probabilities 在 support 上为正；\\(p(x,y)=p(x)p(y|x)\\)。",
+          "title": "互信息的等价形式与独立性",
+          "setup": "考虑离散 X,Y，所有使用的概率在支持上为正；\\(p(x,y)=p(x)p(y|x)\\)。",
           "steps": [
             {
-              "title": "从 entropy difference 展开",
-              "explanation": "把 \\(H(Y)\\) 与 \\(H(Y|X)\\) 写成 joint-weighted sums，使两项使用同一个 \\(p(x,y)\\) 权重。",
+              "title": "从熵差分展开",
+              "explanation": "把 \\(H(Y)\\) 与 \\(H(Y|X)\\) 写成联合-加权求和，使两项使用同一个 \\(p(x,y)\\) 权重。",
               "latex": "I(X;Y)=-\\sum_{x,y}p(x,y)\\log p(y)+\\sum_{x,y}p(x,y)\\log p(y|x)"
             },
             {
-              "title": "合并 logarithms",
-              "explanation": "log difference 变 log ratio，再用 \\(p(y|x)=p(x,y)/p(x)\\)。",
+              "title": "合并对数",
+              "explanation": "log 差分变 log 比例，再用 \\(p(y|x)=p(x,y)/p(x)\\)。",
               "latex": "I(X;Y)=\\sum_{x,y}p(x,y)\\log\\frac{p(x,y)}{p(x)p(y)}"
             },
             {
-              "title": "代入 independence",
-              "explanation": "若 \\(p(x,y)=p(x)p(y)\\)，每个 nonzero term ratio=1，所以所有 contributions 为零。",
+              "title": "代入独立性",
+              "explanation": "若 \\(p(x,y)=p(x)p(y)\\)，每个非零项比例=1，所以所有贡献为零。",
               "latex": "X\\perp Y\\quad\\Longrightarrow\\quad I(X;Y)=0"
             }
           ],
           "symbolNotes": [
-            "\\(0 \\log 0\\) 依 continuity 定义为 0；support mismatch 需谨慎处理，不能直接除以零。",
-            "MI 的单位由 log base 决定；同一报告中 bits 与 nats 不能混加。"
+            "\\(0 \\log 0\\) 依连续性定义为 0；支持失配需谨慎处理，不能直接除以零。",
+            "MI 的单位由对数的底决定；同一报告中位与 nats 不能混加。"
           ],
-          "unitsCheck": "probabilities 与 ratios 无量纲，因此 log argument 合法；differential density 有 reciprocal-unit，所以单独 differential entropy 会受 coordinate units 影响。",
-          "limitCheck": "deterministic continuous relation 可导致 infinite MI in zero-noise idealization；finite measurement noise 与 discretization 会改变 numerical estimate。"
+          "unitsCheck": "概率与比值无量纲，因此 log 自变量合法；连续概率密度有倒数-单位，所以单独微分熵会受坐标单位影响。",
+          "limitCheck": "确定性连续关系可导致无限 MI in 零噪声理想化条件；有限测量噪声与离散化会改变数值估计。"
         },
         "workedExample": {
-          "title": "Binary entropy 与 predictability",
-          "problem": "计算 \\(\\operatorname{Bernoulli} p=0.5\\) 与 \\(p=0.9\\) 的 entropy，使用 \\(\\log 2\\)。",
+          "title": "二值熵与可预测性",
+          "problem": "计算 \\(\\operatorname{Bernoulli} p=0.5\\) 与 \\(p=0.9\\) 的熵，使用 \\(\\log 2\\)。",
           "steps": [
-            "\\(H(0.5)=-0.5log2(0.5)-0.5log2(0.5)=1\\) bit。",
-            "\\(H(0.9)=-0.9log2(0.9)-0.1log2(0.1)\\approx 0.137+0.332=0.469\\) bit。",
-            "\\(p=0.9\\) 的 outcome 更可预测，所以 expected surprise 较低；这与 random variable 的 numerical mean 大小无关。"
+            "\\(H(0.5)=-0.5log2(0.5)-0.5log2(0.5)=1\\) 位。",
+            "\\(H(0.9)=-0.9log2(0.9)-0.1log2(0.1)\\approx 0.137+0.332=0.469\\) 位。",
+            "\\(p=0.9\\) 的结果更可预测，所以预期惊奇度较低；这与随机变量的数值均值大小无关。"
           ],
-          "result": "uniform binary distribution uncertainty 最大；偏向一个 outcome 后 entropy 下降。",
-          "sanityCheck": "\\(p\\to 1\\) 时 \\(H\\to 0\\)；p 与 1-p 交换不改变 entropy，因为只是 outcome labels 交换。"
+          "result": "均匀二值分布不确定性最大；偏向一个结果后熵下降。",
+          "sanityCheck": "\\(p\\to 1\\) 时 \\(H\\to 0\\)；p 与 1-p 交换不改变熵，因为只是结果标签交换。"
         },
         "pitfalls": [
-          "把 high entropy 直接等同于 high useful information，忽略 receiver、task、noise 与 conditional structure。",
-          "用 correlation=0 代替 independence；nonlinear dependent variables 可 zero linear correlation 但 \\(MI>0\\)。"
+          "将高熵直接等同于高有用信息，忽略接收者、任务、噪声和条件结构。",
+          "用零相关代替独立：非线性依赖的变量可以没有线性相关，但仍有 \\(MI>0\\)。"
         ]
       },
       {
         "id": "L15-M2",
-        "title": "Atick-Redlich noisy retina 与 covariance propagation",
+        "title": "含噪视网膜模型中的协方差",
+        "transition": "互信息可以衡量编码保留了多少信号，但滤波也会改变噪声。将信号、输入噪声和输出噪声放回各自处理阶段，才能计算信息与代价如何随编码器变化。",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -181,62 +182,63 @@
           }
         ],
         "paragraphs": [
-          "Atick-Redlich 把 retina 概念化为 noisy channel。world signal s 先加 photoreceptor/input noise \\(\\eta _{x}\\) 得 \\(x=s+\\eta _{x}\\)；retinal processing A 作用于 x；RGC/output stage 再加 \\(\\eta _{y}\\) 得 \\(y=Ax+\\eta _{y}\\)。A 既是 spatial filtering，也可看作从 photoreceptor coordinates 到 output channels 的 linear recoding。",
-          "假设 signal 与 noises zero mean、互相 independent，\\(C_{x}=C_{s}+C_{\\eta _{x}}\\)。linear transform 使 covariance 变成 \\(AC_{x}A^\\mathrm{T}\\)；output noise 最后相加，\\(C_{y}=A(C_{s}+C_{\\eta _{x}})A^\\mathrm{T}+C_{\\eta _{y}}\\)。input noise 会被 A 一同放大或抑制，output noise 不经过 A，因此 optimal gain 不能只根据 signal covariance 决定。",
-          "natural image signal 在 nearby positions 高度 correlated，\\(C_{s}\\) 通常有长空间尺度；isotropic white noise 可写 \\(\\sigma _{x}^2I\\)、\\(\\sigma _{y}^2I\\)。若 A 做 high-pass/center-surround，它可减少 low-frequency redundancy，但也可能相对放大 high-frequency input noise。若 A 全部缩小到零，output redundancy 确实消失，却也丢掉 signal information；因此必须加 information constraint。",
-          "Gaussian assumption 让 covariance 足以描述 distribution，并给 mutual information closed form；真实 natural images 有 edges、heavy tails 与 nonstationarity，故 theory 是二阶近似。模型的价值在于明确 prediction：optimal spatial profile 应随 signal/noise ratio 与 channel cost 变化，而不是把固定 center-surround 当成无条件最优。"
+          "Atick–Redlich 模型将视网膜表示为一个含噪信道。环境信号 s 先叠加光感受器或输入噪声 \\(\\eta _{x}\\)，得到 \\(x=s+\\eta _{x}\\)；视网膜变换 A 作用于输入，RGC 输出阶段再加入噪声 \\(\\eta _{y}\\)，得到 \\(y=Ax+\\eta _{y}\\)。A 既可以表示空间滤波，也可以看作从光感受器坐标到输出通道的线性重编码。",
+          "假设信号和两类噪声均值为零、彼此独立，则 \\(C_{x}=C_{s}+C_{\\eta _{x}}\\)。经过线性变换后，协方差变为 \\(AC_{x}A^\\mathrm{T}\\)；最后再加入输出噪声，得到 \\(C_{y}=A(C_{s}+C_{\\eta _{x}})A^\\mathrm{T}+C_{\\eta _{y}}\\)。输入噪声和信号一起被 A 放大或抑制，输出噪声却不经过 A，所以最优增益不能只由信号协方差决定。",
+          "自然图像的邻近位置通常高度相关，因此 \\(C_{s}\\) 常具有较长的空间尺度。各向同性白噪声可分别写为 \\(\\sigma _{x}^2I\\) 和 \\(\\sigma _{y}^2I\\)。高通或中心—周围滤波可以减少低频冗余，却也可能相对增强高频输入噪声。如果将 A 缩为零，输出虽不再冗余，信号信息也同时消失，因此必须加入保留信息的约束。",
+          "高斯假设使协方差足以描述分布，并使互信息具有解析形式。真实自然图像还包含边缘、重尾分布和非平稳结构，所以这只是二阶近似。模型给出的可检验预测是：最优空间滤波应随信噪比和通道代价改变，固定的中心—周围结构并非在所有条件下都最优。"
         ],
         "keyPoints": [
-          "input noise 在 encoder A 之前加入并被过滤，output noise 在 A 之后加入。",
-          "covariance 传播为 \\(ACA^\\mathrm{T}\\)，independent additive noises 按所在阶段相加。",
-          "redundancy reduction 必须与 retained information 和 output cost 联合约束。"
+          "输入噪声在编码器 A 之前加入，随信号一起被滤波；输出噪声在 A 之后加入。",
+          "线性变换后的协方差为 \\(ACA^\\mathrm{T}\\)，各独立噪声需按其加入阶段计入。",
+          "减少冗余必须与保留信号信息及输出代价同时考虑。"
         ],
         "derivation": {
-          "title": "逐步推导 output covariance",
-          "setup": "s、\\(\\eta _{x}\\)、\\(\\eta _{y}\\) zero mean 且 pairwise independent；\\(x=s+\\eta _{x}\\)，\\(y=A x+\\eta _{y}\\)。",
+          "title": "逐步推导输出协方差",
+          "setup": "s、\\(\\eta _{x}\\)、\\(\\eta _{y}\\) 零均值且两两独立；\\(x=s+\\eta _{x}\\)，\\(y=A x+\\eta _{y}\\)。",
           "steps": [
             {
-              "title": "求 input covariance",
-              "explanation": "展开 \\(E[(s+\\eta _{x})(s+\\eta _{x})^\\mathrm{T}]\\)；cross terms 因 independence 与 zero mean 为零。",
+              "title": "求输入协方差",
+              "explanation": "展开 \\(E[(s+\\eta _{x})(s+\\eta _{x})^\\mathrm{T}]\\)；交叉项因独立性与零均值为零。",
               "latex": "C_x=C_s+C_{\\eta_x}"
             },
             {
-              "title": "通过 linear encoder",
-              "explanation": "对 \\(z=Ax\\)，\\(C_{z}=E[Axx^\\mathrm{T}A^\\mathrm{T}]=AC_{x}A^\\mathrm{T}\\)；A 可是 rectangular，公式仍成立。",
+              "title": "通过线性编码器",
+              "explanation": "对 \\(z=Ax\\)，\\(C_{z}=E[Axx^\\mathrm{T}A^\\mathrm{T}]=AC_{x}A^\\mathrm{T}\\)；A 可是矩形，公式仍成立。",
               "latex": "C_{Ax}=AC_xA^{\\mathsf T}"
             },
             {
-              "title": "加入 output noise",
-              "explanation": "\\(\\eta _{y}\\) 与 Ax independent，因此 covariance 直接相加。",
+              "title": "加入输出噪声",
+              "explanation": "\\(\\eta _{y}\\) 与 Ax 独立，因此协方差直接相加。",
               "latex": "C_y=A(C_s+C_{\\eta_x})A^{\\mathsf T}+C_{\\eta_y}"
             }
           ],
           "symbolNotes": [
-            "若 input 有 N dimensions、output 有 M channels，则 \\(A\\in \\mathbb{R}^{M\\times N}\\)，\\(C_{x}\\) 是 N×N，\\(C_{y}\\) 是 M×M。",
-            "isotropic noise \\(\\sigma ^2I\\) 是假设；correlated noise 需使用完整 covariance matrix。"
+            "若输入有 N 维度、输出有 M 通道，则 \\(A\\in \\mathbb{R}^{M\\times N}\\)，\\(C_{x}\\) 是 N×N，\\(C_{y}\\) 是 M×M。",
+            "各向同性噪声 \\(\\sigma ^2I\\) 是假设；相关的噪声需使用完整协方差矩阵。"
           ],
-          "unitsCheck": "若 s 与 x 是 contrast，无量纲，A 为 output/contrast，\\(AC_{x}A^\\mathrm{T}\\) 具有 \\(\\mathrm{output}^2\\) 单位，可与 \\(C_{\\eta _{y}}\\)相加。",
-          "limitCheck": "\\(\\eta _{x}\\) 与 s correlated 或 noise stimulus-dependent 时 cross terms 不为零；simple additive independent model 失效。"
+          "unitsCheck": "若 s 与 x 是对比度，无量纲，A 为输出/对比度，\\(AC_{x}A^\\mathrm{T}\\) 具有 \\(\\mathrm{output}^2\\) 单位，可与 \\(C_{\\eta _{y}}\\)相加。",
+          "limitCheck": "\\(\\eta _{x}\\) 与 s 相关的或噪声刺激依赖的时交叉项不为零；简单加性独立模型失效。"
         },
         "workedExample": {
-          "title": "二维 encoder 同时变换 signal 与 noise",
-          "problem": "\\(C_{s}=\\operatorname{diag}(9,1)\\)，input noise \\(C_\\eta x=I\\)，\\(A=\\operatorname{diag}(1/2,2)\\)，output noise \\(C_\\eta y=0.25I\\)。求 \\(C_{y}\\)。",
+          "title": "二维编码器同时变换信号与噪声",
+          "problem": "\\(C_{s}=\\operatorname{diag}(9,1)\\)，输入噪声 \\(C_\\eta x=I\\)，\\(A=\\operatorname{diag}(1/2,2)\\)，输出噪声 \\(C_\\eta y=0.25I\\)。求 \\(C_{y}\\)。",
           "steps": [
             "\\(C_{x}=C_{s}+I=\\operatorname{diag}(10,2)\\)。",
             "\\(AC_{x}A^\\mathrm{T}=\\operatorname{diag}((1/2)^2\\times 10,2^2\\times 2)=\\operatorname{diag}(2.5,8)\\)。",
             "\\(C_{y}=\\operatorname{diag}(2.5,8)+\\operatorname{diag}(0.25,0.25)=\\operatorname{diag}(2.75,8.25)\\)。"
           ],
-          "result": "A 抑制第一 coordinate、放大第二 coordinate，但 output noise 在两 axes 都增加同样 0.25 variance。",
-          "sanityCheck": "若 \\(A=0\\)，\\(C_{y}\\) 只剩 0.25I，output 看似 decorrelated 但完全不含 s；这说明 decorrelation alone 不是有效 objective。"
+          "result": "A 抑制第一坐标、放大第二坐标，但输出噪声在两坐标轴都增加同样 0.25 方差。",
+          "sanityCheck": "若 \\(A=0\\)，\\(C_{y}\\) 只剩 0.25I，输出看似去相关但完全不含 s；这说明仅有去相关不是有效目标。"
         },
         "pitfalls": [
-          "在 covariance 传播中漏掉 \\(A^\\mathrm{T}\\)，得到非对称或 shape 错误的 output covariance。",
-          "把 Gaussian second-order model 当作 natural-image full distribution，而忽略 edges 与 higher-order dependencies。"
+          "协方差传播中漏掉 \\(A^\\mathrm{T}\\)，导致结果不对称或维度错误。",
+          "把高斯二阶近似当作自然图像的完整分布，忽略边缘和高阶依赖。"
         ]
       },
       {
         "id": "L15-M3",
-        "title": "Gaussian information、decorrelation nonuniqueness 与 center-surround selection",
+        "title": "去相关为什么不能唯一确定感受野",
+        "transition": "高斯假设将互信息写成协方差的行列式比值，因而可以直接比较不同编码器。但即使输出已去相关，许多旋转后的编码仍然等价；要解释具体感受野形状，还需要额外约束。",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -248,79 +250,79 @@
           }
         ],
         "paragraphs": [
-          "对 d-dimensional Gaussian z，differential entropy 为 \\(h(z)=1/2 \\log[(2\\pi e)^d \\det C_{z}]\\)。在 \\(y=As+A\\eta _{x}+\\eta _{y}\\) 中，condition on s 后 As 变成已知位移，因此只剩 noise covariance \\(C_{y|s}=AC_{\\eta _{x}}A^\\mathrm{T}+C_{\\eta _{y}}\\)；unconditional \\(C_{y}\\) 还包含 \\(AC_{s}A^\\mathrm{T}\\)。把 \\(I(y;s)=h(y)-h(y|s)\\) 代入，两项中的 \\((2\\pi e)^d\\) 完全抵消，得到 \\(I(y;s)=1/2 \\log[\\det C_{y}/\\det C_{y|s}]\\)。determinant 是 covariance eigenvalues 的乘积，所以该 ratio 比较 total output uncertainty volume 与仅 noise volume，而不是比较单一 variance。",
-          "Atick-Redlich 要求 encoder 先满足 retained-information constraint \\(I(y;s)=I^{*}\\le I(x;s)\\)，再在固定 output power 或 dynamic range 下减少 redundancy。令 \\(w=Ax\\) 表示加入 output noise 前的 encoder signal，再写 \\(y=w+\\eta _{y}\\)；输出通道 capacity 为 \\(C_{\\mathrm{out}}=\\max_{p(w)}\\) \\(I(y;w)\\)。redundancy objective \\(R=1-I(y;s)/C_{\\mathrm{out}}\\) 惩罚用大量 channel capacity 重复传递同一信息。若 output covariance 在某 basis 中 diagonal，second-order correlations 消失；在总 power 固定且 output noise isotropic 时，把 variance 较均匀地分配到 channels 可提高 Gaussian channel capacity。objective 不是任意最大化 entropy，而是在 information、noise 与 output range 约束下优化 code。",
-          "whitening transform V 可使 \\(VC_{x}V^\\mathrm{T}=I\\)。对任意 orthogonal U，\\((UV)C_{x}(UV)^\\mathrm{T}=UIU^\\mathrm{T}=I\\)，所以加 output noise 前的 whitened code 可再旋转而保持相同 covariance。若还要声称完整 Gaussian MI 不变，需要 output noise 各向同性 \\(C_{\\eta _{y}}=\\sigma _{y}^{2}I\\)（或没有 output noise），使 total covariance 与 conditional-noise covariance 都只发生 orthogonal similarity transform。若 \\(C_{\\eta _{y}}\\) 各向异性，旋转 encoder 会改变信号相对于各 noise axes 的方向，MI 一般会变。decorrelation 本身只确定一族 solutions，不能单独选出每个 neuron 的 localized center-surround shape。",
-          "加入 translation invariance、rotational symmetry、local wiring 或 identical channel constraints 后，isotropic center-surround 可从等价族中被选出。这个 prediction 说明 center-surround 与 natural statistics 相容，但不是唯一 causal proof。实际 retina 还要处理 optics、photoreceptor low-pass、adaptation 与 non-Gaussian scenes；下一讲的 SNR-dependent filter 正来自这些约束。"
+          "d 维高斯变量 z 的微分熵为 \\(h(z)=1/2 \\log[(2\\pi e)^d \\det C_{z}]\\)。在 \\(y=As+A\\eta _{x}+\\eta _{y}\\) 中，给定 s 后，信号项只产生已知位移，剩余协方差为 \\(C_{y|s}=AC_{\\eta _{x}}A^\\mathrm{T}+C_{\\eta _{y}}\\)；未给定 s 时，\\(C_{y}\\) 还包含 \\(AC_{s}A^\\mathrm{T}\\)。代入 \\(I(y;s)=h(y)-h(y|s)\\)，两项中的 \\((2\\pi e)^d\\) 抵消，得到 \\(I(y;s)=1/2 \\log[\\det C_{y}/\\det C_{y|s}]\\)。行列式等于协方差特征值的乘积，因此这个比值比较的是总输出不确定性与纯噪声不确定性的体积尺度，而非某一个方向的方差。",
+          "Atick–Redlich 框架先要求满足信息约束 \\(I(y;s)=I^{*}\\le I(x;s)\\)，再在固定输出功率或动态范围下减少冗余。令 \\(w=Ax\\) 表示加入输出噪声前的信号，并写成 \\(y=w+\\eta _{y}\\)，输出信道容量为 \\(C_{\\mathrm{out}}=\\max_{p(w)}\\) \\(I(y;w)\\)。冗余目标 \\(R=1-I(y;s)/C_{\\mathrm{out}}\\) 衡量为传递给定信号信息占用了多少通道容量。输出协方差在某个基底中为对角阵时，二阶相关消失；在总功率固定、输出噪声各向同性时，较均匀地分配各通道方差可提高高斯信道容量。因此，优化受到信息、噪声和输出范围的共同限制。",
+          "白化变换 V 使 \\(VC_{x}V^\\mathrm{T}=I\\)。对任意正交矩阵 U，都有 \\((UV)C_{x}(UV)^\\mathrm{T}=UIU^\\mathrm{T}=I\\)，因此白化结果再旋转，协方差仍不变。若还要求完整的高斯互信息保持不变，则需输出噪声各向同性 \\(C_{\\eta _{y}}=\\sigma _{y}^{2}I\\)，或不存在输出噪声，使总协方差与条件噪声协方差同时发生正交相似变换。如果 \\(C_{\\eta _{y}}\\) 各向异性，旋转编码器会改变信号与噪声轴的相对方向，互信息通常随之改变。去相关因而只确定一族解，无法独自选出每个神经元局部的中心—周围形状。",
+          "平移不变性、旋转对称性、局部连接或相同通道约束，可以进一步从等价解中选出各向同性的中心—周围结构。这说明该结构与自然统计相容，并非其形成机制的唯一因果证明。真实视网膜还受到光学、光感受器低通特性、适应和非高斯场景影响；这些限制使最优滤波随信噪比而改变。"
         ],
         "keyPoints": [
-          "Gaussian MI 的 determinant ratio 比较 total output covariance 与 conditional noise covariance。",
-          "whitening/decorrelation 在 orthogonal rotations 下不唯一。",
-          "center-surround uniqueness 需要 symmetry、locality 或其他额外 constraints，不能由 redundancy reduction 单独推出。"
+          "高斯互信息的行列式比值比较总输出协方差与条件噪声协方差。",
+          "白化或去相关允许正交旋转，因此通常不是唯一解。",
+          "要选出特定中心—周围结构，还需对称性、局部性或其他约束。"
         ],
         "derivation": {
-          "title": "从 Gaussian entropy 到 information constraint 与 rotation ambiguity",
-          "setup": "设 d-dimensional output y 与 signal s 联合 Gaussian，conditional covariance \\(C_{y|s}\\) 不依赖具体 s。随后令 V 满足 \\(VC_{x}V^\\mathrm{T}=I\\)，并令 U 为 orthogonal matrix。whitening covariance 的旋转不变性不需要额外条件；完整 Gaussian MI 的旋转不变性还要求 \\(C_{\\eta _{y}}=\\sigma _{y}^{2}I\\) 或无 output noise。",
+          "title": "从高斯熵到信息约束与旋转歧义",
+          "setup": "设 d-维度的输出 y 与信号 s 联合高斯，条件协方差 \\(C_{y|s}\\) 不依赖具体 s。随后令 V 满足 \\(VC_{x}V^\\mathrm{T}=I\\)，并令 U 为正交矩阵。白化协方差的旋转不变性不需要额外条件；完整高斯 MI 的旋转不变性还要求 \\(C_{\\eta _{y}}=\\sigma _{y}^{2}I\\) 或无输出噪声。",
           "steps": [
             {
-              "title": "写 Gaussian differential entropy",
-              "explanation": "Gaussian uncertainty 由 covariance ellipsoid 决定；dimension d 给出共同常数，determinant 汇总所有 principal-axis variances。",
+              "title": "写高斯微分熵",
+              "explanation": "高斯不确定性由协方差椭球决定；维度 d 给出共同常数，行列式汇总所有主要的-轴方差。",
               "latex": "h(\\mathbf z)=\\frac12\\log\\!\\left[(2\\pi e)^d\\det C_z\\right]"
             },
             {
-              "title": "相减得到 mutual information",
-              "explanation": "\\(I(y;s)=h(y)-h(y|s)\\)。两项 dimension 相同，\\((2\\pi e)^d\\) 抵消，只剩 total output covariance 与 conditional noise covariance 的 determinant ratio。",
+              "title": "相减得到 mutual 信息",
+              "explanation": "\\(I(y;s)=h(y)-h(y|s)\\)。两项维度相同，\\((2\\pi e)^d\\) 抵消，只剩总输出协方差与条件噪声协方差的行列式比例。",
               "latex": "I(\\mathbf y;\\mathbf s)=\\frac12\\log\\!\\frac{\\det C_y}{\\det C_{y\\mid s}}"
             },
             {
-              "title": "明确 retained-information 与 output constraints",
-              "explanation": "规范性问题不是无条件最大化 entropy：先要求保留 \\(I^{*}\\)，再限制 output power 或 dynamic range，比较在这些约束下的 redundancy。",
+              "title": "明确保留的-信息与输出约束",
+              "explanation": "规范性问题不是无条件最大化熵：先要求保留 \\(I^{*}\\)，再限制输出功率或动态范围，比较在这些约束下的冗余。",
               "latex": "I(\\mathbf y;\\mathbf s)=I^*,\\qquad \\operatorname{tr}C_y\\le P_{\\max},\\qquad R=1-\\frac{I(\\mathbf y;\\mathbf s)}{C_{\\mathrm{out}}}"
             },
             {
-              "title": "构造另一 encoder",
-              "explanation": "令 \\(A'=UV\\)，先用 V whitening，再在 whitened output space 旋转 axes。",
+              "title": "构造另一编码器",
+              "explanation": "令 \\(A'=UV\\)，先用 V 白化，再在白化后的输出空间旋转坐标轴。",
               "latex": "A'=UV"
             },
             {
-              "title": "传播 covariance",
-              "explanation": "把 A'代入 \\(A'C_{x}A'^\\mathrm{T}\\)，并按 matrix multiplication associativity 分组。",
+              "title": "传播协方差",
+              "explanation": "把 A'代入 \\(A'C_{x}A'^\\mathrm{T}\\)，并按矩阵乘法结合律分组。",
               "latex": "A'C_xA'^{\\mathsf T}=U(VC_xV^{\\mathsf T})U^{\\mathsf T}"
             },
             {
-              "title": "使用 orthogonality",
-              "explanation": "中间 covariance 是 I，所以结果 \\(UIU^\\mathrm{T}=UU^\\mathrm{T}=I\\)；所有 U 都满足同一 second-order objective。",
+              "title": "使用正交性",
+              "explanation": "中间协方差是 I，所以结果 \\(UIU^\\mathrm{T}=UU^\\mathrm{T}=I\\)；所有 U 都满足同一二阶目标。",
               "latex": "U I U^{\\mathsf T}=I"
             },
             {
-              "title": "说明 MI 不变所需的 noise 条件",
-              "explanation": "若 output noise 是各向同性的，旋转前后 total covariance 与 conditional-noise covariance 都由 U 做 orthogonal similarity transform，determinant ratio 不变；各向异性 output noise 不允许这一步。",
+              "title": "说明 MI 不变所需的噪声条件",
+              "explanation": "若输出噪声是各向同性的，旋转前后总协方差与条件噪声协方差都由 U 做正交相似性变换，行列式比例不变；各向异性输出噪声不允许这一步。",
               "latex": "C_{\\eta_y}=\\sigma_y^2 I\\;\\Longrightarrow\\; C'_{y\\mid s}=U(C_{w\\mid s}+\\sigma_y^2I)U^{\\mathsf T}"
             }
           ],
           "symbolNotes": [
-            "d 是 output dimension；\\(C_{y}\\) 包含 signal 与 noise，\\(C_{y|s}\\) 是给定 signal 后剩余的 noise covariance。",
-            "\\(I^{*}\\) 是任务要求保留的信息量，\\(C_{\\mathrm{out}}\\) 是有 output noise 与 power constraint 时的 channel capacity，二者不能混为一个量。",
-            "orthogonal rotation 保持 Euclidean length 与 identity covariance，不表示 biological RF 可以无成本任意 global mixing。",
-            "determinant 与 covariance eigenvalues 相关；\\(\\det C\\) 是 eigenvalues product，zero eigenvalue 会使 Gaussian volume 退化。"
+            "d 是输出维度；\\(C_{y}\\) 包含信号与噪声，\\(C_{y|s}\\) 是给定信号后剩余的噪声协方差。",
+            "\\(I^{*}\\) 是任务要求保留的信息量，\\(C_{\\mathrm{out}}\\) 是有输出噪声与功率约束时的通道容量，二者不能混为一个量。",
+            "正交旋转保持欧氏长度与单位协方差，不表示生物 RF 可以无成本任意全局混合。",
+            "行列式与协方差特征值相关；\\(\\det C\\) 是特征值乘积，零特征值会使高斯体积退化。"
           ],
-          "unitsCheck": "\\(\\det C_{y}\\) 与 \\(\\det C_{y|s}\\) 具有相同的 output-units^{2d}，ratio 与 log argument 无量纲。whitening 通常再把 outputs 标准化为 unit variance；若保留 physical units，需要额外 scale matrix。",
-          "limitCheck": "若 covariance singular，log determinant 需限制到 supported subspace 或 regularize；non-Gaussian data 即使 covariance 为 I，components 仍可 dependent，higher-order objective 可打破 rotation degeneracy。"
+          "unitsCheck": "\\(\\det C_{y}\\) 与 \\(\\det C_{y|s}\\) 具有相同的输出单位^{2d}，比例与 log 自变量无量纲。白化通常再把输出标准化为单位方差；若保留物理单位，需要额外尺度矩阵。",
+          "limitCheck": "若协方差奇异，log 行列式需限制到非零方差子空间或正则化；非高斯数据即使协方差为 I，分量仍可依赖的，高阶目标可打破旋转退化。"
         },
         "workedExample": {
-          "title": "二维 whitening 的 rotation ambiguity",
-          "problem": "\\(C_{x}=\\operatorname{diag}(4,1)\\)。取 \\(V=\\operatorname{diag}(1/2,1)\\)，再取 45° rotation \\(U=(1/\\sqrt 2)[[1,-1],[1,1]]\\)。先比较加 output noise 前 V 与 UV 的 code covariance；再说明何时可以推论 MI 也不变。",
+          "title": "二维白化的旋转歧义",
+          "problem": "\\(C_{x}=\\operatorname{diag}(4,1)\\)。取 \\(V=\\operatorname{diag}(1/2,1)\\)，再取 45° 旋转 \\(U=(1/\\sqrt 2)[[1,-1],[1,1]]\\)。先比较加输出噪声前 V 与 UV 的编码协方差；再说明何时可以推论 MI 也不变。",
           "steps": [
             "\\(VC_{x}V^\\mathrm{T}=\\operatorname{diag}((1/2)^2\\times 4,1)=I\\)。",
             "\\(A'=UV\\)，故 \\(A'C_{x}A'^\\mathrm{T}=U I U^\\mathrm{T}=I\\)。",
-            "V outputs 分别沿原 axes；UV outputs 是两个 whitened coordinates 的 45° mixtures，二者在加 output noise 前都 decorrelated 且 unit variance。若后续噪声为 \\(\\sigma _{y}^{2}I\\)，加噪后 covariance 也只是在两输出轴上同加 \\(\\sigma _{y}^{2}\\)。"
+            "V 输出分别沿原坐标轴；UV 输出是两个白化后的坐标的 45° 混合态，二者在加输出噪声前都去相关且单位方差。若后续噪声为 \\(\\sigma _{y}^{2}I\\)，加噪后协方差也只是在两输出轴上同加 \\(\\sigma _{y}^{2}\\)。"
           ],
-          "result": "同一 covariance objective 允许不同 filter axes；若要偏好 localized center-surround，必须再加入 spatial constraints。",
-          "sanityCheck": "若 U 不是 orthogonal，例如把第一 row 乘2，则 pre-noise output covariance 不再是 I；若 output noise covariance 各向异性，即使 U orthogonal 也不能由 whitening 直接推出 MI 不变。"
+          "result": "同一协方差目标允许不同滤波器坐标轴；若要偏好局部化的中心—周边，必须再加入空间约束。",
+          "sanityCheck": "若 U 不是正交，例如把第一行乘2，则加入噪声前的输出协方差不再是 I；若输出噪声协方差各向异性，即使 U 正交也不能由白化直接推出 MI 不变。"
         },
         "pitfalls": [
-          "把 output entropy 或 channel capacity 越大无条件写成越好，忽略 fixed information、noise 与 firing cost。",
-          "把 normative center-surround prediction 当成 anatomy 或 development 机制的唯一证据。"
+          "无条件追求更大的输出熵或信道容量，忽略固定信息需求、噪声和放电代价。",
+          "将最优化模型对中心—周围结构的预测，当作其解剖或发育机制的唯一证据。"
         ]
       }
     ]
@@ -331,9 +333,9 @@
       "lecture": 15,
       "lectureTitle": "高效编码与信息论",
       "moduleId": "L15-M3",
-      "title": "Noisy sensory channel 中的去冗余必须服从保真与输出代价约束",
+      "title": "含噪感觉通道中的去冗余必须服从保真与输出代价约束",
       "alt": "流程图从含输入噪声的感觉信号，经线性编码器和输出噪声通道，到以保留信息和输出代价共同约束的去相关输出码。",
-      "caption": "encoder A 会同时变换 signal 与 input noise，而 output noise 在 A 之后加入；所以仅令 output covariance diagonal 并不保证有效编码。Atick–Redlich 思路是在 retained information 与 output power 或 dynamic-range constraint 下减少 redundancy：whitening 可消除二阶相关，但任意 orthogonal rotation 仍可保持 whitened covariance，localized center-surround 还需要 symmetry、locality 等额外约束。",
+      "caption": "编码器 A 会同时变换信号与输入噪声，而输出噪声在 A 之后加入；所以仅令输出协方差对角并不保证有效编码。Atick–Redlich 思路是在保留的信息与输出功率或动态范围约束下减少冗余：白化可消除二阶相关，但任意正交旋转仍可保持白化后的协方差，局部中心—周围感受野还需要对称性、局部性等额外约束。",
       "sourceRefs": [
         {
           "file": "Lecture15-EfficientCoding.pdf",
@@ -349,26 +351,26 @@
       "nodes": [
         {
           "id": "noisy-input",
-          "label": "noisy input\n\\(x = s + \\eta _{x}\\)",
+          "label": "含噪输入\n\\(x = s + \\eta _{x}\\)",
           "x": 11,
           "y": 55
         },
         {
           "id": "encoder",
-          "label": "linear encoder A\nsignal + input noise",
+          "label": "线性编码器 A\n信号 + 输入噪声",
           "x": 37,
           "y": 55,
           "tone": "accent"
         },
         {
           "id": "noisy-output",
-          "label": "output channel\n\\(y = Ax + \\eta _{y}\\)",
+          "label": "输出通道\n\\(y = Ax + \\eta _{y}\\)",
           "x": 63,
           "y": 55
         },
         {
           "id": "constrained-code",
-          "label": "保留 information\n降低 redundancy / cost",
+          "label": "保留信息\n降低冗余 / 代价",
           "x": 89,
           "y": 55
         }
@@ -387,7 +389,7 @@
         {
           "from": "noisy-output",
           "to": "constrained-code",
-          "label": "MI + output constraint"
+          "label": "MI + 输出约束"
         }
       ]
     }
@@ -419,7 +421,7 @@
     "思考题：input noise 与 signal covariance 如何合并？"
   ],
   "synthesis": [
-    "Barlow 的 efficient coding 是 normative hypothesis：在资源与噪声约束下，sensory system 应减少可预测 redundancy 并保留有用 information。information theory 用 surprise、entropy 与 mutual information 把\"可预测\"和\"传递多少\"定量化。Atick-Redlich 把 retina 建成 noisy linear encoder/decoder，在 fixed information 与 output capacity constraints 下求低 redundancy； decorrelation 并不唯一，rotational symmetry 才选出 center-surround form。"
+    "高效编码把感觉表征看作受资源和噪声约束的优化问题。信息论用自信息、熵和互信息量化不确定性与信息传递；Atick–Redlich 模型则在信息量与输出容量约束下研究视网膜如何降低冗余。去相关本身不能唯一确定滤波器，还需结合空间对称性等假设，才能得到中心—周边结构的预测。"
   ],
   "workedExamples": [
     "7.1 binary entropy",
@@ -433,10 +435,10 @@
     {
       "id": "L15-F01",
       "lecture": 15,
-      "name": "surprise",
+      "name": "自信息",
       "expression": "S(x) = − log p(x)",
       "latex": "S(x)=-\\log p(x)",
-      "conditions": "chosen log base",
+      "conditions": "明确对数的底",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 2
@@ -444,10 +446,10 @@
     {
       "id": "L15-F02",
       "lecture": 15,
-      "name": "entropy",
+      "name": "熵",
       "expression": "H(X) = E[− log p(X)]",
       "latex": "H(X)=\\mathbb{E}[-\\log p(X)]",
-      "conditions": "discrete distribution",
+      "conditions": "离散概率分布",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 2
@@ -455,10 +457,10 @@
     {
       "id": "L15-F03",
       "lecture": 15,
-      "name": "mutual information",
+      "name": "互信息",
       "expression": "I(X; Y ) = H(X) − H(X|Y )",
       "latex": "I(X;Y)=H(X)-H(X\\mid Y)",
-      "conditions": "joint distribution known",
+      "conditions": "联合分布已知",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 2
@@ -466,10 +468,10 @@
     {
       "id": "L15-F04",
       "lecture": 15,
-      "name": "MI dependence form",
+      "name": "用联合分布表示互信息",
       "expression": "∑ p(x, y) I= p(x, y) log p(x)p(y)",
       "latex": "I(X;Y)=\\sum_{x,y}p(x,y)\\log\\frac{p(x,y)}{p(x)p(y)}",
-      "conditions": "support handled",
+      "conditions": "正确处理分布支持集",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 2
@@ -477,10 +479,10 @@
     {
       "id": "L15-F05",
       "lecture": 15,
-      "name": "linear Gaussian covariance propagation",
+      "name": "线性高斯模型的协方差传播",
       "expression": "Cy = ACx AT + σy2 I",
       "latex": "C_y=AC_xA^{\\mathsf{T}}+\\sigma_y^2I",
-      "conditions": "independent additive output noise",
+      "conditions": "独立的加性输出噪声",
       "sectionId": "L15-M2",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 4
@@ -488,10 +490,10 @@
     {
       "id": "L15-F06",
       "lecture": 15,
-      "name": "Gaussian MI determinant form",
+      "name": "高斯互信息的行列式形式",
       "expression": "1 det Cy I(X; Y ) = log 2 det Cy|x",
       "latex": "I(X;Y)=\\frac{1}{2}\\log\\frac{\\det C_y}{\\det C_{y\\mid x}}",
-      "conditions": "joint Gaussian",
+      "conditions": "变量联合服从高斯分布",
       "sectionId": "L15-M3",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 5
@@ -499,10 +501,10 @@
     {
       "id": "L15-F07",
       "lecture": 15,
-      "name": "decorrelation objective",
+      "name": "去相关目标",
       "expression": "Cout ≈ diagonal",
       "latex": "C_{\\mathrm{out}}\\approx\\operatorname{diag}(C_{\\mathrm{out}})",
-      "conditions": "second-order redundancy",
+      "conditions": "以二阶统计量描述冗余",
       "sectionId": "L15-M2",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 4
@@ -514,7 +516,7 @@
       "lecture": 15,
       "zh": "高效编码",
       "en": "efficient coding",
-      "definition": "在资源/噪声约束下优化 information representation 的 normative principle。",
+      "definition": "在资源和噪声约束下优化信息表征的规范性原则。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 1
@@ -524,7 +526,7 @@
       "lecture": 15,
       "zh": "冗余",
       "en": "redundancy",
-      "definition": "可由其他 components 预测、重复传递的 structure。",
+      "definition": "可由其他分量预测、因而被重复传递的结构。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 1
@@ -534,7 +536,7 @@
       "lecture": 15,
       "zh": "惊讶度",
       "en": "surprise",
-      "definition": "事件的 −log probability。",
+      "definition": "事件概率的负对数。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 1
@@ -544,7 +546,7 @@
       "lecture": 15,
       "zh": "熵",
       "en": "entropy",
-      "definition": "平均 surprise/uncertainty。",
+      "definition": "对结果不确定性或惊讶度取平均。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 2
@@ -554,7 +556,7 @@
       "lecture": 15,
       "zh": "条件熵",
       "en": "conditional entropy",
-      "definition": "给定另一变量后的 residual uncertainty。",
+      "definition": "给定另一变量后仍然存在的不确定性。",
       "sectionId": "L15-M3",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 5
@@ -564,7 +566,7 @@
       "lecture": 15,
       "zh": "互信息",
       "en": "mutual information",
-      "definition": "一个变量对另一个变量减少的不确定性。",
+      "definition": "知道一个变量后，另一个变量减少的不确定性。",
       "sectionId": "L15-M3",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 5
@@ -574,7 +576,7 @@
       "lecture": 15,
       "zh": "微分熵",
       "en": "differential entropy",
-      "definition": "continuous density 的 entropy-like quantity， 可为负且依单位。",
+      "definition": "针对连续概率密度定义的熵，可能为负，且依赖坐标单位。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 2
@@ -584,7 +586,7 @@
       "lecture": 15,
       "zh": "信道容量",
       "en": "channel capacity",
-      "definition": "在 input constraints 下可达到的最大 mutual information。",
+      "definition": "满足输入约束时能够达到的最大互信息。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 3
@@ -594,7 +596,7 @@
       "lecture": 15,
       "zh": "去相关",
       "en": "decorrelation",
-      "definition": "使 covariance off-diagonal 接近零。",
+      "definition": "使协方差矩阵的非对角项接近零。",
       "sectionId": "L15-M2",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 4
@@ -604,21 +606,21 @@
       "lecture": 15,
       "zh": "规范模型",
       "en": "normative model",
-      "definition": "描述系统应优化什么，而非直接指定机制。",
+      "definition": "描述系统应当优化什么，而不直接指定实现机制的模型。",
       "sectionId": "L15-M1",
       "sourceFile": "Lecture15-EfficientCoding.pdf",
       "sourcePage": 1
     }
   ],
   "commonTraps": [
-    "把 efficient coding 当作已证实的唯一机制而非 normative hypothesis。",
-    "把 entropy 与\"有用 information\"无条件等同。",
-    "把 differential entropy 的负值当错误。",
-    "认为 \\(MI=0\\) 仅表示 zero linear correlation；它表示 independence（在定义良好时）。",
-    "只追求 decorrelation 而忽略 noise 与 output capacity。",
-    "认为 whitening solution 唯一。",
-    "把 center-surround 的 normative prediction 写成单一因果证据。",
-    "区分 entropy、differential entropy、mutual information、redundancy 与 channel capacity；不要用\"更多 entropy 就更好\"这类无条件结论。"
+    "把高效编码当作已证实的唯一神经机制，忽略它首先是一种规范性假设。",
+    "把熵无条件等同于任务中有用的信息。",
+    "把微分熵的负值当成计算错误，忽略它与离散熵的差别。",
+    "把 \\(MI=0\\) 只理解为线性相关为零，忽略在定义良好时它意味着独立。",
+    "只追求去相关，忽略输入噪声和输出容量约束。",
+    "认为白化条件能唯一确定滤波器。",
+    "把中心—周边结构符合规范性预测，当成某个生物机制的唯一因果证据。",
+    "混淆熵、微分熵、互信息、冗余与信道容量，并由“熵更大”直接推出“编码更好”。"
   ],
   "errata": [
     {
@@ -630,7 +632,7 @@
       "sourcePage": 1,
       "sectionId": "L15-M1",
       "originalIssue": "这里 的 Barlow 三假设应分别保留；只有第三项是本课重点 efficient-coding hypothesis。",
-      "explanation": "Barlow 的框架包含三项想法：检测具有关键意义的\"passwords\"；为其他 nervous-system regions 过滤 signals；重新编码 sensory messages 以减少 redundancy。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": "这里 的 Barlow 三假设应分别保留"
     },
     {
@@ -642,7 +644,7 @@
       "sourcePage": 3,
       "sectionId": "L15-M1",
       "originalIssue": "这里 已提醒 differential entropy caveat；还需注意其依坐标单位。",
-      "explanation": "continuous variable 用 density \\(f(x)\\) 定义 differential entropy \\(h=-\\int f \\log f\\)，它可为负且随 measurement units 改变。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     },
     {
@@ -654,7 +656,7 @@
       "sourcePage": 6,
       "sectionId": "L15-M3",
       "originalIssue": "这里 的 center-surround uniqueness 依 rotational symmetry 等额外约束，而非 decorrelation alone。",
-      "explanation": "加入 translation invariance、rotational symmetry、local wiring 或 identical channel constraints 后，isotropic center-surround 可从等价族中被选出。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     }
   ],
@@ -671,37 +673,37 @@
         }
       ],
       "conceptTags": [
-        "Barlow hypothesis 与 information-theory 基础"
+        "Barlow 假说、熵与互信息"
       ],
       "difficulty": 2,
-      "type": "comparison",
+      "type": "calculation",
       "cognitiveLevel": "understand",
-      "stem": "为什么 differential entropy 为负不表示 probability theory 出错？",
+      "stem": "为什么微分熵为负不表示概率论出错？",
       "choices": [
         {
           "id": "a",
-          "text": "continuous density 不是单个 outcome probability，可大于 1，且 entropy 含 coordinate bin-size/units；缩放变量会加一个 log scale term。MI 中共同 scale contributions 抵消，因此仍可非负并具有依赖性解释。"
+          "text": "密度可大于 1，微分熵还依赖坐标单位；它与离散熵不同，负值并不矛盾。"
         },
         {
           "id": "b",
-          "text": "decorrelation 只要求 output covariance diagonal 或 whitened，随后任意 orthogonal rotation 仍同样满足；center-surround 形状需要 translation/rotation symmetry、locality、wiring 或 noise/cost 等额外约束来从等价 solutions 中选择。"
+          "text": "负微分熵说明某些事件的概率为负，但连续模型允许这种情况。"
         },
         {
           "id": "c",
-          "text": "input noise 会被 A 重塑，增大某 frequency gain 也放大该部分噪声；output noise 不经 A，增大 gain 反而可提高 signal 相对 output noise。两者在 gain tradeoff 中的作用方向不同，不能合并位置。"
+          "text": "微分熵为负只是因为用了自然对数，换成以 2 为底的对数便总能使它变成非负。"
         },
         {
           "id": "d",
-          "text": "把 high entropy 直接等同于 high useful information，忽略 receiver、task、noise 与 conditional structure。"
+          "text": "微分熵必须像离散熵一样非负，出现负值就说明密度没有归一化，必须重新拟合模型。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Gaussian information、decorrelation nonuniqueness 与 center-surround selection”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Atick-Redlich noisy retina 与 covariance propagation”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 high entropy 直接等同于 high useful information，忽略 receiver、task、noise 与 conditional structure。"
+        "b": "概率与密度都不能为负；可超过 1 的是密度，而不是事件概率。",
+        "c": "换底仅乘正的比例因子，不会改变熵的正负号。",
+        "d": "合法归一化密度也可有负微分熵，例如分布集中在长度小于单位长度的区间。"
       },
-      "explanation": "continuous density 不是单个 outcome probability，可大于 1，且 entropy 含 coordinate bin-size/units；缩放变量会加一个 log scale term。MI 中共同 scale contributions 抵消，因此仍可非负并具有依赖性解释。 continuous variable 用 density \\(f(x)\\) 定义 differential entropy \\(h=-\\int f \\log f\\)，它可为负且随 measurement units 改变。"
+      "explanation": "连续概率密度不等于单个结果的概率，其数值可以大于 1。微分熵依赖坐标尺度与单位，缩放变量会增加一个对数项；互信息中的对应尺度项相消，因此互信息仍非负。 连续变量使用密度 \\(f(x)\\) 定义微分熵 \\(h=-\\int f \\log f\\)，后者可以为负，也随测量单位改变。"
     },
     {
       "id": "L15-Q02",
@@ -715,37 +717,37 @@
         }
       ],
       "conceptTags": [
-        "Atick-Redlich noisy retina 与 covariance propagation"
+        "含噪视网膜模型中的协方差"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么把 input noise 与 output noise 合成一个 A 之前的 noise term 会改变 optimization？",
+      "stem": "为什么把输入噪声与输出噪声合成一个 A 之前的噪声项会改变优化？",
       "choices": [
         {
           "id": "a",
-          "text": "decorrelation 只要求 output covariance diagonal 或 whitened，随后任意 orthogonal rotation 仍同样满足；center-surround 形状需要 translation/rotation symmetry、locality、wiring 或 noise/cost 等额外约束来从等价 solutions 中选择。"
+          "text": "两种噪声都只改变输出均值，不改变协方差，所以合并只是丢掉一个常数偏置。"
         },
         {
           "id": "b",
-          "text": "input noise 会被 A 重塑，增大某 frequency gain 也放大该部分噪声；output noise 不经 A，增大 gain 反而可提高 signal 相对 output noise。两者在 gain tradeoff 中的作用方向不同，不能合并位置。"
+          "text": "输入噪声随编码器滤波，输出噪声随后加入；两者对增益变化的响应不同。"
         },
         {
           "id": "c",
-          "text": "continuous density 不是单个 outcome probability，可大于 1，且 entropy 含 coordinate bin-size/units；缩放变量会加一个 log scale term。MI 中共同 scale contributions 抵消，因此仍可非负并具有依赖性解释。"
+          "text": "只要两种噪声独立，把输出噪声搬到编码器之前仍会对所有候选增益给出完全相同的输出分布。"
         },
         {
           "id": "d",
-          "text": "在 covariance 传播中漏掉 \\(A^\\mathrm{T}\\)，得到非对称或 shape 错误的 output covariance。"
+          "text": "输入噪声不经过编码器，只有输出噪声会随滤波增益放大。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Gaussian information、decorrelation nonuniqueness 与 center-surround selection”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Barlow hypothesis 与 information-theory 基础”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：在 covariance 传播中漏掉 \\(A^\\mathrm{T}\\)，得到非对称或 shape 错误的 output covariance。"
+        "a": "这里噪声均值可为零，却仍贡献方差；加入位置决定该方差是否被编码器变换。",
+        "c": "独立性允许方差相加，不允许忽略中间变换；等效输入噪声通常随编码器改变。",
+        "d": "顺序恰好相反：输入噪声与信号一起经过编码器，输出噪声随后加入。"
       },
-      "explanation": "input noise 会被 A 重塑，增大某 frequency gain 也放大该部分噪声；output noise 不经 A，增大 gain 反而可提高 signal 相对 output noise。两者在 gain tradeoff 中的作用方向不同，不能合并位置。 input noise 会被 A 一同放大或抑制，output noise 不经过 A，因此 optimal gain 不能只根据 signal covariance 决定。"
+      "explanation": "输入噪声会被 A 重塑，增大某频率增益也放大该部分噪声；输出噪声不经 A，增大增益反而可提高信号相对输出噪声。两者在增益权衡中的作用方向不同，不能合并位置。 输入噪声和信号一起被 A 放大或抑制，输出噪声却不经过 A，所以最优增益不能只由信号协方差决定。"
     },
     {
       "id": "L15-Q03",
@@ -759,37 +761,37 @@
         }
       ],
       "conceptTags": [
-        "Gaussian information、decorrelation nonuniqueness 与 center-surround selection"
+        "去相关为什么不能唯一确定感受野"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么\"decorrelation 得到 center-surround\"这一说法缺少关键条件？",
+      "stem": "为什么\"去相关得到中心-周围\"这一说法缺少关键条件？",
       "choices": [
         {
           "id": "a",
-          "text": "continuous density 不是单个 outcome probability，可大于 1，且 entropy 含 coordinate bin-size/units；缩放变量会加一个 log scale term。MI 中共同 scale contributions 抵消，因此仍可非负并具有依赖性解释。"
+          "text": "只要输出协方差为单位矩阵，其每个通道就必然在空间中呈局部中心-周围形状。"
         },
         {
           "id": "b",
-          "text": "input noise 会被 A 重塑，增大某 frequency gain 也放大该部分噪声；output noise 不经 A，增大 gain 反而可提高 signal 相对 output noise。两者在 gain tradeoff 中的作用方向不同，不能合并位置。"
+          "text": "任意正交旋转都会重新引入白化通道间的相关，因此去相关本身已排除了所有非局部编码器。"
         },
         {
           "id": "c",
-          "text": "decorrelation 只要求 output covariance diagonal 或 whitened，随后任意 orthogonal rotation 仍同样满足；center-surround 形状需要 translation/rotation symmetry、locality、wiring 或 noise/cost 等额外约束来从等价 solutions 中选择。"
+          "text": "白化后仍可正交旋转而保留相同协方差；局部中心-周围形状还需对称性、布线或其他约束。"
         },
         {
           "id": "d",
-          "text": "把 output entropy 或 channel capacity 越大无条件写成越好，忽略 fixed information、noise 与 firing cost。"
+          "text": "只需提高样本量，所有白化解就会自动收敛到同一个中心-周围滤波器，不再需要任何额外条件。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Barlow hypothesis 与 information-theory 基础”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Atick-Redlich noisy retina 与 covariance propagation”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 output entropy 或 channel capacity 越大无条件写成越好，忽略 fixed information、noise 与 firing cost。"
+        "a": "单位协方差约束统计关系，不唯一决定各通道的空间形状。",
+        "b": "单位协方差在正交旋转下保持不变，所以白化编码器仍存在等价族。",
+        "d": "旋转不唯一是目标本身的对称性，不是有限样本噪声；增加数据不会自动消除它。"
       },
-      "explanation": "decorrelation 只要求 output covariance diagonal 或 whitened，随后任意 orthogonal rotation 仍同样满足；center-surround 形状需要 translation/rotation symmetry、locality、wiring 或 noise/cost 等额外约束来从等价 solutions 中选择。 对任意 orthogonal U，\\((UV)C_{x}(UV)^\\mathrm{T}=UIU^\\mathrm{T}=I\\)，所以加 output noise 前的 whitened code 可再旋转而保持相同 covariance。"
+      "explanation": "去相关只要求输出协方差为对角矩阵；白化还把各方向方差归一为 1，此时任意正交旋转仍保留单位协方差。仅有方差不等的对角协方差时，一般旋转会重新引入非对角项。中心-周围形状仍需平移/旋转对称性、局部性、连线或噪声/代价等额外约束，从白化后的等价解中选择。 平移不变性、旋转对称性、局部连接或相同通道约束，可以进一步从等价解中选出各向同性的中心-周围结构。"
     },
     {
       "id": "L15-Q04",
@@ -803,37 +805,37 @@
         }
       ],
       "conceptTags": [
-        "Noisy sensory channel 中的去冗余必须服从保真与输出代价约束"
+        "含噪感觉通道中的去冗余必须服从保真与输出代价约束"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Noisy sensory channel 中的去冗余必须服从保真与输出代价约束\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"含噪感觉通道中的去冗余必须服从保真与输出代价约束\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "continuous density 不是单个 outcome probability，可大于 1，且 entropy 含 coordinate bin-size/units；缩放变量会加一个 log scale term。MI 中共同 scale contributions 抵消，因此仍可非负并具有依赖性解释。"
+          "text": "把编码器增益全部设为零即可最优去冗余，因为各通道不再相关，所以一定保留了全部感觉信息。"
         },
         {
           "id": "b",
-          "text": "input noise 会被 A 重塑，增大某 frequency gain 也放大该部分噪声；output noise 不经 A，增大 gain 反而可提高 signal 相对 output noise。两者在 gain tradeoff 中的作用方向不同，不能合并位置。"
+          "text": "图中输出噪声进入编码器后与信号一同放大，因此可以用同一个输入协方差替代全部噪声位置。"
         },
         {
           "id": "c",
-          "text": "把 output entropy 或 channel capacity 越大无条件写成越好，忽略 fixed information、noise 与 firing cost。"
+          "text": "图中白化一步就唯一确定每个神经元的局部中心-周围感受野。"
         },
         {
           "id": "d",
-          "text": "Atick-Redlich 思路是在 retained information 与 output power 或 dynamic-range constraint 下减少 redundancy：whitening 可消除二阶相关，但任意 orthogonal rotation 仍可保持 whitened covariance，localized center-surround 还需要 symmetry、locality 等额外约束。"
+          "text": "编码器同时变换信号和输入噪声，输出噪声随后加入；去冗余还需满足信息保留与输出代价约束。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "图中没有“Barlow hypothesis 与 information-theory 基础”所需的变量与条件。",
-        "b": "图中没有“Atick-Redlich noisy retina 与 covariance propagation”所需的变量与条件。",
-        "c": "图中的标注与关系不支持这种读法：把 output entropy 或 channel capacity 越大无条件写成越好，忽略 fixed information、noise 与 firing cost。"
+        "a": "零增益也消除了信号；相关消失不能替代信息保留条件。",
+        "b": "输出噪声在编码器之后加入，不能直接当作同一固定输入噪声。",
+        "c": "白化允许正交旋转的等价解；局部形状还需要额外结构约束。"
       },
-      "explanation": "encoder A 会同时变换 signal 与 input noise，而 output noise 在 A 之后加入；所以仅令 output covariance diagonal 并不保证有效编码。Atick-Redlich 思路是在 retained information 与 output power 或 dynamic-range constraint 下减少 redundancy：whitening 可消除二阶相关，但任意 orthogonal rotation 仍可保持 whitened covariance，localized center-surround 还需要 symmetry、locality 等额外约束。"
+      "explanation": "编码器 A 会同时变换信号与输入噪声，而输出噪声在 A 之后加入；所以仅令输出协方差对角并不保证有效编码。Atick-Redlich 思路是在保留的信息与输出功率或动态范围约束下减少冗余：白化可消除二阶相关，但任意正交旋转仍可保持白化后的协方差，局部中心-周围感受野还需要对称性、局部性等额外约束。"
     }
   ]
 }

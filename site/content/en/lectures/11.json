@@ -1,7 +1,7 @@
 {
   "lecture": 11,
   "slug": "11",
-  "zhTitle": "机器学习：回归、梯度下降与反向传播",
+  "zhTitle": "回归、梯度下降与反向传播",
   "enTitle": "Machine Learning: Regression, Gradient Descent, and Backpropagation",
   "companionFile": "NEUROSCI366_Lecture11_Machine_Learning_Regression_Backprop_Companion.pdf",
   "companionPages": 24,
@@ -169,6 +169,7 @@
       {
         "id": "L11-M2",
         "title": "Linear Regression: Gradient Decomposition, the Normal Equation, and Deep Linear Factorization",
+        "transition": "The negative gradient gives a local descent direction, but the actual update depends on the prediction model and loss. Expanding it for linear regression reveals an input–target correlation term, a term that constrains the weights, and the normal equations obtained when the gradient vanishes.",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -236,6 +237,7 @@
       {
         "id": "L11-M3",
         "title": "Backpropagation: Layerwise Chain Rules, Error Coordinates, and Weight Gradients",
+        "transition": "In single-layer regression, each weight's contribution to the residual is explicit. A multilayer parameterization routes that influence through intermediate variables, so backpropagation applies the chain rule along those dependencies to determine how hidden-layer changes affect the final loss.",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -692,27 +694,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction."
+          "text": "The gradient points toward local steepest ascent; its negative gives local descent, not the location of a distant global minimum."
         },
         {
           "id": "b",
-          "text": "The forward map W carries hidden coordinates into downstream coordinates."
+          "text": "The gradient points directly toward the nearest minimum; learning rate only determines how far along that route the parameters move."
         },
         {
           "id": "c",
-          "text": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters."
+          "text": "Both signs of the gradient move along contours without changing the loss."
         },
         {
           "id": "d",
-          "text": "Classifying a task as classification or regression only by the model's name instead of examining target support and loss."
+          "text": "Gradients point uphill only for convex losses; for nonconvex losses the same derivative points downhill, so updates no longer need a minus sign."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction. It uses only first-order information at that location and does not directly identify a distant global minimum. Supervised learning supplies input-target pairs. In handwritten-digit recognition, x is an image and y is a discrete digit label, making the task classification. In optic-flow estimation, x may be two adjacent frames and y a continuous motion vector at each location, making it regression. Both require a clear account of how training examples are sampled and whether test examples follow the same distribution.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Backpropagation: Layerwise Chain Rules, Error Coordinates, and Weight Gradients,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Linear Regression: Gradient Decomposition, the Normal Equation, and Deep Linear Factorization,” not the relationship asked about here.",
-        "d": "The error is: Classifying a task as classification or regression only by the model's name instead of examining target support and loss."
+        "b": "A gradient contains local derivative information, not the nearest minimum's location.",
+        "c": "The gradient is perpendicular to contours; a sufficiently small negative-gradient step usually lowers loss.",
+        "d": "Convexity does not change the gradient's local ascent meaning; it affects global optimization properties."
       }
     },
     {
@@ -741,27 +743,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The forward map W carries hidden coordinates into downstream coordinates."
+          "text": "Multiplying linear matrices automatically introduces nonlinear activations, so the overall input–output mapping is no longer linear."
         },
         {
           "id": "b",
-          "text": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters."
+          "text": "Layer weights enter the loss through products, coupling parameters and allowing nonunique factorizations despite a linear map."
         },
         {
           "id": "c",
-          "text": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction."
+          "text": "Because each layer has a convex subproblem when the others are fixed, optimizing all layers jointly must also be convex."
         },
         {
           "id": "d",
-          "text": "Applying a closed-form formula without declaring whether samples are columns or rows, thereby misplacing transposes and dimensions."
+          "text": "Depth reduces the sample count and therefore makes regression nonconvex."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters. Scale and factorization are nonunique, and updates to different layers depend on one another, so optimization in parameter space is generally nonconvex. Expanding the gradient gives \\(\\nabla L=(2/P)(XX^\\mathrm{T}w-Xy)\\). Thus \\(-\\nabla L\\) contains \\(+(2\\eta /P)\\)Xy and \\(-(2\\eta /P)XX^\\mathrm{T}w\\). The first term writes input-target coactivity into the weights; the second grows with the current weights and input covariance, providing stabilization. Its form resembles biological Hebbian learning, but a target y, batch access, and signed error are not ordinary local coactivity.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Backpropagation: Layerwise Chain Rules, Error Coordinates, and Weight Gradients,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “The Components of Supervised Learning and Gradient Descent,” not the relationship asked about here.",
-        "d": "The error is: Applying a closed-form formula without declaring whether samples are columns or rows, thereby misplacing transposes and dimensions."
+        "a": "A composition of linear maps is linear; the factorized parameterization causes the optimization issue.",
+        "c": "Separate convexity does not imply joint convexity; products couple changes across layers.",
+        "d": "Depth does not change sample count; squared loss can remain convex in the overall linear map."
       }
     },
     {
@@ -790,27 +792,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters."
+          "text": "Transposition inverts the forward weights, so backpropagation reconstructs the original inputs."
         },
         {
           "id": "b",
-          "text": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction."
+          "text": "Both passes compute neural activity, so the original weight matrix suffices and transposition is only needed when drawing the network."
         },
         {
           "id": "c",
-          "text": "The forward map W carries hidden coordinates into downstream coordinates."
+          "text": "The chain rule uses the transpose to sum downstream sensitivities back into gradients of hidden coordinates."
         },
         {
           "id": "d",
-          "text": "Describing \\(\\delta\\) as an error molecule that literally propagates backward through biological neurons, without separating a computed derivative from its possible implementation."
+          "text": "Transposition is valid only for orthogonal weight matrices; all other networks require matrix inversion to apply the chain rule."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "The forward map W carries hidden coordinates into downstream coordinates. The chain rule must aggregate downstream scalar sensitivities back into each hidden coordinate, which is exactly the reverse Jacobian product \\(W^\\mathrm{T}\\delta\\); its shape also returns from the downstream dimension to the hidden dimension. Each weight \\(W^{(\\ell -1)}_{ij}\\) contributes presynaptic activation \\(z^{(\\ell -1)}_j\\) to postsynaptic preactivation \\(h^{(\\ell )}_i\\). Therefore \\(\\partial L/\\partial W_{ij}=\\delta _{i} z_{j}\\), and the complete matrix gradient is the outer product \\(\\delta ^{(\\ell )}(z^{(\\ell -1)})^\\mathrm{T}\\). Batch training averages these outer products.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Linear Regression: Gradient Decomposition, the Normal Equation, and Deep Linear Factorization,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “The Components of Supervised Learning and Gradient Descent,” not the relationship asked about here.",
-        "d": "The error is: Describing \\(\\delta\\) as an error molecule that literally propagates backward through biological neurons, without separating a computed derivative from its possible implementation."
+        "a": "A transpose is generally not an inverse; backpropagation computes derivatives rather than reconstructing inputs.",
+        "b": "The backward pass propagates sensitivities, with a different summation direction and matching transpose dimensions.",
+        "d": "Jacobian-transpose gradient propagation requires neither orthogonality nor invertibility."
       }
     },
     {
@@ -839,27 +841,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The forward map W carries hidden coordinates into downstream coordinates."
+          "text": "Following the negative gradient guarantees that every step lowers loss and reaches the global minimum, regardless of the chosen learning rate."
         },
         {
           "id": "b",
-          "text": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters."
+          "text": "Shrinking gaps between markers prove that the optimizer reduces its learning rate after every update."
         },
         {
           "id": "c",
-          "text": "Classifying a task as classification or regression only by the model's name instead of examining target support and loss."
+          "text": "The markers are biological measurements that determine real synaptic learning speed."
         },
         {
           "id": "d",
-          "text": "A normalized one-dimensional convex loss curve with a sequence of gradient-descent iterates approaching its minimum."
+          "text": "The steps show negative-gradient descent with a suitable learning rate; oversized steps can still raise loss."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "At the current parameter, the gradient points in the locally fastest direction of increasing loss, so update \\(\\Delta w=-\\eta \\nabla L\\) moves in the opposite direction. The markers show only normalized iteration order, not experimental observations. They illustrate that an appropriate step can approach the minimum successively, whereas the Taylor approximation does not guarantee descent with an excessively large learning rate.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Backpropagation: Layerwise Chain Rules, Error Coordinates, and Weight Gradients.”",
-        "b": "The diagram does not show the variables and conditions discussed in “Linear Regression: Gradient Decomposition, the Normal Equation, and Deep Linear Factorization.”",
-        "c": "The error is: Classifying a task as classification or regression only by the model's name instead of examining target support and loss."
+        "a": "The direction is local; large steps can invalidate the first-order approximation and increase loss.",
+        "b": "Smaller gradients also shrink steps at a fixed learning rate, so marker spacing alone cannot establish a schedule.",
+        "c": "These are normalized optimization illustrations, without empirical neural data or a biological time unit."
       }
     }
   ]

@@ -78,21 +78,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能把 brain、body 与 environment 画成闭环动力系统，区分 feedforward command、sensory feedback、state estimate 与外部扰动。",
-      "能从单神经元一阶方程推广到 \\(\\tau dh/dt=-h+Wh+I\\)，并正确解释 \\(W_{ij}\\) 的连接方向与矩阵 shape。",
-      "能在 W 可对角化时把 population activity 转到 eigenbasis，逐步得到互不耦合的 mode equations。",
-      "能由 eigenvalue \\(\\lambda _{i}\\) 推出 effective time constant \\(\\tau /(1-\\lambda _{i})\\)，判断 \\(\\lambda _{i}<1\\)、=1、>1 对 decay、integration 与 instability 的意义。",
-      "能求 constant input 下的 fixed point，并区分接近 integrator 的 long memory、perfect integrator 和 runaway positive feedback。"
+      "能把脑、身体与环境画成闭环动力系统，区分前馈指令、感觉反馈、状态估计与外部扰动。",
+      "能从单神经元一阶方程推广到 \\(\\tau dh/dt=-h+Wh+I\\)，并正确解释 \\(W_{ij}\\) 的连接方向与矩阵尺寸。",
+      "能在 W 可对角化时把群体活动转到特征基底，逐步得到互不耦合的模态方程。",
+      "能由特征值 \\(\\lambda _{i}\\) 推出有效时间常数 \\(\\tau /(1-\\lambda _{i})\\)，判断 \\(\\lambda _{i}<1\\)、=1、>1 对衰减、积分与不稳定的意义。",
+      "能求恒定输入下的固定点，并区分接近积分器的长时间记忆、理想积分器和失控的正反馈。"
     ],
     "prerequisiteBridge": [
-      "先复习一个标量一阶系统 \\(\\tau dh/dt=-h+u\\)。没有输入时，负的 -h 把状态拉回零；constant u 让 fixed point 移到 \\(h^{*}=u\\)；解按 \\(e^{-t/\\tau }\\) 衰减。反馈把输入改成状态的函数，例如 \\(u=\\lambda h+I\\)，于是 restoring coefficient 从 1 变成 \\(1-\\lambda\\)。后面的 recurrent population 只是把 h 从一个数换成 vector，把 \\(\\lambda\\) 换成 matrix W；每个 eigenmode 都重复这套标量逻辑。",
-      "矩阵 W 的约定必须在计算前固定。本讲方程写 \\((Wh)_i=\\sum _j W_{ij} h_{j}\\)，因此 \\(W_{ij}\\) 表示 population j 对 population i 的影响：列索引是 source，行索引是 target。\\(h\\in \\mathbb{R}^N\\) 是某一时刻 N 个 units 的 activity column vector，\\(W\\in \\mathbb{R}^{N\\times N}\\)。一个 eigenvector v 满足 \\(Wv=\\lambda v\\)，表示沿 v 方向的 population pattern 经 recurrent multiplication 后方向不变，只被 \\(\\lambda\\) 缩放。",
-      "对角化 \\(W=V\\Lambda V^{-1}\\) 要求有 N 个线性无关 eigenvectors；V 的 columns 是 \\(v_{i}\\)，\\(\\Lambda\\) diagonal entries 是 \\(\\lambda _{i}\\)。activity 写 \\(h=V\\alpha\\) 后，\\(\\alpha =V^{-1}h\\) 是 mode amplitudes，不是另一群真实 neurons。非对称 W 可能有 complex eigenvalues 或不可对角化；这不使动力学失效，只表示要用 real oscillatory blocks、generalized eigenvectors 或直接 matrix exponential。课程的 eigenbasis 推导先处理可对角化情形，以便看清 timescale 与 stability。"
+      "先复习一个标量一阶系统 \\(\\tau dh/dt=-h+u\\)。没有输入时，负的 -h 把状态拉回零；常数 u 让固定点移到 \\(h^{*}=u\\)；解按 \\(e^{-t/\\tau }\\) 衰减。反馈把输入改成状态的函数，例如 \\(u=\\lambda h+I\\)，于是恢复系数从 1 变成 \\(1-\\lambda\\)。后面的循环群体只是把 h 从一个数换成向量，把 \\(\\lambda\\) 换成矩阵 W；每个特征模态都重复这套标量逻辑。",
+      "矩阵 W 的约定必须在计算前固定。本讲方程写 \\((Wh)_i=\\sum _j W_{ij} h_{j}\\)，因此 \\(W_{ij}\\) 表示群体 j 对群体 i 的影响：列索引是来源，行索引是目标。\\(h\\in \\mathbb{R}^N\\) 是某一时刻 N 个单元的活动列向量，\\(W\\in \\mathbb{R}^{N\\times N}\\)。一个特征向量 v 满足 \\(Wv=\\lambda v\\)，表示沿 v 方向的群体模式经循环矩阵乘法后方向不变，只被 \\(\\lambda\\) 缩放。",
+      "对角化 \\(W=V\\Lambda V^{-1}\\) 要求有 N 个线性无关特征向量；V 的列是 \\(v_{i}\\)，\\(\\Lambda\\) 对角分量是 \\(\\lambda _{i}\\)。活动写 \\(h=V\\alpha\\) 后，\\(\\alpha =V^{-1}h\\) 是模态振幅，不是另一群真实神经元。非对称 W 可能有复数特征值或不可对角化；这不使动力学失效，只表示要用实数形式的振荡块、广义特征向量或直接矩阵指数。课程的特征基底推导先处理可对角化情形，以便看清时间尺度与稳定性。"
     ],
     "modules": [
       {
         "id": "l18-m1",
-        "title": "运动控制是 brain–body–environment 闭环",
+        "title": "脑、身体与环境的闭环控制",
         "sourceRefs": [
           {
             "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
@@ -100,64 +100,65 @@
           }
         ],
         "paragraphs": [
-          "先把 motor system 放进 brain、body、environment 的耦合中。brain activity 通过 descending pathways 改变 muscle activation，body mechanics 把 activation 转成姿态与速度，environment 通过重力、接触和物体反作用改变 body state；proprioceptive、visual 与 cutaneous signals 再把结果送回 nervous system。每个箭头都有 delay 与 dynamics，因此运动不是静态 stimulus-response lookup，而是闭环随时间演化。",
-          "feedforward command 根据目标与内部模型提前发出动作，适合补偿已知延迟，却会受未预测扰动与模型误差影响。feedback controller 使用感觉到的 state error 修正输出，能抵抗扰动，但过高 gain 与 delay 可能导致 oscillation。生物控制通常组合两者，并让 spinal cord、brainstem、cerebellum、basal ganglia 与 motor cortex 在不同时间尺度和表征层次上参与，而不是由单一区域顺序接管。",
-          "sensory signal 只是带 delay 与 noise 的 observation，不等于系统此刻的真实 body state。state estimate 是结合近期感觉、运动命令副本与 dynamics model，对位置、速度等 latent state 作出的当前推断；feedback 实际上常围绕这个 estimate 计算 error。central pattern generator（CPG）则说明 recurrent circuit 即使没有逐周期的外界命令，也可产生节律性 motor output；sensory feedback 会校正相位和幅度，而不是从零生成每个周期。",
-          "最小标量例子把 body position 写成 \\(dx/dt=u+d\\)，其中 u 是 neural command，d 是外部 disturbance。取反馈 \\(u=-kx\\)，得到 \\(dx/dt=-kx+d\\)。没有持续扰动时，x 以 rate k 回到零；constant disturbance 时，fixed error 是 d/k。提高 k 可减小 steady error，但现实 sensory delay、actuator limit 与 noise 会限制 gain，这为后续 recurrent stability 提供控制论直觉。",
-          "motor cortex 的 distributed activity 也不必逐 neuron 对应一块 muscle。一个 movement 可由 population trajectory 表示，瞬时 activity pattern 决定系统状态，recurrent dynamics 决定 trajectory 如何继续。分析重点从“哪个 neuron 编码哪个动作变量”扩展为“population state 沿哪些 modes 演化、哪些输入改变 initial condition 或 vector field”。线性网络不是完整 motor theory，而是分解时间结构的第一步。"
+          "先把运动系统放进脑、身体、环境的耦合中。脑活动通过下行通路改变肌肉激活，身体的力学性质把激活转成姿态与速度，环境通过重力、接触和物体反作用改变身体状态；本体感觉、视觉与皮肤感觉信号再把结果送回神经系统。每个箭头都有延迟与动力学，因此运动不是静态刺激到响应的静态对应，而是闭环随时间演化。",
+          "前馈指令根据目标与内部模型提前发出动作，适合补偿已知延迟，却会受未预测扰动与模型误差影响。反馈控制器使用感觉到的状态误差修正输出，能抵抗扰动，但过高增益与延迟可能导致振荡。生物控制通常组合两者，并让脊髓、脑干、小脑、基底节与运动皮层在不同时间尺度和表征层次上参与，而不是由单一区域顺序接管。",
+          "感觉信号只是带延迟与噪声的观测，不等于系统此刻的真实身体状态。状态估计是结合近期感觉、运动命令副本与动力学模型，对位置、速度等潜在状态作出的当前推断；反馈实际上常围绕这个估计计算误差。中枢模式发生器（CPG）则说明循环回路即使没有逐周期的外界命令，也可产生节律性运动输出；感觉反馈会校正相位和幅度，而不是从零生成每个周期。",
+          "最小标量例子把身体位置写成 \\(dx/dt=u+d\\)，其中 u 是神经指令，d 是外部扰动。取反馈 \\(u=-kx\\)，得到 \\(dx/dt=-kx+d\\)。没有持续扰动时，x 以发放率 k 回到零；常数扰动时，固定误差是 d/k。提高 k 可减小稳态误差，但现实感觉延迟、执行器极限与噪声会限制增益，这为后续循环稳定性提供控制论直觉。",
+          "运动皮层的分布式活动也不必逐神经元对应一块肌肉。一个运动可由群体轨迹表示，瞬时活动模式决定系统状态，循环动力学决定轨迹如何继续。分析重点从“哪个神经元编码哪个动作变量”扩展为“群体状态沿哪些模态演化、哪些输入改变初始条件或向量局部场”。线性网络不是完整运动理论，而是分解时间结构的第一步。"
         ],
         "keyPoints": [
-          "brain、body 与 environment 通过 command、mechanics、disturbance 与 sensory feedback 构成闭环。",
-          "feedforward 可预补偿，feedback 可校正扰动；delay、noise 与 gain 决定稳定性代价。",
-          "state estimate 从 noisy delayed observations 推断当前 latent state；CPG 展示 recurrent dynamics 可内生产生节律。",
-          "motor population activity 可作为 dynamical state，不能预设每个 mode 等于单一 muscle 或动作变量。"
+          "脑、身体与环境通过指令、力学、扰动与感觉反馈构成闭环。",
+          "前馈可预补偿，反馈可校正扰动；延迟、噪声与增益决定稳定性代价。",
+          "状态估计从含噪延迟观测推断当前潜在状态；CPG 展示循环动力学可内生产生节律。",
+          "运动群体活动可作为动力学状态，不能预设每个模态等于单一肌肉或动作变量。"
         ],
         "derivation": {
-          "title": "比例 feedback 怎样拒绝 constant disturbance",
-          "setup": "用归一化的一维 body dynamics \\(dx/dt=u+d\\)，目标 position 为 0，选择 proportional controller \\(u=-kx\\)，其中 \\(k>0\\)。",
+          "title": "比例反馈怎样拒绝常数扰动",
+          "setup": "用归一化的一维身体动力学 \\(dx/dt=u+d\\)，目标位置为 0，选择正比控制器 \\(u=-kx\\)，其中 \\(k>0\\)。",
           "steps": [
             {
-              "title": "代入 feedback law",
-              "explanation": "controller 把正 position error 转成负 command，合并后得到一个带 constant forcing 的一阶方程。",
+              "title": "代入反馈定律",
+              "explanation": "控制器把正位置误差转成负指令，合并后得到一个带常数外力的一阶方程。",
               "latex": "\\frac{dx}{dt}=-kx+d"
             },
             {
-              "title": "求 fixed point",
-              "explanation": "steady state 满足 derivative 为零，因此 restoring command \\(kx*\\) 与 disturbance d 平衡。",
+              "title": "求固定点",
+              "explanation": "稳态状态满足导数为零，因此恢复性指令 \\(kx*\\) 与扰动 d 平衡。",
               "latex": "x^*=\\frac{d}{k}"
             },
             {
-              "title": "求相对 fixed point 的 dynamics",
-              "explanation": "令 \\(e=x-x^{*}\\)，代回后 constant terms 抵消，error 以 \\(e^{-kt}\\) 衰减。",
+              "title": "求相对固定点的动力学",
+              "explanation": "令 \\(e=x-x^{*}\\)，代回后常数项抵消，误差以 \\(e^{-kt}\\) 衰减。",
               "latex": "\\frac{de}{dt}=-ke,\\qquad e(t)=e(0)e^{-kt}"
             }
           ],
           "symbolNotes": [
-            "k 是 feedback gain，在这个归一化方程中单位为 inverse time。",
-            "d 被写成 position velocity disturbance；若使用带 mass 的 mechanics，units 与 state dimension 会改变。"
+            "k 是反馈增益，在这个归一化方程中单位为逆矩阵时间。",
+            "d 被写成位置速度扰动；若使用带质量的力学，单位与状态维度会改变。"
           ],
-          "unitsCheck": "x 是 position，\\(dx/dt\\)、u、d 都是 position/time；因此 kx 也必须是 position/time，k 的单位为 1/time。",
-          "limitCheck": "\\(k\\to 0\\) 时没有 restoring feedback，constant disturbance 使 position 持续漂移；k 增大时理想模型误差变小，但未建模 delay 可使高 gain 不稳定。"
+          "unitsCheck": "x 是位置，\\(dx/dt\\)、u、d 都是位置/时间；因此 kx 也必须是位置/时间，k 的单位为 1/时间。",
+          "limitCheck": "\\(k\\to 0\\) 时没有 restoring 反馈，常数扰动使位置持续漂移；k 增大时理想模型误差变小，但未建模延迟可使高增益不稳定。"
         },
         "workedExample": {
-          "title": "持续速度扰动下的 steady position error",
-          "problem": "一维系统 \\(dx/dt=-2x+0.6\\)，初始 \\(x(0)=1\\)。求 fixed point、time constant，并算 \\(t=1 \\mathrm{s}\\) 时的位置。",
+          "title": "持续速度扰动下的稳态位置误差",
+          "problem": "一维系统 \\(dx/dt=-2x+0.6\\)，初始 \\(x(0)=1\\)。求固定点、时间常数，并算 \\(t=1 \\mathrm{s}\\) 时的位置。",
           "steps": [
-            "fixed point 为 \\(x^{*}=d/k=0.6/2=0.3\\)。",
-            "error \\(e=x-0.3\\) 满足 \\(de/dt=-2e\\)，所以 \\(e(t)=0.7e^{-2t}\\)，time constant 为 1/2 s。",
+            "固定点为 \\(x^{*}=d/k=0.6/2=0.3\\)。",
+            "误差 \\(e=x-0.3\\) 满足 \\(de/dt=-2e\\)，所以 \\(e(t)=0.7e^{-2t}\\)，时间常数为 1/2 s。",
             "\\(t=1\\) 时 \\(x=0.3+0.7e^{-2}\\approx 0.3+0.0947=0.3947\\)。"
           ],
-          "result": "系统不会回到零，而会收敛到 0.3 的 steady error；1 秒时约为 0.395。",
-          "sanityCheck": "初始 \\(x=1\\) 时 derivative=\\(-2+0.6=-1.4\\) 为负，轨迹应向较小位置移动；计算结果符合方向。"
+          "result": "系统不会回到零，而会收敛到 0.3 的稳态误差；1 秒时约为 0.395。",
+          "sanityCheck": "初始 \\(x=1\\) 时导数=\\(-2+0.6=-1.4\\) 为负，轨迹应向较小位置移动；计算结果符合方向。"
         },
         "pitfalls": [
-          "把 feedforward 与 feedback 当成互斥系统；实际动作常由预测命令与感觉校正共同生成。",
-          "列举 motor regions 后直接为每区分配单一功能，忽略回路、并行通路与课程图的抽象层级。"
+          "把前馈与反馈当成互斥系统；实际动作常由预测命令与感觉校正共同生成。",
+          "列举运动区域后直接为每区分配单一功能，忽略回路、并行通路与课程图的抽象层级。"
         ]
       },
       {
         "id": "l18-m2",
-        "title": "recurrent population equation 与 eigenmode 分解",
+        "title": "用特征模态分解群体动力学",
+        "transition": "把运动群体活动看成随时间演化的状态之后，需要明确哪些变化来自自身衰减、循环连接和外部驱动。线性循环方程把三者分开，再用特征向量寻找不再彼此混合的群体活动模式。",
         "sourceRefs": [
           {
             "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
@@ -169,67 +170,68 @@
           }
         ],
         "paragraphs": [
-          "从 \\(\\tau dh/dt=-h+Wh+I\\) 开始。\\(h\\in \\mathbb{R}^N\\) 收集 N 个 units 的 activity，-h 是每个 unit 的 leak，Wh 是 recurrent input，I 是外部 drive。按本讲 convention，\\(W_{ij}\\) 从 j 指向 i。若直接看 neuron coordinates，每个 derivative 都依赖许多 \\(h_{j}\\)，方程彼此耦合；目标是寻找一种 coordinate system，使 recurrent multiplication 不再混合 coordinates。",
-          "使用 W 的 right eigenvectors。若 \\(Wv_{i}=\\lambda _{i} v_{i}\\)，沿 \\(v_{i}\\) 的 pattern 经过 W 后只缩放 \\(\\lambda _{i}\\)。把这些 eigenvectors 作为 V 的 columns，若它们线性无关，就有 \\(W=V\\Lambda V^{-1}\\)。activity 展开为 \\(h=V\\alpha\\)，其中 \\(\\alpha _{i}\\) 是第 i 个 population pattern 的 amplitude。这个换 basis 不改变 physical state，只像把二维位移从 x-y 坐标改写成斜轴坐标。",
-          "将 \\(h=V\\alpha\\) 代入原方程并假设 V 不随时间变化，得到 \\(\\tau V d\\alpha /dt=-V\\alpha +WV\\alpha +I\\)。利用 \\(WV=V\\Lambda\\)，再左乘 \\(V^{-1}\\)，变为 \\(\\tau d\\alpha /dt=-\\alpha +\\Lambda \\alpha +V^{-1}I\\)。因为 \\(\\Lambda\\) 是 diagonal，第 i 行只含 \\(\\alpha _{i}\\)：\\(\\tau d\\alpha _{i}/dt=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)。复杂 network 的 linear dynamics 因此分解为一组熟悉的一阶系统。",
-          "这个方法的边界同样重要。非对称 W 的 eigenvectors 未必 orthogonal，\\(V^{-1}\\) 不能随意换成 \\(V^\\mathrm{T}\\)；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。若 W defective，就没有完整 ordinary eigenbasis，需要 Jordan form 或直接计算 \\(e^{(-I+W)t/\\tau }\\)。课程推导选择可对角化情形，是为了突出 eigenvalue 对 timescale 的控制，不是声称所有 cortical connectivity 都对称。"
+          "从 \\(\\tau dh/dt=-h+Wh+I\\) 开始。\\(h\\in \\mathbb{R}^N\\) 收集 N 个单元的活动，-h 是每个单元的泄漏，Wh 是循环输入，I 是外部驱动。按本讲约定，\\(W_{ij}\\) 从 j 指向 i。若直接看神经元坐标，每个导数都依赖许多 \\(h_{j}\\)，方程彼此耦合；目标是寻找一种坐标系，使循环矩阵乘法不再混合坐标。",
+          "使用 W 的右特征向量。若 \\(Wv_{i}=\\lambda _{i} v_{i}\\)，沿 \\(v_{i}\\) 的模式经过 W 后只缩放 \\(\\lambda _{i}\\)。把这些特征向量作为 V 的列，若它们线性无关，就有 \\(W=V\\Lambda V^{-1}\\)。活动展开为 \\(h=V\\alpha\\)，其中 \\(\\alpha _{i}\\) 是第 i 个群体模式的振幅。这个换基底不改变物理状态，只像把二维位移从 x-y 坐标改写成斜轴坐标。",
+          "将 \\(h=V\\alpha\\) 代入原方程并假设 V 不随时间变化，得到 \\(\\tau V d\\alpha /dt=-V\\alpha +WV\\alpha +I\\)。利用 \\(WV=V\\Lambda\\)，再左乘 \\(V^{-1}\\)，变为 \\(\\tau d\\alpha /dt=-\\alpha +\\Lambda \\alpha +V^{-1}I\\)。因为 \\(\\Lambda\\) 是对角，第 i 行只含 \\(\\alpha _{i}\\)：\\(\\tau d\\alpha _{i}/dt=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)。复杂网络的线性动力学因此分解为一组熟悉的一阶系统。",
+          "这个方法的边界同样重要。非对称 W 的特征向量未必正交，\\(V^{-1}\\) 不能随意换成 \\(V^\\mathrm{T}\\)；近乎平行的特征向量会使模态坐标对噪声很敏感。若 W 不可对角化，就没有完整普通特征基底，需要 Jordan 形式或直接计算 \\(e^{(-I+W)t/\\tau }\\)。课程推导选择可对角化情形，是为了突出特征值对时间尺度的控制，不是声称所有皮层连接结构都对称。"
         ],
         "keyPoints": [
           "\\(W_{ij}\\) 的方向由 \\((Wh)_i\\) 展开决定；本讲是 \\(j\\to i\\)。",
-          "\\(h=V\\alpha\\) 把 neuron-coordinate activity 分解为 eigenvector patterns 的 amplitudes。",
-          "可对角化时 \\(\\Lambda\\) 不混合 modes，使每个 \\(\\alpha _{i}\\) 遵循独立的一阶 equation。"
+          "\\(h=V\\alpha\\) 把神经元坐标活动分解为特征向量模式的振幅。",
+          "可对角化时 \\(\\Lambda\\) 不混合模态，使每个 \\(\\alpha _{i}\\) 遵循独立的一阶方程。"
         ],
         "derivation": {
-          "title": "从 recurrent equation 到 decoupled mode equations",
-          "setup": "假设 W 有完整 eigenvector matrix V，满足 \\(W=V\\Lambda V^{-1}\\)。令 \\(h=V\\alpha\\)，并定义 transformed input \\(\\widetilde I=V^{-1}I\\)。",
+          "title": "从循环方程到解耦的模态方程",
+          "setup": "假设 W 有完整特征向量矩阵 V，满足 \\(W=V\\Lambda V^{-1}\\)。令 \\(h=V\\alpha\\)，并定义变换后的输入 \\(\\widetilde I=V^{-1}I\\)。",
           "steps": [
             {
-              "title": "代入 activity expansion",
-              "explanation": "V 为常数 matrix，所以 \\(dh/dt=Vd\\alpha /dt\\)；把 h 的每一处替换为 \\(V\\alpha\\)。",
+              "title": "代入活动展开",
+              "explanation": "V 为常数矩阵，所以 \\(dh/dt=Vd\\alpha /dt\\)；把 h 的每一处替换为 \\(V\\alpha\\)。",
               "latex": "\\tau V\\frac{d\\alpha}{dt}=-V\\alpha+WV\\alpha+I"
             },
             {
-              "title": "使用 eigenvector relation",
-              "explanation": "\\(WV=V\\Lambda\\)，因为 V 的每一 column 都是 W 的 eigenvector。",
+              "title": "使用特征向量关系",
+              "explanation": "\\(WV=V\\Lambda\\)，因为 V 的每一列都是 W 的特征向量。",
               "latex": "\\tau V\\frac{d\\alpha}{dt}=-V\\alpha+V\\Lambda\\alpha+I"
             },
             {
-              "title": "左乘 inverse basis",
-              "explanation": "左乘 \\(V^{-1}\\) 消去 V，并把外部输入投影到 mode coordinates。",
+              "title": "左乘逆矩阵基底",
+              "explanation": "左乘 \\(V^{-1}\\) 消去 V，并把外部输入投影到模态坐标。",
               "latex": "\\tau\\frac{d\\alpha}{dt}=-\\alpha+\\Lambda\\alpha+\\tilde I"
             },
             {
-              "title": "读取第 i 个 diagonal equation",
-              "explanation": "\\(\\Lambda\\) 只有 diagonal entry \\(\\lambda _{i}\\)，因此第 i 个 derivative 不再含其他 \\(\\alpha _{j}\\)。",
+              "title": "读取第 i 个对角方程",
+              "explanation": "\\(\\Lambda\\) 只有对角条目 \\(\\lambda _{i}\\)，因此第 i 个导数不再含其他 \\(\\alpha _{j}\\)。",
               "latex": "\\tau\\frac{d\\alpha_i}{dt}=-(1-\\lambda_i)\\alpha_i+\\tilde I_i"
             }
           ],
           "symbolNotes": [
-            "V columns 是 right eigenvectors；\\(\\alpha\\) 的 coordinates 由 rows of \\(V^{-1}\\) 读取。",
-            "Ĩ_i 是 input 在 left-eigenvector coordinate 中的 component，不一定等于简单 Euclidean dot product。"
+            "V 列是右特征向量；\\(\\alpha\\) 的坐标由行 of \\(V^{-1}\\) 读取。",
+            "Ĩ_i 是输入在 left-特征向量坐标中的分量，不一定等于简单 Euclidean 内积。"
           ],
-          "unitsCheck": "若 V 选为无量纲 normalized patterns，\\(\\alpha\\) 与 h 都有 firing-rate units；\\(\\lambda\\) 与 W dimensionless，\\(\\tau\\) 有 time units，Ĩ 与 h 同单位。",
-          "limitCheck": "\\(W=0\\) 时可取 \\(V=I\\)、\\(\\lambda _{i}=0\\)，每个 neuron mode 独立按 \\(\\tau\\) 衰减；W 已 diagonal 时换 basis 不改变 coordinates。"
+          "unitsCheck": "若 V 选为无量纲归一化的模式，\\(\\alpha\\) 与 h 都有发放率单位；\\(\\lambda\\) 与 W 无量纲，\\(\\tau\\) 有时间单位，Ĩ 与 h 同单位。",
+          "limitCheck": "\\(W=0\\) 时可取 \\(V=I\\)、\\(\\lambda _{i}=0\\)，每个神经元模态独立按 \\(\\tau\\) 衰减；W 已对角时换基底不改变坐标。"
         },
         "workedExample": {
-          "title": "两神经元网络的共同 mode 与差分 mode",
-          "problem": "\\(W=[[0.8,0.1],[0.1,0.8]]\\)，\\(\\tau =20 \\mathrm{ms}\\)。找两个 normalized eigenvectors、eigenvalues，并写无输入 mode equations。",
+          "title": "两神经元网络的共同模态与差分模态",
+          "problem": "\\(W=[[0.8,0.1],[0.1,0.8]]\\)，\\(\\tau =20 \\mathrm{ms}\\)。找两个归一化的特征向量、特征值，并写无输入模态方程。",
           "steps": [
-            "共同 pattern \\(v_{+}=(1,1)/\\sqrt 2\\)：\\(Wv_{+}=(0.9,0.9)/\\sqrt 2\\)，所以 \\(\\lambda _{+}=0.9\\)。",
-            "差分 pattern \\(v_{-}=(1,-1)/\\sqrt 2\\)：\\(Wv_{-}=(0.7,-0.7)/\\sqrt 2\\)，所以 \\(\\lambda _{-}=0.7\\)。",
-            "mode equations 为 \\(20 \\mathrm{ms}\\cdot d\\alpha _{+}/dt=-0.1\\alpha _{+}\\)，\\(20 \\mathrm{ms}\\cdot d\\alpha _{-}/dt=-0.3\\alpha _{-}\\)；共同 mode 衰减更慢。"
+            "共同模式 \\(v_{+}=(1,1)/\\sqrt 2\\)：\\(Wv_{+}=(0.9,0.9)/\\sqrt 2\\)，所以 \\(\\lambda _{+}=0.9\\)。",
+            "差分模式 \\(v_{-}=(1,-1)/\\sqrt 2\\)：\\(Wv_{-}=(0.7,-0.7)/\\sqrt 2\\)，所以 \\(\\lambda _{-}=0.7\\)。",
+            "模态方程为 \\(20 \\mathrm{ms}\\cdot d\\alpha _{+}/dt=-0.1\\alpha _{+}\\)，\\(20 \\mathrm{ms}\\cdot d\\alpha _{-}/dt=-0.3\\alpha _{-}\\)；共同模态衰减更慢。"
           ],
-          "result": "population activity 被分成同向共同 mode \\(\\lambda =0.9\\) 与反向差分 mode \\(\\lambda =0.7\\)。",
-          "sanityCheck": "matrix \\(\\operatorname{trace} 1.6\\) 等于 eigenvalues 0.9+0.7，determinant 0.63 等于 \\(0.9\\times 0.7\\)。"
+          "result": "群体活动被分成同向共同模态 \\(\\lambda =0.9\\) 与反向差分模态 \\(\\lambda =0.7\\)。",
+          "sanityCheck": "矩阵 \\(\\operatorname{trace} 1.6\\) 等于特征值 0.9+0.7，行列式 0.63 等于 \\(0.9\\times 0.7\\)。"
         },
         "pitfalls": [
-          "把 \\(W_{ij}\\) 的 source/target 方向凭习惯决定，不先展开 matrix product。",
-          "默认所有 W 都有 orthonormal eigenbasis；这只对 real symmetric 等特殊 matrices 成立。"
+          "把 \\(W_{ij}\\) 的 来源/目标方向凭习惯决定，不先展开矩阵乘积。",
+          "默认所有 W 都有正交归一特征基底；这只对真实对称等特殊矩阵成立。"
         ]
       },
       {
         "id": "l18-m3",
-        "title": "eigenvalues 控制 timescale、fixed point 与 integration",
+        "title": "特征值、时间尺度与积分",
+        "transition": "在可对角化的线性网络中，耦合活动已经分解成各自演化的模态。每个模态里循环反馈抵消多少泄漏，决定了它快速衰减、缓慢衰减并保留信息、积累输入，还是因正反馈过强而增长。",
         "sourceRefs": [
           {
             "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
@@ -241,68 +243,68 @@
           }
         ],
         "paragraphs": [
-          "从无输入 mode equation \\(\\tau d\\alpha _{i}/dt=-(1-\\lambda _{i})\\alpha _{i}\\) 出发。对于实 \\(\\lambda _{i}<1\\)，解是 \\(\\alpha _{i}(t)=\\alpha _{i}(0)\\exp[-(1-\\lambda _{i})t/\\tau ]\\)，所以 effective time constant 为 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda _{i})\\)。positive recurrent feedback 把 \\(\\lambda\\) 推近 1，会抵消一部分 leak 并延长 memory；negative \\(\\lambda\\) 增强 restoring force，使 mode 更快衰减。连续时间稳定边界看 Re(λ_i)<1，而不是 \\(|\\lambda _{i}|<1\\)。",
-          "\\(\\lambda _{i}=1\\) 时 restoring coefficient 恰为零。无 input 时 \\(\\alpha _{i}\\) 保持初值；有 time-varying input 时 \\(\\tau d\\alpha _{i}/dt=\\widetilde I_{i}(t)\\)，state 累积 input integral，这才是 perfect integrator。若 \\(\\lambda _{i}\\) 略小于 1，则存在很长但有限的 leakage；若 \\(\\lambda _{i}>1\\)，小扰动按正指数增长。constant input 下代数 fixed point \\(\\alpha _{i}*=\\widetilde I_{i}/(1-\\lambda _{i})\\) 仍可存在，但它不稳定，除非初值精确落在该点，轨迹都会离开。真实 nonlinear network 可能因 saturation 停在其他 attractor，但那已超出这条线性 mode 的局部稳定范围。",
-          "还要区分 fixed point 与 timescale。constant transformed input Ĩ_i 下，\\(\\lambda _{i}\\ne 1\\) 时 fixed point 为 \\(\\alpha _{i}*=\\widetilde I_{i}/(1-\\lambda _{i})\\)。同一个小 denominator 同时带来较长 \\(\\tau _{\\mathrm{eff}}\\) 与较大 steady-state gain，因此接近 integration 会放大 constant bias 与 parameter error。一个目标是保留 memory，另一个风险是 drift；生物系统可通过 negative feedback、multiple timescales 或 nonlinear bounds 处理这种敏感性。",
-          "对 arbitrary time-varying input，mode response 是 initial-condition decay 与 input convolution 的和。kernel \\(\\exp[-(1-\\lambda _{i})(t-s)/\\tau ]/\\tau\\) 只给过去输入权重；\\(\\lambda _{i}\\) 越接近 1，kernel 衰减越慢，较久以前的 input 仍影响当前 state。impulse response 因此直接展示 \\(\\tau _{\\mathrm{eff}}\\)，而 transformed input \\(\\widetilde I_{i}=V^{-1}I\\) 的大小决定外界驱动能否进入这个慢 mode。",
-          "在 population space 中，每个 mode 的时间过程叠加成 \\(h(t)=V\\alpha (t)\\)。慢 mode 可能主导晚期 trajectory，即使初始 projection 很小；快速 modes 先消失。外部 input 的效果也取决于它投影到哪些 modes，而不只取决于总能量。用 eigenvalues 解释 motor dynamics 时，应报告 model fit、initial conditions、input projection 与 observed timescale，不能从一条旋转轨迹直接认定某个 eigenmode 是行为命令。"
+          "从无输入模态方程 \\(\\tau d\\alpha _{i}/dt=-(1-\\lambda _{i})\\alpha _{i}\\) 出发。对于实 \\(\\lambda _{i}<1\\)，解是 \\(\\alpha _{i}(t)=\\alpha _{i}(0)\\exp[-(1-\\lambda _{i})t/\\tau ]\\)，所以有效时间常数为 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda _{i})\\)。循环正反馈把 \\(\\lambda\\) 推近 1，会抵消一部分泄漏并延长记忆；负 \\(\\lambda\\) 增强恢复力，使模态更快衰减。连续时间稳定边界看 Re(λ_i)<1，而不是 \\(|\\lambda _{i}|<1\\)。",
+          "\\(\\lambda _{i}=1\\) 时恢复系数恰为零。无输入时 \\(\\alpha _{i}\\) 保持初值；有时间变化的输入时 \\(\\tau d\\alpha _{i}/dt=\\widetilde I_{i}(t)\\)，状态累积输入积分，这才是理想积分器。若 \\(\\lambda _{i}\\) 略小于 1，则存在很长但有限的泄漏时间常数；若 \\(\\lambda _{i}>1\\)，小扰动按正指数增长。恒定输入下代数固定点 \\(\\alpha _{i}*=\\widetilde I_{i}/(1-\\lambda _{i})\\) 仍可存在，但它不稳定，除非初值精确落在该点，轨迹都会离开。真实非线性网络可能因饱和停在其他吸引子，但那已超出这条线性模态的局部稳定范围。",
+          "还要区分固定点与时间尺度。常数变换后的输入 Ĩ_i 下，\\(\\lambda _{i}\\ne 1\\) 时固定点为 \\(\\alpha _{i}*=\\widetilde I_{i}/(1-\\lambda _{i})\\)。同一个小分母同时带来较长 \\(\\tau _{\\mathrm{eff}}\\) 与较大稳态增益，因此接近积分会放大常数偏差与参数误差。一个目标是保留记忆，另一个风险是漂移；生物系统可通过负反馈、多个时间尺度或非线性边界处理这种敏感性。",
+          "对任意随时间变化的输入，模态响应是初始条件衰减与输入卷积的和。核 \\(\\exp[-(1-\\lambda _{i})(t-s)/\\tau ]/\\tau\\) 只给过去输入权重；\\(\\lambda _{i}\\) 越接近 1，核衰减越慢，较久以前的输入仍影响当前状态。脉冲响应因此直接展示 \\(\\tau _{\\mathrm{eff}}\\)，而变换后的输入 \\(\\widetilde I_{i}=V^{-1}I\\) 的大小决定外界驱动能否进入这个慢模态。",
+          "在群体空间中，每个模态的时间过程叠加成 \\(h(t)=V\\alpha (t)\\)。慢模态可能主导晚期轨迹，即使初始投影很小；快速模态先消失。外部输入的效果也取决于它投影到哪些模态，而不只取决于总能量。用特征值解释运动动力学时，应报告模型拟合、初始条件、输入投影与观测到的时间尺度，不能从一条旋转轨迹直接认定某个特征模态是行为命令。"
         ],
         "keyPoints": [
-          "实 eigenvalue \\(\\lambda <1\\) 时 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda )\\)，越靠近 1，衰减越慢。",
-          "\\(\\lambda =1\\) 消除 leak 并在输入下执行 integration；\\(\\lambda >1\\) 使线性 mode 指数增长。",
-          "接近 1 同时提高 memory time 与 constant-input gain，因此也放大 bias 和连接误差。"
+          "实特征值 \\(\\lambda <1\\) 时 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda )\\)，越靠近 1，衰减越慢。",
+          "\\(\\lambda =1\\) 消除泄漏并在输入下执行积分；\\(\\lambda >1\\) 使线性模态指数增长。",
+          "接近 1 同时提高记忆时间与常数输入增益，因此也放大偏差和连接误差。"
         ],
         "derivation": {
-          "title": "mode solution、effective time constant 与 fixed point",
-          "setup": "考虑单个实 mode：\\(\\tau d\\alpha /dt=-(1-\\lambda )\\alpha +\\widetilde I\\)，先令输入为 constant。",
+          "title": "模态解、有效时间常数与固定点",
+          "setup": "考虑单个实模态：\\(\\tau d\\alpha /dt=-(1-\\lambda )\\alpha +\\widetilde I\\)，先令输入为常数。",
           "steps": [
             {
-              "title": "求 constant-input fixed point",
-              "explanation": "令 derivative 为零并在 \\(\\lambda \\ne 1\\) 时解 \\(\\alpha *\\)。",
+              "title": "求常数输入固定点",
+              "explanation": "令导数为零并在 \\(\\lambda \\ne 1\\) 时解 \\(\\alpha *\\)。",
               "latex": "\\alpha^*=\\frac{\\tilde I}{1-\\lambda}"
             },
             {
-              "title": "改写相对 fixed point 的 error",
-              "explanation": "令 \\(e=\\alpha -\\alpha *\\)；constant input 与 fixed-point term 抵消，留下 homogeneous equation。",
+              "title": "改写相对固定点的误差",
+              "explanation": "令 \\(e=\\alpha -\\alpha *\\)；恒定输入与固定点项抵消，留下齐次方程。",
               "latex": "\\tau\\frac{de}{dt}=-(1-\\lambda)e"
             },
             {
-              "title": "积分 homogeneous equation",
-              "explanation": "把 de/e 与 dt 分开积分，得到指数 solution，并把指数 coefficient 写成 effective time constant。",
+              "title": "积分齐次方程",
+              "explanation": "把 de/e 与 dt 分开积分，得到指数解，并把指数系数写成有效时间常数。",
               "latex": "e(t)=e(0)e^{-(1-\\lambda)t/\\tau}=e(0)e^{-t/\\tau_{\\mathrm{eff}}},\\qquad \\tau_{\\mathrm{eff}}=\\frac{\\tau}{1-\\lambda}"
             },
             {
-              "title": "推广到 time-varying input",
-              "explanation": "用 integrating factor 保留初值项，再把每个过去时刻 s 的 transformed input 按 exponential impulse response 加权。这个 convolution 展示 mode 如何充当 leaky temporal filter。",
+              "title": "推广到时间变化的输入",
+              "explanation": "用 integrating 因子保留初值项，再把每个过去时刻 s 的变换后的输入按指数脉冲响应加权。这个卷积展示模态如何充当泄漏时间滤波器。",
               "latex": "\\alpha(t)=e^{-(1-\\lambda)(t-t_0)/\\tau}\\alpha(t_0)+\\frac{1}{\\tau}\\int_{t_0}^{t}e^{-(1-\\lambda)(t-s)/\\tau}\\tilde I(s)\\,ds"
             },
             {
               "title": "单独处理 \\(\\lambda =1\\)",
-              "explanation": "此时不能使用含 \\(1-\\lambda\\) 的 fixed-point 公式；方程变成 derivative 直接等于 input 除以 \\(\\tau\\)。",
+              "explanation": "此时不能使用含 \\(1-\\lambda\\) 的固定点公式；方程变成导数直接等于输入除以 \\(\\tau\\)。",
               "latex": "\\lambda=1:\\quad \\frac{d\\alpha}{dt}=\\frac{\\tilde I(t)}{\\tau},\\qquad \\alpha(t)=\\alpha(0)+\\frac{1}{\\tau}\\int_0^t\\tilde I(s)ds"
             }
           ],
           "symbolNotes": [
-            "\\(\\tau _{\\mathrm{eff}}\\) 只在稳定实 mode \\(\\lambda <1\\) 时是正的 decay time；\\(\\lambda >1\\) 时更合适描述为 growth time \\(\\tau /(\\lambda -1)\\)。",
-            "complex \\(\\lambda\\) 带来 oscillation frequency，由 imaginary part 决定，同时由 1-Re(λ) 决定 envelope stability。"
+            "\\(\\tau _{\\mathrm{eff}}\\) 只在稳定实模态 \\(\\lambda <1\\) 时是正的衰减时间；\\(\\lambda >1\\) 时更合适描述为增长时间 \\(\\tau /(\\lambda -1)\\)。",
+            "复数 \\(\\lambda\\) 带来振荡频率，由虚部分决定，同时由 1-Re(λ) 决定包络稳定性。"
           ],
           "unitsCheck": "\\(\\lambda\\) 无量纲，\\(\\tau\\) 与 \\(\\tau _{\\mathrm{eff}}\\) 都是时间；\\(\\alpha\\) 与 Ĩ 同单位，因此 \\(\\int \\widetilde I ds/\\tau\\) 仍与 \\(\\alpha\\) 同单位。",
-          "limitCheck": "\\(\\lambda =0\\) 给 \\(\\tau _{\\mathrm{eff}}=\\tau\\)；λ→1^- 时 \\(\\tau _{\\mathrm{eff}}\\) 与 constant gain 都变大；\\(\\lambda >1\\) 时 exponent 符号反转，zero fixed point 不稳定。"
+          "limitCheck": "\\(\\lambda =0\\) 给 \\(\\tau _{\\mathrm{eff}}=\\tau\\)；λ→1^- 时 \\(\\tau _{\\mathrm{eff}}\\) 与常数增益都变大；\\(\\lambda >1\\) 时指数符号反转，零固定点不稳定。"
         },
         "workedExample": {
-          "title": "从 20 ms intrinsic time 到 1 s memory",
-          "problem": "某 mode 的 \\(\\tau =20 \\mathrm{ms}\\)、\\(\\lambda =0.98\\)，初始 amplitude 为 5，无输入。求 \\(\\tau _{\\mathrm{eff}}\\) 与 1 s 后 amplitude；再比较 \\(\\lambda =1\\)。",
+          "title": "从 20 ms 内在时间到 1 s 记忆",
+          "problem": "某模态的 \\(\\tau =20 \\mathrm{ms}\\)、\\(\\lambda =0.98\\)，初始振幅为 5，无输入。求 \\(\\tau _{\\mathrm{eff}}\\) 与 1 s 后振幅；再比较 \\(\\lambda =1\\)。",
           "steps": [
             "\\(1-\\lambda =0.02\\)，所以 \\(\\tau _{\\mathrm{eff}}=20 \\mathrm{ms}/0.02=1000 \\mathrm{ms}=1 \\mathrm{s}\\)。",
-            "1 s 后 \\(\\alpha =5e^{-1}\\approx 1.84\\)，说明 recurrent feedback 延长但没有消除 decay。",
-            "若 \\(\\lambda =1\\) 且无输入，\\(d\\alpha /dt=0\\)，1 s 后仍为 5；若存在持续小 bias，它会被不断积分。"
+            "1 s 后 \\(\\alpha =5e^{-1}\\approx 1.84\\)，说明循环反馈延长但没有消除衰减。",
+            "若 \\(\\lambda =1\\) 且无输入，\\(d\\alpha /dt=0\\)，1 s 后仍为 5；若存在持续小偏差，它会被不断积分。"
           ],
-          "result": "\\(\\lambda =0.98\\) 把 intrinsic 20 ms 延长为 1 s leaky memory；\\(\\lambda =1\\) 才是 perfect integrator。",
-          "sanityCheck": "若误把 \\(\\tau _{\\mathrm{eff}}\\) 写成 \\(\\tau /(1+\\lambda )\\)，会得到约 10 ms，与 positive feedback 延长记忆的方向相反。"
+          "result": "\\(\\lambda =0.98\\) 把内在 20 ms 延长为 1 s 泄漏记忆；\\(\\lambda =1\\) 才是理想积分器。",
+          "sanityCheck": "若误把 \\(\\tau _{\\mathrm{eff}}\\) 写成 \\(\\tau /(1+\\lambda )\\)，会得到约 10 ms，与正反馈延长记忆的方向相反。"
         },
         "pitfalls": [
-          "把 discrete-time 稳定条件 \\(|\\lambda |<1\\) 直接套到本讲 \\(\\tau dh/dt=(-I+W)h\\) 的 continuous-time equation。",
-          "在 \\(\\lambda =1\\) 时继续使用 \\(\\alpha *=\\widetilde I/(1-\\lambda )\\)，忽略 perfect integrator 对 constant input 没有有限 fixed point。"
+          "把离散时间稳定条件 \\(|\\lambda |<1\\) 直接套到本讲 \\(\\tau dh/dt=(-I+W)h\\) 的连续时间方程。",
+          "在 \\(\\lambda =1\\) 时继续使用 \\(\\alpha *=\\widetilde I/(1-\\lambda )\\)，忽略理想积分器对恒定输入没有有限固定点。"
         ]
       }
     ]
@@ -313,9 +315,9 @@
       "lecture": 18,
       "lectureTitle": "运动系统与线性神经动力学",
       "moduleId": "l18-m2",
-      "title": "换到 eigenbasis 后，耦合的 neuron dynamics 分解为独立 modes",
-      "alt": "流程图从神经元坐标中的群体活动，经 V 逆变换得到 mode amplitudes，在对角 eigenvalue 空间中独立演化，再由 V 重建神经元活动。",
-      "caption": "若 recurrent matrix W 可对角化为 \\(W=V\\Lambda V^{-1}\\)，activity \\(h=V\\alpha\\) 把 neuron-space pattern 改写为 eigenmode amplitudes。左乘 \\(V^{-1}\\) 后，每个 \\(\\alpha _{i}\\) 独立满足 \\(\\tau \\dot{\\alpha }_i=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)；因此 \\(\\lambda _{i}\\) 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。basis change 是数学坐标变换，不表示一个 mode 等于一个 anatomical neuron。",
+      "title": "换到特征基底后，耦合的神经元动力学分解为独立模态",
+      "alt": "流程图从神经元坐标中的群体活动，经 V 逆变换得到模态振幅，在对角特征值空间中独立演化，再由 V 重建神经元活动。",
+      "caption": "若循环连接矩阵 W 可对角化为 \\(W=V\\Lambda V^{-1}\\)，活动 \\(h=V\\alpha\\) 把神经活动空间模式改写为特征模态振幅。左乘 \\(V^{-1}\\) 后，每个 \\(\\alpha _{i}\\) 独立满足 \\(\\tau \\dot{\\alpha }_i=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)；因此 \\(\\lambda _{i}\\) 而非单个神经元决定该群体模式的衰减、积分或增长。基底变化是数学坐标变换，不表示一个模态等于一个解剖上的神经元。",
       "sourceRefs": [
         {
           "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
@@ -331,32 +333,32 @@
       "nodes": [
         {
           "id": "neuron-space",
-          "label": "neuron space\nh",
+          "label": "神经元空间\nh",
           "x": 11,
           "y": 55
         },
         {
           "id": "mode-coordinates",
-          "label": "mode coordinates\n\\(\\alpha = V^{-1}h\\)",
+          "label": "模态坐标\n\\(\\alpha = V^{-1}h\\)",
           "x": 37,
           "y": 55,
           "tone": "accent"
         },
         {
           "id": "mode-dynamics",
-          "label": "decoupled dynamics\n\\(\\lambda _{i}\\) controls \\(\\alpha _{i}\\)",
+          "label": "解耦的动力学\n\\(\\lambda _{i}\\) 控制 \\(\\alpha _{i}\\)",
           "x": 63,
           "y": 55
         },
         {
           "id": "reconstruction",
-          "label": "reconstruct pattern\n\\(h = V\\alpha\\)",
+          "label": "重构模式\n\\(h = V\\alpha\\)",
           "x": 89,
           "y": 55
         },
         {
           "id": "population-input",
-          "label": "input projection\n\\(\\widetilde I = V^{-1}I\\)",
+          "label": "输入投影\n\\(\\widetilde I = V^{-1}I\\)",
           "x": 37,
           "y": 18
         }
@@ -370,7 +372,7 @@
         {
           "from": "mode-coordinates",
           "to": "mode-dynamics",
-          "label": "\\(\\Lambda\\) diagonal"
+          "label": "\\(\\Lambda\\) 对角"
         },
         {
           "from": "population-input",
@@ -410,7 +412,7 @@
     "思考题：\\(\\lambda >1\\) 时 fixed point 如何？"
   ],
   "synthesis": [
-    "motor control 是 brain、body 与 environment 的 closed-loop dynamics；neural activity 也高度 distributed。线性 recurrent network 将每个 neuron 的 activity 变换到 eigenmode coordinates 后解耦，每个 mode 像独立一阶系统。eigenvalue \\(\\lambda \\) 决定 effective time constant \\(\\tau /(1-\\lambda )\\)：\\(\\lambda <1\\) 衰减，\\(\\lambda \\approx 1\\) 长记忆，\\(\\lambda =1\\) perfect integrator，\\(\\lambda >1\\) runaway growth。"
+    "运动控制依赖脑、身体与环境之间的闭环相互作用。在线性循环网络中，若连接矩阵可对角化，将神经元活动换到特征模态坐标后，就能分别分析各模态。对实特征值 \\(\\lambda\\)，有效时间常数为 \\(\\tau /(1-\\lambda )\\)：\\(\\lambda <1\\) 时衰减，\\(\\lambda \\approx 1\\) 时记忆很长，\\(\\lambda =1\\) 时成为理想积分器，\\(\\lambda >1\\) 时扰动增长。"
   ],
   "workedExamples": [
     "7.1 mode time scale",
@@ -424,10 +426,10 @@
     {
       "id": "L18-F01",
       "lecture": 18,
-      "name": "linear recurrent rate network",
+      "name": "线性循环发放率网络",
       "expression": "τ ḣ = −h + W h + I",
       "latex": "\\tau\\dot{\\mathbf{h}}=-\\mathbf{h}+W\\mathbf{h}+\\mathbf{I}",
-      "conditions": "common \\(\\tau \\)、linearization",
+      "conditions": "各单元共用 \\(\\tau\\)，采用线性化模型",
       "sectionId": "l18-m2",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 2
@@ -435,10 +437,10 @@
     {
       "id": "L18-F02",
       "lecture": 18,
-      "name": "diagonalization",
+      "name": "矩阵对角化",
       "expression": "W = V DV −1",
       "latex": "W=VDV^{-1}",
-      "conditions": "W diagonalizable",
+      "conditions": "W 可对角化",
       "sectionId": "l18-m2",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 2
@@ -446,10 +448,10 @@
     {
       "id": "L18-F03",
       "lecture": 18,
-      "name": "mode coordinates",
+      "name": "模态坐标",
       "expression": "α = V −1 h",
       "latex": "\\boldsymbol{\\alpha}=V^{-1}\\mathbf{h}",
-      "conditions": "V invertible",
+      "conditions": "V 可逆",
       "sectionId": "l18-m2",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 2
@@ -457,10 +459,10 @@
     {
       "id": "L18-F04",
       "lecture": 18,
-      "name": "decoupled mode",
+      "name": "解耦的模态方程",
       "expression": "τ α̇i = −(1 − λi )αi + βi",
       "latex": "\\tau\\dot{\\alpha}_i=-(1-\\lambda_i)\\alpha_i+\\beta_i",
-      "conditions": "eigenbasis",
+      "conditions": "在特征向量基底中表示",
       "sectionId": "l18-m2",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 2
@@ -468,10 +470,10 @@
     {
       "id": "L18-F05",
       "lecture": 18,
-      "name": "mode time constant",
+      "name": "模态时间常数",
       "expression": "τef f = τ /(1 − λ)",
       "latex": "\\tau_{\\mathrm{eff}}=\\frac{\\tau}{1-\\lambda}",
-      "conditions": "\\(\\lambda <1\\) for stable decay",
+      "conditions": "\\(\\lambda <1\\) 时稳定衰减",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 4
@@ -479,10 +481,10 @@
     {
       "id": "L18-F06",
       "lecture": 18,
-      "name": "perfect integrator",
+      "name": "理想积分器",
       "expression": "λ = 1 ⇒ α̇ = β/τ",
       "latex": "\\lambda=1\\Longrightarrow\\dot{\\alpha}=\\frac{\\beta}{\\tau}",
-      "conditions": "exact feedback cancellation",
+      "conditions": "反馈精确抵消泄漏",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 5
@@ -494,7 +496,7 @@
       "lecture": 18,
       "zh": "前馈控制",
       "en": "feedforward control",
-      "definition": "主要依据预先模型/command，不依当前 feedback correction。",
+      "definition": "主要依据预先的模型或指令产生控制，不依赖当前反馈误差。",
       "sectionId": "l18-m1",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 1
@@ -504,7 +506,7 @@
       "lecture": 18,
       "zh": "反馈控制",
       "en": "feedback control",
-      "definition": "根据 sensory/state error 在线修正 action。",
+      "definition": "根据感觉或状态误差实时修正动作。",
       "sectionId": "l18-m1",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 1
@@ -514,7 +516,7 @@
       "lecture": 18,
       "zh": "本体感觉",
       "en": "proprioception",
-      "definition": "关于 body position/force 的 sensory feedback。",
+      "definition": "有关身体位置、运动和受力状态的感觉反馈。",
       "sectionId": "l18-m1",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 1
@@ -524,7 +526,7 @@
       "lecture": 18,
       "zh": "循环网络",
       "en": "recurrent network",
-      "definition": "units 之间存在 feedback loops。",
+      "definition": "单元之间包含反馈环路的网络。",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 5
@@ -534,7 +536,7 @@
       "lecture": 18,
       "zh": "特征模态",
       "en": "eigenmode",
-      "definition": "W eigenvector 对应的 population activity pattern。",
+      "definition": "与 W 的特征向量相对应的群体活动模式。",
       "sectionId": "l18-m2",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 3
@@ -544,7 +546,7 @@
       "lecture": 18,
       "zh": "基变换",
       "en": "change of basis",
-      "definition": "同一 state 在 neuron coordinates 与 mode coordinates 间转换。",
+      "definition": "同一状态在神经元坐标与模态坐标之间的转换。",
       "sectionId": "l18-m2",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 3
@@ -554,7 +556,7 @@
       "lecture": 18,
       "zh": "有效时间常数",
       "en": "effective time constant",
-      "definition": "feedback 后 mode 的 decay/integration timescale。",
+      "definition": "反馈作用后，模态衰减或积分的时间尺度。",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 4
@@ -564,7 +566,7 @@
       "lecture": 18,
       "zh": "固定点",
       "en": "fixed point",
-      "definition": "derivative 为零的 state。",
+      "definition": "状态导数为零的点。",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 5
@@ -574,7 +576,7 @@
       "lecture": 18,
       "zh": "稳定性",
       "en": "stability",
-      "definition": "小 perturbation 是否回到 fixed point。",
+      "definition": "小扰动后，状态是否回到固定点的性质。",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 5
@@ -584,21 +586,21 @@
       "lecture": 18,
       "zh": "完美积分器",
       "en": "perfect integrator",
-      "definition": "无 leak 地累积 input 的 mode。",
+      "definition": "没有泄漏、能够持续积累输入的模态。",
       "sectionId": "l18-m3",
       "sourceFile": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
       "sourcePage": 5
     }
   ],
   "commonTraps": [
-    "把 motor signal 局限于单一区域，忽略 distributed population。",
-    "混淆 neuron activity coordinates 与 eigenmode coordinates。",
-    "把 eigenmode 当作一个 neuron。",
-    "写 \\(V^{-1}WV=D\\) 却不检查 V columns/right eigenvectors convention。",
-    "\\(\\lambda >1\\) 时仍把 \\(\\tau /(1-\\lambda )\\) 当正 decay time。",
-    "认为 \\(\\lambda =1\\) automatically robust；其实对 perturbation 敏感。",
-    "只看 neural dynamics，不考虑 body/environment feedback。",
-    "需要区分 individual neuron activity、population mode coordinate 和 behavioral state；需避免把 eigenmode 当成单个\"特殊神经元\"。"
+    "把运动信号局限在单一脑区，忽略分布式群体活动。",
+    "混淆单神经元活动坐标与特征模态坐标。",
+    "把一个特征模态当成一个神经元，而不是多个神经元的活动组合。",
+    "写下 \\(V^{-1}WV=D\\)，却未核对 V 的列是否按约定排列右特征向量。",
+    "在 \\(\\lambda >1\\) 时仍把 \\(\\tau /(1-\\lambda )\\) 当成正的衰减时间。",
+    "认为 \\(\\lambda =1\\) 就能得到稳健的积分器，忽略参数扰动可能使理想积分变成衰减或增长。",
+    "只分析神经动力学，忽略身体和环境反馈对运动的影响。",
+    "把个体神经元活动、群体模态坐标和行为状态相互替代，尤其把某个模态理解成“特殊神经元”。"
   ],
   "errata": [
     {
@@ -622,7 +624,7 @@
       "sourcePage": 4,
       "sectionId": "l18-m3",
       "originalIssue": "这里 的 \\(\\tau _{\\mathrm{eff}}<0\\) 应解释为 exponential growth/unstable fixed point，而非负的物理 time constant。",
-      "explanation": "对于实 \\(\\lambda _{i}<1\\)，解是 \\(\\alpha _{i}(t)=\\alpha _{i}(0)\\exp[-(1-\\lambda _{i})t/\\tau ]\\)，所以 effective time constant 为 \\(\\tau _{\\mathrm{eff}}=\\tau /(1-\\lambda _{i})\\)。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": "这里 的 \\(\\tau _{\\mathrm{eff}}<0\\) 应解释为 exponential growth/unstable fixed point，而非负的物理 time constant"
     },
     {
@@ -651,37 +653,37 @@
         }
       ],
       "conceptTags": [
-        "运动控制是 brain–body–environment 闭环"
+        "脑、身体与环境的闭环控制"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么增加比例 feedback gain 在无延迟模型中改善 disturbance rejection，却不能据此建议生物系统把 gain 无限增大？",
+      "stem": "为什么增加比例反馈增益在无延迟模型中改善抗扰动能力，却不能据此建议生物系统把增益无限增大？",
       "choices": [
         {
           "id": "a",
-          "text": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 \\(V^\\mathrm{T}V\\) 不等于 I；正确 coordinate transform 是 \\(\\alpha =V^{-1}h\\)，或用对应 left eigenvectors 读取 amplitudes。"
+          "text": "无延迟模型已包含所有实际稳定性限制，只要增益为正，无限增大也不会出现过冲或振荡。"
         },
         {
           "id": "b",
-          "text": "denominator \\(1-\\lambda\\) 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+          "text": "反馈增益只能改变感觉噪声，不能改变对恒定扰动的稳态误差。"
         },
         {
           "id": "c",
-          "text": "把 feedforward 与 feedback 当成互斥系统；实际动作常由预测命令与感觉校正共同生成。"
+          "text": "增大反馈增益会自动缩短神经传导时间，因此足够大的增益总能消除延迟并恢复无延迟模型。"
         },
         {
           "id": "d",
-          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+          "text": "真实闭环还有感觉延迟、肌肉动力学和噪声；高增益可能放大噪声并引起过冲或振荡。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“recurrent population equation 与 eigenmode 分解”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“eigenvalues 控制 timescale、fixed point 与 integration”中的另一组变量与条件，不能由题干推出。",
-        "c": "错误在于：把 feedforward 与 feedback 当成互斥系统；实际动作常由预测命令与感觉校正共同生成。"
+        "a": "忽略延迟和执行器动力学的模型不能保证真实闭环在任意增益下稳定。",
+        "b": "理想比例反馈的稳态误差随增益改变；问题在于真实系统同时受到其他限制。",
+        "c": "控制增益不等于传导速度，不能自动消除神经和机械延迟。"
       },
-      "explanation": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。 提高 k 可减小 steady error，但现实 sensory delay、actuator limit 与 noise 会限制 gain，这为后续 recurrent stability 提供控制论直觉。"
+      "explanation": "理想式遗漏感觉延迟、肌肉动力学、噪声、饱和与能量成本；高增益会放大噪声，并可能让带延迟的闭环过冲或振荡，所以稳定性必须基于完整循环。 反馈控制器使用感觉到的状态误差修正输出，能抵抗扰动，但过高增益与延迟可能导致振荡。"
     },
     {
       "id": "L18-Q02",
@@ -695,37 +697,37 @@
         }
       ],
       "conceptTags": [
-        "recurrent population equation 与 eigenmode 分解"
+        "用特征模态分解群体动力学"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "在非对称 W 中，为什么不能看到 normalized right eigenvectors 后就把 \\(\\alpha\\) 写成 \\(V^\\mathrm{T} h\\)？",
+      "stem": "在非对称 W 中，为什么不能看到归一化的右特征向量后就把 \\(\\alpha\\) 写成 \\(V^\\mathrm{T} h\\)？",
       "choices": [
         {
           "id": "a",
-          "text": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 \\(V^\\mathrm{T}V\\) 不等于 I；正确 coordinate transform 是 \\(\\alpha =V^{-1}h\\)，或用对应 left eigenvectors 读取 amplitudes。"
+          "text": "单位长度不保证特征向量互相正交；坐标应由特征向量矩阵的逆或相应左特征向量读取。"
         },
         {
           "id": "b",
-          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+          "text": "每个向量长度归一化后便自动两两正交，所以转置与逆总是相同。"
         },
         {
           "id": "c",
-          "text": "denominator \\(1-\\lambda\\) 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+          "text": "非对称矩阵的右特征向量都不线性独立，因此任何特征坐标变换都不可能，连矩阵逆也不能用。"
         },
         {
           "id": "d",
-          "text": "把 \\(W_{ij}\\) 的 source/target 方向凭习惯决定，不先展开 matrix product。"
+          "text": "只要所有特征值互不相同，非对称矩阵的右特征向量也必定正交，因此转置总能给出正确坐标。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“运动控制是 brain–body–environment 闭环”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“eigenvalues 控制 timescale、fixed point 与 integration”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 \\(W_{ij}\\) 的 source/target 方向凭习惯决定，不先展开 matrix product。"
+        "b": "归一化只固定各自长度，不改变不同向量之间的夹角。",
+        "c": "非对称矩阵也可对角化并具有完整独立特征基；不能把非正交等同于不独立。",
+        "d": "不同特征值一般保证独立，而非正交；正交性需要额外矩阵结构。"
       },
-      "explanation": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 \\(V^\\mathrm{T}V\\) 不等于 I；正确 coordinate transform 是 \\(\\alpha =V^{-1}h\\)，或用对应 left eigenvectors 读取 amplitudes。 非对称 W 的 eigenvectors 未必 orthogonal，\\(V^{-1}\\) 不能随意换成 \\(V^\\mathrm{T}\\)；近乎平行的 eigenvectors 会使 mode coordinates 对 noise 很敏感。"
+      "explanation": "非对称矩阵的右特征向量通常不正交，所以 \\(V^\\mathrm{T}V\\) 不等于 I；正确坐标变换是 \\(\\alpha =V^{-1}h\\)，或用对应左特征向量读取振幅。 非对称 W 的特征向量未必正交，\\(V^{-1}\\) 不能随意换成 \\(V^\\mathrm{T}\\)；近乎平行的特征向量会使模态坐标对噪声很敏感。"
     },
     {
       "id": "L18-Q03",
@@ -739,37 +741,37 @@
         }
       ],
       "conceptTags": [
-        "eigenvalues 控制 timescale、fixed point 与 integration"
+        "特征值、时间尺度与积分"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么把 \\(\\lambda\\) 从 0.98 调到 0.999 不只是\"记得更久\"，也会让网络更容易 drift？",
+      "stem": "为什么把 \\(\\lambda\\) 从 0.98 调到 0.999 不只是\"记得更久\"，也会让网络更容易漂移？",
       "choices": [
         {
           "id": "a",
-          "text": "非对称 matrix 的 right eigenvectors 通常不 orthogonal，所以 \\(V^\\mathrm{T}V\\) 不等于 I；正确 coordinate transform 是 \\(\\alpha =V^{-1}h\\)，或用对应 left eigenvectors 读取 amplitudes。"
+          "text": "只有衰减时间增大二十倍，恒定输入增益完全不变，所以漂移只能来自代码舍入误差。"
         },
         {
           "id": "b",
-          "text": "denominator \\(1-\\lambda\\) 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+          "text": "时间常数和恒定输入增益都放大二十倍；持续偏置造成更大偏移，使长记忆也更易漂移。"
         },
         {
           "id": "c",
-          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+          "text": "特征值只要仍小于 1，状态对任何持续输入的偏移都必定趋于零，与接近 1 的程度无关。"
         },
         {
           "id": "d",
-          "text": "把 discrete-time 稳定条件 \\(|\\lambda |<1\\) 直接套到本讲 \\(\\tau dh/dt=(-I+W)h\\) 的 continuous-time equation。"
+          "text": "接近 1 会让泄漏更强，因此即使记忆时间延长，低频偏置仍会被更快清除。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“recurrent population equation 与 eigenmode 分解”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“运动控制是 brain–body–environment 闭环”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 discrete-time 稳定条件 \\(|\\lambda |<1\\) 直接套到本讲 \\(\\tau dh/dt=(-I+W)h\\) 的 continuous-time equation。"
+        "a": "时间常数和恒定输入增益含有同一个分母，持续偏置也会被放大。",
+        "c": "稳定性意味着回到受驱动稳态，并不意味着该稳态必须为零。",
+        "d": "接近 1 时反馈抵消更多泄漏，恢复更慢，持续偏置的影响更大。"
       },
-      "explanation": "denominator \\(1-\\lambda\\) 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。 同一个小 denominator 同时带来较长 \\(\\tau _{\\mathrm{eff}}\\) 与较大 steady-state gain，因此接近 integration 会放大 constant bias 与 parameter error。"
+      "explanation": "分母 \\(1-\\lambda\\) 从 0.02 缩到 0.001，时间尺度与恒定输入增益都增大二十倍；微小持续偏置、噪声的低频成分或连接误差会造成更大的状态偏移。 一个目标是保留记忆，另一个风险是漂移；生物系统可通过负反馈、多个时间尺度或非线性边界处理这种敏感性。"
     },
     {
       "id": "L18-Q04",
@@ -783,37 +785,37 @@
         }
       ],
       "conceptTags": [
-        "换到 eigenbasis 后，耦合的 neuron dynamics 分解为独立 modes"
+        "换到特征基底后，耦合的神经元动力学分解为独立模态"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"换到 eigenbasis 后，耦合的 neuron dynamics 分解为独立 modes\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"换到特征基底后，耦合的神经元动力学分解为独立模态\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "理想式遗漏 sensory delay、muscle dynamics、noise、saturation 与能量成本；高 gain 会放大 noise，并可能让带 delay 的闭环 overshoot 或 oscillate，所以稳定性必须基于完整 loop。"
+          "text": "每个模态必定对应一个独立的解剖神经元，因此对角化证明原网络不存在循环连接。"
         },
         {
           "id": "b",
-          "text": "denominator \\(1-\\lambda\\) 从 0.02 缩到 0.001，timescale 与 constant-input gain 都增大二十倍；微小持续 bias、noise 的低频成分或连接误差会造成更大的 state 偏移。"
+          "text": "只需变换活动而保留输入的原坐标，就能使每个模态获得正确驱动，因为输入不经过循环连接的权重。"
         },
         {
           "id": "c",
-          "text": "左乘 \\(V^{-1}\\) 后，每个 \\(\\alpha _{i}\\) 独立满足 \\(\\tau \\dot{\\alpha }_i=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)；因此 \\(\\lambda _{i}\\) 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。"
+          "text": "可对角化时，逆变换把群体活动分成模态，变换后的输入驱动各模态，再由原基底重建神经元活动。"
         },
         {
           "id": "d",
-          "text": "把 \\(W_{ij}\\) 的 source/target 方向凭习惯决定，不先展开 matrix product。"
+          "text": "只要模态特征值为正，它的活动就一定指数增长，与泄漏和时间常数无关。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "图中没有“运动控制是 brain–body–environment 闭环”所需的变量与条件。",
-        "b": "图中没有“eigenvalues 控制 timescale、fixed point 与 integration”所需的变量与条件。",
-        "d": "图中的标注与关系不支持这种读法：把 \\(W_{ij}\\) 的 source/target 方向凭习惯决定，不先展开 matrix product。"
+        "a": "模态是群体活动的坐标方向，不是单个细胞；坐标解耦不删除原有连接。",
+        "b": "输入也必须用同一个逆变换投到模态坐标，否则驱动各模式的幅度不正确。",
+        "d": "这里连续时间系统包含泄漏；正实特征值小于 1 时仍可衰减。"
       },
-      "explanation": "若 recurrent matrix W 可对角化为 \\(W=V\\Lambda V^{-1}\\)，activity \\(h=V\\alpha\\) 把 neuron-space pattern 改写为 eigenmode amplitudes。左乘 \\(V^{-1}\\) 后，每个 \\(\\alpha _{i}\\) 独立满足 \\(\\tau \\dot{\\alpha }_i=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)；因此 \\(\\lambda _{i}\\) 而非单个 neuron 决定该 population pattern 的 decay、integration 或 growth。basis change 是数学坐标变换，不表示一个 mode 等于一个 anatomical neuron。"
+      "explanation": "若循环连接矩阵 W 可对角化为 \\(W=V\\Lambda V^{-1}\\)，活动 \\(h=V\\alpha\\) 把神经活动空间模式改写为特征模态振幅。左乘 \\(V^{-1}\\) 后，每个 \\(\\alpha _{i}\\) 独立满足 \\(\\tau \\dot{\\alpha }_i=-(1-\\lambda _{i})\\alpha _{i}+\\widetilde I_{i}\\)；因此 \\(\\lambda _{i}\\) 而非单个神经元决定该群体模式的衰减、积分或增长。基底变化是数学坐标变换，不表示一个模态等于一个解剖上的神经元。"
     }
   ]
 }

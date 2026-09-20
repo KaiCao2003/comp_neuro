@@ -97,6 +97,7 @@ export type StudyWorkedExample = {
 export type StudyModule = {
   id: string;
   title: string;
+  transition?: string;
   sourceRefs: StudySourceRef[];
   paragraphs: string[];
   keyPoints: string[];
@@ -213,10 +214,11 @@ export type CourseSummary = {
 
 export type SearchRecord = {
   id: string;
-  kind: 'lecture' | 'source-page';
+  kind: 'lecture' | 'source-page' | 'section';
   lecture: number;
   title: string;
   subtitle: string;
   href: string;
   text: string;
+  excerpt?: string;
 };

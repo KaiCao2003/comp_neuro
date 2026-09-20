@@ -1,7 +1,7 @@
 {
   "lecture": 5,
   "slug": "05",
-  "zhTitle": "神经元 II：LIF 解析解与 Hodgkin–Huxley",
+  "zhTitle": "漏积分发放与 Hodgkin–Huxley 模型",
   "enTitle": "Neurons II: LIF Solution and Hodgkin–Huxley",
   "companionFile": "NEUROSCI366_Lecture05_Neurons2_LIF_Hodgkin_Huxley_Companion.pdf",
   "companionPages": 25,
@@ -188,6 +188,7 @@
       {
         "id": "L05-M2",
         "title": "Derive the exact F–I curve from threshold crossings",
+        "transition": "The exponential step response tells us where voltage is heading and how fast it approaches that level; firing rate also requires the time from reset to threshold. Applying the threshold condition to that trajectory separates inputs that never reach threshold from those that produce repeated spikes.",
         "sourceRefs": [
           {
             "file": "Lecture5-Neurons2.pdf",
@@ -261,6 +262,7 @@
       {
         "id": "L05-M3",
         "title": "Hodgkin–Huxley gating, area normalization, and spatial propagation",
+        "transition": "The LIF firing-rate calculation uses prescribed threshold, reset, and refractory rules without explaining their ionic mechanisms. The Hodgkin–Huxley model adds voltage-dependent channel gates to the same current-balance framework, allowing the action potential and recovery to emerge from interacting state variables.",
         "sourceRefs": [
           {
             "file": "Lecture5-Neurons2.pdf",
@@ -720,27 +722,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The derivation assumes \\(V_{\\mathrm{inf}}>V_{T}\\), making the logarithmic ratio a positive number greater than 1."
+          "text": "Doubling both membrane parameters scales the entire response together; at fixed total current, the time constant and the steady offset both remain unchanged."
         },
         {
           "id": "b",
-          "text": "Steady state depends only on the ratio \\(\\alpha /(\\alpha +\\beta )\\), so the common factor cancels. The time constant is the reciprocal of total transition rate; doubling both rates halves the relaxation time."
+          "text": "Doubling leak conductance halves the steady offset; doubling capacitance requires twice as long to store charge, so the time constant also doubles."
         },
         {
           "id": "c",
-          "text": "\\(\\tau _{m}=C/G_{L}\\) remains unchanged. For the same total current \\(I_{e}\\), \\(I_{e}/G_{L}\\) is halved, so \\(V_{\\mathrm{inf}}\\) moves closer to \\(E_{L}\\)."
+          "text": "Doubling capacitance and conductance preserves their ratio and membrane time constant; at fixed current, the steady offset from leak reversal is halved."
         },
         {
           "id": "d",
-          "text": "Combining \\(\\tau _{m}\\) and \\(V_{\\mathrm{inf}}\\) into one parameter effect instead of distinguishing response speed from steady state."
+          "text": "Doubling conductance halves the time constant; the doubled capacitance compensates for leak loss, keeping the steady offset unchanged under the fixed total current."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "\\(\\tau _{m}=C/G_{L}\\) remains unchanged. For the same total current \\(I_{e}\\), \\(I_{e}/G_{L}\\) is halved, so \\(V_{\\mathrm{inf}}\\) moves closer to \\(E_{L}\\). If input also doubles in proportion to area, the steady-state offset can remain unchanged. The first two pages rebuild the circuit from an ideal capacitor to a leaky integrate-and-fire membrane. An ideal capacitor obeys \\(C dV/dt=I_{e}\\) and has no steady state under constant current. Adding leak gives \\(C dV/dt=I_{e}-G_{L}(V-E_{L})\\). Above \\(E_{L}\\), outward leak current is positive and opposes further depolarization; below \\(E_{L}\\), current reverses and drives voltage upward. Thus \\(E_{L}\\) is the stable point with no input.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Derive the exact F–I curve from threshold crossings,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Hodgkin–Huxley gating, area normalization, and spatial propagation,” not the relationship asked about here.",
-        "d": "The error is: Combining \\(\\tau _{m}\\) and \\(V_{\\mathrm{inf}}\\) into one parameter effect instead of distinguishing response speed from steady state."
+        "a": "Their ratio fixes the time constant, but the steady offset is total current divided by leak conductance, so that offset is halved.",
+        "b": "The increased conductance cancels the slowing effect of increased capacitance. Capacitance alone does not determine the time constant.",
+        "d": "The time constant depends on both capacitance and conductance. At steady voltage, capacitive current is zero, so capacitance cannot compensate for steady leak."
       }
     },
     {
@@ -764,27 +766,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "\\(\\tau _{m}=C/G_{L}\\) remains unchanged. For the same total current \\(I_{e}\\), \\(I_{e}/G_{L}\\) is halved, so \\(V_{\\mathrm{inf}}\\) moves closer to \\(E_{L}\\)."
+          "text": "Complex time represents a damped voltage oscillation around threshold; taking its real part as the period extends the same crossing formula to subthreshold input."
         },
         {
           "id": "b",
-          "text": "Steady state depends only on the ratio \\(\\alpha /(\\alpha +\\beta )\\), so the common factor cancels. The time constant is the reciprocal of total transition rate; doubling both rates halves the relaxation time."
+          "text": "A negative time only reflects a reversed integration direction; its absolute value gives the true forward firing interval from reset voltage."
         },
         {
           "id": "c",
-          "text": "Applying the logarithmic formula without first checking \\(V_{\\mathrm{inf}}>V_{T}\\)."
+          "text": "The invalid values arise from omitting the absolute refractory period; adding that period repairs the domain and restores periodic firing below threshold."
         },
         {
           "id": "d",
-          "text": "The derivation assumes \\(V_{\\mathrm{inf}}>V_{T}\\), making the logarithmic ratio a positive number greater than 1."
+          "text": "The formula assumes a steady voltage above threshold; below threshold the trajectory has no crossing, so an invalid time means the assumption failed."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "The derivation assumes \\(V_{\\mathrm{inf}}>V_{T}\\), making the logarithmic ratio a positive number greater than 1. At a subthreshold steady state, the trajectory never crosses threshold; an expression outside its domain simply signals that the assumption failed. Set \\(V(t)=V_{\\mathrm{inf}}+(V_{R}-V_{\\mathrm{inf}})e^{-t/\\tau _{m}}\\) equal to \\(V_{T}\\) to obtain period \\(\\Delta t=\\tau _{m} \\ln[(V_{\\mathrm{inf}}-V_{R})/(V_{\\mathrm{inf}}-V_{T})]\\) and frequency \\(f=1/\\Delta t\\). This relation is not linear. As \\(I_{e}\\) approaches \\(I_{T}\\), the denominator voltage difference approaches zero and \\(\\Delta t\\) diverges. At larger \\(I_{e}\\), the period shortens and approaches the linear strong-input approximation of a perfect integrator.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “LIF time constant, steady state, and current-step response,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Hodgkin–Huxley gating, area normalization, and spatial propagation,” not the relationship asked about here.",
-        "c": "The error is: Applying the logarithmic formula without first checking \\(V_{\\mathrm{inf}}>V_{T}\\)."
+        "a": "A one-dimensional LIF trajectory under constant input is not a damped oscillator. A complex algebraic result does not create a new spiking mechanism.",
+        "b": "Taking an absolute value cannot change whether the trajectory reaches threshold. A subthreshold steady state cannot be converted into a future crossing by changing a sign.",
+        "c": "A refractory period adds waiting time after an existing spike. It cannot create a first spike in a trajectory that never reaches threshold."
       }
     },
     {
@@ -818,27 +820,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Steady state depends only on the ratio \\(\\alpha /(\\alpha +\\beta )\\), so the common factor cancels. The time constant is the reciprocal of total transition rate; doubling both rates halves the relaxation time."
+          "text": "Equilibrium depends on the opening rate’s fraction of total transition rate, so scaling cancels; doubling the total transition rate halves the relaxation time."
         },
         {
           "id": "b",
-          "text": "The derivation assumes \\(V_{\\mathrm{inf}}>V_{T}\\), making the logarithmic ratio a positive number greater than 1."
+          "text": "Equilibrium stays fixed because voltage directly clamps the gate variable; doubling the rates speeds voltage recovery, which indirectly halves the gate’s relaxation time."
         },
         {
           "id": "c",
-          "text": "\\(\\tau _{m}=C/G_{L}\\) remains unchanged. For the same total current \\(I_{e}\\), \\(I_{e}/G_{L}\\) is halved, so \\(V_{\\mathrm{inf}}\\) moves closer to \\(E_{L}\\)."
+          "text": "The opening and closing rates are always equal, so equilibrium must be half-open; accelerating both transitions halves the return time to that fixed occupancy."
         },
         {
           "id": "d",
-          "text": "Treating m, h, and n as currents or voltages instead of gate-open fractions between 0 and 1."
+          "text": "Equilibrium depends on the rate ratio, while relaxation depends on their difference; common scaling preserves the ratio and doubles the net rate, halving relaxation time."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Steady state depends only on the ratio \\(\\alpha /(\\alpha +\\beta )\\), so the common factor cancels. The time constant is the reciprocal of total transition rate; doubling both rates halves the relaxation time. During the action-potential upstroke, rapid growth of Na activation m produces inward Na current and positive feedback. Na inactivation h falls with depolarization while K activation n rises more slowly; together they terminate the upstroke and repolarize the membrane. After a spike, h has not recovered and n remains elevated, making another depolarization difficult. This is the kinetic origin of refractoriness. It differs from the fixed \\(\\delta\\) imposed in LIF, although \\(\\delta\\) can approximate its rate-limiting effect.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Derive the exact F–I curve from threshold crossings,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “LIF time constant, steady state, and current-step response,” not the relationship asked about here.",
-        "d": "The error is: Treating m, h, and n as currents or voltages instead of gate-open fractions between 0 and 1."
+        "b": "Voltage fixes the transition rates rather than directly clamping gate occupancy. Gate relaxation arises from opening and closing transitions, not voltage recovery.",
+        "c": "Opening and closing rates need not be equal. Scaling both preserves the original ratio, which need not imply half-open occupancy.",
+        "d": "Relative rates do determine equilibrium, but the relaxation coefficient is their sum. A difference would incorrectly predict no relaxation when the rates are equal."
       }
     },
     {
@@ -862,27 +864,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "\\(\\tau _{m}=C/G_{L}\\) remains unchanged. For the same total current \\(I_{e}\\), \\(I_{e}/G_{L}\\) is halved, so \\(V_{\\mathrm{inf}}\\) moves closer to \\(E_{L}\\)."
+          "text": "Positive subthreshold current merely creates a longer period rather than zero rate; observing the zero-rate part of the curve for longer would reveal regular spikes."
         },
         {
           "id": "b",
-          "text": "Schematic curve showing how LIF firing rate varies with input current and approaches the refractory-period limit"
+          "text": "Below threshold current there is no firing; above threshold, rate rises with input, while a refractory period makes the strong-input rate approach a finite ceiling."
         },
         {
           "id": "c",
-          "text": "Steady state depends only on the ratio \\(\\alpha /(\\alpha +\\beta )\\), so the common factor cancels. The time constant is the reciprocal of total transition rate; doubling both rates halves the relaxation time."
+          "text": "Saturation means leak conductance grows without bound to cancel added input; the same firing-rate ceiling must therefore remain even if refractoriness is removed."
         },
         {
           "id": "d",
-          "text": "Applying the logarithmic formula without first checking \\(V_{\\mathrm{inf}}>V_{T}\\)."
+          "text": "The absolute refractory period only shifts threshold current and leaves high-input periods unchanged; the curve must ultimately grow linearly without bound like perfect IF."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "When \\(I_{e}\\le I_{T}\\), the subthreshold steady state cannot reach threshold, so firing rate is zero. Above \\(I_{T}\\), the logarithmic term in the threshold-crossing time shapes the curve, while the absolute refractory period \\(\\delta\\) limits the strong-input rate to \\(1/\\delta\\).",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “LIF time constant, steady state, and current-step response.”",
-        "c": "The diagram does not show the variables and conditions discussed in “Hodgkin–Huxley gating, area normalization, and spatial propagation.”",
-        "d": "The error is: Applying the logarithmic formula without first checking \\(V_{\\mathrm{inf}}>V_{T}\\)."
+        "a": "Under subthreshold constant input, LIF approaches a voltage below threshold. Waiting longer cannot make that trajectory keep charging across threshold.",
+        "c": "Leak parameters are fixed here. The labeled ceiling comes from mandatory refractory time and is not the same as the unlimited-input behavior without refractoriness.",
+        "d": "Refractory time adds directly to each firing period and limits maximum rate. It is not merely a horizontal shift of threshold current."
       }
     }
   ]

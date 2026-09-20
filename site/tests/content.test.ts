@@ -78,11 +78,11 @@ describe('course content', () => {
       ],
       '03': [
         ['1–3', '清理工作区', 'Workspace cleanup', ['clear all;'], ['`clear all`', '`clearvars`'], []],
-        ['7–15', 'Part 1 时间网格与参数', 'Part 1 grid and parameters', ['dt = 0.001;', 'T = 0.250;', 'tau = 0.01;', 'omega = 220;', 't0 = 0.150;'], ['`dt=0.001 s`', '`T=0.250 s`', '`dt/tau=0.1`', '`omega=220 rad/s`', '`t0=0.150 s`'], ['`t0`', 'frequency']],
+        ['7–15', '第 1 部分：时间网格与参数', 'Part 1 grid and parameters', ['dt = 0.001;', 'T = 0.250;', 'tau = 0.01;', 'omega = 220;', 't0 = 0.150;'], ['`dt=0.001 s`', '`T=0.250 s`', '`dt/tau=0.1`', '`omega=220 rad/s`', '`t0=0.150 s`'], ['`t0`', 'frequency']],
         ['17–30', '分段输入与端点', 'Piecewise input and endpoint', ['I = NaN(num_t,1);', 't_values(t) < 0.250'], ['251\\times 1', '`<`'], ['`t=0.250 s`', '`I(251)`', '`NaN`']],
         ['32–37', '显式 Euler', 'Forward Euler', ['x(t) = x(t-1)+dt/tau*(-x(t-1)+I(t-1));'], ['`x(k)=x(k-1)+(dt/tau)*(-x(k-1)+I(k-1))`', '1-dt/\\tau=0.9'], ['`x(251)`', '`I(250)`']],
-        ['39–44', 'Part 1 绘图', 'Part 1 plots', ['plot(t_values,I);', 'plot(t_values,x);'], ['`I(t)`', '`x(t)`'], ['`0.250 s`']],
-        ['48–61', 'Part 2 振子', 'Part 2 oscillator', ['dt = 0.0001;', 'x = NaN(num_t,2);', 'x(t,1)', 'x(t,2)'], ['`dt=0.0001 au`', '`T=10 au`', '100001\\times 2', '\\dot{x}_1=x_{2}', '\\dot{x}_2=-x_{1}'], ['x_{1}(t)=\\sin(t)', 'x_{2}(t)=\\cos(t)', 'Euler']],
+        ['39–44', '第 1 部分：绘图', 'Part 1 plots', ['plot(t_values,I);', 'plot(t_values,x);'], ['`I(t)`', '`x(t)`'], ['`0.250 s`']],
+        ['48–61', '第 2 部分：振子', 'Part 2 oscillator', ['dt = 0.0001;', 'x = NaN(num_t,2);', 'x(t,1)', 'x(t,2)'], ['`dt=0.0001 au`', '`T=10 au`', '100001\\times 2', '\\dot{x}_1=x_{2}', '\\dot{x}_2=-x_{1}'], ['x_{1}(t)=\\sin(t)', 'x_{2}(t)=\\cos(t)', 'Euler']],
         ['63–69', '绘图与数值漂移', 'Plots and numerical drift', ['close all;', 'plot(t_values,x(:,1))', 'plot(t_values,x(:,2))'], ['`close all`', '1\\pm i h', '\\sqrt{1+h^2}>1'], ['`h=10^-4`', '1.0005', 'h\\to 0']],
       ],
     } as const;
@@ -106,7 +106,7 @@ describe('course content', () => {
           expect(row.lines, `${locale}:${slug}:${lines}`).toBe(lines);
           expect(row.role, `${locale}:${slug}:${lines}`).toBe(role);
           for (const token of explanationTokens) expect(row.explanation, `${locale}:${slug}:${lines} explanation`).toContain(token);
-          for (const token of resultTokens) expect(row.result, `${locale}:${slug}:${lines} result`).toContain(token);
+          for (const token of resultTokens) expect(row.result, `${locale}:${slug}:${lines} result`).toContain(locale === 'zh' && token === 'frequency' ? '频率' : token);
         }
       });
 
@@ -252,6 +252,78 @@ describe('course content', () => {
       for (const question of content.questions.filter((item: { type: string }) => item.type === 'figure')) {
         expect(question.stem).toMatch(/图|曲线|坐标|axis|nullcline|轨迹|椭圆/i);
       }
+    }
+  });
+
+  it('classifies formula-bearing conceptual questions without treating LaTeX as code', () => {
+    expect(questions.find((question: { id: string }) => question.id === 'L03-Q01')).toMatchObject({
+      type: 'comparison',
+      stem: '若输入从 \\(I=5\\) 突然改为 \\(I=-2\\)，解的哪一部分发生改变，状态是否瞬间跳到 −2？',
+    });
+    expect(questions.find((question: { id: string }) => question.id === 'L19-Q04')).toMatchObject({
+      type: 'concept',
+      stem: '若没有中心化就直接计算 \\(E[hh^\\mathrm{T}]\\)，主要可能混入什么？',
+    });
+    expect(questions.find((question: { id: string }) => question.id === 'L08-Q01')).toMatchObject({ type: 'debug' });
+    for (const question of questions.filter((item: { type: string }) => item.type === 'debug')) {
+      expect(question.stem.replace(/\\\([\s\S]*?\\\)/g, ' ')).toMatch(/MATLAB|源代码|代码|\bbug\b|\bdebug\b|inv\(/i);
+    }
+  });
+
+  it('uses complete authored alternatives, balanced choices, and targeted feedback for every quiz', () => {
+    for (const locale of ['zh', 'en']) {
+      const prefix = locale === 'en' ? 'en/' : '';
+      const guideDir = locale === 'en' ? 'locales/en' : 'self-study';
+      const figureDir = locale === 'en' ? 'locales/en/figures-' : 'figures/';
+      const batches = ['01-09', '10-18', '19-27'];
+      const authored = batches.flatMap((batch) => JSON.parse(fs.readFileSync(path.join(root, 'source', guideDir, `${batch}.json`), 'utf8')));
+      const authoredFigures = batches.flatMap((batch) => JSON.parse(fs.readFileSync(path.join(root, 'source', `${figureDir}${batch}.json`), 'utf8')));
+      expect(authored).toHaveLength(27);
+      let checkedQuestions = 0;
+      for (const guide of authored) {
+        const lecture = guide.lecture;
+        const content = read(`${prefix}lectures/${String(lecture).padStart(2, '0')}.json`);
+        const specifications = [
+          ...guide.modules.map((module: { id: string; selfCheck: { answer: string; choiceAnswer: string; distractors: { text: string; explanation: string }[] } }, index: number) => ({
+            question: content.questions[index],
+            sectionId: module.id,
+            correctAnswer: module.selfCheck.choiceAnswer,
+            fullAnswer: module.selfCheck.answer,
+            distractors: module.selfCheck.distractors,
+          })),
+          ...authoredFigures.filter((figure: { lecture: number }) => figure.lecture === lecture).map((figure: { moduleId: string; questionAnswer: string; questionDistractors: { text: string; explanation: string }[] }, index: number) => ({
+            question: content.questions[guide.modules.length + index],
+            sectionId: figure.moduleId,
+            correctAnswer: figure.questionAnswer,
+            distractors: figure.questionDistractors,
+          })),
+        ];
+        expect(specifications).toHaveLength(content.questions.length);
+        for (const { question, sectionId, correctAnswer, fullAnswer, distractors } of specifications) {
+          expect(question).toBeTruthy();
+          expect(question.sectionId).toBe(sectionId);
+          expect(distractors).toHaveLength(3);
+          const correct = question.choices.find((choice: { id: string }) => choice.id === question.correctChoiceId);
+          expect(comparisonText(correct.text), question.id).toBe(comparisonText(correctAnswer));
+          if (fullAnswer) expect(comparisonText(question.explanation), question.id).toContain(comparisonText(fullAnswer));
+          const wrong = question.choices.filter((choice: { id: string }) => choice.id !== question.correctChoiceId);
+          const wrongLengths = wrong.map((choice: { text: string }) => choice.text.length);
+          expect(correct.text.length, `${question.id} correct option is uniquely longest`).toBeLessThanOrEqual(Math.max(...wrongLengths));
+          expect(correct.text.length, `${question.id} correct option is uniquely shortest`).toBeGreaterThanOrEqual(Math.min(...wrongLengths));
+          expect(wrong.map((choice: { text: string }) => comparisonText(choice.text)).sort(), question.id)
+            .toEqual(distractors.map((item: { text: string }) => comparisonText(item.text)).sort());
+          for (const choice of wrong) {
+            const authoredChoice = distractors.find((item: { text: string }) => comparisonText(item.text) === comparisonText(choice.text));
+            expect(comparisonText(question.wrongChoiceExplanations[choice.id]), question.id).toBe(comparisonText(authoredChoice.explanation));
+          }
+          checkedQuestions += 1;
+        }
+        for (const figure of content.figures) {
+          expect(figure).not.toHaveProperty('questionAnswer');
+          expect(figure).not.toHaveProperty('questionDistractors');
+        }
+      }
+      expect(checkedQuestions).toBe(132);
     }
   });
 

@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "从 Hebbian cell assembly 到 binary Hopfield abstraction，区分 biological hypothesis、state variable、encoding rule 与 retrieval dynamics。",
-      "手动执行 asynchronous sign updates，计算 overlap，并说明 symmetric weights 与 zero diagonal 对energy descent的作用。",
-      "推导单神经元翻转的energy change以及\\(P=1\\) stored pattern的local field，识别aligned、antialigned与spurious attractors。",
-      "将多pattern local field分为signal和crosstalk，估计variance、error probability与loading \\(\\alpha =P/N\\)。",
-      "说明\\(\\alpha c\\approx 0.138\\)只属于经典dense unbiased random Hopfield assumptions，并比较sparse stochastic与global inhibition变体。"
+      "从赫布细胞细胞集群到二值 Hopfield 抽象模型，区分生物假说、状态变量、编码规则与检索动力学。",
+      "手动执行异步符号更新，计算重叠度，并说明对称权重与零对角对能量下降的作用。",
+      "推导单神经元翻转的能量变化以及\\(P=1\\) 已存储的模式的局部场，识别对齐的、反向对齐的与伪记忆吸引子。",
+      "将多模式局部场分为信号和串扰，估计方差、误差概率与负载 \\(\\alpha =P/N\\)。",
+      "说明\\(\\alpha c\\approx 0.138\\)只属于经典稠密无偏随机 Hopfield 假设，并比较稀疏随机与全局抑制变体。"
     ],
     "prerequisiteBridge": [
-      "Hopfield network把每个neuron简化为\\(S_{i}\\in {-1,+1}\\)。一个memory pattern \\(\\xi ^{\\mu }\\)也是N个正负号组成的向量；encoding用outer products把patterns写入symmetric weights。retrieval从partial/noisy cue开始，每次选择一个neuron，用其weighted input的sign更新，直到没有unit改变。这个过程是abstract associative memory，不等同于真实spike timing。",
-      "energy可理解为网络state的标量地形：在对称weights、asynchronous update下，每次真正翻转都不增加E，因此trajectory最终落到local minimum。local minimum对应fixed point，但不保证是想存的memory；反pattern、odd mixtures与spin-glass states也可成为minima。pattern completion就是初态落在目标memory的basin中。",
-      "存多个random patterns时，检索目标pattern的local field含目标signal和其余patterns的crosstalk。目标signal随N归一化后约为1，许多独立干扰项的总variance约为\\(P/N=\\alpha\\)。\\(\\alpha\\)增大时error更可能，超过经典临界附近retrieval相消。中央极限定理给Gaussian近似，但0.138常数还需更完整self-consistent analysis。"
+      "Hopfield 网络将每个神经元简化为 \\(S_{i}\\in {-1,+1}\\)，记忆模式 \\(\\xi ^{\\mu }\\) 则是 N 个正负号组成的向量。编码时，用模式的外积构造对称权重；检索时，从残缺或带噪线索出发，逐个单元按加权输入的符号更新，直到状态不再改变。这是联想记忆的抽象模型，不直接描述真实的脉冲时序。",
+      "能量函数为每个网络状态指定一个标量。在对称权重和异步更新条件下，每次真正的状态翻转都不增加能量，轨迹最终进入局部极小值。它对应固定点，却未必是目标记忆：反模式、奇数混合模式和自旋玻璃状态也可能稳定。只有初态落入目标记忆的吸引域，才会完成正确的模式补全。",
+      "存储多个随机模式时，目标模式的局部场由目标信号与其他模式的串扰组成。按 N 归一化后，目标信号约为 1，许多近独立干扰项的总方差约为 \\(P/N=\\alpha\\)。负载 \\(\\alpha\\) 增大，错误更容易出现；超过经典临界值后，稳定检索解消失。中心极限定理支持高斯近似，但约 0.138 的临界值还需要更完整的自洽分析。 检索过程需要同时检验状态是否稳定、与目标有多相似以及线索允许多大误差。只看到能量下降，并不能据此判定回忆内容正确；系统也可能稳定在训练时未存储的混合模式。"
     ],
     "modules": [
       {
         "id": "l26-m1",
-        "title": "Explicit memory、Hebbian assembly 与pattern completion",
+        "title": "细胞集群与模式补全",
         "sourceRefs": [
           {
             "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -110,27 +110,27 @@
           }
         ],
         "paragraphs": [
-          "Hebbian assembly hypothesis认为共同参与一个experience的cells形成增强互连。encoding改变connections，partial cue重新激活一部分members，recurrent excitation招回缺失members，得到pattern completion。engram一词指与memory存储和表达有因果关系的cellular ensemble，不能只凭activation correlation命名。",
-          "Hopfield abstraction把assembly变为binary pattern\\(\\xi\\)，令\\(W_{ij}=(1/N)\\sum \\mu \\xi _{i}^{\\mu }\\xi _{j}^{\\mu }\\)、\\(W_{ii}=0\\)。same-sign pairs得到正weight，opposite-sign pairs得到负weight。真实synapses受Dale law、稀疏连接与spiking约束，经典dense matrix首先展示computational principle。",
-          "retrieval cue \\(S(0)\\)与目标pattern有positive overlap \\(m=(1/N)\\sum i\\xi iS_{i}\\)。\\(m=1\\)完全匹配，\\(m=0\\)平均无关，\\(m=-1\\)为整体反pattern。若cue位于目标basin，asynchronous dynamics逐步纠错；basin size决定可容忍corruption，而不只fixed point是否存在。",
-          "因果engram实验需分别测试sufficiency与necessity：人工激活tagged ensemble能否触发 memory-like behavior，抑制它是否选择性损害retrieval。即便成立，Hopfield的 binary units 与 Hebbian weights 仍是model mapping，不应从behavior直接推断exact W。"
+          "赫布细胞集群假说认为共同参与一次经历的细胞形成增强互连。编码改变连接，部分线索重新激活一部分成员，循环兴奋反馈招回缺失成员，得到模式补全。记忆痕迹一词指与记忆存储和表达有因果关系的细胞群，不能只凭活动相关性命名。",
+          "Hopfield 抽象模型把细胞集群变为二值模式\\(\\xi\\)，令\\(W_{ij}=(1/N)\\sum_{\\mu} \\xi _{i}^{\\mu }\\xi _{j}^{\\mu }\\)、\\(W_{ii}=0\\)。同号成对项得到正权重，异号成对项得到负权重。真实突触受 Dale 定律、稀疏连接与脉冲发放约束，经典稠密矩阵首先展示计算原理。",
+          "检索线索 \\(S(0)\\)与目标模式有正重叠度 \\(m=(1/N)\\sum_{i}\\xi_{i}S_{i}\\)。\\(m=1\\)完全匹配，\\(m=0\\)平均无关，\\(m=-1\\)为整体反模式。若线索位于目标吸引域，异步动力学逐步纠错；吸引域大小决定可容忍扰乱，而不只固定点是否存在。",
+          "因果记忆痕迹实验需分别测试充分性与必要性：人工激活标记的细胞群能否触发类似记忆提取的行为，抑制它是否选择性损害检索。即便成立，Hopfield 的二值单元与赫布权重仍是模型映射，不应从行为直接推断精确 W。 对照实验还应排除非特异性唤醒或运动效应：触发同一动作本身不等于唤起了相同记忆，需要检验与情境有关的选择和细节。"
         ],
         "keyPoints": [
-          "cell assembly提供pattern completion假说。",
-          "Hopfield outer-product rule是抽象encoding。",
-          "overlap与basin分别量化cue相似和retrieval robustness。"
+          "细胞细胞集群提供模式补全假说。",
+          "Hopfield 外积规则是抽象编码。",
+          "重叠度与吸引域分别量化线索相似和检索鲁棒性。"
         ],
         "derivation": {
-          "title": "overlap 对cue corruption的响应",
-          "setup": "设目标pattern中有fraction f的bits被翻转。",
+          "title": "重叠度对线索扰乱的响应",
+          "setup": "设目标模式中有比例 f 的位被翻转。",
           "steps": [
             {
-              "title": "写一致bits贡献",
-              "explanation": "比例1-f的bits满足\\(\\xi iS_{i}=+1\\)。"
+              "title": "写一致位贡献",
+              "explanation": "比例1-f 的位满足\\(\\xi iS_{i}=+1\\)。"
             },
             {
-              "title": "写翻转bits贡献",
-              "explanation": "比例f的bits满足\\(\\xi iS_{i}=-1\\)。"
+              "title": "写翻转位贡献",
+              "explanation": "比例 f 的位满足\\(\\xi iS_{i}=-1\\)。"
             },
             {
               "title": "求平均",
@@ -139,31 +139,31 @@
             }
           ],
           "symbolNotes": [
-            "m无量纲并位于\\([-1,1]\\)。",
-            "f是翻转比例，位于\\([0,1]\\)。"
+            "m 无量纲并位于\\([-1,1]\\)。",
+            "f 是翻转比例，位于\\([0,1]\\)。"
           ],
-          "unitsCheck": "两项都是dimensionless fraction，overlap无量纲。",
+          "unitsCheck": "两项都是无量纲比例，重叠度无量纲。",
           "limitCheck": "\\(f=0\\)时\\(m=1\\)；\\(f=0.5\\)时\\(m=0\\)；\\(f=1\\)时\\(m=-1\\)。"
         },
         "workedExample": {
-          "title": "计算noisy cue overlap",
-          "problem": "一个100-bit pattern中有20 bits被翻转。求与原pattern的overlap。",
+          "title": "计算含噪线索重叠度",
+          "problem": "一个100-位模式中有20 位被翻转。求与原模式的重叠度。",
           "steps": [
-            "80 bits各贡献+1，总和80。",
-            "20 bits各贡献-1，总和-20。",
-            "总和60除以\\(N=100\\)，\\(m=0.6\\)。"
+            "80 位各贡献+1，总和80。",
+            "20 位各贡献-1，总和-20。",
+            "总和60 除以\\(N=100\\)，\\(m=0.6\\)。"
           ],
-          "result": "overlap为0.6。",
+          "result": "重叠度为0.6。",
           "sanityCheck": "也可用\\(1-2f=1-0.4=0.6\\)核对。"
         },
         "pitfalls": [
-          "把activation-tagged cells自动称为causal engram。",
-          "把positive overlap当作成功的充分条件。"
+          "把激活标记的细胞自动称为因果记忆痕迹。",
+          "把正重叠度当作成功的充分条件。"
         ]
       },
       {
         "id": "l26-m2",
-        "title": "Binary asynchronous dynamics 与stored random patterns",
+        "title": "二值神经元的异步更新",
         "sourceRefs": [
           {
             "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -171,64 +171,65 @@
           }
         ],
         "paragraphs": [
-          "每步选i，计算local field \\(h_{i}=\\sum _j W_{ij} S_{j}\\)，然后置\\(S_{i}\\leftarrow \\operatorname{sgn}(h_{i})\\)。\\(W_{ii}=0\\)避免self-state直接投票；\\(h_{i}=0\\)时tie rule必须事先说明，可保持原值或固定sign。update order可随机或sequential，不同order可能落到不同basin，但每步使用最新state。",
-          "一轮sweep通常指平均更新N次，并不等于收敛。停止条件是完整检查中没有unit会改变，或energy和state达到固定点。finite deterministic asynchronous system在严格energy descent下不能无限访问新states，但zero-field ties若随意翻转可产生degeneracy。",
-          "stored patterns常取independent unbiased random±1，便于计算容量。这不是自然记忆的统计模型：真实patterns相关且sparse。相关patterns会增大structured crosstalk，也可能支持category structure；因此random assumption是baseline而非事实。",
-          "synchronous update同时用old state计算所有new states，可能出现two-cycle，经典single-flip energy proof不直接适用。编程或手算时应明确是否原地更新；把asynchronous伪装成vectorized simultaneous multiply会改变动力学结论。"
+          "每步选 i，计算局部场 \\(h_{i}=\\sum _j W_{ij} S_{j}\\)，然后置\\(S_{i}\\leftarrow \\operatorname{sgn}(h_{i})\\)。\\(W_{ii}=0\\)避免自身状态直接投票；\\(h_{i}=0\\)时零局部场的更新规则必须事先说明，可保持原值或固定符号。更新顺序可随机或顺序，不同顺序可能落到不同吸引域，但每步使用最新状态。",
+          "一轮轮更新通常指平均更新 N 次，并不等于收敛。停止条件是完整检查中没有单元会改变，或能量和状态达到固定点。有限确定性异步系统在严格能量下降下不能无限访问新状态，但零局部场平局若随意翻转可产生退化。 实现时可记录每次更新前后的状态与能量，并固定处理零局部场的规则。这样能够区分真正达到固定点、单纯运行时间不足，以及同步更新导致的往返变化。",
+          "已存储的模式常取独立无偏随机±1，便于计算容量。这不是自然记忆的统计模型：真实模式相关且稀疏。相关模式会增大有结构的串扰，也可能支持类别结构；因此随机假设是基线而非事实。 在解释实际数据前，需要检查模式相关性是否使独立随机基线的预测失效。",
+          "同步更新同时用旧的状态计算所有新的状态，可能出现二周期振荡，经典单单元翻转能量证明不直接适用。编程或手算时应明确是否原地更新；把异步伪装成向量化的同时乘法会改变动力学结论。 这种逐次使用最新状态的约定，也是后续能量下降证明的必要前提。"
         ],
         "keyPoints": [
-          "asynchronous update立即写回一个unit。",
-          "收敛需检查fixed state，不是固定sweeps。",
-          "random unbiased patterns是分析假设。"
+          "异步更新立即写回一个单元。",
+          "收敛需检查固定状态，不是固定轮更新。",
+          "随机无偏模式是分析假设。"
         ],
         "derivation": {
-          "title": "一次三unit asynchronous update",
-          "setup": "用明确矩阵和state展示local field与原地写回。",
+          "title": "一次三单元异步更新",
+          "setup": "用明确矩阵和状态展示局部场与原地写回。",
           "steps": [
             {
-              "title": "定义weights与state",
+              "title": "定义权重与状态",
               "explanation": "令\\(W_{12}=W_{21}=1\\)、\\(W_{23}=W_{32}=1\\)、其他为0，初态\\(S=(1,-1,1)\\)。"
             },
             {
-              "title": "更新unit 2",
-              "explanation": "\\(h_{2}=S_{1}+S_{3}=2\\)，所以S2从-1变+1。",
+              "title": "更新单元 2",
+              "explanation": "\\(h_{2}=S_{1}+S_{3}=2\\)，所以 S2 从-1 变+1。",
               "latex": "S_2\\leftarrow\\operatorname{sgn}(2)=+1"
             },
             {
-              "title": "更新unit 1",
-              "explanation": "使用已经改变的S2，\\(h_{1}=S_{2}=1\\)，S1保持+1。"
+              "title": "更新单元 1",
+              "explanation": "使用已经改变的 S2，\\(h_{1}=S_{2}=1\\)，S1 保持+1。"
             },
             {
-              "title": "更新unit 3",
-              "explanation": "\\(h_{3}=S_{2}=1\\)，S3保持+1，得到fixed state。"
+              "title": "更新单元 3",
+              "explanation": "\\(h_{3}=S_{2}=1\\)，S3 保持+1，得到固定状态。"
             }
           ],
           "symbolNotes": [
-            "\\(S_{i}\\)为±1，W在此例无量纲。",
-            "local field单位等于weight×state的单位。"
+            "\\(S_{i}\\)为±1，W 在此例无量纲。",
+            "局部场单位等于权重×状态的单位。"
           ],
-          "unitsCheck": "若weights无量纲，h也无量纲，sign operation合法。",
-          "limitCheck": "若第一步没有立即写回S2，后续fields会不同，显示update convention的重要性。"
+          "unitsCheck": "若权重无量纲，h 也无量纲，符号操作合法。",
+          "limitCheck": "若第一步没有立即写回 S2，后续局部场会不同，显示更新约定的重要性。"
         },
         "workedExample": {
-          "title": "手算一次update",
-          "problem": "\\(h_{i}=-0.7\\)，当前\\(S_{i}=+1\\)，采用sgn(0)=保持。更新后state与flip indicator是什么？",
+          "title": "手算一次更新",
+          "problem": "\\(h_{i}=-0.7\\)，当前\\(S_{i}=+1\\)，采用 sgn(0)=保持。更新后状态与翻转指示变量是什么？",
           "steps": [
             "\\(h_{i}\\)负，所以\\(\\operatorname{sgn}(h_{i})=-1\\)。",
-            "\\(S_{i}\\)从+1改为-1。",
-            "\\(\\Delta S_{i}=-1-(+1)=-2\\)，发生flip。"
+            "\\(S_{i}\\)从+1 改为-1。",
+            "\\(\\Delta S_{i}=-1-(+1)=-2\\)，发生翻转。"
           ],
-          "result": "new \\(S_{i}=-1\\)，\\(\\Delta S_{i}=-2\\)。",
-          "sanityCheck": "new state与negative local field同号。"
+          "result": "新的 \\(S_{i}=-1\\)，\\(\\Delta S_{i}=-2\\)。",
+          "sanityCheck": "新的状态与负局部场同号。"
         },
         "pitfalls": [
-          "用旧state一次性更新全部units却称asynchronous。",
-          "忽略\\(h=0\\)的tie convention。"
-        ]
+          "用旧状态一次性更新全部单元却称异步。",
+          "忽略\\(h=0\\)的平局约定。"
+        ],
+        "transition": "细胞集合与重叠指标说明了模式补全想实现什么，却还没有规定网络怎样从线索走向结果。逐个单元的异步更新把检索变成可追踪的动态过程，也使更新顺序与停止条件成为模型的一部分。"
       },
       {
         "id": "l26-m3",
-        "title": "Energy descent 与\\(P=1\\) stored attractor",
+        "title": "能量下降与\\(P=1\\) 存储吸引子",
         "sourceRefs": [
           {
             "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -236,67 +237,68 @@
           }
         ],
         "paragraphs": [
-          "energy \\(E=-(1/2)\\sum _i\\sum _{j\\ne i}W_{ij}S_{i}S_{j}\\)。1/2避免对称pair重复计数。只翻转unit i时，其他pair不变；利用\\(W_{ij}=W_{ji}\\)，energy change化为\\(\\Delta E=-\\Delta S_{i} h_{i}\\)。若new \\(S_{i}\\)与\\(h_{i}\\)同号，翻转时\\(\\Delta E<0\\)，不翻时为0。",
-          "\\(P=1\\)且\\(W_{ij}=\\xi _{i}\\xi _{j}/N\\)。将\\(S=\\xi\\)代入\\(h_{i}=(\\xi _{i}/N)\\sum _{j\\ne i}\\xi _{j}^{2}=((N-1)/N)\\xi _{i}\\)，因此\\(\\operatorname{sign}(h_{i})=\\xi _{i}\\)，pattern是fixed point。将\\(S=-\\xi\\)代入则\\(h_{i}=-((N-1)/N)\\xi _{i}\\)，与\\(S_{i}=-\\xi _{i}\\)同号，所以antipattern也稳定。",
-          "energy non-increase保证达到某local minimum，不保证global minimum或target memory。noisy cue可能越过basin boundary落入spurious state。symmetric W是proof的核心；asymmetric plasticity 或delays可产生cycles、chaos或sequence dynamics，不能继续用同一Lyapunov function宣称收敛。",
-          "\\(W_{ii}=0\\)移除self-coupling并让\\(P=1\\) field少一个term；N大时(N-1)/N接近1，但小N例题不能直接写成1。严格保留这一项可训练学生区分finite-size calculation与large-N approximation。"
+          "能量 \\(E=-(1/2)\\sum _i\\sum _{j\\ne i}W_{ij}S_{i}S_{j}\\)。1/2 避免对称成对项重复计数。只翻转单元 i 时，其他成对项不变；利用\\(W_{ij}=W_{ji}\\)，能量变化化为\\(\\Delta E=-\\Delta S_{i} h_{i}\\)。若新的 \\(S_{i}\\)与\\(h_{i}\\)同号，翻转时\\(\\Delta E<0\\)，不翻时为0。",
+          "\\(P=1\\)且\\(W_{ij}=\\xi _{i}\\xi _{j}/N\\)。将\\(S=\\xi\\)代入\\(h_{i}=(\\xi _{i}/N)\\sum _{j\\ne i}\\xi _{j}^{2}=((N-1)/N)\\xi _{i}\\)，因此\\(\\operatorname{sign}(h_{i})=\\xi _{i}\\)，模式是固定点。将\\(S=-\\xi\\)代入则\\(h_{i}=-((N-1)/N)\\xi _{i}\\)，与\\(S_{i}=-\\xi _{i}\\)同号，所以反模式也稳定。 这是全局符号翻转对称性的结果：翻转全部状态也会翻转局部场，符号一致性仍保持。",
+          "能量不增加保证达到某局部最小值，不保证全局最小值或目标记忆。含噪线索可能越过吸引域边界落入伪记忆状态。对称 W 是证明的核心；非对称可塑性或延迟可产生周期、混沌或序列动力学，不能继续用同一 Lyapunov 函数宣称收敛。",
+          "\\(W_{ii}=0\\)移除自耦合并让\\(P=1\\) 局部场少一个项；N 大时(N-1)/N 接近1，但小 N 例题不能直接写成1。严格保留这一项可训练学生区分有限大小计算与大 N 近似。 有限网络中，省略自连接会实际改变局部场大小；只有说明采用的极限条件后，才能把这一差别忽略。"
         ],
         "keyPoints": [
-          "symmetric asynchronous dynamics使energy不增加。",
-          "\\(P=1\\)时\\(\\xi\\)与\\(-\\xi\\)都因global sign symmetry稳定。",
-          "energy descent不保证检索到desired memory。"
+          "对称异步动力学使能量不增加。",
+          "\\(P=1\\)时\\(\\xi\\)与\\(-\\xi\\)都因全局符号对称性稳定。",
+          "能量下降不保证检索到所需的记忆。"
         ],
         "derivation": {
-          "title": "single-unit flip的energy change",
-          "setup": "只让\\(S_{i}\\)从old变new，其余states固定。",
+          "title": "单个单元翻转的能量变化",
+          "setup": "只让\\(S_{i}\\)从旧的变新的，其余状态固定。",
           "steps": [
             {
               "title": "提取相关项",
-              "explanation": "对称pair合并后，与i有关的energy为\\(-S_{i}\\sum _{j\\ne i}W_{ij}S_{j}\\)。",
+              "explanation": "对称成对项合并后，与 i 有关的能量为\\(-S_{i}\\sum _{j\\ne i}W_{ij}S_{j}\\)。",
               "latex": "E_i=-S_i h_i"
             },
             {
               "title": "计算差",
-              "explanation": "new与old energy相减。",
+              "explanation": "新的与旧的能量相减。",
               "latex": "\\Delta E=-(S_i^{\\mathrm{new}}-S_i^{\\mathrm{old}})h_i=-\\Delta S_i h_i"
             },
             {
-              "title": "按sign更新",
-              "explanation": "若发生flip，new state与\\(h_{i}\\)同号，\\(\\Delta S_{i}\\) \\(h_{i}>0\\)。",
+              "title": "按符号更新",
+              "explanation": "若发生翻转，新的状态与\\(h_{i}\\)同号，\\(\\Delta S_{i}\\) \\(h_{i}>0\\)。",
               "latex": "\\Delta E<0"
             },
             {
               "title": "不翻转情形",
-              "explanation": "若old已与field同号，\\(\\Delta S_{i}=0\\)。",
+              "explanation": "若旧的已与局部场同号，\\(\\Delta S_{i}=0\\)。",
               "latex": "\\Delta E=0"
             }
           ],
           "symbolNotes": [
-            "E单位为weight，S无量纲，h单位为weight。",
-            "对称性与更新时其他states固定是推导前提。"
+            "E 单位为权重，S 无量纲，h 单位为权重。",
+            "对称性与更新时其他状态固定是推导前提。"
           ],
-          "unitsCheck": "\\(\\Delta S\\)无量纲，乘h得到energy单位。",
-          "limitCheck": "\\(h_{i}=0\\)时\\(\\Delta E=0\\)；tie flip可能在等能states间移动。"
+          "unitsCheck": "\\(\\Delta S\\)无量纲，乘 h 得到能量单位。",
+          "limitCheck": "\\(h_{i}=0\\)时\\(\\Delta E=0\\)；平局翻转可能在等能状态间移动。"
         },
         "workedExample": {
-          "title": "\\(P=1\\)有限N field",
-          "problem": "\\(N=5\\)，pattern \\(\\xi =(1,-1,1,-1,1)\\)，network处于\\(\\xi\\)。求unit1的local field。",
+          "title": "\\(P=1\\)有限 N 局部场",
+          "problem": "\\(N=5\\)，模式 \\(\\xi =(1,-1,1,-1,1)\\)，网络处于\\(\\xi\\)。求单元1 的局部场。",
           "steps": [
             "\\(W_{ij}=\\xi _{1}\\xi _{j}/5\\)。",
             "\\(h_{1}=\\sum _{j\\ne 1}(\\xi _{1}\\xi _{j}/5)\\xi _{j}=(\\xi _{1}/5)\\sum _{j\\ne 1}\\xi _{j}^{2}\\)。",
             "四项\\(\\xi _{j}^{2}=1\\)，所以\\(h_{1}=4/5=0.8\\)，与\\(\\xi _{1}\\)同号。"
           ],
-          "result": "\\(h_{1}=0.8\\)，unit1保持+1。",
+          "result": "\\(h_{1}=0.8\\)，单元1 保持+1。",
           "sanityCheck": "通式\\((N-1)\\xi _{1}/N=4/5\\)一致。"
         },
         "pitfalls": [
-          "漏掉energy的1/2后又重复计数。",
-          "把局部minimum自动称为stored pattern。"
-        ]
+          "漏掉能量的1/2 后又重复计数。",
+          "把局部最小值自动称为已存储的模式。"
+        ],
+        "transition": "局部更新规则告诉我们每一步怎样改变状态，但反复更新是否会稳定下来还需要论证。对称权重下的能量变化提供了这一检验，并可先用只存一个模式的情况核对目标吸引子。"
       },
       {
         "id": "l26-m4",
-        "title": "Spurious mixtures 与signal-plus-crosstalk分解",
+        "title": "检索中的信号、串扰与伪记忆",
         "sourceRefs": [
           {
             "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -304,27 +306,27 @@
           }
         ],
         "paragraphs": [
-          "检索pattern1时设\\(S\\approx \\xi ^{1}\\)。代Hebbian W后，\\(h_{i}\\)的\\(\\mu =1\\)项与\\(\\xi _{i}^{1}\\)对齐，是signal；\\(\\mu >1\\)项包含random overlaps，是crosstalk。即使每个干扰pattern与目标平均正交，有限N的overlap不为零，许多小项相加可翻转某些bits。",
-          "odd mixture可写\\(S_{i}=\\operatorname{sgn}(\\xi _{i}^{1}+\\xi _{i}^{2}+\\xi _{i}^{3})\\)。三pattern逐component投票不会tie，并可能在Hebbian field下self-consistent。它不是输入训练集中的任何一个pattern，却可成为fixed point，减少usable basins并导致错误组合式recall。",
-          "two-pattern mixture有component ties，稳定性更依tie rule和bias；odd mixtures在dense unbiased model中更典型。pattern correlations会产生structured mixtures，不应把所有false memories归于 independent Gaussian noise。识别spurious state可比较与每个 stored-pattern overlap，而非只看energy低。",
-          "basin边界随P增加收缩。一个cue可与目标overlap最高却仍流向mixture，因为energy landscape由所有patterns共同塑造。实验类比“memory blending”只能作为hypothesis；真实memory distortion还受semantic inference、encoding overlap与systems consolidation影响。"
+          "检索模式1 时设\\(S\\approx \\xi ^{1}\\)。代赫布 W 后，\\(h_{i}\\)的\\(\\mu =1\\)项与\\(\\xi _{i}^{1}\\)对齐，是信号；\\(\\mu >1\\)项包含随机重叠，是串扰。即使每个干扰模式与目标平均正交，有限 N 的重叠度不为零，许多小项相加可翻转某些位。 串扰来自其他已存储模式对当前局部场的贡献；目标自身的信号与这些贡献相加之后，才决定下一次更新的方向。",
+          "奇数混合态可写\\(S_{i}=\\operatorname{sgn}(\\xi _{i}^{1}+\\xi _{i}^{2}+\\xi _{i}^{3})\\)。三模式逐分量投票不会平局，并可能在赫布局部场下自身一致。它不是输入训练集中的任何一个模式，却可成为固定点，减少可用吸引域并导致错误组合式回忆。",
+          "双模式混合态有分量平局，稳定性更依零局部场的更新规则和偏差；奇数混合态在稠密无偏模型中更典型。模式相关性会产生有结构的混合态，不应把所有错误记忆归于独立高斯噪声。识别伪记忆状态可比较与每个已存储的模式重叠度，而非只看能量低。",
+          "吸引域边界随 P 增加收缩。一个线索可与目标重叠度最高却仍流向混合态，因为能量景观由所有模式共同塑造。实验类比“记忆混合”只能作为假说；真实记忆失真还受语义推断、编码重叠度与系统巩固影响。"
         ],
         "keyPoints": [
-          "local field可拆成target-aligned signal和multi-memory crosstalk。",
-          "odd component-wise majority可形成spurious attractor。",
-          "最低energy或最高初始overlap都不保证目标retrieval。"
+          "局部场可拆成目标对齐的信号和多记忆串扰。",
+          "奇数逐分量 多数可形成伪记忆吸引子。",
+          "最低能量或最高初始重叠度都不保证目标检索。"
         ],
         "derivation": {
-          "title": "local field的signal与crosstalk",
-          "setup": "将Hebbian sum展开，并指定当前state为目标pattern1。",
+          "title": "局部场的信号与串扰",
+          "setup": "将赫布求和展开，并指定当前状态为目标模式1。",
           "steps": [
             {
-              "title": "代入weights",
-              "explanation": "把P个outer products放入local field。",
+              "title": "代入权重",
+              "explanation": "把 P 个外乘积放入局部场。",
               "latex": "h_i=\\frac1N\\sum_{\\mu=1}^{P}\\xi_i^{(\\mu)}\\sum_{j\\ne i}\\xi_j^{(\\mu)}S_j"
             },
             {
-              "title": "指定retrieval state",
+              "title": "指定检索状态",
               "explanation": "令\\(S_{j}=\\xi _{j}^{1}\\)。"
             },
             {
@@ -334,35 +336,36 @@
             },
             {
               "title": "命名剩余项",
-              "explanation": "第二项由其他patterns的finite overlaps构成crosstalk。"
+              "explanation": "第二项由其他模式的有限重叠度构成串扰。"
             }
           ],
           "symbolNotes": [
-            "\\(\\mu\\)索引memory，i、j索引neurons。",
-            "patterns与states为±1，h单位随W。"
+            "\\(\\mu\\)索引记忆，i、j 索引神经元。",
+            "模式与状态为±1，h 单位随 W。"
           ],
-          "unitsCheck": "1/N normalization使signal保持order one，而非随N增长。",
-          "limitCheck": "\\(P=1\\)时crosstalk sum为空；\\(N\\to \\infty\\)且P固定时random crosstalk趋弱。"
+          "unitsCheck": "1/N 归一化使信号保持一的量级，而非随 N 增长。",
+          "limitCheck": "\\(P=1\\)时串扰求和为空；\\(N\\to \\infty\\)且 P 固定时随机串扰趋弱。"
         },
         "workedExample": {
-          "title": "三pattern majority bit",
-          "problem": "某unit三个patterns的bits为(+1,+1,-1)。求odd-mixture bit；若为(+1,-1,-1)又如何？",
+          "title": "三模式多数位",
+          "problem": "某单元三个模式的位为(+1,+1,-1)。求奇数混合态位；若为(+1,-1,-1)又如何？",
           "steps": [
-            "第一组\\(\\operatorname{sum}=+1\\)，sign为+1。",
-            "第二组\\(\\operatorname{sum}=-1\\)，sign为-1。",
-            "三个±1相加不可能为0，所以无需tie rule。"
+            "第一组\\(\\operatorname{sum}=+1\\)，符号为+1。",
+            "第二组\\(\\operatorname{sum}=-1\\)，符号为-1。",
+            "三个±1 相加不可能为0，所以无需零局部场的更新规则。"
           ],
-          "result": "两种mixture bits分别为+1与-1。",
-          "sanityCheck": "结果总是等于三者中的majority sign。"
+          "result": "两种混合态位分别为+1 与-1。",
+          "sanityCheck": "结果总是等于三者中的多数符号。"
         },
         "pitfalls": [
-          "把crosstalk mean近零误写成每个instance都为零。",
-          "用spurious attractor直接解释所有人类false memory。"
-        ]
+          "把串扰均值近零误写成每个实例都为零。",
+          "用伪记忆吸引子直接解释所有人类错误记忆。"
+        ],
+        "transition": "能量下降保证的是向稳定状态移动，不保证那个状态就是想找回的记忆。加入多个存储模式后，把局部场拆成目标信号与串扰，便能解释错误比特和伪混合吸引子为何出现。"
       },
       {
         "id": "l26-m5",
-        "title": "Gaussian crosstalk、loading 与经典capacity",
+        "title": "记忆负载与经典容量",
         "sourceRefs": [
           {
             "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -370,67 +373,68 @@
           }
         ],
         "paragraphs": [
-          "对unbiased independent patterns，单个非目标overlap\\(\\sum _j\\xi _{j}^{\\mu }\\xi _{j}^{1}\\)均值0、variance约N。乘1/N后每pattern对field贡献variance约1/N；P-1个近独立项相加给crosstalk variance约\\((P-1)/N\\approx \\alpha\\)。中央极限定理据此把noise近似Gaussian。",
-          "目标bit稳定要求\\(\\xi _{i}^{1}h_{i}>0\\)，即unit-aligned signal 1加noise仍为正。若\\(\\mathrm{noise}\\approx N(0,\\alpha )\\)，single-step error近似\\(\\Phi (-1/\\sqrt \\alpha )\\)，随\\(\\alpha\\)上升。units errors又反馈到fields，完整self-consistency使经典dense model retrieval临界\\(\\alpha c\\)约0.138，而不是简单single-step tail直接给出。",
-          "P可随N线性增长，但“capacity=Pmax”依retrieval criterion、acceptable error与basin size。0.138适用于symmetric、dense、unbiased、independent random±1 patterns、Hebbian weights与经典dynamics。sparse coding、correlated patterns、alternative rules或 finite N 都会改数值。",
-          "spin-glass regime仍有很多stable states但与任何 stored pattern 的 overlap 很小，network收敛却不retrieval。只检查energy convergence会误判memory成功；应同时测target overlap、bit error、basin volume与 trial-to-trial outcome。"
+          "对无偏且相互独立的模式，单个非目标重叠度\\(\\sum _j\\xi _{j}^{\\mu }\\xi _{j}^{1}\\)均值0、方差约 N。乘1/N 后每模式对局部场贡献方差约1/N；P-1 个近独立项相加给串扰方差约\\((P-1)/N\\approx \\alpha\\)。中央极限定理据此把噪声近似高斯。",
+          "目标位稳定要求\\(\\xi _{i}^{1}h_{i}>0\\)，即单元对齐的信号 1 加噪声仍为正。若\\(\\mathrm{noise}\\approx N(0,\\alpha )\\)，单步误差近似\\(\\Phi (-1/\\sqrt \\alpha )\\)，随\\(\\alpha\\)上升。单元误差又反馈到局部场，完整自洽性使经典稠密模型检索临界\\(\\alpha_c\\)约0.138，而不是简单单步尾部直接给出。",
+          "P 可随 N 线性增长，但“容量=Pmax”依检索标准、可接受的误差与吸引域大小。0.138 适用于对称、稠密、无偏、独立随机±1 模式、赫布权重与经典动力学。稀疏编码、相关的模式、候选规则或有限 N 都会改数值。",
+          "自旋玻璃状态区域仍有很多稳定状态但与任何已存储的模式的重叠度很小，网络收敛却不检索。只检查能量收敛会误判记忆成功；应同时测目标重叠度、位误差、吸引域体积与试次间结果。 这些指标分别检查收敛位置、错误数量和对线索扰乱的容忍度。"
         ],
         "keyPoints": [
-          "crosstalk variance约为loading \\(\\alpha\\)。",
-          "Gaussian tail给error tendency，完整critical value需self-consistency。",
-          "convergence与retrieval是不同评价。"
+          "串扰方差约为负载 \\(\\alpha\\)。",
+          "高斯尾部给误差趋势，完整临界价值需自身一致性。",
+          "收敛与检索是不同评价。"
         ],
         "derivation": {
-          "title": "crosstalk variance的数量级",
-          "setup": "假设patterns independent、unbiased，并忽略有限index correlations。",
+          "title": "串扰方差的数量级",
+          "setup": "假设模式独立、无偏，并忽略有限索引相关性。",
           "steps": [
             {
-              "title": "单pattern overlap",
-              "explanation": "N个独立±1 products求和，均值0、variance N。",
+              "title": "单模式重叠度",
+              "explanation": "N 个独立±1 乘积求和，均值0、方差 N。",
               "latex": "\\operatorname{Var}\\!\\left(\\sum_j\\xi_j^{(\\mu)}\\xi_j^{(1)}\\right)\\approx N"
             },
             {
               "title": "包含1/N",
-              "explanation": "单pattern field contribution variance除以\\(N^{2}\\)。",
+              "explanation": "单模式局部场贡献方差除以\\(N^{2}\\)。",
               "latex": "\\operatorname{Var}(z_{\\mu})\\approx\\frac1N"
             },
             {
-              "title": "累加P-1项",
-              "explanation": "独立variances相加。",
+              "title": "累加 P-1 项",
+              "explanation": "独立方差相加。",
               "latex": "\\operatorname{Var}\\!\\left(\\sum_{\\mu=2}^{P}z_{\\mu}\\right)\\approx\\frac{P-1}{N}"
             },
             {
-              "title": "定义loading",
-              "explanation": "大N时用\\(\\alpha =P/N\\)表示。",
+              "title": "定义负载",
+              "explanation": "大 N 时用\\(\\alpha =P/N\\)表示。",
               "latex": "\\sigma_{\\mathrm{cross}}^2\\approx\\alpha=\\frac PN"
             }
           ],
           "symbolNotes": [
-            "\\(\\alpha\\)无量纲，P与N是counts。",
-            "\\(z\\mu\\)表示一个non-target pattern对aligned field的贡献。"
+            "\\(\\alpha\\)无量纲，P 与 N 是计数。",
+            "\\(z\\mu\\)表示一个非目标模式对对齐的局部场的贡献。"
           ],
-          "unitsCheck": "variance为dimensionless field平方，因classic weights与states无量纲。",
-          "limitCheck": "P固定且\\(N\\to \\infty\\)时\\(\\alpha \\to 0\\)；P与N同比增长时noise保持order one。"
+          "unitsCheck": "方差为无量纲局部场平方，因经典权重与状态无量纲。",
+          "limitCheck": "P 固定且\\(N\\to \\infty\\)时\\(\\alpha \\to 0\\)；P 与 N 同比增长时噪声保持一的量级。"
         },
         "workedExample": {
-          "title": "粗略Gaussian bit error",
-          "problem": "\\(\\alpha =0.25\\)，取\\(\\mathrm{signal}=1\\)、noise standard deviation\\(\\sqrt \\alpha =0.5\\)。error需\\(\\mathrm{noise}<-1\\)，相当于标准正态\\(Z<-2\\)。",
+          "title": "粗略高斯位误差",
+          "problem": "\\(\\alpha =0.25\\)，取\\(\\mathrm{signal}=1\\)、噪声标准差\\(\\sqrt \\alpha =0.5\\)。误差需\\(\\mathrm{noise}<-1\\)，相当于标准正态\\(Z<-2\\)。",
           "steps": [
-            "标准化threshold为\\(-1/0.5=-2\\)。",
-            "查标准正态tail \\(\\Phi (-2)\\approx 0.0228\\)。",
-            "这是single-step independent-noise近似，不是最终capacity判据。"
+            "标准化阈值为\\(-1/0.5=-2\\)。",
+            "查标准正态尾部 \\(\\Phi (-2)\\approx 0.0228\\)。",
+            "这是单步独立噪声近似，不是最终容量判据。"
           ],
-          "result": "粗略bit error约2.28%。",
-          "sanityCheck": "\\(\\alpha\\)增大时threshold绝对值减小，left-tail probability应增大。"
+          "result": "粗略位误差约2.28%。",
+          "sanityCheck": "\\(\\alpha\\)增大时阈值绝对值减小，左尾部概率应增大。"
         },
         "pitfalls": [
-          "把0.138当作所有脑memory的容量比例。",
-          "用Gaussian单步tail冒充完整临界推导。"
-        ]
+          "把0.138 当作所有脑记忆的容量比例。",
+          "用高斯单步尾部冒充完整临界推导。"
+        ],
+        "transition": "串扰分解指出了其他记忆怎样干扰目标，容量问题还要问干扰随存储数量增长得多快。对独立无偏模式估计串扰方差，再采用高斯近似，可以区分单步错误倾向与完整检索临界条件。"
       },
       {
         "id": "l26-m6",
-        "title": "Sparse stochastic associative memory 与global inhibition",
+        "title": "稀疏联想记忆与全局抑制",
         "sourceRefs": [
           {
             "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -438,63 +442,64 @@
           }
         ],
         "paragraphs": [
-          "真实ensembles常只有fraction a的units active。用\\(\\xi _{i}\\in {0,1}\\)且\\(P(active)=a\\)时，pattern mean不为零；Hebbian rule需中心化\\(\\xi _{i}-a\\)，避免所有units共享巨大positive bias。retrieval output可用probabilistic logistic rule而非hard sign，引入temperature控制stochasticity。",
-          "把 global inhibition 直接写进每条 weight：在 centered Hebbian term 后减去 \\(\\gamma /(aN)\\)。代入 local field 后，这一 uniform negative term 变成 \\(-(\\gamma /(aN))\\sum _jS_{j}\\)，因此当前 active population 越大，所有 units 承受的抑制越强。它与 stochastic threshold u 共同限制总 activity 接近 aN，但不等同于某一个 inhibitory neuron；若改写成 adaptive threshold，必须明确给出与 population activity 的对应关系。",
-          "sparse code减少patterns间active overlap，可提高每synapse携带的信息或某些capacity metrics；“near-optimal”必须说明按patterns/neuron、bits/synapse还是retrieval error衡量。不能直接把dense \\(\\alpha c=0.138\\)与sparse模型一个数字比较而不统一activity和metric。",
-          "temperature \\(T\\to 0\\)时probabilistic update接近deterministic threshold，T大时state更随机并可能逃出shallow minima。stochasticity可帮助sampling，却也损害stable recall。验证alternative model应画false positive/negative rates、overlap distribution和capacity随a、T、inhibition变化，而非只报最大P。"
+          "真实细胞群常只有比例 a 的单元活跃。用\\(\\xi _{i}\\in {0,1}\\)且\\(P(active)=a\\)时，模式均值不为零；赫布规则需中心化\\(\\xi _{i}-a\\)，避免所有单元共享巨大正偏置。检索输出可用概率性 Logistic 更新而非确定性符号函数，引入温度控制随机性。",
+          "把全局抑制直接写进每条权重：在中心化后的赫布项后减去 \\(\\gamma /(aN)\\)。代入局部场后，这一均匀负项变成 \\(-(\\gamma /(aN))\\sum _jS_{j}\\)，因此当前活跃群体越大，所有单元承受的抑制越强。它与随机阈值 u 共同限制总活动接近 aN，但不等同于某一个抑制性神经元；若改写成自适应阈值，必须明确给出与群体活动的对应关系。",
+          "稀疏编码减少模式间活跃重叠度，可提高每突触携带的信息或某些容量指标；“接近最优”必须说明按模式/神经元、位/突触还是检索误差衡量。不能直接把稠密 \\(\\alpha c=0.138\\)与稀疏模型一个数字比较而不统一活动和指标。",
+          "温度 \\(T\\to 0\\)时概率性更新接近确定性阈值，T 大时状态更随机并可能逃出浅极小值。随机性可帮助采样，却也损害稳定回忆。验证候选模型应画假阳性与假阴性率、重叠度分布和容量随 a、T、抑制变化，而非只报最大 P。 同一容量数值只有在这些条件一致时才可比较。"
         ],
         "keyPoints": [
-          "sparse patterns需mean subtraction或threshold control。",
-          "global inhibition稳定population activity。",
-          "capacity比较必须统一information与error metric。"
+          "稀疏模式需均值相减或阈值控制。",
+          "全局抑制稳定群体活动。",
+          "容量比较必须统一信息与误差指标。"
         ],
         "derivation": {
-          "title": "稀疏 Hebbian covariance rule 与 global inhibition",
-          "setup": "用 active probability a 中心化每个 pattern bit，并完整保留 uniform inhibitory weight term。",
+          "title": "稀疏赫布协方差规则与全局抑制",
+          "setup": "用活跃概率 a 中心化每个模式位，并完整保留均匀抑制性权重项。",
           "steps": [
             {
-              "title": "定义中心化bit",
-              "explanation": "active bit高于mean，inactive bit低于mean。",
+              "title": "定义中心化位",
+              "explanation": "活跃位高于均值，不活跃位低于均值。",
               "latex": "\\widetilde\\xi_i^{(\\mu)}=\\xi_i^{(\\mu)}-a"
             },
             {
-              "title": "写完整 weight rule",
-              "explanation": "第一项用 centered products 消除 common mean，第二项提供 global inhibition。",
+              "title": "写完整权重规则",
+              "explanation": "第一项用中心化后的乘积消除共同均值，第二项提供全局抑制。",
               "latex": "W_{ij}=\\frac{1}{Na(1-a)}\\sum_{\\mu=1}^{P}(\\xi_i^{(\\mu)}-a)(\\xi_j^{(\\mu)}-a)-\\frac{\\gamma}{aN}"
             },
             {
-              "title": "展开 global field",
-              "explanation": "uniform inhibitory weight 对所有 active presynaptic units 求和，形成随 population activity 增长的负反馈。",
+              "title": "展开全局局部场",
+              "explanation": "均匀抑制性权重对所有活跃突触前单元求和，形成随群体活动增长的负反馈。",
               "latex": "h_i=\\sum_jW_{ij}S_j=h_i^{\\mathrm{Hebb}}-\\frac{\\gamma}{aN}\\sum_jS_j"
             },
             {
-              "title": "加入 stochastic update",
-              "explanation": "用 threshold u 与 effective temperature T 把 field 转为下一时刻 active probability。",
+              "title": "加入随机更新",
+              "explanation": "用阈值 u 与有效温度 T 把局部场转为下一时刻活跃概率。",
               "latex": "P(S_i(t+1)=1)=\\frac{1}{1+\\exp[-(h_i-u)/T]}"
             }
           ],
           "symbolNotes": [
-            "a 是 target sparsity，\\(\\gamma\\) 是 global-inhibition strength，T 为 effective temperature。",
-            "\\(\\xi\\) 与 S 为 0 或 1；u、h 与 T 使用相容的 field units。"
+            "a 是目标稀疏度，\\(\\gamma\\) 是全局抑制强度，T 为有效温度。",
+            "\\(\\xi\\) 与 S 为 0 或 1；u、h 与 T 使用相容的局部场单元。"
           ],
-          "unitsCheck": "normalization \\(a(1-a)\\) 无量纲；global term 与 Hebbian term 必须同为 weight units，logistic argument (h-u)/T 必须无量纲。",
-          "limitCheck": "\\(a=0\\)或1时variance为零且公式不可用；\\(T\\to 0\\)时logistic趋向hard threshold。"
+          "unitsCheck": "归一化 \\(a(1-a)\\) 无量纲；全局项与赫布项必须同为权重单位，Logistic 自变量 (h-u)/T 必须无量纲。",
+          "limitCheck": "\\(a=0\\)或1 时方差为零且公式不可用；\\(T\\to 0\\)时 Logistic 趋向确定性阈值。"
         },
         "workedExample": {
-          "title": "中心化sparse bits",
-          "problem": "sparsity \\(a=0.1\\)。一个active bit与一个inactive bit的centered values分别是多少？它们乘积呢？",
+          "title": "中心化稀疏位",
+          "problem": "稀疏度 \\(a=0.1\\)。一个活跃位与一个不活跃位的中心化后的数值分别是多少？它们乘积呢？",
           "steps": [
-            "active:\\(1-a=0.9\\)。",
-            "inactive:\\(0-a=-0.1\\)。",
-            "乘积\\(0.9\\times (-0.1)=-0.09\\)，表示不同activity的pair贡献负association。"
+            "活跃:\\(1-a=0.9\\)。",
+            "不活跃:\\(0-a=-0.1\\)。",
+            "乘积\\(0.9\\times (-0.1)=-0.09\\)，表示不同活动的成对项贡献负关联。"
           ],
-          "result": "centered values为0.9与-0.1，乘积-0.09。",
-          "sanityCheck": "平均centered value为\\(0.1\\times 0.9+0.9\\times (-0.1)=0\\)。"
+          "result": "中心化后的数值为0.9 与-0.1，乘积-0.09。",
+          "sanityCheck": "平均中心化后的价值为\\(0.1\\times 0.9+0.9\\times (-0.1)=0\\)。"
         },
         "pitfalls": [
-          "把dense sign rule原样用于sparse 0/1 code。",
-          "声称sparse capacity更高却不说明比较单位。"
-        ]
+          "把稠密符号规则原样用于稀疏 0/1 编码。",
+          "声称稀疏容量更高却不说明比较单位。"
+        ],
+        "transition": "经典容量分析依赖稠密、无偏的二元模式，不能直接移植到只激活少数细胞的表征。改用稀疏编码后，需要重新处理均值偏置、活动抑制与随机更新，并在一致的误差标准下比较容量。"
       }
     ]
   },
@@ -503,9 +508,9 @@
       "id": "L26-FIG-A1",
       "lecture": 26,
       "moduleId": "l26-m4",
-      "title": "Hopfield basins：下降不等于正确回忆",
-      "alt": "接近目标的 cue 经异步更新下降到 stored pattern，而 ambiguous cue 虽然同样降低 energy 却下降到 spurious minimum",
-      "caption": "在 symmetric weights、zero diagonal 与 asynchronous updates 的条件下，两条路径都让 E 不增加；但 cue 所在 basin 决定终点。接近目标的 cue 可完成到 \\(\\xi ^{\\mu }\\)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。",
+      "title": "Hopfield 吸引域：下降不等于正确回忆",
+      "alt": "接近目标的线索经异步更新下降到存储模式，而含糊的线索虽然同样降低能量却下降到伪记忆极小值",
+      "caption": "在对称权重、零对角线与异步更新的条件下，两条路径都让 E 不增加；但线索所在吸引域决定终点。接近目标的线索可补全为 \\(\\xi ^{\\mu }\\)，含糊的线索则可能被串扰引到混合态，因此必须区分能量降低、到达固定点与正确回忆：能量较低本身并不意味着已经稳定，固定点也可能对应伪记忆。",
       "sourceRefs": [
         {
           "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -521,13 +526,13 @@
       "nodes": [
         {
           "id": "target-cue",
-          "label": "cue near\npattern \\(\\mu\\)",
+          "label": "邻近线索\n模式 \\(\\mu\\)",
           "x": 8,
           "y": 72
         },
         {
           "id": "target-update",
-          "label": "asynchronous\nsign update",
+          "label": "异步\nsign 更新",
           "x": 37,
           "y": 72
         },
@@ -540,19 +545,19 @@
         },
         {
           "id": "stored",
-          "label": "stored pattern\n\\(\\xi ^{\\mu }\\)",
+          "label": "存储模式\n\\(\\xi ^{\\mu }\\)",
           "x": 94,
           "y": 72
         },
         {
           "id": "ambiguous-cue",
-          "label": "ambiguous\ncue",
+          "label": "含糊的\n线索",
           "x": 8,
           "y": 25
         },
         {
           "id": "spurious-update",
-          "label": "asynchronous\nsign update",
+          "label": "异步\nsign 更新",
           "x": 37,
           "y": 25
         },
@@ -565,7 +570,7 @@
         },
         {
           "id": "spurious",
-          "label": "spurious\nminimum",
+          "label": "伪记忆\n极小值",
           "x": 94,
           "y": 25
         }
@@ -582,7 +587,7 @@
         {
           "from": "target-energy",
           "to": "stored",
-          "label": "target basin"
+          "label": "目标吸引域"
         },
         {
           "from": "ambiguous-cue",
@@ -595,7 +600,7 @@
         {
           "from": "spurious-energy",
           "to": "spurious",
-          "label": "mixture basin"
+          "label": "混合吸引域"
         }
       ],
       "lectureTitle": "Hopfield 联想记忆模型"
@@ -629,7 +634,7 @@
     "思考题：overlap \\(m=1\\)、0、−1 分别表示？"
   ],
   "synthesis": [
-    "Hopfield model 把 explicit memory 抽象为 attractor dynamics：partial cue 经 recurrent updates 收敛到 stored pattern。symmetric weights 与 asynchronous single-neuron updates 保证 Ising energy 不增加。\\(P=1\\) 时 Hebbian weights 使目标及其反号成为 fixed points；\\(P>1\\) 时其他 memories 产生 crosstalk noise，loading \\(\\alpha =P/N\\) 增大后 retrieval errors 上升，并在经典 dense random model 的 \\(\\alpha \\approx 0.138\\) 附近失去稳定 retrieval。"
+    "Hopfield 模型把联想记忆写成吸引子动力学：局部线索通过循环更新趋向某个稳定状态。对称权重和异步单神经元更新保证能量不增加，但不保证总能找回正确记忆。\\(P=1\\) 时，赫布权重使目标模式及其反号成为固定点；\\(P>1\\) 时，不同记忆产生串扰。负载 \\(\\alpha =P/N\\) 增大后，检索错误增加；经典稠密随机模式模型在 \\(\\alpha \\approx 0.138\\) 附近失去稳定检索，这不是大脑记忆容量的估计。"
   ],
   "workedExamples": [
     "7.1 小 N pattern completion",
@@ -643,10 +648,10 @@
     {
       "id": "L26-F01",
       "lecture": 26,
-      "name": "binary neuron state",
+      "name": "二值神经元状态",
       "expression": "Si ∈ {−1, +1}",
       "latex": "S_i\\in\\{-1,+1\\}",
-      "conditions": "classic dense model",
+      "conditions": "经典稠密 Hopfield 模型",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -654,10 +659,10 @@
     {
       "id": "L26-F02",
       "lecture": 26,
-      "name": "asynchronous update",
+      "name": "异步更新",
       "expression": "Si ← sgn(hi )",
       "latex": "S_i(t+1)=\\operatorname{sgn}\\!\\left(\\sum_{j=1}^{N}W_{ij}S_j(t)\\right)",
-      "conditions": "one neuron at a time",
+      "conditions": "每次只更新一个神经元",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -665,10 +670,10 @@
     {
       "id": "L26-F03",
       "lecture": 26,
-      "name": "Hopfield energy",
+      "name": "Hopfield 能量",
       "expression": "1∑ E=− Wij Si Sj 2 ij",
       "latex": "E=-\\frac{1}{2}\\sum_i\\sum_{j\\ne i}W_{ij}S_iS_j",
-      "conditions": "symmetric W",
+      "conditions": "W 对称",
       "sectionId": "l26-m2",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 2
@@ -676,7 +681,7 @@
     {
       "id": "L26-F04",
       "lecture": 26,
-      "name": "Hebbian storage rule",
+      "name": "赫布存储规则",
       "expression": "Wij = N −1 ξi ξj µ",
       "latex": "W_{ij}=\\frac{1}{N}\\sum_{\\mu=1}^{P}\\xi_i^{(\\mu)}\\xi_j^{(\\mu)},\\qquad W_{ii}=0",
       "conditions": "\\(W_{ii}=0\\)",
@@ -687,10 +692,10 @@
     {
       "id": "L26-F05",
       "lecture": 26,
-      "name": "pattern overlap",
+      "name": "模式重叠度",
       "expression": "mµ = N −1 ξ i Si i",
       "latex": "m^{\\mu}=\\frac{1}{N}\\sum_{i=1}^{N}\\xi_i^{(\\mu)}S_i",
-      "conditions": "±1 patterns",
+      "conditions": "模式分量取 ±1",
       "sectionId": "l26-m2",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 2
@@ -698,10 +703,10 @@
     {
       "id": "L26-F06",
       "lecture": 26,
-      "name": "retrieval field decomposition",
+      "name": "检索局部场的分解",
       "expression": "h = signal + crosstalk",
       "latex": "h=\\text{signal}+\\text{crosstalk}",
-      "conditions": "random-pattern analysis",
+      "conditions": "采用随机模式分析",
       "sectionId": "l26-m3",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 3
@@ -709,10 +714,10 @@
     {
       "id": "L26-F07",
       "lecture": 26,
-      "name": "loading ratio",
+      "name": "记忆负载比",
       "expression": "α = P /N",
       "latex": "\\alpha=\\frac{P}{N}",
-      "conditions": "P memories, N neurons",
+      "conditions": "P 个记忆，N 个神经元",
       "sectionId": "l26-m5",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 5
@@ -720,10 +725,10 @@
     {
       "id": "L26-F08",
       "lecture": 26,
-      "name": "classic capacity threshold",
+      "name": "经典容量阈值",
       "expression": "αc ≈ 0.138",
       "latex": "\\alpha_c\\approx 0.138",
-      "conditions": "dense unbiased random Hopfield",
+      "conditions": "稠密、无偏随机模式的 Hopfield 模型",
       "sectionId": "l26-m2",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 2
@@ -735,7 +740,7 @@
       "lecture": 26,
       "zh": "联想记忆",
       "en": "associative memory",
-      "definition": "由 partial/noisy cue 恢复 stored pattern。",
+      "definition": "从不完整或含噪的线索恢复已存储的模式。",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -745,7 +750,7 @@
       "lecture": 26,
       "zh": "细胞集合",
       "en": "cell assembly",
-      "definition": "共同活动并因 Hebbian connections 形成的 neuron group。",
+      "definition": "通过共同活动与赫布连接形成的神经元群。",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -755,7 +760,7 @@
       "lecture": 26,
       "zh": "吸引子盆地",
       "en": "basin of attraction",
-      "definition": "收敛到同一 attractor 的 initial states 集合。",
+      "definition": "在动力学作用下收敛到同一吸引子的初始状态集合。",
       "sectionId": "l26-m4",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 4
@@ -765,7 +770,7 @@
       "lecture": 26,
       "zh": "模式补全",
       "en": "pattern completion",
-      "definition": "由 incomplete cue 重建完整 memory。",
+      "definition": "从不完整线索重建完整记忆。",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -775,7 +780,7 @@
       "lecture": 26,
       "zh": "异步更新",
       "en": "asynchronous update",
-      "definition": "每步只更新一个 unit。",
+      "definition": "每一步只更新一个单元。",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -785,7 +790,7 @@
       "lecture": 26,
       "zh": "Ising 能量",
       "en": "Ising energy",
-      "definition": "symmetric binary network 的 Lyapunov function。",
+      "definition": "对称二值网络中，用于分析异步动力学的能量函数。",
       "sectionId": "l26-m3",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 3
@@ -795,7 +800,7 @@
       "lecture": 26,
       "zh": "重叠",
       "en": "overlap",
-      "definition": "current state 与 stored pattern 的 normalized dot product。",
+      "definition": "当前状态与存储模式之间的归一化内积。",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -805,7 +810,7 @@
       "lecture": 26,
       "zh": "串扰",
       "en": "crosstalk",
-      "definition": "其他 stored patterns 对目标 retrieval 的 interference。",
+      "definition": "其他已存储模式对目标检索产生的干扰。",
       "sectionId": "l26-m2",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 2
@@ -815,7 +820,7 @@
       "lecture": 26,
       "zh": "伪吸引子",
       "en": "spurious attractor",
-      "definition": "不对应单一 stored pattern 的 stable state。",
+      "definition": "不对应某个单独存储模式的稳定状态。",
       "sectionId": "l26-m1",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 1
@@ -825,7 +830,7 @@
       "lecture": 26,
       "zh": "自旋玻璃",
       "en": "spin glass",
-      "definition": "大量无序 metastable states 主导的 regime。",
+      "definition": "大量无序亚稳态占主导的状态区域。",
       "sectionId": "l26-m4",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 4
@@ -835,21 +840,21 @@
       "lecture": 26,
       "zh": "温度",
       "en": "temperature",
-      "definition": "stochastic update noise 的 scale parameter。",
+      "definition": "控制随机更新噪声大小的参数。",
       "sectionId": "l26-m6",
       "sourceFile": "Lecture26-Memory-HopfieldModel.pdf",
       "sourcePage": 6
     }
   ],
   "commonTraps": [
-    "synchronous 与 asynchronous dynamics 混用 energy proof。",
-    "忘记 W 必须 symmetric 且 \\(W_{ii}=0\\)。",
-    "\\(P=1\\) 时只说 \\(\\xi \\) attractor，忽略 \\(-\\xi \\) 与 spurious/global symmetry。",
-    "把 overlap 与 exact bit accuracy 混为一谈。",
-    "crosstalk variance 不检查 N、P scaling。",
-    "把 Gaussian approximation 当精确 finite-N law。",
-    "把 0.138N 当作大脑 memory capacity。",
-    "需要明确\"memory capacity 0.138N\"只属于经典 dense randompattern Hopfield model 的稳定-retrieval criterion，不是大脑记忆容量结论。"
+    "把异步更新的能量证明用于同步更新，忽略更新规则不同。",
+    "忘记能量单调性要求 W 对称且 \\(W_{ii}=0\\)。",
+    "在 \\(P=1\\) 时只把 \\(\\xi\\) 视为吸引子，忽略 \\(-\\xi\\) 及模型的整体反号对称性。",
+    "混淆与目标模式的重叠和逐位完全正确的检索。",
+    "分析串扰方差时，未检查它随神经元数 N 和模式数 P 的变化。",
+    "把高斯近似当成有限 N 下精确成立的分布规律。",
+    "把 0.138N 当成大脑的记忆容量。",
+    "将 0.138N 的稳定检索容量从经典稠密随机模式 Hopfield 模型推广到大脑，忽略模式结构、更新规则和检索标准。"
   ],
   "errata": [
     {
@@ -873,7 +878,7 @@
       "sourcePage": 5,
       "sectionId": "l26-m5",
       "originalIssue": "这里 的 \\(\\alpha _{c}\\approx 0.138\\) 仅属于 classic dense unbiased random-pattern Hopfield retrieval criterion。",
-      "explanation": "units errors又反馈到fields，完整self-consistency使经典dense model retrieval临界\\(\\alpha c\\)约0.138，而不是简单single-step tail直接给出。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     },
     {
@@ -885,7 +890,7 @@
       "sourcePage": 6,
       "sectionId": "l26-m6",
       "originalIssue": "这里 的 sparse stochastic model 是 alternative family，capacity comparison 依 activity sparsity 与 information metric。",
-      "explanation": "不能直接把dense \\(\\alpha c=0.138\\)与sparse模型一个数字比较而不统一activity和metric。",
+      "explanation": "该记号或实现与后续推导所需的定义不一致，照字面使用会得到错误结果。",
       "correction": null
     }
   ],
@@ -902,37 +907,37 @@
         }
       ],
       "conceptTags": [
-        "Explicit memory、Hebbian assembly 与pattern completion"
+        "细胞集群与模式补全"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "为何\\(m>0\\)不能保证retrieval成功？",
+      "stem": "为何\\(m>0\\)不能保证检索成功？",
       "choices": [
         {
           "id": "a",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "只要重叠为正，线索就按定义属于目标吸引域，因此任何更新顺序都必然成功。"
         },
         {
           "id": "b",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "重叠本身就是网络能量，正重叠说明目标必定是唯一的全局能量最低点。"
         },
         {
           "id": "c",
-          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+          "text": "初始重叠只由存储数量决定，与当前线索中哪些比特被改变完全无关。"
         },
         {
           "id": "d",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "正重叠只说明线索相似；检索还取决于目标吸引域、串扰和网络条件。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Gaussian crosstalk、loading 与经典capacity”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Energy descent 与\\(P=1\\) stored attractor”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Spurious mixtures 与signal-plus-crosstalk分解”中的另一组变量与条件，不能由题干推出。"
+        "a": "重叠是相似性统计，吸引域则由完整动力学决定，两者不等价。",
+        "b": "模式重叠和网络能量是不同的量，正重叠不排除其他吸引子。",
+        "c": "重叠直接比较当前线索与目标模式，也会随具体错误比特变化。"
       },
-      "explanation": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。 engram一词指与memory存储和表达有因果关系的cellular ensemble，不能只凭activation correlation命名。"
+      "explanation": "它只量化起点相似度；吸引域还受存储量、具体串扰、更新顺序与网络参数影响。 记忆痕迹一词指与记忆存储和表达有因果关系的细胞群，不能只凭活动相关性命名。"
     },
     {
       "id": "L26-Q02",
@@ -946,37 +951,37 @@
         }
       ],
       "conceptTags": [
-        "Binary asynchronous dynamics 与stored random patterns"
+        "二值神经元的异步更新"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么\"每个neuron都更新过一次\"不保证fixed point？",
+      "stem": "为什么\"每个神经元都更新过一次\"不保证固定点？",
       "choices": [
         {
           "id": "a",
-          "text": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。"
+          "text": "后更新的单元会改变先前单元的局部场；需再检查完整一轮是否仍有状态改变。"
         },
         {
           "id": "b",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "一个单元被更新后，其局部场就被永久固定，后续邻居变化不会再影响它。"
         },
         {
           "id": "c",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "只要更新顺序随机，每个单元各更新一次就必然得到所有顺序共同的唯一固定点。"
         },
         {
           "id": "d",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "一轮后总能量比初始值低，就足以证明所有单元此后都保持不变，无需再检查各局部场。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Gaussian crosstalk、loading 与经典capacity”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Explicit memory、Hebbian assembly 与pattern completion”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Energy descent 与\\(P=1\\) stored attractor”中的另一组变量与条件，不能由题干推出。"
+        "b": "局部场依赖其他单元的当前状态，邻居更新会改变它。",
+        "c": "随机顺序不提供一次扫描收敛或唯一固定点的保证。",
+        "d": "能量下降可以发生在收敛过程中，不能证明已经到达固定点。"
       },
-      "explanation": "早先unit更新后，后续units改变会反过来改变它的local field；需再次检查整轮无变化。 每步选i，计算local field \\(h_{i}=\\sum _j W_{ij} S_{j}\\)，然后置\\(S_{i}\\leftarrow \\operatorname{sgn}(h_{i})\\)。"
+      "explanation": "早先单元更新后，后续单元改变会反过来改变它的局部场；需再次检查整轮无变化。 停止条件是完整检查中没有单元会改变，或能量和状态达到固定点。 一轮轮更新通常指平均更新 N 次，并不等于收敛。停止条件是完整检查中没有单元会改变，或能量和状态达到固定点。有限确定性异步系统在严格能量下降下不能无限访问新状态，但零局部场平局若随意翻转可产生退化。 实现时可记录每次更新前后的状态与能量，并固定处理零局部场的规则。这样能够区分真正达到固定点、单纯运行时间不足，以及同步更新导致的往返变化。"
     },
     {
       "id": "L26-Q03",
@@ -990,37 +995,37 @@
         }
       ],
       "conceptTags": [
-        "Energy descent 与\\(P=1\\) stored attractor"
+        "能量下降与\\(P=1\\) 存储吸引子"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "equation",
       "cognitiveLevel": "understand",
       "stem": "若W不对称，为什么\\(\\Delta E\\)推导失效？",
       "choices": [
         {
           "id": "a",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "非对称权重只改变能量的单位，所以原有证明可以原封不动使用。"
         },
         {
           "id": "b",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "非对称权重使配对项无法合成更新所用的同一局部场，原能量下降证明失效。"
         },
         {
           "id": "c",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "非对称性保证每次更新都增加能量，因此所有非对称网络都必然持续振荡而绝不收敛。"
         },
         {
           "id": "d",
-          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+          "text": "只要仍使用异步更新，任意非对称权重都自动变成等效的对称权重。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Gaussian crosstalk、loading 与经典capacity”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Explicit memory、Hebbian assembly 与pattern completion”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Spurious mixtures 与signal-plus-crosstalk分解”中的另一组变量与条件，不能由题干推出。"
+        "a": "对称性用于合并能量差中的两组配对项，并非单位选择。",
+        "c": "失去这个下降保证不等于证明能量必然上升或所有网络均不收敛。",
+        "d": "更新顺序并不改变权重矩阵的对称性。"
       },
-      "explanation": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。 只翻转unit i时，其他pair不变；利用\\(W_{ij}=W_{ji}\\)，energy change化为\\(\\Delta E=-\\Delta S_{i} h_{i}\\)。"
+      "explanation": "i作为第一和第二索引的成对项不能合并成同一个局部场，单一标量能量未必随更新下降。 \\(W_{ii}=0\\)移除自耦合并让\\(P=1\\) 局部场少一个项；N 大时(N-1)/N 接近1，但小 N 例题不能直接写成1。"
     },
     {
       "id": "L26-Q04",
@@ -1034,37 +1039,37 @@
         }
       ],
       "conceptTags": [
-        "Spurious mixtures 与signal-plus-crosstalk分解"
+        "检索中的信号、串扰与伪记忆"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么mixture energy低仍不能把它算作正确memory？",
+      "stem": "为什么混合态的能量低，仍不能把它算作正确记忆？",
       "choices": [
         {
           "id": "a",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "任何能量低于初始线索的状态，都应重新定义为该线索的正确记忆。"
         },
         {
           "id": "b",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "混合模式只要能量低，就证明它曾作为一个完整样本被存储，无法由多个模式的相互作用产生。"
         },
         {
           "id": "c",
-          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+          "text": "能量描述动力学稳定性，正确记忆由存储目标定义；稳定的混合模式仍可能不是目标模式。"
         },
         {
           "id": "d",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "网络能量包含显式目标标签，因此会自动排除所有未被指定为记忆的稳定状态。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Gaussian crosstalk、loading 与经典capacity”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Explicit memory、Hebbian assembly 与pattern completion”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Energy descent 与\\(P=1\\) stored attractor”中的另一组变量与条件，不能由题干推出。"
+        "a": "相对于初态的能量下降不能替代对目标身份的判断。",
+        "b": "多个存储模式的串扰可以产生未被单独存储的混合吸引子。",
+        "d": "标准能量函数没有用于判别目标身份的独立语义标签。"
       },
-      "explanation": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。 一个cue可与目标overlap最高却仍流向mixture，因为energy landscape由所有patterns共同塑造。"
+      "explanation": "正确回忆要求恢复指定的目标模式。能量只约束动力学的变化方向，既不识别目标身份，也不能仅凭数值较低就证明已到达稳定状态。 识别伪记忆状态可比较与每个已存储的模式重叠度，而非只看能量低。"
     },
     {
       "id": "L26-Q05",
@@ -1078,37 +1083,37 @@
         }
       ],
       "conceptTags": [
-        "Gaussian crosstalk、loading 与经典capacity"
+        "记忆负载与经典容量"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么\\(\\alpha =0.1\\)低于0.138仍不能保证每个cue成功？",
+      "stem": "为什么\\(\\alpha =0.1\\)低于0.138仍不能保证每个线索成功？",
       "choices": [
         {
           "id": "a",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "低于临界负载时，每个可能线索都属于目标吸引域，包括与其他记忆完全相同的线索。"
         },
         {
           "id": "b",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "0.138 是适用于任何大小、任何编码和任何错误容忍标准的精确有限网络保证。"
         },
         {
           "id": "c",
-          "text": "正确性由训练目标与behavioral identity定义；energy只决定动力学稳定，不知道哪些patterns被指定为记忆。"
+          "text": "只要网络能量最终停止下降，就已证明指定记忆检索成功，因此无需检查最终模式与目标是否一致。"
         },
         {
           "id": "d",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "临界负载是特定假设下的大网络典型结果；有限样本、线索质量和吸引域差异仍可导致失败。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Explicit memory、Hebbian assembly 与pattern completion”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Energy descent 与\\(P=1\\) stored attractor”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Spurious mixtures 与signal-plus-crosstalk分解”中的另一组变量与条件，不能由题干推出。"
+        "a": "容量结果不保证任意线索检索指定目标，不同吸引域仍然存在。",
+        "b": "该经典数值依赖模式统计、大网络极限和检索判据。",
+        "c": "收敛到错误或伪吸引子也会使更新停止，必须另查目标一致性。"
       },
-      "explanation": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。 P可随N线性增长，但\"capacity=Pmax\"依retrieval criterion、acceptable error与basin size。"
+      "explanation": "临界值是大N典型统计与特定检索标准；有限模式、质量较差的线索、吸引域差异和随机实例仍可失败。 P 可随 N 线性增长，但\"容量=Pmax\"依检索标准、可接受的误差与吸引域大小。"
     },
     {
       "id": "L26-Q06",
@@ -1122,37 +1127,37 @@
         }
       ],
       "conceptTags": [
-        "Sparse stochastic associative memory 与global inhibition"
+        "稀疏联想记忆与全局抑制"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么不中心化的0/1 Hebb容易产生全局positive bias？",
+      "stem": "为什么不中心化的0/1 赫布容易产生全局正偏置？",
       "choices": [
         {
           "id": "a",
-          "text": "只有共同active产生正项、inactive不产生抵消，许多patterns会让多数weights向正，推动过度activity。"
+          "text": "未中心化的共激活只贡献正项，非激活没有负项抵消，累积后可推动过度活动。"
         },
         {
           "id": "b",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "0/1 模式中大量零值会自动生成负权重，准确抵消所有共同激活产生的正权重。"
         },
         {
           "id": "c",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "只要每个模式足够稀疏，所有突触权重的均值就严格为零，不再需要中心化或阈值调节。"
         },
         {
           "id": "d",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "全局正偏置是因为赫布规则只统计共同静默，而完全忽略共同激活。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Gaussian crosstalk、loading 与经典capacity”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Explicit memory、Hebbian assembly 与pattern completion”中的另一组变量与条件，不能由题干推出。",
-        "d": "该结论使用“Energy descent 与\\(P=1\\) stored attractor”中的另一组变量与条件，不能由题干推出。"
+        "b": "乘积中含零只得到零，不会自动产生负项。",
+        "c": "稀疏并不等于零均值，未经中心化的共同激活仍产生正偏置。",
+        "d": "未中心化 0/1 外积的正贡献恰好来自共同激活。"
       },
-      "explanation": "只有共同active产生正项、inactive不产生抵消，许多patterns会让多数weights向正，推动过度activity。 用\\(\\xi _{i}\\in {0,1}\\)且\\(P(active)=a\\)时，pattern mean不为零；Hebbian rule需中心化\\(\\xi _{i}-a\\)，避免所有units共享巨大positive bias。"
+      "explanation": "只有共同活跃产生正项、不活跃的不产生抵消，许多模式会让多数权重向正，推动过度活动。 用\\(\\xi _{i}\\in {0,1}\\)且\\(P(active)=a\\)时，模式均值不为零；赫布规则需中心化\\(\\xi _{i}-a\\)，避免所有单元共享巨大正偏置。"
     },
     {
       "id": "L26-Q07",
@@ -1166,37 +1171,37 @@
         }
       ],
       "conceptTags": [
-        "Hopfield basins：下降不等于正确回忆"
+        "Hopfield 吸引域：下降不等于正确回忆"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Hopfield basins：下降不等于正确回忆\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"Hopfield 吸引域：下降不等于正确回忆\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "临界值是大N典型统计与特定retrieval criterion；finite patterns、bad cue、basin差异和随机instance仍可失败。"
+          "text": "图中的伪吸引子路径必然有一段能量上升，否则不可能到达错误记忆。"
         },
         {
           "id": "b",
-          "text": "接近目标的 cue 可完成到 \\(\\xi ^{\\mu }\\)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。"
+          "text": "两条路径都可降低能量，却进入目标或伪吸引域；收敛并不等同于正确回忆。"
         },
         {
           "id": "c",
-          "text": "它只量化起点相似度；basin还受存储量、具体crosstalk、update order与network parameters影响。"
+          "text": "只要两条路径使用相同的对称权重，每一个初始线索就必然到达同一个唯一存储模式。"
         },
         {
           "id": "d",
-          "text": "i作为第一和第二index的pair terms不能合并成同一个local field，单一标量energy未必随update下降。"
+          "text": "最低能量自动标明实验要求的目标身份，所以进入混合吸引域也应算作正确回忆。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "图中没有“Gaussian crosstalk、loading 与经典capacity”所需的变量与条件。",
-        "c": "图中没有“Explicit memory、Hebbian assembly 与pattern completion”所需的变量与条件。",
-        "d": "图中没有“Energy descent 与\\(P=1\\) stored attractor”所需的变量与条件。"
+        "a": "在给定对称异步条件下，错误吸引子也可以通过不增能量的更新到达。",
+        "c": "同一网络可有多个吸引域，初始线索会影响最终状态。",
+        "d": "能量本身不包含所要求目标的身份标签。"
       },
-      "explanation": "在 symmetric weights、zero diagonal 与 asynchronous updates 的条件下，两条路径都让 E 不增加；但 cue 所在 basin 决定终点。接近目标的 cue 可完成到 \\(\\xi ^{\\mu }\\)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。"
+      "explanation": "在对称权重、零对角线与异步更新的条件下，两条路径都让 E 不增加；但线索所在吸引域决定终点。接近目标的线索可补全为 \\(\\xi ^{\\mu }\\)，含糊的线索则可能被串扰引到混合态，因此必须区分能量降低、到达固定点与正确回忆：能量较低本身并不意味着已经稳定，固定点也可能对应伪记忆。"
     }
   ]
 }

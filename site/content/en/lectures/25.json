@@ -1,7 +1,7 @@
 {
   "lecture": 25,
   "slug": "25",
-  "zhTitle": "强化学习：MDP、Bellman 方程与 Q-learning",
+  "zhTitle": "强化学习、贝尔曼方程与 Q 学习",
   "enTitle": "Reinforcement Learning: MDPs, Bellman Equations, and Q-Learning",
   "companionFile": "NEUROSCI366_Lecture25_Reinforcement_Learning_MDP_Q_Learning_Companion.pdf",
   "companionPages": 25,
@@ -95,7 +95,7 @@
     ],
     "prerequisiteBridge": [
       "Reinforcement learning represents interaction as a loop. In state \\(s_{t}\\), an agent chooses action \\(a_{t}\\); the environment returns reward \\(R_{t+1}\\) and moves to \\(s_{t+1}\\). State is not just any observation on a screen; it should summarize the history needed to predict the future. If the same observation has different futures after 'key collected' versus 'key not collected,' key status must be added. Otherwise the Markov property fails and the algorithm incorrectly averages two distinct situations.",
-      "Return is the discounted sum of future rewards. Small \\(\\gamma\\) emphasizes the near term, while \\(\\gamma\\) close to one values the distant future and can keep the infinite sum of a continuing task finite. \\(V_{\\pi }(s)\\) is expected return from a state while following policy \\(\\pi\\). \\(Q_{\\pi }(s,a)\\) additionally fixes the first action. Neither is a single reward or current firing rate; both average over random future transitions and choices.",
+      "Return is the discounted sum of future rewards. Small \\(\\gamma\\) emphasizes the near term, while \\(\\gamma\\) close to 1 values the distant future and can keep the infinite sum of a continuing task finite. \\(V_{\\pi }(s)\\) is expected return from a state while following policy \\(\\pi\\). \\(Q_{\\pi }(s,a)\\) additionally fixes the first action. Neither is a single reward or current firing rate; both average over random future transitions and choices.",
       "The Bellman idea is simply 'the entire future equals the next reward plus the remaining future from the next state.' It turns a long-horizon problem into a one-step recursion. Q-learning builds the target \\(R+\\gamma \\max Q_{\\mathrm{next}}\\) from an actually sampled step, then moves the old estimate toward that target. The maximum assumes optimal actions thereafter; current behavior may still explore, allowing a greedy target to be learned from nongreedy data."
     ],
     "modules": [
@@ -172,7 +172,7 @@
           }
         ],
         "paragraphs": [
-          "Return from time t is \\(G_{t}=\\sum _{k=0}\\infty \\gamma ^kR_{t+k+1}\\). The first term is undiscounted, the following reward is multiplied by \\(\\gamma\\), and so on. \\(\\gamma\\) is not a learning rate; it changes temporal preference and mathematical convergence of the objective. A finite episode can use \\(\\gamma =1\\), whereas continuing positive reward generally requires \\(\\gamma <1\\).",
+          "Return from time t is \\(G_{t}=\\sum _{k=0}^{\\infty} \\gamma ^kR_{t+k+1}\\). The first term is undiscounted, the following reward is multiplied by \\(\\gamma\\), and so on. \\(\\gamma\\) is not a learning rate; it changes temporal preference and mathematical convergence of the objective. A finite episode can use \\(\\gamma =1\\), whereas continuing positive reward generally requires \\(\\gamma <1\\).",
           "\\(V_{\\pi }(s)=E_{\\pi }[G_{t}|s_{t}=s]\\) averages over environmental randomness and future policy actions. \\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\) fixes only the first action, after which \\(\\pi\\) is followed. Consequently, \\(V_{\\pi }(s)=\\sum _{a}\\pi (a|s)Q_{\\pi }(s,a)\\); under a deterministic policy, only the selected action contributes.",
           "Value scale varies with reward units and \\(\\gamma\\). If reward normalization differs across animals or sessions, V magnitudes cannot be compared directly. The rough time horizon associated with \\(\\gamma\\) is about \\(1/(1-\\gamma )\\) steps, but episodic termination and transition structure alter the actual influence.",
           "When relating a neural signal to V or Q, control immediate reward, state identity, and action. State value may appear before several actions, whereas Q should vary with the candidate action. Greater firing on high-reward trials alone cannot distinguish received reward, expected return, and movement vigor."
@@ -228,7 +228,8 @@
         "pitfalls": [
           "Treating \\(\\gamma\\) as learning rate \\(\\alpha\\).",
           "Conflating a single-trial return with expected value."
-        ]
+        ],
+        "transition": "A Markov state specifies information sufficient to predict the next step without yet defining the long-term goal of action selection. Discounted return supplies that goal, while state and state–action values specify the conditions held fixed in its expectation."
       },
       {
         "id": "l25-m3",
@@ -296,7 +297,8 @@
         "pitfalls": [
           "Applying the maximum to the current action that has already been executed.",
           "Extending a tabular convergence theorem unconditionally to a deep network."
-        ]
+        ],
+        "transition": "Value definitions include the entire future, whose possible trajectories are usually impractical to enumerate. Splitting return into immediate reward and the remainder, then conditioning on the next state, yields the recursive Bellman relation."
       },
       {
         "id": "l25-m4",
@@ -364,7 +366,8 @@
         "pitfalls": [
           "Setting Q directly to immediate reward.",
           "Assuming that off-policy learning removes the need for data covering unvisited actions."
-        ]
+        ],
+        "transition": "The Bellman relation specifies consistency in expectation, but a learner may not know the transition distribution. Q-learning constructs an update from an observed transition and relies on exploration to obtain evidence about other actions."
       },
       {
         "id": "l25-m5",
@@ -401,7 +404,8 @@
         "pitfalls": [
           "Calling a place field a transition model.",
           "Forcing behavior generated by a mixed strategy into a purely model-free or model-based category."
-        ]
+        ],
+        "transition": "Cached Q values can update from direct experience without automatically incorporating changes along unvisited routes. A generative transition and reward model offers another route; Tolman-style mazes and revaluation tests probe whether animals use such structural knowledge."
       },
       {
         "id": "l25-m6",
@@ -469,7 +473,8 @@
         "pitfalls": [
           "Equating a compressed sequence directly with a Bellman backup.",
           "Reporting sample efficiency without measuring planning failures caused by model bias."
-        ]
+        ],
+        "transition": "A generative map can produce simulated transitions as well as compare future routes. Applying value updates to both simulated and real experience clarifies how replay may improve sample efficiency and how repeated simulation may amplify model bias."
       }
     ]
   },
@@ -768,7 +773,7 @@
     {
       "id": "L25-G07",
       "lecture": 25,
-      "zh": "Bellman 方程",
+      "zh": "贝尔曼方程",
       "en": "Bellman equation",
       "definition": "A recursive self-consistency relation for value.",
       "sectionId": "l25-m3",
@@ -778,7 +783,7 @@
     {
       "id": "L25-G08",
       "lecture": 25,
-      "zh": "Q-learning",
+      "zh": "Q 学习",
       "en": "Q-learning",
       "definition": "A model-free, off-policy TD control algorithm.",
       "sectionId": "l25-m3",
@@ -886,27 +891,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "Every extra variable guarantees a Markov state, making any training improvement sufficient proof of a correct representation."
         },
         {
           "id": "b",
-          "text": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "text": "A valid Markov state must retain the complete raw history without compressing it."
         },
         {
           "id": "c",
-          "text": "It may memorize samples without capturing generalizable, future-relevant structure and will perform poorly in held-out contexts."
+          "text": "Trial IDs may memorize samples without capturing future-relevant structure, so predictions can fail in new contexts."
         },
         {
           "id": "d",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "Random environmental transitions rule out any useful Markov state, leaving trial number as the only possible representation available to the learner."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "It may memorize samples without capturing generalizable, future-relevant structure and will perform poorly in held-out contexts. An MDP is defined by states, actions, reward, and the transition–reward distribution \\(p(s',r|s,a)\\). The Markov property says that, conditioned on current s and a, the next outcome does not change with earlier trajectory. It does not require a deterministic environment: one s,a pair may lead randomly to several \\(s'\\) values, provided the probabilities are determined fully by current state.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Discounted return, \\(V_{\\pi }\\), and \\(Q_{\\pi }\\),” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Bellman recursion: from the entire future to a one-step backup,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Tolman mazes, latent state, and generative maps,” not the relationship asked about here."
+        "a": "Adding a variable need not capture all future-relevant information, and training error does not prove conditional independence.",
+        "b": "Only information needed to predict the future must be retained, not every past observation.",
+        "d": "Markov transitions may be stochastic; the condition concerns remaining dependence on history."
       }
     },
     {
@@ -930,27 +935,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "text": "Action value requires repeating that same action forever, regardless of later states."
         },
         {
           "id": "b",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "After the fixed first action, every later action must maximize value even when the evaluated policy is explicitly exploratory or otherwise nongreedy."
         },
         {
           "id": "c",
-          "text": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced."
+          "text": "Fixing the first action removes all environmental randomness, so no expectation over future outcomes is needed."
         },
         {
           "id": "d",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "The action condition fixes the first move only; after reaching the next state, future actions follow the policy being evaluated."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).' \\(V_{\\pi }(s)=E_{\\pi }[G_{t}|s_{t}=s]\\) averages over environmental randomness and future policy actions. \\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\) fixes only the first action, after which \\(\\pi\\) is followed. Consequently, \\(V_{\\pi }(s)=\\sum _{a}\\pi (a|s)Q_{\\pi }(s,a)\\); under a deterministic policy, only the selected action contributes.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Bellman recursion: from the entire future to a one-step backup,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Tolman mazes, latent state, and generative maps,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Simulated experience, hippocampal replay, and sample efficiency,” not the relationship asked about here."
+        "a": "The condition fixes the initial action rather than the entire future action sequence.",
+        "b": "Policy action value follows the stated policy thereafter, not an automatically substituted optimal policy.",
+        "c": "Transitions, rewards, and later actions can remain random after conditioning on the first action."
       }
     },
     {
@@ -974,27 +979,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "text": "Different successor states may have different best actions; averaging first and fixing one action removes state-dependent continuation choices."
         },
         {
           "id": "b",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "Maximum and expectation always commute because expectation is linear for every operation."
         },
         {
           "id": "c",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "The next action must be fixed before the successor state is observed, or the current value violates the Markov condition and cannot be defined."
         },
         {
           "id": "d",
-          "text": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced."
+          "text": "Moving the maximum outside permits independent optimal actions in each successor state and therefore increases flexibility."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem. The Bellman operator maps one Q table to another. In the tabular discounted setting with \\(\\gamma <1\\) it is a contraction, so repeated backups approach a unique fixed point. As \\(\\gamma\\) approaches 1, information reaches farther but contraction slows. Function approximation and off-policy sampling can invalidate this simple convergence guarantee.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Discounted return, \\(V_{\\pi }\\), and \\(Q_{\\pi }\\),” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Tolman mazes, latent state, and generative maps,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Simulated experience, hippocampal replay, and sample efficiency,” not the relationship asked about here."
+        "b": "Linearity of expectation does not allow an arbitrary nonlinear maximum to move outside it.",
+        "c": "A Markov policy can depend on the state actually reached; it need not use one action across states.",
+        "d": "An outer fixed action removes, rather than adds, state-dependent freedom."
       }
     },
     {
@@ -1018,27 +1023,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "The random branch must exclude the greedy action to count as exploration."
         },
         {
           "id": "b",
-          "text": "The random branch samples uniformly from all actions, including the greedy action, so total greedy probability exceeds \\(1-\\epsilon\\)."
+          "text": "The random branch samples all actions, including the greedy one, so it contributes additional probability to selecting that action."
         },
         {
           "id": "c",
-          "text": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "text": "The random branch weights actions in proportion to their values, so it always chooses the greedy action more often than any alternative."
         },
         {
           "id": "d",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "Conditional on entering the random branch, greedy choice has probability epsilon divided by the number of actions, since branch-entry probability must be counted again."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "The random branch samples uniformly from all actions, including the greedy action, so total greedy probability exceeds \\(1-\\epsilon\\). In behavioral analysis, exploration should not simply be labeled random error; animals may direct exploration toward uncertain actions. Fitting ε-greedy to systematic uncertainty seeking misattributes it to value or temperature. Model comparisons should include alternatives such as softmax and directed exploration.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Discounted return, \\(V_{\\pi }\\), and \\(Q_{\\pi }\\),” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Bellman recursion: from the entire future to a one-step backup,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Tolman mazes, latent state, and generative maps,” not the relationship asked about here."
+        "a": "The standard epsilon-greedy random branch samples uniformly from all actions.",
+        "c": "This branch is uniform rather than value weighted.",
+        "d": "Given the random branch, each action has conditional probability one divided by the action count. Multiplying by epsilon gives this branch’s contribution to the unconditional probability."
       }
     },
     {
@@ -1062,27 +1067,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "Any immediate response to reward revaluation can arise only from a complete generative map."
         },
         {
           "id": "b",
-          "text": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "text": "One place-tuned hippocampal neuron proves that the animal explicitly stores every environmental transition and reward and uses this map for the decision."
         },
         {
           "id": "c",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "Rules, instructions, or direct cues can also change choices rapidly; novel transitions and controls are needed to test map-based planning."
         },
         {
           "id": "d",
-          "text": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced."
+          "text": "Immediate choice changes exclude every learning mechanism and reveal nothing about state representation."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions. Tolman-style maze results suggest that animals can learn environmental structure rather than a single stimulus–response chain. When reward location changes or a familiar route closes, an agent with a transition map and reward model can plan before traversing every route again. A purely cached model-free Q estimate generally needs new prediction errors to change gradually.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Discounted return, \\(V_{\\pi }\\), and \\(Q_{\\pi }\\),” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Bellman recursion: from the entire future to a one-step backup,” not the relationship asked about here.",
-        "d": "That conclusion uses the variables and conditions from “Simulated experience, hippocampal replay, and sample efficiency,” not the relationship asked about here."
+        "a": "Several mechanisms can rapidly alter choice, so this behavior does not uniquely identify a full map.",
+        "b": "Spatial tuning neither establishes a complete model nor proves its use in the current choice.",
+        "d": "Well-controlled revaluation experiments can constrain candidate learning mechanisms and representations."
       }
     },
     {
@@ -1106,27 +1111,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "Enough replay guarantees that systematic model errors cancel like independent zero-mean noise."
         },
         {
           "id": "b",
-          "text": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "text": "Each replay sample is a new independent observation of the real environment and therefore carries exactly the same new information as an actual trial."
         },
         {
           "id": "c",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "More replay necessarily covers all state-action pairs uniformly, making sampling priorities irrelevant."
         },
         {
           "id": "d",
-          "text": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced."
+          "text": "Repeated simulation from a biased model can reinforce wrong values; benefits also depend on coverage, priorities, and model uncertainty."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced. Hippocampal replay reinstates place-cell sequences during rest or sleep. Sequences may run forward or backward, be temporally compressed, and favor reward or future paths. Replay is compatible with memory consolidation, planning, and credit propagation, but detecting a sequence does not show that downstream circuitry performs a particular numerical update; replay may serve several functions.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Discounted return, \\(V_{\\pi }\\), and \\(Q_{\\pi }\\),” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Bellman recursion: from the entire future to a one-step backup,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Tolman mazes, latent state, and generative maps,” not the relationship asked about here."
+        "a": "Repeatedly using a biased model does not automatically cancel its systematic error.",
+        "b": "A simulated sample comes from the existing model rather than a new observation of the environment.",
+        "c": "Replay can repeatedly concentrate on a few experiences instead of improving coverage."
       }
     },
     {
@@ -1150,27 +1155,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The agent selects an action from the current state, the environment returns reward and a next state, and a one-step Bellman target updates the action value backward."
+          "text": "The environment supplies reward and a successor state; a one-step target updates the current action value, and the successor starts the next interaction."
         },
         {
           "id": "b",
-          "text": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "text": "The Bellman backup directly changes environmental transition probabilities to force movement along the highest-value path."
         },
         {
           "id": "c",
-          "text": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "text": "Before choosing its action, the agent already observes that action's actual reward and successor state, so the illustrated target requires no environmental interaction."
         },
         {
           "id": "d",
-          "text": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced."
+          "text": "Reward updates every action in the successor state while leaving the executed current action's value unchanged."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "In the forward interaction, policy maps \\(s_{t}\\) to \\(a_{t}\\), after which the environment samples r and \\(s_{t+1}\\). The backup then uses \\(r+\\gamma \\max_{a'}Q(s_{t+1},a')\\) to update current \\(Q(s_{t},a_{t})\\). A dashed path carries \\(s_{t+1}\\) into the next cycle, showing that the Markov transition and value backup are connected steps pointing in opposite directions.",
       "wrongChoiceExplanations": {
-        "b": "The diagram does not show the variables and conditions discussed in “Discounted return, \\(V_{\\pi }\\), and \\(Q_{\\pi }\\).”",
-        "c": "The diagram does not show the variables and conditions discussed in “Tolman mazes, latent state, and generative maps.”",
-        "d": "The diagram does not show the variables and conditions discussed in “Simulated experience, hippocampal replay, and sample efficiency.”"
+        "b": "The backup updates a value estimate rather than rewriting the environment's transition mechanism.",
+        "c": "The actual reward and successor are observed after the action and environmental response.",
+        "d": "The illustrated update targets the value of the action actually taken in the current state."
       }
     }
   ]

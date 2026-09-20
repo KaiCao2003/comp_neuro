@@ -155,6 +155,7 @@ for (const summary of englishCourse) {
   const guideValues = [
     ...en.studyGuide.objectives,
     ...en.studyGuide.prerequisiteBridge,
+    ...en.studyGuide.modules.map((studyModule) => studyModule.transition ?? ''),
     ...en.studyGuide.modules.flatMap((module) => [module.title, ...module.paragraphs, ...module.keyPoints, module.derivation?.setup ?? '', ...(module.derivation?.steps ?? []).flatMap((step) => [step.title, step.explanation]), ...(module.derivation?.symbolNotes ?? []), module.derivation?.unitsCheck ?? '', module.derivation?.limitCheck ?? '', module.workedExample.title, module.workedExample.problem, ...module.workedExample.steps, module.workedExample.result, module.workedExample.sanityCheck, ...module.pitfalls]),
   ];
   const guideText = guideValues.join(' ');

@@ -118,7 +118,7 @@
         ],
         "paragraphs": [
           "Barlow's framework contributes three ideas: detect “passwords” of critical significance, filter signals for other nervous-system regions, and recode sensory messages to reduce redundancy. Focus on the third. Efficient coding explains why a code is advantageous under specified input statistics, noise, and cost. It is a normative hypothesis; the same receptive field may also have developmental, biophysical, or task-specific explanations.",
-          "Surprise for one outcome should increase as its probability decreases, and surprises for independent events should add. Because their joint probability is pq, the continuous monotone solution of \\(S(pq)=S(p)+S(q)\\) is \\(S(p)=-\\log_{bp}\\). Base 2 gives bits and base e gives nats; an event of probability 1 has zero surprise.",
+          "Surprise for one outcome should increase as its probability decreases, and surprises for independent events should add. Because their joint probability is pq, the continuous monotone solution of \\(S(pq)=S(p)+S(q)\\) is \\(S(p)=-\\log_b p\\). Base 2 gives bits and base e gives nats; an event of probability 1 has zero surprise.",
           "Entropy \\(H(X)=E[-\\log p(X)]\\) is expected surprise before observation. Conditional entropy \\(H(Y|X)\\) averages the remaining uncertainty in Y at each x. Mutual information \\(I(X;Y)=H(Y)-H(Y|X)\\) is the average reduction in uncertainty about Y after observing X, equivalently \\(\\sum p(x,y)\\log(p(x,y)/(p(x)p(y)))\\). It detects every statistical dependence, not only linear correlation.",
           "If X and Y are independent, the joint ratio equals 1, \\(\\log 1=0\\), and \\(I=0\\). Under standard discrete or continuous definitions, the converse also holds almost everywhere. For a continuous variable, differential entropy \\(h=-\\int f \\log f\\) uses density \\(f(x)\\); it can be negative and changes with measurement units. Mutual information is an entropy difference whose coordinate-scaling terms cancel, making it more stable than differential entropy alone."
         ],
@@ -173,6 +173,7 @@
       {
         "id": "L15-M2",
         "title": "The Noisy Retina of Atick and Redlich and Covariance Propagation",
+        "transition": "Mutual information measures retained signal, but redundancy reduction alone does not select a retinal filter. Placing the signal, input noise, and output noise at their respective processing stages lets us calculate how filtering changes information and cost together.",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -236,6 +237,7 @@
       {
         "id": "L15-M3",
         "title": "Gaussian Information, Nonunique Decorrelation, and the Selection of Center-Surround Filters",
+        "transition": "Covariance propagation separates filtered input noise from noise added at the output. Under Gaussian assumptions, these matrices yield a determinant expression for mutual information, allowing us to compare encoders and test whether decorrelation uniquely selects a center–surround structure.",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -689,27 +691,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term."
+          "text": "Densities can exceed one and differential entropy depends on units, so negative values need not violate probability theory."
         },
         {
           "id": "b",
-          "text": "Decorrelation requires only a diagonal or whitened output covariance, and any subsequent orthogonal rotation satisfies it equally well."
+          "text": "Negative differential entropy means some event probabilities are negative, which continuous models permit."
         },
         {
           "id": "c",
-          "text": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise."
+          "text": "The negative sign only comes from using natural logarithms, so changing to base-two logarithms always makes differential entropy nonnegative."
         },
         {
           "id": "d",
-          "text": "Equating high entropy directly with high useful information while ignoring the receiver, task, noise, and conditional structure."
+          "text": "Differential entropy must be nonnegative; a negative result proves that the density is not normalized and the model must be refitted."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term. Shared scale contributions cancel in MI, which remains nonnegative and retains its dependence interpretation. Barlow's framework contributes three ideas: detect “passwords” of critical significance, filter signals for other nervous-system regions, and recode sensory messages to reduce redundancy. Focus on the third. Efficient coding explains why a code is advantageous under specified input statistics, noise, and cost. It is a normative hypothesis; the same receptive field may also have developmental, biophysical, or task-specific explanations.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Gaussian Information, Nonunique Decorrelation, and the Selection of Center-Surround Filters,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “The Noisy Retina of Atick and Redlich and Covariance Propagation,” not the relationship asked about here.",
-        "d": "The error is: Equating high entropy directly with high useful information while ignoring the receiver, task, noise, and conditional structure."
+        "b": "Neither probability nor density may be negative; densities, unlike event probabilities, can exceed one.",
+        "c": "Changing logarithm base multiplies by a positive factor and does not change the sign.",
+        "d": "A normalized density can have negative differential entropy, for example on an interval shorter than one unit."
       }
     },
     {
@@ -733,27 +735,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Decorrelation requires only a diagonal or whitened output covariance, and any subsequent orthogonal rotation satisfies it equally well."
+          "text": "Both noises alter only the output mean, so combining them merely removes a constant bias."
         },
         {
           "id": "b",
-          "text": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise."
+          "text": "Input noise is filtered by the encoder, whereas output noise is added afterward; changing gain affects them differently and changes the optimal tradeoff."
         },
         {
           "id": "c",
-          "text": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term."
+          "text": "Independence guarantees that moving output noise before the encoder preserves the same output distribution for every candidate gain, without changing the noise model."
         },
         {
           "id": "d",
-          "text": "Omitting \\(A^\\mathrm{T}\\) in covariance propagation, producing a nonsymmetric result or incorrect output shape."
+          "text": "Only output noise is amplified by the encoder; input noise bypasses it."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise. Their effects on the gain tradeoff differ and cannot be merged. Assuming signal and noises are zero-mean and mutually independent, \\(C_{x}=C_{s}+C_{\\eta _{x}}\\). A linear transformation yields \\(AC_{x}A^\\mathrm{T}\\), after which output noise adds: \\(C_{y}=A(C_{s}+C_{\\eta _{x}})A^\\mathrm{T}+C_{\\eta _{y}}\\). Input noise is amplified or attenuated together with the signal, while output noise never passes through A; optimal gain therefore cannot be based on signal covariance alone.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Gaussian Information, Nonunique Decorrelation, and the Selection of Center-Surround Filters,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Barlow's Hypotheses and the Foundations of Information Theory,” not the relationship asked about here.",
-        "d": "The error is: Omitting \\(A^\\mathrm{T}\\) in covariance propagation, producing a nonsymmetric result or incorrect output shape."
+        "a": "Zero-mean noises still contribute covariance; their location determines whether that covariance is transformed.",
+        "c": "Independence permits covariance addition, not ignoring the intervening transform; equivalent input noise generally depends on the encoder.",
+        "d": "The order is reversed: input noise passes through the encoder with the signal, while output noise is added afterward."
       }
     },
     {
@@ -782,27 +784,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term."
+          "text": "Identity output covariance necessarily makes every channel's spatial filter a localized center–surround pattern."
         },
         {
           "id": "b",
-          "text": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise."
+          "text": "Every orthogonal rotation reintroduces correlations between whitened channels, so decorrelation alone already excludes all nonlocal encoders from the solution set."
         },
         {
           "id": "c",
-          "text": "Decorrelation requires only a diagonal or whitened output covariance, and any subsequent orthogonal rotation satisfies it equally well."
+          "text": "Whitened channels can still be orthogonally rotated without changing covariance; local center–surround shapes require symmetry, wiring, or additional constraints."
         },
         {
           "id": "d",
-          "text": "Claiming that more output entropy or channel capacity is unconditionally better while ignoring fixed information, noise, and firing cost."
+          "text": "More samples remove every ambiguity and select a unique center–surround filter."
         }
       ],
       "correctChoiceId": "c",
-      "explanation": "Decorrelation requires only a diagonal or whitened output covariance, and any subsequent orthogonal rotation satisfies it equally well. Translation and rotation symmetry, locality, wiring, noise, or cost constraints are needed to select center-surround filters from the equivalent solutions. A whitening transform V satisfies \\(VC_{x}V^\\mathrm{T}=I\\). For any orthogonal U, \\((UV)C_{x}(UV)^\\mathrm{T}=UIU^\\mathrm{T}=I\\), so the pre-output-noise whitened code may be rotated without changing covariance. Full Gaussian MI is also unchanged only if output noise is isotropic, \\(C_{\\eta _{y}}=\\sigma _{y}^{2}I\\), or absent; then total and conditional-noise covariances undergo the same orthogonal similarity transformation. With anisotropic output noise, rotating the encoder changes signal alignment with the noise axes and generally changes MI. Decorrelation alone therefore identifies a family of solutions, not a unique localized center-surround shape for each neuron.",
+      "explanation": "Decorrelation requires a diagonal output covariance; whitening additionally scales all variances to one, so any orthogonal rotation preserves the identity covariance. A merely diagonal covariance with unequal variances generally gains off-diagonal entries after rotation. Translation and rotation symmetry, locality, wiring, noise, or cost constraints are still needed to select center-surround filters among the equivalent whitened solutions. A whitening transform V satisfies \\(VC_{x}V^\\mathrm{T}=I\\). For any orthogonal U, \\((UV)C_{x}(UV)^\\mathrm{T}=UIU^\\mathrm{T}=I\\), so the pre-output-noise whitened code may be rotated without changing covariance. Full Gaussian MI is also unchanged only if output noise is isotropic, \\(C_{\\eta _{y}}=\\sigma _{y}^{2}I\\), or absent; then total and conditional-noise covariances undergo the same orthogonal similarity transformation. With anisotropic output noise, rotating the encoder changes signal alignment with the noise axes and generally changes MI. Decorrelation alone therefore identifies a family of solutions, not a unique localized center-surround shape for each neuron.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Barlow's Hypotheses and the Foundations of Information Theory,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “The Noisy Retina of Atick and Redlich and Covariance Propagation,” not the relationship asked about here.",
-        "d": "The error is: Claiming that more output entropy or channel capacity is unconditionally better while ignoring fixed information, noise, and firing cost."
+        "a": "Identity covariance constrains statistics but does not uniquely determine each channel's spatial shape.",
+        "b": "Identity covariance is invariant under orthogonal rotation, leaving an equivalent family of whitened encoders.",
+        "d": "Rotational ambiguity is a symmetry of the objective, not merely finite-sample noise."
       }
     },
     {
@@ -831,27 +833,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term."
+          "text": "Setting every encoder gain to zero is optimal because the channels become uncorrelated, which guarantees preservation of all sensory information."
         },
         {
           "id": "b",
-          "text": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise."
+          "text": "Output noise passes through the encoder with the signal, so a single fixed input covariance can replace all noise locations throughout optimization."
         },
         {
           "id": "c",
-          "text": "Claiming that more output entropy or channel capacity is unconditionally better while ignoring fixed information, noise, and firing cost."
+          "text": "Whitening uniquely determines each neuron's localized center–surround receptive field."
         },
         {
           "id": "d",
-          "text": "A flow diagram in which a sensory signal with input noise passes through a linear encoder and output-noise channel to a decorrelated output code jointly constrained by retained information and output cost."
+          "text": "Signal and input noise pass through the encoder before output noise is added; information and output cost constrain redundancy reduction."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "Encoder A transforms signal and input noise together, whereas output noise enters after A. A diagonal output covariance alone therefore does not guarantee useful coding. In the Atick–Redlich framework, redundancy is reduced subject to retained-information and output-power or dynamic-range constraints. Whitening removes second-order correlations, but any orthogonal rotation preserves whitened covariance; localized center-surround filters require additional assumptions such as symmetry and locality.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Barlow's Hypotheses and the Foundations of Information Theory.”",
-        "b": "The diagram does not show the variables and conditions discussed in “The Noisy Retina of Atick and Redlich and Covariance Propagation.”",
-        "c": "The error is: Claiming that more output entropy or channel capacity is unconditionally better while ignoring fixed information, noise, and firing cost."
+        "a": "Zero gain also removes the signal; absent correlation is not a substitute for information retention.",
+        "b": "Output noise is added after the encoder and cannot simply be treated as the same fixed input noise.",
+        "c": "Orthogonal rotations leave equivalent whitened codes; localized shapes need additional structural constraints."
       }
     }
   ]

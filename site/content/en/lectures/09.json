@@ -1,7 +1,7 @@
 {
   "lecture": 9,
   "slug": "09",
-  "zhTitle": "神经网络 II：突触动力学与 firing-rate 模型",
+  "zhTitle": "突触动力学与发放率模型",
   "enTitle": "Neural Networks II: Synaptic Dynamics and Rate Models",
   "companionFile": "NEUROSCI366_Lecture09_Neural_Networks2_Rate_Models_Companion.pdf",
   "companionPages": 20,
@@ -167,7 +167,8 @@
       },
       {
         "id": "L09-M2",
-        "title": "ODE representation of an exponential synapse and a network with 2N states",
+        "title": "Representing exponential synapses with state variables",
+        "transition": "The equivalence between exponential convolution and a first-order differential equation means that the relevant input history can be stored in one current state. Applying this result to the synaptic kernel introduces one synaptic-current variable per neuron, with spike inputs handled as event-driven jumps.",
         "sourceRefs": [
           {
             "file": "Lecture9-NeuralNetworks2.pdf",
@@ -243,6 +244,7 @@
       {
         "id": "L09-M3",
         "title": "From spike averaging to rate dynamics and feedforward layers",
+        "transition": "The voltage-and-synapse model retains the effects of individual spikes, while describing average activity may not require tracking every event. We next take conditional averages of spike inputs and add a current-to-rate relationship, distinguishing rate models that retain synaptic dynamics from those that eliminate that time scale.",
         "sourceRefs": [
           {
             "file": "Lecture9-NeuralNetworks2.pdf",
@@ -553,7 +555,7 @@
     {
       "id": "L09-G04",
       "lecture": 9,
-      "zh": "rate response",
+      "zh": "发放率响应时间",
       "en": "firing-rate response time",
       "definition": "The timescale on which a population rate approaches \\(F(I)\\).",
       "sectionId": "L09-M3",
@@ -593,7 +595,7 @@
     {
       "id": "L09-G08",
       "lecture": 9,
-      "zh": "sigmoid",
+      "zh": "S 形函数",
       "en": "sigmoid",
       "definition": "A smooth S-shaped function with lower and upper saturation.",
       "sectionId": "L09-M3",
@@ -680,27 +682,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The timescale ratio supplies a testable small parameter and an expected error: the fast variable relaxes before the slow variable changes."
+          "text": "Steady output remains equal to input because the exponential eventually reaches zero; kernel area affects only transients, not the gain for constant input."
         },
         {
           "id": "b",
-          "text": "An event-driven implementation applies the jump derived by integration and preserves impulse area. Unless fixed height is scaled by 1/dt, changing the time step changes both the area and total input."
+          "text": "Removing normalization makes kernel area the reciprocal of the time constant, so steady output is reduced by that factor while decay time remains unchanged."
         },
         {
           "id": "c",
-          "text": "If the weight units from this lecture's area-normalized convention are retained, the kernel area changes from 1 to \\(\\tau\\) and the steady-state response becomes \\(\\tau I_{0}\\)."
+          "text": "With fixed original weights retained, the missing normalization makes kernel area the time constant; steady output gains that factor, and units must be checked."
         },
         {
           "id": "d",
-          "text": "Multiplying only part of the equation by the integrating factor and failing to verify the product rule."
+          "text": "This merely switches from area to peak normalization; because the exponential shape is unchanged, neither the weight interpretation nor the constant-input output needs to change."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "If the weight units from this lecture's area-normalized convention are retained, the kernel area changes from 1 to \\(\\tau\\) and the steady-state response becomes \\(\\tau I_{0}\\). If peak normalization is intentional, weights must instead be interpreted as amplitudes and their units checked again. Consider \\(\\tau dx/dt=-x+I(t)\\). Moving terms and dividing by \\(\\tau\\) gives \\(dx/dt+x/\\tau =I(t)/\\tau\\). After multiplication by \\(e^{t/\\tau }\\), the left side becomes \\(d[xe^{t/\\tau }]/dt\\) by the product rule. Integrating from initial time \\(t_{0}\\) to the present t retains both an initial-condition term and a forced integral. If the system is assumed to have been stable since the distant past and the initial transient has vanished, the lower limit can instead be written as \\(-\\infty\\).",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “From spike averaging to rate dynamics and feedforward layers,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “ODE representation of an exponential synapse and a network with 2N states,” not the relationship asked about here.",
-        "d": "The error is: Multiplying only part of the equation by the integrating factor and failing to verify the product rule."
+        "a": "Steady gain for constant input is the integral of the kernel. Decay of an impulse response does not make its final value determine constant-input output.",
+        "b": "The integral of the unnormalized exponential is the time constant, not its reciprocal. The missing coefficient changes overall gain.",
+        "d": "Normalization conventions can change, but preserving the physical model requires consistent weights and units. Identical shape does not imply identical gain."
       }
     },
     {
@@ -715,7 +717,7 @@
         }
       ],
       "conceptTags": [
-        "ODE representation of an exponential synapse and a network with 2N states"
+        "Representing exponential synapses with state variables"
       ],
       "difficulty": 2,
       "type": "debug",
@@ -724,27 +726,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "If the weight units from this lecture's area-normalized convention are retained, the kernel area changes from 1 to \\(\\tau\\) and the steady-state response becomes \\(\\tau I_{0}\\)."
+          "text": "Event-driven updates set pulse width to zero and discard impulse area; stability improves because synaptic input is removed and only smooth decay remains."
         },
         {
           "id": "b",
-          "text": "The timescale ratio supplies a testable small parameter and an expected error: the fast variable relaxes before the slow variable changes."
+          "text": "A fixed-height one-bin pulse already represents fixed charge; a smaller step automatically samples that same event more often and therefore preserves its area."
         },
         {
           "id": "c",
-          "text": "Treating W simultaneously as kernel area and current-jump amplitude, thereby omitting a factor of \\(\\tau _{s}\\)."
+          "text": "Event-driven updates avoid step-size dependence because weight units and kernel normalization can be ignored; the same number is added whether weight denotes charge or current."
         },
         {
           "id": "d",
-          "text": "An event-driven implementation applies the jump derived by integration and preserves impulse area. Unless fixed height is scaled by 1/dt, changing the time step changes both the area and total input."
+          "text": "Event-driven updates apply the integrated impulse’s fixed jump; a one-bin pulse with fixed height instead changes area and total input when step size changes."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "An event-driven implementation applies the jump derived by integration and preserves impulse area. Unless fixed height is scaled by 1/dt, changing the time step changes both the area and total input. For network neuron i, the input events are \\(S_{i}(t)=\\sum _jW_{ij}\\Delta _{j}(t)+\\sum _jU_{ij}X_{j}(t)\\). The synaptic state therefore obeys \\(\\tau _{s} dI_{i}/dt=-I_{i}+S_{i}(t)\\), while the membrane state obeys C \\(dV_{i}/dt=-G_{L}(V_{i}-E_{L})+I_{i}\\). Each i has two continuous variables, \\(V_{i}\\) and \\(I_{i}\\), so N neurons have 2N ODE states in total.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Integrating factors, causal integrals, and exponential convolution,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “From spike averaging to rate dynamics and feedforward layers,” not the relationship asked about here.",
-        "c": "The error is: Treating W simultaneously as kernel area and current-jump amplitude, thereby omitting a factor of \\(\\tau _{s}\\)."
+        "a": "An event-driven update preserves the finite integrated effect as a jump. It does not remove synaptic input.",
+        "b": "The stated event still occupies one bin. Shortening that bin at fixed height reduces area rather than automatically adding more event samples.",
+        "c": "The jump must be derived from the actual state equation. Weight units and kernel normalization determine that jump."
       }
     },
     {
@@ -778,27 +780,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The timescale ratio supplies a testable small parameter and an expected error: the fast variable relaxes before the slow variable changes."
+          "text": "A fast synaptic state approaches quasi-equilibrium before firing rates change; without time-scale separation, removing it may alter delays, transients, and stability."
         },
         {
           "id": "b",
-          "text": "If the weight units from this lecture's area-normalized convention are retained, the kernel area changes from 1 to \\(\\tau\\) and the steady-state response becomes \\(\\tau I_{0}\\)."
+          "text": "A small synaptic time constant makes synaptic current itself nearly zero, allowing both its derivative and all recurrent input to be removed without changing average activity."
         },
         {
           "id": "c",
-          "text": "An event-driven implementation applies the jump derived by integration and preserves impulse area. Unless fixed height is scaled by 1/dt, changing the time step changes both the area and total input."
+          "text": "Finite time constants never affect the steady-state equation, so deleting the synaptic derivative preserves both steady rates and all transient predictions exactly."
         },
         {
           "id": "d",
-          "text": "Claiming that a model retains single-trial Poisson fluctuations after averaging its spike trains."
+          "text": "Faster synapses are statistically independent of firing rate, so the joint dynamics factorize; deleting the synaptic derivative merely removes an independent noise component."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "The timescale ratio supplies a testable small parameter and an expected error: the fast variable relaxes before the slow variable changes. Without timescale separation, deleting the derivative changes delay, stability, and transients and must be tested against data. The first approximation assumes that the rate responds rapidly, sets \\(h=F(I)\\) directly, and retains only synaptic dynamics. A more complete second model adds \\(\\tau _{h} dh/dt=-h+F(I)\\), keeping separate response times for I and h. If synapses are much faster than rate, \\(\\tau _{s}\\ll \\tau _{h}\\), set \\(I\\approx Wh+Ux\\) to obtain the common form \\(\\tau _{h} dh/dt=-h+F(Wh+Ux)\\). Every deleted derivative must be justified by an explicit timescale separation.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Integrating factors, causal integrals, and exponential convolution,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “ODE representation of an exponential synapse and a network with 2N states,” not the relationship asked about here.",
-        "d": "The error is: Claiming that a model retains single-trial Poisson fluctuations after averaging its spike trains."
+        "b": "A fast synapse can still carry finite quasi-steady current. Eliminating a derivative does not eliminate input or connectivity.",
+        "c": "A zero derivative at equilibrium does not imply equivalent dynamics. Without time-scale separation, removing a state can change transients and stability.",
+        "d": "Different time scales do not imply statistical independence. Inputs and feedback still couple the states, and quasi-equilibrium reduction is not simply noise removal."
       }
     },
     {
@@ -822,27 +824,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "If the weight units from this lecture's area-normalized convention are retained, the kernel area changes from 1 to \\(\\tau\\) and the steady-state response becomes \\(\\tau I_{0}\\)."
+          "text": "Equal peaks guarantee equal total areas and integrated effects of one spike; the time constant can only shift when the peak occurs."
         },
         {
           "id": "b",
-          "text": "Comparison of fast and slow exponentially decaying synaptic states with the same initial amplitude"
+          "text": "Both curves have the same peak, but a larger synaptic time constant gives slower decay and longer memory; equal peaks do not imply equal areas."
         },
         {
           "id": "c",
-          "text": "The timescale ratio supplies a testable small parameter and an expected error: the fast variable relaxes before the slow variable changes."
+          "text": "A larger time constant means faster synaptic updating and an earlier return to zero; the higher slow curve must therefore reflect a stronger initial input."
         },
         {
           "id": "d",
-          "text": "Treating W simultaneously as kernel area and current-jump amplitude, thereby omitting a factor of \\(\\tau _{s}\\)."
+          "text": "These equal-peak curves also describe area-normalized kernels at equal weights; changing the time constant alters decay but cannot affect the normalized kernel’s peak."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "For a peak-normalized exponential response, larger \\(\\tau _{s}\\) makes the effect of a spike decay more slowly and preserves a longer memory. Under the area-normalized kernel \\(K_{s}=\\tau _{s}^{-1}e^{-t/\\tau _{s}}\\), the peak also changes as \\(1/\\tau _{s}\\), so the normalization convention must be checked before curves are compared.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Integrating factors, causal integrals, and exponential convolution.”",
-        "c": "The diagram does not show the variables and conditions discussed in “From spike averaging to rate dynamics and feedforward layers.”",
-        "d": "The error is: Treating W simultaneously as kernel area and current-jump amplitude, thereby omitting a factor of \\(\\tau _{s}\\)."
+        "a": "At a fixed peak, a slower exponential has larger area. Both peaks occur at event onset here, rather than being shifted in time.",
+        "c": "A larger time constant gives a smaller fractional decay per unit time. Initial amplitudes are equal here; the difference is decay speed.",
+        "d": "An area-normalized exponential has peak amplitude inversely proportional to its time constant. Equal weights then do not imply equal peaks."
       }
     }
   ]

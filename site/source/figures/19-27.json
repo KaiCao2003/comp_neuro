@@ -3,9 +3,9 @@
     "id": "L19-FIG-A1",
     "lecture": 19,
     "moduleId": "l19-m6",
-    "title": "Scree cliff 与累计方差",
-    "alt": "归一化 scree 曲线快速下降后进入平缓尾部，累计方差曲线则逐渐接近百分之百",
-    "caption": "按主成分顺序比较两条曲线：单个 eigenvalue 在 cliff 后只贡献少量新增方差，而累计方差仍单调增加。拐点提供候选维度，不等于自动给出唯一的截断位置；图中坐标仅表达第 6 页的归一化关系，不是经验数据。",
+    "title": "碎石图与累计解释方差",
+    "alt": "归一化碎石图曲线快速下降后进入平缓尾部，累计方差曲线则逐渐接近百分之百",
+    "caption": "按主成分顺序比较两条曲线：单个特征值在陡降后只贡献少量新增方差，而累计方差仍单调增加。拐点提供候选维度，不等于自动给出唯一的截断位置；图中坐标仅表达第 6 页的归一化关系，不是经验数据。",
     "sourceRefs": [
       {
         "file": "Lecture19-PopulationActivity-PCA-UPDATE.pdf",
@@ -18,7 +18,7 @@
     "yLabel": "归一化方差 / 累计比例",
     "curves": [
       {
-        "label": "eigenvalue \\(\\lambda _{k}\\)",
+        "label": "特征值 \\(\\lambda _{k}\\)",
         "points": [
           [
             5,
@@ -90,17 +90,32 @@
       {
         "x": 38,
         "y": 20,
-        "label": "cliff 后边际收益变小"
+        "label": "陡降后边际收益变小"
       }
-    ]
+    ],
+    "questionDistractors": [
+      {
+        "text": "陡降后每个特征值变小，因此累计方差曲线也应转向下降。",
+        "explanation": "累计方差是非负特征值的归一化部分和。小特征值使新增比例变小，但不会让已经累计的方差减少。"
+      },
+      {
+        "text": "陡降后的尾部接近平坦，表示那些主成分各自解释完全相同且为零的方差，可以无损删除。",
+        "explanation": "尾部平坦只表示相邻特征值相近且较小，不表示全部为零；删除非零特征值对应的方向仍有重构误差。"
+      },
+      {
+        "text": "陡降的位置唯一确定了真实神经维度，并保证该截断保留全部行为信息。",
+        "explanation": "拐点只是候选截断依据；维度选择还受噪声、预处理和目标影响，活动方差也不保证行为信息保留。"
+      }
+    ],
+    "questionAnswer": "拐点后单个特征值较小，累计方差仍增加；拐点只提示候选维度。"
   },
   {
     "id": "L20-FIG-A1",
     "lecture": 20,
     "moduleId": "l20-m4",
-    "title": "Morris–Lecar nullclines 与 relaxation cycle",
-    "alt": "电压恢复相平面中的 N 形电压 nullcline、S 形恢复 nullcline、不稳定交点和环绕交点的 relaxation trajectory",
-    "caption": "两条 nullclines 的交点是候选平衡点；这里交点不稳定，轨迹便沿 V-nullcline 的外侧吸引支缓慢移动，并在 folds 附近快速跳到另一支。闭环的长段对应慢 recovery，近水平跨越对应快 voltage transition；曲线是第 3–4 页机制的归一化示意。",
+    "title": "Morris–Lecar 零流线与弛豫振荡周期",
+    "alt": "电压恢复相平面中的 N 形电压零流线、S 形恢复零流线、不稳定交点和环绕交点的弛豫轨迹",
+    "caption": "两条零流线的交点是候选平衡点；这里交点不稳定，轨迹便沿电压零流线的外侧吸引支缓慢移动，并在折点附近快速跳到另一支。闭环的长段对应慢恢复，近水平跨越对应快电压转移；曲线是第 3–4 页机制的归一化示意。",
     "sourceRefs": [
       {
         "file": "Lecture20-CentralPatternGenerators.pdf",
@@ -113,11 +128,11 @@
     ],
     "schematic": true,
     "kind": "state-space",
-    "xLabel": "membrane voltage V（low → high）",
-    "yLabel": "recovery variable N",
+    "xLabel": "膜电压 V（低 → 高）",
+    "yLabel": "恢复变量 N",
     "nullclines": [
       {
-        "label": "V-nullcline",
+        "label": "电压零流线",
         "points": [
           [
             8,
@@ -194,7 +209,7 @@
     ],
     "trajectories": [
       {
-        "label": "relaxation cycle",
+        "label": "弛豫振荡周期",
         "points": [
           [
             24,
@@ -243,7 +258,7 @@
       {
         "x": 50,
         "y": 40,
-        "label": "unstable fixed point",
+        "label": "不稳定固定点",
         "stable": false
       }
     ],
@@ -263,15 +278,30 @@
         "y": 53,
         "label": "slow"
       }
+    ],
+    "questionAnswer": "外侧分支上的慢恢复与折点附近的快速电压跳跃组成循环；图中交点不稳定，轨迹不在那里停下。",
+    "questionDistractors": [
+      {
+        "text": "零流线就是时间轨迹；交点稳定，因此状态沿闭环反复经过交点。",
+        "explanation": "零流线是导数为零的点集，不是时间分段；图中交点不稳定，闭环绕过它。"
+      },
+      {
+        "text": "近水平跨越表示电压几乎不变而恢复变量快速跃迁；沿外分支的长段才是电压以相同速度持续增长的过程。",
+        "explanation": "横轴是电压；近水平跨越主要改变电压，而外分支段体现慢恢复，不是恒速电压增长。"
+      },
+      {
+        "text": "闭合环只由初值决定；图中每个点都使两个导数为零，所以轨迹不需要任何快慢变化就能持续绕行。",
+        "explanation": "两个导数同时为零只能静止，不能沿闭环运动；循环来自沿途非零的向量场。"
+      }
     ]
   },
   {
     "id": "L21-FIG-A1",
     "lecture": 21,
     "moduleId": "l21-m2",
-    "title": "Eigenvalue-one integrator 的三种命运",
+    "title": "积分模态的三种变化：泄漏、保持与增长",
     "alt": "命令结束后，特征值小于一的模态衰减，等于一的模态保持，大于一的模态增长",
-    "caption": "输入撤掉后，同一初始 mode amplitude 的走向只取决于 \\(1-\\lambda\\)：\\(\\lambda <1\\) 时泄漏，\\(\\lambda =1\\) 时导数项的恢复系数为零而保持记忆，\\(\\lambda >1\\) 时小偏差会增长。因此 \\(\\det(I-W)=0\\) 只保证积分模态，还必须检查其余模态的稳定性。",
+    "caption": "输入撤掉后，同一初始模态振幅的走向只取决于 \\(1-\\lambda\\)：\\(\\lambda <1\\) 时泄漏，\\(\\lambda =1\\) 时导数项的恢复系数为零而保持记忆，\\(\\lambda >1\\) 时小偏差会增长。因此 \\(\\det(I-W)=0\\) 只保证积分模态，还必须检查其余模态的稳定性。",
     "sourceRefs": [
       {
         "file": "Lecture21-OculomotorIntegrator.pdf",
@@ -281,10 +311,10 @@
     "schematic": true,
     "kind": "plot",
     "xLabel": "命令结束后的时间",
-    "yLabel": "mode amplitude \\(\\alpha\\)（normalized）",
+    "yLabel": "模态振幅 \\(\\alpha\\)（归一化的）",
     "curves": [
       {
-        "label": "\\(\\lambda  < 1\\)：leak",
+        "label": "\\(\\lambda  < 1\\)：泄漏",
         "points": [
           [
             0,
@@ -378,15 +408,30 @@
         "y": 70,
         "label": "\\(\\lambda =1\\)：状态被保持"
       }
+    ],
+    "questionAnswer": "输入撤除后，模式按连接特征值分成衰减、保持和增长；存在积分模式仍不保证其余方向稳定。",
+    "questionDistractors": [
+      {
+        "text": "三条曲线只反映初始振幅不同；输入撤除后所有模式必须以同一时间常数衰减。",
+        "explanation": "图中变化的是连接特征值及其与漏项的差，因而增长率不同；初值不是唯一差别。"
+      },
+      {
+        "text": "高于 1 的特征值产生更强恢复力，因此增长曲线应改成最快衰减；只有小于 1 才可能使偏差不断放大。",
+        "explanation": "该解释颠倒符号；超过 1 后递归反馈超过漏电，完整模式增长率为正。"
+      },
+      {
+        "text": "中间保持曲线已经证明整个网络在任意扰动下稳定，不必再检查其他特征值、初态偏差或横向模式的增长。",
+        "explanation": "一条保持曲线只证明该模式没有漏项；其他方向仍可能衰减或增长。"
+      }
     ]
   },
   {
     "id": "L22-FIG-A1",
     "lecture": 22,
     "moduleId": "l22-m5",
-    "title": "从 population activity 到闭环 BMI",
-    "alt": "神经群体活动经过 GPFA latent inference、跨日对齐和共享 BMI decoder 产生 cursor feedback，再反馈到新的神经活动",
-    "caption": "观测活动先被 GPFA 压到 daily latent coordinates，再由 \\(A_{d}\\) 对齐到共同空间并交给共享 decoder B；decoder 输出改变 cursor feedback，反馈又会改变后续 neural activity。因而跨日稳定指低维映射可转移，不要求单个 neuron 的 loading 不变。",
+    "title": "从群体活动到闭环 BMI",
+    "alt": "神经群体活动经过 GPFA 潜变量推断、跨日对齐和共享 BMI 解码器产生光标反馈，再反馈到新的神经活动",
+    "caption": "观测活动先被 GPFA 压到每日潜在坐标，再由 \\(A_{d}\\) 对齐到共同空间并交给共享解码器 B；解码器输出改变光标反馈，反馈又会改变后续神经活动。因而跨日稳定指低维映射可转移，不要求单个神经元的载荷不变。",
     "sourceRefs": [
       {
         "file": "Lecture22-MotorCortex-UPDATE.pdf",
@@ -402,33 +447,33 @@
     "nodes": [
       {
         "id": "activity",
-        "label": "spikes / rates\n\\(r_{d}(t)\\)",
+        "label": "脉冲 / 发放率\n\\(r_{d}(t)\\)",
         "x": 8,
         "y": 65
       },
       {
         "id": "latent",
-        "label": "GPFA latent\n\\(\\alpha _{d}(t)\\)",
+        "label": "GPFA 潜在\n\\(\\alpha _{d}(t)\\)",
         "x": 36,
         "y": 65,
         "tone": "accent"
       },
       {
         "id": "aligned",
-        "label": "cross-day\n\\(A_{d}\\) \\(\\alpha _{d}\\)",
+        "label": "跨日\n\\(A_{d}\\) \\(\\alpha _{d}\\)",
         "x": 64,
         "y": 65
       },
       {
         "id": "decoder",
-        "label": "BMI decoder\nB \\(\\widetilde{\\alpha }_d\\)",
+        "label": "BMI 解码器\nB \\(\\widetilde{\\alpha }_d\\)",
         "x": 92,
         "y": 65,
         "tone": "accent"
       },
       {
         "id": "feedback",
-        "label": "cursor +\nfeedback",
+        "label": "光标 +\n反馈",
         "x": 92,
         "y": 20
       }
@@ -452,13 +497,28 @@
       {
         "from": "decoder",
         "to": "feedback",
-        "label": "action"
+        "label": "动作"
       },
       {
         "from": "feedback",
         "to": "activity",
-        "label": "closed loop",
+        "label": "闭环",
         "dashed": true
+      }
+    ],
+    "questionAnswer": "每日潜在坐标先对齐再交给共享解码器；光标反馈返回参与者，继续影响后续神经活动。",
+    "questionDistractors": [
+      {
+        "text": "对齐只在反馈结束后把图画重叠，不会影响共享解码器实际接收的坐标。",
+        "explanation": "图中的对齐映射位于潜在推断与共享解码之间，是解码输入的一部分。"
+      },
+      {
+        "text": "共享解码器已经排除了参与者适应；反馈箭头只是显示结果，后续神经活动必定和开环校准时保持完全相同的分布。",
+        "explanation": "反馈可改变参与者策略和活动分布；共享参数不把闭环系统变成被动开环系统。"
+      },
+      {
+        "text": "跨日映射可用，说明每个神经元的载荷都必须永久不变；只要有一个载荷变化，就不可能获得稳定的潜在读出。",
+        "explanation": "群体潜在结构可在个别载荷变化时仍被对齐，稳定低维读出不等于固定单细胞身份。"
       }
     ]
   },
@@ -466,9 +526,9 @@
     "id": "L23-FIG-A1",
     "lecture": 23,
     "moduleId": "l23-m4",
-    "title": "Drift–diffusion 的 first-passage paths",
+    "title": "漂移–扩散的首次到达路径",
     "alt": "两条从共同起点出发的噪声积累轨迹分别首次触及正负决策边界",
-    "caption": "每条 path 从 bias b 出发，逐步累积带噪 evidence，并在第一次碰到 +B 或 −B 时停止；终点给 choice，横坐标给 decision time。两条轨迹可在相同任务参数下因噪声走向不同边界，越过边界后不能继续平均再判定。",
+    "caption": "每条路径从偏置 b 出发，逐步累积带噪证据，并在第一次碰到 +B 或 −B 时停止；终点给选择，横坐标给决策时间。两条轨迹可在相同任务参数下因噪声走向不同边界，越过边界后不能继续平均再判定。",
     "sourceRefs": [
       {
         "file": "Lecture23-Intro-ShortTermMemory-PerceptualDecisions.pdf",
@@ -477,8 +537,8 @@
     ],
     "schematic": true,
     "kind": "plot",
-    "xLabel": "accumulation time",
-    "yLabel": "decision variable \\(a(t)\\)",
+    "xLabel": "累积时间",
+    "yLabel": "决策变量 \\(a(t)\\)",
     "curves": [
       {
         "label": "+B",
@@ -509,7 +569,7 @@
         "dashed": true
       },
       {
-        "label": "trial → +B",
+        "label": "试次 → +B",
         "points": [
           [
             0,
@@ -546,7 +606,7 @@
         ]
       },
       {
-        "label": "trial → −B",
+        "label": "试次 → −B",
         "points": [
           [
             0,
@@ -597,15 +657,30 @@
         "y": 50,
         "label": "start b"
       }
+    ],
+    "questionAnswer": "两条路径在相同参数下可先触及不同边界；首次越界的符号决定选择，横坐标给出决策时间。",
+    "questionDistractors": [
+      {
+        "text": "只有路径的最终平均高度才决定选择；首次越界后应继续积分足够长时间，再用两条轨迹的平均值给该试次分类。",
+        "explanation": "首次到达模型在第一次触边时终止该决策；不能用越界后或其他试次的平均值改写已作选择。"
+      },
+      {
+        "text": "正负边界表示反应时间长短，两者是同一选择；横坐标表示刺激强度。",
+        "explanation": "边界符号编码两种选择，时间沿横轴读出；该解释把变量的含义互换了。"
+      },
+      {
+        "text": "到达相反边界证明两个试次必定使用不同的平均证据；固定相干度时，噪声只能改变时间而不能改变选择方向。",
+        "explanation": "固定平均证据并不固定噪声路径，随机积累既可改变到达时间，也可改变先触及哪个边界。"
+      }
     ]
   },
   {
     "id": "L24-FIG-A1",
     "lecture": 24,
     "moduleId": "l24-m6",
-    "title": "TD error 从 reward 转移到 predictive cue",
-    "alt": "三条时间线比较学习前、学习后和奖励省略时 cue 与 reward deadline 附近的 dopamine prediction error",
-    "caption": "逐行比较同一 trial：学习前只有 unexpected reward 产生正 \\(\\delta\\)；学会 cue–reward 关系后，正 \\(\\delta\\) 提前到 cue，按时到来的 reward 处接近零；若 reward 在 deadline 被省略，该时刻出现负 \\(\\delta\\)。这个符号组合支持 prediction error，而不是单纯 reward response。",
+    "title": "TD 误差从奖励转移到预测线索",
+    "alt": "三条时间线比较学习前、学习后和奖励省略时线索与奖励截止时间附近的多巴胺预测误差",
+    "caption": "逐行比较同一试次：学习前只有未预期的奖励产生正 \\(\\delta\\)；学会线索–奖励关系后，正 \\(\\delta\\) 提前到线索，按时到来的奖励处接近零；若奖励在截止时间被省略，该时刻出现负 \\(\\delta\\)。这个符号组合支持预测误差，而不是单纯奖励响应。",
     "sourceRefs": [
       {
         "file": "Lecture24-LearningFromRewards.pdf",
@@ -623,35 +698,35 @@
       {
         "x": 20,
         "lane": 0,
-        "label": "cue: \\(\\delta \\approx 0\\)"
+        "label": "线索: \\(\\delta \\approx 0\\)"
       },
       {
         "x": 75,
         "lane": 0,
-        "label": "reward: \\(+\\delta\\)",
+        "label": "奖励: \\(+\\delta\\)",
         "tone": "accent"
       },
       {
         "x": 20,
         "lane": 1,
-        "label": "cue: \\(+\\delta\\)",
+        "label": "线索: \\(+\\delta\\)",
         "tone": "accent"
       },
       {
         "x": 75,
         "lane": 1,
-        "label": "reward: \\(\\delta \\approx 0\\)"
+        "label": "奖励: \\(\\delta \\approx 0\\)"
       },
       {
         "x": 20,
         "lane": 2,
-        "label": "cue: \\(+\\delta\\)",
+        "label": "线索: \\(+\\delta\\)",
         "tone": "accent"
       },
       {
         "x": 75,
         "lane": 2,
-        "label": "omission: \\(-\\delta\\)",
+        "label": "遗漏: \\(-\\delta\\)",
         "tone": "accent"
       }
     ],
@@ -664,8 +739,23 @@
       {
         "from": 4,
         "to": 5,
-        "label": "deadline",
+        "label": "截止时间",
         "dashed": true
+      }
+    ],
+    "questionAnswer": "学习后正误差移到预测线索；按时奖励处接近零，而省略奖励在预期时刻产生负误差。",
+    "questionDistractors": [
+      {
+        "text": "学习后线索和按时奖励都保持同样大小的正误差，说明两者各自被独立计为新奖励。",
+        "explanation": "已经预测的奖励不再提供同样的正惊讶信号。"
+      },
+      {
+        "text": "省略奖励时只会缺少正误差，不会出现低于基线的负响应。",
+        "explanation": "图中明确标出了预期奖励时刻的负误差。"
+      },
+      {
+        "text": "奖励省略的负误差发生在线索出现之前，因此不需要学习线索与奖励之间的时间关系。",
+        "explanation": "图中的负响应发生在预期奖励截止时刻，需要定时预测。"
       }
     ]
   },
@@ -673,9 +763,9 @@
     "id": "L25-FIG-A1",
     "lecture": 25,
     "moduleId": "l25-m3",
-    "title": "Agent–environment loop 与一步 Bellman backup",
-    "alt": "agent 从当前状态选择动作，environment 返回奖励和下一状态，再用一步 Bellman target 反向更新 action value",
-    "caption": "前向 interaction 由 \\(s_{t}\\) 经 policy 产生 \\(a_{t}\\)，environment 再采样 r 与 \\(s_{t+1}\\)；随后 backup 用 \\(r+\\gamma  \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。虚线把 \\(s_{t+1}\\) 送回下一轮，显示 Markov transition 与 value backup 是方向相反但相互连接的两步。",
+    "title": "智能体–环境循环与一步贝尔曼回传更新",
+    "alt": "智能体从当前状态选择动作，环境返回奖励和下一状态，再用一步贝尔曼目标反向更新动作价值",
+    "caption": "前向交互由 \\(s_{t}\\) 经策略产生 \\(a_{t}\\)，环境再采样 r 与 \\(s_{t+1}\\)；随后回传更新用 \\(r+\\gamma  \\max_{a'}Q(s_{t+1},a')\\) 更新当前 \\(Q(s_{t},a_{t})\\)。虚线把 \\(s_{t+1}\\) 送回下一轮，显示马尔可夫状态转移与价值回传更新是方向相反但相互连接的两步。",
     "sourceRefs": [
       {
         "file": "Lecture25-ReinforcementLearning.pdf",
@@ -691,45 +781,45 @@
     "nodes": [
       {
         "id": "state",
-        "label": "state\n\\(s_{t}\\)",
+        "label": "状态\n\\(s_{t}\\)",
         "x": 8,
         "y": 72
       },
       {
         "id": "agent",
-        "label": "Agent\n\\(\\pi\\), Q",
+        "label": "智能体\n\\(\\pi\\), Q",
         "x": 35,
         "y": 72,
         "tone": "accent"
       },
       {
         "id": "action",
-        "label": "action\n\\(a_{t}\\)",
+        "label": "动作\n\\(a_{t}\\)",
         "x": 62,
         "y": 72
       },
       {
         "id": "environment",
-        "label": "Environment\nP, R",
+        "label": "环境\nP, R",
         "x": 90,
         "y": 72
       },
       {
         "id": "outcome",
-        "label": "outcome\nr, \\(s'\\)",
+        "label": "结果\nr, \\(s'\\)",
         "x": 90,
         "y": 25
       },
       {
         "id": "target",
-        "label": "Bellman target\n\\(r + \\gamma  \\max Q'\\)",
+        "label": "贝尔曼目标\n\\(r + \\gamma  \\max Q'\\)",
         "x": 62,
         "y": 25,
         "tone": "accent"
       },
       {
         "id": "update",
-        "label": "update\n\\(Q(s_{t},a_{t})\\)",
+        "label": "更新\n\\(Q(s_{t},a_{t})\\)",
         "x": 35,
         "y": 25
       }
@@ -751,7 +841,7 @@
       {
         "from": "environment",
         "to": "outcome",
-        "label": "sample"
+        "label": "样本"
       },
       {
         "from": "outcome",
@@ -760,7 +850,7 @@
       {
         "from": "target",
         "to": "update",
-        "label": "backup"
+        "label": "回传更新"
       },
       {
         "from": "update",
@@ -772,15 +862,30 @@
         "label": "\\(s_{t} \\leftarrow  s'\\)",
         "dashed": true
       }
+    ],
+    "questionAnswer": "环境先给出奖励与下一状态，再用一步目标更新当前动作价值；下一状态进入新一轮交互。",
+    "questionDistractors": [
+      {
+        "text": "贝尔曼回传更新直接改变环境转移概率，使环境按照当前价值最大的路径移动。",
+        "explanation": "图中的回传更新更新价值估计，并不直接改写环境转移机制。"
+      },
+      {
+        "text": "智能体在选择当前动作之前就能观察其真实下一状态和奖励，因此无需与环境交互即可得到目标。",
+        "explanation": "真实的下一状态与奖励是在执行动作、环境响应之后获得的。"
+      },
+      {
+        "text": "奖励只用于更新下一状态所有动作的价值，当前执行过的动作价值保持不变。",
+        "explanation": "图中被更新的是当前状态下实际执行动作的价值。"
+      }
     ]
   },
   {
     "id": "L26-FIG-A1",
     "lecture": 26,
     "moduleId": "l26-m4",
-    "title": "Hopfield basins：下降不等于正确回忆",
-    "alt": "接近目标的 cue 经异步更新下降到 stored pattern，而 ambiguous cue 虽然同样降低 energy 却下降到 spurious minimum",
-    "caption": "在 symmetric weights、zero diagonal 与 asynchronous updates 的条件下，两条路径都让 E 不增加；但 cue 所在 basin 决定终点。接近目标的 cue 可完成到 \\(\\xi ^{\\mu }\\)，ambiguous cue 则可能被 crosstalk 引到 mixture，因此低 energy 只保证稳定，不保证回忆正确。",
+    "title": "Hopfield 吸引域：下降不等于正确回忆",
+    "alt": "接近目标的线索经异步更新下降到存储模式，而含糊的线索虽然同样降低能量却下降到伪记忆极小值",
+    "caption": "在对称权重、零对角线与异步更新的条件下，两条路径都让 E 不增加；但线索所在吸引域决定终点。接近目标的线索可补全为 \\(\\xi ^{\\mu }\\)，含糊的线索则可能被串扰引到混合态，因此必须区分能量降低、到达固定点与正确回忆：能量较低本身并不意味着已经稳定，固定点也可能对应伪记忆。",
     "sourceRefs": [
       {
         "file": "Lecture26-Memory-HopfieldModel.pdf",
@@ -796,13 +901,13 @@
     "nodes": [
       {
         "id": "target-cue",
-        "label": "cue near\npattern \\(\\mu\\)",
+        "label": "邻近线索\n模式 \\(\\mu\\)",
         "x": 8,
         "y": 72
       },
       {
         "id": "target-update",
-        "label": "asynchronous\nsign update",
+        "label": "异步\nsign 更新",
         "x": 37,
         "y": 72
       },
@@ -815,19 +920,19 @@
       },
       {
         "id": "stored",
-        "label": "stored pattern\n\\(\\xi ^{\\mu }\\)",
+        "label": "存储模式\n\\(\\xi ^{\\mu }\\)",
         "x": 94,
         "y": 72
       },
       {
         "id": "ambiguous-cue",
-        "label": "ambiguous\ncue",
+        "label": "含糊的\n线索",
         "x": 8,
         "y": 25
       },
       {
         "id": "spurious-update",
-        "label": "asynchronous\nsign update",
+        "label": "异步\nsign 更新",
         "x": 37,
         "y": 25
       },
@@ -840,7 +945,7 @@
       },
       {
         "id": "spurious",
-        "label": "spurious\nminimum",
+        "label": "伪记忆\n极小值",
         "x": 94,
         "y": 25
       }
@@ -857,7 +962,7 @@
       {
         "from": "target-energy",
         "to": "stored",
-        "label": "target basin"
+        "label": "目标吸引域"
       },
       {
         "from": "ambiguous-cue",
@@ -870,7 +975,22 @@
       {
         "from": "spurious-energy",
         "to": "spurious",
-        "label": "mixture basin"
+        "label": "混合吸引域"
+      }
+    ],
+    "questionAnswer": "两条路径都可降低能量，却进入目标或伪吸引域；收敛并不等同于正确回忆。",
+    "questionDistractors": [
+      {
+        "text": "图中的伪吸引子路径必然有一段能量上升，否则不可能到达错误记忆。",
+        "explanation": "在给定对称异步条件下，错误吸引子也可以通过不增能量的更新到达。"
+      },
+      {
+        "text": "只要两条路径使用相同的对称权重，每一个初始线索就必然到达同一个唯一存储模式。",
+        "explanation": "同一网络可有多个吸引域，初始线索会影响最终状态。"
+      },
+      {
+        "text": "最低能量自动标明实验要求的目标身份，所以进入混合吸引域也应算作正确回忆。",
+        "explanation": "能量本身不包含所要求目标的身份标签。"
       }
     ]
   },
@@ -878,9 +998,9 @@
     "id": "L27-FIG-A1",
     "lecture": 27,
     "moduleId": "l27-m3",
-    "title": "Teacher–Student–Notebook 的离线 replay 通道",
-    "alt": "Teacher 在线训练 Student，Student activity 与稀疏 Notebook code 成对存储，Notebook completion 后通过 V 重建 Student pattern 并离线回放",
-    "caption": "在线阶段 Teacher 产生训练经历，Student pattern \\(z^{\\mu }\\) 与 Notebook code \\(\\xi ^{\\mu }\\) 成对存储；检索时 Notebook 先把 partial cue 完成，再用 V 计算 \\(\\widetilde{z}_i=\\sum _jV_{ij}\\xi _{j}\\)。虚线 replay 把重建活动送回 Student，所以 Student 可在 Teacher 缺席时继续学习。",
+    "title": "教师、学生与笔记本系统之间的离线重放",
+    "alt": "教师系统在线训练学生系统，学生系统活动与稀疏笔记本系统编码成对存储，笔记本系统补全后通过 V 重建学生系统模式并离线回放",
+    "caption": "在线阶段教师系统产生训练经历，学生系统模式 \\(z^{\\mu }\\) 与笔记本系统编码 \\(\\xi ^{\\mu }\\) 成对存储；检索时笔记本系统先把部分线索完成，再用 V 计算 \\(\\widetilde{z}_i=\\sum _jV_{ij}\\xi _{j}\\)。虚线重放把重建活动送回学生系统，所以学生系统可在教师系统缺席时继续学习。",
     "sourceRefs": [
       {
         "file": "Lecture27-SystemsConsolidation-Generalization.pdf",
@@ -896,32 +1016,32 @@
     "nodes": [
       {
         "id": "teacher",
-        "label": "Teacher\nexamples",
+        "label": "教师系统\n样本",
         "x": 8,
         "y": 70
       },
       {
         "id": "student",
-        "label": "Student\n\\(z^{\\mu }\\)",
+        "label": "学生系统\n\\(z^{\\mu }\\)",
         "x": 35,
         "y": 70,
         "tone": "accent"
       },
       {
         "id": "notebook",
-        "label": "Notebook code\n\\(\\xi ^{\\mu }\\)",
+        "label": "笔记本系统编码\n\\(\\xi ^{\\mu }\\)",
         "x": 64,
         "y": 70
       },
       {
         "id": "complete",
-        "label": "completed code\n\\(\\hat{\\xi }\\)",
+        "label": "补全后的编码\n\\(\\hat{\\xi }\\)",
         "x": 92,
         "y": 70
       },
       {
         "id": "replay",
-        "label": "replay target\n\\(\\widetilde{z} = V\\hat{\\xi }\\)",
+        "label": "重放 target\n\\(\\widetilde{z} = V\\hat{\\xi }\\)",
         "x": 64,
         "y": 22,
         "tone": "accent"
@@ -931,7 +1051,7 @@
       {
         "from": "teacher",
         "to": "student",
-        "label": "online"
+        "label": "在线"
       },
       {
         "from": "student",
@@ -951,8 +1071,23 @@
       {
         "from": "replay",
         "to": "student",
-        "label": "offline update",
+        "label": "离线更新",
         "dashed": true
+      }
+    ],
+    "questionAnswer": "笔记本系统先补全线索，再经读出连接重建学生系统活动，使教师系统缺席时也能回放学习。",
+    "questionDistractors": [
+      {
+        "text": "离线回放必须先从教师系统取得新的在线样本，笔记本系统不能单独提供学习目标。",
+        "explanation": "图中的回放通道明确允许教师系统缺席时使用重建活动。"
+      },
+      {
+        "text": "读出连接的作用是把所有笔记本系统编码映成同一个活动模式，因而不必保存不同经历与学生系统活动的配对。",
+        "explanation": "读出重建依赖配对存储，不是把所有经历压成同一目标。"
+      },
+      {
+        "text": "笔记本系统的补全直接证明学生系统已学到真实环境规律，不需要再计算任何学习更新。",
+        "explanation": "补全提供回放样本；是否学到可泛化规律仍取决于学生系统的训练。"
       }
     ]
   }

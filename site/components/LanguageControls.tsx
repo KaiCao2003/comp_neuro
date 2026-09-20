@@ -72,7 +72,6 @@ export function LanguageNotice({ locale }: { locale: Locale }) {
   return (
     <aside className="language-notice" aria-label={copy.languageNoticeLabel}>
       <div>
-        <span lang={targetLanguage}>{copy.languageNotice}</span>
         <Link
           href={`${counterpartHref(pathname)}${suffix}`}
           hrefLang={targetLanguage}

@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { type KeyboardEvent, type MouseEvent, useEffect, useState } from 'react';
+import { type KeyboardEvent, type MouseEvent, useEffect, useMemo, useState } from 'react';
 import { localizedHref, type Locale } from '@/lib/i18n';
 import { assetPath } from '@/lib/site';
 import { beginLectureSession, saveReadingLocation, seededShuffle, selectQuestionIds } from '@/lib/study-state';
-import type { Lecture, Question, StudyModule as StudyModuleData } from '@/lib/types';
+import type { Lecture, Question } from '@/lib/types';
 import { FormulaView } from './FormulaView';
 import { QuestionBlock } from './QuestionBlock';
 import { ScientificText } from './ScientificText';
@@ -79,16 +79,8 @@ function CodeAuditTable({ lecture, locale }: { lecture: Lecture; locale: Locale 
   );
 }
 
-function transitionTo(previous: StudyModuleData, current: StudyModuleData, locale: Locale) {
-  const established = previous.keyPoints.at(-1) ?? previous.title;
-  const nextUse = current.keyPoints[0] ?? current.title;
-  return locale === 'zh'
-    ? `上一部分已经建立了：${established} 现在转向“${current.title}”，因为下一步要把这个结论落实为：${nextUse}`
-    : `The previous section established: ${established} We now turn to “${current.title}” because the next step is to make that result concrete as: ${nextUse}`;
-}
-
 type CrossLink = { term: string; targets: { lecture: number; slug: string; title: string; sectionId: string }[] };
-type LectureNavigation = Pick<Lecture, 'lecture' | 'slug'>;
+type LectureNavigation = Pick<Lecture, 'lecture' | 'slug' | 'zhTitle' | 'enTitle'>;
 
 function closeMobileToc(event: MouseEvent<HTMLAnchorElement>) {
   event.currentTarget.closest('details')?.removeAttribute('open');
@@ -97,11 +89,24 @@ function closeMobileToc(event: MouseEvent<HTMLAnchorElement>) {
 export function LectureReader({ lecture, previous, next, crossLinks = [], locale = 'zh' }: { lecture: Lecture; previous?: LectureNavigation; next?: LectureNavigation; crossLinks?: CrossLink[]; locale?: Locale }) {
   const [sessionSeed, setSessionSeed] = useState(`lecture-${lecture.slug}`);
   const [selectedQuestions, setSelectedQuestions] = useState<Record<string, Question>>({});
+  const [activeSection, setActiveSection] = useState('chapter-start');
   const hasCodeAudit = Boolean(lecture.codeAudit?.length);
   const hasSupplement = lecture.specialSection.length > 0 || lecture.codeSources.length > 0 || hasCodeAudit;
   const supplementLabel = hasCodeAudit
-    ? (locale === 'zh' ? 'MATLAB 源码审计' : 'MATLAB source audit')
+    ? (locale === 'zh' ? 'MATLAB 代码解析' : 'MATLAB code walkthrough')
     : (locale === 'zh' ? '补充讲解' : 'Further explanation');
+  const contents = useMemo(() => [
+    { id: 'chapter-start', title: locale === 'zh' ? '本讲导读' : 'Overview' },
+    ...lecture.studyGuide.modules.map((module) => ({ id: module.id, title: module.title })),
+    ...(hasSupplement ? [{ id: `lecture-${lecture.slug}-supplement`, title: supplementLabel }] : []),
+    { id: 'synthesis', title: locale === 'zh' ? '本讲小结' : 'Summary' },
+    ...(crossLinks.length ? [{ id: 'cross-lecture', title: locale === 'zh' ? '跨讲关联' : 'Cross-lecture links' }] : []),
+    { id: 'formulas', title: locale === 'zh' ? '公式与记号' : 'Formulas and notation' },
+    { id: 'glossary', title: locale === 'zh' ? '术语' : 'Glossary' },
+    { id: 'traps', title: locale === 'zh' ? '常见错误与限制' : 'Errors and limitations' },
+    { id: 'practice', title: locale === 'zh' ? '练习' : 'Practice' },
+    { id: 'companion', title: locale === 'zh' ? '伴读 PDF' : 'Companion PDF' },
+  ], [lecture, locale, hasSupplement, supplementLabel, crossLinks.length]);
 
   useEffect(() => {
     const { state, session } = beginLectureSession(lecture.lecture);
@@ -130,17 +135,20 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let frame = 0;
+    const sections = contents.map((item) => document.getElementById(item.id)).filter((item): item is HTMLElement => Boolean(item));
+    const currentSection = () => sections.filter((section) => section.getBoundingClientRect().top <= 180).at(-1)?.id ?? 'chapter-start';
     const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(() => { setActiveSection(currentSection()); frame = 0; });
       clearTimeout(timer);
       timer = setTimeout(() => {
-        const sections = lecture.studyGuide.modules.map((module) => document.getElementById(module.id)).filter(Boolean) as HTMLElement[];
-        const current = sections.filter((section) => section.getBoundingClientRect().top <= 180).at(-1)?.id;
-        saveReadingLocation(lecture.lecture, current, window.scrollY);
+        saveReadingLocation(lecture.lecture, currentSection(), window.scrollY);
       }, 180);
     };
+    frame = requestAnimationFrame(() => { setActiveSection(currentSection()); frame = 0; });
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(timer); };
-  }, [lecture]);
+    return () => { window.removeEventListener('scroll', onScroll); clearTimeout(timer); cancelAnimationFrame(frame); };
+  }, [lecture.lecture, contents]);
 
   function print(withAnswers: boolean) {
     document.documentElement.dataset.printAnswers = String(withAnswers);
@@ -152,49 +160,34 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
     <div className="lecture-shell">
       <aside className="lecture-toc" aria-label={locale === 'zh' ? '本讲目录' : 'Lecture contents'}>
         <p className="rail-title">{locale === 'zh' ? `第 ${lecture.lecture} 讲` : `Lecture ${lecture.lecture}`}</p>
-        {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={module.id}><ScientificText text={module.title} /></a>)}
-        {hasSupplement && <a href={`#lecture-${lecture.slug}-supplement`}>{supplementLabel}</a>}
-        <a href="#synthesis">{locale === 'zh' ? '串联' : 'Synthesis'}</a>
-        {crossLinks.length > 0 && <a href="#cross-lecture">{locale === 'zh' ? '跨讲关联' : 'Cross-lecture links'}</a>}
-        <a href="#formulas">{locale === 'zh' ? '公式' : 'Formulas'}</a>
-        <a href="#glossary">{locale === 'zh' ? '术语' : 'Glossary'}</a>
-        <a href="#practice">{locale === 'zh' ? '练习' : 'Practice'}</a>
-        <a href="#companion">{locale === 'zh' ? '伴读 PDF' : 'Companion PDF'}</a>
+        <nav>{contents.map((item) => <a href={`#${item.id}`} key={item.id} aria-current={activeSection === item.id ? 'location' : undefined}><ScientificText text={item.title} /></a>)}</nav>
+        <Link className="toc-back" href={localizedHref(locale, '/')}>{locale === 'zh' ? '← 课程目录' : '← Course contents'}</Link>
       </aside>
 
       <details className="mobile-lecture-toc">
         <summary>{locale === 'zh' ? '本讲目录' : 'Lecture contents'}</summary>
         <nav aria-label={locale === 'zh' ? '本讲移动目录' : 'Mobile lecture contents'}>
-          {lecture.studyGuide.modules.map((module) => <a href={`#${module.id}`} key={`mobile-${module.id}`} onClick={closeMobileToc}><ScientificText text={module.title} /></a>)}
-          {hasSupplement && <a href={`#lecture-${lecture.slug}-supplement`} onClick={closeMobileToc}>{supplementLabel}</a>}
-          <a href="#synthesis" onClick={closeMobileToc}>{locale === 'zh' ? '串联' : 'Synthesis'}</a>
-          <a href="#formulas" onClick={closeMobileToc}>{locale === 'zh' ? '公式' : 'Formulas'}</a>
-          <a href="#glossary" onClick={closeMobileToc}>{locale === 'zh' ? '术语' : 'Glossary'}</a>
-          <a href="#practice" onClick={closeMobileToc}>{locale === 'zh' ? '练习' : 'Practice'}</a>
-          <a href="#companion" onClick={closeMobileToc}>{locale === 'zh' ? '伴读 PDF' : 'Companion PDF'}</a>
+          {contents.map((item) => <a href={`#${item.id}`} key={item.id} onClick={closeMobileToc} aria-current={activeSection === item.id ? 'location' : undefined}><ScientificText text={item.title} /></a>)}
         </nav>
       </details>
 
       <main className="lecture-main" id="main-content">
-        <header className="chapter-header">
+        <header className="chapter-header" id="chapter-start">
           <p className="eyebrow">{locale === 'zh' ? `第 ${lecture.lecture} 讲` : `Lecture ${lecture.lecture}`}</p>
           <h1><ScientificText text={locale === 'zh' ? lecture.zhTitle : lecture.enTitle} /></h1>
-          {locale === 'zh' && <p className="english-title"><ScientificText text={lecture.enTitle} /></p>}
         </header>
 
         <section className="chapter-opening">
-          <p className="opening-chain"><ScientificText text={lecture.dependencyMap} /></p>
           {lecture.studyGuide.prerequisiteBridge.map((paragraph, index) => <p key={`opening-${index}`}><ScientificText text={paragraph} /></p>)}
         </section>
 
         <div className="lecture-flow">
-          {lecture.studyGuide.modules.map((module, index) => (
+          {lecture.studyGuide.modules.map((module) => (
             <div className="lesson-segment" key={module.id}>
               <StudyModule
                 module={module}
                 locale={locale}
                 figures={lecture.figures.filter((figure) => figure.moduleId === module.id)}
-                transition={index ? transitionTo(lecture.studyGuide.modules[index - 1], module, locale) : undefined}
               />
               {selectedQuestions[module.id] && <QuestionBlock locale={locale} question={selectedQuestions[module.id]} seed={sessionSeed} />}
             </div>
@@ -211,7 +204,7 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
         )}
 
         <section className="chapter-section long-form" id="synthesis">
-          <h2>{locale === 'zh' ? '把整讲串起来' : 'Putting the lecture together'}</h2>
+          <h2>{locale === 'zh' ? '本讲小结' : 'Summary'}</h2>
           <TextParagraphs items={lecture.synthesis} />
         </section>
 
@@ -224,9 +217,9 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
 
         <section className="chapter-section" id="glossary">
           <h2>{locale === 'zh' ? '术语' : 'Glossary'}</h2>
-          <div className="table-scroll"><table><thead><tr><th>{locale === 'zh' ? '中文' : 'Term'}</th><th>{locale === 'zh' ? 'English / symbol' : 'Chinese / symbol'}</th><th>{locale === 'zh' ? '定义' : 'Definition'}</th></tr></thead><tbody>
-            {lecture.glossary.map((entry) => <tr key={entry.id}><td><ScientificText text={locale === 'zh' ? entry.zh : entry.en} /></td><td><ScientificText text={locale === 'zh' ? entry.en : entry.zh} /></td><td><ScientificText text={entry.definition} /></td></tr>)}
-          </tbody></table></div>
+          <dl className="glossary-list">
+            {lecture.glossary.map((entry) => <div key={entry.id}><dt><ScientificText text={locale === 'zh' ? entry.zh : entry.en} /><span><ScientificText text={locale === 'zh' ? entry.en : entry.zh} /></span></dt><dd><ScientificText text={entry.definition} /></dd></div>)}
+          </dl>
         </section>
 
         <section className="chapter-section" id="traps">
@@ -250,8 +243,8 @@ export function LectureReader({ lecture, previous, next, crossLinks = [], locale
         </div>
 
         <nav className="chapter-pagination" aria-label={locale === 'zh' ? '讲次导航' : 'Lecture navigation'}>
-          {previous ? <Link href={localizedHref(locale, `/lectures/${previous.slug}/`)}>← {locale === 'zh' ? `第 ${previous.lecture} 讲` : `Lecture ${previous.lecture}`}</Link> : <span />}
-          {next ? <Link href={localizedHref(locale, `/lectures/${next.slug}/`)}>{locale === 'zh' ? `第 ${next.lecture} 讲` : `Lecture ${next.lecture}`} →</Link> : <span />}
+          {previous ? <Link href={localizedHref(locale, `/lectures/${previous.slug}/`)}><span>← {locale === 'zh' ? `第 ${previous.lecture} 讲` : `Lecture ${previous.lecture}`}</span><ScientificText text={locale === 'zh' ? previous.zhTitle : previous.enTitle} /></Link> : <span />}
+          {next ? <Link href={localizedHref(locale, `/lectures/${next.slug}/`)}><span>{locale === 'zh' ? `第 ${next.lecture} 讲` : `Lecture ${next.lecture}`} →</span><ScientificText text={locale === 'zh' ? next.zhTitle : next.enTitle} /></Link> : <span />}
         </nav>
       </main>
     </div>

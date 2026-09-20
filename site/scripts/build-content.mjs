@@ -17,6 +17,12 @@ const formulaLatexOverrides = Object.assign({}, ...[
   'formula-latex-10-18.json',
   'formula-latex-19-27.json',
 ].map((file) => JSON.parse(fs.readFileSync(path.join(root, 'source', file), 'utf8'))));
+const lectureNotes = JSON.parse(fs.readFileSync(path.join(root, 'source/locales/zh/lecture-notes.json'), 'utf8'));
+const formulaLabels = JSON.parse(fs.readFileSync(path.join(root, 'source/locales/zh/formula-labels.json'), 'utf8'));
+const formulaConditions = JSON.parse(fs.readFileSync(path.join(root, 'source/locales/zh/formula-conditions.json'), 'utf8'));
+const glossaryEntries = JSON.parse(fs.readFileSync(path.join(root, 'source/locales/zh/glossary.json'), 'utf8'));
+const lectureNotesByNumber = new Map(lectureNotes.map((notes) => [notes.lecture, notes]));
+if (lectureNotesByNumber.size !== 27 || lectureNotes.length !== 27) throw new Error('Expected authored Chinese notes for all 27 lectures');
 
 fs.mkdirSync(lectureOutputDir, { recursive: true });
 
@@ -108,25 +114,6 @@ const splitNumberedParagraph = (value = '') => {
   if (matches.length < 2) return [value.replace(/^\d+\.\s+/, '')];
   return matches.map((match, index) => value.slice(match.index + match[0].length, matches[index + 1]?.index ?? value.length).trim()).filter(Boolean);
 };
-
-const cleanRiskBoundary = (value = '') => cleanTextbookParagraph(value)
-  .replace(/^适用边界：/, '')
-  .replace(/^这是一份导论 PDF，不要写成 40 页的泛化计算神经科学百科；重点是忠实、清晰地建立后续 26 课的依赖地图。$/, '本讲只建立后续 26 讲所需的概念与依赖关系，不展开为通用计算神经科学综述。')
-  .replace(/^审计\.m 中 clear all、inv 等写法：忠实解释课程代码，同时指出/, 'MATLAB 源码中的 clear all 与 inv 按原样解释；')
-  .replace(/^不要只解释代码语法。必须/, '代码解释需要')
-  .replace(/^本课只铺到/, '本讲止于')
-  .replace(/使用用户熟悉的 Neuropixels\/HD-cell 数据作为 transfer example，但保留 MT 原例。/, 'Neuropixels/HD-cell 数据可作为迁移例，MT 保留为原例。')
-  .replace(/可用 sparse-noise RF mapping 作为个性化 transfer。/, 'sparse-noise RF mapping 可作为迁移例。')
-  .replace(/^这是全课程最容易因 scaling 跳步而失真的一课。/, '本讲的 scaling 推导容易因跳步失真。')
-  .replace(/^以 UPDATE 为主并明确记录它新增 Page 6。/, '')
-  .replace(/^明确/g, '需要明确')
-  .replace(/^始终/g, '需要')
-  .replace(/^清楚/g, '需要')
-  .replace(/不得把/g, '不能把')
-  .replace(/不要把/g, '需避免把')
-  .replace(/禁止/g, '不能')
-  .replace(/必须/g, '需要')
-  .trim();
 
 const MAX_CHOICE_LENGTH = 220;
 const BANNED_QUESTION_TEXT = /不检查单位、?\s*shape\s*或\s*conditioning|Course-specific risk boundary|适用条件\/约定：.*sanity check|undefined|本讲第\s*\d+\s*节(?:的核心内容是什么|中，?哪项推理最准确)|以下哪项属于本讲讨论的核心内容|根据原讲义.+第\s*\d+\s*页主要讨论什么|哪一项概括了该页主题|公式表中的.+解决什么问题|该结论忽略了题干中的第|该结论在任何参数和边界条件下都无条件成立|变量名称相似就足以推出结论|这是纯粹的记号约定，不会改变模型预测|该关系在任意参数和边界条件下都保持不变/i;
@@ -479,7 +466,9 @@ function parseFormulas(raw, lecture, sourceUnits) {
     const id = `L${String(lecture).padStart(2, '0')}-F${String(index + 1).padStart(2, '0')}`;
     const latex = formulaLatexOverrides[id] ?? KEY_LATEX[lecture]?.find(([needle]) => name.toLowerCase().includes(needle.toLowerCase()))?.[1] ?? null;
     const anchor = bestSourceUnit(sourceUnits, `${name} ${expression} ${conditions}`, index);
-    return { id, lecture, name, expression, latex, conditions, sectionId: anchor?.id ?? `lecture-${lecture}-formulas`, sourceFile: anchor?.sourceFile ?? '', sourcePage: anchor?.page ?? 1 };
+    if (!formulaLabels[id]) throw new Error(`Missing authored Chinese formula label: ${id}`);
+    if (!formulaConditions[id]) throw new Error(`Missing authored Chinese formula conditions: ${id}`);
+    return { id, lecture, name: formulaLabels[id], expression, latex, conditions: formulaConditions[id], sectionId: anchor?.id ?? `lecture-${lecture}-formulas`, sourceFile: anchor?.sourceFile ?? '', sourcePage: anchor?.page ?? 1 };
   }).filter((item) => item.name && (item.expression || item.latex));
 }
 
@@ -541,11 +530,13 @@ function parseGlossary(raw, lecture, sourceUnits) {
     .map((entry, index) => {
       const anchor = bestSourceUnit(sourceUnits, `${entry.zh} ${entry.en} ${entry.definition}`, index);
       const id = `L${String(lecture).padStart(2, '0')}-G${String(index + 1).padStart(2, '0')}`;
+      if (!glossaryEntries[id]) throw new Error(`Missing authored Chinese glossary entry: ${id}`);
       return {
         id,
         lecture,
         ...entry,
         ...(GLOSSARY_OVERRIDES[id] ?? {}),
+        ...glossaryEntries[id],
         sectionId: anchor?.id ?? `lecture-${lecture}-glossary`,
         sourceFile: anchor?.sourceFile ?? '',
         sourcePage: anchor?.page ?? 1,
@@ -576,7 +567,9 @@ function parseSourceClaims(prompt) {
 
 const levelCycle = ['understand', 'apply', 'analyze', 'evaluate', 'apply'];
 const questionType = (stem) => {
-  if (/MATLAB|源代码|代码|\bbug\b|\bdebug\b|inv\(|\\/.test(stem)) return 'debug';
+  // LaTeX commands and formula delimiters are not evidence of a code question.
+  const prose = stem.replace(/\\\([\s\S]*?\\\)/g, ' ');
+  if (/MATLAB|源代码|代码|\bbug\b|\bdebug\b|inv\(/i.test(prose)) return 'debug';
   // A numerical worked example can mention an axis or a curve in its result;
   // classify by the requested operation before looking for figure vocabulary.
   if (/^计算\s|求|多少|shapes?|数值|mean|variance|SD|概率|Fano factor|CV 是多少|如何缩放/.test(stem)) return 'calculation';
@@ -606,92 +599,16 @@ function makeChoices(correct, distractors, correctIndex, distractorNotes = []) {
   const correctChoiceId = ids[correctIndex];
   const wrongChoiceExplanations = {};
   ordered.forEach((text, index) => {
-    if (index !== correctIndex) wrongChoiceExplanations[ids[index]] = selected.find((item) => item.text === text)?.note ?? '该选项把结论放在错误或缺失的前提下，不能满足题干限定。';
+    if (index !== correctIndex) wrongChoiceExplanations[ids[index]] = selected.find((item) => item.text === text).note;
   });
   return { choices: ordered.map((text, index) => ({ id: ids[index], text })), correctChoiceId, wrongChoiceExplanations };
 }
 
-function plausibleAnswerDistractors(stem, answer) {
-  const results = [];
-  const add = (text, note) => {
-    const cleaned = compact(text);
-    if (cleaned && cleaned !== compact(answer) && !results.some((item) => item.text === cleaned)) results.push({ text: cleaned, note });
-  };
-
-  const exactShape = compact(answer).match(/^(\d+)×(\d+)[。.]?$/);
-  if (exactShape) {
-    const [, rows, columns] = exactShape;
-    const dimensions = [...stem.matchAll(/(\d+)×(\d+)/g)].flatMap((match) => [match[1], match[2]]);
-    add(`${columns}×${rows}。`, '该选项把输出矩阵的行、列次序转置了。');
-    add(`${rows}×${dimensions[1] ?? rows}。`, '矩阵乘法消去内维，输出不应保留题干中的内维。');
-    add(`${dimensions.at(-2) ?? columns}×${columns}。`, '该选项保留了错误的外维；应先写出相乘对象的 shape 链。');
-    return results.slice(0, 3);
+function authoredQuestionDistractors(items, id) {
+  if (!Array.isArray(items) || items.length !== 3 || items.some((item) => !item.text || !item.explanation)) {
+    throw new Error(`${id} needs three authored distractors with explanations.`);
   }
-
-  const namedShapes = [...compact(answer).matchAll(/([A-Za-z][A-Za-z0-9]*)\s*:\s*([A-Za-z0-9]+)×([A-Za-z0-9]+)/g)];
-  if (namedShapes.length === 3) {
-    const render = (shapes) => namedShapes.map((match, index) => `${match[1]}:${shapes[index][0]}×${shapes[index][1]}`).join('，') + '。';
-    const original = namedShapes.map((match) => [match[2], match[3]]);
-    add(render(original.map(([rows, columns]) => [columns, rows])), '该选项把每个对象的行、列方向都转置了。');
-    add(render(original.map((_, index) => original[(index + 1) % original.length])), '该选项把不同变量的 shape 互换了。');
-    add(render([[original[0][0], '1'], [original[0][0], original[0][1]], [original[2][0], original[0][0]]]), '该选项没有保持 design matrix、filter 与 output 的乘法链。');
-    return results.slice(0, 3);
-  }
-
-  const evaluatedExpression = compact(answer).match(/^(.*=)([+-]?\d+(?:\.\d+)?)([。.]?)$/);
-  if (evaluatedExpression) {
-    const value = Number(evaluatedExpression[2]);
-    const alternatives = [value + 2, value === 0 ? 1 : value - 1, value * 2];
-    alternatives.forEach((replacement) => add(`${evaluatedExpression[1]}${replacement}${evaluatedExpression[3]}`, '该选项在乘加运算中使用了错误的分量或算术结果。'));
-    return results.slice(0, 3);
-  }
-
-  if (/Bernoulli\(p\).*variance.*最大/i.test(stem)) {
-    add('p=0，此时 p(1-p)=0。', 'p=0 是 variance 的边界最小值，不是最大值。');
-    add('p=1，此时 p(1-p)=0。', 'p=1 是 variance 的边界最小值，不是最大值。');
-    add('p=1/4，此时 p(1-p)=3/16。', 'p=1/4 的 variance 小于 p=1/2 时的 1/4。');
-    return results;
-  }
-
-  if (/Exponential\(λ\).*mean.*SD/i.test(stem)) {
-    add('mean=1/λ，SD=1/λ²。', '1/λ² 是 variance，不是 standard deviation。');
-    add('mean=λ，SD=λ。', 'λ 是 rate parameter；mean 与 SD 都是它的倒数。');
-    add('mean=1/λ²，SD=1/λ。', '该选项把 mean 与 variance 混淆了。');
-    return results;
-  }
-
-  const replacements = [
-    ['max', 'min', '该选项把最大化与最小化方向颠倒了。'],
-    ['min', 'max', '该选项把最小化与最大化方向颠倒了。'],
-    ['增加', '减少', '该选项把参数变化的方向颠倒了。'],
-    ['增大', '减小', '该选项把参数变化的方向颠倒了。'],
-    ['上升', '下降', '该选项把响应变化方向颠倒了。'],
-    ['正', '负', '该选项把符号或相关方向颠倒了。'],
-    ['负', '正', '该选项把符号或相关方向颠倒了。'],
-    ['相同', '不同', '该选项混淆了相同与不同的条件。'],
-    ['不同', '相同', '该选项把两个对象错误地合并为同一对象。'],
-    ['内部', '外部', '该选项把运算所在的位置放错了。'],
-    ['先', '后', '该选项颠倒了计算或因果顺序。'],
-    ['独立', '不独立', '该选项反转了独立性条件。'],
-    ['不成立', '成立', '该选项删除了原答案中的否定或限制。'],
-    ['不等于', '等于', '该选项把有条件的区别改成了恒等。'],
-    ['1/λ', 'λ', '该选项把 rate 与对应的时间尺度取反关系写反了。'],
-    ['argmax', 'argmin', '该选项选择了相反的优化方向。'],
-    ['greedy', 'random', '该选项混淆了 greedy target 与 exploratory behavior。'],
-  ];
-  for (const [from, to, note] of replacements) {
-    if (answer.includes(from)) add(answer.replace(from, to), note);
-    if (results.length >= 3) break;
-  }
-
-  const numberMatch = compact(answer).match(/^([+-]?\d+(?:\.\d+)?)(\s*(?:%|Hz|ms|s|mV|V|A|Ω|ohm|spikes?|spikes?\/s)?)?[。.]?$/i);
-  if (numberMatch && results.length < 3) {
-    const value = Number(numberMatch[1]);
-    const alternatives = [value === 0 ? 1 : 0, value * 2, value === 1 ? 0.5 : value + 1];
-    alternatives.forEach((replacement) => add(`${replacement}${numberMatch[2] ?? ''}`, '该选项代入了错误的数值或漏掉了题干给出的系数。'));
-  }
-
-  return results.slice(0, 3);
+  return items.map(({ text, explanation }) => ({ text, note: explanation }));
 }
 
 function buildQuestions(lecture) {
@@ -748,27 +665,11 @@ function buildQuestions(lecture) {
     const firstRef = module.sourceRefs[0];
     const anchor = anchors.find((unit) => unit.sourceFile === firstRef.file && unit.page === firstRef.page)
       ?? bestSourceUnit(anchors, module.sourceRefs.map((ref) => `${ref.file} ${ref.page}`).join(' '), index);
-    const candidates = plausibleAnswerDistractors(module.selfCheck.prompt, module.selfCheck.answer);
-    const otherChecks = lecture.studyGuide.modules
-      .filter((candidate) => candidate.id !== module.id)
-      .map((candidate) => ({
-        text: candidate.selfCheck.answer,
-        note: `该结论使用“${candidate.title}”中的另一组变量与条件，不能由题干推出。`,
-      }))
-      .sort((left, right) => right.text.length - left.text.length);
-    const pitfalls = module.pitfalls.map((pitfall) => ({
-      text: pitfall,
-      note: `错误在于：${pitfall}`,
-    }));
-    const lectureTraps = lecture.commonTraps.map((trap) => ({
-      text: trap,
-      note: `错误在于：${trap}`,
-    }));
-    const distractors = [...candidates, ...otherChecks, ...pitfalls, ...lectureTraps];
+    const distractors = authoredQuestionDistractors(module.selfCheck.distractors, module.id);
     const previousCount = questions.length;
     add({
       stem: module.selfCheck.prompt,
-      correct: module.selfCheck.answer,
+      correct: module.selfCheck.choiceAnswer ?? module.selfCheck.answer,
       distractors: distractors.map((candidate) => candidate.text),
       wrongNotes: distractors.map((candidate) => candidate.note),
       explanation: `${module.selfCheck.answer} ${bestSourceSentence(module.paragraphs.join(' '), `${module.selfCheck.prompt} ${module.selfCheck.answer}`)}`,
@@ -788,16 +689,8 @@ function buildQuestions(lecture) {
       ?? figure.sourceRefs[0];
     const anchor = anchors.find((unit) => unit.sourceFile === firstRef.file && unit.page === firstRef.page)
       ?? bestSourceUnit(anchors, `${figure.title} ${figure.caption}`, index);
-    const figureAnswer = bestSourceSentence(figure.caption, figure.title);
-    const candidates = [
-      ...plausibleAnswerDistractors(figure.title, figureAnswer),
-      ...lecture.studyGuide.modules
-        .filter((module) => module.id !== figure.moduleId)
-        .map((module) => ({ text: module.selfCheck.answer, note: `图中没有“${module.title}”所需的变量与条件。` }))
-        .sort((left, right) => right.text.length - left.text.length),
-      ...(figureModule?.pitfalls ?? []).map((pitfall) => ({ text: pitfall, note: `图中的标注与关系不支持这种读法：${pitfall}` })),
-      ...lecture.commonTraps.map((trap) => ({ text: trap, note: `图中的标注与关系不支持这种读法：${trap}` })),
-    ];
+    const figureAnswer = figure.questionAnswer ?? bestSourceSentence(figure.caption, figure.title);
+    const candidates = authoredQuestionDistractors(figure.questionDistractors, figure.id);
     const previousCount = questions.length;
     add({
       stem: `观察“${figure.title}”时，哪项解释符合图中的标注与关系？`,
@@ -839,7 +732,6 @@ const lectures = indexRows.map((row) => {
     .filter((figure) => figure.lecture === row.lecture)
     .map((figure) => ({ ...figure, lectureTitle: row.zhTitle }));
   const formulaSectionStart = findActualHeading(raw, 'Formula and notation sheet');
-  const trapsSectionStart = findActualHeading(raw, 'Common traps, assumptions, and limitations');
   const questionsSectionStart = findActualHeading(raw, 'Cumulative Knowledge Check');
   const hintsSectionStart = findActualHeading(raw, 'Hint Bank');
   const answersSectionStart = findActualHeading(raw, 'Complete Answer Key with reasoning');
@@ -869,11 +761,8 @@ const lectures = indexRows.map((row) => {
     }
   })();
   const derivations = paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, 'Derivations')) + 1, findActualHeading(raw, 'Cross-page synthesis / 跨页因果与数学链'))).map(cleanTextbookParagraph).filter(Boolean);
-  const synthesis = paragraphs(sliceBetween(raw, 'Cross-page synthesis / 跨页因果与数学链', 'Worked examples and transfer')).map(cleanTextbookParagraph).filter(Boolean);
+  const { synthesis, commonTraps } = lectureNotesByNumber.get(row.lecture);
   const workedExamples = paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', findActualHeading(raw, 'Worked examples and transfer')) + 1, formulaSectionStart)).map(cleanTextbookParagraph).filter((item) => item && !isGenericReflection(item));
-  const commonTraps = paragraphs(normalizedRaw.slice(normalizedRaw.indexOf('\n', trapsSectionStart) + 1, questionsSectionStart))
-    .flatMap((item) => item.startsWith('Course-specific risk boundary.') ? [cleanRiskBoundary(item)] : splitNumberedParagraph(cleanTextbookParagraph(item)))
-    .filter(Boolean);
   const diagnostic = readNumbered(sliceBetween(raw, 'Five-minute prerequisite diagnostic', 'Source-aligned lesson / 按原笔记页序')).map((item) => cleanDiagnostic(item.text)).filter(Boolean);
   const errata = structureErrata(parseErrata(raw), sourceFiles, sourceUnits, studyGuide, row.lecture, row.zhTitle);
   const specialHeading = row.lecture === 2 || row.lecture === 3 ? 'MATLAB source audit / 代码逐行审计' : null;
@@ -968,6 +857,10 @@ function withoutOpenPrompts(lecture) {
   const publishedLecture = structuredClone(lecture);
   delete publishedLecture.coreQuestion;
   delete publishedLecture.diagnostic;
+  publishedLecture.figures.forEach((figure) => {
+    delete figure.questionAnswer;
+    delete figure.questionDistractors;
+  });
   publishedLecture.sourceUnits = publishedLecture.sourceUnits.map((unit) => {
     delete unit.stopPredict;
     return unit;

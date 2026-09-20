@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能把 Hebb 假说、LTP/LTD、STDP 时序窗以及 NMDA-Ca2+-AMPA 机制连成一条有条件的解释链，并说明哪些部分是经验规律、哪些部分是候选机制。",
-      "能从中心化 firing-rate Hebb rule 推导期望权重动力学 \\(E[dw/dt]=Cw\\)，逐项说明向量方向、矩阵 shape 与减均值为何允许 depression。",
-      "能用 quadratic form 证明 covariance matrix 对称且 positive semidefinite，并用 eigenbasis 解释最大方差方向为何增长最快。",
-      "能比较 synaptic scaling、Oja rule 与 BCM sliding threshold 如何分别控制总幅度、局部归一化和 LTP/LTD 分界。",
-      "能区分 unsupervised、supervised 与 reward-based learning，并解释 error、reward 或 reward-prediction error 作为 third factor 的门控作用。"
+      "联系赫布假说、LTP/LTD、STDP 时序窗与 NMDA-Ca2+-AMPA 机制，区分实验规律和候选机制。",
+      "从中心化的放电率赫布规则推导期望权重动力学 \\(E[dw/dt]=Cw\\)，说明向量与矩阵的维度，以及减去均值为何允许权重减小。",
+      "用二次型证明协方差矩阵对称、半正定，并用特征向量解释最大方差方向为何增长最快。",
+      "比较突触缩放、Oja 规则和 BCM 滑动阈值如何控制权重幅度及增强、减弱的分界。",
+      "区分无监督、监督和奖赏学习，说明误差、奖赏或奖赏预测误差作为第三因子时的作用。"
     ],
     "prerequisiteBridge": [
-      "先把 firing rate 看成一个时间窗内的平均放电强度，把突触权重 \\(w_{i}\\) 看成输入 \\(x_{i}\\) 对 postsynaptic rate h 的影响系数。在线性近似下，\\(h=w^\\mathrm{T} x\\) 表示把各输入乘权后相加。这里 w 和 x 都是 M×1 column vector，\\(w^\\mathrm{T} x\\) 是 scalar；这一 shape 约定会贯穿 Hebbian expected dynamics。还要注意，rate approximation 丢掉了单次 spike 的精确时刻，因此它适合分析较慢的平均权重演化，不能替代 STDP 的毫秒级因果顺序。",
-      "随机输入每次不同，因此要区分单次更新与跨试次平均。中心化变量写成 \\(x-\\mu\\)，其中 \\(\\mu =E[x]\\)。covariance matrix \\(C=E[(x-\\mu )(x-\\mu )^\\mathrm{T}]\\) 的第 i,j 项描述两个输入偏离各自均值时是否同向变化；对角项是 variance。减均值不是装饰，它把共同偏高与共同偏低都纳入关系，并允许乘积为负。",
-      "一阶微分方程 \\(dw/dt=aw\\) 的解是 \\(w(t)=w(0)e^{at}\\)：\\(a>0\\) 时幅度指数增长，\\(a<0\\) 时衰减。eigenvector v 满足 \\(Cv=\\lambda v\\)，意思是矩阵作用后方向不变、只按 \\(\\lambda\\) 缩放。任何能在 eigenvectors 上展开的初始权重，都可分成若干独立增长的 mode；这正是分析 Hebbian blow-up 与稳定化规则所需的数学入口。"
+      "放电率表示一个时间窗内的平均放电强度，突触权重 \\(w_{i}\\) 表示输入 \\(x_{i}\\) 对突触后放电率 h 的影响。在线性近似下，\\(h=w^\\mathrm{T} x\\) 将各输入乘以对应权重后相加。这里 w 和 x 都是 M×1 列向量，\\(w^\\mathrm{T} x\\) 是标量；后面的权重动力学均沿用这一维度约定。放电率近似舍弃了单次脉冲的精确时刻，适合分析较慢的平均学习过程，却不能取代 STDP 对毫秒级时序的描述。",
+      "随机输入在每次试验中都可能不同，单次权重变化也不等于平均学习趋势。将输入中心化为 \\(x-\\mu\\)，其中 \\(\\mu =E[x]\\)，便得到协方差矩阵 \\(C=E[(x-\\mu )(x-\\mu )^\\mathrm{T}]\\)。矩阵的第 i,j 项描述两个输入偏离各自均值时是否同向变化，对角项则是各输入的方差。中心化以后，共同升高和共同降低都产生正乘积，一升一降则产生负乘积。",
+      "一阶微分方程 \\(dw/dt=aw\\) 的解为 \\(w(t)=w(0)e^{at}\\)：\\(a>0\\) 时幅度指数增长，\\(a<0\\) 时衰减。特征向量 v 满足 \\(Cv=\\lambda v\\)，即矩阵作用后方向不变，只按 \\(\\lambda\\) 缩放。将初始权重展开为特征向量的组合，便可分别分析每个分量的增长。这既解释了赫布学习偏向哪些输入方向，也揭示了权重为何需要稳定化机制。"
     ],
     "modules": [
       {
         "id": "L10-M1",
-        "title": "从突触时序与受体机制到 firing-rate Hebb rule",
+        "title": "突触可塑性：从脉冲时序到赫布规则",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -114,62 +114,63 @@
           }
         ],
         "paragraphs": [
-          "Hebb 的原始命题把共同活动与连接增强联系起来。实验上，高频刺激 CA3 到 CA1 通路后记录到长期增强（long-term potentiation, LTP），低频 protocol 可得到长期抑制（long-term depression, LTD）。这两种现象描述的是诱导后 synaptic efficacy 的持续改变，不等同于瞬时 facilitation，也不能仅凭一条曲线断言唯一分子机制。",
-          "spike-timing-dependent plasticity（STDP）把相对时序纳入更新。令 \\(\\Delta t=t_{\\mathrm{post}}-t_{\\mathrm{pre}}\\)；经典 pair-based window 常写成 \\(\\Delta t>0\\) 时 \\(\\Delta w=A_{+}e^{-\\Delta t/\\tau _{+}}\\)，\\(\\Delta t<0\\) 时 \\(\\Delta w=-A_{-}e^{\\Delta t/\\tau _{-}}\\)。指数项表达时间间隔越长，局部 coincidence 越弱。A_± 与 τ_± 是 protocol-dependent 参数，不是所有脑区共享的常数。",
-          "采用以下 canonical mechanism：presynaptic terminal 释放 glutamate；AMPA current 帮助 postsynaptic membrane depolarize；depolarization 移走 NMDA pore 中的 Mg2+ block；NMDA-mediated Ca2+ influx 把 pre/post coincidence 转成 intracellular signal。必须分清两步：presynaptic release 提供 glutamate，Mg2+ block 的解除则依赖 postsynaptic depolarization。较强或不同时间形状的 Ca2+ signal 可偏向 kinase 与 AMPA insertion，另一范围可偏向 phosphatase 与 AMPA removal。关键是条件链，不是把 Ca2+ 简写成单向的 LTP 开关。",
-          "rate model 丢弃单个 spike 的毫秒时序，保留一段时间内的活动强弱。basic rule \\(\\tau _{w} dw_{i}/dt=h x_{i}\\) 在 h,\\(x_{i}\\ge 0\\) 时只有 potentiation。三类 covariance rule 分别中心化 output、中心化 input，或同时中心化二者；共同目的都是把“高于自身基线的共同变化”与“绝对值很大”分开。双中心化 rule 在统计推导中最直接，因为其期望正好产生 input covariance。"
+          "赫布假说将神经元的共同活动与连接增强联系起来。在 CA3 到 CA1 通路中，高频刺激可诱导长期增强（long-term potentiation，LTP），一些低频刺激方案则可诱导长期抑制（long-term depression，LTD）。两者指刺激结束后仍持续的突触效能变化，有别于短暂的易化。观察到增强或减弱本身，还不足以确定唯一的分子机制。",
+          "脉冲时序依赖可塑性（STDP）进一步考虑突触前后脉冲的先后顺序。令 \\(\\Delta t=t_{\\mathrm{post}}-t_{\\mathrm{pre}}\\)；经典双脉冲实验的时序窗常写成：\\(\\Delta t>0\\) 时 \\(\\Delta w=A_{+}e^{-\\Delta t/\\tau _{+}}\\)，\\(\\Delta t<0\\) 时 \\(\\Delta w=-A_{-}e^{\\Delta t/\\tau _{-}}\\)。时间间隔越长，两个事件局部重合的程度越低，更新幅度也随之减小。A_± 与 τ_± 依赖具体刺激方案，并非各脑区共用的常数。",
+          "一种典型机制始于突触前末梢释放谷氨酸。AMPA 电流促进突触后膜去极化，解除 NMDA 通道中的 Mg2+ 阻塞，随后流入的 Ca2+ 将突触前后活动的重合转化为胞内信号。谷氨酸来自突触前释放，解除阻塞则依赖突触后去极化，二者缺一不可。较强或具有特定时间形状的 Ca2+ 信号可偏向激酶激活与 AMPA 受体插入，另一范围则可偏向磷酸酶激活与受体移除。因此，Ca2+ 的作用取决于幅度和时间过程，不能视为只触发 LTP 的开关。",
+          "放电率模型舍弃单次脉冲的毫秒时序，只保留一段时间内的活动强弱。基本规则 \\(\\tau _{w} dw_{i}/dt=h x_{i}\\) 在 h 和 \\(x_{i}\\ge 0\\) 时只会增强权重。协方差规则通过对输出、输入或两者减去均值，区分相对于自身基线的共同变化与单纯较大的活动值。其中，输入和输出同时中心化的形式最便于统计推导，因为平均更新可以直接写成输入协方差的函数。"
         ],
         "keyPoints": [
-          "LTP/LTD 是长期 efficacy change 的实验现象，STDP window 是对特定时序 protocol 的经验摘要。",
-          "NMDA coincidence detection 依赖 glutamate 与 postsynaptic depolarization 同时存在，Ca2+ 再连接到 AMPA trafficking。",
-          "basic nonnegative Hebb 只增不减；中心化 activity 才让 negative covariance 对应 depression。"
+          "LTP/LTD 描述突触效能的长期变化；STDP 时序窗概括特定刺激方案下的实验规律。",
+          "NMDA 的重合检测依赖谷氨酸与突触后去极化同时存在，随后由 Ca2+ 信号调节 AMPA 受体。",
+          "非负活动下的基本赫布规则只增不减；中心化以后，负协方差才能对应权重减小。"
         ],
         "derivation": {
-          "title": "从双中心化局部更新到 covariance learning",
-          "setup": "设 \\(x\\in \\mathbb{R}^{M\\times 1}\\)，\\(w\\in \\mathbb{R}^{M\\times 1}\\)，线性输出 \\(h=w^\\mathrm{T} x\\)；学习比神经活动慢，因此在计算 input ensemble expectation 时把 w 当作固定参数。",
+          "title": "从双中心化局部更新到协方差学习",
+          "setup": "设 \\(x\\in \\mathbb{R}^{M\\times 1}\\)，\\(w\\in \\mathbb{R}^{M\\times 1}\\)，线性输出 \\(h=w^\\mathrm{T} x\\)；学习比神经活动慢，因此在计算输入细胞群期望时把 w 当作固定参数。",
           "steps": [
             {
-              "title": "写出中心化局部 rule",
-              "explanation": "对第 i 个 synapse，令 \\(\\tau _{w} dw_{i}/dt=(h-E[h])(x_{i}-E[x_{i}])\\)。vector form 为 \\(\\tau _{w} dw/dt=(x-\\mu _{x})(h-E[h])\\)，右侧仍是 M×1。",
+              "title": "写出中心化局部规则",
+              "explanation": "对第 i 个突触，令 \\(\\tau _{w} dw_{i}/dt=(h-E[h])(x_{i}-E[x_{i}])\\)。向量形式为 \\(\\tau _{w} dw/dt=(x-\\mu _{x})(h-E[h])\\)，右侧仍是 M×1。",
               "latex": "\\tau_w\\dot{\\mathbf w}=(\\mathbf x-\\boldsymbol\\mu_x)(h-\\mathbb E[h])"
             },
             {
-              "title": "把 output deviation 改写为 input deviation",
-              "explanation": "因为 \\(h=w^\\mathrm{T} x\\) 且 w 在 ensemble average 内固定，\\(E[h]=w^\\mathrm{T} \\mu _{x}\\)，所以 \\(h-E[h]=w^\\mathrm{T}(x-\\mu _{x})\\)。",
+              "title": "把输出偏差改写为输入偏差",
+              "explanation": "因为 \\(h=w^\\mathrm{T} x\\) 且 w 在细胞群平均内固定，\\(E[h]=w^\\mathrm{T} \\mu _{x}\\)，所以 \\(h-E[h]=w^\\mathrm{T}(x-\\mu _{x})\\)。",
               "latex": "h-\\mathbb E[h]=\\mathbf w^{\\mathsf T}(\\mathbf x-\\boldsymbol\\mu_x)"
             },
             {
-              "title": "取期望并识别 covariance",
-              "explanation": "代回后先形成 outer product，再让 w 右乘：\\(E[(x-\\mu )(x-\\mu )^\\mathrm{T}]w=C_{xw}\\)。因此 expected update 是 covariance matrix 对当前 weight direction 的作用。",
+              "title": "取期望并识别协方差",
+              "explanation": "代回后先形成外乘积，再让 w 右乘：\\(E[(x-\\mu )(x-\\mu )^\\mathrm{T}]w=C_{xw}\\)。因此预期更新是协方差矩阵对当前权重方向的作用。",
               "latex": "\\tau_w\\mathbb E[\\dot{\\mathbf w}]=\\mathbb E[(\\mathbf x-\\boldsymbol\\mu)(\\mathbf x-\\boldsymbol\\mu)^{\\mathsf T}]\\mathbf w=C_x\\mathbf w"
             }
           ],
           "symbolNotes": [
-            "\\(C_{x}\\in \\mathbb{R}^{M\\times M}\\)；\\(C_{ij}\\) 的单位是 \\(\\mathrm{input}_{i}\\times \\mathrm{input}_{j}\\)，若 input 已标准化则为无量纲。",
-            "\\(\\tau _{w}\\) 是 learning time constant；w 的 orientation 是 column vector，h 是 scalar，transpose 不能省略。"
+            "\\(C_{x}\\in \\mathbb{R}^{M\\times M}\\)；\\(C_{ij}\\) 的单位是 \\(\\mathrm{input}_{i}\\times \\mathrm{input}_{j}\\)，若输入已标准化则为无量纲。",
+            "\\(\\tau _{w}\\) 是学习时间常数；w 的朝向是列向量，h 是标量，转置不能省略。"
           ],
-          "unitsCheck": "若 x 以 Hz 表示、h 也以 Hz 表示，则原始 rule 的右侧含 \\(\\mathrm{Hz}^2\\)；比例常数或 \\(\\tau _{w}\\) 必须吸收单位，使 \\(dw/dt\\) 与 weight/time 一致。课程公式常省略这一生物尺度因子。",
-          "limitCheck": "若 input covariance 为零，expected update 为零；若所有 activity 不中心化且恒为正，rule 退回只增长，无法表达 anticorrelation 或低于基线的 LTD。"
+          "unitsCheck": "若 x 以 Hz 表示、h 也以 Hz 表示，则原始规则的右侧含 \\(\\mathrm{Hz}^2\\)；比例常数或 \\(\\tau _{w}\\) 必须吸收单位，使 \\(dw/dt\\) 与权重/时间一致。课程公式常省略这一生物尺度因子。",
+          "limitCheck": "若输入协方差为零，预期更新为零；若所有活动不中心化且恒为正，规则退回只增长，无法表达负相关或低于基线的 LTD。"
         },
         "workedExample": {
-          "title": "两种活动状态为何可造成 potentiation 或 depression",
-          "problem": "某 input 的均值为 5 Hz，postsynaptic output 均值为 10 Hz。比较状态 A：\\(x_{i}=8\\),\\(h=14\\)；状态 B：\\(x_{i}=8\\),\\(h=7\\)。令一次更新量与 deviation product 成正比。",
+          "title": "两种活动状态为何可造成增强或抑制",
+          "problem": "某输入的均值为 5 Hz，突触后输出均值为 10 Hz。比较状态 A：\\(x_{i}=8\\),\\(h=14\\)；状态 B：\\(x_{i}=8\\),\\(h=7\\)。令一次更新量与偏差乘积成正比。",
           "steps": [
-            "状态 A 的 deviations 是 +3 与 +4，乘积为 +12，因此该次 sample 推动 potentiation。",
-            "状态 B 的 deviations 是 +3 与 -3，乘积为 -9，因此该次 sample 推动 depression。",
-            "若改用 basic product \\(hx_{i}\\)，两种状态分别给 112 与 56，都是正数，无法区分共同偏高与一高一低。"
+            "状态 A 的偏差是 +3 与 +4，乘积为 +12，因此该次样本推动增强。",
+            "状态 B 的偏差是 +3 与 -3，乘积为 -9，因此该次样本推动抑制。",
+            "若改用基本乘积 \\(hx_{i}\\)，两种状态分别给 112 与 56，都是正数，无法区分共同偏高与一高一低。"
           ],
-          "result": "中心化 rule 用相对基线的共同波动决定符号，而不是用绝对 firing rate 大小决定符号。",
-          "sanityCheck": "当 \\(x_{i}\\) 恰等于其均值时 deviation 为零，无论 h 多大，这个 sample 对该 synapse 的 covariance estimate 都不贡献。"
+          "result": "中心化规则用相对基线的共同波动决定符号，而不是用绝对发放率大小决定符号。",
+          "sanityCheck": "当 \\(x_{i}\\) 恰等于其均值时偏差为零，无论 h 多大，这个样本对该突触的协方差估计都不贡献。"
         },
         "pitfalls": [
-          "把 NMDA-Ca2+ 链写成所有 synapse 都遵守的唯一机制，忽略 neuromodulation、dendritic voltage 与 burst context。",
-          "只说“fire together wire together”，却不说明 baseline centering、更新符号和学习时间尺度。"
+          "将 NMDA-Ca2+ 机制视为所有突触唯一的可塑性机制，忽略神经调质、树突电压和簇发状态的影响。",
+          "只用“共同放电就增强连接”概括学习，却不说明活动基线、更新符号和学习时间尺度。"
         ]
       },
       {
         "id": "L10-M2",
-        "title": "Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up",
+        "title": "协方差如何选择权重方向",
+        "transition": "协方差矩阵决定平均更新偏向哪些方向。将权重分解到它的特征向量上，可以看清主方向如何形成，以及为什么方向明确以后权重仍可能无限增长。",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -181,62 +182,63 @@
           }
         ],
         "paragraphs": [
-          "expected dynamics \\(\\tau _{w} E[dw/dt]=Cw\\) 把学习问题变成线性 dynamical system。C 的一个 eigenvector \\(v_{k}\\) 满足 \\(Cv_{k}=\\lambda _{k}v_{k}\\)，因此若 w 正好沿 \\(v_{k}\\)，更新也沿同一方向，只有幅度改变。对于 symmetric covariance，不同 eigenvectors 可取为 orthogonal basis，于是任意初始 w 都能写成 \\(\\sum _k a_{k}v_{k}\\)。",
-          "covariance 必须对称：\\(C_{ij}=E[(x_{i}-\\mu _{i})(x_{j}-\\mu _{j})]\\)，交换两个 scalar 因子的顺序不改变乘积。它也 positive semidefinite（PSD）：任意 v 的 quadratic form \\(v^\\mathrm{T}Cv\\) 等于 projection \\(v^\\mathrm{T}(x-\\mu )\\) 的平方期望。PSD 不表示每个 off-diagonal element 都为正；anticorrelated variables 可以给负 covariance，而整体 quadratic form 仍不为负。",
-          "在 eigenbasis 中，每个 coefficient 满足 \\(\\tau _{w} da_{k}/dt=\\lambda _{k}a_{k}\\)，解为 \\(a_{k}(t)=a_{k}(0)e^{\\lambda _{k}t/\\tau _{w}}\\)。最大 \\(\\lambda\\) 的 mode 比其他 mode 增长更快，所以归一化方向趋向 principal eigenvector。这解释了与 PCA 的形式联系，也同时暴露 basic Hebb 的问题：PSD eigenvalues 非负，所有已有分量都不会由这条期望动力学主动衰减。",
-          "“方向趋向 PC1”与“权重学到稳定 PC1”不能混为一谈。basic rule 的 norm 持续扩大，最终会超出 linear neuron、stationary statistics 与 fixed learning rate 的适用范围。只有额外 normalization 或 competition 控制幅度时，才能讨论稳定的 PCA-like solution；非线性输出、nonstationary input 或多个相近 eigenvalues 会改变收敛速度和结果。"
+          "期望动力学 \\(\\tau _{w} E[dw/dt]=Cw\\) 将学习写成一个线性动力系统。协方差矩阵 C 的特征向量 \\(v_{k}\\) 满足 \\(Cv_{k}=\\lambda _{k}v_{k}\\)；权重若恰好沿 \\(v_{k}\\)，更新后也只改变幅度。由于协方差矩阵对称，其特征向量可构成正交基，任意初始权重都能展开为 \\(\\sum _k a_{k}v_{k}\\)。",
+          "协方差矩阵的对称性直接来自 \\(C_{ij}=E[(x_{i}-\\mu _{i})(x_{j}-\\mu _{j})]\\)：交换两个标量因子的顺序不改变乘积。它也必然半正定（半正定性（PSD）），因为任意向量 v 的二次型 \\(v^\\mathrm{T}Cv\\) 等于投影 \\(v^\\mathrm{T}(x-\\mu )\\) 的平方期望。半正定并不要求每个非对角元素为正：反相关输入的协方差可以为负，但整个二次型仍不会小于零。",
+          "在特征向量基底中，各系数分别满足 \\(\\tau _{w} da_{k}/dt=\\lambda _{k}a_{k}\\)，解为 \\(a_{k}(t)=a_{k}(0)e^{\\lambda _{k}t/\\tau _{w}}\\)。最大的 \\(\\lambda\\) 对应增长最快的分量，因此归一化后的权重方向趋向主特征向量。这说明了赫布学习与 PCA 的形式联系，也暴露出稳定性问题：协方差的特征值非负，这套期望动力学不会主动衰减已有分量。",
+          "权重方向趋向第一主成分，不代表权重本身收敛。基本规则仍会使权重范数不断增大，最终超出线性神经元、平稳输入统计和固定学习率近似的适用范围。只有通过归一化或竞争控制幅度，才能进一步讨论稳定的主成分解。输出非线性、输入统计变化或相近的特征值，也会影响收敛速度与最终结果。"
         ],
         "keyPoints": [
-          "covariance symmetric PSD 的核心证据是 \\(v^\\mathrm{T}Cv=E[(v^\\mathrm{T}(x-\\mu ))^2]\\ge 0\\)。",
-          "eigenbasis 把 coupled weight dynamics 拆成独立指数 mode，\\(\\lambda _{k}\\) 决定各 mode 的增长率。",
-          "principal direction selection 不等于 norm stability，Hebbian=PCA 只在附加条件下成立。"
+          "协方差半正定的核心证据是 \\(v^\\mathrm{T}Cv=E[(v^\\mathrm{T}(x-\\mu ))^2]\\ge 0\\)。",
+          "特征向量基底将耦合的权重动力学拆成独立的指数分量，由 \\(\\lambda _{k}\\) 决定各自增长率。",
+          "主方向的选择与权重幅度的稳定是两个问题，赫布学习与 PCA 的对应需要附加条件。"
         ],
         "derivation": {
-          "title": "PSD、eigenvalue 非负与 eigenmode solution",
-          "setup": "设 \\(C=E[(x-\\mu )(x-\\mu )^\\mathrm{T}]\\) 有有限 second moments，且 C 为实对称 M×M matrix。",
+          "title": "半正定性（PSD）、特征值非负与特征模态解",
+          "setup": "设 \\(C=E[(x-\\mu )(x-\\mu )^\\mathrm{T}]\\) 有有限二阶矩，且 C 为实对称 M×M 矩阵。",
           "steps": [
             {
-              "title": "把 quadratic form 化为平方",
-              "explanation": "将 C 的定义代入 \\(v^\\mathrm{T}Cv\\)，并利用 expectation 的线性，把左右 v 移入样本表达式；两边 scalar factors 相乘形成同一个 projection 的平方。",
+              "title": "把二次形式化为平方",
+              "explanation": "将 C 的定义代入 \\(v^\\mathrm{T}Cv\\)，并利用期望的线性，把左右 v 移入样本表达式；两边标量因子相乘形成同一个投影的平方。",
               "latex": "\\mathbf v^{\\mathsf T}C\\mathbf v=\\mathbb E[(\\mathbf v^{\\mathsf T}(\\mathbf x-\\boldsymbol\\mu))^2]\\ge 0"
             },
             {
-              "title": "由 eigenvector 求 eigenvalue 符号",
+              "title": "由特征向量求特征值符号",
               "explanation": "若 \\(Cv=\\lambda v\\) 且 \\(v\\ne 0\\)，则 \\(v^\\mathrm{T}Cv=\\lambda v^\\mathrm{T}v\\)。分母 \\(v^\\mathrm{T}v=||v||^2>0\\)，所以 \\(\\lambda =(v^\\mathrm{T}Cv)/||v||^2\\ge 0\\)。",
               "latex": "\\lambda=\\frac{\\mathbf v^{\\mathsf T}C\\mathbf v}{\\|\\mathbf v\\|_2^2}\\ge 0"
             },
             {
-              "title": "展开并求解每个 coefficient",
-              "explanation": "写 \\(w=\\sum _ka_{k}v_{k}\\)，代入 \\(\\tau _{w} dw/dt=Cw\\)。orthogonal eigenvectors 的 coefficients 可逐项比较，得到独立的一阶 ODE。",
+              "title": "展开并求解每个系数",
+              "explanation": "写 \\(w=\\sum _ka_{k}v_{k}\\)，代入 \\(\\tau _{w} dw/dt=Cw\\)。正交特征向量的系数可逐项比较，得到独立的一阶 ODE。",
               "latex": "\\tau_w\\dot a_k=\\lambda_k a_k,\\qquad a_k(t)=a_k(0)e^{\\lambda_k t/\\tau_w}"
             }
           ],
           "symbolNotes": [
-            "\\(\\lambda _{k}\\) 的单位与 covariance 相同；在规范化模型中常由 learning-rate scale 吸收，使 exponent 无量纲。",
-            "\\(a_{k}\\) 是 weight vector 在 population-wide statistical direction \\(v_{k}\\) 上的 coordinate，不代表某个单独 synapse。"
+            "\\(\\lambda _{k}\\) 的单位与协方差相同；在规范化模型中常由学习发放率尺度吸收，使指数无量纲。",
+            "\\(a_{k}\\) 是权重向量在群体宽统计方向 \\(v_{k}\\) 上的坐标，不代表某个单独突触。"
           ],
-          "unitsCheck": "指数 \\(\\lambda _{k}t/\\tau _{w}\\) 必须无量纲；若 \\(\\lambda\\) 带 \\(\\mathrm{input}^2\\) 单位，则完整模型中的 learning-rate coefficient 应带 reciprocal \\(\\mathrm{input}^2\\)。",
-          "limitCheck": "\\(\\lambda _{k}=0\\) 时该 mode 的 coefficient 保持初值；两个最大 eigenvalues 相等时不存在唯一 principal direction，结果依初值和噪声。"
+          "unitsCheck": "指数 \\(\\lambda _{k}t/\\tau _{w}\\) 必须无量纲；若 \\(\\lambda\\) 带 \\(\\mathrm{input}^2\\) 单位，则完整模型中的学习发放率系数应带倒数 \\(\\mathrm{input}^2\\)。",
+          "limitCheck": "\\(\\lambda _{k}=0\\) 时该模态的系数保持初值；两个最大特征值相等时不存在唯一主要的方向，结果依初值和噪声。"
         },
         "workedExample": {
-          "title": "两维 covariance 的增长率与方向",
+          "title": "两维协方差的增长率与方向",
           "problem": "令 \\(C=\\operatorname{diag}(4,1)\\)，\\(\\tau _{w}=1 \\mathrm{s}\\)，\\(w(0)=(1,1)^\\mathrm{T}\\)。计算 \\(t=1 \\mathrm{s}\\) 时两个分量及其比值。",
           "steps": [
-            "eigenvectors 是坐标轴 \\(e_{1}\\),\\(e_{2}\\)，eigenvalues 分别为 4 和 1。",
+            "特征向量是坐标轴 \\(e_{1}\\),\\(e_{2}\\)，特征值分别为 4 和 1。",
             "\\(w_{1}(1)=e^4\\approx 54.60\\)，\\(w_{2}(1)=e\\approx 2.72\\)。",
-            "比值 \\(w_{1}/w_{2}=e^3\\approx 20.09\\)，方向已非常接近第一轴，但 norm 约为 54.67，远大于初始 \\(\\sqrt 2\\)。"
+            "比值 \\(w_{1}/w_{2}=e^3\\approx 20.09\\)，方向已非常接近第一轴，但范数约为 54.67，远大于初始 \\(\\sqrt 2\\)。"
           ],
-          "result": "最大 variance direction 快速占优，同时 total weight magnitude 爆炸；这两个结论来自同一正反馈动力学。",
-          "sanityCheck": "若把 C 改成 zero matrix，则两个分量都保持 1；若交换 diagonal entries，最终占优轴也随之交换。"
+          "result": "最大方差方向快速占优，同时总权重大小爆炸；这两个结论来自同一正反馈动力学。",
+          "sanityCheck": "若把 C 改成零矩阵，则两个分量都保持 1；若交换对角分量，最终占优轴也随之交换。"
         },
         "pitfalls": [
-          "把 eigenvector 当作某个具体 neuron 或 synapse；它是整个 input/weight space 中的方向。",
-          "看到 principal direction 占优就忽略所有分量仍指数增长，从而错误宣称 basic Hebb 已经稳定。"
+          "把特征向量当成某个神经元或突触；它表示整个输入或权重空间中的一个方向。",
+          "看到主方向占优就宣称学习已稳定，却没有检查权重范数是否仍在增长。"
         ]
       },
       {
         "id": "L10-M3",
-        "title": "稳定化规则与 third-factor learning",
+        "title": "控制权重增长与引入第三因子",
+        "transition": "基本赫布规则缺少控制幅度的反馈。突触缩放、Oja 规则和 BCM 阈值提供了不同的稳定化方式；若学习还要服务于任务或奖赏，则需要加入活动相关性之外的信号。",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -248,57 +250,57 @@
           }
         ],
         "paragraphs": [
-          "synaptic scaling 在较慢时间尺度上整体 rescale 一组 synapses，使 total weight 或 postsynaptic activity 回到目标范围。它可保留相对权重 pattern，却需要某种 cell-wide measurement。若每次 Hebbian change 后把 norm 拉回固定值，方向仍会朝 principal covariance eigenvector 旋转，幅度则不再无限增长。",
-          "Oja rule 将归一化写进局部近似：\\(dw/dt\\propto hx-h^2w\\)。第一项是 Hebbian correlation，第二项随 output energy 和当前 weight 增长，形成 weight-dependent decay。在 centered linear stationary input 下，expected fixed point 可对齐 principal eigenvector 并具有有限 norm；这不是所有 Oja variants 的普遍性质，而是该简化条件下的结果。",
-          "BCM rule 用 postsynaptic sliding threshold 改变更新符号，例如 \\(dw_{i}/dt\\propto h x_{i}(h-\\theta )\\)，并让 \\(\\theta\\) 随近期 \\(h^2\\) 调整。当 \\(h<\\theta\\) 时同一 presynaptic activity 倾向 LTD，当 \\(h>\\theta\\) 时倾向 LTP；长期活动升高会推高 \\(\\theta\\)，使 potentiation 门槛更严。与 Oja 的显式 weight decay 不同，BCM 通过 activity-dependent sign switch 产生竞争与稳定。",
-          "unsupervised learning 只依 input 与 neural activity，可寻找统计结构；supervised learning 还需要 target-output error；reward learning 用 reward 或 expected reward 的偏差选择有利行为。three-factor rule 把 pre activity、post activity 与第三个 modulatory signal 相乘。第三因子决定何时或朝何方向巩固 local eligibility，但不必总是 dopamine，也不等同于 backprop 中可精确定位到每个 weight 的 gradient。"
+          "突触缩放在较慢时间尺度上整体调整一组权重，使总权重或突触后活动回到目标范围。它能够保留权重之间的相对关系，但需要细胞整体活动的测量。如果每次赫布更新后都将权重范数恢复为固定值，方向仍可朝协方差的主特征向量转动，幅度却不再无限增长。",
+          "Oja 规则将归一化写成局部近似：\\(dw/dt\\propto hx-h^2w\\)。第一项增强活动相关的连接，第二项随输出能量和当前权重增大，提供与权重相关的衰减。在输入已中心化、统计平稳且输出线性的条件下，期望动力学的固定点可沿主特征向量，并保持有限范数。这一结论依赖上述简化条件，不能推广为所有 Oja 变体的无条件性质。",
+          "BCM 规则通过随活动变化的突触后阈值控制更新符号，例如 \\(dw_{i}/dt\\propto h x_{i}(h-\\theta )\\)，并让 \\(\\theta\\) 随近期 \\(h^2\\) 调整。当 \\(h<\\theta\\) 时，同一突触前活动倾向诱导 LTD；当 \\(h>\\theta\\) 时则倾向诱导 LTP。长期活动增高会推高 \\(\\theta\\)，提高增强的门槛。它与 Oja 的区别在于：Oja 显式衰减权重，BCM 则通过活动依赖的符号切换形成竞争与稳定。",
+          "无监督学习仅依据输入和神经活动寻找统计结构；监督学习还需要目标与输出之间的误差；奖赏学习则根据奖赏或奖赏预测偏差选择有利行为。三因子规则将突触前活动、突触后活动与一个调制信号相乘，由第三因子决定何时、向哪个方向巩固局部可塑性资格。第三因子不一定是多巴胺，也不等于反向传播为每个权重计算的精确梯度。"
         ],
         "keyPoints": [
-          "scaling 是整体 rescale，Oja 是 Hebbian term 加局部 weight-dependent decay，BCM 是动态 postsynaptic threshold。",
-          "Oja 对 PCA 的连接依赖 centered linear stationary input 和合适 learning rate。",
-          "three-factor learning 在 pre/post coactivity 之外加入 error、reward 或 contextual gate。"
+          "突触缩放整体调整权重；Oja 增加局部衰减；BCM 调整突触后活动阈值。",
+          "Oja 与 PCA 的联系依赖中心化、线性、平稳输入及合适的学习率。",
+          "三因子学习在突触前后共同活动之外，再引入误差、奖赏或情境调制。"
         ],
         "derivation": {
-          "title": "Oja fixed point 为何能同时选方向和控 norm",
-          "setup": "采用 centered linear neuron \\(h=w^\\mathrm{T} x\\)，\\(C=E[xx^\\mathrm{T}]\\)，expected Oja dynamics \\(E[dw/dt]=\\eta (Cw-(w^\\mathrm{T}Cw)w)\\)。",
+          "title": "Oja 固定点为何能同时选方向和控范数",
+          "setup": "采用中心化后的线性神经元 \\(h=w^\\mathrm{T} x\\)，\\(C=E[xx^\\mathrm{T}]\\)，预期 Oja 动力学 \\(E[dw/dt]=\\eta (Cw-(w^\\mathrm{T}Cw)w)\\)。",
           "steps": [
             {
-              "title": "计算两个 expectation",
-              "explanation": "\\(E[hx]=E[xx^\\mathrm{T}]w=Cw\\)；\\(E[h^2]=E[w^\\mathrm{T}xx^\\mathrm{T}w]=w^\\mathrm{T}Cw\\)，是当前方向上的 output variance。",
+              "title": "计算两个期望",
+              "explanation": "\\(E[hx]=E[xx^\\mathrm{T}]w=Cw\\)；\\(E[h^2]=E[w^\\mathrm{T}xx^\\mathrm{T}w]=w^\\mathrm{T}Cw\\)，是当前方向上的输出方差。",
               "latex": "\\mathbb E[h\\mathbf x]=C\\mathbf w,\\qquad \\mathbb E[h^2]=\\mathbf w^{\\mathsf T}C\\mathbf w"
             },
             {
-              "title": "代入 eigenvector candidate",
-              "explanation": "若 \\(w=a v_{k}\\) 且 \\(||v_{k}||=1\\)，则 \\(Cw=a\\lambda _{k}v_{k}\\)，\\(w^\\mathrm{T}Cw=a^2\\lambda _{k}\\)。dynamics 仍沿 \\(v_{k}\\)，幅度满足 da/dt=ηλ_ka(1-a^2)。",
+              "title": "代入特征向量候选",
+              "explanation": "若 \\(w=a v_{k}\\) 且 \\(||v_{k}||=1\\)，则 \\(Cw=a\\lambda _{k}v_{k}\\)，\\(w^\\mathrm{T}Cw=a^2\\lambda _{k}\\)。动力学仍沿 \\(v_{k}\\)，幅度满足 da/dt=ηλ_ka(1-a^2)。",
               "latex": "\\dot a=\\eta\\lambda_k a(1-a^2)"
             },
             {
-              "title": "判断有限 fixed amplitude",
-              "explanation": "对 \\(\\lambda _{k}>0\\)，\\(a=\\pm 1\\) 是有限 fixed points；当 \\(0<a<1\\) 时增长，当 \\(a>1\\) 时 decay。不同 directions 的 competition 使最大 \\(\\lambda\\) mode 在常见初始化下最稳定占优。",
+              "title": "判断有限固定振幅",
+              "explanation": "对 \\(\\lambda _{k}>0\\)，\\(a=\\pm 1\\) 是有限固定点；当 \\(0<a<1\\) 时增长，当 \\(a>1\\) 时衰减。不同方向的竞争使最大 \\(\\lambda\\) 模态在常见初始化下最稳定占优。",
               "latex": "a^*\\in\\{0,\\pm1\\}"
             }
           ],
           "symbolNotes": [
-            "\\(\\eta\\) 是 learning rate，必须足够小才能让 online noisy updates 近似 expected ODE。",
-            "这里 fixed norm 为 1 来自 rule 的 scaling convention；不同参数化可得到其他目标 norm。"
+            "\\(\\eta\\) 是学习率，必须足够小才能让在线含噪更新近似预期 ODE。",
+            "这里固定范数为 1 来自规则的缩放约定；不同参数化可得到其他目标范数。"
           ],
-          "unitsCheck": "\\(h^2w\\) 与 hx 两项必须同单位；实际生物 rule 需要比例常数或规范化变量来匹配，抽象公式通常把这些尺度并入 \\(\\eta\\)。",
-          "limitCheck": "若 \\(\\lambda _{k}=0\\)，该方向没有统计驱动力；若 input nonstationary，固定 C 与固定 principal component 的结论失效。"
+          "unitsCheck": "\\(h^2w\\) 与 hx 两项必须同单位；实际生物规则需要比例常数或规范化变量来匹配，抽象公式通常把这些尺度并入 \\(\\eta\\)。",
+          "limitCheck": "若 \\(\\lambda _{k}=0\\)，该方向没有统计驱动力；若输入非平稳，固定 C 与固定主要的分量的结论失效。"
         },
         "workedExample": {
-          "title": "BCM 阈值如何改变同一 synapse 的更新符号",
+          "title": "BCM 阈值如何改变同一突触的更新符号",
           "problem": "令 \\(x_{i}=2\\)，更新核心为 \\(x_{i}\\) \\(h(h-\\theta )\\)。先取 \\(\\theta =5\\)，比较 \\(h=3\\) 与 \\(h=8\\)；再解释长期高活动如何改变 \\(\\theta\\)。",
           "steps": [
-            "\\(h=3\\) 时，\\(2\\times 3\\times (3-5)=-12\\)，更新为 depression。",
-            "\\(h=8\\) 时，\\(2\\times 8\\times (8-5)=48\\)，更新为 potentiation。",
-            "若长期 \\(h^2\\) 偏高，sliding threshold dynamics 会提高 \\(\\theta\\)，使未来同样的 h 更不容易跨过 potentiation threshold。"
+            "\\(h=3\\) 时，\\(2\\times 3\\times (3-5)=-12\\)，更新为抑制。",
+            "\\(h=8\\) 时，\\(2\\times 8\\times (8-5)=48\\)，更新为增强。",
+            "若长期 \\(h^2\\) 偏高，滑动阈值动力学会提高 \\(\\theta\\)，使未来同样的 h 更不容易跨过增强阈值。"
           ],
-          "result": "BCM 用 postsynaptic operating point 决定 plasticity sign，并通过慢阈值反馈抵消持续高活动造成的失控增长。",
-          "sanityCheck": "当 \\(h=\\theta\\) 或 \\(x_{i}=0\\) 时瞬时更新为零；只改变 presynaptic activity 不能替代 postsynaptic threshold crossing。"
+          "result": "BCM 用突触后工作点决定可塑性符号，并通过慢阈值反馈抵消持续高活动造成的失控增长。",
+          "sanityCheck": "当 \\(h=\\theta\\) 或 \\(x_{i}=0\\) 时瞬时更新为零；只改变突触前活动不能替代突触后阈值越界。"
         },
         "pitfalls": [
-          "把 synaptic scaling、Oja 与 BCM 当成同一个 normalization 名称，忽略它们测量的变量和反馈位置不同。",
-          "把 three-factor rule 的形式相似性当成 backprop 或 reward circuit 的完整生物机制证明。"
+          "将突触缩放、Oja 和 BCM 当作同一种归一化，忽略它们测量的变量和反馈位置不同。",
+          "仅凭三因子规则与其他学习算法形式相似，就认定它已证明反向传播或奖赏回路的生物实现。"
         ]
       }
     ]
@@ -309,9 +311,9 @@
       "lecture": 10,
       "lectureTitle": "突触可塑性",
       "moduleId": "L10-M3",
-      "title": "Oja rule 同时选择主统计方向并限制权重范数",
-      "alt": "流程图展示中心化输入先产生线性输出，Hebbian 增长项与 Oja 归一化项合成权重更新，最后得到有界的主协方差模态。",
-      "caption": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 \\(-h^{2}w\\) 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。这个结论依赖 stationary input、合适的小 learning rate 与非退化的最大 eigenvalue。",
+      "title": "Oja 规则：选择主成分并限制权重范数",
+      "alt": "流程图展示中心化输入先产生线性输出，赫布增长项与 Oja 归一化项合成权重更新，最后得到有界的主协方差模态。",
+      "caption": "对中心化线性输入，Oja 更新把赫布项 h x 与权重相关的衰减项 \\(-h^{2}w\\) 放在同一次局部更新中：前者把 w 转向输入协方差的高方差方向，后者在输出变大时增强衰减，因此方向可趋近最大特征值对应的特征向量而范数不再无界增长。这个结论依赖稳态输入、合适的小学习率与非退化的最大特征值。",
       "sourceRefs": [
         {
           "file": "Lecture10-SynapticPlasticity.pdf",
@@ -339,14 +341,14 @@
         },
         {
           "id": "oja-update",
-          "label": "Hebb: h x\n归一化: \\(-h^{2}w\\)",
+          "label": "赫布: h x\n归一化: \\(-h^{2}w\\)",
           "x": 63,
           "y": 55,
           "tone": "accent"
         },
         {
           "id": "bounded-mode",
-          "label": "有界权重\n主 covariance mode",
+          "label": "有界权重\n主协方差模态",
           "x": 89,
           "y": 55
         }
@@ -355,7 +357,7 @@
         {
           "from": "centered-input",
           "to": "linear-output",
-          "label": "projection"
+          "label": "投影"
         },
         {
           "from": "linear-output",
@@ -396,7 +398,7 @@
     "思考题：basic Hebb 最终偏向哪个 eigenmode？"
   ],
   "synthesis": [
-    "本课把突触可塑性连接三个层级：实验现象（LTP/LTD/STDP）、候选分子机制（NMDA-dependent \\(\\mathrm{Ca}^{2+}\\) 与 AMPA trafficking）、以及抽象 learning rule。基本 Hebb rule 会沿输入 covariance 的高-variance eigenmode 放大，但同时产生正反馈和无界增长；synaptic scaling、Oja 与 BCM 分别通过全局归一化、局部 weight-dependent decay 和动态阈值稳定系统。"
+    "突触可塑性需要区分实验现象、候选机制和学习规则三个层次。LTP、LTD 与 STDP 描述可观测的改变；NMDA 依赖的 \\(\\mathrm{Ca}^{2+}\\) 信号与 AMPA 受体转运解释部分机制。在线性条件下，基本赫布规则放大输入协方差的高方差方向，也会造成权重无界增长。突触缩放、Oja 规则和 BCM 规则以不同方式限制这种正反馈。"
   ],
   "workedExamples": [
     "7.1 两维 covariance 的 mode selection",
@@ -411,10 +413,10 @@
     {
       "id": "L10-F01",
       "lecture": 10,
-      "name": "STDP timing rule",
+      "name": "STDP 的时间依赖规则",
       "expression": "∆w = f (tpost − tpre )",
       "latex": "\\Delta w=f(t_{\\mathrm{post}}-t_{\\mathrm{pre}})",
-      "conditions": "pair-based approximation",
+      "conditions": "基于脉冲对的近似",
       "sectionId": "L10-M1",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 1
@@ -422,10 +424,10 @@
     {
       "id": "L10-F02",
       "lecture": 10,
-      "name": "basic rate Hebb",
+      "name": "基本发放率赫布规则",
       "expression": "τw ẇi = hxi",
       "latex": "\\tau_w\\dot{w}_i=h x_i",
-      "conditions": "activities 非负时只 potentiates",
+      "conditions": "活动非负时只产生增强",
       "sectionId": "L10-M3",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 6
@@ -433,10 +435,10 @@
     {
       "id": "L10-F03",
       "lecture": 10,
-      "name": "centered Hebb expected dynamics",
+      "name": "中心化赫布规则的期望动力学",
       "expression": "τw E[ẇ] = Cw",
       "latex": "\\tau_w\\mathbb{E}[\\dot{\\mathbf{w}}]=C\\mathbf{w}",
-      "conditions": "linear neuron、stationary inputs",
+      "conditions": "线性神经元，输入统计平稳",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 3
@@ -444,10 +446,10 @@
     {
       "id": "L10-F04",
       "lecture": 10,
-      "name": "covariance PSD",
+      "name": "协方差矩阵的半正定性",
       "expression": "vT Cv ≥ 0",
       "latex": "\\mathbf{v}^{\\mathsf{T}}C\\mathbf{v}\\ge 0",
-      "conditions": "finite second moments",
+      "conditions": "二阶矩有限",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 4
@@ -455,10 +457,10 @@
     {
       "id": "L10-F05",
       "lecture": 10,
-      "name": "Hebbian eigenmode growth",
+      "name": "赫布学习中特征模态的增长",
       "expression": "ȧk = (λk /τw )ak",
       "latex": "\\dot{a}_k=\\frac{\\lambda_k}{\\tau_w}a_k",
-      "conditions": "C fixed",
+      "conditions": "协方差 C 固定",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 4
@@ -466,10 +468,10 @@
     {
       "id": "L10-F06",
       "lecture": 10,
-      "name": "Oja rule",
+      "name": "Oja 规则",
       "expression": "ẇi ∝ hxi − h2 wi",
       "latex": "\\dot{w}_i\\propto h x_i-h^2w_i",
-      "conditions": "online PCA approximation",
+      "conditions": "Oja 更新作为在线 PCA 的近似",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 3
@@ -477,10 +479,10 @@
     {
       "id": "L10-F07",
       "lecture": 10,
-      "name": "BCM sign switch",
+      "name": "BCM 的增减阈值",
       "expression": "ẇi ∝ hxi (h − θ)",
       "latex": "\\dot{w}_i\\propto h x_i(h-\\theta)",
-      "conditions": "dynamic threshold",
+      "conditions": "阈值随活动动态变化",
       "sectionId": "L10-M3",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 5
@@ -492,7 +494,7 @@
       "lecture": 10,
       "zh": "长时程增强",
       "en": "long-term potentiation, LTP",
-      "definition": "synaptic efficacy 的持久增强。",
+      "definition": "突触效能的持久增强。",
       "sectionId": "L10-M1",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 1
@@ -502,7 +504,7 @@
       "lecture": 10,
       "zh": "长时程抑制",
       "en": "long-term depression, LTD",
-      "definition": "synaptic efficacy 的持久降低。",
+      "definition": "突触效能的持久降低。",
       "sectionId": "L10-M1",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 1
@@ -512,7 +514,7 @@
       "lecture": 10,
       "zh": "脉冲时序依赖可塑性",
       "en": "spike-timing-dependent plasticity, STDP",
-      "definition": "weight change 随 pre/post spike timing 变化的经验规则。",
+      "definition": "权重变化取决于突触前后脉冲相对时序的经验规律。",
       "sectionId": "L10-M1",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 1
@@ -520,9 +522,9 @@
     {
       "id": "L10-G04",
       "lecture": 10,
-      "zh": "Hebbian rule",
+      "zh": "赫布规则",
       "en": "Hebbian learning",
-      "definition": "共同活动促进连接变化的一类规则。",
+      "definition": "将共同活动与连接变化联系起来的一类学习规则。",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 4
@@ -532,7 +534,7 @@
       "lecture": 10,
       "zh": "协方差规则",
       "en": "covariance rule",
-      "definition": "用 centered pre/post fluctuations 驱动 plasticity。",
+      "definition": "利用中心化后的突触前后活动波动驱动可塑性的规则。",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 4
@@ -542,7 +544,7 @@
       "lecture": 10,
       "zh": "主特征向量",
       "en": "principal eigenvector",
-      "definition": "covariance 最大 eigenvalue 对应方向。",
+      "definition": "协方差矩阵最大特征值对应的方向。",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 3
@@ -552,7 +554,7 @@
       "lecture": 10,
       "zh": "突触缩放",
       "en": "synaptic scaling",
-      "definition": "为保持总体 activity/weight 水平而整体重标定。",
+      "definition": "为维持总体活动或权重水平，对突触强度进行整体缩放。",
       "sectionId": "L10-M3",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 5
@@ -562,7 +564,7 @@
       "lecture": 10,
       "zh": "Oja 规则",
       "en": "Oja rule",
-      "definition": "含局部归一化项的 Hebbian PCA rule。",
+      "definition": "带局部归一化项、可提取主成分的赫布学习规则。",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 3
@@ -572,7 +574,7 @@
       "lecture": 10,
       "zh": "BCM 规则",
       "en": "BCM rule",
-      "definition": "用滑动 postsynaptic threshold 控制 LTP/LTD。",
+      "definition": "通过滑动的突触后活动阈值控制增强与抑制的规则。",
       "sectionId": "L10-M1",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 1
@@ -582,21 +584,21 @@
       "lecture": 10,
       "zh": "三因子规则",
       "en": "three-factor rule",
-      "definition": "pre、post 与第三调制/teaching signal 共同决定更新。",
+      "definition": "由突触前活动、突触后活动及第三调制或教学信号共同决定更新的规则。",
       "sectionId": "L10-M2",
       "sourceFile": "Lecture10-SynapticPlasticity.pdf",
       "sourcePage": 4
     }
   ],
   "commonTraps": [
-    "把 LTP/LTD 等同于单一 \\(NMDA/\\mathrm{Ca}^{2+}\\) pathway；机制依 synapse/context 而变。",
-    "basic Hebb 只看共同高活动，忽略 centered covariance 与 depression。",
-    "把 eigenvector 当作某个具体 neuron。",
-    "证明 PSD 时只说\"covariance 应该为正\"而不写 quadratic form。",
-    "把方向选择与 norm 稳定混淆。",
-    "把 Hebbian learning 无条件等同于 PCA。",
-    "认为所有 reward learning 的第三因子都是 dopamine。",
-    "需要明确 Hebbian learning 与 PCA 的联系是特定线性、统计和稳定化条件下的结果，需避免把\"Hebbian = PCA\"写成普遍同义。"
+    "把 LTP/LTD 归结为单一的 \\(NMDA/\\mathrm{Ca}^{2+}\\) 通路，忽略机制会随突触类型和实验条件改变。",
+    "只用基本赫布规则描述共同高活动，忽略中心化协方差与突触减弱。",
+    "把输入协方差的特征向量当成某个具体神经元。",
+    "证明协方差矩阵半正定时，只说它“应当为正”，却没有检查任意方向的二次型。",
+    "把学习方向的选择与权重范数的稳定混为一谈。",
+    "把赫布学习在特定线性与稳定化条件下的结果，推广为它与 PCA 总是等价。",
+    "认为所有奖励学习中的第三因子都是多巴胺。",
+    "看到赫布学习提取高方差方向，就称其为 PCA，未检查线性响应、输入统计和权重稳定化条件。"
   ],
   "errata": [
     {
@@ -608,7 +610,7 @@
       "sourcePage": 1,
       "sectionId": "L10-M1",
       "originalIssue": "这里 的 \\(AMPA/NMDA/\\mathrm{Ca}^{2+}\\) 链是课程级 canonical mechanism，不是所有 synapses 的唯一实现。",
-      "explanation": "A_± 与 τ_± 是 protocol-dependent 参数，不是所有脑区共享的常数。",
+      "explanation": "AMPA 电流促进突触后膜去极化，解除 NMDA 通道中的 Mg2+ 阻塞，随后流入的 Ca2+ 将突触前后活动的重合转化为胞内信号。",
       "correction": null
     },
     {
@@ -620,7 +622,7 @@
       "sourcePage": 5,
       "sectionId": "L10-M3",
       "originalIssue": "这里 中 Oja/BCM 公式是简化 firing-rate rules；不同文献 normalization 和 threshold dynamics 可略有差异。",
-      "explanation": "与 Oja 的显式 weight decay 不同，BCM 通过 activity-dependent sign switch 产生竞争与稳定。",
+      "explanation": "它与 Oja 的区别在于：Oja 显式衰减权重，BCM 则通过活动依赖的符号切换形成竞争与稳定。",
       "correction": null
     },
     {
@@ -632,7 +634,7 @@
       "sourcePage": 6,
       "sectionId": "L10-M3",
       "originalIssue": "这里 的 backprop/error 与 biological three-factor rules 仅有形式联系，机制不能直接等同。",
-      "explanation": "第三因子决定何时或朝何方向巩固 local eligibility，但不必总是 dopamine，也不等同于 backprop 中可精确定位到每个 weight 的 gradient。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": "这里 的 backprop/error 与 biological three-factor rules 仅有形式联系，机制不能直接等同"
     }
   ],
@@ -649,37 +651,37 @@
         }
       ],
       "conceptTags": [
-        "从突触时序与受体机制到 firing-rate Hebb rule"
+        "突触可塑性：从脉冲时序到赫布规则"
       ],
       "difficulty": 2,
-      "type": "calculation",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么不能把经典 STDP window 直接当成 firing-rate covariance rule？",
+      "stem": "为什么经典 STDP 窗口不能直接等同于发放率协方差规则？",
       "choices": [
         {
           "id": "a",
-          "text": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+          "text": "STDP 只取决于突触前脉冲频率，协方差规则才需要同时测量突触前后活动。"
         },
         {
           "id": "b",
-          "text": "PSD 限制的是任意整体方向上的 variance \\(v^\\mathrm{T}Cv\\) 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 \\(C_{ij}<0\\)，但所有线性组合的 variance 仍是平方期望。"
+          "text": "两者只差时间单位，把毫秒换成秒，就能让任意 STDP 窗口与协方差规则完全等价。"
         },
         {
           "id": "c",
-          "text": "把 NMDA-Ca2+ 链写成所有 synapse 都遵守的唯一机制，忽略 neuromodulation、dendritic voltage 与 burst context。"
+          "text": "STDP 可使突触减弱，而中心化的协方差规则只能增强突触。"
         },
         {
           "id": "d",
-          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+          "text": "STDP 保留脉冲时序；协方差规则平均中心化活动，二者的联系依赖统计假设。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“稳定化规则与 third-factor learning”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up”中的另一组变量与条件，不能由题干推出。",
-        "c": "错误在于：把 NMDA-Ca2+ 链写成所有 synapse 都遵守的唯一机制，忽略 neuromodulation、dendritic voltage 与 burst context。"
+        "a": "STDP 的时间差由突触前后两个脉冲共同决定，并非仅由突触前频率决定。",
+        "b": "单位换算不会恢复平均过程中丢失的时序；等价还依赖脉冲统计和时间尺度假设。",
+        "c": "中心化后的活动乘积可以为负，因此协方差规则也能产生突触减弱。"
       },
-      "explanation": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。 令 \\(\\Delta t=t_{\\mathrm{post}}-t_{\\mathrm{pre}}\\)；经典 pair-based window 常写成 \\(\\Delta t>0\\) 时 \\(\\Delta w=A_{+}e^{-\\Delta t/\\tau _{+}}\\)，\\(\\Delta t<0\\) 时 \\(\\Delta w=-A_{-}e^{\\Delta t/\\tau _{-}}\\)。"
+      "explanation": "STDP 保留突触前后脉冲的毫秒级相对时序；协方差规则则对较长时间窗内的活动波动取平均。二者只在特定统计与时间尺度假设下相联系，所用变量、实验方案和机制层级并不相同。 放电率模型舍弃单次脉冲的毫秒时序，只保留一段时间内的活动强弱。"
     },
     {
       "id": "L10-Q02",
@@ -693,37 +695,37 @@
         }
       ],
       "conceptTags": [
-        "Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up"
+        "协方差如何选择权重方向"
       ],
       "difficulty": 2,
       "type": "calculation",
       "cognitiveLevel": "understand",
-      "stem": "为什么 covariance 中存在负的 off-diagonal element 仍不违背 PSD？",
+      "stem": "为什么协方差中存在负的非对角元素仍不违背半正定性（PSD）？",
       "choices": [
         {
           "id": "a",
-          "text": "PSD 限制的是任意整体方向上的 variance \\(v^\\mathrm{T}Cv\\) 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 \\(C_{ij}<0\\)，但所有线性组合的 variance 仍是平方期望。"
+          "text": "半正定性约束线性组合的方差，不要求每对变量的协方差都非负。"
         },
         {
           "id": "b",
-          "text": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+          "text": "只要矩阵对称，它的所有特征值就非负，所以负的非对角项不会造成问题。"
         },
         {
           "id": "c",
-          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+          "text": "负的非对角项和对称位置的正项抵消，因此不会改变任何线性组合的方差。"
         },
         {
           "id": "d",
-          "text": "把 eigenvector 当作某个具体 neuron 或 synapse；它是整个 input/weight space 中的方向。"
+          "text": "负协方差只是有限样本误差，真实的总体协方差矩阵中不会出现。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“稳定化规则与 third-factor learning”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“从突触时序与受体机制到 firing-rate Hebb rule”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 eigenvector 当作某个具体 neuron 或 synapse；它是整个 input/weight space 中的方向。"
+        "b": "对称矩阵仍可有负特征值；半正定性（PSD） 还需要所有方向上的二次型非负。",
+        "c": "协方差矩阵的对称位置数值相同，并非相反；这些项也会影响投影方差。",
+        "d": "真实变量也可反相关；负协方差与总体矩阵的半正定性（PSD） 性质并不冲突。"
       },
-      "explanation": "PSD 限制的是任意整体方向上的 variance \\(v^\\mathrm{T}Cv\\) 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 \\(C_{ij}<0\\)，但所有线性组合的 variance 仍是平方期望。 PSD 不表示每个 off-diagonal element 都为正；anticorrelated variables 可以给负 covariance，而整体 quadratic form 仍不为负。"
+      "explanation": "半正定性（PSD） 限制的是任意整体方向上的方差 \\(v^\\mathrm{T}Cv\\) 不能为负，而不是要求每个矩阵元素非负。两个变量可以负相关，使 \\(C_{ij}<0\\)，但所有线性组合的方差仍是平方期望。 半正定并不要求每个非对角元素为正：反相关输入的协方差可以为负，但整个二次型仍不会小于零。"
     },
     {
       "id": "L10-Q03",
@@ -737,37 +739,37 @@
         }
       ],
       "conceptTags": [
-        "稳定化规则与 third-factor learning"
+        "控制权重增长与引入第三因子"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 reward-based three-factor rule 不能简化为\"Hebb rule 再乘 dopamine\"这一个句子？",
+      "stem": "为什么基于奖励的三因子规则不能简化为\"赫布规则再乘多巴胺\"这一个句子？",
       "choices": [
         {
           "id": "a",
-          "text": "PSD 限制的是任意整体方向上的 variance \\(v^\\mathrm{T}Cv\\) 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 \\(C_{ij}<0\\)，但所有线性组合的 variance 仍是平方期望。"
+          "text": "多巴胺浓度就是奖赏大小，因此突触不需要区分已预期奖赏与意外奖赏。"
         },
         {
           "id": "b",
-          "text": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。"
+          "text": "第三因子的含义、时序与资格迹都影响更新，多巴胺只是候选实现。"
         },
         {
           "id": "c",
-          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+          "text": "只要释放多巴胺，所有突触都能获得各自的精确任务梯度，无需局部活动或资格迹。"
         },
         {
           "id": "d",
-          "text": "把 synaptic scaling、Oja 与 BCM 当成同一个 normalization 名称，忽略它们测量的变量和反馈位置不同。"
+          "text": "只需同时测量三种信号，调制到达的时间不影响学习。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“从突触时序与受体机制到 firing-rate Hebb rule”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 synaptic scaling、Oja 与 BCM 当成同一个 normalization 名称，忽略它们测量的变量和反馈位置不同。"
+        "a": "奖赏与奖赏预测误差不同；第三因子的编码内容必须由模型和实验明确。",
+        "c": "一个广泛的调制信号不能单独提供每条连接的精确梯度；局部资格决定哪些突触可更新。",
+        "d": "调制信号与资格迹的时间重叠会影响更新，延迟不能被忽略。"
       },
-      "explanation": "第三因子可能编码 reward、reward-prediction error、error、context 或其他 neuromodulatory gate；其时序、受体、eligibility trace 与目标 weight specificity 都影响更新，因此 dopamine 只是部分系统中的候选实现。 第三因子决定何时或朝何方向巩固 local eligibility，但不必总是 dopamine，也不等同于 backprop 中可精确定位到每个 weight 的 gradient。"
+      "explanation": "第三因子可能编码奖励、奖励预测误差、误差、情境或其他神经调质的门控；其时序、受体、资格迹与目标权重特异性都影响更新，因此多巴胺只是部分系统中的候选实现。 三因子规则将突触前活动、突触后活动与一个调制信号相乘，由第三因子决定何时、向哪个方向巩固局部可塑性资格。"
     },
     {
       "id": "L10-Q04",
@@ -781,37 +783,37 @@
         }
       ],
       "conceptTags": [
-        "Oja rule 同时选择主统计方向并限制权重范数"
+        "Oja 规则：选择主成分并限制权重范数"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Oja rule 同时选择主统计方向并限制权重范数\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"Oja 规则：选择主成分并限制权重范数\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "PSD 限制的是任意整体方向上的 variance \\(v^\\mathrm{T}Cv\\) 不能为负，而不是要求每个 matrix element 非负。两个变量可 anticorrelated，使 \\(C_{ij}<0\\)，但所有线性组合的 variance 仍是平方期望。"
+          "text": "图中衰减项去掉所有高方差方向，使权重最终沿最小协方差特征值的方向排列。"
         },
         {
           "id": "b",
-          "text": "STDP 保留 pre/post spike 的毫秒级相对时序，covariance rule 对较长时间窗的 activity fluctuation 取平均；二者可在特定统计和时间尺度假设下联系，但状态变量、实验 protocol 与可解释的机制层级不同。"
+          "text": "只保留图中的赫布项也会得到相同的有界权重，因为协方差的正半定性会自动停止增长。"
         },
         {
           "id": "c",
-          "text": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 \\(-h^{2}w\\) 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。"
+          "text": "赫布项选择统计方向，输出相关衰减控制范数；收敛仍需合适的输入和步长。"
         },
         {
           "id": "d",
-          "text": "把 synaptic scaling、Oja 与 BCM 当成同一个 normalization 名称，忽略它们测量的变量和反馈位置不同。"
+          "text": "该图说明 Oja 对任意学习率和非平稳输入都必然收敛到同一主成分。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "图中没有“Covariance 的几何、PSD 证明与 Hebbian eigenmode blow-up”所需的变量与条件。",
-        "b": "图中没有“从突触时序与受体机制到 firing-rate Hebb rule”所需的变量与条件。",
-        "d": "图中的标注与关系不支持这种读法：把 synaptic scaling、Oja 与 BCM 当成同一个 normalization 名称，忽略它们测量的变量和反馈位置不同。"
+        "a": "Oja 的赫布增长偏向最大方差方向；衰减项控制幅度，不是选择最小主成分。",
+        "b": "非负协方差特征值可产生持续增长；去掉稳定项不能保证权重有界。",
+        "d": "大步长和变化的输入统计会破坏这里的收敛条件。"
       },
-      "explanation": "对中心化线性输入，Oja 更新把 Hebbian 项 h x 与权重相关的衰减项 \\(-h^{2}w\\) 放在同一次局部更新中：前者把 w 转向输入 covariance 的高方差方向，后者在输出变大时增强衰减，因此方向可趋近 principal eigenvector 而范数不再无界增长。这个结论依赖 stationary input、合适的小 learning rate 与非退化的最大 eigenvalue。"
+      "explanation": "对中心化线性输入，Oja 更新把赫布项 h x 与权重相关的衰减项 \\(-h^{2}w\\) 放在同一次局部更新中：前者把 w 转向输入协方差的高方差方向，后者在输出变大时增强衰减，因此方向可趋近最大特征值对应的特征向量而范数不再无界增长。这个结论依赖稳态输入、合适的小学习率与非退化的最大特征值。"
     }
   ]
 }

@@ -22,8 +22,8 @@ describe('lesson question presentation', () => {
   });
 
   it('reads as a continuous lesson and keeps only the companion PDF link', () => {
-    expect(lectureReader).toContain('transitionTo');
-    expect(lectureReader).toContain('transition={index ?');
+    expect(studyModule).toContain('text={module.transition}');
+    expect(lectureReader).not.toContain('transitionTo');
     expect(lectureReader).toContain('lecture.companionHref');
     expect(lectureReader).not.toContain('/resources/original/');
     expect(lectureReader).not.toContain('lecture.sourceFiles');
@@ -43,5 +43,17 @@ describe('lesson question presentation', () => {
     expect(lectureReader).toContain('aria-labelledby={`${tableId}-caption`}');
     expect(lectureReader).toContain('aria-describedby={`${tableId}-hint`}');
     expect(lectureReader.indexOf('<SourceCodeListing')).toBeLessThan(lectureReader.indexOf('<CodeAuditTable'));
+  });
+
+  it('publishes authored transitions in both languages without manufactured causal links', () => {
+    for (const edition of ['content', 'content/en']) {
+      for (let lecture = 1; lecture <= 27; lecture += 1) {
+        const record = JSON.parse(fs.readFileSync(path.join(root, edition, 'lectures', `${String(lecture).padStart(2, '0')}.json`), 'utf8'));
+        const transitions = record.studyGuide.modules.slice(1).map((item: { transition?: string }) => item.transition);
+        expect(transitions.every((text: string | undefined) => Boolean(text?.trim()))).toBe(true);
+        expect(new Set(transitions).size).toBe(transitions.length);
+        for (const text of transitions) expect(text).not.toMatch(/上一部分已经建立了：|The previous section established:/);
+      }
+    }
   });
 });

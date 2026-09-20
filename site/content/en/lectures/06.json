@@ -1,7 +1,7 @@
 {
   "lecture": 6,
   "slug": "06",
-  "zhTitle": "神经编码 I：Poisson 脉冲与最大似然",
+  "zhTitle": "泊松脉冲与最大似然解码",
   "enTitle": "Neural Coding I: Poisson Spikes and Maximum Likelihood",
   "companionFile": "NEUROSCI366_Lecture06_Neural_Coding1_Poisson_ML_Companion.pdf",
   "companionPages": 26,
@@ -155,6 +155,7 @@
       {
         "id": "L06-M2",
         "title": "Random-dot motion, rasters, PSTHs, and trial-to-trial variability",
+        "transition": "After choosing counts or spike times as the response, we must ensure that repeated trials share the relevant stimulus conditions. Random-dot motion provides a concrete setting in which rasters, PSTHs, and count variability reveal individual events, average temporal structure, and differences between trials.",
         "sourceRefs": [
           {
             "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
@@ -228,6 +229,7 @@
       {
         "id": "L06-M3",
         "title": "Poisson coding, maximum likelihood, and Fisher curvature",
+        "transition": "A PSTH and a Fano factor summarize the mean response and count variability, but do not yet specify the full probability of a response pattern. A Poisson model provides a testable starting point for connecting those summaries to likelihood, maximum-likelihood decoding, and Fisher information.",
         "sourceRefs": [
           {
             "file": "Lecture6-Neurons3-NeuralCoding1.pdf",
@@ -694,27 +696,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Concatenation discards alignment to each stimulus onset and the identity of each trial."
+          "text": "Accurate count prediction makes spike times a deterministic function of count; a timing model can only duplicate existing information and cannot improve any task."
         },
         {
           "id": "b",
-          "text": "The natural logarithm is strictly increasing on positive numbers, so it preserves the ordering of candidate likelihoods."
+          "text": "A timing model has more parameters, so lower training error is sufficient to establish that exact times contain information beyond count."
         },
         {
           "id": "c",
-          "text": "Compressing each action-potential waveform to an event and then claiming that the model explains channel dynamics."
+          "text": "Correct counts show that mean rate contains everything predictable; any remaining timing variability must be measurement error and should be excluded from a coding model."
         },
         {
           "id": "d",
-          "text": "It establishes only that counts suffice for the chosen task. To determine whether timing adds predictive information beyond counts, compare the count model with a model that retains timing on independent data."
+          "text": "A count model checks only that response summary; independent-data comparisons with timing-sensitive models are needed to test for information beyond counts."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "It establishes only that counts suffice for the chosen task. To determine whether timing adds predictive information beyond counts, compare the count model with a model that retains timing on independent data. Na activation, Na inactivation, K activation, and the refractory period constrain observable spike sequences: the absolute refractory period imposes a lower bound on adjacent interspike intervals, recovery of gating variables introduces history dependence, and conductances and morphology shape the stimulus-to-spike transformation. Thus, even a coding model that uses only counts cannot permit unbounded firing rates or negative counts. Compressed mechanisms remain present as boundary conditions on the statistical description.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Random-dot motion, rasters, PSTHs, and trial-to-trial variability,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “Poisson coding, maximum likelihood, and Fisher curvature,” not the relationship asked about here.",
-        "c": "The error is: Compressing each action-potential waveform to an event and then claiming that the model explains channel dynamics."
+        "a": "Many different spike sequences have the same count. Accurate count prediction does not show that those timing differences are irrelevant to the task.",
+        "b": "Extra parameters can fit training noise. A timing advantage must be tested on independent data against an appropriate count baseline.",
+        "c": "Trial-specific timing can contain noise or stimulus-related structure. A count model alone cannot classify all remaining variability as measurement error."
       }
     },
     {
@@ -743,27 +745,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Concatenation discards alignment to each stimulus onset and the identity of each trial."
+          "text": "Concatenation loses onset alignment and trial identity, mixing time-locked changes, trial variability, and drift; trial boundaries can also create false intervals."
         },
         {
           "id": "b",
-          "text": "The natural logarithm is strictly increasing on positive numbers, so it preserves the ordering of candidate likelihoods."
+          "text": "Concatenation changes only display order; retaining the total spike count lets the histogram uniquely reconstruct the response on every trial."
         },
         {
           "id": "c",
-          "text": "It establishes only that counts suffice for the chosen task. To determine whether timing adds predictive information beyond counts, compare the count model with a model that retains timing on independent data."
+          "text": "Concatenation supplies more samples and reduces trial noise; stimulus alignment becomes unnecessary because a sufficiently long average must recover the true PSTH."
         },
         {
           "id": "d",
-          "text": "Dividing a PSTH only by bin width and omitting trial count, thereby inflating the rate by a factor of K."
+          "text": "The main issue is that concatenation changes the neuron’s physical refractory period; new boundary intervals reflect biological retraining between connected trials."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "Concatenation discards alignment to each stimulus onset and the identity of each trial. It can no longer separate time-locked changes in the mean, trial-to-trial count variability, and slow state drift, and it may create artificial intervals at concatenation boundaries. Each row of a raster represents one trial, each tick represents one spike, and the horizontal axis is time relative to stimulus onset. A raster displays both mean temporal structure and trial differences. If many rows become denser around 100 ms after stimulus onset, the conditional rate has increased during that period; variation in event counts and times across rows shows that repeated responses are not deterministic trajectories. A raster is not a rate curve: visual density must be converted to a normalized count before experiments can be compared.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Poisson coding, maximum likelihood, and Fisher curvature,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “From channel dynamics to coding observables,” not the relationship asked about here.",
-        "d": "The error is: Dividing a PSTH only by bin width and omitting trial count, thereby inflating the rate by a factor of K."
+        "b": "A total count does not identify trial membership or stimulus-relative times. Many trial structures can produce the same histogram.",
+        "c": "A PSTH estimates rate as a function of stimulus-relative time. Long averaging without that alignment cannot reconstruct its temporal structure.",
+        "d": "Intervals across artificial trial boundaries are processing artifacts, not a continuous physiological sequence. Concatenation does not change cellular refractoriness."
       }
     },
     {
@@ -802,27 +804,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "Concatenation discards alignment to each stimulus onset and the identity of each trial."
+          "text": "The logarithm normalizes likelihood into a posterior and removes prior effects, ensuring that the likelihood and log-likelihood select the same parameter."
         },
         {
           "id": "b",
-          "text": "The natural logarithm is strictly increasing on positive numbers, so it preserves the ordering of candidate likelihoods."
+          "text": "The logarithm is strictly increasing on positive values, preserving candidate likelihood order; it turns products into sums without changing which parameter maximizes them."
         },
         {
           "id": "c",
-          "text": "It establishes only that counts suffice for the chosen task. To determine whether timing adds predictive information beyond counts, compare the count model with a model that retains timing on independent data."
+          "text": "The largest individual factor always determines a product’s maximum; that factor also has the largest logarithm, so other neurons cannot affect the estimate."
         },
         {
           "id": "d",
-          "text": "Interchanging \\(P(n|s)\\) and \\(P(s|n)\\) without specifying a prior or normalization."
+          "text": "The logarithm turns correlated responses into independent evidence; preserving each neuron’s mean during that transformation keeps the maximum-likelihood estimate unchanged."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "The natural logarithm is strictly increasing on positive numbers, so it preserves the ordering of candidate likelihoods. Taking logs only changes products into sums and improves numerical stability; it does not change the maximizer. If neurons are conditionally independent given \\(\\theta\\), the population likelihood is a product of neuron-wise terms. Its log-likelihood is ℓ(θ)=Σ_i[N_i ln(f_i(θ)T)−f_i(θ)T−ln(N_i!)]. The maximum-likelihood estimate \\(\\theta _{\\mathrm{hat}}\\) is the direction under which the observed counts are most probable. Factorial terms that do not depend on \\(\\theta\\) may be omitted when finding the maximum, but they still matter when calculating normalized probabilities or comparing different datasets.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Random-dot motion, rasters, PSTHs, and trial-to-trial variability,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “From channel dynamics to coding observables,” not the relationship asked about here.",
-        "d": "The error is: Interchanging \\(P(n|s)\\) and \\(P(s|n)\\) without specifying a prior or normalization."
+        "a": "Taking logs is not normalization and neither adds nor removes a prior. The maximizer is preserved by strict monotonicity.",
+        "c": "Maximum likelihood balances all factors. Maximizing one factor does not necessarily maximize their product.",
+        "d": "A mathematical transformation does not make correlated observations independent. The correct joint likelihood structure still matters."
       }
     },
     {
@@ -851,27 +853,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The natural logarithm is strictly increasing on positive numbers, so it preserves the ordering of candidate likelihoods."
+          "text": "The compression from voltage to spike times is reversible; sufficiently fine PSTH bins can reconstruct the original voltage waveform and every individual trial detail."
         },
         {
           "id": "b",
-          "text": "It establishes only that counts suffice for the chosen task. To determine whether timing adds predictive information beyond counts, compare the count model with a model that retains timing on independent data."
+          "text": "A PSTH needs only bin count divided by trial number; that value is already in hertz and remains directly comparable when bin width changes."
         },
         {
           "id": "c",
-          "text": "Flow diagram converting a continuous voltage trace into spike times, a repeated-trial raster, and a PSTH"
+          "text": "The raster retains trial event structure; dividing bin counts by trial number and bin duration gives the PSTH’s average rate while discarding trial identity."
         },
         {
           "id": "d",
-          "text": "Dividing a PSTH only by bin width and omitting trial count, thereby inflating the rate by a factor of K."
+          "text": "Both raster and PSTH preserve every trial’s identity, so one PSTH uniquely determines single-trial count variance and slow drift."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "Threshold detection first compresses a continuous trace into event times. The raster retains each trial's event structure, whereas the PSTH divides the total spike count in a time bin by \\(K\\Delta t\\), yielding a rate averaged across trials while discarding trial identity.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “Poisson coding, maximum likelihood, and Fisher curvature.”",
-        "b": "The diagram does not show the variables and conditions discussed in “From channel dynamics to coding observables.”",
-        "d": "The error is: Dividing a PSTH only by bin width and omitting trial count, thereby inflating the rate by a factor of K."
+        "a": "Threshold events discard subthreshold voltage and waveform information. Averaging also loses trial identity; finer bins cannot restore what was discarded.",
+        "b": "Dividing by trial number gives counts per trial per bin. Dividing by bin duration in seconds is also required to obtain hertz.",
+        "d": "Different trial arrangements can produce the same mean PSTH. Count variance and drift require retained trial information or separate analyses."
       }
     }
   ]

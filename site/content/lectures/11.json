@@ -1,7 +1,7 @@
 {
   "lecture": 11,
   "slug": "11",
-  "zhTitle": "机器学习：回归、梯度下降与反向传播",
+  "zhTitle": "回归、梯度下降与反向传播",
   "enTitle": "Machine Learning: Regression, Gradient Descent, and Backpropagation",
   "companionFile": "NEUROSCI366_Lecture11_Machine_Learning_Regression_Backprop_Companion.pdf",
   "companionPages": 24,
@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能从 dataset、architecture、loss 与 learning rule 四个层面定义 supervised-learning problem，并区分 classification 与 regression 的 target support。",
-      "能用 first-order Taylor expansion 说明 gradient 为何给出局部最陡上升方向，以及负 gradient step 为何降低 squared loss。",
-      "能逐步推导 linear-regression gradient、Hebbian-like/stabilization decomposition 与 normal equation，并说明 singular design matrix 的处理。",
-      "能解释 deep linear network 的 input-output mapping 虽线性，但多层 factorization 使 optimization dynamics 非线性且通常非凸。",
-      "能按 shape 推导 backprop error recurrence 与 layer weight gradient，并把 backprop 作为训练算法而非已确立的神经生物机制。"
+      "从数据、网络结构、损失和学习规则四个层面定义监督学习问题，并根据目标的取值区分分类与回归。",
+      "用一阶泰勒展开说明梯度为何指向局部最陡上升方向，以及足够小的负梯度更新为何降低平方损失。",
+      "推导线性回归梯度，将其拆成相关学习项与稳定项，并说明正规方程及奇异矩阵的处理。",
+      "解释深度线性网络为何仍表示线性映射，而多层参数化却产生非线性、通常非凸的优化问题。",
+      "核对各层维度，推导反向传播的误差递推与权重梯度，区分训练算法与尚待验证的生物机制。"
     ],
     "prerequisiteBridge": [
-      "supervised dataset 由 P 个配对样本 \\((x_\\mu,y_\\mu )\\) 组成。\\(x_\\mu\\) 是 N×1 feature vector；若每个 sample 放成 matrix X 的一列，则 \\(X\\in \\mathbb{R}^{N\\times P}\\)。scalar regression 的 targets 可组成 \\(y\\in \\mathbb{R}^{P\\times 1}\\)，prediction 是 \\(X^\\mathrm{T} w\\)。classification 的 y 常是离散 label 或 one-hot vector，而 regression target 可连续。",
-      "gradient 是所有 partial derivatives 组成、与 parameter shape 相同的对象。对 scalar function \\(L(w)\\)，小改变量 \\(\\Delta w\\) 引起的 first-order change 近似为 \\(\\Delta L\\approx \\nabla L^\\mathrm{T}\\Delta w\\)。dot product 等于两个向量长度乘夹角 cosine；在固定 step length 下，让 \\(\\Delta w\\) 与 \\(-\\nabla L\\) 同向可使这一线性近似最负。",
-      "chain rule 处理复合函数：若 \\(y=f(z)\\)、\\(z=g(x)\\)，则 \\(dy/dx=(dy/dz)(dz/dx)\\)。多层网络只是把这个规则重复使用，但 matrix shape 决定 transpose 与 outer product 的位置。平方函数的 derivative 为 \\(d(e^2)/de=2e\\)；matrix-vector product \\(z=Wx\\) 中，\\(W_{ij}\\) 只影响 \\(z_{i}\\)，且 derivative 对 \\(x_{j}\\) 成正比。"
+      "监督数据包含 P 对样本 \\((x_\\mu,y_\\mu )\\)。其中 \\(x_\\mu\\) 是 N×1 特征向量；每个样本占矩阵 X 的一列，因此 \\(X\\in \\mathbb{R}^{N\\times P}\\)。标量回归的目标写成 \\(y\\in \\mathbb{R}^{P\\times 1}\\)，预测为 \\(X^\\mathrm{T} w\\)。回归目标可以连续取值，分类目标则通常是离散标签或独热向量。",
+      "梯度由所有偏导数组成，维度与参数相同。对标量函数 \\(L(w)\\)，参数的小变化 \\(\\Delta w\\) 引起的一阶损失变化约为 \\(\\Delta L\\approx \\nabla L^\\mathrm{T}\\Delta w\\)。点积等于向量长度的乘积再乘夹角余弦，因此在步长固定时，令 \\(\\Delta w\\) 沿 \\(-\\nabla L\\) 方向，可以使这一局部近似下降最多。",
+      "链式法则处理复合函数：若 \\(y=f(z)\\)、\\(z=g(x)\\)，则 \\(dy/dx=(dy/dz)(dz/dx)\\)。多层网络重复应用同一规则，但矩阵维度决定了转置与外积的位置。平方函数的导数为 \\(d(e^2)/de=2e\\)；在矩阵乘法 \\(z=Wx\\) 中，权重 \\(W_{ij}\\) 只直接影响 \\(z_{i}\\)，相应导数与 \\(x_{j}\\) 成正比。"
     ],
     "modules": [
       {
         "id": "L11-M1",
-        "title": "Supervised learning 的组成与 gradient descent",
+        "title": "监督学习与梯度下降",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -114,62 +114,63 @@
           }
         ],
         "paragraphs": [
-          "supervised learning 给出 input-target pairs。手写数字任务中 x 是 image、y 是离散 digit label，属于 classification；optic-flow 任务中 x 可是一对相邻 frames、y 是每个位置的连续 motion vector，属于 regression。两类任务都需要明确 train examples 如何采样，以及 test examples 是否来自相同 distribution。",
-          "architecture 描述 prediction function。多层网络可写 \\(z^{(0)}=x\\)，\\(h^{(\\ell )}=W^{(\\ell -1)}z^{(\\ell -1)}\\)，\\(z^{(\\ell )}=\\phi (h^{(\\ell )})\\)，最后 \\(\\hat{y}=g(W^{(L)}z^{(L)})\\)。若第 ℓ 层有 \\(N_\\ell\\) units，则 \\(W^{(\\ell -1)}\\in \\mathbb{R}^{N_\\ell \\times N_{\\ell -1}}\\)；写 shape 能在推导前发现大多数 transpose errors。",
-          "loss 把 prediction 与 target 的差异压成 scalar。regression 常用 squared error，classification 常用 cross-entropy；loss 的选择包含 noise model 与任务偏好。optimization rule 再决定如何改变 W。把 architecture、loss 和 learning rule 混成一个词，会无法判断性能变化来自 representation、objective 还是 optimizer。",
-          "在 parameter plane 上，squared loss contours 是椭圆；gradient 垂直于等高线并指向局部上升。first-order Taylor approximation 只在 step 足够小时可靠，所以 learning rate \\(\\eta\\) 既不能大到跨过 valley，也不能小到训练停滞。负 gradient 是局部下降方向，不保证深网络一次就到 global optimum。"
+          "监督学习从输入与目标的配对数据中学习预测关系。手写数字任务的输入是图像、目标是离散数字标签，属于分类；光流任务的输入可以是相邻两帧图像、目标是各位置的连续运动向量，属于回归。无论哪类任务，都需要说明训练样本如何采集，以及测试数据是否与训练数据来自相同分布。",
+          "网络结构规定了预测函数的形式。多层网络可写为 \\(z^{(0)}=x\\)、\\(h^{(\\ell )}=W^{(\\ell -1)}z^{(\\ell -1)}\\)、\\(z^{(\\ell )}=\\phi (h^{(\\ell )})\\)，最后得到 \\(\\hat{y}=g(W^{(L)}z^{(L)})\\)。若第 ℓ 层有 \\(N_\\ell\\) 个单元，则 \\(W^{(\\ell -1)}\\in \\mathbb{R}^{N_\\ell \\times N_{\\ell -1}}\\)。先核对各层维度，可以在求导前发现输入输出方向或矩阵转置错误。",
+          "损失函数将预测与目标的差异归结为一个标量。回归常用平方误差，分类常用交叉熵；具体选择包含对噪声分布和任务代价的假设。优化规则再决定如何改变权重。因此，网络结构、损失函数和学习规则需要分别说明，才能判断性能变化究竟来自表示能力、训练目标还是优化过程。",
+          "在线性回归的参数平面上，平方损失的等高线呈椭圆。梯度垂直于等高线，指向局部上升方向。由于一阶泰勒近似只在小范围内可靠，学习率 \\(\\eta\\) 过大可能跨过谷底，过小则会使训练极慢。负梯度提供局部下降方向，不能保证深度网络一步到达全局最优。"
         ],
         "keyPoints": [
-          "dataset 定义问题证据，architecture 定义 hypothesis class，loss 定义错误，optimizer 定义搜索路径。",
-          "gradient 与 parameter 同 shape，指向局部最陡上升；gradient descent 使用负号。",
-          "Taylor derivation 是局部论证，learning rate 过大时 loss 可能反而上升。"
+          "数据决定学习依据，结构限定可表达的函数，损失定义错误，优化器决定搜索方式。",
+          "梯度与参数维度相同，指向局部最陡上升方向；梯度下降沿其反方向更新。",
+          "一阶展开只提供局部保证，学习率过大时损失仍可能上升。"
         ],
         "derivation": {
-          "title": "由 Taylor expansion 推出 gradient descent，并求单样本 linear gradient",
-          "setup": "scalar prediction \\(\\hat{y}=w^\\mathrm{T}x\\)，loss \\(L(w)=1/2(y-\\hat{y})^2\\)，parameter step 为 \\(\\Delta w\\)。",
+          "title": "由 Taylor 展开推出梯度下降，并求单样本线性梯度",
+          "setup": "标量预测 \\(\\hat{y}=w^\\mathrm{T}x\\)，损失 \\(L(w)=1/2(y-\\hat{y})^2\\)，参数步为 \\(\\Delta w\\)。",
           "steps": [
             {
-              "title": "写 first-order loss change",
-              "explanation": "在当前 w 附近，小 step 的 loss 变化由 gradient 与 step 的 dot product 决定，二阶及更高项在 step 很小时较小。",
+              "title": "写首次顺序损失变化",
+              "explanation": "在当前 w 附近，小步的损失变化由梯度与步的内积决定，二阶及更高项在步很小时较小。",
               "latex": "L(\\mathbf w+\\Delta\\mathbf w)\\approx L(\\mathbf w)+\\nabla L(\\mathbf w)^{\\mathsf T}\\Delta\\mathbf w"
             },
             {
               "title": "选择局部下降方向",
-              "explanation": "令 \\(\\Delta w=-\\eta \\nabla L\\)，linear term 变为 \\(-\\eta ||\\nabla L||^2\\le 0\\)。\\(\\eta >0\\) 控制 step size。",
+              "explanation": "令 \\(\\Delta w=-\\eta \\nabla L\\)，线性项变为 \\(-\\eta ||\\nabla L||^2\\le 0\\)。\\(\\eta >0\\) 控制步大小。",
               "latex": "\\Delta\\mathbf w=-\\eta\\nabla L,\\qquad \\Delta L\\approx-\\eta\\|\\nabla L\\|_2^2"
             },
             {
-              "title": "对 squared error 使用 chain rule",
-              "explanation": "令 \\(e=y-w^\\mathrm{T}x\\)。\\(\\partial L/\\partial e=e\\)，\\(\\partial e/\\partial w=-x\\)，所以 \\(\\mathrm{gradient}=-ex\\)，更新为 \\(+\\eta ex\\)；正 error 会沿 x 提高 prediction。",
+              "title": "对平方误差使用链规则",
+              "explanation": "令 \\(e=y-w^\\mathrm{T}x\\)。\\(\\partial L/\\partial e=e\\)，\\(\\partial e/\\partial w=-x\\)，所以 \\(\\mathrm{gradient}=-ex\\)，更新为 \\(+\\eta ex\\)；正误差会沿 x 提高预测。",
               "latex": "\\nabla_{\\mathbf w}L=-(y-\\mathbf w^{\\mathsf T}\\mathbf x)\\mathbf x"
             }
           ],
           "symbolNotes": [
-            "\\(\\eta\\) 的单位是 parameter^2/loss，使 \\(\\eta \\nabla L\\) 与 parameter 同单位；标准化后常视为数值 hyperparameter。",
-            "对 batch loss，gradient 是 P 个 sample gradients 的平均，而不是先平均 x 和 y 再相乘。"
+            "\\(\\eta\\) 的单位是参数^2/损失，使 \\(\\eta \\nabla L\\) 与参数同单位；标准化后常视为数值超参数。",
+            "对批量损失，梯度是 P 个样本梯度的平均，而不是先平均 x 和 y 再相乘。"
           ],
-          "unitsCheck": "若 y 和 yhat 以 deg/s 表示、x 无量纲，则 gradient 含 \\((\\mathrm{deg}/s)^2\\) per weight；\\(\\eta\\) 必须把更新转换回 weight 单位。",
-          "limitCheck": "当 residual \\(e=0\\) 或 \\(x=0\\) 时 gradient 为零；\\(\\eta\\) 太大时被忽略的二阶项可使 loss 增加。"
+          "unitsCheck": "若 y 和 预测值 以 deg/s 表示、x 无量纲，则梯度含 \\((\\mathrm{deg}/s)^2\\) 每权重；\\(\\eta\\) 必须把更新转换回权重单位。",
+          "limitCheck": "当残差 \\(e=0\\) 或 \\(x=0\\) 时梯度为零；\\(\\eta\\) 太大时被忽略的二阶项可使损失增加。"
         },
         "workedExample": {
-          "title": "一次可手算的 gradient step",
-          "problem": "\\(x=(1,2)^\\mathrm{T}\\)，\\(y=5\\)，\\(w=(0,0)^\\mathrm{T}\\)，\\(L=1/2(y-w^\\mathrm{T}x)^2\\)，\\(\\eta =0.1\\)。计算更新与新 loss。",
+          "title": "一次可手算的梯度步",
+          "problem": "\\(x=(1,2)^\\mathrm{T}\\)，\\(y=5\\)，\\(w=(0,0)^\\mathrm{T}\\)，\\(L=1/2(y-w^\\mathrm{T}x)^2\\)，\\(\\eta =0.1\\)。计算更新与新损失。",
           "steps": [
-            "初始 prediction 为 0，residual \\(e=5\\)，\\(\\mathrm{gradient}=-ex=(-5,-10)^\\mathrm{T}\\)。",
+            "初始预测为 0，残差 \\(e=5\\)，\\(\\mathrm{gradient}=-ex=(-5,-10)^\\mathrm{T}\\)。",
             "更新 \\(w_{\\mathrm{new}}=w-\\eta \\mathrm{gradient}=(0.5,1.0)^\\mathrm{T}\\)。",
-            "新 \\(\\mathrm{prediction}=0.5+2=2.5\\)，新 loss=\\(1/2(5-2.5)^2=3.125\\)；初始 loss=12.5。"
+            "新 \\(\\mathrm{prediction}=0.5+2=2.5\\)，新损失=\\(1/2(5-2.5)^2=3.125\\)；初始损失=12.5。"
           ],
-          "result": "负 gradient step 把 prediction 朝 target 推进，并把 loss 降低四倍。",
-          "sanityCheck": "gradient 与 w 都是 \\(2\\times 1\\)；若误去掉更新负号，w 会变成 (-0.5,-1)，\\(\\mathrm{prediction}=-2.5\\)，loss 增大到 28.125。"
+          "result": "负梯度步把预测朝目标推进，并把损失降低四倍。",
+          "sanityCheck": "梯度与 w 都是 \\(2\\times 1\\)；若误去掉更新负号，w 会变成 (-0.5,-1)，\\(\\mathrm{prediction}=-2.5\\)，损失增大到 28.125。"
         },
         "pitfalls": [
-          "把 classification 与 regression 仅按模型名称区分，而不检查 target support 和 loss。",
-          "把 negative gradient 的局部下降保证误写成对任意 learning rate 和任意 nonconvex network 的全局保证。"
+          "根据模型名称区分分类与回归，却没有检查目标的取值和损失函数。",
+          "将负梯度的局部下降性质推广为任意步长、任意非凸网络都能收敛到全局最优。"
         ]
       },
       {
         "id": "L11-M2",
-        "title": "Linear regression：gradient decomposition、normal equation 与 deep linear factorization",
+        "title": "线性回归的梯度与正规方程",
+        "transition": "在线性回归中，可以把梯度的每一项直接对应到数据与残差的关系。展开更新式后，输入—目标相关项和限制权重增长的项便显现出来；令梯度为零则得到正规方程。",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -181,62 +182,63 @@
           }
         ],
         "paragraphs": [
-          "先固定 matrix orientation：\\(X\\in \\mathbb{R}^{N\\times P}\\) 的每一列是 sample，\\(w\\in \\mathbb{R}^{N\\times 1}\\)，\\(y\\in \\mathbb{R}^{P\\times 1}\\)，\\(\\mathrm{prediction}=X^\\mathrm{T}w\\)。batch loss \\(L=||y-X^\\mathrm{T}w||^2/P\\)。gradient 汇总每个 feature 与 residual 的 correlation，因此 update 中包含 Xy 这一 data-dependent Hebbian-like term。",
-          "展开 gradient 得 \\(\\nabla L=(2/P)(XX^\\mathrm{T}w-Xy)\\)。更新 \\(-\\nabla L\\) 因而包含 \\(+(2\\eta /P)\\)Xy 与 \\(-(2\\eta /P)XX^\\mathrm{T}w\\)。前一项把 input-target coactivity 写入 weights，后一项随当前 weights 和 input covariance 增长，提供 stabilization。它与 biological Hebb 在形式上相似，但 target y、batch access 与 signed error 不是普通 local coactivity。",
-          "设 \\(\\mathrm{gradient}=0\\) 得 normal equation \\(XX^\\mathrm{T} \\hat{w}=Xy\\)；若 \\(XX^\\mathrm{T}\\) invertible，\\(\\hat{w}=(XX^\\mathrm{T})^{-1}\\)Xy。若 features 冗余或 \\(P<N\\)，matrix 可 singular，不能硬算 inverse。pseudoinverse 选择最小 norm solution；ridge regression 则把 \\(XX^\\mathrm{T}\\) 改成 \\(XX^\\mathrm{T}+\\lambda I\\)，以少量 bias 换 numerical stability。",
-          "deep linear network 令所有 activations 为 identity，则 overall mapping \\(M=W^{(L)}\\cdots W^{(0)}\\) 仍线性：\\(\\hat{y}=Mx\\)。然而同一个 M 可由许多 layer factorizations 表示，loss 对单个 layer weights 含 products，因此 parameter landscape 与 learning dynamics 非线性。representation function 的线性不等于 optimization problem 为简单 convex regression。"
+          "约定 \\(X\\in \\mathbb{R}^{N\\times P}\\) 的每一列为一个样本，权重为 \\(w\\in \\mathbb{R}^{N\\times 1}\\)，目标为 \\(y\\in \\mathbb{R}^{P\\times 1}\\)，于是 \\(\\mathrm{prediction}=X^\\mathrm{T}w\\)，批量损失为 \\(L=||y-X^\\mathrm{T}w||^2/P\\)。梯度汇总了各特征与预测残差的相关性，其中 Xy 表示输入与目标的相关项，在形式上类似赫布学习。",
+          "展开梯度得到 \\(\\nabla L=(2/P)(XX^\\mathrm{T}w-Xy)\\)。沿 \\(-\\nabla L\\) 更新时，可分成 \\(+(2\\eta /P)\\)Xy 与 \\(-(2\\eta /P)XX^\\mathrm{T}w\\) 两部分：前者将输入和目标的共同活动写入权重，后者随当前权重和输入二阶统计增大，限制继续增长。这种代数形式与生物赫布规则相似，但目标 y、整批样本和带符号误差都超出了普通局部共同活动的定义。",
+          "令 \\(\\mathrm{gradient}=0\\)，得到正规方程 \\(XX^\\mathrm{T} \\hat{w}=Xy\\)。如果 \\(XX^\\mathrm{T}\\) 可逆，则 \\(\\hat{w}=(XX^\\mathrm{T})^{-1}\\)Xy。特征冗余或 \\(P<N\\) 时，矩阵可能奇异，不能直接求逆。伪逆可以选出最小范数解；岭回归将 \\(XX^\\mathrm{T}\\) 改为 \\(XX^\\mathrm{T}+\\lambda I\\)，用一定偏差换取数值稳定性。",
+          "深度线性网络的所有激活函数都是恒等映射，因此总映射 \\(M=W^{(L)}\\cdots W^{(0)}\\) 仍然线性，即 \\(\\hat{y}=Mx\\)。但同一个总矩阵可以分解为多组层间权重，损失对各层参数包含乘积，所以参数空间中的优化与学习动力学仍是非线性的。输入输出函数线性，并不意味着多层参数优化等同于普通凸回归。"
         ],
         "keyPoints": [
-          "least-squares update 可拆成 input-target correlation 与 weight-dependent covariance stabilization。",
-          "closed form 需要明确 X orientation 与 invertibility；singular 时用 pseudoinverse 或 regularization。",
-          "deep linear 的 function class 仍线性，但 factorized parameters 造成非凸与 scale nonuniqueness。"
+          "最小二乘更新可拆为输入—目标相关项，以及依赖输入二阶统计和当前权重的稳定项。",
+          "使用解析解前必须明确样本排列方向与矩阵可逆性；奇异问题可采用伪逆或正则化。",
+          "深度线性网络仍表示线性函数，但多层分解引入了非凸性和参数尺度的不唯一性。"
         ],
         "derivation": {
-          "title": "Batch least-squares gradient 与 normal equation",
-          "setup": "定义 residual \\(r=y-X^\\mathrm{T}w\\in \\mathbb{R}^{P\\times 1}\\)，loss \\(L=(1/P)r^\\mathrm{T}r\\)；保持这个比例，不加可选的 1/2。",
+          "title": "批量最小二乘梯度与正规方程",
+          "setup": "定义残差 \\(r=y-X^\\mathrm{T}w\\in \\mathbb{R}^{P\\times 1}\\)，损失 \\(L=(1/P)r^\\mathrm{T}r\\)；保持这个比例，不加可选的 1/2。",
           "steps": [
             {
-              "title": "展开 scalar loss",
-              "explanation": "把 quadratic 展开为 \\(y^\\mathrm{T}y-2y^\\mathrm{T}X^\\mathrm{T}w+w^\\mathrm{T}XX^\\mathrm{T}w\\)。第一项与 w 无关。",
+              "title": "展开标量损失",
+              "explanation": "把二次展开为 \\(y^\\mathrm{T}y-2y^\\mathrm{T}X^\\mathrm{T}w+w^\\mathrm{T}XX^\\mathrm{T}w\\)。第一项与 w 无关。",
               "latex": "L=\\frac1P(\\mathbf y^{\\mathsf T}\\mathbf y-2\\mathbf y^{\\mathsf T}X^{\\mathsf T}\\mathbf w+\\mathbf w^{\\mathsf T}XX^{\\mathsf T}\\mathbf w)"
             },
             {
-              "title": "逐项求 gradient",
-              "explanation": "linear term 给 -2Xy/P；对 symmetric \\(XX^\\mathrm{T}\\)，quadratic term gradient 为 \\(2XX^\\mathrm{T}w/P\\)。",
+              "title": "逐项求梯度",
+              "explanation": "线性项给 -2Xy/P；对对称 \\(XX^\\mathrm{T}\\)，二次项梯度为 \\(2XX^\\mathrm{T}w/P\\)。",
               "latex": "\\nabla_{\\mathbf w}L=\\frac{2}{P}(XX^{\\mathsf T}\\mathbf w-X\\mathbf y)"
             },
             {
-              "title": "设 gradient 为零",
-              "explanation": "stationary point 满足 \\(XX^\\mathrm{T} \\hat{w}=Xy\\)。squared loss 为 convex quadratic；若 \\(XX^\\mathrm{T}\\) positive definite，该 stationary point 是唯一 minimum。",
+              "title": "设梯度为零",
+              "explanation": "稳态点满足 \\(XX^\\mathrm{T} \\hat{w}=Xy\\)。平方损失为凸二次；若 \\(XX^\\mathrm{T}\\) 正定，该稳态点是唯一最小值。",
               "latex": "\\hat{\\mathbf w}=(XX^{\\mathsf T})^{-1}X\\mathbf y"
             }
           ],
           "symbolNotes": [
-            "\\(XX^\\mathrm{T}\\) 是 N×N feature covariance scale matrix，Xy 是 N×1 feature-target correlation vector。",
-            "若使用 samples-as-rows convention，公式会写成 \\((X^\\mathrm{T}X)^{-1}X^\\mathrm{T}y\\)；两种写法不能混用。"
+            "\\(XX^\\mathrm{T}\\) 是 N×N 特征协方差尺度矩阵，Xy 是 N×1 特征目标相关性向量。",
+            "若使用样本按行排列的约定，公式会写成 \\((X^\\mathrm{T}X)^{-1}X^\\mathrm{T}y\\)；两种写法不能混用。"
           ],
-          "unitsCheck": "\\(XX^\\mathrm{T}w\\) 与 Xy 都含 feature×target 的匹配尺度；若 features 单位差异很大，conditioning 与 learning-rate sensitivity 会恶化，通常需 standardization。",
-          "limitCheck": "当 \\(XX^\\mathrm{T}\\) singular 时 inverse 不存在；gradient descent 仍可找到一个 interpolating solution，但选到哪一个取决于 initialization、optimizer 与 regularization。"
+          "unitsCheck": "\\(XX^\\mathrm{T}w\\) 与 Xy 都含特征×目标的匹配尺度；若特征单位差异很大，条件化与学习发放率敏感度会恶化，通常需标准化。",
+          "limitCheck": "当 \\(XX^\\mathrm{T}\\) 奇异时逆矩阵不存在；梯度下降仍可找到一个插值解，但选到哪一个取决于初始化、优化器与正则化。"
         },
         "workedExample": {
-          "title": "两 feature、两 sample 的 closed-form fit",
-          "problem": "\\(X=[[1,0],[0,2]]\\)，即 columns 为 \\((1,0)^\\mathrm{T}\\) 与 \\((0,2)^\\mathrm{T}\\)；targets \\(y=(3,4)^\\mathrm{T}\\)。求 what。",
+          "title": "两特征、两样本的闭式解拟合",
+          "problem": "\\(X=[[1,0],[0,2]]\\)，即列为 \\((1,0)^\\mathrm{T}\\) 与 \\((0,2)^\\mathrm{T}\\)；目标 \\(y=(3,4)^\\mathrm{T}\\)。求估计权重。",
           "steps": [
             "\\(XX^\\mathrm{T}=\\operatorname{diag}(1,4)\\)，\\(Xy=(3,8)^\\mathrm{T}\\)。",
             "\\((XX^\\mathrm{T})^{-1}=\\operatorname{diag}(1,1/4)\\)，所以 \\(\\hat{w}=(3,2)^\\mathrm{T}\\)。",
-            "predictions \\(X^\\mathrm{T}\\hat{w}=(3,4)^\\mathrm{T}\\)，与 targets 完全相同，residual 为零。"
+            "预测 \\(X^\\mathrm{T}\\hat{w}=(3,4)^\\mathrm{T}\\)，与目标完全相同，残差为零。"
           ],
-          "result": "feature 2 的 sample value 为 2，因此 weight 只需 2 就预测 target 4；closed form 尊重 feature scaling。",
-          "sanityCheck": "若误用 \\(X^\\mathrm{T}X\\) 在本例恰好仍 diagonal，可能掩盖 orientation bug；一般 non-square X 时 shape 会立即暴露错误。"
+          "result": "特征 2 的样本价值为 2，因此权重只需 2 就预测目标 4；闭式解尊重特征缩放。",
+          "sanityCheck": "若误用 \\(X^\\mathrm{T}X\\) 在本例恰好仍对角，可能掩盖行列方向错误；一般非方阵 X 时尺寸会立即暴露错误。"
         },
         "pitfalls": [
-          "不声明 samples-as-columns 或 samples-as-rows 就套 closed-form 公式，导致 transpose 与 shape 错位。",
-          "在 singular 或 ill-conditioned matrix 上直接求 inverse，忽略 pseudoinverse、ridge 和 feature scaling。"
+          "没有说明样本占行还是占列便套用解析解，导致矩阵维度和转置位置错误。",
+          "直接对奇异或病态矩阵求逆，忽略伪逆、岭回归和特征尺度的影响。"
         ]
       },
       {
         "id": "L11-M3",
-        "title": "Backpropagation：逐层 chain rule、error coordinates 与 weight gradient",
+        "title": "反向传播：沿依赖链计算梯度",
+        "transition": "多层网络把权重对损失的影响分散到一连串中间变量中。反向传播逐层应用链式法则，沿这条依赖链计算隐藏层及其权重的梯度。",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -248,57 +250,57 @@
           }
         ],
         "paragraphs": [
-          "forward pass 保存每层 preactivation \\(h^{(\\ell )}=W^{(\\ell -1)}z^{(\\ell -1)}\\) 与 activation \\(z^{(\\ell )}=\\phi (h^{(\\ell )})\\)。backprop 不把 target 物理地送回网络，而是计算 scalar loss 对这些 intermediate variables 的 derivatives。定义 \\(\\delta ^{(\\ell )}=\\partial L/\\partial h^{(\\ell )}\\)，它与该层 units 数目相同。",
-          "从 layer ℓ+1 往回看，\\(h^{(\\ell +1)}=W^{(\\ell )}z^{(\\ell )}\\)。一个 hidden activation 对所有 downstream preactivations 都有影响，因此 sensitivity 先乘 \\((W^{(\\ell )})^\\mathrm{T}\\) 汇总 downstream error，再逐元素乘 \\(\\phi '(h^{(\\ell )})\\)。transpose 来自坐标映射，不是约定性的装饰。",
-          "每个 weight \\(W^{(\\ell -1)}_{ij}\\) 把 presynaptic activation \\(z^{(\\ell -1)}_j\\) 贡献给 postsynaptic preactivation \\(h^{(\\ell )}_i\\)。于是 \\(\\partial L/\\partial W_{ij}=\\delta _{i} z_{j}\\)，整个 matrix gradient 是 outer product \\(\\delta ^{(\\ell )}(z^{(\\ell -1)})^\\mathrm{T}\\)。batch training 对这些 outer products 求平均。",
-          "nonlinear activation 的 derivative 决定 error 是否能穿过该 unit。sigmoid saturated 时 derivative 很小，可造成 vanishing gradient；large weights 可造成 exploding gradient。ReLU 在正区 derivative 为 1、负区为 0，也可能产生 inactive units。backprop 是精确 chain-rule algorithm；它与 biological three-factor rule 的 outer-product 形式可比较，但 weight transport、global target 与 update timing 都是机制差异。"
+          "前向计算保存各层激活前输入 \\(h^{(\\ell )}=W^{(\\ell -1)}z^{(\\ell -1)}\\) 与激活值 \\(z^{(\\ell )}=\\phi (h^{(\\ell )})\\)。反向传播计算的是标量损失对这些中间变量的导数，并非把目标值实际送回网络。定义 \\(\\delta ^{(\\ell )}=\\partial L/\\partial h^{(\\ell )}\\)，它与所在层的单元数具有相同维度。 保存中间激活使同一条前向计算链上的局部导数可以重复使用，避免为每个权重重新计算整个网络。",
+          "相邻两层满足 \\(h^{(\\ell +1)}=W^{(\\ell )}z^{(\\ell )}\\)。一个隐藏单元的激活会影响所有下游单元，因此先乘 \\((W^{(\\ell )})^\\mathrm{T}\\) 汇总下游误差信息，再逐元素乘本层的激活导数 \\(\\phi '(h^{(\\ell )})\\)。这里的转置来自坐标映射的方向，逐元素乘法则来自局部链式法则。 下游单元对当前单元的影响需要相加；每条路径的权重和局部斜率则按链式法则相乘。",
+          "权重 \\(W^{(\\ell -1)}_{ij}\\) 将突触前激活 \\(z^{(\\ell -1)}_j\\) 传给突触后输入 \\(h^{(\\ell )}_i\\)。因此 \\(\\partial L/\\partial W_{ij}=\\delta _{i} z_{j}\\)，整层的权重梯度就是外积 \\(\\delta ^{(\\ell )}(z^{(\\ell -1)})^\\mathrm{T}\\)。批量训练对各样本产生的外积求平均，便得到整批数据的梯度。 这个外积的行对应接收输入的单元，列对应发送输入的单元，因此它与权重矩阵具有完全相同的行列尺寸。",
+          "激活函数的导数决定误差信息能否有效传过一个单元。sigmoid 饱和时导数很小，可能造成梯度消失；过大的权重则可能造成梯度爆炸。ReLU 在正区间导数为 1、负区间为 0，也可能出现长期不激活的单元。反向传播是链式法则的精确计算算法；虽然其外积形式可与生物三因子规则比较，但权重传递、全局目标和更新时间仍存在机制上的差别。"
         ],
         "keyPoints": [
-          "\\(\\delta\\) 是 loss 对 preactivation 的 derivative，不是 firing error 的直接生物实体。",
-          "hidden error recurrence 包含 downstream weight transpose 与 local activation derivative。",
-          "weight gradient 是 postsynaptic sensitivity 与 presynaptic activation 的 outer product。"
+          "\\(\\delta\\) 是损失对激活前输入的导数，不应直接等同于某种生物放电误差信号。",
+          "隐藏层误差的递推包含下游权重转置和本层激活函数导数。",
+          "权重梯度是突触后损失敏感度与突触前激活的外积。"
         ],
         "derivation": {
-          "title": "两层网络的 backprop recurrence",
-          "setup": "令 \\(h^1=W^0x\\)，\\(z^1=\\phi (h^1)\\)，\\(h^2=W^1z^1\\)，\\(\\mathrm{prediction}=h^2\\)；loss 为任意 differentiable scalar。",
+          "title": "两层网络的反向传播循环反馈",
+          "setup": "令 \\(h^1=W^0x\\)，\\(z^1=\\phi (h^1)\\)，\\(h^2=W^1z^1\\)，\\(\\mathrm{prediction}=h^2\\)；损失为任意可导标量。",
           "steps": [
             {
-              "title": "定义 output sensitivity",
-              "explanation": "先直接由 loss 求 \\(\\delta ^2=\\partial L/\\partial h^2\\)。对于 squared error \\(L=1/2||y-h^2||^2\\)，\\(\\delta ^2=h^2-y\\)。",
+              "title": "定义输出敏感度",
+              "explanation": "先直接由损失求 \\(\\delta ^2=\\partial L/\\partial h^2\\)。对于平方误差 \\(L=1/2||y-h^2||^2\\)，\\(\\delta ^2=h^2-y\\)。",
               "latex": "\\boldsymbol\\delta^{(2)}=\\frac{\\partial L}{\\partial\\mathbf h^{(2)}}"
             },
             {
-              "title": "把 sensitivity 传到 hidden preactivation",
-              "explanation": "chain rule 先通过 linear map 得 \\((W^1)^\\mathrm{T}\\delta ^2\\)，再通过 elementwise nonlinearity 得 hidden \\(\\delta\\)。",
+              "title": "把敏感度传到隐藏激活前输入",
+              "explanation": "链规则先通过线性映射得 \\((W^1)^\\mathrm{T}\\delta ^2\\)，再通过逐元素非线性得隐藏 \\(\\delta\\)。",
               "latex": "\\boldsymbol\\delta^{(1)}=((W^{(1)})^{\\mathsf T}\\boldsymbol\\delta^{(2)})\\odot\\phi'(\\mathbf h^{(1)})"
             },
             {
-              "title": "形成两个 weight gradients",
-              "explanation": "每个 matrix gradient 是该层 postsynaptic \\(\\delta\\) 与进入该层的 activation 的 outer product，因此 shape 自动匹配。",
+              "title": "形成两个权重梯度",
+              "explanation": "每个矩阵梯度是该层突触后 \\(\\delta\\) 与进入该层的激活的外乘积，因此尺寸自动匹配。",
               "latex": "\\frac{\\partial L}{\\partial W^{(1)}}=\\boldsymbol\\delta^{(2)}(\\mathbf z^{(1)})^{\\mathsf T},\\quad \\frac{\\partial L}{\\partial W^{(0)}}=\\boldsymbol\\delta^{(1)}\\mathbf x^{\\mathsf T}"
             }
           ],
           "symbolNotes": [
-            "若 \\(W^0\\) 是 H×N、\\(W^1\\) 是 O×H，则 \\(\\delta ^1\\) 是 H×1、\\(\\delta ^2\\) 是 O×1，两个 gradients 分别为 H×N 与 O×H。",
-            "⊙ 是 elementwise product；把它误写成 matrix multiplication 会改变 shape 和数值含义。"
+            "若 \\(W^0\\) 是 H×N、\\(W^1\\) 是 O×H，则 \\(\\delta ^1\\) 是 H×1、\\(\\delta ^2\\) 是 O×1，两个梯度分别为 H×N 与 O×H。",
+            "⊙ 是逐元素乘积；把它误写成矩阵乘法会改变尺寸和数值含义。"
           ],
-          "unitsCheck": "\\(\\delta\\) 对 preactivation 的单位是 loss/preactivation；乘 presynaptic activation 后得到 loss/weight，与 gradient 定义一致。",
-          "limitCheck": "若某 hidden unit 的 \\(\\phi '=0\\)，它在当前 sample 上不给 upstream weights 传 gradient；这不表示该 unit 永久无用，但连续 inactive 会阻断学习。"
+          "unitsCheck": "\\(\\delta\\) 对激活前输入的单位是损失/激活前输入；乘突触前激活后得到损失/权重，与梯度定义一致。",
+          "limitCheck": "若某隐藏单元的 \\(\\phi '=0\\)，它在当前样本上不给上游权重传梯度；这不表示该单元永久无用，但连续不活跃会阻断学习。"
         },
         "workedExample": {
-          "title": "按 shape 手算一条 backprop 路径",
-          "problem": "取 \\(x=(1,2)^\\mathrm{T}\\)，\\(W^0=[[1,0],[0,1]]\\)，\\(\\phi\\) 为 identity，\\(W^1=(1,-1)\\)，target \\(y=0\\)，loss=\\(1/2(\\hat{y}-y)^2\\)。",
+          "title": "按尺寸手算一条反向传播路径",
+          "problem": "取 \\(x=(1,2)^\\mathrm{T}\\)，\\(W^0=[[1,0],[0,1]]\\)，\\(\\phi\\) 为身份，\\(W^1=(1,-1)\\)，目标 \\(y=0\\)，损失=\\(1/2(\\hat{y}-y)^2\\)。",
           "steps": [
-            "hidden \\(z^1=W^0x=(1,2)^\\mathrm{T}\\)；prediction \\(\\hat{y}=(1,-1)\\cdot (1,2)=-1\\)。",
+            "隐藏 \\(z^1=W^0x=(1,2)^\\mathrm{T}\\)；预测 \\(\\hat{y}=(1,-1)\\cdot (1,2)=-1\\)。",
             "\\(\\delta ^2=\\hat{y}-y=-1\\)；\\(\\delta ^1=(W^1)^\\mathrm{T}\\delta ^2=(-1,1)^\\mathrm{T}\\)。",
             "\\(\\partial L/\\partial W^1=\\delta ^2(z^1)^\\mathrm{T}=(-1,-2)\\)；\\(\\partial L/\\partial W^0=\\delta ^1x^\\mathrm{T}=[[-1,-2],[1,2]]\\)。"
           ],
-          "result": "两个 gradient 的 shape 分别为 \\(1\\times 2\\) 与 \\(2\\times 2\\)，并可由 local outer products 逐项核对。",
-          "sanityCheck": "对 \\(W^1_1\\) 微小增加会让 yhat 增加；当前 residual 为 -1，增加 yhat 会接近 target 0，因此 gradient 对 \\(W^1_1\\) 为负，negative-gradient update 确实增加该 weight。"
+          "result": "两个梯度的尺寸分别为 \\(1\\times 2\\) 与 \\(2\\times 2\\)，并可由局部外乘积逐项核对。",
+          "sanityCheck": "对 \\(W^1_1\\) 微小增加会让 预测值 增加；当前残差为 -1，增加 预测值 会接近目标 0，因此梯度对 \\(W^1_1\\) 为负，负梯度更新确实增加该权重。"
         },
         "pitfalls": [
-          "把 \\(\\delta\\) 称为在生物神经元中实际向后传播的 error molecule，而不区分计算 derivative 与机制实现。",
-          "只记 recurrence 公式，不逐层标 h、z、\\(\\delta\\) 和 W 的 shape，容易在 transpose 或 elementwise derivative 处出错。"
+          "将 \\(\\delta\\) 描述为真实神经元中向后传播的误差分子，混淆导数计算与生物实现。",
+          "只记递推公式，却不核对 h、z、\\(\\delta\\) 和 W 的维度，因而混淆转置与逐元素乘法。"
         ]
       }
     ]
@@ -307,11 +309,11 @@
     {
       "id": "L11-FIG-A1",
       "lecture": 11,
-      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "lectureTitle": "回归、梯度下降与反向传播",
       "moduleId": "L11-M1",
-      "title": "负梯度沿局部斜率下降损失",
+      "title": "沿负梯度方向降低损失",
       "alt": "归一化的一维凸损失曲线和一串逐步接近最低点的梯度下降迭代点。",
-      "caption": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 \\(\\Delta w=-\\eta \\nabla L\\) 沿相反方向移动。图中的 marker 只表示归一化的迭代顺序，不是实验数据；它说明合适步长可逐次靠近 minimum，但 Taylor 近似不能保证过大的 learning rate 仍会下降。",
+      "caption": "在当前参数处，梯度指向损失最快上升的局部方向，因此更新 \\(\\Delta w=-\\eta \\nabla L\\) 沿相反方向移动。图中的标记只表示归一化的迭代顺序，不是实验数据；它说明合适步长可逐次靠近极小值，但 Taylor 近似不能保证过大的学习率仍会下降。",
       "sourceRefs": [
         {
           "file": "Lecture11-MachineLearning.pdf",
@@ -325,10 +327,10 @@
       "schematic": true,
       "kind": "plot",
       "xLabel": "参数 w（归一化）",
-      "yLabel": "loss \\(L(w)\\)（归一化）",
+      "yLabel": "损失 \\(L(w)\\)（归一化）",
       "curves": [
         {
-          "label": "凸 loss",
+          "label": "凸损失",
           "points": [
             [
               5,
@@ -377,7 +379,7 @@
           ]
         },
         {
-          "label": "gradient steps",
+          "label": "梯度步",
           "points": [
             [
               12,
@@ -404,7 +406,7 @@
         {
           "x": 50,
           "y": 11,
-          "label": "minimum"
+          "label": "极小值"
         }
       ]
     }
@@ -438,7 +440,7 @@
     "思考题：但其 training 为什么可非凸？"
   ],
   "synthesis": [
-    "机器学习问题必须同时指定 representation/architecture、 objective/loss 和 optimization/learning rule。线性回归提供最透明的例子：squared error 的 gradient 可分成 data-dependent Hebbian-like term 与 weight-dependent stabilization term，并有 normal-equation closed form。在深层网络中，backprop 只是反复应用 chain rule，把 output error 经 weight transpose 与 local activation derivative 传回各层。"
+    "一个学习问题需要分别指定网络结构、损失函数和优化方法。线性回归中，平方损失的梯度可分解为依赖输入输出相关性的项与依赖当前权重的项，并可与正规方程的解析解比较。深层网络的反向传播则反复应用链式法则：输出误差经权重转置与局部激活函数导数传回各层，从而计算参数梯度。"
   ],
   "workedExamples": [
     "7.1 一次 gradient step",
@@ -452,10 +454,10 @@
     {
       "id": "L11-F01",
       "lecture": 11,
-      "name": "gradient descent",
+      "name": "梯度下降",
       "expression": "∆w = −η∇w L",
       "latex": "\\Delta\\mathbf{w}=-\\eta\\nabla_{\\mathbf{w}}L",
-      "conditions": "\\(\\eta >0\\)、局部 step",
+      "conditions": "\\(\\eta >0\\)，采用局部小步更新",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -463,10 +465,10 @@
     {
       "id": "L11-F02",
       "lecture": 11,
-      "name": "linear-regression loss",
+      "name": "线性回归的损失函数",
       "expression": "1 L= ∥y − X T w∥2 2P",
       "latex": "L=\\frac{1}{2P}\\lVert\\mathbf{y}-X^{\\mathsf{T}}\\mathbf{w}\\rVert_2^2",
-      "conditions": "source orientation X:N×P",
+      "conditions": "样本按列排列，X 为 N×P",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 1
@@ -474,10 +476,10 @@
     {
       "id": "L11-F03",
       "lecture": 11,
-      "name": "least-squares gradient",
+      "name": "最小二乘梯度",
       "expression": "∇w L = −X(y − X T w)/P",
       "latex": "\\nabla_{\\mathbf{w}}L=-\\frac{1}{P}X(\\mathbf{y}-X^{\\mathsf{T}}\\mathbf{w})",
-      "conditions": "differentiable squared loss",
+      "conditions": "可微的平方损失",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -485,10 +487,10 @@
     {
       "id": "L11-F04",
       "lecture": 11,
-      "name": "closed-form solution",
+      "name": "最小二乘解析解",
       "expression": "ŵ = (XX T )−1 Xy",
       "latex": "\\hat{\\mathbf{w}}=(XX^{\\mathsf{T}})^{-1}X\\mathbf{y}",
-      "conditions": "\\(XX^\\mathrm{T}\\) invertible",
+      "conditions": "\\(XX^\\mathrm{T}\\) 可逆",
       "sectionId": "L11-M3",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 5
@@ -496,10 +498,10 @@
     {
       "id": "L11-F05",
       "lecture": 11,
-      "name": "backprop error recurrence",
+      "name": "反向传播的误差递推",
       "expression": "δ (ℓ) = (W (ℓ+1)T δ (ℓ+1) ) ⊙ ϕ′",
       "latex": "\\delta^{(\\ell)}=\\left((W^{(\\ell+1)})^{\\mathsf{T}}\\delta^{(\\ell+1)}\\right)\\odot\\phi'",
-      "conditions": "compatible shapes",
+      "conditions": "各层矩阵维度相容",
       "sectionId": "L11-M3",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 5
@@ -507,10 +509,10 @@
     {
       "id": "L11-F06",
       "lecture": 11,
-      "name": "layer weight gradient",
+      "name": "层权重的梯度",
       "expression": "∂L/∂W (ℓ) = δ (ℓ) z (ℓ−1)T",
       "latex": "\\frac{\\partial L}{\\partial W^{(\\ell)}}=\\delta^{(\\ell)}(z^{(\\ell-1)})^{\\mathsf{T}}",
-      "conditions": "single example; batch averages later",
+      "conditions": "先写单个样本的梯度，再对批量样本平均",
       "sectionId": "L11-M3",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 6
@@ -522,7 +524,7 @@
       "lecture": 11,
       "zh": "监督学习",
       "en": "supervised learning",
-      "definition": "由 input-target pairs 学习预测。",
+      "definition": "从输入与目标配对的样本中学习预测。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -532,7 +534,7 @@
       "lecture": 11,
       "zh": "分类",
       "en": "classification",
-      "definition": "预测离散 label。",
+      "definition": "预测离散标签的任务。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -542,7 +544,7 @@
       "lecture": 11,
       "zh": "回归",
       "en": "regression",
-      "definition": "预测连续 target。",
+      "definition": "预测连续目标量的任务。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -552,7 +554,7 @@
       "lecture": 11,
       "zh": "架构",
       "en": "architecture",
-      "definition": "模型变量如何连接与计算。",
+      "definition": "规定模型中各变量如何连接并参与计算的结构。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 1
@@ -562,7 +564,7 @@
       "lecture": 11,
       "zh": "损失函数",
       "en": "loss function",
-      "definition": "量化 prediction 与 target 不一致的 objective。",
+      "definition": "量化预测与目标之间差异的优化目标。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 1
@@ -572,7 +574,7 @@
       "lecture": 11,
       "zh": "梯度",
       "en": "gradient",
-      "definition": "各参数偏导数组成、指向最快上升方向的向量。",
+      "definition": "由各参数的偏导数组成、指向局部最快上升方向的向量。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -582,7 +584,7 @@
       "lecture": 11,
       "zh": "学习率",
       "en": "learning rate",
-      "definition": "每次 gradient step 的尺度。",
+      "definition": "控制每次梯度更新幅度的参数。",
       "sectionId": "L11-M1",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 2
@@ -592,7 +594,7 @@
       "lecture": 11,
       "zh": "正规方程",
       "en": "normal equation",
-      "definition": "least-squares optimum 的线性方程。",
+      "definition": "最小二乘最优解所满足的线性方程组。",
       "sectionId": "L11-M2",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 3
@@ -602,7 +604,7 @@
       "lecture": 11,
       "zh": "反向传播",
       "en": "backpropagation",
-      "definition": "高效计算多层 chain-rule gradients 的算法。",
+      "definition": "利用链式法则高效计算多层网络梯度的算法。",
       "sectionId": "L11-M3",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 5
@@ -612,27 +614,27 @@
       "lecture": 11,
       "zh": "局部导数",
       "en": "local derivative",
-      "definition": "某一计算节点输出对输入的 derivative。",
+      "definition": "某个计算节点的输出对其输入的导数。",
       "sectionId": "L11-M3",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 5
     }
   ],
   "commonTraps": [
-    "把 architecture、loss 与 optimizer 混成同一个概念。",
-    "忘记 gradient 指向上升，更新应取负号。",
-    "matrix calculus 不标 shape，导致 transpose 错误。",
-    "在 singular design matrix 上直接求 inverse。",
-    "认为 deep linear network 的 optimization 也是线性/convex。",
-    "把 backprop 当成已确立的生物突触机制。",
-    "误把 source 页的历史性旁注当作严格技术结论。",
-    "需避免把 backprop 描述成\"误差直接传回神经元\"的生物机制；清楚标为训练算法，并讨论与 three-factor plasticity 的形式联系和机制差异。"
+    "把网络结构、损失函数和优化算法混为一个概念。",
+    "忘记梯度指向局部上升方向，最小化损失时更新应取负号。",
+    "进行矩阵求导时不标明行列维度，导致转置位置错误。",
+    "设计矩阵奇异时仍直接求逆，忽略解的存在性与唯一性。",
+    "认为深层线性网络中的参数优化也一定是线性或凸问题。",
+    "把反向传播当作已经确立的生物突触学习机制。",
+    "把历史性讨论中的旁注当作经过证明的技术结论。",
+    "将反向传播描述成误差直接传回生物神经元，或仅凭形式相似就把它与三因子可塑性视为同一机制。"
   ],
   "errata": [
     {
       "id": "L11-E01",
       "lecture": 11,
-      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "lectureTitle": "回归、梯度下降与反向传播",
       "kind": "caution",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 3,
@@ -644,7 +646,7 @@
     {
       "id": "L11-E02",
       "lecture": 11,
-      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "lectureTitle": "回归、梯度下降与反向传播",
       "kind": "caution",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 6,
@@ -656,13 +658,13 @@
     {
       "id": "L11-E03",
       "lecture": 11,
-      "lectureTitle": "机器学习：回归、梯度下降与反向传播",
+      "lectureTitle": "回归、梯度下降与反向传播",
       "kind": "caution",
       "sourceFile": "Lecture11-MachineLearning.pdf",
       "sourcePage": 4,
       "sectionId": "L11-M2",
       "originalIssue": "backprop 与 three-factor plasticity 只在 outer-product/error-gating 形式上相似，biological transport/mechanism 不同。",
-      "explanation": "它与 biological Hebb 在形式上相似，但 target y、batch access 与 signed error 不是普通 local coactivity。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": null
     }
   ],
@@ -679,37 +681,37 @@
         }
       ],
       "conceptTags": [
-        "Supervised learning 的组成与 gradient descent"
+        "监督学习与梯度下降"
       ],
       "difficulty": 2,
-      "type": "equation",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么\"gradient 指向最小值\"这句话不准确？",
+      "stem": "为什么\"梯度指向最小值\"这句话不准确？",
       "choices": [
         {
           "id": "a",
-          "text": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+          "text": "梯度指向局部最陡上升，负梯度才是局部下降；局部导数并不指定远处全局最小值。"
         },
         {
           "id": "b",
-          "text": "forward map W 把 hidden coordinates 映到 downstream；chain rule 要把 downstream sensitivities 汇总回各 hidden coordinate，Jacobian 的反向乘法正是 \\(W^\\mathrm{T}\\delta\\)，shape 也由此回到 hidden dimension。"
+          "text": "梯度直接指向最近的最小值，只是当前学习率决定一步能走到多近。"
         },
         {
           "id": "c",
-          "text": "loss 对 product \\(W^L\\cdots W^0\\) 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+          "text": "梯度与负梯度都沿等高线移动，只能改变参数方向，不能改变损失。"
         },
         {
           "id": "d",
-          "text": "把 classification 与 regression 仅按模型名称区分，而不检查 target support 和 loss。"
+          "text": "只有凸损失的梯度指向上升；非凸损失中梯度方向会变成下降方向，而且不再需要负号。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Backpropagation：逐层 chain rule、error coordinates 与 weight gradient”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Linear regression：gradient decomposition、normal equation 与 deep linear factorization”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 classification 与 regression 仅按模型名称区分，而不检查 target support 和 loss。"
+        "b": "梯度由当前位置的导数决定，并不提供最近最小值的位置。",
+        "c": "梯度垂直于等高线；足够小的负梯度步通常能降低损失。",
+        "d": "梯度的局部上升含义不因凸性改变；非凸性影响的是全局优化性质。"
       },
-      "explanation": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。 负 gradient 是局部下降方向，不保证深网络一次就到 global optimum。"
+      "explanation": "梯度指向当前点的局部最陡上升方向，负梯度才是局部下降方向；它只利用当前位置的一阶信息，不能直接指出远处全局极小值的位置。 负梯度提供局部下降方向，不能保证深度网络一步到达全局最优。"
     },
     {
       "id": "L11-Q02",
@@ -723,37 +725,37 @@
         }
       ],
       "conceptTags": [
-        "Linear regression：gradient decomposition、normal equation 与 deep linear factorization"
+        "线性回归的梯度与正规方程"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 deep linear network 的 overall mapping 线性，却不能直接把所有 layer 的训练都当成普通 convex linear regression？",
+      "stem": "为什么深层线性网络的整体映射线性，却不能直接把所有层的训练都当成普通凸线性回归？",
       "choices": [
         {
           "id": "a",
-          "text": "forward map W 把 hidden coordinates 映到 downstream；chain rule 要把 downstream sensitivities 汇总回各 hidden coordinate，Jacobian 的反向乘法正是 \\(W^\\mathrm{T}\\delta\\)，shape 也由此回到 hidden dimension。"
+          "text": "线性矩阵相乘会自动产生非线性激活，所以整个网络其实不再是线性映射。"
         },
         {
           "id": "b",
-          "text": "loss 对 product \\(W^L\\cdots W^0\\) 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+          "text": "整体映射虽线性，层间权重却以乘积进入损失；联合训练存在参数耦合和分解不唯一。"
         },
         {
           "id": "c",
-          "text": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+          "text": "只要每次固定其他层能得到凸子问题，就足以证明所有层的联合优化也一定是凸问题。"
         },
         {
           "id": "d",
-          "text": "不声明 samples-as-columns 或 samples-as-rows 就套 closed-form 公式，导致 transpose 与 shape 错位。"
+          "text": "深度让训练样本数量减少，因此正规方程失效，即使直接优化整体矩阵也必然非凸。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Backpropagation：逐层 chain rule、error coordinates 与 weight gradient”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Supervised learning 的组成与 gradient descent”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：不声明 samples-as-columns 或 samples-as-rows 就套 closed-form 公式，导致 transpose 与 shape 错位。"
+        "a": "线性映射的复合仍是线性映射；非凸性来自对各层因子的参数化。",
+        "c": "分别凸不等于联合凸；不同层的乘积使同时变化的参数相互耦合。",
+        "d": "深度不改变样本数；平方损失对整体线性映射可凸，但对分层因子通常不凸。"
       },
-      "explanation": "loss 对 product \\(W^L\\cdots W^0\\) 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。 deep linear network 令所有 activations 为 identity，则 overall mapping \\(M=W^{(L)}\\cdots W^{(0)}\\) 仍线性：\\(\\hat{y}=Mx\\)。"
+      "explanation": "权重乘积 \\(W^L\\cdots W^0\\) 定义的是线性输入-输出映射，但这一乘积对各层权重是多线性的。平方损失对组合后的矩阵是二次函数，对各层权重的联合优化则通常非凸；同时存在尺度和分解的非唯一性，不同层的更新也相互依赖。 但同一个总矩阵可以分解为多组层间权重，损失对各层参数包含乘积，所以参数空间中的优化与学习动力学仍是非线性的。"
     },
     {
       "id": "L11-Q03",
@@ -767,37 +769,37 @@
         }
       ],
       "conceptTags": [
-        "Backpropagation：逐层 chain rule、error coordinates 与 weight gradient"
+        "反向传播：沿依赖链计算梯度"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "backprop error recurrence 为什么使用 downstream weight 的 transpose？",
+      "stem": "反向传播误差递推为什么使用下游权重的转置？",
       "choices": [
         {
           "id": "a",
-          "text": "loss 对 product \\(W^L\\cdots W^0\\) 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+          "text": "转置就是前向权重的逆，因此反向传播是在逐层重建输入。"
         },
         {
           "id": "b",
-          "text": "gradient 指向当前点的局部最陡上升方向，负 gradient 才是局部下降方向；它只利用当前位置的 first-order information，不能直接指出远处 global minimum 的位置。"
+          "text": "前向与反向都在计算神经活动，所以可直接用原权重矩阵，只有绘图时才需要转置。"
         },
         {
           "id": "c",
-          "text": "forward map W 把 hidden coordinates 映到 downstream；chain rule 要把 downstream sensitivities 汇总回各 hidden coordinate，Jacobian 的反向乘法正是 \\(W^\\mathrm{T}\\delta\\)，shape 也由此回到 hidden dimension。"
+          "text": "链式法则用转置把下游敏感度汇总回隐藏坐标，使梯度维度与隐藏层一致。"
         },
         {
           "id": "d",
-          "text": "把 \\(\\delta\\) 称为在生物神经元中实际向后传播的 error molecule，而不区分计算 derivative 与机制实现。"
+          "text": "转置只在权重矩阵为正交矩阵时才能使用，否则链式法则必须改成求矩阵逆。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Linear regression：gradient decomposition、normal equation 与 deep linear factorization”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“Supervised learning 的组成与 gradient descent”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 \\(\\delta\\) 称为在生物神经元中实际向后传播的 error molecule，而不区分计算 derivative 与机制实现。"
+        "a": "转置一般不等于逆；反向传播传递导数，而不是重建前向输入。",
+        "b": "反向传递的是对隐藏变量的敏感度，求和方向与前向不同，形状也要求转置。",
+        "d": "Jacobian 的转置传播梯度不要求正交，也不要求前向映射可逆。"
       },
-      "explanation": "forward map W 把 hidden coordinates 映到 downstream；chain rule 要把 downstream sensitivities 汇总回各 hidden coordinate，Jacobian 的反向乘法正是 \\(W^\\mathrm{T}\\delta\\)，shape 也由此回到 hidden dimension。 一个 hidden activation 对所有 downstream preactivations 都有影响，因此 sensitivity 先乘 \\((W^{(\\ell )})^\\mathrm{T}\\) 汇总 downstream error，再逐元素乘 \\(\\phi '(h^{(\\ell )})\\)。"
+      "explanation": "前向映射 W 把隐藏的坐标映到下游；链式法则要把下游敏感度汇总回各隐藏的坐标，Jacobian 的反向乘法正是 \\(W^\\mathrm{T}\\delta\\)，形状也由此回到隐藏的维度。 这里的转置来自坐标映射的方向，逐元素乘法则来自局部链式法则。"
     },
     {
       "id": "L11-Q04",
@@ -811,37 +813,37 @@
         }
       ],
       "conceptTags": [
-        "负梯度沿局部斜率下降损失"
+        "沿负梯度方向降低损失"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"负梯度沿局部斜率下降损失\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"沿负梯度方向降低损失\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "forward map W 把 hidden coordinates 映到 downstream；chain rule 要把 downstream sensitivities 汇总回各 hidden coordinate，Jacobian 的反向乘法正是 \\(W^\\mathrm{T}\\delta\\)，shape 也由此回到 hidden dimension。"
+          "text": "曲线说明只要沿负梯度更新，步长可以任意大，每一步都必然降低损失并到达全局最小值。"
         },
         {
           "id": "b",
-          "text": "loss 对 product \\(W^L\\cdots W^0\\) 是线性的 mapping，但对任一组分 layer parameters 是多线性 product；存在 scale/factorization nonuniqueness，多个 layers 的 updates 相互依赖，因此 parameter optimization 通常非凸。"
+          "text": "图中迭代点之间的间距逐渐缩小，因此优化器必定在每一步主动降低学习率。"
         },
         {
           "id": "c",
-          "text": "把 classification 与 regression 仅按模型名称区分，而不检查 target support 和 loss。"
+          "text": "图中点是实验测量值，可直接用来估计神经元真实突触的更新速度。"
         },
         {
           "id": "d",
-          "text": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 \\(\\Delta w=-\\eta \\nabla L\\) 沿相反方向移动。"
+          "text": "合适步长下，负梯度迭代趋近谷底；过大步长可越过谷底并提高损失。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "图中没有“Backpropagation：逐层 chain rule、error coordinates 与 weight gradient”所需的变量与条件。",
-        "b": "图中没有“Linear regression：gradient decomposition、normal equation 与 deep linear factorization”所需的变量与条件。",
-        "c": "图中的标注与关系不支持这种读法：把 classification 与 regression 仅按模型名称区分，而不检查 target support 和 loss。"
+        "a": "负梯度给出局部方向；大步长会使一阶近似失效并可能提高损失。",
+        "b": "固定学习率下梯度变小，也会使步长缩小；图中间距不能单独识别学习率变化。",
+        "c": "这是归一化优化示意，既不是神经数据，也未规定生物时间单位。"
       },
-      "explanation": "在当前参数处，gradient 指向 loss 最快上升的局部方向，因此更新 \\(\\Delta w=-\\eta \\nabla L\\) 沿相反方向移动。图中的 marker 只表示归一化的迭代顺序，不是实验数据；它说明合适步长可逐次靠近 minimum，但 Taylor 近似不能保证过大的 learning rate 仍会下降。"
+      "explanation": "在当前参数处，梯度指向损失最快上升的局部方向，因此更新 \\(\\Delta w=-\\eta \\nabla L\\) 沿相反方向移动。图中的标记只表示归一化的迭代顺序，不是实验数据；它说明合适步长可逐次靠近极小值，但 Taylor 近似不能保证过大的学习率仍会下降。"
     }
   ]
 }

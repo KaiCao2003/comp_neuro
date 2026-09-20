@@ -69,7 +69,7 @@
           "Consider \\(W=[[0,w_{0}],[w_{0},0]]\\) with rate equations \\(\\tau  dh_{1}/dt=-h_{1}+w_{0}h_{2}+I_{1}\\) and \\(\\tau  dh_{2}/dt=-h_{2}+w_{0}h_{1}+I_{2}\\). Zeros on the diagonal mean that this teaching example has no self-coupling, while equal off-diagonal entries make the reciprocal coupling symmetric. That symmetry suggests testing \\(h_{1}=h_{2}\\) and \\(h_{1}=-h_{2}\\): exchanging the neurons leaves the first pattern unchanged and changes only the sign of the second.",
           "Set \\(\\det(W-\\lambda I)=\\lambda ^{2}-w_{0}^{2}=0\\) to obtain \\(\\lambda _{+}=w_{0}\\) and \\(\\lambda _{-}=-w_{0}\\). Substituting \\(\\lambda _{+}\\) gives \\(h_{2}=h_{1}\\), so a common eigenvector is \\((1,1)^\\mathrm{T}\\). Substituting \\(\\lambda _{-}\\) gives \\(h_{2}=-h_{1}\\), so a difference eigenvector is \\((1,-1)^\\mathrm{T}\\). Dividing each by \\(\\sqrt 2\\) produces unit vectors with zero dot product, an orthonormal basis V. Normalization preserves direction and lets coordinates be computed directly by dot products.",
           "The new coordinates are \\(\\alpha =V^\\mathrm{T} h\\): \\(\\alpha _{+}=(h_{1}+h_{2})/\\sqrt 2\\) and \\(\\alpha _{-}=(h_{1}-h_{2})/\\sqrt 2\\). Applying the same transformation to the input gives \\(\\beta _{+}=(I_{1}+I_{2})/\\sqrt 2\\) and \\(\\beta _{-}=(I_{1}-I_{2})/\\sqrt 2\\). Substitute \\(h=V\\alpha\\) into the original equation and left-multiply by \\(V^\\mathrm{T}\\) to obtain \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}+\\beta _{+}\\) and \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}+\\beta _{-}\\). Each equation now contains only its own coordinate, confirming that the basis change has decoupled the dynamics.",
-          "Both modes are population patterns, not patterns belonging separately to neuron 1 and neuron 2. Increasing the common mode changes both neurons in the same direction; increasing the difference mode raises one and lowers the other. In an asymmetric network the eigenvectors need not be orthogonal, so \\(V^{-1}\\) need not equal \\(V^\\mathrm{T}\\). Mode decomposition may still be possible, but the coordinate transform and geometry must use the general inverse rather than the orthogonal special case."
+          "Both modes are population patterns, not patterns belonging separately to either individual neuron. Increasing the common mode changes both neurons in the same direction; increasing the difference mode raises one and lowers the other. In an asymmetric network the eigenvectors need not be orthogonal, so \\(V^{-1}\\) need not equal \\(V^\\mathrm{T}\\). Mode decomposition may still be possible, but the coordinate transform and geometry must use the general inverse rather than the orthogonal special case."
         ],
         "keyPoints": [
           "\\(\\lambda _{+}=w_{0}\\) corresponds to the normalized common vector \\((1,1)^\\mathrm{T}/\\sqrt 2\\).",
@@ -122,7 +122,22 @@
         },
         "selfCheck": {
           "prompt": "If \\(I_{1}=1\\) and \\(I_{2}=-1\\), which mode is driven directly?",
-          "answer": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\) and \\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\), so only the difference mode is driven directly; the neurons tend to change in opposite directions."
+          "answer": "\\(\\beta _{+}=(1-1)/\\sqrt 2=0\\) and \\(\\beta _{-}=(1-(-1))/\\sqrt 2=\\sqrt 2\\), so only the difference mode is driven directly; the neurons tend to change in opposite directions.",
+          "distractors": [
+            {
+              "text": "Only the common mode is driven: equal input magnitudes give \\(\\beta _{+}=\\sqrt 2\\).",
+              "explanation": "The common projection uses signed inputs: \\(\\beta _{+}=(1+(-1))/\\sqrt 2=0\\). Taking absolute values changes the input vector."
+            },
+            {
+              "text": "Neither mode is driven, because zero total input makes the whole input vector zero.",
+              "explanation": "Zero total input removes the common projection only. Opposite nonzero components still drive the difference direction."
+            },
+            {
+              "text": "Both modes receive equal nonzero drive, because each neuron receives an input of unit magnitude.",
+              "explanation": "Modes are joint directions of both neurons. Project the signed input vector onto each direction instead of assigning drive according to individual input magnitudes."
+            }
+          ],
+          "choiceAnswer": "Only the difference mode is driven; the signed inputs cancel in the common projection."
         },
         "pitfalls": [
           "Omitting \\(1/\\sqrt 2\\) makes the coordinate and reconstruction scales inconsistent.",
@@ -144,10 +159,10 @@
         ],
         "guidingQuestion": "Why does the same w0 slow the common mode but accelerate the difference mode?",
         "paragraphs": [
-          "The homogeneous mode equations are \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) and \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\). Comparing them with \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) gives \\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\). Writing the result as \\(1/(1\\mp w_{0})\\) is valid only after normalizing \\(\\tau\\) to 1; otherwise it loses the time unit. The dimensionally complete expression is \\(\\tau /(1\\mp w_{0})\\). Positive coupling supplies positive feedback to common changes and cancels part of the intrinsic leak. For opposing changes it acts as restoring feedback, because a rise in neuron 1 drives neuron 2 upward and reduces their difference.",
+          "The homogeneous mode equations are \\(\\tau  d\\alpha _{+}/dt=-(1-w_{0})\\alpha _{+}\\) and \\(\\tau  d\\alpha _{-}/dt=-(1+w_{0})\\alpha _{-}\\). Comparing them with \\(\\tau _{\\mathrm{eff}} d\\alpha /dt=-\\alpha\\) gives \\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\). Writing the result as \\(1/(1\\mp w_{0})\\) is valid only after normalizing \\(\\tau\\) to 1; otherwise it loses the time unit. The dimensionally complete expression is \\(\\tau /(1\\mp w_{0})\\). Positive coupling supplies positive feedback to common changes and cancels part of the intrinsic leak. For opposing changes it acts as restoring feedback, because a rise in either neuron drives the other upward and reduces their difference.",
           "When \\(|w_{0}|<1\\), both 1-w0 and 1+w0 are positive, so both modes decay exponentially after input removal. As w0 approaches 1, \\(\\tau _{+}\\) becomes long and the common coordinate behaves as a leaky integrator. At \\(w_{0}=1\\) the common equation has no leak: sustained input is integrated and the accumulated \\(\\alpha _{+}\\) remains after the input ends. The same logic moves to the difference mode as w0 approaches -1. Equality marks a perfect integrator and should not be lumped into the ordinary leaky regime.",
           "If \\(|w_{0}|>1\\), at least one coefficient becomes negative. For example, at \\(w_{0}=1.2\\) the common equation is \\(\\tau  d\\alpha _{+}/dt=+0.2\\alpha _{+}\\), so a small perturbation grows exponentially. Mathematical instability does not \\(\\operatorname{mean} a\\) real firing rate can increase without bound; neuronal saturation, thresholds, and inhibition change the large-amplitude behavior. Linear analysis nevertheless identifies a direction that leaves the fixed point locally.",
-          "Read the activity-space sketches as follows. In the h1-h2 plane, the common axis has slope +1 and the difference axis has slope -1. If \\(\\tau _{-}\\) is much smaller than \\(\\tau _{+}\\), an arbitrary initial state rapidly loses its difference component, approaches the common axis, and then moves slowly along it. The drawn axes show eigenvector directions; trajectory speed comes from the eigenvalues and \\(\\tau\\), not from the lengths of the lines."
+          "Read the activity-space sketches as follows. In the two-neuron activity plane, the common axis has slope +1 and the difference axis has slope -1. If \\(\\tau _{-}\\) is much smaller than \\(\\tau _{+}\\), an arbitrary initial state rapidly loses its difference component, approaches the common axis, and then moves slowly along it. The drawn axes show eigenvector directions; trajectory speed comes from the eigenvalues and \\(\\tau\\), not from the lengths of the lines."
         ],
         "keyPoints": [
           "\\(\\tau _{+}=\\tau /(1-w_{0})\\) and \\(\\tau _{-}=\\tau /(1+w_{0})\\); the signs cannot be collapsed into a common denominator.",
@@ -200,12 +215,28 @@
         },
         "selfCheck": {
           "prompt": "At \\(w_{0}=-0.9\\), which mode is slowest, and what is its time constant in units of \\(\\tau\\)?",
-          "answer": "The difference mode is slowest because \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\); the common mode has \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\). Negative coupling near -1 preserves the opposing-change pattern."
+          "answer": "The difference mode is slowest because \\(\\tau _{-}=\\tau /(1-0.9)=10\\tau\\); the common mode has \\(\\tau _{+}=\\tau /(1+0.9)\\approx 0.526\\tau\\). Negative coupling near -1 preserves the opposing-change pattern.",
+          "distractors": [
+            {
+              "text": "The common mode is slowest at \\(10\\tau\\); the difference mode has a time constant of about \\(0.526\\tau\\).",
+              "explanation": "Negative coupling slows the difference direction. The common denominator is \\(1-w_{0}=1.9\\); the difference denominator is \\(1+w_{0}=0.1\\)."
+            },
+            {
+              "text": "Both modes have time constant \\(10\\tau\\), since both use the same coupling strength.",
+              "explanation": "The modes have opposite coupling eigenvalues. Their time constants are \\(\\tau/(1-w_{0})\\) and \\(\\tau/(1+w_{0})\\), which are different here."
+            },
+            {
+              "text": "The difference time constant is \\(-10\\tau\\), so this mode grows rather than decays.",
+              "explanation": "Here \\(1+w_{0}=0.1>0\\), giving a positive difference time constant. Both modes are stable when \\(|w_{0}|<1\\)."
+            }
+          ],
+          "choiceAnswer": "The difference mode is slowest at \\(10\\tau\\); the common mode has time constant \\(\\tau/1.9\\)."
         },
         "pitfalls": [
           "Judging stability from the sign of an eigenvalue of W while forgetting the -h term in the full ODE.",
           "Using \\(\\tau /(1-w_{0})\\) for both modes and thereby losing the negative sign of the difference eigenvalue."
-        ]
+        ],
+        "transition": "The common and difference coordinates have separated the coupled equations into independent modes. Combining each mode’s recurrent feedback with intrinsic leak now determines its decay time and the boundaries between decay, integration, and growth."
       },
       {
         "id": "l19-m3",
@@ -222,7 +253,7 @@
         ],
         "guidingQuestion": "Precisely what does 'nearly one-dimensional population dynamics' mean, and what does it not claim?",
         "paragraphs": [
-          "Activity space uses (h1,h2) to describe the state of both neurons at each moment; mode space uses \\((\\alpha _{+},\\alpha _{-})\\) to describe the same point. An invertible V connects the two, so they are not distinct datasets. Activity space corresponds directly to recorded firing rates, whereas mode space exposes the dynamics because each \\(\\alpha\\) coordinate evolves with its own time constant. A coordinate change removes no information; dimensionality reduction occurs only when coordinates are later discarded.",
+          "Activity space uses the two neuron states to describe the state of both neurons at each moment; mode space uses \\((\\alpha _{+},\\alpha _{-})\\) to describe the same point. An invertible V connects the two, so they are not distinct datasets. Activity space corresponds directly to recorded firing rates, whereas mode space exposes the dynamics because each \\(\\alpha\\) coordinate evolves with its own time constant. A coordinate change removes no information; dimensionality reduction occurs only when coordinates are later discarded.",
           "Any state can be written \\(h(t)=\\alpha +(t)\\xi _{+}+\\alpha -(t)\\xi _{-}\\). If \\(\\tau _{-}\\) is much smaller than \\(\\tau _{+}\\) and no persistent difference input acts during the delay, \\(\\alpha -(t)\\) decays much faster than \\(\\alpha +(t)\\). After several \\(\\tau _{-}\\), \\(h(t)\\approx \\alpha +(t)\\xi _{+}\\) and subsequent states lie near the common axis. 'One-dimensional' means that \\(\\alpha _{+}\\) is the main free coordinate needed for the trajectory, not that only one neuron participates.",
           "Approximation quality can be measured by residual energy. Because the basis is orthonormal, \\(||h||^{2}=\\alpha +^{2}+\\alpha -^{2}\\). Discarding the difference mode gives squared reconstruction error exactly \\(\\alpha -^{2}\\). An analyst may set a tolerance, for example calling the state 95% common-mode when \\(\\alpha -^{2}/(\\alpha +^{2}+\\alpha -^{2})<0.05\\). This criterion is chosen for the analysis; it is not an absolute boundary that appears automatically in a sketch.",
           "This reasoning also states the conditions for a low-dimensional conclusion. Strong drive to \\(\\beta - at\\) every moment or trial-specific fast transients keep the difference coordinate away from zero. If nonlinear dynamics rotate directions with state, no fixed V describes the entire trajectory. Near-one-dimensionality is a property of a particular data distribution and time window, not a claim that the network can access only one line forever."
@@ -278,12 +309,28 @@
         },
         "selfCheck": {
           "prompt": "If a constant input \\(\\beta _{-}=1\\) acts at every moment, must \\(\\alpha _{-}\\) approach zero?",
-          "answer": "No. A stable difference mode approaches the nonzero fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure."
+          "answer": "No. A stable difference mode approaches the nonzero fixed point \\(\\alpha _{-}* = \\beta _{-}/(1+w_{0})\\), so the trajectory can remain away from the common axis. Low-dimensional conclusions depend on input structure.",
+          "distractors": [
+            {
+              "text": "Yes. Stability means every mode returns to the origin regardless of the sustained input.",
+              "explanation": "Stability describes convergence toward the input-dependent fixed point. Nonzero sustained difference input generally shifts that fixed point away from the origin."
+            },
+            {
+              "text": "Yes. A constant has zero derivative, so the input disappears from the first-order state equation.",
+              "explanation": "The equation contains the input itself, not its derivative. Constant drive remains in the steady-state balance."
+            },
+            {
+              "text": "No, but any constant difference input necessarily causes linear growth with no fixed point.",
+              "explanation": "A stable difference mode retains a restoring term that can balance constant input. Linear growth under constant drive requires an integration mode with no restoring term."
+            }
+          ],
+          "choiceAnswer": "No. With stable dynamics, sustained input shifts the difference mode to a nonzero fixed point."
         },
         "pitfalls": [
           "Calling a coordinate transform itself dimensionality reduction; true reduction begins only when a coordinate is discarded.",
           "Interpreting low dimensionality as activity in only a few neurons instead of coordinated variation of many neurons through a few population patterns."
-        ]
+        ],
+        "transition": "Different mode time constants explain rapid approach to one direction followed by slower motion along it. Viewing the same trajectory in neural and mode coordinates lets us distinguish a reversible coordinate change from an approximation that actually discards information."
       },
       {
         "id": "l19-m4",
@@ -302,13 +349,13 @@
         "paragraphs": [
           "Now suppose W is unknown and we observe only T population vectors \\(h_{t}\\in \\mathbb{R}^N\\). First compute the \\(\\operatorname{mean} \\bar{h}\\) and define \\(\\delta h_{t}=h_{t}-\\bar{h}\\). The covariance \\(C=(1/T)\\sum _t \\delta h_{t}\\delta h_{t}^\\mathrm{T}\\) is an N×N symmetric positive-semidefinite matrix; \\(C_{ij}\\) describes centered cofluctuation between neurons i and j. For a chosen unit direction v, each sample has scalar projection \\(p_{t}=v^\\mathrm{T}\\delta h_{t}\\).",
           "The projection variance is \\((1/T)\\sum  p_{t}^{2}=(1/T)\\sum  v^\\mathrm{T}\\delta h_{t}\\delta h_{t}^\\mathrm{T}v=v^\\mathrm{T}Cv\\). Without a constraint on ||v||, scaling v arbitrarily would make the variance arbitrarily large, so require \\(v^\\mathrm{T}v=1\\). Maximize \\(v^\\mathrm{T}Cv-\\lambda (v^\\mathrm{T}v-1)\\) with a Lagrange multiplier. Differentiating with respect to every component of v gives \\(2Cv-2\\lambda v=0\\), or \\(Cv=\\lambda v\\). The candidate directions are therefore covariance eigenvectors.",
-          "Along eigenvector \\(v_{k}\\), projected variance equals \\(\\lambda _{k}\\) because \\(v_{k}^\\mathrm{T}Cv_{k}=v_{k}^\\mathrm{T}(\\lambda _{k}v_{k})=\\lambda _{k}\\). Choosing \\(v_{1}\\) for the largest eigenvalue gives PC1. The derivation establishes only maximum data variance. A small but reliable task signal or a large measurement artifact can make PC1 poor for decoding, nor is it automatically a causal circuit direction.",
+          "Along eigenvector \\(v_{k}\\), projected variance equals \\(\\lambda _{k}\\) because \\(v_{k}^\\mathrm{T}Cv_{k}=v_{k}^\\mathrm{T}(\\lambda _{k}v_{k})=\\lambda _{k}\\). Choosing \\(v_{1}\\) for the largest eigenvalue gives the first principal component. The derivation establishes only maximum data variance. A small but reliable task signal or a large measurement artifact can make the first principal component poor for decoding, nor is it automatically a causal circuit direction.",
           "Modes of W and PCs of C align only under additional conditions. For example, in a linear network driven by isotropic noise at stationarity, with W normal or symmetric, slow dynamical modes often accumulate more variance. Structured input, unequal noise, trial conditions, and nonlinear observations can all rotate the covariance. Similar axes motivate a hypothesis; statistical collinearity does not identify recurrent weights by itself."
         ],
         "keyPoints": [
           "PCA must be applied to centered activity: \\(C=E[\\delta h\\delta h^\\mathrm{T}]\\).",
           "Under a unit-norm constraint, projected variance is \\(v^\\mathrm{T}Cv\\).",
-          "A stationary point satisfies \\(Cv=\\lambda v\\), and the eigenvector with the largest \\(\\lambda\\) is PC1.",
+          "A stationary point satisfies \\(Cv=\\lambda v\\), and the eigenvector with the largest \\(\\lambda\\) is the first principal component.",
           "Maximum variance is not the same as maximum causal or behavioral relevance."
         ],
         "derivation": {
@@ -356,12 +403,28 @@
         },
         "selfCheck": {
           "prompt": "What is chiefly mixed in if \\(E[hh^\\mathrm{T}]\\) is computed without centering?",
-          "answer": "The mean outer-product term \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations."
+          "answer": "The mean outer-product term \\(\\bar{h}\\) \\(\\bar{h}^\\mathrm{T}\\) is included, so the leading direction may represent the mean firing pattern rather than trial or temporal fluctuations.",
+          "distractors": [
+            {
+              "text": "Nothing extra is included: taking an expectation automatically removes the mean, so a second moment always equals covariance.",
+              "explanation": "Expectation does not perform centering: \\(E[hh^\\mathrm{T}]=C+\\bar{h}\\bar{h}^\\mathrm{T}\\). Equality with covariance requires zero mean."
+            },
+            {
+              "text": "Only a scalar multiple of the identity is added, so the eigenvectors must remain unchanged.",
+              "explanation": "The mean outer product is generally a directional rank-one term, not an isotropic identity term. It can rotate the leading direction."
+            },
+            {
+              "text": "The recurrent matrix eigenvalues are included, automatically making the first PC the slowest dynamical mode.",
+              "explanation": "The extra term comes from the activity mean. Statistical covariance directions and recurrent dynamical modes need not coincide; inputs and noise also matter."
+            }
+          ],
+          "choiceAnswer": "The mean outer product can dominate the leading direction instead of fluctuations around the mean."
         },
         "pitfalls": [
           "Calling covariance eigenvectors recurrent modes.",
           "Forgetting to constrain \\(||v||=1\\), which leaves variance maximization unbounded."
-        ]
+        ],
+        "transition": "The preceding directions came from a known connectivity matrix, whereas recordings usually provide only population activity. PCA finds high-variance directions in centered observations; its statistical axes must still be distinguished from the network’s dynamical modes."
       },
       {
         "id": "l19-m5",
@@ -378,8 +441,8 @@
         ],
         "guidingQuestion": "When K PCs are retained, exactly what is preserved, and at what step is information lost?",
         "paragraphs": [
-          "Order the covariance eigenvalues \\(\\lambda _{1}\\ge \\lambda _{2}\\ge \\cdots \\ge \\lambda _{N}\\) with orthonormal eigenvectors v1,...,vN. PC one uses v1. PC two must be orthogonal to v1 and maximize variance in the remaining subspace, so it uses v2. Continuing gives \\(V_{K}=[v_{1},\\cdots ,vK]\\), an N×K matrix. For one centered sample, score vector \\(p=V_{K}^\\mathrm{T}(h-\\bar{h})\\) has K coordinates.",
-          "If all N components are retained, V is an orthogonal square matrix and \\(h=\\bar{h}+VV^\\mathrm{T}(h-\\bar{h})\\); the transform is reversible and loses no information. With \\(K<N\\), reconstruction \\(\\hat{h}=\\bar{h}+V_{\\mathrm{KV},K}^\\mathrm{T}(h-\\bar{h})\\) is the sample's orthogonal projection onto the top-K subspace. The discarded residual \\(e=(I-V_{\\mathrm{KV},K}^\\mathrm{T})(h-\\bar{h})\\) is orthogonal to the retained subspace.",
+          "Order the covariance eigenvalues \\(\\lambda _{1}\\ge \\lambda _{2}\\ge \\cdots \\ge \\lambda _{N}\\) with orthonormal eigenvectors. The first component uses the direction of maximum variance. The second is orthogonal to it and maximizes variance in the remaining subspace. Continuing gives \\(V_{K}=[v_{1},\\cdots ,vK]\\), an N×K matrix. For one centered sample, score vector \\(p=V_{K}^\\mathrm{T}(h-\\bar{h})\\) has K coordinates.",
+          "If all N components are retained, V is an orthogonal square matrix and \\(h=\\bar{h}+VV^\\mathrm{T}(h-\\bar{h})\\); the transform is reversible and loses no information. With \\(K<N\\), reconstruction \\(\\hat{h}=\\bar{h}+V_{K}V_{K}^\\mathrm{T}(h-\\bar{h})\\) is the sample's orthogonal projection onto the top-K subspace. The discarded residual \\(e=(I-V_{K}V_{K}^\\mathrm{T})(h-\\bar{h})\\) is orthogonal to the retained subspace.",
           "Mean squared reconstruction error equals the sum of discarded eigenvalues \\(\\sum _{k>K}\\lambda _{k}\\). This is why PCA minimizes squared reconstruction error among all K-dimensional linear subspaces. Calling the reconstruction denoised requires an extra assumption: noise primarily occupies low-variance directions and signal occupies high-variance directions. A rare but important movement command on a low-variance axis would be treated as residual by PCA.",
           "The practical algorithm has five steps: center across the neuron dimension; compute the N×N covariance or apply SVD to the data matrix; sort eigenpairs; project to obtain scores; and reconstruct or analyze for the task. Training and test data must use the training-set mean and PCs. Recomputing them separately and then comparing coordinates can turn a basis change into an apparent condition difference."
         ],
@@ -418,7 +481,7 @@
             "The columns of \\(V_{K}\\) are N-dimensional unit vectors; p is a K-dimensional score vector.",
             "\\(\\hat{h}\\) and h have the same firing-rate units; \\(\\lambda _{k}\\) and squared error both have units of \\(\\mathrm{rate}^{2}\\)."
           ],
-          "unitsCheck": "\\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) has shape N×N and acts on N×1 centered activity. \\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\), but \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is generally not \\(I_{N}\\).",
+          "unitsCheck": "\\(V_{K}V_{K}^\\mathrm{T}\\) has shape N×N and acts on N×1 centered activity. \\(V_{K}^\\mathrm{T}V_{K}=I_{K}\\), but \\(V_{K}V_{K}^\\mathrm{T}\\) is generally not \\(I_{N}\\).",
           "limitCheck": "At \\(K=N\\), residual and error are zero; at \\(K=0\\), reconstruction is only the mean and error equals total variance."
         },
         "workedExample": {
@@ -433,13 +496,29 @@
           "sanityCheck": "The original squared norm is 21, the reconstruction has 20, and the residual has 1, satisfying the orthogonal Pythagorean relation \\(21=20+1\\)."
         },
         "selfCheck": {
-          "prompt": "Why does \\(V_{K}^\\mathrm{T}V_{K}=I\\) not imply \\(V_{\\mathrm{KV},K}^\\mathrm{T}=I\\)?",
-          "answer": "When \\(K<N\\), \\(V_{K}\\) is not square. \\(V_{K}^\\mathrm{T}V_{K}\\) is the identity in K-space, while \\(V_{\\mathrm{KV},K}^\\mathrm{T}\\) is the N-space projector onto a K-dimensional subspace."
+          "prompt": "Why does \\(V_{K}^\\mathrm{T}V_{K}=I\\) not imply \\(V_{K}V_{K}^\\mathrm{T}=I\\)?",
+          "answer": "When \\(K<N\\), \\(V_{K}\\) is not square. \\(V_{K}^\\mathrm{T}V_{K}\\) is the identity in K-space, while \\(V_{K}V_{K}^\\mathrm{T}\\) is the N-space projector onto a K-dimensional subspace.",
+          "distractors": [
+            {
+              "text": "Orthogonal columns make \\(V_{K}\\) square, so reversing the multiplication order cannot change the identity.",
+              "explanation": "For \\(K<N\\), \\(V_{K}\\) has shape \\(N\\times K\\). Column orthogonality does not supply the missing columns or make the matrix square."
+            },
+            {
+              "text": "\\(V_{K}V_{K}^\\mathrm{T}\\) is the N-space identity because the transpose automatically reconstructs discarded coordinates.",
+              "explanation": "Transposition maps retained coordinates back to activity space but cannot recover discarded components. Orthogonal-complement vectors map to zero, unlike an identity operator."
+            },
+            {
+              "text": "Both products are simply \\(K/N\\) times an identity matrix and contain no directional information.",
+              "explanation": "An orthogonal projector preserves vectors in the retained subspace and removes vectors in its orthogonal complement. Its action is directional, not a uniform scalar rescaling."
+            }
+          ],
+          "choiceAnswer": "Column orthogonality gives a K-space identity; in N-space the product projects onto the retained subspace."
         },
         "pitfalls": [
-          "Fitting PCA separately in each condition and comparing PC1 coordinates directly, despite possible rotation of the axes.",
+          "Fitting PCA separately in each condition and comparing the first principal component coordinates directly, despite possible rotation of the axes.",
           "Assuming that a smoother reconstruction means the discarded activity was noise, without behavioral or held-out validation."
-        ]
+        ],
+        "transition": "Maximizing projected variance identifies the first principal component, but one direction may not describe the population adequately. Adding orthogonal components makes projection, reconstruction, and the error from omitted directions explicit."
       },
       {
         "id": "l19-m6",
@@ -508,12 +587,28 @@
         },
         "selfCheck": {
           "prompt": "Why does '95% variance explained' not guarantee retention of 95% of behavioral information?",
-          "answer": "Variance measures activity amplitude, whereas behavioral information depends on condition distributions and the decoder. A low-variance direction may reliably distinguish choices, so the two percentages are not generally equivalent."
+          "answer": "Variance measures activity amplitude, whereas behavioral information depends on condition distributions and the decoder. A low-variance direction may reliably distinguish choices, so the two percentages are not generally equivalent.",
+          "distractors": [
+            {
+              "text": "It does guarantee this, because PCA ranks components by behavioral prediction accuracy.",
+              "explanation": "PCA ranks directions by activity variance without using behavioral labels. A high-variance direction may be behaviorally irrelevant, while a low-variance direction may carry a reliable signal."
+            },
+            {
+              "text": "It does guarantee this, because the remaining 5% of variance must be measurement noise with no task information.",
+              "explanation": "A variance fraction does not distinguish signal from noise. Behavioral readouts, conditional distributions, or held-out prediction are needed to assess retained behavioral information."
+            },
+            {
+              "text": "The only obstacle is that 95% variance means retaining 95% of neurons rather than all neurons.",
+              "explanation": "PCA truncation retains population directions, not a percentage of neurons. Variance and behavioral information differ because they measure different statistical properties and depend on the readout."
+            }
+          ],
+          "choiceAnswer": "Activity variance and behavioral information differ because the readout can use low-variance directions."
         },
         "pitfalls": [
           "Treating a hand-drawn elbow as the one true neural dimensionality.",
           "Reporting only a cumulative-variance threshold while omitting centering, trial averaging, noise treatment, and held-out validation."
-        ]
+        ],
+        "transition": "The number of retained components determines how much variance reconstruction discards. The eigenvalue spectrum and cumulative variance offer checkable selection criteria, while preservation of behavioral information requires a separate test."
       }
     ]
   },
@@ -625,7 +720,22 @@
         },
         "selfCheck": {
           "prompt": "If both cells stop alternating after the block but continue to oscillate at different frequencies, is this a purely network-generated rhythm?",
-          "answer": "No. Coordinated alternation depends on network coupling, but each cell retains intrinsic oscillatory capacity; the full mechanism is coupled intrinsic oscillators."
+          "answer": "No. Coordinated alternation depends on network coupling, but each cell retains intrinsic oscillatory capacity; the full mechanism is coupled intrinsic oscillators.",
+          "choiceAnswer": "No. Coupling organizes alternation, but oscillations that persist after the block also indicate intrinsic rhythmic capacity.",
+          "distractors": [
+            {
+              "text": "Yes. Loss of alternation proves that neither cell had any intrinsic oscillatory capacity before the block.",
+              "explanation": "Alternation and individual oscillation are different observations. Continued oscillation after the block supports intrinsic rhythmic capacity."
+            },
+            {
+              "text": "Yes. Different frequencies merely reset the old network phase; every oscillation persisting after a complete block must still come from reciprocal inhibition.",
+              "explanation": "With a complete block, the removed reciprocal inhibition cannot still drive the rhythm. Separate frequencies are compatible with uncoupled intrinsic oscillators."
+            },
+            {
+              "text": "Continued oscillation proves that both cells are merely followers of an external pacemaker and excludes any intrinsic contribution.",
+              "explanation": "The observation does not identify an external pacemaker. Residual drive needs controls, but persistence does not exclude intrinsic oscillation."
+            }
+          ]
         },
         "pitfalls": [
           "Interpreting disappearance of the rhythm after a block as cell death without testing excitability.",
@@ -699,12 +809,28 @@
         },
         "selfCheck": {
           "prompt": "What happens if the full eigenvalues are \\(0.2\\pm 5i s^{-1}\\)?",
-          "answer": "The trajectory rotates while its envelope grows as \\(e^{0.2t}\\), producing an outward spiral. The linear model is unstable; whether a limit cycle subsequently forms depends on nonlinear saturation."
+          "answer": "The trajectory rotates while its envelope grows as \\(e^{0.2t}\\), producing an outward spiral. The linear model is unstable; whether a limit cycle subsequently forms depends on nonlinear saturation.",
+          "choiceAnswer": "The trajectory spirals outward with an exponentially growing envelope; a bounded limit cycle would require nonlinear regulation.",
+          "distractors": [
+            {
+              "text": "The trajectory spirals inward because the large imaginary part cancels the growth caused by the positive real part.",
+              "explanation": "The real part controls the envelope and the imaginary part the rotation rate; a large imaginary part does not cancel positive growth."
+            },
+            {
+              "text": "It immediately approaches a stable closed orbit: the imaginary part fixes frequency and the positive real part stabilizes a unique amplitude.",
+              "explanation": "A positive real part amplifies the linear solution without stabilizing amplitude. A stable cycle requires additional nonlinear structure."
+            },
+            {
+              "text": "The state grows monotonically without rotation, because any positive real part removes the dynamical effect of the imaginary part.",
+              "explanation": "The imaginary part still produces rotation. The positive real part changes the amplitude envelope during that rotation."
+            }
+          ]
         },
         "pitfalls": [
           "Writing rad/s directly as Hz and forgetting to divide by \\(2\\pi\\).",
           "Reporting only the imaginary part while ignoring the -h leak in the full equation."
-        ]
+        ],
+        "transition": "Pacemakers, followers, and half-center circuits suggest different sources of rhythm. A solvable linear two-neuron model lets us first distinguish oscillations after a perturbation from an autonomous rhythm that persists."
       },
       {
         "id": "l20-m3",
@@ -717,7 +843,7 @@
         ],
         "guidingQuestion": "How do ionic-current equations generate a two-dimensional phase plane, and how can that plane identify resting and oscillatory candidates?",
         "paragraphs": [
-          "Morris–Lecar compresses conductance dynamics into two state variables, V and N. Its voltage equation is C dV/dt=-gL(V-EL)-gCa M∞(V)(V-ECa)-gK \\(N(V-E_{K})+I_{e}\\). Each \\(g(V-E)\\) is conductance times driving force; the preceding minus signs follow the outward-current convention. \\(M_{\\infty }(V)\\) assumes fast Ca activation and therefore takes its voltage-dependent steady-state value immediately, whereas N follows \\(N_{\\infty }(V)\\) on a slower time scale.",
+          "Morris–Lecar compresses conductance dynamics into two state variables, V and N. Its voltage equation is \\(C\\,dV/dt=-g_{L}(V-E_{L})-g_{Ca}M_{\\infty}(V)(V-E_{Ca})-g_{K}N(V-E_{K})+I_{e}\\). Each \\(g(V-E)\\) is conductance times driving force; the preceding minus signs follow the outward-current convention. \\(M_{\\infty }(V)\\) assumes fast Ca activation and therefore takes its voltage-dependent steady-state value immediately, whereas N follows \\(N_{\\infty }(V)\\) on a slower time scale.",
           "The recovery equation can be written \\(\\tau N dN/dt=N_{\\infty }(V)-N\\). When \\(N<N_{\\infty }\\), \\(dN/dt>0\\) and K activation increases; when \\(N>N_{\\infty }\\), it decreases. The N-nullcline is therefore the \\(\\operatorname{sigmoid} N=N_{\\infty }(V)\\). The V-nullcline is obtained by setting net membrane current to zero and is often cubic-like or N-shaped. Their intersection makes both derivatives zero and is a candidate equilibrium.",
           "Read a phase plane by determining signs in each region. Whether \\(dV/dt\\) is positive on a given side of the V-nullcline must be checked with a test point, not guessed from the curve's appearance. Below the N-nullcline, usually \\(N<N_{\\infty }\\) and arrows point upward; above it, arrows point downward. A fixed point is stable if nearby arrows converge, a saddle if one direction converges and another diverges, and unstable if the flow departs overall.",
           "Fast–slow separation comes from the difference between the voltage time scale C/g and \\(\\tau N\\). When V is fast, a trajectory quickly approaches an attracting branch of the V-nullcline, then N slowly carries it along that branch. If the fixed point lies in an unstable middle region, the state may not settle and instead jump between the two stable branches, forming a relaxation oscillation. The particular bifurcation depends on parameters; a hand-drawn nullcline diagram conveys mechanism, not universal numerical values."
@@ -772,12 +898,28 @@
         },
         "selfCheck": {
           "prompt": "Why is a nullcline not the neuron's actual trajectory?",
-          "answer": "A nullcline is only the set of points where one derivative is instantaneously zero. The other variable usually continues to change, so the state crosses or moves nearby; only an intersection of both nullclines can remain stationary."
+          "answer": "A nullcline is only the set of points where one derivative is instantaneously zero. The other variable usually continues to change, so the state crosses or moves nearby; only an intersection of both nullclines can remain stationary.",
+          "choiceAnswer": "A nullcline zeros one derivative, while the other variable may still change; only a joint intersection can be stationary.",
+          "distractors": [
+            {
+              "text": "A nullcline is already the trajectory; connecting its points in horizontal-coordinate order reveals the actual time course.",
+              "explanation": "Geometric ordering is not temporal ordering. The vector field formed by both derivatives determines trajectory direction."
+            },
+            {
+              "text": "Every nullcline point stops both variables, so a trajectory remains there permanently as soon as it reaches either curve.",
+              "explanation": "One nullcline constrains only one derivative. A nonzero derivative of the other variable still moves the state."
+            },
+            {
+              "text": "Only noise prevents a nullcline from being a trajectory; without noise every initial state follows the same nullcline.",
+              "explanation": "Even a deterministic two-dimensional system can cross a nullcline because the other derivative is nonzero; noise is not required."
+            }
+          ]
         },
         "pitfalls": [
           "Treating a reversal potential as a fixed current and ignoring the driving force V-E.",
           "Assigning arrows from the cubic curve's shape alone instead of checking regional signs in the equations."
-        ]
+        ],
+        "transition": "Complex eigenvalues make the linear trajectory rotate, but their negative real part makes its amplitude decay. Nonlinear conductances and a slow recovery variable provide a concrete route to amplitude regulation in the Morris–Lecar model."
       },
       {
         "id": "l20-m4",
@@ -842,12 +984,28 @@
         },
         "selfCheck": {
           "prompt": "Why can two mutually inhibitory cells generate a network rhythm even when neither oscillates in isolation?",
-          "answer": "Inhibition switches each partner's effective nullcline between active and inactive conditions. Slow recovery makes the cells reach their transitions in turn, so coupling creates periodic state switching."
+          "answer": "Inhibition switches each partner's effective nullcline between active and inactive conditions. Slow recovery makes the cells reach their transitions in turn, so coupling creates periodic state switching.",
+          "choiceAnswer": "Inhibition switches the effective nullclines, and slow recovery can bring the partners to alternating transitions under suitable parameters.",
+          "distractors": [
+            {
+              "text": "Reciprocal inhibition creates a rhythm simply by fixing both voltages low; whether recovery changes over time is irrelevant.",
+              "explanation": "Two stationary low states are not an alternating rhythm. A mechanism must carry the system toward successive transitions."
+            },
+            {
+              "text": "Each inhibitory event permanently increases the partner’s input current; unbounded accumulation guarantees a stable cycle at every inhibitory strength.",
+              "explanation": "Inhibition is not permanent accumulation of positive current. Rhythm depends on recovery, thresholds, and transition ordering, not arbitrary parameters."
+            },
+            {
+              "text": "Connecting the cells automatically eliminates their resting solutions, because any negative coupling makes every equilibrium unstable.",
+              "explanation": "A negative weight alone does not remove or destabilize every fixed point. The coupled nullclines and vector field must be analyzed."
+            }
+          ]
         },
         "pitfalls": [
           "Treating the fast jump as motion along a nullcline; the state leaves the slow manifold during a jump.",
           "Assuming mutual inhibition alone is sufficient without checking the recovery variable and threshold ordering."
-        ]
+        ],
+        "transition": "Current balance and nullclines locate fixed points without yet establishing whether trajectories settle or circulate. Fast voltage and slow recovery let us follow motion along branches and rapid jumps, then examine how reciprocal inhibition changes that geometry."
       },
       {
         "id": "l20-m5",
@@ -913,12 +1071,28 @@
         },
         "selfCheck": {
           "prompt": "If the active cell falls below VT and its partner jumps 20 ms later, does that delay refute release?",
-          "answer": "No. Release requires only that removal of inhibition be the upstream trigger. The partner still takes finite time to leave its low state according to its own membrane and recovery dynamics."
+          "answer": "No. Release requires only that removal of inhibition be the upstream trigger. The partner still takes finite time to leave its low state according to its own membrane and recovery dynamics.",
+          "choiceAnswer": "No. Removal of inhibition can trigger the transition even though the partner takes finite time to leave its low state.",
+          "distractors": [
+            {
+              "text": "Yes. Release requires both voltage jumps at exactly the same instant, so any nonzero delay necessarily identifies escape.",
+              "explanation": "Release specifies the causal trigger, not simultaneous completion of two finite-rate transitions."
+            },
+            {
+              "text": "Yes. Firing after inhibition ends proves the inhibited cell had already escaped first, making the active cell’s fall a consequence.",
+              "explanation": "That reversed causal claim is not supported by the stated order. Diagnosing escape requires the state before inhibition is removed."
+            },
+            {
+              "text": "No, but only if the delay is entirely a recording artifact and the released cell has no intrinsic transition dynamics.",
+              "explanation": "Membrane and recovery dynamics can themselves produce a delay; a measurement artifact is not necessary."
+            }
+          ]
         },
         "pitfalls": [
           "Naming the mechanism solely from which cell spikes first, without measuring synaptic state.",
           "Treating release and escape as mutually exclusive and ignoring mixed regimes and stochastic switching."
-        ]
+        ],
+        "transition": "Reciprocal inhibition and slow recovery can organize alternation, yet the same alternating pattern can begin with different events. Tracking both cells before a switch distinguishes termination by the active cell, or release, from breakthrough by the inhibited cell, or escape."
       },
       {
         "id": "l20-m6",
@@ -985,12 +1159,28 @@
         },
         "selfCheck": {
           "prompt": "Why are two linear rate variables h1 and h2 usually insufficient for a stable half-center limit cycle?",
-          "answer": "A linear system can only decay, rotate neutrally, or grow; it lacks a slow state and amplitude regulation. Adaptation or recovery plus nonlinear F supplies phase switching and a bounded cycle."
+          "answer": "A linear system can only decay, rotate neutrally, or grow; it lacks a slow state and amplitude regulation. Adaptation or recovery plus nonlinear F supplies phase switching and a bounded cycle.",
+          "choiceAnswer": "Linear rates lack attracting amplitude regulation; slow adaptation together with a nonlinearity can support bounded switching.",
+          "distractors": [
+            {
+              "text": "Any imaginary eigenvalue automatically fixes a unique attracting amplitude, so adding a slow variable merely renames coordinates.",
+              "explanation": "Purely imaginary modes have initial-condition-dependent orbits, not an attracting cycle; negative or positive real parts cause decay or growth."
+            },
+            {
+              "text": "The only problem is neuron count: adding more fully linear units guarantees a unique stable limit cycle without nonlinear dynamics.",
+              "explanation": "Extra linear dimensions do not create attraction to a finite nonzero amplitude. Linear modes still follow their growth or decay rates."
+            },
+            {
+              "text": "An arbitrary constant input is sufficient, because it automatically changes sign on each cycle to maintain alternation.",
+              "explanation": "A constant input does not reverse sign each cycle. It can shift a linear fixed point without creating phase switching."
+            }
+          ]
         },
         "pitfalls": [
           "Naming a in the rate model as a particular K channel without additional evidence.",
           "Inferring a half-center from one rate trace without verifying antiphase activity and perturbation responses in the partner."
-        ]
+        ],
+        "transition": "Release and escape depend on the ordering of fast activity, slow recovery, and inhibitory switching. Keeping those relationships without retaining every ion channel yields a rate–adaptation half-center whose phase-resetting predictions can be tested."
       }
     ]
   },
@@ -1106,7 +1296,22 @@
         },
         "selfCheck": {
           "prompt": "If position returns to center after the velocity command with a time constant of 5 s, is this still an integrator?",
-          "answer": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift."
+          "answer": "It is a leaky rather than perfect integrator. Behavior may appear persistent for periods shorter than 5 s, but a long delay reveals measurable drift.",
+          "choiceAnswer": "It is a leaky integrator: short observations may look persistent, but a longer delay reveals the finite drift time scale.",
+          "distractors": [
+            {
+              "text": "It is perfect integration because reaching any nonzero state is sufficient, regardless of whether the state later decays.",
+              "explanation": "Perfect integration retains the state after input ends. Measurable decay indicates a remaining leak toward center."
+            },
+            {
+              "text": "It cannot be integration at all: any finite drift time proves the network never accumulated the velocity command, even approximately over short intervals.",
+              "explanation": "Integration can be leaky. The state can accumulate input while older contributions decay with a finite time constant."
+            },
+            {
+              "text": "Five seconds is a fixed latency: the position remains exactly unchanged for that interval and then jumps instantly to center.",
+              "explanation": "A time constant sets the scale of continuous exponential decay, not a deadline followed by an abrupt jump."
+            }
+          ]
         },
         "pitfalls": [
           "Conflating velocity tuning and position tuning as the same population signal.",
@@ -1180,12 +1385,28 @@
         },
         "selfCheck": {
           "prompt": "What happens if the same constraint gives \\(\\lambda _{2}=1.1\\)?",
-          "answer": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator."
+          "answer": "The memory mode still has \\(\\lambda =1\\), but the transverse mode's full growth rate is \\((1.1-1)/\\tau >0\\). Any small error grows, so the full network is not a stable, usable integrator.",
+          "choiceAnswer": "The integrating mode remains, but the transverse mode amplifies small errors, so the whole network is not a stable integrator.",
+          "distractors": [
+            {
+              "text": "The whole network remains stable because an eigenvalue of one automatically projects all other modes onto the memory direction.",
+              "explanation": "Canceling leak in one mode does not eliminate other eigendirections. Transverse stability must be checked separately."
+            },
+            {
+              "text": "The transverse mode decays faster because larger connectivity eigenvalues strengthen the restoring force, returning every deviation to the memory axis.",
+              "explanation": "The full growth rate subtracts the intrinsic leak from the connectivity eigenvalue. Exceeding one makes that rate positive."
+            },
+            {
+              "text": "Both modes immediately become oscillatory because a second eigenvalue above one necessarily creates an imaginary pair.",
+              "explanation": "A real eigenvalue above one indicates growth along that direction; it does not create an imaginary part or make another mode oscillate."
+            }
+          ]
         },
         "pitfalls": [
           "Replacing the general matrix with the symmetric two-neuron special case and missing asymmetric compensation.",
           "Checking \\(\\det(I-W)=0\\) without checking \\(\\lambda _{2}\\), input projection, and readout."
-        ]
+        ],
+        "transition": "Holding eye position requires a state to outlast the velocity command, but correlated tuning curves do not specify the needed connections. A general bilateral weight matrix lets us solve for the mode that cancels leak and check the stability of the remaining mode."
       },
       {
         "id": "l21-m3",
@@ -1254,12 +1475,28 @@
         },
         "selfCheck": {
           "prompt": "Why does fitting become linear after fixing the nonlinearities even though the neuron response itself remains nonlinear?",
-          "answer": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear."
+          "answer": "\\(S_{j}\\) and \\(F_{i}^{-1}\\) already apply nonlinear transformations to the data. Only the unknown weights linearly combine those transformed features; the full input–output mapping remains nonlinear.",
+          "choiceAnswer": "The fixed nonlinearities transform known data; unknown weights then combine those features linearly without linearizing the whole response.",
+          "distractors": [
+            {
+              "text": "Fixing the nonlinearities means replacing every activation function with the identity and discarding all thresholds and saturation.",
+              "explanation": "Fixed means known, not removed. Inverse response and synaptic transformations still enter the features and targets."
+            },
+            {
+              "text": "All parameters of any nonlinear network can be fitted linearly; enough recordings automatically separate unknown activation curves from unique weights.",
+              "explanation": "The linear weight problem requires the relevant nonlinearities to be fixed and usable in the transformation. Identifiability still requires separate checks."
+            },
+            {
+              "text": "The fit necessarily uses a first-order Taylor expansion at one stimulus and is valid only for infinitesimal changes around it.",
+              "explanation": "Here linearity concerns how weights enter, not necessarily a local Taylor approximation. Known nonlinear transformations can be evaluated directly."
+            }
+          ]
         },
         "pitfalls": [
           "Treating parameter variability and observation noise as the same source.",
           "Applying \\(YX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\) without stating sample orientation and obtaining incompatible shapes."
-        ]
+        ],
+        "transition": "The perfect-integration condition permits compensating weight combinations, so one function need not identify one parameter set. Fitting nonlinear neurons to tuning data first requires converting target rates into required inputs and identifying which unknowns remain linear weights."
       },
       {
         "id": "l21-m4",
@@ -1272,8 +1509,8 @@
         ],
         "guidingQuestion": "Why does a squared-error fit form a quadratic surface, and how does the Hessian arise from the data design?",
         "paragraphs": [
-          "With samples as columns, write the loss \\(L(W)=1/2||Y-WX||_F^{2}\\). The Frobenius norm sums squared residuals across all outputs and samples. Output rows are independent, so begin with one weight row w and target row y: \\(L(w)=1/2(y-wX)(y-wX)^\\mathrm{T}\\). Expanding gives the constant \\(yy^\\mathrm{T}\\), the linear term \\(-yX^\\mathrm{T}w^\\mathrm{T}\\), and the quadratic term wXX^\\(Tw^\\mathrm{T}\\).",
-          "Differentiating with respect to w gives gradient \\((wX-y)X^\\mathrm{T}\\). Setting it to zero gives the normal equation wXX^\\(T=yX^\\mathrm{T}\\). If \\(XX^\\mathrm{T}\\) is invertible, \\(\\hat{w}=yX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\); stacking all rows gives \\(\\hat{W}=YX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\). If features are collinear, \\(XX^\\mathrm{T}\\) is singular and requires a pseudoinverse, regularization, or redesigned samples.",
+          "With samples as columns, write the loss \\(L(W)=1/2||Y-WX||_F^{2}\\). The Frobenius norm sums squared residuals across all outputs and samples. Output rows are independent, so begin with one weight row w and target row y: \\(L(w)=1/2(y-wX)(y-wX)^\\mathrm{T}\\). Expanding gives the constant \\(\\tfrac12 yy^\\mathrm{T}\\), the linear term \\(-yX^\\mathrm{T}w^\\mathrm{T}\\), and the quadratic term \\(\\tfrac12 wXX^\\mathrm{T}w^\\mathrm{T}\\).",
+          "Differentiating with respect to w gives gradient \\((wX-y)X^\\mathrm{T}\\). Setting it to zero gives the normal equation \\(wXX^\\mathrm{T}=yX^\\mathrm{T}\\). If \\(XX^\\mathrm{T}\\) is invertible, \\(\\hat{w}=yX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\); stacking all rows gives \\(\\hat{W}=YX^\\mathrm{T}(XX^\\mathrm{T})^{-1}\\). If features are collinear, \\(XX^\\mathrm{T}\\) is singular and requires a pseudoinverse, regularization, or redesigned samples.",
           "Near the optimum, let \\(\\Delta w=w-\\hat{w}\\). The normal equation eliminates the cross term, leaving \\(L=L\\min+1/2 \\Delta w H \\Delta w^\\mathrm{T}\\) with \\(H=XX^\\mathrm{T}\\). The same feature Hessian applies row by row to the full W, or appears in blocks after vectorizing the parameters. H depends only on design features for this local curvature; changing the noise model or constraints changes the effective Hessian.",
           "This connects fitting with experimental design. If one feature combination barely changes across positions, X contains little information along that direction and H has a small eigenvalue. Conditions that selectively activate that combination can increase curvature and tighten parameter uncertainty. Sloppiness need not be accepted passively; perturbations and improved sampling can reduce it."
         ],
@@ -1328,12 +1565,28 @@
         },
         "selfCheck": {
           "prompt": "How does adding a ridge penalty \\(\\lambda ||w||^{2}/2\\) change the Hessian?",
-          "answer": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data."
+          "answer": "H becomes \\(XX^\\mathrm{T}+\\lambda I\\). Every eigenvalue increases by \\(\\lambda\\), stabilizing the inverse, but the estimate is biased toward zero; regularization must not be mistaken for additional data.",
+          "choiceAnswer": "Ridge adds a scaled identity to the Hessian, shifting its eigenvalues upward without supplying new observations.",
+          "distractors": [
+            {
+              "text": "Ridge decreases Hessian eigenvalues, making flat directions flatter and thereby stabilizing the inverse.",
+              "explanation": "A positive quadratic penalty adds positive curvature rather than subtracting it, moving small eigenvalues away from zero."
+            },
+            {
+              "text": "The Hessian is unchanged: the penalty only shifts observed targets and cannot affect curvature, parameter bias, or numerical conditioning.",
+              "explanation": "A quadratic penalty on weights directly contributes second derivatives and shrinks the estimate toward zero."
+            },
+            {
+              "text": "The penalty is equivalent to collecting independent neural observations; larger eigenvalues prove new experimental evidence for each parameter.",
+              "explanation": "The extra curvature comes from the chosen penalty, not new measurements; regularization is not additional experimental evidence."
+            }
+          ]
         },
         "pitfalls": [
           "Treating existence of a closed-form inverse as proof that the biological parameters are unique.",
           "Ignoring feature scaling; different units directly alter Hessian eigenvalues and comparisons of stiffness."
-        ]
+        ],
+        "transition": "Once cellular and synaptic nonlinearities are fixed, known features and target inputs define a linear weight-fitting problem. Least squares supplies a solution, while its Hessian measures how strongly those features constrain different parameter changes."
       },
       {
         "id": "l21-m5",
@@ -1400,12 +1653,28 @@
         },
         "selfCheck": {
           "prompt": "Why can sloppy not be translated as 'this parameter is unimportant'?",
-          "answer": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it. The combination may still be crucial for an unmeasured behavior, a perturbation response, or biological viability."
+          "answer": "A Hessian direction usually combines parameters, and small curvature means only that the current data and loss are insensitive to it. The combination may still be crucial for an unmeasured behavior, a perturbation response, or biological viability.",
+          "choiceAnswer": "Sloppiness is low curvature of a parameter combination under this loss; that direction may still affect unmeasured behavior.",
+          "distractors": [
+            {
+              "text": "A sloppy eigenvector must contain only one synapse, which can therefore be deleted without changing any model prediction.",
+              "explanation": "A Hessian direction usually combines parameters. Insensitivity in current data does not establish invariance of every prediction."
+            },
+            {
+              "text": "Low curvature establishes irrelevance under every possible stimulus, behavior, and parameter scaling, eliminating the need for perturbation tests.",
+              "explanation": "Curvature depends on data, loss, and parameter scaling. New conditions can constrain a previously sloppy combination."
+            },
+            {
+              "text": "Sloppiness necessarily means more neural noise, because parameter-Hessian eigenvalues are the eigenvalues of activity covariance.",
+              "explanation": "Loss curvature in parameter space and covariance in neural activity space are different objects and cannot be equated."
+            }
+          ]
         },
         "pitfalls": [
           "Comparing Hessian eigenvalues of unstandardized parameters and creating artificial sloppiness through unit differences.",
           "Interchanging parameter-space Hessian eigenvectors with neural-activity PCs or dynamical modes."
-        ]
+        ],
+        "transition": "A single optimal weight matrix does not reveal how many nearby models fit adequately. Resolving the Hessian into parameter directions separates steep from shallow loss changes and supports an ensemble representation of what the data leave uncertain."
       }
     ]
   },
@@ -1526,7 +1795,22 @@
         },
         "selfCheck": {
           "prompt": "Why does a PC explaining 70% of neural variance not necessarily explain 70% of behavioral variance?",
-          "answer": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances."
+          "answer": "Behavior depends on a separate readout map, which may ignore high-variance directions or amplify low-variance directions; there is no fixed ratio between the two variances.",
+          "choiceAnswer": "Behavior depends on its readout: a high-variance neural direction may be ignored while a low-variance direction strongly affects output.",
+          "distractors": [
+            {
+              "text": "Because PCA ranks neural directions using behavioral labels, the percentages agree exactly whenever those labels are noise free.",
+              "explanation": "PCA ranks neural variance without using behavioral labels. Noise-free labels do not equate the two variance fractions."
+            },
+            {
+              "text": "The only issue is neuron count: recording every cell makes every linear readout preserve variance fractions, forcing both percentages to be 70%.",
+              "explanation": "Even with complete observations, a readout can select or weight directions differently and change the composition of output variance."
+            },
+            {
+              "text": "Seventy percent neural variance means the PC contains seventy percent of cells, while behavioral variance counts the remainder.",
+              "explanation": "A principal component is a direction in recorded activity coordinates; explained variance is not a fraction of neurons."
+            }
+          ]
         },
         "pitfalls": [
           "Treating a cosine-fit preferred direction as an immutable causal label.",
@@ -1603,12 +1887,28 @@
         },
         "selfCheck": {
           "prompt": "If one latent factor is multiplied everywhere by 2 without changing C, is it still the same GPFA model?",
-          "answer": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2."
+          "answer": "No; the predicted mean changes. It is an equivalent coordinate reparameterization only if the corresponding column of C is also divided by 2.",
+          "choiceAnswer": "No. With the loading fixed, the predicted mean changes; observational equivalence requires inverse scaling of that loading column.",
+          "distractors": [
+            {
+              "text": "It is unchanged because latent factors are unobserved, so arbitrarily rescaling them cannot affect the observation distribution.",
+              "explanation": "Unobserved does not mean causally absent from the model. The factor enters the observation mean through its loading."
+            },
+            {
+              "text": "It remains equivalent if residual covariance doubles, since extra zero-mean noise exactly cancels the doubled factor contribution to the mean.",
+              "explanation": "Residual covariance controls variability around the mean; it cannot cancel a systematic change in the predicted mean."
+            },
+            {
+              "text": "The corresponding loading column should also double, because scaling both factors in the same direction preserves their product and the mean.",
+              "explanation": "Doubling both factors multiplies their product by four. Preserving the observation product requires inverse scaling."
+            }
+          ]
         },
         "pitfalls": [
           "Treating a latent factor as a directly measured neuron.",
           "Concluding from diagonal \\(\\Sigma\\) that real neurons are independent; independence applies only to residuals conditional on the latent state."
-        ]
+        ],
+        "transition": "Population trajectories place single-cell tuning in a shared activity space, but projection alone does not separate shared variation from observation noise. The GPFA observation model first specifies how latent factors and residual variability generate neural recordings."
       },
       {
         "id": "l22-m3",
@@ -1625,7 +1925,7 @@
         ],
         "guidingQuestion": "How does a squared-exponential kernel encode smoothness, and how should target preparation, go cue, and movement be separated in delayed reaches?",
         "paragraphs": [
-          "The squared-exponential kernel \\(K(t,t')=\\sigma s^{2}\\) \\(\\exp[-(t-t')^{2}/(2\\tau ^{2})]+\\sigma n^{2}\\delta tt'\\) gives covariance between two times for one factor. \\(\\sigma s^{2}\\) controls smooth signal variance, \\(\\tau\\) controls the correlation-decay time, and \\(\\sigma n^{2}\\) adds independent variability only in the same time bin. Because \\(\\alpha\\) and loading C have a global scale ambiguity, impose \\(\\sigma n^{2}+\\sigma s^{2}=1\\) as a normalization convention. That constraint fixes scale; it is not a new biological law. Nor is this the only GP kernel: for rapid switching or oscillation, Matérn or periodic kernels may better match the hypothesis.",
+          "The squared-exponential kernel \\(K(t,t')=\\sigma_s^2\\exp[-(t-t')^2/(2\\tau^2)]+\\sigma_n^2\\delta_{tt'}\\) gives covariance between two times for one factor. \\(\\sigma_s^{2}\\) controls smooth signal variance, \\(\\tau\\) controls the correlation-decay time, and \\(\\sigma_n^{2}\\) adds independent variability only in the same time bin. Because \\(\\alpha\\) and loading C have a global scale ambiguity, impose \\(\\sigma_n^{2}+\\sigma_s^{2}=1\\) as a normalization convention. That constraint fixes scale; it is not a new biological law. Nor is this the only GP kernel: for rapid switching or oscillation, Matérn or periodic kernels may better match the hypothesis.",
           "Fitting jointly estimates latent trajectories, loadings, baselines, noise, and kernel hyperparameters, commonly by marginal likelihood or an EM-like procedure. Increasing K always increases in-sample flexibility, so choose dimensionality with cross-validation, held-out likelihood, or reconstruction prediction. Training explained variance alone can mistake noise dimensions for meaningful factors.",
           "Read a delayed-reach plot along its timeline. The interval after target onset but before the go cue is the preparatory epoch; movement begins only after go. Preparatory activity for different targets may approach different latent locations without producing obvious movement. After the cue, trajectories depart from those initial states along target-specific movement paths. The plot supports the idea that an initial condition influences later dynamics, but trajectories alone cannot exclude sustained common input.",
           "Trial averaging clarifies preparatory trajectories but conceals single-trial onset jitter and variability. To claim that trajectory geometry predicts behavior, use the pre-go latent state to predict reaction time, directional error, or muscle activity on held-out trials. A post-go divergence may reflect alignment and condition averaging, so compare it with shuffled labels and alternative alignments."
@@ -1680,12 +1980,28 @@
         },
         "selfCheck": {
           "prompt": "Why does a smooth kernel not prove that the true cortical trajectory is intrinsically smooth?",
-          "answer": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale."
+          "answer": "Some smoothness comes from the prior. Compare held-out data, alternative kernels, and temporal resolutions to determine whether the data support that time scale.",
+          "choiceAnswer": "Smoothness partly comes from the prior, so held-out data, alternative kernels, and temporal resolution must test its support.",
+          "distractors": [
+            {
+              "text": "The kernel only decorates the plot; it does not affect latent inference, so all apparent smoothness comes from data.",
+              "explanation": "The kernel specifies temporal covariance of latent states and therefore affects inference, not just plot appearance."
+            },
+            {
+              "text": "A differentiable kernel proves identical differentiability in the real population, regardless of sample size or whether observations are held out.",
+              "explanation": "A mathematical property of the model prior is not an established biological property; data must distinguish alternative temporal structures."
+            },
+            {
+              "text": "The smooth kernel removes all observation noise, so lower training reconstruction error alone rules out oversmoothing or an incorrect time scale.",
+              "explanation": "Smoothing does not guarantee the true trajectory. Training fit cannot replace held-out prediction and time-scale sensitivity checks."
+            }
+          ]
         },
         "pitfalls": [
           "Mistaking \\(\\tau\\) for the number K of latent factors.",
           "Interpreting divergence after the go cue as recurrent causality without testing a sustained-input model."
-        ]
+        ],
+        "transition": "The observation model relates a latent state to neural activity at one time without specifying relationships across times. A temporal covariance kernel supplies that missing structure and lets us test whether delayed-reach data support the inferred smoothness."
       },
       {
         "id": "l22-m4",
@@ -1757,12 +2073,28 @@
         },
         "selfCheck": {
           "prompt": "If the downstream readout changes to \\(U'\\), must the original output-null vector remain null?",
-          "answer": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable."
+          "answer": "No. The null space depends on the particular readout. One neural direction may be irrelevant to one output yet affect another muscle group or cognitive variable.",
+          "choiceAnswer": "No. Nullness is relative to a readout; the same activity direction can be silent for one output and potent for another.",
+          "distractors": [
+            {
+              "text": "It must remain null because zero output means that every neuron in the original vector is silent.",
+              "explanation": "A nonzero activity vector can cancel under a particular readout. Zero output does not imply a zero neural state."
+            },
+            {
+              "text": "It must remain null because neuron count alone determines the null directions, regardless of weight rotations or which muscles are read out.",
+              "explanation": "Matrix size and rank constrain null-space dimension, but the actual null directions depend on the weights."
+            },
+            {
+              "text": "It must become nonzero: changing any readout entry makes it impossible to share a nonzero null vector with the original matrix.",
+              "explanation": "Two different readouts may share null directions. A weight change guarantees neither preservation nor loss of nullness for a given vector."
+            }
+          ]
         },
         "pitfalls": [
           "Incorrectly inferring \\(r=0\\) from \\(Ur=0\\).",
           "Defining and testing the null space on the same training trials, thereby overfitting."
-        ]
+        ],
+        "transition": "Smooth latent trajectories reveal preparatory changes without explaining why preparation need not produce movement. Specifying a readout from neural activity to motor output lets us identify activity directions in its null space."
       },
       {
         "id": "l22-m5",
@@ -1830,12 +2162,28 @@
         },
         "selfCheck": {
           "prompt": "Why can an improvement in closed-loop performance not be attributed entirely to more accurate decoder parameters?",
-          "answer": "The participant changes neural strategy in response to feedback, and the decoder may update online. Performance comes from joint adaptation, so one side must be frozen or otherwise controlled to separate the causes."
+          "answer": "The participant changes neural strategy in response to feedback, and the decoder may update online. Performance comes from joint adaptation, so one side must be frozen or otherwise controlled to separate the causes.",
+          "choiceAnswer": "Feedback can change neural strategy while the decoder also adapts; separating their contributions requires controlling one side.",
+          "distractors": [
+            {
+              "text": "Feedback cannot change the participant’s fixed neural signal, so every improvement measures only decoder accuracy.",
+              "explanation": "Closed-loop output becomes new input to the participant, who can learn and adjust; the neural distribution need not remain fixed."
+            },
+            {
+              "text": "Online updates necessarily worsen the decoder, so improvement can only come from the participant and requires no controls even when both change.",
+              "explanation": "Online updates can help or harm performance. A single outcome measure cannot uniquely assign contributions when both sides change."
+            },
+            {
+              "text": "Once latent trajectories align across days, every neuron and the participant’s entire strategy are proven fixed, removing the need to assess adaptation.",
+              "explanation": "Latent alignment does not require fixed individual-cell loadings or strategy and does not rule out closed-loop learning."
+            }
+          ]
         },
         "pitfalls": [
           "Treating aligned latent stability as permanent stability of individual-neuron identity.",
           "Using test-day behavior to choose an alignment and then reporting those same data as cross-day generalization."
-        ]
+        ],
+        "transition": "Whether neural activity changes output depends on the readout, making a changed decoder a useful functional intervention. Closed-loop BMI places that readout inside a feedback system and raises the further problem of aligning population coordinates across days."
       }
     ]
   },
@@ -1952,7 +2300,22 @@
         },
         "selfCheck": {
           "prompt": "Why does continued brain activity with the eyes closed not by itself prove cognition in this lecture's sense?",
-          "answer": "Persistent activity may be spontaneous fluctuation or an unmeasured input. It must carry task-relevant history and predict later behavior."
+          "answer": "Persistent activity may be spontaneous fluctuation or an unmeasured input. It must carry task-relevant history and predict later behavior.",
+          "choiceAnswer": "Persistent activity may reflect spontaneous fluctuation or unmeasured input; its link to task history and later behavior remains unproven.",
+          "distractors": [
+            {
+              "text": "Closing the eyes eliminates all external and bodily input, making every remaining fluctuation an exact working memory of prior events.",
+              "explanation": "Closing the eyes leaves other sensory inputs, bodily state, and spontaneous activity. Persistence does not identify information content."
+            },
+            {
+              "text": "The definition only requires ongoing firing, with no relation to history, goals, or behavior, so any nonzero mean firing rate is sufficient.",
+              "explanation": "The working definition concerns dependence beyond current input, requiring tests of relevant history rather than mere activity."
+            },
+            {
+              "text": "The sole obstacle is that cognition requires complete neural silence; any active internal state would be destroyed by being represented.",
+              "explanation": "The definition does not require silence. Historical and task relevance matter; activity or silence alone is insufficient."
+            }
+          ]
         },
         "pitfalls": [
           "Treating a working definition as the only definition of cognition.",
@@ -1994,12 +2357,28 @@
         },
         "selfCheck": {
           "prompt": "Why does monotonic delay-period firing with f1 not by itself prove that this is the memory used for behavior?",
-          "answer": "The correlated signal could be a passive readout. Functional evidence is stronger when its trial fluctuations, selective perturbation, or downstream coupling affect comparison behavior."
+          "answer": "The correlated signal could be a passive readout. Functional evidence is stronger when its trial fluctuations, selective perturbation, or downstream coupling affect comparison behavior.",
+          "choiceAnswer": "The signal may be a passive readout; trial variability, selective perturbations, or downstream coupling must link it to comparison behavior.",
+          "distractors": [
+            {
+              "text": "Monotonic tuning guarantees this is the sole memory source, because no other neurons can represent the same ordering of stimuli.",
+              "explanation": "Several populations can encode the same stimulus correlatively. Monotonicity does not exclude copies or common drive."
+            },
+            {
+              "text": "A sufficiently long delay average turns correlation into causation, even if perturbing the signal leaves comparison behavior entirely unchanged.",
+              "explanation": "Longer averaging does not establish functional causality; perturbations, trial predictions, and downstream use need independent evidence."
+            },
+            {
+              "text": "It cannot be memory because every monotonic code can only represent a motor command, never an earlier stimulus frequency.",
+              "explanation": "Monotonic coding can represent frequency or other variables. The unresolved issue is behavioral use, not the code’s monotonic form."
+            }
+          ]
         },
         "pitfalls": [
           "Attributing every drop in accuracy to forgetting without checking other task epochs.",
           "Extending a mechanism for discrete DMS directly to continuous frequency memory."
-        ]
+        ],
+        "transition": "A history-dependent internal state can be tested by holding current input fixed while changing the past. Delayed matching and the Romo frequency-comparison task specify what must be retained and separate encoding, maintenance, and readout in time."
       },
       {
         "id": "l23-m3",
@@ -2067,12 +2446,28 @@
         },
         "selfCheck": {
           "prompt": "Why does increasing \\(\\lambda\\) from 0.99 to 1.01 not simply lengthen memory a little?",
-          "answer": "It crosses the stability boundary. The linear mode changes from slow decay to exponential growth and needs another nonlinearity to limit amplitude."
+          "answer": "It crosses the stability boundary. The linear mode changes from slow decay to exponential growth and needs another nonlinearity to limit amplitude.",
+          "choiceAnswer": "The change crosses the stability boundary, turning slow decay into exponential growth that needs nonlinear amplitude control.",
+          "distractors": [
+            {
+              "text": "Larger eigenvalues always stabilize the mode, so crossing one merely increases the decay time slightly.",
+              "explanation": "The full growth rate passes through zero at one and becomes positive above it; it is no longer a decay time."
+            },
+            {
+              "text": "The mode automatically forms a stable closed orbit; crossing one supplies both frequency and saturated amplitude without any further nonlinearity.",
+              "explanation": "Instability of a real mode does not automatically supply an oscillation frequency or saturation; the full nonlinear system must be examined."
+            },
+            {
+              "text": "The mode stops responding to input because recurrent feedback above one exactly cancels every external drive and leaves only zero activity.",
+              "explanation": "Exceeding one makes the homogeneous component grow; it does not cancel arbitrary input and instead amplifies small deviations."
+            }
+          ]
         },
         "pitfalls": [
           "Using the \\(\\tau _{\\mathrm{eff}}\\) formula for \\(\\lambda >1\\) and still calling it a positive decay time constant.",
           "Examining only condition-averaged persistent firing and ignoring single-trial drift."
-        ]
+        ],
+        "transition": "Delayed-task behavior establishes that past information remains usable without uniquely identifying its storage mechanism. A recurrent mode near the integration boundary is one candidate; its decay time can be checked against the delay the task requires."
       },
       {
         "id": "l23-m4",
@@ -2140,12 +2535,28 @@
         },
         "selfCheck": {
           "prompt": "Why do identical coherence values yield different choices and RTs?",
-          "answer": "Each trial has a different noise path, which changes both the first-passage time and which boundary is reached first."
+          "answer": "Each trial has a different noise path, which changes both the first-passage time and which boundary is reached first.",
+          "choiceAnswer": "Equal coherence fixes mean evidence, not each noise path; the first boundary reached and its crossing time can therefore vary.",
+          "distractors": [
+            {
+              "text": "Equal coherence fixes every evidence sample, so different choices must be assigned randomly after accumulation rather than arise from model noise.",
+              "explanation": "Coherence does not fix each stochastic realization. Accumulated noise itself changes the first-passage direction and timing."
+            },
+            {
+              "text": "Both boundaries encode the same choice; their signs distinguish fast from slow responses.",
+              "explanation": "The first boundary identifies the choice, and its crossing time is a modeled decision variable, not a plotting artifact."
+            },
+            {
+              "text": "Different response times require different coherences, because repeating a stochastic process with fixed parameters necessarily repeats its exact path.",
+              "explanation": "Fixed distribution parameters do not fix a random sample; identical parameters permit different noise paths."
+            }
+          ]
         },
         "pitfalls": [
           "Treating the leaky equation as a classic no-leak DDM.",
           "Changing \\(\\Delta t\\) in a simulation without rescaling the noise and thereby creating a time-step artifact."
-        ]
+        ],
+        "transition": "Persistent activity describes retention after an input ends, whereas a decision may require continued updating as evidence arrives. Adding time-varying evidence, noise, and decision boundaries gives an accumulation process that predicts both choices and response times."
       },
       {
         "id": "l23-m5",
@@ -2182,12 +2593,28 @@
         },
         "selfCheck": {
           "prompt": "Why can mean LIP ramp slopes alone not distinguish accumulation from averaged discrete steps?",
-          "answer": "Both forms of single-trial dynamics can yield similar smooth curves when different onset or choice times are averaged, requiring single-trial model comparison."
+          "answer": "Both forms of single-trial dynamics can yield similar smooth curves when different onset or choice times are averaged, requiring single-trial model comparison.",
+          "choiceAnswer": "Variable step times can average into a smooth ramp, so mean slopes alone require follow-up comparison of single-trial models.",
+          "distractors": [
+            {
+              "text": "Trial averaging preserves every sharp step, so a smooth mean excludes all discrete-switching models at the single-trial level.",
+              "explanation": "Steps at different trial times can average into a gradual curve. A smooth mean does not guarantee smooth individual trials."
+            },
+            {
+              "text": "The two models necessarily have opposite mean slopes, so slope sign alone identifies the mechanism without trial distributions, timing, or choice conditioning.",
+              "explanation": "Both single-trial processes can produce mean ramps in the same direction. Slope sign has no unique mapping to mechanism."
+            },
+            {
+              "text": "Sampling the same mean curve more densely uniquely recovers whether each individual trial contained a discrete step.",
+              "explanation": "Denser sampling of an average cannot recover information lost by averaging across trials; individual recordings and model comparisons are needed."
+            }
+          ]
         },
         "pitfalls": [
           "Equating psychometric slope directly with one sensory-noise parameter.",
           "Using resemblance to a ramp-to-threshold plot in place of a causal test."
-        ]
+        ],
+        "transition": "One noise trajectory gives one choice and first-passage time, while experiments measure distributions across trials. Psychometric and chronometric curves summarize those outcomes; comparing them with LIP activity tests behavior and neural predictions together."
       },
       {
         "id": "l23-m6",
@@ -2255,12 +2682,28 @@
         },
         "selfCheck": {
           "prompt": "Why do two choice attractors generally require a saddle or basin boundary between them?",
-          "answer": "Distinct basins of attraction in a continuous dynamical system must be separated by a boundary that flows to neither attractor. In two dimensions, that boundary is commonly the stable manifold of a saddle."
+          "answer": "Distinct basins of attraction in a continuous dynamical system must be separated by a boundary that flows to neither attractor. In two dimensions, that boundary is commonly the stable manifold of a saddle.",
+          "choiceAnswer": "Distinct attraction basins require a separating boundary, often the stable manifold of a saddle in a planar choice model.",
+          "distractors": [
+            {
+              "text": "The basins can overlap, so one deterministic initial state converges simultaneously to both choices.",
+              "explanation": "A deterministic initial state has one trajectory and cannot simultaneously converge to two distinct attractors."
+            },
+            {
+              "text": "Every nullcline is automatically an uncrossable basin boundary, so all decision boundaries follow without analyzing trajectories, saddles, or the vector field.",
+              "explanation": "A nullcline zeros only one derivative and can generally be crossed; basin boundaries follow from the full dynamics."
+            },
+            {
+              "text": "The boundary must itself be a third stable choice attractor that draws nearby states into an additional behavioral option.",
+              "explanation": "A saddle’s stable manifold can separate basins without the saddle being a third stable choice attracting a full neighborhood."
+            }
+          ]
         },
         "pitfalls": [
           "Treating a nullcline itself as a trajectory.",
           "Mapping a reduced-model attractor one-to-one onto a single anatomical population."
-        ]
+        ],
+        "transition": "Similar average ramps and behavioral curves can arise from different single-trial processes, so curve shape does not uniquely specify a circuit. The Wong–Wang model makes competing choices explicit as recurrent populations whose nullclines and basin boundaries can be examined."
       }
     ]
   },
@@ -2381,7 +2824,22 @@
         },
         "selfCheck": {
           "prompt": "Why should a dopamine pulse without preceding eligibility not selectively strengthen one stimulus–action synapse?",
-          "answer": "The third factor broadcasts the outcome, but local eligibility identifies the synapse that participated in the action; without eligibility, there is no correct credit address."
+          "answer": "The third factor broadcasts the outcome, but local eligibility identifies the synapse that participated in the action; without eligibility, there is no correct credit address.",
+          "choiceAnswer": "Dopamine broadcasts the outcome, while local eligibility identifies participating synapses; without it, selective credit has no address.",
+          "distractors": [
+            {
+              "text": "The dopamine pulse itself contains each synapse's address, so a local activity record is unnecessary.",
+              "explanation": "A broadcast third factor does not identify which synapses participated in the preceding action."
+            },
+            {
+              "text": "A rewarded action should strengthen every stimulus-action synapse equally, including those inactive during selection, to store the whole action.",
+              "explanation": "Equal strengthening assigns credit to inactive synapses and loses the required local specificity."
+            },
+            {
+              "text": "Eligibility supplies the reward's sign, whereas dopamine specifies the individual synapse to update.",
+              "explanation": "These roles are reversed: eligibility marks local participation and the third factor carries the outcome signal."
+            }
+          ]
         },
         "pitfalls": [
           "Equating dopamine with a pure reward scalar.",
@@ -2454,12 +2912,28 @@
         },
         "selfCheck": {
           "prompt": "Why does an underestimated baseline produce systematic positive drift?",
-          "answer": "The mean of R-b becomes positive. If mean eligibility is also positive, an offset update appears that is unrelated to genuine reward–eligibility covariance."
+          "answer": "The mean of R-b becomes positive. If mean eligibility is also positive, an offset update appears that is unrelated to genuine reward–eligibility covariance.",
+          "choiceAnswer": "A low baseline leaves a positive mean reward difference; positive mean eligibility then adds an update unrelated to covariance.",
+          "distractors": [
+            {
+              "text": "Lowering the baseline increases reward variance, so positive drift must occur even when eligibility has zero mean.",
+              "explanation": "Subtracting a constant leaves variance unchanged; the extra drift depends on mean eligibility."
+            },
+            {
+              "text": "The baseline changes update noise only and can never affect the mean weight update.",
+              "explanation": "A baseline error multiplied by nonzero mean eligibility changes the expected update."
+            },
+            {
+              "text": "A lower baseline makes the mean reward difference more negative and therefore suppresses all action weights until choices cease.",
+              "explanation": "The baseline is subtracted from reward, so lowering it increases rather than decreases the difference."
+            }
+          ]
         },
         "pitfalls": [
           "Treating the baseline as removing the learning signal from reward.",
           "Using the current outcome itself as a baseline that leaks action information while still claiming an unbiased estimate."
-        ]
+        ],
+        "transition": "Local eligibility identifies synapses involved in a choice, but a nonnegative reward gate alone does not explain when learning stops or reverses. Subtracting a reward baseline lets us relate average updating to reward–eligibility covariance."
       },
       {
         "id": "l24-m3",
@@ -2527,12 +3001,28 @@
         },
         "selfCheck": {
           "prompt": "Why does a matching curve not prove that the animal explicitly computes RA/RB?",
-          "answer": "A long-run ratio can emerge automatically from local prediction-error updates and stochastic choice; the behavioral equality does not uniquely identify the internal algorithm."
+          "answer": "A long-run ratio can emerge automatically from local prediction-error updates and stochastic choice; the behavioral equality does not uniquely identify the internal algorithm.",
+          "choiceAnswer": "Local updates and stochastic choices can produce matching over time; the behavioral ratio alone does not identify the internal computation.",
+          "distractors": [
+            {
+              "text": "Matching can occur only after neurons explicitly divide the total rewards obtained from the two options.",
+              "explanation": "Local learning and stochastic choice can also generate the same long-run allocation."
+            },
+            {
+              "text": "The matching ratio is fixed entirely by the experimenter's nominal reward probabilities and cannot depend on obtained rewards or choice history.",
+              "explanation": "Matching concerns obtained reward allocation, which depends jointly on the schedule and choices."
+            },
+            {
+              "text": "Enough repeated choices make the matching curve identify a unique synaptic update rule.",
+              "explanation": "More repetitions improve precision without necessarily distinguishing algorithms with the same behavioral prediction."
+            }
+          ]
         },
         "pitfalls": [
           "Counting only reward occurrences even when reward magnitudes differ.",
           "Ignoring an unexplored action and forcing the interior-equilibrium derivation onto a boundary solution."
-        ]
+        ],
+        "transition": "At equilibrium, covariance-based updating constrains the conditional returns of actions that remain selected. Applying this condition to a foraging schedule whose payoffs depend on choice allocation connects local learning to matching without assuming explicit reward-ratio calculation."
       },
       {
         "id": "l24-m4",
@@ -2600,12 +3090,28 @@
         },
         "selfCheck": {
           "prompt": "If reward is unchanged but the prediction from old cue A is removed, why does B begin learning again?",
-          "answer": "The total prediction falls and positive prediction error returns. Because B is active, it now receives an update—the logic of unblocking."
+          "answer": "The total prediction falls and positive prediction error returns. Because B is active, it now receives an update—the logic of unblocking.",
+          "choiceAnswer": "Removing A's prediction lowers the total prediction, restoring a positive error that updates B when B is active.",
+          "distractors": [
+            {
+              "text": "An unchanged reward guarantees an unchanged prediction error, so B cannot learn further.",
+              "explanation": "Prediction error depends on reward minus the total prediction, not reward alone."
+            },
+            {
+              "text": "Removing A creates a larger negative error, so B must first lose value before it can learn the unchanged reward.",
+              "explanation": "Lowering the total prediction while holding reward fixed shifts the error in the positive direction."
+            },
+            {
+              "text": "B automatically copies all of A's removed weights without being active or receiving further feedback.",
+              "explanation": "The update combines the active feature with current prediction error; it does not transfer weights directly."
+            }
+          ]
         },
         "pitfalls": [
           "Explaining blocking only from co-occurrence of B and reward.",
           "Excluding an attentional alternative without a corresponding experiment."
-        ]
+        ],
+        "transition": "Matching describes long-run allocation without specifying how a new cue changes a prediction after one outcome. A reward-prediction-error objective explains blocking between compound cues and connects delayed reward to the value of the next state."
       },
       {
         "id": "l24-m5",
@@ -2642,12 +3148,28 @@
         },
         "selfCheck": {
           "prompt": "Why does equal state value not imply that two actions are equally good?",
-          "answer": "V is a policy-weighted average. One action may have high Q and another low Q while producing the same aggregate V under a particular policy."
+          "answer": "V is a policy-weighted average. One action may have high Q and another low Q while producing the same aggregate V under a particular policy.",
+          "choiceAnswer": "State value averages action values under the policy; knowing that average does not establish equality among the individual actions.",
+          "distractors": [
+            {
+              "text": "All actions in a state must have equal values, or the state's value cannot be defined.",
+              "explanation": "State value is well defined as a policy-weighted average of unequal action values."
+            },
+            {
+              "text": "State value equals only the most frequently selected action's value and ignores every other action even when its probability is positive.",
+              "explanation": "Every action with positive policy probability contributes to the expected state value."
+            },
+            {
+              "text": "Equal immediate rewards guarantee equal action values regardless of later transitions and policies.",
+              "explanation": "Action values also include future rewards, which can differ after identical immediate rewards."
+            }
+          ]
         },
         "pitfalls": [
           "Conflating \\(Q(s,a)\\) with immediate reward.",
           "Ignoring the decisive role of feature representation in the transfer of learning."
-        ]
+        ],
+        "transition": "Temporal-difference learning links a current prediction to later value, but which times and actions it can distinguish depends on its features. Temporal features and state–action values make that representation explicit and expose the risks of inappropriate feature sharing."
       },
       {
         "id": "l24-m6",
@@ -2715,12 +3237,28 @@
         },
         "selfCheck": {
           "prompt": "Why does an omission dip support prediction error more strongly than merely observing no burst at reward time?",
-          "answer": "It is a negative signal below baseline timed to the expected reward. A purely nonnegative reward detector cannot naturally generate this timed negative response."
+          "answer": "It is a negative signal below baseline timed to the expected reward. A purely nonnegative reward detector cannot naturally generate this timed negative response.",
+          "choiceAnswer": "Omission produces a below-baseline signal at the expected time, adding a timed negative error that a nonnegative reward detector cannot readily explain.",
+          "distractors": [
+            {
+              "text": "Receiving no reward necessarily stops all neural activity, so the omission response adds no information.",
+              "explanation": "The relevant observation is a timed decline relative to baseline, not cessation of all activity."
+            },
+            {
+              "text": "No burst at predicted reward already proves prediction error uniquely, so the additional timed negative omission response places no further constraint on a model.",
+              "explanation": "Other mechanisms could suppress a burst; a timed negative response imposes an additional constraint."
+            },
+            {
+              "text": "The dip merely detects a physically negative reward and does not depend on prior expectation.",
+              "explanation": "An omitted expected reward can produce a negative error without any negative physical stimulus."
+            }
+          ]
         },
         "pitfalls": [
           "Writing that the cue itself contains physical reward because it evokes a response.",
           "Labeling every dopamine change an RPE without controlling movement and salience."
-        ]
+        ],
+        "transition": "With temporal states and value predictions specified, we can predict error signals at an unexpected reward, a learned cue, and reward omission. Comparing those timelines with dopamine also requires separating effects on later learning from immediate effects on action performance."
       }
     ]
   },
@@ -2735,7 +3273,7 @@
     ],
     "prerequisiteBridge": [
       "Reinforcement learning represents interaction as a loop. In state \\(s_{t}\\), an agent chooses action \\(a_{t}\\); the environment returns reward \\(R_{t+1}\\) and moves to \\(s_{t+1}\\). State is not just any observation on a screen; it should summarize the history needed to predict the future. If the same observation has different futures after 'key collected' versus 'key not collected,' key status must be added. Otherwise the Markov property fails and the algorithm incorrectly averages two distinct situations.",
-      "Return is the discounted sum of future rewards. Small \\(\\gamma\\) emphasizes the near term, while \\(\\gamma\\) close to one values the distant future and can keep the infinite sum of a continuing task finite. \\(V_{\\pi }(s)\\) is expected return from a state while following policy \\(\\pi\\). \\(Q_{\\pi }(s,a)\\) additionally fixes the first action. Neither is a single reward or current firing rate; both average over random future transitions and choices.",
+      "Return is the discounted sum of future rewards. Small \\(\\gamma\\) emphasizes the near term, while \\(\\gamma\\) close to 1 values the distant future and can keep the infinite sum of a continuing task finite. \\(V_{\\pi }(s)\\) is expected return from a state while following policy \\(\\pi\\). \\(Q_{\\pi }(s,a)\\) additionally fixes the first action. Neither is a single reward or current firing rate; both average over random future transitions and choices.",
       "The Bellman idea is simply 'the entire future equals the next reward plus the remaining future from the next state.' It turns a long-horizon problem into a one-step recursion. Q-learning builds the target \\(R+\\gamma  \\max Q_{\\mathrm{next}}\\) from an actually sampled step, then moves the old estimate toward that target. The maximum assumes optimal actions thereafter; current behavior may still explore, allowing a greedy target to be learned from nongreedy data."
     ],
     "diagnostic": [
@@ -2837,7 +3375,22 @@
         },
         "selfCheck": {
           "prompt": "Why might adding the trial number to state improve training prediction but still be a poor representation?",
-          "answer": "It may memorize samples without capturing generalizable, future-relevant structure and will perform poorly in held-out contexts."
+          "answer": "It may memorize samples without capturing generalizable, future-relevant structure and will perform poorly in held-out contexts.",
+          "choiceAnswer": "Trial IDs may memorize samples without capturing future-relevant structure, so predictions can fail in new contexts.",
+          "distractors": [
+            {
+              "text": "Every extra variable guarantees a Markov state, making any training improvement sufficient proof of a correct representation.",
+              "explanation": "Adding a variable need not capture all future-relevant information, and training error does not prove conditional independence."
+            },
+            {
+              "text": "A valid Markov state must retain the complete raw history without compressing it.",
+              "explanation": "Only information needed to predict the future must be retained, not every past observation."
+            },
+            {
+              "text": "Random environmental transitions rule out any useful Markov state, leaving trial number as the only possible representation available to the learner.",
+              "explanation": "Markov transitions may be stochastic; the condition concerns remaining dependence on history."
+            }
+          ]
         },
         "pitfalls": [
           "Misunderstanding Markov as requiring a unique next state.",
@@ -2855,7 +3408,7 @@
         ],
         "guidingQuestion": "How can a sequence of future rewards be compressed into one value while preserving the distinction between policy and the first action?",
         "paragraphs": [
-          "Return from time t is \\(G_{t}=\\sum _{k=0}\\infty \\gamma ^kR_{t+k+1}\\). The first term is undiscounted, the following reward is multiplied by \\(\\gamma\\), and so on. \\(\\gamma\\) is not a learning rate; it changes temporal preference and mathematical convergence of the objective. A finite episode can use \\(\\gamma =1\\), whereas continuing positive reward generally requires \\(\\gamma <1\\).",
+          "Return from time t is \\(G_{t}=\\sum _{k=0}^{\\infty} \\gamma ^kR_{t+k+1}\\). The first term is undiscounted, the following reward is multiplied by \\(\\gamma\\), and so on. \\(\\gamma\\) is not a learning rate; it changes temporal preference and mathematical convergence of the objective. A finite episode can use \\(\\gamma =1\\), whereas continuing positive reward generally requires \\(\\gamma <1\\).",
           "\\(V_{\\pi }(s)=E_{\\pi }[G_{t}|s_{t}=s]\\) averages over environmental randomness and future policy actions. \\(Q_{\\pi }(s,a)=E_{\\pi }[G_{t}|s_{t}=s,a_{t}=a]\\) fixes only the first action, after which \\(\\pi\\) is followed. Consequently, \\(V_{\\pi }(s)=\\sum _{a}\\pi (a|s)Q_{\\pi }(s,a)\\); under a deterministic policy, only the selected action contributes.",
           "Value scale varies with reward units and \\(\\gamma\\). If reward normalization differs across animals or sessions, V magnitudes cannot be compared directly. The rough time horizon associated with \\(\\gamma\\) is about \\(1/(1-\\gamma )\\) steps, but episodic termination and transition structure alter the actual influence.",
           "When relating a neural signal to V or Q, control immediate reward, state identity, and action. State value may appear before several actions, whereas Q should vary with the candidate action. Greater firing on high-reward trials alone cannot distinguish received reward, expected return, and movement vigor."
@@ -2910,12 +3463,28 @@
         },
         "selfCheck": {
           "prompt": "Why does a in \\(Q_{\\pi }(s,a)\\) fix only the first step?",
-          "answer": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'"
+          "answer": "The definition conditions on \\(a_{t}=a\\). Future actions are sampled from \\(\\pi\\) beginning in the next state, so Q evaluates 'take a first, then follow \\(\\pi\\).'",
+          "choiceAnswer": "The action condition fixes the first move only; after reaching the next state, future actions follow the policy being evaluated.",
+          "distractors": [
+            {
+              "text": "Action value requires repeating that same action forever, regardless of later states.",
+              "explanation": "The condition fixes the initial action rather than the entire future action sequence."
+            },
+            {
+              "text": "After the fixed first action, every later action must maximize value even when the evaluated policy is explicitly exploratory or otherwise nongreedy.",
+              "explanation": "Policy action value follows the stated policy thereafter, not an automatically substituted optimal policy."
+            },
+            {
+              "text": "Fixing the first action removes all environmental randomness, so no expectation over future outcomes is needed.",
+              "explanation": "Transitions, rewards, and later actions can remain random after conditioning on the first action."
+            }
+          ]
         },
         "pitfalls": [
           "Treating \\(\\gamma\\) as learning rate \\(\\alpha\\).",
           "Conflating a single-trial return with expected value."
-        ]
+        ],
+        "transition": "A Markov state specifies information sufficient to predict the next step without yet defining the long-term goal of action selection. Discounted return supplies that goal, while state and state–action values specify the conditions held fixed in its expectation."
       },
       {
         "id": "l25-m3",
@@ -2983,12 +3552,28 @@
         },
         "selfCheck": {
           "prompt": "Why can the maximum not be moved outside the expectation while fixing the same \\(a'\\)?",
-          "answer": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem."
+          "answer": "Different random next states can have different best actions. Averaging first would force one action across states and change the optimal-continuation problem.",
+          "choiceAnswer": "Different successor states may have different best actions; averaging first and fixing one action removes state-dependent continuation choices.",
+          "distractors": [
+            {
+              "text": "Maximum and expectation always commute because expectation is linear for every operation.",
+              "explanation": "Linearity of expectation does not allow an arbitrary nonlinear maximum to move outside it."
+            },
+            {
+              "text": "The next action must be fixed before the successor state is observed, or the current value violates the Markov condition and cannot be defined.",
+              "explanation": "A Markov policy can depend on the state actually reached; it need not use one action across states."
+            },
+            {
+              "text": "Moving the maximum outside permits independent optimal actions in each successor state and therefore increases flexibility.",
+              "explanation": "An outer fixed action removes, rather than adds, state-dependent freedom."
+            }
+          ]
         },
         "pitfalls": [
           "Applying the maximum to the current action that has already been executed.",
           "Extending a tabular convergence theorem unconditionally to a deep network."
-        ]
+        ],
+        "transition": "Value definitions include the entire future, whose possible trajectories are usually impractical to enumerate. Splitting return into immediate reward and the remainder, then conditioning on the next state, yields the recursive Bellman relation."
       },
       {
         "id": "l25-m4",
@@ -3056,12 +3641,28 @@
         },
         "selfCheck": {
           "prompt": "Why can the random branch of ε-greedy still select the greedy action?",
-          "answer": "The random branch samples uniformly from all actions, including the greedy action, so total greedy probability exceeds \\(1-\\epsilon\\)."
+          "answer": "The random branch samples uniformly from all actions, including the greedy action, so total greedy probability exceeds \\(1-\\epsilon\\).",
+          "choiceAnswer": "The random branch samples all actions, including the greedy one, so it contributes additional probability to selecting that action.",
+          "distractors": [
+            {
+              "text": "The random branch must exclude the greedy action to count as exploration.",
+              "explanation": "The standard epsilon-greedy random branch samples uniformly from all actions."
+            },
+            {
+              "text": "The random branch weights actions in proportion to their values, so it always chooses the greedy action more often than any alternative.",
+              "explanation": "This branch is uniform rather than value weighted."
+            },
+            {
+              "text": "Conditional on entering the random branch, greedy choice has probability epsilon divided by the number of actions, since branch-entry probability must be counted again.",
+              "explanation": "Given the random branch, each action has conditional probability one divided by the action count. Multiplying by epsilon gives this branch’s contribution to the unconditional probability."
+            }
+          ]
         },
         "pitfalls": [
           "Setting Q directly to immediate reward.",
           "Assuming that off-policy learning removes the need for data covering unvisited actions."
-        ]
+        ],
+        "transition": "The Bellman relation specifies consistency in expectation, but a learner may not know the transition distribution. Q-learning constructs an update from an observed transition and relies on exploration to obtain evidence about other actions."
       },
       {
         "id": "l25-m5",
@@ -3098,12 +3699,28 @@
         },
         "selfCheck": {
           "prompt": "Why is immediate sensitivity to revaluation not sufficient proof of a complete internal map?",
-          "answer": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions."
+          "answer": "Other rules, instructions, or direct cues can also alter choice rapidly; constrain the explanation with multiple novel transitions and control conditions.",
+          "choiceAnswer": "Rules, instructions, or direct cues can also change choices rapidly; novel transitions and controls are needed to test map-based planning.",
+          "distractors": [
+            {
+              "text": "Any immediate response to reward revaluation can arise only from a complete generative map.",
+              "explanation": "Several mechanisms can rapidly alter choice, so this behavior does not uniquely identify a full map."
+            },
+            {
+              "text": "One place-tuned hippocampal neuron proves that the animal explicitly stores every environmental transition and reward and uses this map for the decision.",
+              "explanation": "Spatial tuning neither establishes a complete model nor proves its use in the current choice."
+            },
+            {
+              "text": "Immediate choice changes exclude every learning mechanism and reveal nothing about state representation.",
+              "explanation": "Well-controlled revaluation experiments can constrain candidate learning mechanisms and representations."
+            }
+          ]
         },
         "pitfalls": [
           "Calling a place field a transition model.",
           "Forcing behavior generated by a mixed strategy into a purely model-free or model-based category."
-        ]
+        ],
+        "transition": "Cached Q values can update from direct experience without automatically incorporating changes along unvisited routes. A generative transition and reward model offers another route; Tolman-style mazes and revaluation tests probe whether animals use such structural knowledge."
       },
       {
         "id": "l25-m6",
@@ -3171,12 +3788,28 @@
         },
         "selfCheck": {
           "prompt": "Why is more replay not always better?",
-          "answer": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced."
+          "answer": "If the learned model has systematic error, repeated simulation amplifies its bias; coverage, priority, and model uncertainty must be balanced.",
+          "choiceAnswer": "Repeated simulation from a biased model can reinforce wrong values; benefits also depend on coverage, priorities, and model uncertainty.",
+          "distractors": [
+            {
+              "text": "Enough replay guarantees that systematic model errors cancel like independent zero-mean noise.",
+              "explanation": "Repeatedly using a biased model does not automatically cancel its systematic error."
+            },
+            {
+              "text": "Each replay sample is a new independent observation of the real environment and therefore carries exactly the same new information as an actual trial.",
+              "explanation": "A simulated sample comes from the existing model rather than a new observation of the environment."
+            },
+            {
+              "text": "More replay necessarily covers all state-action pairs uniformly, making sampling priorities irrelevant.",
+              "explanation": "Replay can repeatedly concentrate on a few experiences instead of improving coverage."
+            }
+          ]
         },
         "pitfalls": [
           "Equating a compressed sequence directly with a Bellman backup.",
           "Reporting sample efficiency without measuring planning failures caused by model bias."
-        ]
+        ],
+        "transition": "A generative map can produce simulated transitions as well as compare future routes. Applying value updates to both simulated and real experience clarifies how replay may improve sample efficiency and how repeated simulation may amplify model bias."
       }
     ]
   },
@@ -3244,8 +3877,8 @@
         "guidingQuestion": "How can a shared-activity cell assembly yield a testable encoding–cue–retrieval chain?",
         "paragraphs": [
           "The Hebbian assembly hypothesis proposes that cells jointly active in an experience develop stronger mutual connections. Encoding changes the connections, a partial cue reactivates some members, and recurrent excitation recruits the missing members to complete the pattern. An engram is a cellular ensemble causally involved in memory storage and expression; activation correlation alone is insufficient for that label.",
-          "The Hopfield abstraction represents an assembly by binary pattern \\(\\xi\\) and sets \\(W_{ij}=(1/N)\\sum \\mu \\xi _{i}^{\\mu }\\xi _{j}^{\\mu }\\), with \\(W_{ii}=0\\). Same-sign pairs receive positive weights and opposite-sign pairs negative weights. Real synapses obey Dale's law and constraints from sparse connectivity and spiking; the classic dense matrix first illustrates a computational principle.",
-          "Retrieval cue \\(S(0)\\) has overlap \\(m=(1/N)\\sum i\\xi iS_{i}\\) with the target pattern. \\(m=1\\) is an exact match, \\(m=0\\) is uncorrelated on average, and \\(m=-1\\) is the global antipattern. If the cue lies in the target basin, asynchronous dynamics correct errors progressively. Basin size measures tolerated corruption, not merely whether the fixed point exists.",
+          "The Hopfield abstraction represents an assembly by binary pattern \\(\\xi\\) and sets \\(W_{ij}=(1/N)\\sum_{\\mu} \\xi _{i}^{\\mu }\\xi _{j}^{\\mu }\\), with \\(W_{ii}=0\\). Same-sign pairs receive positive weights and opposite-sign pairs negative weights. Real synapses obey Dale's law and constraints from sparse connectivity and spiking; the classic dense matrix first illustrates a computational principle.",
+          "Retrieval cue \\(S(0)\\) has overlap \\(m=(1/N)\\sum_{i}\\xi_{i}S_{i}\\) with the target pattern. \\(m=1\\) is an exact match, \\(m=0\\) is uncorrelated on average, and \\(m=-1\\) is the global antipattern. If the cue lies in the target basin, asynchronous dynamics correct errors progressively. Basin size measures tolerated corruption, not merely whether the fixed point exists.",
           "A causal engram experiment must test sufficiency and necessity separately: does artificial activation of a tagged ensemble trigger memory-like behavior, and does its suppression selectively impair retrieval? Even if both hold, binary Hopfield units and Hebbian weights remain a model mapping; behavior does not identify the exact W directly."
         ],
         "keyPoints": [
@@ -3291,7 +3924,22 @@
         },
         "selfCheck": {
           "prompt": "Why does \\(m>0\\) not guarantee successful retrieval?",
-          "answer": "It measures only similarity at the start. The basin also depends on memory load, the particular crosstalk, update order, and network parameters."
+          "answer": "It measures only similarity at the start. The basin also depends on memory load, the particular crosstalk, update order, and network parameters.",
+          "choiceAnswer": "Positive overlap indicates initial similarity to the target; retrieval still depends on the basin, crosstalk, and network conditions.",
+          "distractors": [
+            {
+              "text": "Positive overlap places a cue in the target basin by definition and guarantees success under every update order.",
+              "explanation": "Overlap measures similarity, whereas a basin is determined by the full dynamics."
+            },
+            {
+              "text": "Overlap is the network's energy, so a positive value makes the target the unique global minimum.",
+              "explanation": "Overlap and energy are different quantities; positive overlap does not exclude other attractors."
+            },
+            {
+              "text": "Initial overlap depends only on how many patterns were stored and is completely independent of which cue bits were altered before retrieval.",
+              "explanation": "Overlap directly compares the current cue with the target and changes with its particular errors."
+            }
+          ]
         },
         "pitfalls": [
           "Automatically calling activation-tagged cells a causal engram.",
@@ -3361,12 +4009,28 @@
         },
         "selfCheck": {
           "prompt": "Why does updating every neuron once not guarantee a fixed point?",
-          "answer": "After an early unit is updated, later unit changes can alter its local field, so another complete sweep without changes is required."
+          "answer": "After an early unit is updated, later unit changes can alter its local field, so another complete sweep without changes is required.",
+          "choiceAnswer": "Later updates can change the local fields of units updated earlier; another full sweep must check whether any state still changes.",
+          "distractors": [
+            {
+              "text": "Updating a unit permanently fixes its local field, so later changes in its neighbors cannot affect it.",
+              "explanation": "A local field depends on the current states of other units and can change when they update."
+            },
+            {
+              "text": "A random update order guarantees that one sweep reaches the unique fixed point shared by every possible order.",
+              "explanation": "Random ordering guarantees neither one-sweep convergence nor a unique fixed point."
+            },
+            {
+              "text": "Any energy decrease after one sweep proves that all units will remain unchanged thereafter, making further local-field checks unnecessary.",
+              "explanation": "Energy may decrease during convergence; that alone does not establish a fixed point."
+            }
+          ]
         },
         "pitfalls": [
           "Updating all units at once from the old state and calling it asynchronous.",
           "Ignoring the tie convention at \\(h=0\\)."
-        ]
+        ],
+        "transition": "Assemblies and overlap define the goal of pattern completion without specifying how a cue evolves into a retrieved state. Asynchronous single-unit updates turn retrieval into a traceable process in which update order and stopping criteria are part of the model."
       },
       {
         "id": "l26-m3",
@@ -3434,12 +4098,28 @@
         },
         "selfCheck": {
           "prompt": "Why does the derivation of \\(\\Delta E\\) fail when W is asymmetric?",
-          "answer": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating."
+          "answer": "Pair terms with i as the first and second index cannot be combined into the same local field, so one scalar energy need not decline under updating.",
+          "choiceAnswer": "Asymmetric weights prevent the paired terms from yielding the update’s local field, invalidating the descent proof.",
+          "distractors": [
+            {
+              "text": "Asymmetry only changes energy units, leaving every step of the original proof valid.",
+              "explanation": "Symmetry combines the pair terms in the energy difference; it is not a choice of units."
+            },
+            {
+              "text": "Asymmetry guarantees that every update raises energy, so all asymmetric networks must oscillate forever and can never reach any fixed state.",
+              "explanation": "Losing a descent guarantee does not prove energy always rises or that every such network fails to converge."
+            },
+            {
+              "text": "Asynchronous updates automatically turn any asymmetric matrix into an equivalent symmetric one.",
+              "explanation": "The update schedule does not change the weight matrix's symmetry."
+            }
+          ]
         },
         "pitfalls": [
           "Omitting the energy factor 1/2 and then double-counting pairs.",
           "Automatically calling every local minimum a stored pattern."
-        ]
+        ],
+        "transition": "A local update rule specifies each step without proving that repeated updates settle. Energy changes under symmetric weights provide that test, and the single-pattern case first lets us verify the intended stored attractor."
       },
       {
         "id": "l26-m4",
@@ -3505,12 +4185,28 @@
         },
         "selfCheck": {
           "prompt": "Why does low mixture energy not make it a correct memory?",
-          "answer": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories."
+          "answer": "Correctness is defined by the training target and behavioral identity; energy determines dynamical stability and does not know which patterns were designated as memories.",
+          "choiceAnswer": "Energy describes dynamical stability, while correctness is defined by the stored target; a stable mixture may still be the wrong pattern.",
+          "distractors": [
+            {
+              "text": "Any state below the initial cue's energy should be redefined as that cue's correct memory.",
+              "explanation": "Energy descent relative to the starting state cannot replace a check of target identity."
+            },
+            {
+              "text": "Low mixture energy proves the complete mixture was presented as a training sample and could not have emerged from interactions among other stored patterns.",
+              "explanation": "Crosstalk among stored patterns can create mixture attractors that were never stored individually."
+            },
+            {
+              "text": "The energy function carries explicit target labels and automatically rejects all unassigned stable states.",
+              "explanation": "The standard energy has no separate semantic label that identifies the intended target."
+            }
+          ]
         },
         "pitfalls": [
           "Mistaking a near-zero mean crosstalk for zero crosstalk in every instance.",
           "Using a spurious attractor to explain every human false memory directly."
-        ]
+        ],
+        "transition": "Energy descent moves the network toward stability without guaranteeing the desired memory. With several stored patterns, decomposing the local field into target signal and crosstalk explains how erroneous bits and spurious mixtures can arise."
       },
       {
         "id": "l26-m5",
@@ -3524,7 +4220,7 @@
         "guidingQuestion": "Why does \\(\\alpha =P/N\\) control the scale of random interference, and why is 0.138 not a universal constant for every associative memory?",
         "paragraphs": [
           "For independent unbiased patterns, one nontarget overlap \\(\\sum _j\\xi _{j}^{\\mu }\\xi _{j}^{1}\\) has \\(\\operatorname{mean} 0\\) and variance approximately N. After multiplication by 1/N, one pattern contributes field variance of about 1/N. Summing P-1 nearly independent terms gives crosstalk variance \\((P-1)/N\\approx \\alpha\\). This motivates a Gaussian-noise approximation through the central limit theorem.",
-          "A target bit is stable when \\(\\xi _{i}^{1}h_{i}>0\\): unit-aligned signal 1 plus noise remains positive. If \\(\\mathrm{noise}\\approx N(0,\\alpha )\\), the single-step error is approximately \\(\\Phi (-1/\\sqrt \\alpha )\\) and rises with \\(\\alpha\\). Unit errors feed back into the fields, so full self-consistency gives the classic dense-model retrieval threshold \\(\\alpha c\\) of about 0.138 rather than the simple single-step tail alone.",
+          "A target bit is stable when \\(\\xi _{i}^{1}h_{i}>0\\): unit-aligned signal 1 plus noise remains positive. If \\(\\mathrm{noise}\\approx N(0,\\alpha )\\), the single-step error is approximately \\(\\Phi (-1/\\sqrt \\alpha )\\) and rises with \\(\\alpha\\). Unit errors feed back into the fields, so full self-consistency gives the classic dense-model retrieval threshold \\(\\alpha_c\\) of about 0.138 rather than the simple single-step tail alone.",
           "P can grow linearly with N, but 'capacity=Pmax' depends on the retrieval criterion, acceptable error, and basin size. The value 0.138 assumes symmetric dense connectivity, unbiased independent random ±1 patterns, Hebbian weights, and classic dynamics. Sparse codes, correlated patterns, alternative rules, or finite N change the number.",
           "A spin-glass regime still has many stable states but little overlap with any stored pattern; the network converges without retrieving. Checking energy convergence alone misclassifies success. Also measure target overlap, bit error, basin volume, and trial-to-trial outcomes."
         ],
@@ -3578,12 +4274,28 @@
         },
         "selfCheck": {
           "prompt": "Why does \\(\\alpha =0.1\\) below 0.138 still not guarantee success for every cue?",
-          "answer": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail."
+          "answer": "The threshold is a large-N typical statistic under a particular retrieval criterion. Finite patterns, poor cues, basin differences, and random instances can still fail.",
+          "choiceAnswer": "The critical load is an asymptotic result under specific assumptions; finite networks, cue quality, and basin differences can cause failure.",
+          "distractors": [
+            {
+              "text": "Below critical load, every possible cue belongs to the desired basin, including cues identical to other stored memories.",
+              "explanation": "Capacity does not guarantee retrieval of a specified target from every possible cue."
+            },
+            {
+              "text": "The value 0.138 is an exact guarantee for any finite network, coding scheme, and tolerated retrieval error.",
+              "explanation": "The classical value depends on pattern statistics, the large-network limit, and the retrieval criterion."
+            },
+            {
+              "text": "Once energy stops decreasing, the specified memory has necessarily been retrieved, so comparing the final state with the intended pattern is redundant.",
+              "explanation": "Convergence to an incorrect or spurious attractor also stops updates; target identity must be checked separately."
+            }
+          ]
         },
         "pitfalls": [
           "Treating 0.138 as the capacity ratio of every biological memory.",
           "Passing off a one-step Gaussian tail calculation as the full critical derivation."
-        ]
+        ],
+        "transition": "The crosstalk decomposition identifies interference from other memories; capacity also requires knowing how that interference grows with load. Estimating its variance for independent unbiased patterns motivates a Gaussian approximation while separating one-step errors from a full retrieval threshold."
       },
       {
         "id": "l26-m6",
@@ -3651,12 +4363,28 @@
         },
         "selfCheck": {
           "prompt": "Why does an uncentered 0/1 Hebbian rule produce a global positive bias?",
-          "answer": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity."
+          "answer": "Only jointly active bits contribute positively, while inactivity supplies no canceling term. Across many patterns, most weights become positive and drive excessive activity.",
+          "choiceAnswer": "Uncentered coactivity adds only positive terms without negative cancellation from inactivity, potentially driving excessive activity.",
+          "distractors": [
+            {
+              "text": "Zeros in 0/1 patterns automatically create negative weights that cancel every positive coactivity term.",
+              "explanation": "A product containing zero is zero, not a negative contribution."
+            },
+            {
+              "text": "Sufficiently sparse patterns make every weight's mean exactly zero, so neither centering nor threshold control can ever be needed for stable activity.",
+              "explanation": "Sparsity does not imply zero mean; uncentered coactivity can retain a positive bias."
+            },
+            {
+              "text": "The positive bias arises because the Hebbian rule counts only shared silence and ignores coactivity.",
+              "explanation": "The positive contributions in the uncentered 0/1 outer product come from coactivity."
+            }
+          ]
         },
         "pitfalls": [
           "Applying the dense sign rule unchanged to a sparse 0/1 code.",
           "Claiming higher sparse capacity without stating the units of comparison."
-        ]
+        ],
+        "transition": "Classic capacity analysis assumes dense unbiased binary patterns and cannot be transferred directly to sparse ensembles. Sparse coding requires revisiting mean bias, activity control, and stochastic updates, then comparing capacity using consistent error criteria."
       }
     ]
   },
@@ -3776,7 +4504,22 @@
         },
         "selfCheck": {
           "prompt": "Why does correct recall of facts from a remote memory not show that the original episode was preserved intact?",
-          "answer": "Facts can be reconstructed from semantic knowledge, rehearsal, or schemas; spatiotemporal and perceptual details must be tested separately."
+          "answer": "Facts can be reconstructed from semantic knowledge, rehearsal, or schemas; spatiotemporal and perceptual details must be tested separately.",
+          "choiceAnswer": "Facts can come from semantic knowledge or reconstruction; preservation of original spatial, temporal, and perceptual details needs separate testing.",
+          "distractors": [
+            {
+              "text": "Correct remote facts prove that every sensory detail of the original episode remains intact.",
+              "explanation": "Factual knowledge and rich episodic detail are distinct aspects of memory performance."
+            },
+            {
+              "text": "Correct remote facts show complete independence from all medial temporal structures, and this conclusion must hold for every person and every memory task.",
+              "explanation": "One performance measure does not establish every anatomical dependency or justify unrestricted generalization."
+            },
+            {
+              "text": "Using semantic knowledge to answer facts proves that no episodic memory was ever formed.",
+              "explanation": "Current semantic support does not rule out a richer episodic representation in the past."
+            }
+          ]
         },
         "pitfalls": [
           "Treating one patient's pattern as a universal law.",
@@ -3849,12 +4592,28 @@
         },
         "selfCheck": {
           "prompt": "Why need Notebook replay not reproduce the original experience pixel for pixel?",
-          "answer": "It can serve as a training sample as long as it reconstructs the task-relevant statistics or targets required for Student learning; the required fidelity is a modeling assumption."
+          "answer": "It can serve as a training sample as long as it reconstructs the task-relevant statistics or targets required for Student learning; the required fidelity is a modeling assumption.",
+          "choiceAnswer": "Replay must recover targets or statistical structure needed by the Student; exact detail-by-detail fidelity depends on the model's assumptions.",
+          "distractors": [
+            {
+              "text": "Replay can drive learning only by reproducing every original input pixel exactly, making all approximate targets useless.",
+              "explanation": "A useful learning target need not reproduce every perceptual detail of the original experience."
+            },
+            {
+              "text": "Any Notebook activity necessarily teaches the correct rule, even if it preserves no task-relevant relationship at all.",
+              "explanation": "Useful training still requires the relevant target or statistics; arbitrary activity provides no such guarantee."
+            },
+            {
+              "text": "During replay the Student must receive the identical online Teacher input again, because learning without the Teacher present is impossible by definition.",
+              "explanation": "The Notebook can supply reconstructed training samples while the Teacher is absent."
+            }
+          ]
         },
         "pitfalls": [
           "Mistaking the Teacher for a particular brain region.",
           "Ignoring how replay-selection bias changes the Student's objective."
-        ]
+        ],
+        "transition": "Different effects on recent and remote memory raise the question of changing system dependence, but case evidence does not specify an information-transfer algorithm. Teacher–Student–Notebook separates environmental regularities, rapid episodic storage, and slow learning into analyzable computational roles."
       },
       {
         "id": "l27-m3",
@@ -3922,12 +4681,28 @@
         },
         "selfCheck": {
           "prompt": "Why is stronger pattern separation not always better?",
-          "answer": "If similar partial cues are mapped with no continuity, retrieval addresses become fragile; stronger separation also consumes finite code space."
+          "answer": "If similar partial cues are mapped with no continuity, retrieval addresses become fragile; stronger separation also consumes finite code space.",
+          "choiceAnswer": "Excessive separation can impair retrieval from similar partial cues and consume code space, creating a tradeoff with completion.",
+          "distractors": [
+            {
+              "text": "Stronger separation guarantees correct addressing from every partial cue, eliminating any need for pattern completion.",
+              "explanation": "Reducing overlap between episodes does not guarantee that an incomplete cue reaches the right memory."
+            },
+            {
+              "text": "Maximum separation maps every experience to one identical sparse code so that replay can avoid all conflicts between memory addresses.",
+              "explanation": "One shared code increases confusion rather than separating episodes."
+            },
+            {
+              "text": "Separation changes replay speed only and can never affect cue similarity, address reliability, or storage capacity.",
+              "explanation": "Separation changes representational geometry and can affect these retrieval and capacity properties."
+            }
+          ]
         },
         "pitfalls": [
           "Describing separation and completion as opposing operations at the same instant.",
           "Replacing the centered V rule with an uncentered symmetric outer product, or measuring code overlap without testing retrieval from a partial cue."
-        ]
+        ],
+        "transition": "Assigning rapid storage and replay to the Notebook still leaves two operations unspecified: keeping similar episodes distinct and retrieving them from partial cues. Pattern separation, completion, and bidirectional connections turn these requirements into different mappings."
       },
       {
         "id": "l27-m4",
@@ -3999,12 +4774,28 @@
         },
         "selfCheck": {
           "prompt": "Why can the minimum generalization error remain above zero?",
-          "answer": "The Teacher target contains unpredictable noise \\(\\epsilon\\). Even if the Student recovers the true weight, it cannot predict \\(\\epsilon\\) in a new episode."
+          "answer": "The Teacher target contains unpredictable noise \\(\\epsilon\\). Even if the Student recovers the true weight, it cannot predict \\(\\epsilon\\) in a new episode.",
+          "choiceAnswer": "New targets contain unpredictable noise, so even recovery of the true weights leaves an irreducible component of generalization error.",
+          "distractors": [
+            {
+              "text": "Recovering the true weights also predicts each new random noise realization exactly, forcing error to zero.",
+              "explanation": "The true underlying rule does not specify an independent new noise realization."
+            },
+            {
+              "text": "Any positive minimum error proves the optimizer has not converged, and continued fitting of stored examples must eventually eliminate every source of error.",
+              "explanation": "Further training-set fitting cannot eliminate error from unpredictable new noise."
+            },
+            {
+              "text": "Memorizing one episode's noise in the Notebook makes independent noise in every new episode predictable to the Student.",
+              "explanation": "Memory for previously observed noise does not predict independent future noise."
+            }
+          ]
         },
         "pitfalls": [
           "Using a fall in training error to claim improved generalization, or omitting recalled x tilde when calculating memory error.",
           "Forgetting the lower bound set by irreducible noise."
-        ]
+        ],
+        "transition": "The replay circuit specifies which recalled samples reach the Student, but remembering those samples and learning generalizable structure are different achievements. A linear Teacher–Student model makes that distinction measurable through separate memory and generalization errors."
       },
       {
         "id": "l27-m5",
@@ -4071,12 +4862,28 @@
         },
         "selfCheck": {
           "prompt": "Why does 'stopping consolidation' not mean deleting the Notebook memory?",
-          "answer": "What stops is further Student fitting of that component; the Notebook can still preserve it and support retrieval of episodic detail."
+          "answer": "What stops is further Student fitting of that component; the Notebook can still preserve it and support retrieval of episodic detail.",
+          "choiceAnswer": "The Student stops further fitting that component; the Notebook may retain it and still support retrieval of episodic details.",
+          "distractors": [
+            {
+              "text": "Stopping consolidation requires immediate deletion of the component from the Notebook.",
+              "explanation": "Stopping transfer and deleting an existing episodic record are different operations."
+            },
+            {
+              "text": "Stopping proves that the Student has copied every detail perfectly, making all future Notebook support for that component unnecessary.",
+              "explanation": "The stopping point is based on generalization, not perfect copying of unpredictable detail."
+            },
+            {
+              "text": "Stopping consolidation halts the encoding and retrieval of every memory, not just transfer of the selected component to the Student.",
+              "explanation": "The model concerns transfer of a particular component, not shutdown of the entire memory system."
+            }
+          ]
         },
         "pitfalls": [
           "Treating t* as a fixed age threshold without considering predictability.",
           "Treating the Go-CLS lesion curve as an established clinical fact rather than a prediction to be tested."
-        ]
+        ],
+        "transition": "Memory error can continue falling while the Student begins fitting noise that cannot be predicted in new episodes. Go-CLS therefore makes generalization, rather than complete copying, the transfer objective and derives predictability-dependent stopping and lesion predictions."
       }
     ]
   }

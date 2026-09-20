@@ -379,10 +379,12 @@ describe('scientific inline text', () => {
     const root = path.resolve(import.meta.dirname, '..');
     const lecture = JSON.parse(fs.readFileSync(path.join(root, 'content/lectures/03.json'), 'utf8'));
     const englishLecture = JSON.parse(fs.readFileSync(path.join(root, 'content/en/lectures/03.json'), 'utf8'));
-    const studyModule = lecture.studyGuide.modules.find((item: { paragraphs: string[] }) => item.paragraphs.includes(regressionParagraph));
+    const studyModule = lecture.studyGuide.modules.find((item: { id: string }) => item.id === 'L03-M1');
     const question = englishLecture.questions.find((item: { sectionId: string; type: string }) => item.sectionId === 'L03-M2' && item.type !== 'figure');
 
     expect(studyModule).toBeTruthy();
+    expect(parseScientificText(studyModule.paragraphs[2]).filter((part) => part.kind === 'math'))
+      .toEqual(parseScientificText(regressionParagraph).filter((part) => part.kind === 'math'));
     expect(question).toBeTruthy();
     const moduleHtml = renderToStaticMarkup(<StudyModule module={studyModule} locale="zh" />);
     const questionHtml = renderToStaticMarkup(<QuestionBlock question={question} seed="scientific-text-regression" locale="en" />);

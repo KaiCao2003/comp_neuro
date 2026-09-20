@@ -1,7 +1,7 @@
 {
   "lecture": 14,
   "slug": "14",
-  "zhTitle": "Spike-Triggered Covariance 与广义线性模型",
+  "zhTitle": "脉冲触发协方差与广义线性模型",
   "enTitle": "Spike-Triggered Covariance and Generalized Linear Models",
   "companionFile": "NEUROSCI366_Lecture14_STC_and_GLM_Companion.pdf",
   "companionPages": 25,
@@ -165,6 +165,7 @@
       {
         "id": "L14-M2",
         "title": "The Three GLM Components and Gaussian and Poisson Likelihoods",
+        "transition": "STC identifies stimulus directions whose variance changes before spikes, but does not by itself specify a probability model for each response. A GLM combines a response distribution, linear predictor, and link function into a fitted likelihood, distinguishing continuous responses from spike counts.",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -182,7 +183,7 @@
         "paragraphs": [
           "A GLM has three components: response distribution \\(p(y|\\theta )\\), linear predictor \\(\\eta =X\\beta\\), and link \\(g(m)=\\eta\\) connecting \\(\\eta\\) with conditional \\(\\operatorname{mean} m\\). The exponential-family canonical form \\(p(y|\\theta )=\\exp[y\\theta +H(y)-D(\\theta )]\\) separates the data term, base measure, and log-partition function. D normalizes the distribution and determines its mean and variance.",
           "For a unit-variance Gaussian model with identity link, \\(m=\\eta =x^\\mathrm{T}\\beta\\). The β-dependent part of the log likelihood is \\(-1/2\\Sigma (y-m)^2\\), so likelihood maximization equals mean-squared-error minimization. Unknown or heteroscedastic variance requires an extension; squared loss is not the only model for continuous responses.",
-          "For a nonnegative integer count \\(y\\ge 0\\), the Poisson model is \\(p(y|\\lambda )=\\lambda ^ye^{-\\lambda }/y\\)!. Its canonical parameter is \\(\\theta =\\log\\lambda\\), predictor \\(\\eta =\\theta\\), and inverse link \\(\\lambda =e^\\eta\\). The exponential maps every real predictor to a positive mean and gives log likelihood Σ[yη-e^η-log(y!)], whose gradient is the covariate times observed minus predicted count.",
+          "For a nonnegative integer count \\(y\\ge 0\\), the Poisson model is \\(p(y|\\lambda )=\\lambda ^y e^{-\\lambda }/y!\\). Its canonical parameter is \\(\\theta =\\log\\lambda\\), predictor \\(\\eta =\\theta\\), and inverse link \\(\\lambda =e^\\eta\\). The exponential maps every real predictor to a positive mean and gives log likelihood Σ[yη-e^η-log(y!)], whose gradient is the covariate times observed minus predicted count.",
           "Poisson conditional independence says that bins or samples are independent after conditioning on all included covariates; it does not say that real spike trains lack refractoriness or coupling. Adding past spikes to the design matrix models history dependence conditionally. Bin size also sets response support: a longer window permits count>1, while a very small bin is closer to Bernoulli."
         ],
         "keyPoints": [
@@ -236,6 +237,7 @@
       {
         "id": "L14-M3",
         "title": "Retinal Population Filters, Bernoulli Logit, and Conditional Dependence",
+        "transition": "Independence in a Poisson likelihood is conditional on the included covariates, so the predictor's contents matter. Adding a neuron's own spike history and other neurons' histories can describe refractoriness and population dependence; binary spike bins also require comparing Bernoulli and count models.",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -545,7 +547,7 @@
     {
       "id": "L14-G05",
       "lecture": 14,
-      "zh": "链接函数",
+      "zh": "连接函数",
       "en": "link function",
       "definition": "The mapping between a conditional mean and \\(\\eta\\).",
       "sectionId": "L14-M1",
@@ -555,7 +557,7 @@
     {
       "id": "L14-G06",
       "lecture": 14,
-      "zh": "Poisson 回归",
+      "zh": "泊松回归",
       "en": "Poisson regression",
       "definition": "A log-link GLM for a count or rate.",
       "sectionId": "L14-M2",
@@ -673,27 +675,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The model controls only measured covariates. Unobserved common input, global state, model mismatch, and indirect network paths can still create conditional dependence."
+          "text": "Positive eigenvectors are excitatory and negative ones inhibitory, provided the numerical solver uses a consistent sign convention."
         },
         {
           "id": "b",
-          "text": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts."
+          "text": "A positive eigenvalue guarantees monotonically increasing firing on both sides of its axis, while a negative eigenvalue guarantees decreasing firing on both sides."
         },
         {
           "id": "c",
-          "text": "Selecting the largest eigenvector of \\(\\Delta C\\) under colored stimulation and mistaking the stimulus's own high variance for a neural feature."
+          "text": "Covariance retains only the stimulus mean and therefore loses response polarity."
         },
         {
           "id": "d",
-          "text": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis."
+          "text": "An eigenvector's overall sign is arbitrary: covariance identifies an axis, while the response nonlinearity determines preferences for signed projections."
         }
       ],
       "correctChoiceId": "d",
       "explanation": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis. Use the blowfly H1 neuron as an example: its stimulus \\(s(t)=v(t)\\) is image velocity rather than a two-dimensional light pattern. The response may depend on projections through several temporal filters \\(K_{1}\\cdots K_{n}\\) followed by a multidimensional nonlinearity F. Thus stimulus-vector coordinates are defined by the question: they may be pixels, velocity history, past spikes, or other measured covariates.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “Retinal Population Filters, Bernoulli Logit, and Conditional Dependence,” not the relationship asked about here.",
-        "b": "That conclusion uses the variables and conditions from “The Three GLM Components and Gaussian and Poisson Likelihoods,” not the relationship asked about here.",
-        "c": "The error is: Selecting the largest eigenvector of \\(\\Delta C\\) under colored stimulation and mistaking the stimulus's own high variance for a neural feature."
+        "a": "A solver's sign choice has no physiological meaning; reversing the vector leaves the same feature axis.",
+        "b": "Eigenvalue sign describes conditional variance expansion or contraction, not the complete rate-versus-projection function.",
+        "c": "Covariance describes centered second-order statistics; the relevant issue is the arbitrary sign of the axis."
       }
     },
     {
@@ -727,27 +729,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts."
+          "text": "An unconstrained linear predictor may be negative; using it directly as the expected count can violate the Poisson mean's allowed range."
         },
         {
           "id": "b",
-          "text": "The model controls only measured covariates. Unobserved common input, global state, model mismatch, and indirect network paths can still create conditional dependence."
+          "text": "An identity link forces every observed count to equal its mean and removes Poisson randomness."
         },
         {
           "id": "c",
-          "text": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis."
+          "text": "The problem is that an identity link allows means above one, whereas every Poisson mean must stay between zero and one like a binary probability."
         },
         {
           "id": "d",
-          "text": "Treating Gaussian, Poisson, and Bernoulli as merely three loss names without checking response support and variance assumptions."
+          "text": "A log link automatically fixes all count-window and physical-unit errors."
         }
       ],
       "correctChoiceId": "a",
       "explanation": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts. The log link \\(\\lambda =e^\\eta\\) maps the whole real line to positive means and yields the convenient residual gradient of the canonical Poisson likelihood. For a unit-variance Gaussian model with identity link, \\(m=\\eta =x^\\mathrm{T}\\beta\\). The β-dependent part of the log likelihood is \\(-1/2\\Sigma (y-m)^2\\), so likelihood maximization equals mean-squared-error minimization. Unknown or heteroscedastic variance requires an extension; squared loss is not the only model for continuous responses.",
       "wrongChoiceExplanations": {
-        "b": "That conclusion uses the variables and conditions from “Retinal Population Filters, Bernoulli Logit, and Conditional Dependence,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Multiple Relevant Features and Spike-Triggered Covariance,” not the relationship asked about here.",
-        "d": "The error is: Treating Gaussian, Poisson, and Bernoulli as merely three loss names without checking response support and variance assumptions."
+        "b": "The link specifies a mean, not a deterministic equality between each observation and that mean.",
+        "c": "Expected counts can exceed one; the issue with an unconstrained identity link is negative values.",
+        "d": "Binning and units must be specified separately; choosing a link does not correct inconsistent conventions."
       }
     },
     {
@@ -776,27 +778,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts."
+          "text": "Joint fitting removes all common input, so every nonzero coupling necessarily identifies a direct anatomical connection."
         },
         {
           "id": "b",
-          "text": "The model controls only measured covariates. Unobserved common input, global state, model mismatch, and indirect network paths can still create conditional dependence."
+          "text": "Joint fitting controls included variables only; unobserved common input and indirect paths can still produce coupling without a direct synapse."
         },
         {
           "id": "c",
-          "text": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis."
+          "text": "If coupling predicts held-out responses consistently, its causal direction and direct connection are established without intervention or additional identifiability assumptions."
         },
         {
           "id": "d",
-          "text": "Including current or future spikes in a history design matrix, causing information leakage and falsely high predictive performance."
+          "text": "Positive coupling always proves excitation; only negative coupling remains ambiguous."
         }
       ],
       "correctChoiceId": "b",
       "explanation": "The model controls only measured covariates. Unobserved common input, global state, model mismatch, and indirect network paths can still create conditional dependence. Establishing a causal synapse additionally requires intervention, anatomy, or stronger identifiability assumptions. In a very small bin, \\(y_{t}\\in {0,1}\\) and a Bernoulli likelihood is suitable. Use log odds \\(\\theta =\\log[q/(1-q)]\\) as predictor \\(\\eta\\), with inverse link \\(q=e^\\eta /(1+e^\\eta )\\). At \\(\\eta =0\\), \\(q=0.5\\); increasing \\(\\eta\\) by one multiplies the odds by e. That statement is more accurate than a fixed probability increment because sigmoid slope differs near 0 and near 1.",
       "wrongChoiceExplanations": {
-        "a": "That conclusion uses the variables and conditions from “The Three GLM Components and Gaussian and Poisson Likelihoods,” not the relationship asked about here.",
-        "c": "That conclusion uses the variables and conditions from “Multiple Relevant Features and Spike-Triggered Covariance,” not the relationship asked about here.",
-        "d": "The error is: Including current or future spikes in a history design matrix, causing information leakage and falsely high predictive performance."
+        "a": "Unobserved inputs do not disappear simply because other measured covariates are fitted.",
+        "c": "Stable prediction can arise from common causes or indirect paths and does not establish direct causation.",
+        "d": "Both signs describe conditional predictive relationships and can be influenced by omitted variables."
       }
     },
     {
@@ -825,27 +827,27 @@
       "choices": [
         {
           "id": "a",
-          "text": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts."
+          "text": "Each branch generates independent spikes that are summed, and the inverse link merely sets the plot's axis units."
         },
         {
           "id": "b",
-          "text": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis."
+          "text": "Self-history and coupling branches may include current and future spikes, improving accuracy without leaking the response because the stimulus is also included in the model."
         },
         {
           "id": "c",
-          "text": "Three input branches represent stimulus history, a neuron's own spike history, and other neurons' histories; after filtering, they meet in a linear predictor whose inverse link produces a conditional spike."
+          "text": "Stimulus and histories combine in the predictor; the inverse link yields a conditional mean or probability, not an anatomical wiring map."
         },
         {
           "id": "d",
-          "text": "Including current or future spikes in a history design matrix, causing information leakage and falsely high predictive performance."
+          "text": "Including stimulus input turns the coupling branch into a verified anatomical wiring map."
         }
       ],
       "correctChoiceId": "c",
       "explanation": "A population GLM adds a stimulus filter, self-history filter, and cross-neuron coupling filters in predictor \\(\\eta _{i}(t)\\), then uses a log or logit inverse link to produce a nonnegative rate or binary spike probability. Simultaneous fitting reduces omitted-covariate confounding, but a coupling coefficient still denotes predictive dependence conditional on the included variables, not an anatomical synapse.",
       "wrongChoiceExplanations": {
-        "a": "The diagram does not show the variables and conditions discussed in “The Three GLM Components and Gaussian and Poisson Likelihoods.”",
-        "b": "The diagram does not show the variables and conditions discussed in “Multiple Relevant Features and Spike-Triggered Covariance.”",
-        "d": "The error is: Including current or future spikes in a history design matrix, causing information leakage and falsely high predictive performance."
+        "a": "Branches combine into a linear predictor; the inverse link maps that predictor to a response mean or probability.",
+        "b": "Current targets and future events leak information; history covariates must precede the predicted event.",
+        "d": "Measured stimulus control cannot eliminate unobserved common drive or indirect interactions."
       }
     }
   ]

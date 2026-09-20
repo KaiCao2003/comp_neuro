@@ -43,47 +43,24 @@ const shorten = (value, limit = 210) => {
 };
 const unique = (items) => [...new Set(items.map((item) => shorten(item)).filter(Boolean))];
 const choiceCandidate = (text, feedback) => ({ text, feedback });
-const fallbackDistractors = [
-  'The conclusion holds without checking units, assumptions, or boundary conditions.',
-  'A descriptive correlation by itself establishes the proposed biological mechanism.',
-  'Changing the model parameters cannot change this prediction.',
-  'The symbols are interchangeable because they have similar names.',
-  'The result applies equally to single trials and conditional averages.',
-];
-const fallbackFeedback = new Map([
-  [fallbackDistractors[0], 'Units, assumptions, and boundary conditions are part of the claim. Omitting those checks can turn a dimensionally or mathematically invalid result into an apparently plausible answer.'],
-  [fallbackDistractors[1], 'A descriptive association constrains what a mechanism must explain, but it does not by itself identify the causal biological process.'],
-  [fallbackDistractors[2], 'Parameter changes can alter fixed points, timescales, stability, and predictions. The relevant regime must be checked before carrying over a conclusion.'],
-  [fallbackDistractors[3], 'Similar names do not make variables interchangeable. Their definitions, units, dimensions, and roles in the equation determine whether a substitution is valid.'],
-  [fallbackDistractors[4], 'A conditional average can hide trial-to-trial variability and nonlinear single-trial dynamics. The level of analysis must match the claim in the question.'],
-]);
-function distractorFeedback(choice, position) {
-  const fallback = fallbackFeedback.get(choice);
-  if (fallback) return fallback;
-  throw new Error(`Distractor ${position + 1} has no targeted feedback: ${choice}`);
-}
-
-function uniqueCandidates(items) {
-  const seen = new Set();
-  const candidates = [];
-  for (const [position, item] of items.entries()) {
-    const candidate = typeof item === 'string' ? choiceCandidate(item, distractorFeedback(item, position)) : item;
-    const text = shorten(candidate?.text);
-    if (!text || seen.has(text)) continue;
-    seen.add(text);
-    candidates.push(choiceCandidate(text, clean(candidate.feedback) || distractorFeedback(text, position)));
-  }
-  return candidates;
-}
-
 function sourceAnchors(refs = [], section) {
   return refs.map((ref) => ({ ...ref, section }));
 }
 
+function authoredQuestionDistractors(items, id) {
+  if (!Array.isArray(items) || items.length !== 3 || items.some((item) => !item.text || !item.explanation)) {
+    throw new Error(`${id} needs three authored distractors with explanations.`);
+  }
+  return items.map(({ text, explanation }) => choiceCandidate(text, explanation));
+}
+
 function makeQuestion({ lecture, index, sectionId, refs, type = 'concept', level = 'understand', difficulty = 2, stem, answer, distractors, explanation, tags = [] }) {
-  const correct = shorten(answer);
-  const wrong = uniqueCandidates([...distractors, ...fallbackDistractors]).filter((candidate) => candidate.text !== correct).slice(0, 3);
-  if (!correct || wrong.length < 3) throw new Error(`Unable to construct English question L${lecture} #${index}`);
+  const correct = clean(answer);
+  const wrong = distractors.map(({ text, feedback }) => choiceCandidate(clean(text), clean(feedback)));
+  const choiceTexts = [correct, ...wrong.map((candidate) => candidate.text)];
+  if (choiceTexts.some((text) => !text || text.length > 210) || new Set(choiceTexts).size !== 4) {
+    throw new Error(`Unable to construct English question L${lecture} #${index}: choices must be distinct and no longer than 210 characters.`);
+  }
   const correctIndex = ((lecture * 37) + (index * 17)) % 4;
   const orderedCandidates = [...wrong];
   orderedCandidates.splice(correctIndex, 0, choiceCandidate(correct, ''));
@@ -113,11 +90,6 @@ function makeQuestion({ lecture, index, sectionId, refs, type = 'concept', level
 
 function buildQuestions(lecture) {
   const guide = lecture.studyGuide;
-  const pitfallCandidate = (pitfall) => choiceCandidate(pitfall, `The error is: ${clean(pitfall)}`);
-  const misconceptionPool = uniqueCandidates([
-    ...guide.modules.flatMap((module) => module.pitfalls.map(pitfallCandidate)),
-    ...lecture.commonTraps.map(pitfallCandidate),
-  ]);
   const result = [];
   const add = (spec) => {
     const firstRef = spec.refs?.[0];
@@ -137,22 +109,14 @@ function buildQuestions(lecture) {
     return 'concept';
   };
   guide.modules.forEach((module, moduleIndex) => {
-    const modulePitfalls = module.pitfalls.map(pitfallCandidate);
-    const otherModuleAnswers = guide.modules
-      .filter((candidate) => candidate.id !== module.id)
-      .map((candidate) => choiceCandidate(
-        candidate.selfCheck.answer,
-        `That conclusion uses the variables and conditions from “${candidate.title},” not the relationship asked about here.`,
-      ))
-      .sort((left, right) => clean(right.text).length - clean(left.text).length);
     const previousCount = result.length;
     add({
       sectionId: module.id,
       refs: module.sourceRefs,
       type: diagnosticType(module.selfCheck),
       stem: module.selfCheck.prompt,
-      answer: module.selfCheck.answer,
-      distractors: [...otherModuleAnswers, ...modulePitfalls, ...misconceptionPool, ...fallbackDistractors],
+      answer: module.selfCheck.choiceAnswer ?? module.selfCheck.answer,
+      distractors: authoredQuestionDistractors(module.selfCheck.distractors, module.id),
       explanation: `${module.selfCheck.answer} ${module.paragraphs[moduleIndex % module.paragraphs.length]}`,
       tags: [module.title],
     });
@@ -162,14 +126,6 @@ function buildQuestions(lecture) {
   lecture.figures.forEach((figure) => {
     const figureModule = guide.modules.find((module) => module.id === figure.moduleId);
     const refs = figure.sourceRefs.filter((ref) => figureModule?.sourceRefs.some((moduleRef) => moduleRef.file === ref.file && moduleRef.page === ref.page));
-    const figurePitfalls = (figureModule?.pitfalls ?? []).map(pitfallCandidate);
-    const otherModuleAnswers = guide.modules
-      .filter((module) => module.id !== figure.moduleId)
-      .map((module) => choiceCandidate(
-        module.selfCheck.answer,
-        `The diagram does not show the variables and conditions discussed in “${module.title}.”`,
-      ))
-      .sort((left, right) => clean(right.text).length - clean(left.text).length);
     const previousCount = result.length;
     add({
       sectionId: figure.moduleId,
@@ -178,8 +134,8 @@ function buildQuestions(lecture) {
       level: 'analyze',
       difficulty: 4,
       stem: `Which interpretation is supported by the schematic “${figure.title}”?`,
-      answer: figure.alt,
-      distractors: [...otherModuleAnswers, ...figurePitfalls, ...misconceptionPool, ...fallbackDistractors],
+      answer: figure.questionAnswer ?? figure.alt,
+      distractors: authoredQuestionDistractors(figure.questionDistractors, figure.id),
       explanation: figure.caption,
       tags: [figure.title],
     });
@@ -224,6 +180,10 @@ for (let lectureNumber = 1; lectureNumber <= 27; lectureNumber += 1) {
   const publishedLecture = structuredClone(lecture);
   delete publishedLecture.coreQuestion;
   delete publishedLecture.diagnostic;
+  publishedLecture.figures.forEach((figure) => {
+    delete figure.questionAnswer;
+    delete figure.questionDistractors;
+  });
   publishedLecture.sourceUnits = publishedLecture.sourceUnits.map((unit) => {
     delete unit.stopPredict;
     return unit;

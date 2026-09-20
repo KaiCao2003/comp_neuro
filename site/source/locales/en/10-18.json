@@ -109,7 +109,22 @@
         },
         "selfCheck": {
           "prompt": "Why is a classical STDP window not interchangeable with a firing-rate covariance rule?",
-          "answer": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window. They can be related under specific statistical and timescale assumptions, but they use different state variables, experimental protocols, and levels of mechanistic interpretation."
+          "answer": "STDP preserves millisecond relative timing between pre- and postsynaptic spikes, whereas a covariance rule averages activity fluctuations over a longer window. They can be related under specific statistical and timescale assumptions, but they use different state variables, experimental protocols, and levels of mechanistic interpretation.",
+          "distractors": [
+            {
+              "text": "STDP depends only on presynaptic firing rate, whereas a covariance rule must measure both presynaptic and postsynaptic activity.",
+              "explanation": "The STDP time difference involves both spikes, not presynaptic rate alone."
+            },
+            {
+              "text": "The rules differ only in time units, so converting milliseconds to seconds makes any STDP window exactly equivalent to a covariance rule.",
+              "explanation": "Unit conversion does not restore discarded timing. Equivalence also depends on spike statistics and timescales."
+            },
+            {
+              "text": "STDP can depress synapses, whereas centered covariance rules can only strengthen them.",
+              "explanation": "Products of centered activities can be negative, allowing covariance rules to produce depression."
+            }
+          ],
+          "choiceAnswer": "STDP retains spike timing; covariance rules average centered activity. Their connection requires statistical assumptions."
         },
         "pitfalls": [
           "Treating the NMDA–Ca2+ sequence as the sole mechanism at every synapse while ignoring neuromodulation, dendritic voltage, and burst context.",
@@ -119,6 +134,7 @@
       {
         "id": "L10-M2",
         "title": "Covariance Geometry, the PSD Proof, and Hebbian Eigenmode Blow-Up",
+        "transition": "Centering activity lets a synaptic rule distinguish shared increases from opposite fluctuations. Averaging over many inputs exposes the covariance matrix, which determines which weight directions grow fastest and whether that growth can stop on its own.",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -134,7 +150,7 @@
           "The expected dynamics \\(\\tau _{w} E[dw/dt]=Cw\\) form a linear dynamical system. An eigenvector \\(v_{k}\\) of C satisfies \\(Cv_{k}=\\lambda _{k}v_{k}\\), so if w lies along \\(v_{k}\\), the update remains in that direction and changes only its magnitude. For a symmetric covariance matrix, the eigenvectors can be chosen as an orthogonal basis, allowing any initial w to be written as \\(\\sum _k a_{k}v_{k}\\).",
           "Covariance is symmetric because \\(C_{ij}=E[(x_{i}-\\mu _{i})(x_{j}-\\mu _{j})]\\), and exchanging the two scalar factors leaves their product unchanged. It is also positive semidefinite (PSD): for every v, the quadratic form \\(v^\\mathrm{T}Cv\\) is the expected square of the projection \\(v^\\mathrm{T}(x-\\mu )\\). PSD does not require every off-diagonal entry to be positive. Anticorrelated variables may have negative covariance while the full quadratic form remains nonnegative.",
           "In the eigenbasis, each coefficient obeys \\(\\tau _{w} da_{k}/dt=\\lambda _{k}a_{k}\\), with solution \\(a_{k}(t)=a_{k}(0)e^{\\lambda _{k}t/\\tau _{w}}\\). The mode with the largest \\(\\lambda\\) grows faster than the others, so the normalized direction approaches the principal eigenvector. This produces the formal link to PCA while exposing the defect of basic Hebbian learning: because PSD eigenvalues are nonnegative, no existing component is actively reduced by these expected dynamics.",
-          "A direction approaching PC1 is not the same as a weight vector converging to a stable PC1 solution. Under the basic rule the norm keeps increasing until the assumptions of a linear neuron, stationary statistics, and a fixed learning rate fail. A stable PCA-like solution can be discussed only after normalization or competition controls magnitude. A nonlinear output, nonstationary input, or several similar eigenvalues can alter both convergence and the resulting direction."
+          "A direction approaching the first principal component is not the same as a weight vector converging to a stable the first principal component solution. Under the basic rule the norm keeps increasing until the assumptions of a linear neuron, stationary statistics, and a fixed learning rate fail. A stable PCA-like solution can be discussed only after normalization or competition controls magnitude. A nonlinear output, nonstationary input, or several similar eigenvalues can alter both convergence and the resulting direction."
         ],
         "keyPoints": [
           "The central evidence that covariance is symmetric PSD is \\(v^\\mathrm{T}Cv=E[(v^\\mathrm{T}(x-\\mu ))^2]\\ge 0\\).",
@@ -181,7 +197,22 @@
         },
         "selfCheck": {
           "prompt": "Why does a negative off-diagonal covariance entry not violate positive semidefiniteness?",
-          "answer": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately. Two variables can be anticorrelated, giving \\(C_{ij}<0\\), while every linear combination still has a variance equal to an expected square."
+          "answer": "Positive semidefiniteness constrains the variance \\(v^\\mathrm{T}Cv\\) along every complete direction, not each matrix entry separately. Two variables can be anticorrelated, giving \\(C_{ij}<0\\), while every linear combination still has a variance equal to an expected square.",
+          "distractors": [
+            {
+              "text": "Symmetry alone makes every eigenvalue nonnegative, so negative off-diagonal entries cannot create any problem for a symmetric matrix.",
+              "explanation": "A symmetric matrix can have negative eigenvalues; PSD additionally requires nonnegative quadratic forms."
+            },
+            {
+              "text": "A negative off-diagonal entry cancels a positive entry at its symmetric position, leaving every projected variance unchanged.",
+              "explanation": "Symmetric covariance entries are equal, not opposite, and they affect projected variance."
+            },
+            {
+              "text": "Negative covariance is only sampling error and disappears in the population matrix.",
+              "explanation": "Population variables can be anticorrelated while their covariance matrix remains PSD."
+            }
+          ],
+          "choiceAnswer": "PSD requires nonnegative variance for every linear combination, not nonnegative covariance for every pair of variables."
         },
         "pitfalls": [
           "Interpreting an eigenvector as one particular neuron or synapse; it is a direction in the full input or weight space.",
@@ -191,6 +222,7 @@
       {
         "id": "L10-M3",
         "title": "Stabilizing Rules and Third-Factor Learning",
+        "transition": "Growth toward a principal component does not make the weights settle at a finite size. Normalization, Oja's decay term, and BCM's sliding threshold supply different forms of amplitude control; task errors or rewards require learning signals beyond activity correlations.",
         "sourceRefs": [
           {
             "file": "Lecture10-SynapticPlasticity.pdf",
@@ -253,7 +285,22 @@
         },
         "selfCheck": {
           "prompt": "Why is it inadequate to reduce a reward-based three-factor rule to “Hebbian learning multiplied by dopamine”?",
-          "answer": "The third factor may encode reward, reward-prediction error, an error signal, context, or another neuromodulatory gate. Its timing, receptors, eligibility trace, and specificity for the target weight all affect learning, so dopamine is only one candidate implementation in some systems."
+          "answer": "The third factor may encode reward, reward-prediction error, an error signal, context, or another neuromodulatory gate. Its timing, receptors, eligibility trace, and specificity for the target weight all affect learning, so dopamine is only one candidate implementation in some systems.",
+          "distractors": [
+            {
+              "text": "Dopamine concentration simply equals reward magnitude, so synapses need not distinguish expected rewards from unexpected rewards during learning.",
+              "explanation": "Reward and reward-prediction error differ; the proposed signal must be specified and tested."
+            },
+            {
+              "text": "Dopamine release supplies every synapse with its exact task gradient, without local activity or eligibility traces.",
+              "explanation": "A broad modulatory signal alone cannot specify each connection's gradient; local eligibility determines which synapses can change."
+            },
+            {
+              "text": "Measuring three signals is sufficient; their relative timing cannot affect learning.",
+              "explanation": "Temporal overlap between modulation and eligibility affects the update."
+            }
+          ],
+          "choiceAnswer": "The third factor needs a defined signal and timing relative to local eligibility; dopamine is one candidate implementation."
         },
         "pitfalls": [
           "Treating synaptic scaling, Oja's rule, and BCM as interchangeable names for normalization, despite their different measured variables and feedback locations.",
@@ -372,7 +419,22 @@
         },
         "selfCheck": {
           "prompt": "Why is the statement “the gradient points toward the minimum” inaccurate?",
-          "answer": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction. It uses only first-order information at that location and does not directly identify a distant global minimum."
+          "answer": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction. It uses only first-order information at that location and does not directly identify a distant global minimum.",
+          "distractors": [
+            {
+              "text": "The gradient points directly toward the nearest minimum; learning rate only determines how far along that route the parameters move.",
+              "explanation": "A gradient contains local derivative information, not the nearest minimum's location."
+            },
+            {
+              "text": "Both signs of the gradient move along contours without changing the loss.",
+              "explanation": "The gradient is perpendicular to contours; a sufficiently small negative-gradient step usually lowers loss."
+            },
+            {
+              "text": "Gradients point uphill only for convex losses; for nonconvex losses the same derivative points downhill, so updates no longer need a minus sign.",
+              "explanation": "Convexity does not change the gradient's local ascent meaning; it affects global optimization properties."
+            }
+          ],
+          "choiceAnswer": "The gradient points toward local steepest ascent; its negative gives local descent, not the location of a distant global minimum."
         },
         "pitfalls": [
           "Classifying a task as classification or regression only by the model's name instead of examining target support and loss.",
@@ -382,6 +444,7 @@
       {
         "id": "L11-M2",
         "title": "Linear Regression: Gradient Decomposition, the Normal Equation, and Deep Linear Factorization",
+        "transition": "The negative gradient gives a local descent direction, but the actual update depends on the prediction model and loss. Expanding it for linear regression reveals an input–target correlation term, a term that constrains the weights, and the normal equations obtained when the gradient vanishes.",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -444,7 +507,22 @@
         },
         "selfCheck": {
           "prompt": "Why can training every layer of a deep linear network not be treated as ordinary convex linear regression, even though the overall mapping is linear?",
-          "answer": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters. Scale and factorization are nonunique, and updates to different layers depend on one another, so optimization in parameter space is generally nonconvex."
+          "answer": "The product \\(W^L\\cdots W^0\\) defines a linear mapping, but it is a multilinear product of the component layer parameters. Scale and factorization are nonunique, and updates to different layers depend on one another, so optimization in parameter space is generally nonconvex.",
+          "distractors": [
+            {
+              "text": "Multiplying linear matrices automatically introduces nonlinear activations, so the overall input–output mapping is no longer linear.",
+              "explanation": "A composition of linear maps is linear; the factorized parameterization causes the optimization issue."
+            },
+            {
+              "text": "Because each layer has a convex subproblem when the others are fixed, optimizing all layers jointly must also be convex.",
+              "explanation": "Separate convexity does not imply joint convexity; products couple changes across layers."
+            },
+            {
+              "text": "Depth reduces the sample count and therefore makes regression nonconvex.",
+              "explanation": "Depth does not change sample count; squared loss can remain convex in the overall linear map."
+            }
+          ],
+          "choiceAnswer": "Layer weights enter the loss through products, coupling parameters and allowing nonunique factorizations despite a linear map."
         },
         "pitfalls": [
           "Applying a closed-form formula without declaring whether samples are columns or rows, thereby misplacing transposes and dimensions.",
@@ -454,6 +532,7 @@
       {
         "id": "L11-M3",
         "title": "Backpropagation: Layerwise Chain Rules, Error Coordinates, and Weight Gradients",
+        "transition": "In single-layer regression, each weight's contribution to the residual is explicit. A multilayer parameterization routes that influence through intermediate variables, so backpropagation applies the chain rule along those dependencies to determine how hidden-layer changes affect the final loss.",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -516,7 +595,22 @@
         },
         "selfCheck": {
           "prompt": "Why does the backpropagated error recurrence use the transpose of the downstream weight matrix?",
-          "answer": "The forward map W carries hidden coordinates into downstream coordinates. The chain rule must aggregate downstream scalar sensitivities back into each hidden coordinate, which is exactly the reverse Jacobian product \\(W^\\mathrm{T}\\delta\\); its shape also returns from the downstream dimension to the hidden dimension."
+          "answer": "The forward map W carries hidden coordinates into downstream coordinates. The chain rule must aggregate downstream scalar sensitivities back into each hidden coordinate, which is exactly the reverse Jacobian product \\(W^\\mathrm{T}\\delta\\); its shape also returns from the downstream dimension to the hidden dimension.",
+          "distractors": [
+            {
+              "text": "Transposition inverts the forward weights, so backpropagation reconstructs the original inputs.",
+              "explanation": "A transpose is generally not an inverse; backpropagation computes derivatives rather than reconstructing inputs."
+            },
+            {
+              "text": "Both passes compute neural activity, so the original weight matrix suffices and transposition is only needed when drawing the network.",
+              "explanation": "The backward pass propagates sensitivities, with a different summation direction and matching transpose dimensions."
+            },
+            {
+              "text": "Transposition is valid only for orthogonal weight matrices; all other networks require matrix inversion to apply the chain rule.",
+              "explanation": "Jacobian-transpose gradient propagation requires neither orthogonality nor invertibility."
+            }
+          ],
+          "choiceAnswer": "The chain rule uses the transpose to sum downstream sensitivities back into gradients of hidden coordinates."
         },
         "pitfalls": [
           "Describing \\(\\delta\\) as an error molecule that literally propagates backward through biological neurons, without separating a computed derivative from its possible implementation.",
@@ -635,7 +729,22 @@
         },
         "selfCheck": {
           "prompt": "Why is “ON cells prefer light and OFF cells prefer dark” an incomplete account of a center-surround receptive field?",
-          "answer": "The response depends on contrast location and surround context. A bright spot in an ON center can excite, whereas a bright surround can cancel it. A balanced kernel may not respond to the same global luminance, so both polarity and spatial pattern must be specified."
+          "answer": "The response depends on contrast location and surround context. A bright spot in an ON center can excite, whereas a bright surround can cancel it. A balanced kernel may not respond to the same global luminance, so both polarity and spatial pattern must be specified.",
+          "distractors": [
+            {
+              "text": "ON and OFF labels specify different luminance thresholds, while center and surround illumination always have the same sign of effect within a cell.",
+              "explanation": "Center and surround carry opposing filter weights, which a single luminance threshold cannot describe."
+            },
+            {
+              "text": "Equal receptive-field area guarantees equal responses, regardless of weight signs or arrangement.",
+              "explanation": "Responses depend on matching the signed kernel, not area alone."
+            },
+            {
+              "text": "Uniform brightening makes both ON-center and surround contributions positive, so it always produces the largest possible response regardless of spatial contrast.",
+              "explanation": "The antagonistic surround contributes with the opposite sign and can cancel center drive."
+            }
+          ],
+          "choiceAnswer": "Responses also depend on whether contrast falls in the center or surround; balanced positive and negative regions can cancel uniform luminance changes."
         },
         "pitfalls": [
           "Treating a receptive field as a purely geometric boundary without defining its internal positive and negative weights, time lags, and response measure.",
@@ -645,6 +754,7 @@
       {
         "id": "L12-M2",
         "title": "Feature Maps, Gabor Simple Cells, and Orientation Tuning",
+        "transition": "Center–surround filtering turns luminance differences into local contrast signals without specifying an edge's orientation. Applying filters across the image produces feature maps; arranging their positive and negative regions into elongated bands lets us analyze simple-cell orientation, frequency, and phase selectivity.",
         "sourceRefs": [
           {
             "file": "Lecture12-IntroToVision.pdf",
@@ -707,7 +817,22 @@
         },
         "selfCheck": {
           "prompt": "Why does changing Gabor phase \\(\\phi\\) not change preferred orientation \\(\\theta\\)?",
-          "answer": "\\(\\phi\\) translates positive and negative lobes along a fixed carrier axis and determines whether a bright or dark edge aligns with the filter. \\(\\theta\\) rotates the coordinate system and determines which edge or grating direction aligns with the elongated lobes."
+          "answer": "\\(\\phi\\) translates positive and negative lobes along a fixed carrier axis and determines whether a bright or dark edge aligns with the filter. \\(\\theta\\) rotates the coordinate system and determines which edge or grating direction aligns with the elongated lobes.",
+          "distractors": [
+            {
+              "text": "Phase only changes response gain, without moving lobes or changing how bright and dark regions align with the filter.",
+              "explanation": "Phase changes the carrier's bright and dark positions and therefore their alignment."
+            },
+            {
+              "text": "Phase and orientation rotate the entire coordinate system through the same angle; they differ only in the units used to express that angle.",
+              "explanation": "Phase shifts the carrier pattern; orientation rotates spatial coordinates, so they are distinct transformations."
+            },
+            {
+              "text": "Changing phase increases spatial frequency and rotates the preferred orientation.",
+              "explanation": "Spatial frequency controls lobe spacing; phase alone changes neither that frequency nor the axis orientation."
+            }
+          ],
+          "choiceAnswer": "Phase shifts bright and dark lobes along a fixed axis; orientation rotates that axis, changing a different spatial property."
         },
         "pitfalls": [
           "Confusing the grating wave-vector direction with bar orientation without noting that they usually differ by 90°.",
@@ -717,6 +842,7 @@
       {
         "id": "L12-M3",
         "title": "Spatiotemporal Receptive Fields and Motion as Space-Time Orientation",
+        "transition": "A static Gabor filter distinguishes edge orientation and luminance phase, but telling leftward from rightward motion also requires temporal order. Including stimulus history in the receptive field makes motion direction a joint pattern of spatial position and time lag.",
         "sourceRefs": [
           {
             "file": "Lecture12-IntroToVision.pdf",
@@ -779,7 +905,22 @@
         },
         "selfCheck": {
           "prompt": "Why does a biphasic temporal kernel not automatically guarantee direction selectivity?",
-          "answer": "If the kernel still factors into a fixed spatial profile and a temporal waveform, it only reweights one spatial feature over time and never pairs distinct locations with particular lags. Direction selectivity requires space-time nonseparability or an equivalent multichannel nonlinear computation."
+          "answer": "If the kernel still factors into a fixed spatial profile and a temporal waveform, it only reweights one spatial feature over time and never pairs distinct locations with particular lags. Direction selectivity requires space-time nonseparability or an equivalent multichannel nonlinear computation.",
+          "distractors": [
+            {
+              "text": "The positive temporal lobe encodes rightward motion and the negative lobe encodes leftward motion, so two signs already establish direction selectivity.",
+              "explanation": "Temporal weight signs do not specify left versus right; spatial positions must also be paired with delays."
+            },
+            {
+              "text": "Every biphasic temporal kernel automatically shifts spatial lobes over delays, making a separable kernel equivalent to a tilted space–time kernel.",
+              "explanation": "A separable kernel only rescales its fixed spatial profile at each delay; preferred positions do not move."
+            },
+            {
+              "text": "A sufficiently narrow temporal kernel distinguishes opposite directions by itself.",
+              "explanation": "Higher temporal resolution alone does not establish the spatial ordering needed to distinguish direction."
+            }
+          ],
+          "choiceAnswer": "A biphasic temporal kernel can reweight one fixed spatial pattern; direction selectivity also needs specific pairings of locations and delays."
         },
         "pitfalls": [
           "Mixing time lag with absolute time, thereby flipping the receptive field on the temporal axis and reversing the inferred preferred direction.",
@@ -898,7 +1039,22 @@
         },
         "selfCheck": {
           "prompt": "Why must each member of the spike-triggered ensemble contain a stimulus history rather than only the frame in which the spike occurs?",
-          "answer": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time. A history vector permits simultaneous estimation of spatial and temporal receptive-field structure."
+          "answer": "Neural responses have latency and may depend on multiple past lags. Using only the current frame discards temporal filtering and attaches the causal feature to the wrong spike time. A history vector permits simultaneous estimation of spatial and temporal receptive-field structure.",
+          "distractors": [
+            {
+              "text": "Current frames always contain future information, and histories only remove it.",
+              "explanation": "A current frame need not contain future information; earlier stimulation may drive the spike through temporal filtering."
+            },
+            {
+              "text": "A history vector repeats the current frame to increase sample count, and more repetitions independently identify each lag's contribution.",
+              "explanation": "Histories need actual past frames; repeating one frame adds no independent information about temporal filtering."
+            },
+            {
+              "text": "Responses depend only on the current frame, so past frames merely smooth measurement noise and cannot change the estimated temporal structure.",
+              "explanation": "Latency and integration across past moments are part of the receptive field being estimated, not merely measurement noise."
+            }
+          ],
+          "choiceAnswer": "Spikes have latency and can depend on several past moments; stimulus histories preserve temporal structure that the current frame may miss."
         },
         "pitfalls": [
           "Flattening the stimulus without recording pixel and lag order, so the resulting vector cannot be reshaped correctly into a receptive field.",
@@ -908,6 +1064,7 @@
       {
         "id": "L13-M2",
         "title": "Least Squares, the Hessian, and White-Noise Isotropy",
+        "transition": "Aligning stimulus histories before spikes organizes the data. Whether those data uniquely constrain a receptive field depends on which directions the stimulus covariance covers; the least-squares Hessian expresses that identifiability as curvature of the loss.",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -970,7 +1127,22 @@
         },
         "selfCheck": {
           "prompt": "Why does an elongated loss contour indicate that some filter combinations are estimated unreliably?",
-          "answer": "Moving along the ellipse's long axis raises loss only slightly. This is a small-eigenvalue direction of the Hessian, where many different K values make similar predictions on the sampled stimuli, allowing finite noise to shift the minimum substantially."
+          "answer": "Moving along the ellipse's long axis raises loss only slightly. This is a small-eigenvalue direction of the Hessian, where many different K values make similar predictions on the sampled stimuli, allowing finite noise to shift the minimum substantially.",
+          "distractors": [
+            {
+              "text": "The long axis has the largest Hessian eigenvalue, so tiny parameter changes create large losses and therefore make that direction least reliable.",
+              "explanation": "At a fixed loss increment, the long axis corresponds to small curvature and weak constraints."
+            },
+            {
+              "text": "Elongated contours prove that the spatial receptive field itself is elongated.",
+              "explanation": "These contours describe parameter-space loss, not the receptive field's shape in visual space."
+            },
+            {
+              "text": "Every filter along the long axis makes exactly identical predictions with zero loss, so an elongated contour always implies a nonunique solution.",
+              "explanation": "A small nonzero eigenvalue can produce a unique but unstable estimate; strict nonuniqueness requires missing constraints."
+            }
+          ],
+          "choiceAnswer": "Low curvature along the long axis lets different filters predict similarly, so noise can move the estimate far in that direction."
         },
         "pitfalls": [
           "Interpreting a circular loss contour as a circular receptive field; the contour describes curvature in parameter space, not spatial shape.",
@@ -980,6 +1152,7 @@
       {
         "id": "L13-M3",
         "title": "From the Kernel Estimate to the STA, Nonlinearity, and Failure Diagnostics",
+        "transition": "White noise simplifies covariance correction, but experiments record spike counts rather than a noiseless continuous firing rate. Expressing the stimulus–count correlation through the spike-triggered average exposes the STA's scale factors and leads to estimating the nonlinearity that converts projections into firing rates.",
         "sourceRefs": [
           {
             "file": "Lecture13-SpikeTriggeredAverage-UPDATE.pdf",
@@ -1043,7 +1216,22 @@
         },
         "selfCheck": {
           "prompt": "Why is a smooth increasing \\(\\hat{F}(L)\\) curve on the training data insufficient evidence that an LNP model predicts?",
-          "answer": "Both K and F were estimated from the same data, and binning plus a flexible curve can absorb noise. Generalization must be tested by computing projections on held-out stimuli and predicting conditional rates or spikes there."
+          "answer": "Both K and F were estimated from the same data, and binning plus a flexible curve can absorb noise. Generalization must be tested by computing projections on held-out stimuli and predicting conditional rates or spikes there.",
+          "distractors": [
+            {
+              "text": "A strictly monotonic training curve removes all noise, so it eliminates the need for held-out evaluation.",
+              "explanation": "Monotonicity or smoothness can still permit overfitting and does not establish prediction on new data."
+            },
+            {
+              "text": "Refit both the filter and nonlinearity on test spikes, then use those same spikes to demonstrate that the resulting model generalizes.",
+              "explanation": "Refitting to test responses uses the answers being evaluated and destroys independence of the prediction test."
+            },
+            {
+              "text": "Matching the overall mean firing rate guarantees correct stimulus-specific predictions.",
+              "explanation": "A correct overall mean can coexist with large errors in conditional responses."
+            }
+          ],
+          "choiceAnswer": "The filter and curve fitted to the same data may absorb noise; freeze the model and test spike predictions on held-out stimuli."
         },
         "pitfalls": [
           "Comparing raw STA amplitudes across conditions without correcting for spike rate, stimulus variance, duration, and bin width.",
@@ -1158,7 +1346,22 @@
         },
         "selfCheck": {
           "prompt": "Why cannot the sign of an STC eigenvector say whether a stimulus is excitatory or inhibitory?",
-          "answer": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis."
+          "answer": "Covariance describes an unoriented axis. v and -v have identical squared projections and covariance. To learn how projection sign affects rate, fit or inspect the nonlinearity along that axis.",
+          "distractors": [
+            {
+              "text": "Positive eigenvectors are excitatory and negative ones inhibitory, provided the numerical solver uses a consistent sign convention.",
+              "explanation": "A solver's sign choice has no physiological meaning; reversing the vector leaves the same feature axis."
+            },
+            {
+              "text": "A positive eigenvalue guarantees monotonically increasing firing on both sides of its axis, while a negative eigenvalue guarantees decreasing firing on both sides.",
+              "explanation": "Eigenvalue sign describes conditional variance expansion or contraction, not the complete rate-versus-projection function."
+            },
+            {
+              "text": "Covariance retains only the stimulus mean and therefore loses response polarity.",
+              "explanation": "Covariance describes centered second-order statistics; the relevant issue is the arbitrary sign of the axis."
+            }
+          ],
+          "choiceAnswer": "An eigenvector's overall sign is arbitrary: covariance identifies an axis, while the response nonlinearity determines preferences for signed projections."
         },
         "pitfalls": [
           "Selecting the largest eigenvector of \\(\\Delta C\\) under colored stimulation and mistaking the stimulus's own high variance for a neural feature.",
@@ -1168,6 +1371,7 @@
       {
         "id": "L14-M2",
         "title": "The Three GLM Components and Gaussian and Poisson Likelihoods",
+        "transition": "STC identifies stimulus directions whose variance changes before spikes, but does not by itself specify a probability model for each response. A GLM combines a response distribution, linear predictor, and link function into a fitted likelihood, distinguishing continuous responses from spike counts.",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -1186,7 +1390,7 @@
         "paragraphs": [
           "A GLM has three components: response distribution \\(p(y|\\theta )\\), linear predictor \\(\\eta =X\\beta\\), and link \\(g(m)=\\eta\\) connecting \\(\\eta\\) with conditional \\(\\operatorname{mean} m\\). The exponential-family canonical form \\(p(y|\\theta )=\\exp[y\\theta +H(y)-D(\\theta )]\\) separates the data term, base measure, and log-partition function. D normalizes the distribution and determines its mean and variance.",
           "For a unit-variance Gaussian model with identity link, \\(m=\\eta =x^\\mathrm{T}\\beta\\). The β-dependent part of the log likelihood is \\(-1/2\\Sigma (y-m)^2\\), so likelihood maximization equals mean-squared-error minimization. Unknown or heteroscedastic variance requires an extension; squared loss is not the only model for continuous responses.",
-          "For a nonnegative integer count \\(y\\ge 0\\), the Poisson model is \\(p(y|\\lambda )=\\lambda ^ye^{-\\lambda }/y\\)!. Its canonical parameter is \\(\\theta =\\log\\lambda\\), predictor \\(\\eta =\\theta\\), and inverse link \\(\\lambda =e^\\eta\\). The exponential maps every real predictor to a positive mean and gives log likelihood Σ[yη-e^η-log(y!)], whose gradient is the covariate times observed minus predicted count.",
+          "For a nonnegative integer count \\(y\\ge 0\\), the Poisson model is \\(p(y|\\lambda )=\\lambda ^y e^{-\\lambda }/y!\\). Its canonical parameter is \\(\\theta =\\log\\lambda\\), predictor \\(\\eta =\\theta\\), and inverse link \\(\\lambda =e^\\eta\\). The exponential maps every real predictor to a positive mean and gives log likelihood Σ[yη-e^η-log(y!)], whose gradient is the covariate times observed minus predicted count.",
           "Poisson conditional independence says that bins or samples are independent after conditioning on all included covariates; it does not say that real spike trains lack refractoriness or coupling. Adding past spikes to the design matrix models history dependence conditionally. Bin size also sets response support: a longer window permits count>1, while a very small bin is closer to Bernoulli."
         ],
         "keyPoints": [
@@ -1234,7 +1438,22 @@
         },
         "selfCheck": {
           "prompt": "Why is the identity link \\(\\lambda =\\eta\\) structurally unsuitable for \\(a \\operatorname{Poisson} GLM\\)?",
-          "answer": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts. The log link \\(\\lambda =e^\\eta\\) maps the whole real line to positive means and yields the convenient residual gradient of the canonical Poisson likelihood."
+          "answer": "The linear predictor \\(\\eta\\) may be any real number, so an identity link permits negative expected counts. The log link \\(\\lambda =e^\\eta\\) maps the whole real line to positive means and yields the convenient residual gradient of the canonical Poisson likelihood.",
+          "distractors": [
+            {
+              "text": "An identity link forces every observed count to equal its mean and removes Poisson randomness.",
+              "explanation": "The link specifies a mean, not a deterministic equality between each observation and that mean."
+            },
+            {
+              "text": "The problem is that an identity link allows means above one, whereas every Poisson mean must stay between zero and one like a binary probability.",
+              "explanation": "Expected counts can exceed one; the issue with an unconstrained identity link is negative values."
+            },
+            {
+              "text": "A log link automatically fixes all count-window and physical-unit errors.",
+              "explanation": "Binning and units must be specified separately; choosing a link does not correct inconsistent conventions."
+            }
+          ],
+          "choiceAnswer": "An unconstrained linear predictor may be negative; using it directly as the expected count can violate the Poisson mean's allowed range."
         },
         "pitfalls": [
           "Treating Gaussian, Poisson, and Bernoulli as merely three loss names without checking response support and variance assumptions.",
@@ -1244,6 +1463,7 @@
       {
         "id": "L14-M3",
         "title": "Retinal Population Filters, Bernoulli Logit, and Conditional Dependence",
+        "transition": "Independence in a Poisson likelihood is conditional on the included covariates, so the predictor's contents matter. Adding a neuron's own spike history and other neurons' histories can describe refractoriness and population dependence; binary spike bins also require comparing Bernoulli and count models.",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -1306,7 +1526,22 @@
         },
         "selfCheck": {
           "prompt": "Why does fitting stimulus and coupling filters jointly still not justify interpreting a coupling coefficient as a causal synapse?",
-          "answer": "The model controls only measured covariates. Unobserved common input, global state, model mismatch, and indirect network paths can still create conditional dependence. Establishing a causal synapse additionally requires intervention, anatomy, or stronger identifiability assumptions."
+          "answer": "The model controls only measured covariates. Unobserved common input, global state, model mismatch, and indirect network paths can still create conditional dependence. Establishing a causal synapse additionally requires intervention, anatomy, or stronger identifiability assumptions.",
+          "distractors": [
+            {
+              "text": "Joint fitting removes all common input, so every nonzero coupling necessarily identifies a direct anatomical connection.",
+              "explanation": "Unobserved inputs do not disappear simply because other measured covariates are fitted."
+            },
+            {
+              "text": "If coupling predicts held-out responses consistently, its causal direction and direct connection are established without intervention or additional identifiability assumptions.",
+              "explanation": "Stable prediction can arise from common causes or indirect paths and does not establish direct causation."
+            },
+            {
+              "text": "Positive coupling always proves excitation; only negative coupling remains ambiguous.",
+              "explanation": "Both signs describe conditional predictive relationships and can be influenced by omitted variables."
+            }
+          ],
+          "choiceAnswer": "Joint fitting controls included variables only; unobserved common input and indirect paths can still produce coupling without a direct synapse."
         },
         "pitfalls": [
           "Including current or future spikes in a history design matrix, causing information leakage and falsely high predictive performance.",
@@ -1380,7 +1615,7 @@
         "guidingQuestion": "How can the idea that a sensory system should not waste spikes on predictable content be converted into quantitative measures of uncertainty and dependence?",
         "paragraphs": [
           "Barlow's framework contributes three ideas: detect “passwords” of critical significance, filter signals for other nervous-system regions, and recode sensory messages to reduce redundancy. Focus on the third. Efficient coding explains why a code is advantageous under specified input statistics, noise, and cost. It is a normative hypothesis; the same receptive field may also have developmental, biophysical, or task-specific explanations.",
-          "Surprise for one outcome should increase as its probability decreases, and surprises for independent events should add. Because their joint probability is pq, the continuous monotone solution of \\(S(pq)=S(p)+S(q)\\) is \\(S(p)=-\\log_{bp}\\). Base 2 gives bits and base e gives nats; an event of probability 1 has zero surprise.",
+          "Surprise for one outcome should increase as its probability decreases, and surprises for independent events should add. Because their joint probability is pq, the continuous monotone solution of \\(S(pq)=S(p)+S(q)\\) is \\(S(p)=-\\log_b p\\). Base 2 gives bits and base e gives nats; an event of probability 1 has zero surprise.",
           "Entropy \\(H(X)=E[-\\log p(X)]\\) is expected surprise before observation. Conditional entropy \\(H(Y|X)\\) averages the remaining uncertainty in Y at each x. Mutual information \\(I(X;Y)=H(Y)-H(Y|X)\\) is the average reduction in uncertainty about Y after observing X, equivalently \\(\\sum p(x,y)\\log(p(x,y)/(p(x)p(y)))\\). It detects every statistical dependence, not only linear correlation.",
           "If X and Y are independent, the joint ratio equals 1, \\(\\log 1=0\\), and \\(I=0\\). Under standard discrete or continuous definitions, the converse also holds almost everywhere. For a continuous variable, differential entropy \\(h=-\\int f \\log f\\) uses density \\(f(x)\\); it can be negative and changes with measurement units. Mutual information is an entropy difference whose coordinate-scaling terms cancel, making it more stable than differential entropy alone."
         ],
@@ -1429,7 +1664,22 @@
         },
         "selfCheck": {
           "prompt": "Why does negative differential entropy not mean probability theory has failed?",
-          "answer": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term. Shared scale contributions cancel in MI, which remains nonnegative and retains its dependence interpretation."
+          "answer": "A continuous density is not the probability of one outcome; it may exceed 1, and its entropy contains the coordinate bin size or units. Rescaling a variable adds a log-scale term. Shared scale contributions cancel in MI, which remains nonnegative and retains its dependence interpretation.",
+          "distractors": [
+            {
+              "text": "Negative differential entropy means some event probabilities are negative, which continuous models permit.",
+              "explanation": "Neither probability nor density may be negative; densities, unlike event probabilities, can exceed one."
+            },
+            {
+              "text": "The negative sign only comes from using natural logarithms, so changing to base-two logarithms always makes differential entropy nonnegative.",
+              "explanation": "Changing logarithm base multiplies by a positive factor and does not change the sign."
+            },
+            {
+              "text": "Differential entropy must be nonnegative; a negative result proves that the density is not normalized and the model must be refitted.",
+              "explanation": "A normalized density can have negative differential entropy, for example on an interval shorter than one unit."
+            }
+          ],
+          "choiceAnswer": "Densities can exceed one and differential entropy depends on units, so negative values need not violate probability theory."
         },
         "pitfalls": [
           "Equating high entropy directly with high useful information while ignoring the receiver, task, noise, and conditional structure.",
@@ -1439,6 +1689,7 @@
       {
         "id": "L15-M2",
         "title": "The Noisy Retina of Atick and Redlich and Covariance Propagation",
+        "transition": "Mutual information measures retained signal, but redundancy reduction alone does not select a retinal filter. Placing the signal, input noise, and output noise at their respective processing stages lets us calculate how filtering changes information and cost together.",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -1497,7 +1748,22 @@
         },
         "selfCheck": {
           "prompt": "Why does moving input and output noise into one term before A change the optimization?",
-          "answer": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise. Their effects on the gain tradeoff differ and cannot be merged."
+          "answer": "A reshapes input noise, so increasing gain at one frequency also amplifies its input noise. Output noise does not pass through A, and increasing gain can improve signal relative to output noise. Their effects on the gain tradeoff differ and cannot be merged.",
+          "distractors": [
+            {
+              "text": "Both noises alter only the output mean, so combining them merely removes a constant bias.",
+              "explanation": "Zero-mean noises still contribute covariance; their location determines whether that covariance is transformed."
+            },
+            {
+              "text": "Independence guarantees that moving output noise before the encoder preserves the same output distribution for every candidate gain, without changing the noise model.",
+              "explanation": "Independence permits covariance addition, not ignoring the intervening transform; equivalent input noise generally depends on the encoder."
+            },
+            {
+              "text": "Only output noise is amplified by the encoder; input noise bypasses it.",
+              "explanation": "The order is reversed: input noise passes through the encoder with the signal, while output noise is added afterward."
+            }
+          ],
+          "choiceAnswer": "Input noise is filtered by the encoder, whereas output noise is added afterward; changing gain affects them differently and changes the optimal tradeoff."
         },
         "pitfalls": [
           "Omitting \\(A^\\mathrm{T}\\) in covariance propagation, producing a nonsymmetric result or incorrect output shape.",
@@ -1507,6 +1773,7 @@
       {
         "id": "L15-M3",
         "title": "Gaussian Information, Nonunique Decorrelation, and the Selection of Center-Surround Filters",
+        "transition": "Covariance propagation separates filtered input noise from noise added at the output. Under Gaussian assumptions, these matrices yield a determinant expression for mutual information, allowing us to compare encoders and test whether decorrelation uniquely selects a center–surround structure.",
         "sourceRefs": [
           {
             "file": "Lecture15-EfficientCoding.pdf",
@@ -1591,7 +1858,22 @@
         },
         "selfCheck": {
           "prompt": "What crucial conditions are missing from the statement “decorrelation produces center-surround filters”?",
-          "answer": "Decorrelation requires only a diagonal or whitened output covariance, and any subsequent orthogonal rotation satisfies it equally well. Translation and rotation symmetry, locality, wiring, noise, or cost constraints are needed to select center-surround filters from the equivalent solutions."
+          "answer": "Decorrelation requires a diagonal output covariance; whitening additionally scales all variances to one, so any orthogonal rotation preserves the identity covariance. A merely diagonal covariance with unequal variances generally gains off-diagonal entries after rotation. Translation and rotation symmetry, locality, wiring, noise, or cost constraints are still needed to select center-surround filters among the equivalent whitened solutions.",
+          "distractors": [
+            {
+              "text": "Identity output covariance necessarily makes every channel's spatial filter a localized center–surround pattern.",
+              "explanation": "Identity covariance constrains statistics but does not uniquely determine each channel's spatial shape."
+            },
+            {
+              "text": "Every orthogonal rotation reintroduces correlations between whitened channels, so decorrelation alone already excludes all nonlocal encoders from the solution set.",
+              "explanation": "Identity covariance is invariant under orthogonal rotation, leaving an equivalent family of whitened encoders."
+            },
+            {
+              "text": "More samples remove every ambiguity and select a unique center–surround filter.",
+              "explanation": "Rotational ambiguity is a symmetry of the objective, not merely finite-sample noise."
+            }
+          ],
+          "choiceAnswer": "Whitened channels can still be orthogonally rotated without changing covariance; local center–surround shapes require symmetry, wiring, or additional constraints."
         },
         "pitfalls": [
           "Claiming that more output entropy or channel capacity is unconditionally better while ignoring fixed information, noise, and firing cost.",
@@ -1705,7 +1987,22 @@
         },
         "selfCheck": {
           "prompt": "Why should a weaker surround in low light not be summarized as the visual system “no longer caring about edges”?",
-          "answer": "Edges can remain behaviorally important. The change means that current high-frequency evidence is unreliable relative to noise and strong differencing would amplify noise. The system temporarily sacrifices resolution for a more stable estimate; the behavioral target need not have changed."
+          "answer": "Edges can remain behaviorally important. The change means that current high-frequency evidence is unreliable relative to noise and strong differencing would amplify noise. The system temporarily sacrifices resolution for a more stable estimate; the behavioral target need not have changed.",
+          "distractors": [
+            {
+              "text": "A weaker surround proves the animal has permanently abandoned edges and will ignore them even after bright-light conditions return.",
+              "explanation": "Adaptation reflects present signal and noise conditions, not a demonstrated permanent change in task preferences."
+            },
+            {
+              "text": "Dim light eliminates every high-frequency signal completely, so all such channels should be deleted and any remaining contrast information has no value.",
+              "explanation": "Reliability usually varies continuously across frequencies rather than vanishing everywhere at one threshold."
+            },
+            {
+              "text": "A weaker surround improves precision without ever sacrificing spatial resolution.",
+              "explanation": "Pooling can reduce independent noise while also smoothing detail and lowering spatial resolution."
+            }
+          ],
+          "choiceAnswer": "Unreliable high-frequency evidence favors pooling over differencing, trading resolution for stability without abandoning edges as a goal."
         },
         "pitfalls": [
           "Equating high SNR with high mean luminance, even though SNR also depends on frequency, internal noise, and stimulus contrast.",
@@ -1715,6 +2012,7 @@
       {
         "id": "l16-m2",
         "title": "From Translation-Invariant Statistics to Fourier Diagonalization",
+        "transition": "Whether dim light favors pooling or differencing depends on signal reliability at each spatial frequency. With approximately translation-invariant image statistics, Fourier modes provide directions that can be analyzed separately, turning spatial filtering into gain and phase changes at each frequency.",
         "sourceRefs": [
           {
             "file": "Lecture16-Adaptation.pdf",
@@ -1777,7 +2075,22 @@
         },
         "selfCheck": {
           "prompt": "Why do Fourier modes “diagonalize” a translation-invariant linear filter?",
-          "answer": "After convolution, each input mode \\(e^{i\\xi \\cdot x}\\) remains the same \\(\\xi\\) and is multiplied only by complex number \\(\\hat{K}(\\xi )\\); distinct \\(\\xi\\) never mix. In this basis, the operator is represented by diagonal gains, one per mode."
+          "answer": "After convolution, each input mode \\(e^{i\\xi \\cdot x}\\) remains the same \\(\\xi\\) and is multiplied only by complex number \\(\\hat{K}(\\xi )\\); distinct \\(\\xi\\) never mix. In this basis, the operator is represented by diagonal gains, one per mode.",
+          "distractors": [
+            {
+              "text": "Diagonalization converts every input frequency into one output frequency and erases differences between modes.",
+              "explanation": "Each mode retains its frequency; diagonalization removes coupling rather than frequency labels."
+            },
+            {
+              "text": "A Fourier transform diagonalizes every position-dependent linear filter, so translation invariance is unnecessary and arbitrary spatial changes cannot mix frequencies.",
+              "explanation": "Position-dependent filters can mix frequencies; the stated diagonal structure relies on convolution or translation invariance."
+            },
+            {
+              "text": "Real images force all Fourier gains to be positive real numbers.",
+              "explanation": "Real kernels can have complex gains; conjugate symmetry, not positivity of every gain, ensures real outputs."
+            }
+          ],
+          "choiceAnswer": "Convolution preserves each Fourier mode's frequency and changes only its complex amplitude; modes do not mix, leaving a gain for each frequency."
         },
         "pitfalls": [
           "Drawing the frequency-vector direction along the stripe direction and thereby rotating the orientation interpretation by ninety degrees.",
@@ -1787,6 +2100,7 @@
       {
         "id": "l16-m3",
         "title": "Natural-Image Power Spectra, Whitening, and Testable Adaptation",
+        "transition": "Convolution becomes multiplication at each Fourier frequency, so the filter's squared magnitude determines the change in power. Combining this relation with the natural-image spectrum gives the ideal whitening gain, which we can then examine for noise limits and test against measured filter adaptation.",
         "sourceRefs": [
           {
             "file": "Lecture16-Adaptation.pdf",
@@ -1849,7 +2163,22 @@
         },
         "selfCheck": {
           "prompt": "Why must an LNP filter's scale convention be fixed before comparing two adaptation conditions?",
-          "answer": "Multiplying k by constant a while dividing the nonlinearity's horizontal axis by a gives identical firing predictions. Without fixing ||k|| or another convention, an apparent gain change can be only parameterization nonuniqueness."
+          "answer": "Multiplying k by constant a while dividing the nonlinearity's horizontal axis by a gives identical firing predictions. Without fixing ||k|| or another convention, an apparent gain change can be only parameterization nonuniqueness.",
+          "distractors": [
+            {
+              "text": "Every filter-amplitude difference is genuine adaptation because the nonlinearity can change only the output baseline.",
+              "explanation": "The nonlinearity's input scale can also change, compensating for a rescaled filter projection."
+            },
+            {
+              "text": "Fixing the norm forces filter direction and nonlinearity to be identical across conditions, eliminating the need to test adaptation.",
+              "explanation": "Normalization removes one parameter freedom; direction, shape, and nonlinearity may still change."
+            },
+            {
+              "text": "Normalization only prevents numerical overflow; with enough samples the data uniquely determine the separate scales of both the filter and nonlinearity without any additional convention.",
+              "explanation": "The ambiguity is structural, so more samples alone do not remove equivalent parameterizations."
+            }
+          ],
+          "choiceAnswer": "Rescaling the filter can be offset by reparameterizing the nonlinearity; identical predictions can therefore appear to have different filter gains without a fixed convention."
         },
         "pitfalls": [
           "Treating \\(1/|\\xi |^{2}\\) as an exact law for every natural image rather than an approximate trend over an ensemble.",
@@ -1968,7 +2297,22 @@
         },
         "selfCheck": {
           "prompt": "Why does the energy model retain orientation tuning after gaining phase invariance?",
-          "answer": "Phase rotates the matched quadrature outputs in their two-dimensional plane. Changing orientation reduces both filter projections' common amplitude A, so \\(A^{2}\\) still falls with orientation mismatch."
+          "answer": "Phase rotates the matched quadrature outputs in their two-dimensional plane. Changing orientation reduces both filter projections' common amplitude A, so \\(A^{2}\\) still falls with orientation mismatch.",
+          "distractors": [
+            {
+              "text": "Orientation changes also rotate the outputs at fixed radius, making their squared sum insensitive to orientation just as it is to phase.",
+              "explanation": "Fixed-radius rotation describes phase changes within matched features; orientation mismatch generally lowers projection amplitude."
+            },
+            {
+              "text": "Squaring cannot remove phase, so the energy model has no phase invariance.",
+              "explanation": "One squared response still varies with phase, but the matched quadrature pair's squared sum can cancel that variation."
+            },
+            {
+              "text": "Poisson noise creates orientation tuning even when both filters have identical mean responses to every orientation, so filter selectivity is unnecessary.",
+              "explanation": "Orientation dependence comes from filter matching; Poisson noise does not create a missing mean preference."
+            }
+          ],
+          "choiceAnswer": "Phase redistributes quadrature outputs, but orientation mismatch reduces their shared amplitude and hence the squared energy."
         },
         "pitfalls": [
           "Concluding from a near-zero complex-cell STA that the stimulus does not drive the cell, while ignoring positive-negative cancellation under an even nonlinearity.",
@@ -1978,6 +2322,7 @@
       {
         "id": "l17-m2",
         "title": "Task Optimization and Neural Predictivity Are Two Different Tests",
+        "transition": "The energy model is constructed around phase invariance, whereas task-trained networks develop representations while optimizing a behavioral objective. Comparing them with visual cortex requires a separate test of how well those representations predict held-out neural responses, beyond classification accuracy.",
         "sourceRefs": [
           {
             "file": "Lecture17-VisualNetworks.pdf",
@@ -2036,7 +2381,22 @@
         },
         "selfCheck": {
           "prompt": "Why is it invalid to repeatedly select the most brain-like network layer on test neural stimuli and report its highest correlation on the same data?",
-          "answer": "Repeated layer selection already uses the test responses. The maximum contains positive selection noise and is biased upward. Choose layers and regularization on validation neural data and perform the final evaluation once on an independent test set."
+          "answer": "Repeated layer selection already uses the test responses. The maximum contains positive selection noise and is biased upward. Choose layers and regularization on validation neural data and perform the final evaluation once on an independent test set.",
+          "distractors": [
+            {
+              "text": "Layer selection is not fitting if network weights remain frozen, so the largest test correlation remains an independent performance estimate.",
+              "explanation": "Data-dependent layer selection is model selection and can exploit test-response noise."
+            },
+            {
+              "text": "Trying more layers cancels noise and makes the highest correlation unbiased.",
+              "explanation": "Taking a maximum favors positive noise; more candidates usually increase selection bias."
+            },
+            {
+              "text": "Selecting a layer and then recalculating correlation on the same test set removes leakage, provided the layer is fixed during the final calculation and no weights change.",
+              "explanation": "Recalculation cannot undo earlier use of test answers; independent evaluation data are still needed."
+            }
+          ],
+          "choiceAnswer": "Choosing layers from test responses uses the test data and biases the maximum correlation; select on validation data and evaluate once on an independent test set."
         },
         "pitfalls": [
           "Mistaking the fitting power of a flexible nonlinear mapping for similarity between the original representation and neural representation.",
@@ -2046,6 +2406,7 @@
       {
         "id": "l17-m3",
         "title": "E/I Recurrence, Nullclines, and Inhibition Stabilization",
+        "transition": "Matching neural responses still does not identify the circuit mechanism that produces them. Surround suppression poses a more specific dynamical problem: how excitatory and inhibitory populations move together to a new steady state after an input change, and why that state is stable.",
         "sourceRefs": [
           {
             "file": "Lecture17-VisualNetworks.pdf",
@@ -2113,7 +2474,22 @@
         },
         "selfCheck": {
           "prompt": "Why does lower inhibitory-neuron firing after surround not imply that inhibition did not cause surround suppression?",
-          "answer": "A firing rate is the network fixed-point outcome, while inhibitory current also depends on connectivity and presynaptic rate. Surround can first lower E drive and thereby lower I, even though I feedback still determines the fixed point at which E amplification is contained."
+          "answer": "A firing rate is the network fixed-point outcome, while inhibitory current also depends on connectivity and presynaptic rate. Surround can first lower E drive and thereby lower I, even though I feedback still determines the fixed point at which E amplification is contained.",
+          "distractors": [
+            {
+              "text": "Lower inhibitory firing means all inhibitory synapses have failed, so only intrinsic adaptation in excitatory cells can cause the suppression.",
+              "explanation": "Reduced population firing does not mean synapses have failed or exclude inhibition from the circuit response."
+            },
+            {
+              "text": "Any decrease in inhibitory firing necessarily increases net input to target cells, regardless of the simultaneous change in excitatory drive.",
+              "explanation": "Net input depends on both contributions; excitatory drive may decrease more strongly."
+            },
+            {
+              "text": "A lower inhibitory rate alone proves that the network is an ISN.",
+              "explanation": "An ISN requires an unstable excitatory subsystem and a stable complete loop; one rate change is insufficient."
+            }
+          ],
+          "choiceAnswer": "Rates reflect circuit rebalancing: less excitatory drive can lower inhibitory firing while inhibition still helps produce suppression."
         },
         "pitfalls": [
           "Conflating inhibitory-population rate, inhibitory current received by a target, and net suppression.",
@@ -2230,7 +2606,22 @@
         },
         "selfCheck": {
           "prompt": "Why does larger proportional gain improve disturbance rejection in a delay-free model but not justify infinite gain in a biological system?",
-          "answer": "The ideal equation omits sensory delay, muscle dynamics, noise, saturation, and energetic cost. High gain amplifies noise and can cause overshoot or oscillation in a delayed loop, so stability must be assessed for the complete loop."
+          "answer": "The ideal equation omits sensory delay, muscle dynamics, noise, saturation, and energetic cost. High gain amplifies noise and can cause overshoot or oscillation in a delayed loop, so stability must be assessed for the complete loop.",
+          "distractors": [
+            {
+              "text": "The delay-free model already includes all real stability limits, so any positive gain can grow without bound without producing overshoot or oscillation.",
+              "explanation": "Omitting delays and actuator dynamics prevents such a guarantee for the real loop."
+            },
+            {
+              "text": "Feedback gain changes noise but never affects constant-disturbance steady-state error.",
+              "explanation": "Proportional gain changes ideal steady-state error, while real systems impose additional constraints."
+            },
+            {
+              "text": "Increasing gain automatically shortens neural conduction time until sufficiently strong feedback eliminates all delay and restores the ideal model.",
+              "explanation": "Control gain is not conduction speed and cannot automatically remove neural or mechanical delays."
+            }
+          ],
+          "choiceAnswer": "Real loops also contain sensory delays, muscle dynamics, and noise; high gain can amplify noise and produce overshoot or oscillation."
         },
         "pitfalls": [
           "Treating feedforward and feedback as mutually exclusive, although real actions commonly combine predictive commands with sensory correction.",
@@ -2240,6 +2631,7 @@
       {
         "id": "l18-m2",
         "title": "The Recurrent Population Equation and Eigenmode Decomposition",
+        "transition": "Treating motor population activity as an evolving state calls for separating intrinsic decay, recurrent connectivity, and external drive. A linear recurrent equation makes these contributions explicit, while its eigenvectors identify population patterns that no longer mix in the transformed coordinates.",
         "sourceRefs": [
           {
             "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
@@ -2307,7 +2699,22 @@
         },
         "selfCheck": {
           "prompt": "For asymmetric W, why can normalized right eigenvectors not justify writing \\(\\alpha =V^\\mathrm{T} h\\)?",
-          "answer": "Right eigenvectors of an asymmetric matrix are generally not orthogonal, so \\(V^\\mathrm{T}V\\ne I\\). The correct transform is \\(\\alpha =V^{-1}h\\), equivalently using the associated left eigenvectors to read amplitudes."
+          "answer": "Right eigenvectors of an asymmetric matrix are generally not orthogonal, so \\(V^\\mathrm{T}V\\ne I\\). The correct transform is \\(\\alpha =V^{-1}h\\), equivalently using the associated left eigenvectors to read amplitudes.",
+          "distractors": [
+            {
+              "text": "Normalizing each eigenvector automatically makes all vectors orthogonal, so transposition and inversion always give the same coordinates.",
+              "explanation": "Normalization fixes lengths, not angles between vectors."
+            },
+            {
+              "text": "Right eigenvectors of every asymmetric matrix are linearly dependent, so no eigenbasis coordinate transform or inverse matrix can ever be used.",
+              "explanation": "Asymmetric matrices can be diagonalizable with independent eigenvectors; nonorthogonality is not dependence."
+            },
+            {
+              "text": "Distinct eigenvalues guarantee orthogonal right eigenvectors even for asymmetric matrices.",
+              "explanation": "Distinct eigenvalues generally ensure independence, not orthogonality; the latter needs additional matrix structure."
+            }
+          ],
+          "choiceAnswer": "Unit length does not ensure orthogonality; coordinates require the eigenvector matrix's inverse or left eigenvectors."
         },
         "pitfalls": [
           "Inferring source-target direction of \\(W_{ij}\\) by habit instead of expanding the matrix product.",
@@ -2317,6 +2724,7 @@
       {
         "id": "l18-m3",
         "title": "Eigenvalues Control Timescale, Fixed Points, and Integration",
+        "transition": "In a diagonalizable linear network, coupled activity has been separated into independently evolving modes. How much recurrent feedback offsets leak in each mode determines whether it decays quickly, decays slowly and retains information, integrates input, or grows because feedback is too strong.",
         "sourceRefs": [
           {
             "file": "Lecture18-IntroToMotorSystemsAndDynamics.pdf",
@@ -2390,7 +2798,22 @@
         },
         "selfCheck": {
           "prompt": "Why does changing \\(\\lambda\\) from 0.98 to 0.999 create drift risk in addition to longer memory?",
-          "answer": "The denominator \\(1-\\lambda\\) shrinks from 0.02 to 0.001, multiplying timescale and constant-input gain by twenty. A tiny persistent bias, low-frequency noise, or connectivity error produces a much larger state displacement."
+          "answer": "The denominator \\(1-\\lambda\\) shrinks from 0.02 to 0.001, multiplying timescale and constant-input gain by twenty. A tiny persistent bias, low-frequency noise, or connectivity error produces a much larger state displacement.",
+          "distractors": [
+            {
+              "text": "Only decay time increases twentyfold while constant-input gain is unchanged, so any resulting drift must come exclusively from numerical roundoff.",
+              "explanation": "Both quantities share the same denominator, so persistent bias is amplified too."
+            },
+            {
+              "text": "Any eigenvalue below one forces all sustained-input displacements to vanish.",
+              "explanation": "Stability means approaching the driven steady state, which need not be zero."
+            },
+            {
+              "text": "Moving closer to one strengthens leak, so persistent low-frequency biases are removed more rapidly even though the network retains its initial state for longer.",
+              "explanation": "Feedback offsets more leak near one, slowing restoration and magnifying persistent bias."
+            }
+          ],
+          "choiceAnswer": "Decay time and constant-input gain both grow twentyfold, so persistent biases cause larger shifts as memory becomes longer."
         },
         "pitfalls": [
           "Applying the discrete-time condition \\(|\\lambda |<1\\) directly to continuous-time equation \\(\\tau dh/dt=(-I+W)h\\).",

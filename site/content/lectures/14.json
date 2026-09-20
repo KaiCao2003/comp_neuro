@@ -1,7 +1,7 @@
 {
   "lecture": 14,
   "slug": "14",
-  "zhTitle": "Spike-Triggered Covariance 与广义线性模型",
+  "zhTitle": "脉冲触发协方差与广义线性模型",
   "enTitle": "Spike-Triggered Covariance and Generalized Linear Models",
   "companionFile": "NEUROSCI366_Lecture14_STC_and_GLM_Companion.pdf",
   "companionPages": 25,
@@ -88,21 +88,21 @@
   ],
   "studyGuide": {
     "objectives": [
-      "能说明单一 STA 为何不足以描述 H1/complex-like multiple-feature response，并用 spike-triggered covariance 的 eigenvectors 找到 variance-changing stimulus directions。",
-      "能定义 GLM 的 response distribution、linear predictor 与 link function，说明 canonical parameter 与 mean 之间的关系。",
-      "能分别从 Gaussian、Poisson 与 Bernoulli probability model 写出 log likelihood，并解释 identity、log 与 logit links 的 support。",
-      "能严格区分 Poisson count、small-bin Bernoulli spike/no-spike 与 logistic classification，避免把三者的 likelihood 与解释混用。",
-      "能重构 retinal population GLM 的 stimulus、self-history 与 coupling filters，并说明 fitted coupling 是 conditional prediction 而非 direct synapse 证明。"
+      "解释单一 STA 为什么不足以描述多个特征驱动的 H1 类或复杂细胞式响应，并用脉冲触发协方差寻找方差改变的刺激方向。",
+      "定义 GLM 的响应分布、线性预测量和连接函数，说明自然参数与条件均值的关系。",
+      "从高斯、Poisson 和 Bernoulli 分布写出对数似然，解释恒等、对数与 logit 连接函数对应的取值范围。",
+      "区分 Poisson 计数、小时间格下的 Bernoulli 放电记录和逻辑分类，避免混用其似然及观察单位。",
+      "构造包含刺激、自身放电历史和耦合滤波器的视网膜群体 GLM，说明拟合耦合为何不等于直接突触连接。"
     ],
     "prerequisiteBridge": [
-      "STA 比较 spike 前 stimulus 的 mean；STC 比较其 covariance。对 centered vector s，covariance \\(C=E[(s-\\mu )(s-\\mu )^\\mathrm{T}]\\)。两个 covariance 的差 \\(\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}\\) 若在某 eigenvector 上有正 eigenvalue，表示 spikes 前该 direction variance 增大；负 eigenvalue 表示该 direction 的 values 被限制在较窄范围。",
-      "likelihood 把 observed data 在给定 parameters 下的 probability 相乘，log likelihood 把 product 变成 sum，便于计算与优化。GLM 不是说 response mean 对 x 必须线性，而是先形成 predictor \\(\\eta =x^\\mathrm{T}\\beta\\)；link g 把 conditional \\(\\operatorname{mean} m=E[y|x]\\) 映到 \\(\\eta\\)，即 \\(g(m)=\\eta\\)。",
-      "Poisson variable 支持 nonnegative integer counts，\\(\\operatorname{mean} \\lambda >0\\)；Bernoulli variable 只取 0 或 1，\\(\\operatorname{mean} q\\) 是 probability。log link \\(\\lambda =e^\\eta\\) 保证 positive rate，logit link \\(\\log[q/(1-q)]=\\eta\\) 给 \\(q=\\operatorname{sigmoid}(\\eta )\\)。neural history covariates 必须只使用当前 bin 之前的 spikes，避免用未来信息预测过去。"
+      "STA 比较放电前刺激的均值，脉冲触发协方差（STC）则比较其离散程度。刺激向量的协方差为 \\(C=E[(s-\\mu )(s-\\mu )^\\mathrm{T}]\\)。对协方差差值 \\(\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}\\)，某特征方向的正特征值表示放电前沿该方向的方差增大，负特征值则表示刺激被限制在更窄的范围内。",
+      "似然将给定参数下观测数据的概率相乘，对数似然则把乘积变成便于优化的和。广义线性模型（GLM）先形成线性预测量 \\(\\eta =x^\\mathrm{T}\\beta\\)，再由连接函数 g 将条件 \\(\\operatorname{mean} m=E[y|x]\\) 映到 \\(\\eta\\)，即 \\(g(m)=\\eta\\)。线性的是预测量，响应均值本身可以非线性依赖输入。",
+      "Poisson 变量取非负整数，\\(\\operatorname{mean} \\lambda >0\\)；Bernoulli 变量只取 0 或 1，其 \\(\\operatorname{mean} q\\) 是概率。对数连接的反函数 \\(\\lambda =e^\\eta\\) 保证均值为正；logit 连接 \\(\\log[q/(1-q)]=\\eta\\) 对应 \\(q=\\operatorname{sigmoid}(\\eta )\\)。使用神经放电历史作为协变量时，只能取当前时间格之前的脉冲，以免泄漏未来信息。"
     ],
     "modules": [
       {
         "id": "L14-M1",
-        "title": "Multiple relevant features 与 spike-triggered covariance",
+        "title": "用协方差寻找多个相关特征",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -110,62 +110,63 @@
           }
         ],
         "paragraphs": [
-          "以 blowfly H1 neuron 为例，stimulus \\(s(t)=v(t)\\) 是 image velocity，而非二维 light pattern。response 可依多个 temporal filters \\(K_{1}\\cdots K_{n}\\) 的 projections，再经 multidimensional nonlinearity F。这个例子提醒：stimulus vector 的坐标由问题定义，可是 pixels、velocity history、past spikes 或其他 measured covariates。",
-          "若 nonlinearity 对 +K 与 -K symmetric，spike-triggered mean 会抵消；若 response 依多个 relevant filters，单一 STA 至多给出一个 spike-triggered mean direction，可能稳定地指向某个线性组合，却不能恢复完整 relevant subspace。前者是 symmetry cancellation，后者是 dimensionality limitation，不能把两者都解释成 noisy 或 unstable average。STC 先计算 spike-triggered covariance \\(C_{\\mathrm{spike}}\\)，再与 raw stimulus covariance \\(C_{\\mathrm{stim}}\\) 比较。\\(\\Delta C\\) 的 eigenvectors 给 variance changed directions，而 eigenvalue sign 给 variance 增大或减小。",
-          "positive eigenvalue 表示 spike-conditioned ensemble 沿该 feature direction 展宽，例如只要 projection magnitude 大就 spike；negative eigenvalue 表示 spikes 要求 projection 落在较窄 range。eigenvector 的正负号本身不唯一，v 与 -v 表示同一轴；真正 response sign 需结合 multidimensional nonlinearity 解释。",
-          "white stimulus 下 \\(C_{\\mathrm{stim}}\\approx \\sigma ^2I\\)，可直接分析 \\(\\Delta C\\)。colored stimulus 会让高-variance input directions 即使与 neuron 无关也主导 covariance；应先 whitening，或解 generalized eigenproblem \\(C_{\\mathrm{spike}}\\) \\(v=\\lambda C_{\\mathrm{stim}} v\\)。STC 仍受 finite spikes、高 dimension 与 non-Gaussian input 影响，需要 null distribution、regularization 与 held-out validation。"
+          "丽蝇 H1 神经元提供了一个例子：刺激 \\(s(t)=v(t)\\) 是图像速度，而非二维亮度图。响应可以同时依赖多个时间滤波器 \\(K_{1}\\cdots K_{n}\\) 的投影，再经过多维非线性 F。因此，刺激向量的坐标取决于实验问题，可以是像素、速度历史、过去的脉冲或其他测量变量。",
+          "若响应对正负投影对称，脉冲触发均值就会相互抵消。若响应依赖多个特征，单一 STA 也只能给出一个均值方向；它可能稳定地指向某个线性组合，却无法恢复完整的相关子空间。前者源于对称性，后者源于维度限制，二者都不能简单归因于噪声。STC 将放电前的协方差 \\(C_{\\mathrm{spike}}\\) 与全部刺激的协方差 \\(C_{\\mathrm{stim}}\\) 比较，以 \\(\\Delta C\\) 的特征向量寻找方差改变的方向。",
+          "正特征值表示放电前刺激沿该方向更分散，例如较大的投影绝对值更容易触发放电；负特征值表示放电要求投影落在较窄范围。特征向量的正负号不唯一，v 与 -v 表示同一轴，因此不能根据向量符号判断兴奋或抑制，仍须结合多维非线性。",
+          "白噪声下有 \\(C_{\\mathrm{stim}}\\approx \\sigma ^2I\\)，可以直接分析 \\(\\Delta C\\)。有色刺激本身的高方差方向却可能主导结果，即使这些方向与神经响应无关。可先进行白化，或求解广义特征值问题 \\(C_{\\mathrm{spike}}\\) \\(v=\\lambda C_{\\mathrm{stim}} v\\)。有限脉冲数、高维度和非高斯输入仍会影响估计，需要零假设分布、正则化和保留数据检验。"
         ],
         "keyPoints": [
-          "STC 寻找 spike-conditioned variance 改变，能发现 STA 因 symmetry 遗漏的 dimensions。",
-          "positive 与 negative covariance changes 都有解释价值，eigenvector sign 不代表 excitation sign。",
-          "colored stimuli 必须 relative to \\(C_{\\mathrm{stim}}\\) 做 whitening 或 generalized eigen correction。"
+          "STC 寻找放电前刺激方差的变化，能够发现 STA 因对称性遗漏的特征方向。",
+          "方差增大和减小都可能有意义，特征向量的符号不等于响应的兴奋或抑制符号。",
+          "有色刺激需要以 \\(C_{\\mathrm{stim}}\\) 为参照，进行白化或广义特征值校正。"
         ],
         "derivation": {
-          "title": "从 covariance difference 到 relevant axes",
-          "setup": "令 raw stimulus \\(\\operatorname{mean} \\mu _{s}\\)、spike-triggered \\(\\operatorname{mean} \\mu _{sp}\\)；分别对各自 mean 中心化得到 \\(C_{\\mathrm{stim}}\\) 与 \\(C_{\\mathrm{spike}}\\)。",
+          "title": "从协方差差分到相关坐标轴",
+          "setup": "令原始刺激 \\(\\operatorname{mean} \\mu _{s}\\)、脉冲触发 \\(\\operatorname{mean} \\mu _{sp}\\)；分别对各自均值中心化得到 \\(C_{\\mathrm{stim}}\\) 与 \\(C_{\\mathrm{spike}}\\)。",
           "steps": [
             {
-              "title": "定义 covariance change",
-              "explanation": "两个 covariance 必须使用一致 coordinate system；subtract 后得到 symmetric matrix。",
+              "title": "定义协方差变化",
+              "explanation": "两个协方差必须使用一致坐标系；减去后得到对称矩阵。",
               "latex": "\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}"
             },
             {
-              "title": "把任意 direction 的 variance change 写成 quadratic form",
-              "explanation": "unit vector v 上的 projection variance 差等于 \\(v^\\mathrm{T}\\Delta Cv\\)；这直接比较 spike-conditioned 与 baseline spread。",
+              "title": "把任意方向的方差变化写成二次形式",
+              "explanation": "单位向量 v 上的投影方差差等于 \\(v^\\mathrm{T}\\Delta Cv\\)；这直接比较脉冲条件化的与基线离散程度。",
               "latex": "\\Delta\\operatorname{Var}(\\mathbf v^{\\mathsf T}s)=\\mathbf v^{\\mathsf T}\\Delta C\\mathbf v"
             },
             {
-              "title": "用 eigendecomposition 找 extrema",
-              "explanation": "在 \\(||v||=1\\) constraint 下，Rayleigh quotient 的 extrema 出现在 \\(\\Delta C\\) eigenvectors；eigenvalues 就是这些 axes 上的 variance change。",
+              "title": "用特征分解找极值",
+              "explanation": "在 \\(||v||=1\\) 约束下，Rayleigh 商的极值出现在 \\(\\Delta C\\) 特征向量；特征值就是这些坐标轴上的方差变化。",
               "latex": "\\Delta C\\mathbf v_k=\\lambda_k\\mathbf v_k"
             }
           ],
           "symbolNotes": [
-            "\\(C_{\\mathrm{spike}}\\) 与 \\(C_{\\mathrm{stim}}\\) 都是 P×P；sample count 常远小于 P 时 estimate rank deficient。",
-            "generalized eigenvalue \\(\\lambda\\) 比较 relative variance ratio；与直接 \\(\\Delta C\\) eigenvalue 的 numerical scale 不同。"
+            "\\(C_{\\mathrm{spike}}\\) 与 \\(C_{\\mathrm{stim}}\\) 都是 P×P；样本计数常远小于 P 时估计秩不足的。",
+            "广义特征值 \\(\\lambda\\) 比较相对方差比；与直接 \\(\\Delta C\\) 特征值的数值尺度不同。"
           ],
-          "unitsCheck": "covariance 与 \\(\\Delta C\\) 的单位是 stimulus^2，eigenvalue 同单位；normalized/whitened space 中可视为相对无量纲变化。",
-          "limitCheck": "若 \\(C_{\\mathrm{spike}}=C_{\\mathrm{stim}}\\)，second moment 不变，STC 不提供 feature；neuron 仍可能依赖更高阶 statistics。"
+          "unitsCheck": "协方差与 \\(\\Delta C\\) 的单位是刺激^2，特征值同单位；归一化的/白化后的空间中可视为相对无量纲变化。",
+          "limitCheck": "若 \\(C_{\\mathrm{spike}}=C_{\\mathrm{stim}}\\)，二阶矩不变，STC 不提供特征；神经元仍可能依赖更高阶统计量。"
         },
         "workedExample": {
-          "title": "二维 STC 的正负 directions",
-          "problem": "raw stimulus \\(C_{\\mathrm{stim}}=I\\)；spike-conditioned \\(C_{\\mathrm{spike}}=\\operatorname{diag}(4,0.25)\\)。求 \\(\\Delta C\\)、eigenvectors 与解释。",
+          "title": "二维 STC 的正负方向",
+          "problem": "原始刺激 \\(C_{\\mathrm{stim}}=I\\)；脉冲条件化的 \\(C_{\\mathrm{spike}}=\\operatorname{diag}(4,0.25)\\)。求 \\(\\Delta C\\)、特征向量与解释。",
           "steps": [
-            "\\(\\Delta C=\\operatorname{diag}(3,-0.75)\\)。matrix 已 diagonal，eigenvectors 是 \\(e_{1}=(1,0)^\\mathrm{T}\\) 与 \\(e_{2}=(0,1)^\\mathrm{T}\\)。",
-            "沿 \\(e_{1}\\)，spike-conditioned variance 从 1 增到 4，变化 +3，提示 large \\(|s_{1}|\\) 与 spiking 关联。",
-            "沿 \\(e_{2}\\)，variance 从 1 降到 0.25，变化 -0.75，提示 spiking 偏好 \\(s_{2}\\) 接近某窄 range。"
+            "\\(\\Delta C=\\operatorname{diag}(3,-0.75)\\)。矩阵已对角，特征向量是 \\(e_{1}=(1,0)^\\mathrm{T}\\) 与 \\(e_{2}=(0,1)^\\mathrm{T}\\)。",
+            "沿 \\(e_{1}\\)，脉冲条件化的方差从 1 增到 4，变化 +3，提示较大的 \\(|s_{1}|\\) 与脉冲发放关联。",
+            "沿 \\(e_{2}\\)，方差从 1 降到 0.25，变化 -0.75，提示脉冲发放偏好 \\(s_{2}\\) 接近某窄范围。"
           ],
-          "result": "同一个 neuron 可同时要求一个 projection magnitude 大、另一个 projection 受限，单一 STA 无法表达。",
-          "sanityCheck": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是 total variance change，但只看 trace 会丢失一正一负的 axis-specific structure。"
+          "result": "同一个神经元可同时要求一个投影大小大、另一个投影受限，单一 STA 无法表达。",
+          "sanityCheck": "\\(\\operatorname{trace} \\Delta C=2.25\\) 是总方差变化，但只看痕迹会丢失一正一负的轴-特有结构。"
         },
         "pitfalls": [
-          "在 colored stimulus 上直接挑 \\(\\Delta C\\) 最大 eigenvector，把 stimulus 自身的高 variance 误认为 neural feature。",
-          "只报告正 eigenvalues，遗漏 spike-conditioned ensemble 被压窄的 negative directions。"
+          "直接选择有色刺激下 \\(\\Delta C\\) 的最大特征向量，将刺激自身的高方差误认作神经特征。",
+          "只报告正特征值，遗漏放电前刺激分布变窄的方向。"
         ]
       },
       {
         "id": "L14-M2",
-        "title": "GLM 三要素与 Gaussian、Poisson likelihood",
+        "title": "GLM 的连接函数与响应分布",
+        "transition": "STC 寻找相关刺激方向，GLM 则进一步指定每次响应的概率。通过响应分布、线性预测量和连接函数，可以将连续响应与脉冲计数分别写成可拟合的似然。",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -181,62 +182,63 @@
           }
         ],
         "paragraphs": [
-          "GLM 有三个部件：response distribution \\(p(y|\\theta )\\)、linear predictor \\(\\eta =X\\beta\\)，以及把 conditional \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 相连的 link \\(g(m)=\\eta\\)。exponential family 的 canonical form \\(p(y|\\theta )=\\exp[y\\theta +H(y)-D(\\theta )]\\) 把 data-dependent term、base measure 与 log partition 分开；D 保证 distribution normalization，并决定 mean 与 variance。",
-          "Gaussian unit-variance model 取 identity link，\\(m=\\eta =x^\\mathrm{T}\\beta\\)。log likelihood 中与 \\(\\beta\\) 有关的部分是 \\(-1/2\\Sigma (y-m)^2\\)，因此 maximizing likelihood 等价于 minimizing mean-squared error。若 variance 未知或 heteroscedastic，这个简单等价需扩展，不能把 squared loss 当成所有 continuous response 的唯一模型。",
-          "Poisson model 对 count \\(y\\ge 0\\) 使用 \\(p(y|\\lambda )=\\lambda ^ye^{-\\lambda }/y\\)!。canonical parameter \\(\\theta =\\log\\lambda\\)，linear predictor \\(\\eta =\\theta\\)，inverse link \\(\\lambda =e^\\eta\\)。exponential 让任何 real predictor 都映到 positive mean，并使 log likelihood 变成 Σ[yη-e^η-log(y!)]，其 gradient 是 covariate 乘 observed-minus-predicted count。",
-          "Poisson conditional independence 表示给定所有 included covariates 后 bins/samples 独立，不等于真实 spike train 没有 refractory 或 coupling。把 past spikes 放入 design matrix 可使 conditional model 表达 history dependence。bin size 也决定 response support：较长 window 可有 count>1，极小 bin 更接近 Bernoulli。"
+          "GLM 包含响应分布 \\(p(y|\\theta )\\)、线性预测量 \\(\\eta =X\\beta\\)，以及连接条件 \\(\\operatorname{mean} m\\) 与 \\(\\eta\\) 的函数 \\(g(m)=\\eta\\)。指数族的标准形式 \\(p(y|\\theta )=\\exp[y\\theta +H(y)-D(\\theta )]\\) 将数据相关项、基准测度和对数配分函数分开；D 保证概率归一化，并决定均值与方差。",
+          "单位方差的高斯模型使用恒等连接，\\(m=\\eta =x^\\mathrm{T}\\beta\\)。对数似然中依赖 \\(\\beta\\) 的部分为 \\(-1/2\\Sigma (y-m)^2\\)，所以最大化似然等价于最小化均方误差。如果方差未知或随输入改变，就需要扩展这个模型；平方损失并不是所有连续响应唯一合理的选择。",
+          "Poisson 模型对非负计数 \\(y\\ge 0\\) 使用 \\(p(y|\\lambda )=\\lambda ^y e^{-\\lambda }/y!\\)。其自然参数为 \\(\\theta =\\log\\lambda\\)，令线性预测量 \\(\\eta =\\theta\\)，便得到反连接函数 \\(\\lambda =e^\\eta\\)。指数函数将任意实数预测量映到正均值，对数似然则写成 Σ[yη-e^η-log(y!)]。求导后，梯度由协变量乘以观测计数与预测计数之差构成。",
+          "Poisson 模型的独立性是给定已纳入协变量后的条件独立性，并不否认真实脉冲存在不应期或神经元间耦合。将过去放电加入设计矩阵，就可以描述历史依赖。时间格宽度也影响模型选择：较长时间窗脉冲计数可能大于 1，极小时间格则更接近只记录有无放电的 Bernoulli 变量。"
         ],
         "keyPoints": [
-          "GLM 的 linear 部分是 predictor，mean 可由 inverse link 非线性决定。",
-          "Gaussian identity link 对应 squared error；Poisson log link 对应 positive count mean。",
-          "likelihood assumption 包括 response support 与 conditional independence，必须与 binning 匹配。"
+          "GLM 中线性的是预测量，均值通过反连接函数可以非线性依赖输入。",
+          "高斯恒等连接对应平方误差，Poisson 对数连接对应正的计数均值。",
+          "似然包含对响应取值与条件独立性的假设，必须与时间分箱方式匹配。"
         ],
         "derivation": {
-          "title": "从 probability mass 得到 Poisson log likelihood 与 gradient",
-          "setup": "P independent observations \\(y_\\mu\\)，predictor \\(\\eta _\\mu =x_\\mu ^\\mathrm{T}\\beta\\)，\\(\\operatorname{mean} \\lambda _\\mu =e^{\\eta _\\mu }\\)。",
+          "title": "从概率质量得到泊松 log 似然与梯度",
+          "setup": "P 独立观测 \\(y_\\mu\\)，预测量 \\(\\eta _\\mu =x_\\mu ^\\mathrm{T}\\beta\\)，\\(\\operatorname{mean} \\lambda _\\mu =e^{\\eta _\\mu }\\)。",
           "steps": [
             {
-              "title": "写 joint likelihood 并取 log",
-              "explanation": "independent samples 的 probabilities 相乘；log 把 product 变 sum。",
+              "title": "写联合似然并取 log",
+              "explanation": "独立样本的概率相乘；log 把乘积变求和。",
               "latex": "\\ell(\\beta)=\\sum_{\\mu=1}^{P}\\left[y_\\mu\\eta_\\mu-e^{\\eta_\\mu}-\\log(y_\\mu!)\\right]"
             },
             {
-              "title": "对 predictor 求 derivative",
-              "explanation": "\\(y\\eta\\) derivative 是 y，\\(-e^\\eta\\) derivative 是 \\(-e^\\eta =-\\lambda\\)；factorial term 与 \\(\\beta\\) 无关。",
+              "title": "对预测量求导数",
+              "explanation": "\\(y\\eta\\) 导数是 y，\\(-e^\\eta\\) 导数是 \\(-e^\\eta =-\\lambda\\)；阶乘项与 \\(\\beta\\) 无关。",
               "latex": "\\frac{\\partial\\ell}{\\partial\\eta_\\mu}=y_\\mu-\\lambda_\\mu"
             },
             {
-              "title": "chain 到 coefficients",
-              "explanation": "\\(\\partial \\eta _\\mu /\\partial \\beta =x_\\mu\\)，因此所有 samples 贡献 covariate times count residual。",
+              "title": "链到系数",
+              "explanation": "\\(\\partial \\eta _\\mu /\\partial \\beta =x_\\mu\\)，因此所有样本贡献协变量 times 计数残差。",
               "latex": "\\nabla_\\beta\\ell=\\sum_\\mu \\mathbf x_\\mu(y_\\mu-e^{\\mathbf x_\\mu^{\\mathsf T}\\beta})"
             }
           ],
           "symbolNotes": [
-            "\\(\\lambda _\\mu\\) 是 expected count per observation window；若 model rate 为 spikes/s，需乘 bin width 得 count mean。",
-            "log(y!) 影响 absolute likelihood 与 model comparison，但不影响 \\(\\beta\\) gradient；不能在报告 likelihood value 时随意删除。"
+            "\\(\\lambda _\\mu\\) 是预期计数每观测时间窗；若模型发放率为脉冲/s，需乘时间格宽度得计数均值。",
+            "log(y!) 影响 absolute 似然与模型比较，但不影响 \\(\\beta\\) 梯度；不能在报告似然价值时随意删除。"
           ],
-          "unitsCheck": "\\(\\eta\\) 与 log\\(\\lambda\\) 需无量纲；实际 count mean 是无量纲 expected events，continuous-time rate 乘 \\(\\Delta t\\) 后才进入 Poisson mean。",
-          "limitCheck": "若 data variance 远大于 mean，Poisson may be overdispersed；negative binomial 或 latent-state model 可能更适合。"
+          "unitsCheck": "\\(\\eta\\) 与 log\\(\\lambda\\) 需无量纲；实际计数均值是无量纲预期事件，连续时间发放率乘 \\(\\Delta t\\) 后才进入泊松均值。",
+          "limitCheck": "若数据方差远大于均值，数据相对泊松假设存在过度离散；负二项或潜在状态模型可能更适合。"
         },
         "workedExample": {
-          "title": "单 coefficient Poisson update direction",
-          "problem": "一个 observation \\(x=2\\)、\\(\\beta =0\\)，故 \\(\\eta =0\\)、\\(\\lambda =1\\)；observed count \\(y=3\\)。求 log-likelihood gradient 对 \\(\\beta\\) 的 contribution。",
+          "title": "单系数泊松更新方向",
+          "problem": "一个观测 \\(x=2\\)、\\(\\beta =0\\)，故 \\(\\eta =0\\)、\\(\\lambda =1\\)；观测到的计数 \\(y=3\\)。求对数似然梯度对 \\(\\beta\\) 的贡献。",
           "steps": [
-            "predictor \\(\\eta =x\\beta =0\\)，inverse log link 给 \\(\\lambda =e^0=1\\)。",
-            "count residual \\(y-\\lambda =2\\)。",
-            "gradient contribution \\(x(y-\\lambda )=2\\times 2=4\\)，为正；gradient ascent 会增加 \\(\\beta\\)，从而提高 predicted count。"
+            "预测量 \\(\\eta =x\\beta =0\\)，对数连接函数的逆函数给 \\(\\lambda =e^0=1\\)。",
+            "计数残差 \\(y-\\lambda =2\\)。",
+            "梯度贡献 \\(x(y-\\lambda )=2\\times 2=4\\)，为正；梯度上升会增加 \\(\\beta\\)，从而提高预测的计数。"
           ],
-          "result": "Poisson gradient 用 observed minus expected count 决定方向，同时由 covariate magnitude 决定该 sample 对 coefficient 的作用。",
-          "sanityCheck": "若 \\(y=0\\)，同一 sample gradient 为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；prediction 始终保持 positive。"
+          "result": "泊松梯度用观测计数减去期望计数决定方向，同时由协变量大小决定该样本对系数的作用。",
+          "sanityCheck": "若 \\(y=0\\)，同一样本梯度为 \\(2(0-1)=-2\\)，会降低 \\(\\beta\\) 与 \\(\\lambda\\)；预测始终保持正。"
         },
         "pitfalls": [
-          "把 Gaussian、Poisson 与 Bernoulli 只当三个 loss 名称，不检查 response support 与 variance assumption。",
-          "从 Poisson conditional model 推断真实 spikes 无 refractory 或 shared network fluctuations。"
+          "只将高斯、Poisson 和 Bernoulli 当成不同损失名称，不检查响应取值与方差假设。",
+          "根据条件 Poisson 模型推断真实脉冲没有不应期或共同网络波动。"
         ]
       },
       {
         "id": "L14-M3",
-        "title": "Retinal population filters、Bernoulli logit 与 conditional dependence",
+        "title": "群体放电历史与条件依赖",
+        "transition": "条件独立性取决于预测量纳入了哪些信息。加入自身与其他神经元的放电历史，可以描述不应期和群体依赖；若每格只记录有无放电，还需要明确 Bernoulli 与计数模型的区别。",
         "sourceRefs": [
           {
             "file": "Lecture14-STC-GLM.pdf",
@@ -248,57 +250,57 @@
           }
         ],
         "paragraphs": [
-          "retinal population GLM 为每个 neuron i 建 predictor η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)\\(+b_{i}\\)。stimulus filter \\(k_{i}\\) 描述 receptive-field drive；self-history \\(h_{i}\\) 可在 spike 后短 lag 为负以表达 refractory，也可稍后为正以表达 burst tendency；coupling filter \\(c_{ij}\\) 描述其他 neurons' past spikes 对 i 的 conditional rate。",
-          "所有 filters 同时拟合很重要。若先忽略 self-history，refractory structure 可能被 stimulus filter 吸收；若忽略 shared stimulus，coupling filter 会把共同 stimulus drive 当成 interaction。即使 simultaneous fit，unobserved neurons 与 global state 仍可产生 residual coupling，因此 coefficient 是 predictive conditional dependence，不是 anatomical synapse label。",
-          "极小 bin 中 response \\(y_{t}\\in {0,1}\\)，可用 Bernoulli likelihood。log odds \\(\\theta =\\log[q/(1-q)]\\) 作为 predictor \\(\\eta\\)，inverse link \\(q=e^\\eta /(1+e^\\eta )\\)。\\(\\eta =0\\) 时 \\(q=0.5\\)，\\(\\eta\\) 增加一单位使 odds 乘 e；这种解释比直接说 probability 增加固定量更准确，因为 sigmoid near 0 与 near 1 的 slope 不同。",
-          "Bernoulli negative log likelihood 是 binary cross-entropy。它既可用于 small-bin spike/no-spike，也可用于 behavioral classification，但 observation unit 与 covariates 不同。若 r 是 continuous-time rate，则 Poisson bin mean 为 \\(\\lambda _{\\mathrm{bin}}=r\\Delta t\\)；在 \\(\\lambda _{\\mathrm{bin}}\\ll 1\\) 时，至少一个 spike 的概率 \\(q=1-e^{-\\lambda _{\\mathrm{bin}}}\\approx \\lambda _{\\mathrm{bin}}\\approx r\\Delta t\\)，因而接近 Bernoulli。若上一模块的 \\(\\lambda\\) 已表示每个 bin 的 expected count，就不能再乘一次 \\(\\Delta t\\)。当 bin 内多 spikes 不可忽略时，Bernoulli 会丢掉 count information。选择模型前必须先声明每个 sample 是 count window、binary bin 还是 behavioral trial。"
+          "视网膜群体 GLM 为每个神经元建立预测量 η_i(t)=k_i*s(t)+h_i*y_i(t-past)+Σ_{j≠i}c_{ij}*y_j(t-past)\\(+b_{i}\\)。刺激核 \\(k_{i}\\) 描述感受野驱动；自身历史核 \\(h_{i}\\) 在放电后短延迟处可为负，描述不应期，在较晚时刻为正则可描述簇发倾向；耦合核 \\(c_{ij}\\) 表示其他神经元过去的放电如何改变该细胞的条件放电率。",
+          "这些滤波器应同时拟合。忽略自身放电历史，可能使刺激核吸收不应期结构；忽略共同刺激，则可能使耦合核将共同驱动误认作相互作用。即使同时拟合，未记录的神经元和全局状态仍可能造成剩余耦合。因此，耦合系数说明条件预测关系，不能直接标注为解剖突触。",
+          "极小时间格内若记录 \\(y_{t}\\in {0,1}\\)，可采用 Bernoulli 似然。将对数优势 \\(\\theta =\\log[q/(1-q)]\\) 作为预测量 \\(\\eta\\)，其反连接为 \\(q=e^\\eta /(1+e^\\eta )\\)。\\(\\eta =0\\) 时 \\(q=0.5\\)；\\(\\eta\\) 增加一单位，优势比乘以 e。概率不会因此增加固定数值，因为 sigmoid 在不同工作点的斜率不同。",
+          "Bernoulli 负对数似然就是二元交叉熵，可用于小时间格的有无放电记录，也可用于行为分类，但二者的观察单位和协变量不同。若 r 是连续时间放电率，Poisson 时间格均值为 \\(\\lambda _{\\mathrm{bin}}=r\\Delta t\\)。当 \\(\\lambda _{\\mathrm{bin}}\\ll 1\\) 时，至少一个脉冲的概率 \\(q=1-e^{-\\lambda _{\\mathrm{bin}}}\\approx \\lambda _{\\mathrm{bin}}\\approx r\\Delta t\\)，因此可近似为 Bernoulli。若 \\(\\lambda\\) 已表示每格的预期计数，则不能再乘一次 \\(\\Delta t\\)。当每格多次放电不可忽略时，Bernoulli 会丢失计数信息，所以建模前应明确每个样本究竟是计数时间窗、二元时间格还是行为试次。"
         ],
         "keyPoints": [
-          "population predictor 可同时包含 stimulus、self-history、cross-neuron history 与 bias。",
-          "coupling filter 是 conditional statistical coefficient，不自动等于 direct excitatory/inhibitory synapse。",
-          "Bernoulli logit 映射到 probability；small-bin Poisson 近似只在 expected count 很小时成立。"
+          "群体预测量可以同时包含刺激、自身放电历史、其他神经元的放电历史和偏置。",
+          "耦合滤波器描述条件统计关系，不自动等同于直接兴奋性或抑制性突触。",
+          "Bernoulli 的 logit 连接输出概率；小时间格 Poisson 近似要求预期计数远小于一。"
         ],
         "derivation": {
-          "title": "从 Bernoulli likelihood 到 sigmoid 与 cross-entropy",
-          "setup": "单 observation \\(y\\in {0,1}\\)，spike probability q，logit predictor \\(\\eta =\\log[q/(1-q)]=x^\\mathrm{T}\\beta\\)。",
+          "title": "从 Bernoulli 似然到 sigmoid 与交叉-熵",
+          "setup": "单观测 \\(y\\in {0,1}\\)，脉冲概率 q，logit 预测量 \\(\\eta =\\log[q/(1-q)]=x^\\mathrm{T}\\beta\\)。",
           "steps": [
             {
-              "title": "解出 inverse link",
+              "title": "解出逆矩阵连接函数",
               "explanation": "从 \\(q/(1-q)=e^\\eta\\) 出发，移项得到 \\(q=e^\\eta /(1+e^\\eta )=1/(1+e^{-\\eta })\\)。",
               "latex": "q=\\sigma(\\eta)=\\frac{1}{1+e^{-\\eta}}"
             },
             {
-              "title": "写 log likelihood",
-              "explanation": "Bernoulli probability \\(q^y(1-q)^{1-y}\\) 取 log，得到 \\(y\\log q+(1-y)\\log(1-q)\\)。",
+              "title": "写 log 似然",
+              "explanation": "Bernoulli 概率 \\(q^y(1-q)^{1-y}\\) 取 log，得到 \\(y\\log q+(1-y)\\log(1-q)\\)。",
               "latex": "\\ell=y\\log q+(1-y)\\log(1-q)"
             },
             {
-              "title": "识别 residual gradient",
-              "explanation": "sigmoid derivative \\(q(1-q)\\) 与 log terms 的 derivative 抵消后，\\(\\partial ell/\\partial \\eta =y-q\\)；再乘 x 得 coefficient gradient。",
+              "title": "识别残差梯度",
+              "explanation": "sigmoid 导数 \\(q(1-q)\\) 与 log 项的导数抵消后，\\(\\partial ell/\\partial \\eta =y-q\\)；再乘 x 得系数梯度。",
               "latex": "\\nabla_\\beta\\ell=\\mathbf x(y-q)"
             }
           ],
           "symbolNotes": [
-            "q 是当前 bin 至少一个 spike 的 probability；若 y 表示 behavioral choice，解释变为 choice probability。",
-            "odds=q/(1-q) 与 probability 不同；coefficient \\(\\beta _{j}\\) 表示 \\(x_{j}\\) 增加一单位时 odds 乘 \\(e^{\\beta _{j}}\\)，其他 covariates 固定。"
+            "q 是当前时间格至少一个脉冲的概率；若 y 表示行为选择，解释变为选择概率。",
+            "优势比=q/(1-q) 与概率不同；系数 \\(\\beta _{j}\\) 表示 \\(x_{j}\\) 增加一单位时优势比乘 \\(e^{\\beta _{j}}\\)，其他协变量固定。"
           ],
-          "unitsCheck": "\\(\\eta\\) 和 log odds 无量纲，所以有单位的 covariate 需要 reciprocal-unit coefficient，使 \\(x_{j}\\beta _{j}\\) 无量纲。",
-          "limitCheck": "q 接近 0 或 1 时 sigmoid slope \\(q(1-q)\\) 很小；极端 separation 会让 unregularized logistic coefficients diverge。"
+          "unitsCheck": "\\(\\eta\\) 和 log 优势比无量纲，所以有单位的协变量需要倒数-单位系数，使 \\(x_{j}\\beta _{j}\\) 无量纲。",
+          "limitCheck": "q 接近 0 或 1 时 sigmoid 斜率 \\(q(1-q)\\) 很小；极端分离会让未正则化的 Logistic 系数发散。"
         },
         "workedExample": {
-          "title": "History filters 如何组合成 conditional spike probability",
-          "problem": "某 bin predictor 由 bias -2、stimulus contribution +1.5、refractory self-history -3、另一 neuron coupling +0.5 组成。计算 \\(\\eta\\) 与 q；再去掉 refractory term 比较。",
+          "title": "历史滤波器如何组合成条件脉冲概率",
+          "problem": "某时间格预测量由偏差 -2、刺激贡献 +1.5、不应期自身历史 -3、另一神经元耦合 +0.5 组成。计算 \\(\\eta\\) 与 q；再去掉不应期项比较。",
           "steps": [
-            "含全部 terms 时 \\(\\eta =-2+1.5-3+0.5=-3\\)，\\(q=1/(1+e^3)\\approx 0.047\\)。",
-            "去掉 refractory term 时 \\(\\eta =0\\)，\\(q=0.5\\)。",
-            "因此最近自身 spike 的强负 history filter 可在 stimulus 与 coupling drive 存在时仍压低 immediate spike probability。"
+            "含全部项时 \\(\\eta =-2+1.5-3+0.5=-3\\)，\\(q=1/(1+e^3)\\approx 0.047\\)。",
+            "去掉不应期项时 \\(\\eta =0\\)，\\(q=0.5\\)。",
+            "因此最近自身脉冲的强负历史滤波器可在刺激与耦合驱动存在时仍压低即时脉冲概率。"
           ],
-          "result": "GLM 在 predictor 中加总不同来源的 evidence，再由 sigmoid 把总量变成合法 probability。",
-          "sanityCheck": "贡献相加发生在 log-odds space，不是直接把 probabilities 相加；直接相加可能超过 1。"
+          "result": "GLM 在预测量中加总不同来源的证据，再由 sigmoid 把总量变成合法概率。",
+          "sanityCheck": "贡献相加发生在对数优势比空间，不是直接把概率相加；直接相加可能超过 1。"
         },
         "pitfalls": [
-          "在 history design matrix 中误用当前或未来 spikes，造成 information leakage 与虚假高预测力。",
-          "把 log-odds coefficient 当成 probability 的固定加减量，忽略 sigmoid operating point。"
+          "构造历史设计矩阵时误用当前或未来脉冲，造成信息泄漏和虚高的预测成绩。",
+          "将对数优势系数当作概率的固定增减量，忽略 sigmoid 的工作点。"
         ]
       }
     ]
@@ -307,11 +309,11 @@
     {
       "id": "L14-FIG-A1",
       "lecture": 14,
-      "lectureTitle": "Spike-Triggered Covariance 与广义线性模型",
+      "lectureTitle": "脉冲触发协方差与广义线性模型",
       "moduleId": "L14-M3",
-      "title": "Population GLM 把 stimulus、self-history 与 coupling 放进同一 conditional predictor",
-      "alt": "三个输入分支分别表示刺激历史、自身脉冲历史和其他神经元历史，它们经过滤波后汇入线性预测器，再经 inverse link 产生条件脉冲概率。",
-      "caption": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor \\(\\eta _{i}(t)\\) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。simultaneous fitting 可减少 omitted-covariate 混淆，但 coupling coefficient 仍只表示给定已纳入变量后的 predictive dependence，不能直接当作 anatomical synapse。",
+      "title": "群体广义线性模型把刺激、自身历史与耦合放进同一条件预测量",
+      "alt": "三个输入分支分别表示刺激历史、自身脉冲历史和其他神经元历史，它们经过滤波后汇入线性预测器，再经 连接函数的逆函数产生条件脉冲概率。",
+      "caption": "群体广义线性模型同时把刺激滤波器、自身历史滤波器与跨神经元耦合滤波器加到预测量 \\(\\eta _{i}(t)\\) 中，再由对数或 logit 连接函数的逆函数映到非负发放率或二值脉冲概率。同时拟合可减少遗漏协变量混淆，但耦合系数仍只表示给定已纳入变量后的预测依赖，不能直接当作解剖上的突触。",
       "sourceRefs": [
         {
           "file": "Lecture14-STC-GLM.pdf",
@@ -327,38 +329,38 @@
       "nodes": [
         {
           "id": "stimulus",
-          "label": "stimulus history\n\\(k_{i} * s\\)",
+          "label": "刺激历史\n\\(k_{i} * s\\)",
           "x": 10,
           "y": 82
         },
         {
           "id": "self-history",
-          "label": "self-history\n\\(h_{i} * y_{i}\\)",
+          "label": "自身历史\n\\(h_{i} * y_{i}\\)",
           "x": 10,
           "y": 55
         },
         {
           "id": "coupling",
-          "label": "other neurons\n\\(\\sum c_{ij} * y_{j}\\)",
+          "label": "其他神经元\n\\(\\sum c_{ij} * y_{j}\\)",
           "x": 10,
           "y": 28
         },
         {
           "id": "predictor",
-          "label": "linear predictor\n\\(\\eta _{i}(t)\\)+ bias",
+          "label": "线性预测量\n\\(\\eta _{i}(t)\\)+ 偏置",
           "x": 45,
           "y": 55,
           "tone": "accent"
         },
         {
           "id": "inverse-link",
-          "label": "inverse link\nexp / sigmoid",
+          "label": "连接函数的逆函数\nexp / sigmoid",
           "x": 70,
           "y": 55
         },
         {
           "id": "response",
-          "label": "conditional\nspike response",
+          "label": "条件\n脉冲响应",
           "x": 94,
           "y": 55
         }
@@ -384,7 +386,7 @@
         {
           "from": "inverse-link",
           "to": "response",
-          "label": "mean / probability"
+          "label": "均值 / 概率"
         }
       ]
     }
@@ -413,7 +415,7 @@
     "思考题：Poisson 为什么常用 log link？"
   ],
   "synthesis": [
-    "STC 比较 spike-triggered 与 raw stimulus covariance，寻找 spikes 前 variance 被放大或压缩的 directions；colored stimuli 需 whitening/correction。GLM 则用 response distribution、linear predictor 与 link function 统一多种 regression。retinal population GLM 可同时拟合 stimulus filters、self-history 与 cross-neuron couplings，但它仍是统计模型，coupling filter 不自动等于直接 synapse。"
+    "STC 比较脉冲前刺激与总体刺激的协方差，找出方差发生变化的方向；刺激本身有相关性时，需要白化或相应校正。GLM 用响应分布、线性预测量和连接函数描述不同类型的数据，还可加入自身历史与神经元间耦合项。这些项提高预测能力，但拟合出的耦合不等于直接的解剖连接。"
   ],
   "workedExamples": [
     "7.1 distribution/link matching",
@@ -427,10 +429,10 @@
     {
       "id": "L14-F01",
       "lecture": 14,
-      "name": "STC covariance change",
+      "name": "脉冲触发协方差的变化",
       "expression": "∆C = Cspike − Cstim",
       "latex": "\\Delta C=C_{\\mathrm{spike}}-C_{\\mathrm{stim}}",
-      "conditions": "centered ensembles",
+      "conditions": "样本集合已中心化",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -438,10 +440,10 @@
     {
       "id": "L14-F02",
       "lecture": 14,
-      "name": "GLM linear predictor",
+      "name": "GLM 线性预测量",
       "expression": "η = Xβ",
       "latex": "\\boldsymbol{\\eta}=X\\boldsymbol{\\beta}",
-      "conditions": "shape-compatible design",
+      "conditions": "设计矩阵维度相容",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -449,10 +451,10 @@
     {
       "id": "L14-F03",
       "lecture": 14,
-      "name": "link function",
+      "name": "连接函数",
       "expression": "g(E[y|x]) = η",
       "latex": "g(\\mathbb{E}[y\\mid x])=\\eta",
-      "conditions": "chosen response family",
+      "conditions": "已选定响应分布族",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -460,10 +462,10 @@
     {
       "id": "L14-F04",
       "lecture": 14,
-      "name": "Poisson log-link inverse",
+      "name": "泊松对数连接的逆函数",
       "expression": "λ = eη",
       "latex": "\\lambda=e^{\\eta}",
-      "conditions": "positive mean",
+      "conditions": "均值为正",
       "sectionId": "L14-M2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 4
@@ -471,7 +473,7 @@
     {
       "id": "L14-F05",
       "lecture": 14,
-      "name": "logistic inverse link",
+      "name": "Logistic 逆连接函数",
       "expression": "q = (1 + e−η )−1",
       "latex": "q=(1+e^{-\\eta})^{-1}",
       "conditions": "\\(0<q<1\\)",
@@ -482,10 +484,10 @@
     {
       "id": "L14-F06",
       "lecture": 14,
-      "name": "Poisson log-likelihood",
+      "name": "泊松对数似然",
       "expression": "ℓP ois = (yη − eη − log y!)",
       "latex": "\\ell_{\\mathrm{Pois}}=\\sum(y\\eta-e^{\\eta}-\\log(y!))",
-      "conditions": "conditionally independent bins/counts",
+      "conditions": "给定条件后，各时间格的计数独立",
       "sectionId": "L14-M2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 3
@@ -493,10 +495,10 @@
     {
       "id": "L14-F07",
       "lecture": 14,
-      "name": "logistic loss",
+      "name": "Logistic 损失",
       "expression": "−ℓBern = cross-entropy",
       "latex": "-\\ell_{\\mathrm{Bern}}=\\operatorname{cross\\text{-}entropy}",
-      "conditions": "Bernoulli outcomes",
+      "conditions": "响应为伯努利二值结果",
       "sectionId": "L14-M3",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 6
@@ -508,7 +510,7 @@
       "lecture": 14,
       "zh": "脉冲触发协方差",
       "en": "spike-triggered covariance, STC",
-      "definition": "对 spike-triggered ensemble covariance 的分析。",
+      "definition": "分析脉冲触发刺激集合的协方差。",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -518,7 +520,7 @@
       "lecture": 14,
       "zh": "相关子空间",
       "en": "relevant subspace",
-      "definition": "多个 stimulus filters 张成的 response-sensitive subspace。",
+      "definition": "由多个影响响应的刺激滤波器张成的子空间。",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -528,7 +530,7 @@
       "lecture": 14,
       "zh": "指数族",
       "en": "exponential family",
-      "definition": "可写成特定 canonical statistic/parameter 形式的分布族。",
+      "definition": "可用指定的充分统计量与自然参数形式表示的概率分布族。",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -538,7 +540,7 @@
       "lecture": 14,
       "zh": "线性预测子",
       "en": "linear predictor",
-      "definition": "\\(\\eta =X\\beta \\)。",
+      "definition": "由输入线性组合得到的 \\(\\eta =X\\beta\\)。",
       "sectionId": "L14-M2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 2
@@ -546,9 +548,9 @@
     {
       "id": "L14-G05",
       "lecture": 14,
-      "zh": "链接函数",
+      "zh": "连接函数",
       "en": "link function",
-      "definition": "conditional mean 与 \\(\\eta \\) 之间的映射。",
+      "definition": "条件均值与线性预测量 \\(\\eta\\) 之间的映射。",
       "sectionId": "L14-M1",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1
@@ -556,9 +558,9 @@
     {
       "id": "L14-G06",
       "lecture": 14,
-      "zh": "Poisson 回归",
+      "zh": "泊松回归",
       "en": "Poisson regression",
-      "definition": "count/rate 的 log-link GLM。",
+      "definition": "对计数或发放率使用对数连接函数的广义线性模型。",
       "sectionId": "L14-M2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 4
@@ -568,7 +570,7 @@
       "lecture": 14,
       "zh": "逻辑回归",
       "en": "logistic regression",
-      "definition": "Bernoulli outcome 的 logit-link GLM。",
+      "definition": "对伯努利结果使用 logit 连接函数的广义线性模型。",
       "sectionId": "L14-M2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 4
@@ -578,7 +580,7 @@
       "lecture": 14,
       "zh": "对数几率",
       "en": "log odds",
-      "definition": "\\(\\log[q/(1-q)]\\)。",
+      "definition": "概率优势比的对数，\\(\\log[q/(1-q)]\\)。",
       "sectionId": "L14-M3",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 6
@@ -588,7 +590,7 @@
       "lecture": 14,
       "zh": "历史滤波器",
       "en": "history filter",
-      "definition": "过去 spikes 对当前 conditional response 的线性影响。",
+      "definition": "描述过去脉冲对当前条件响应影响的线性滤波器。",
       "sectionId": "L14-M3",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 5
@@ -598,27 +600,27 @@
       "lecture": 14,
       "zh": "耦合滤波器",
       "en": "coupling filter",
-      "definition": "其他 units' histories 的 predictive filter。",
+      "definition": "利用其他神经元活动历史预测当前响应的滤波器。",
       "sectionId": "L14-M2",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 2
     }
   ],
   "commonTraps": [
-    "\\(STA=0\\) 就认为没有 relevant feature。",
-    "colored stimulus 下直接对 \\(\\Delta C\\) 做普通 eigendecomposition。",
-    "把 GLM 的 linear 理解为 response mean 必须线性。",
-    "Poisson link 使用 identity 导致 negative rate。",
-    "把 Bernoulli logistic classification 与 Poisson small-count model 混同。",
-    "把 fitted coupling filters 当作直接 anatomical synapses。",
-    "忽略 history dependence 导致 apparent stimulus filter 偏差。",
-    "需避免把 GLM 的\"linear\"理解成 response mean 需要线性；linear 指 predictor，对 mean 的关系由 link 决定。"
+    "看到 \\(STA=0\\) 就认为不存在与反应相关的刺激特征。",
+    "刺激本身具有相关性时，直接对 \\(\\Delta C\\) 做普通特征分解，未校正刺激协方差。",
+    "把 GLM 的“线性”理解为平均响应必须与输入呈线性关系。",
+    "Poisson 模型使用恒等连接函数时，未处理可能出现的负发放率。",
+    "混淆伯努利逻辑分类与 Poisson 小计数模型，忽略响应变量和概率假设不同。",
+    "把拟合的神经元间耦合滤波器直接当成解剖突触。",
+    "忽略历史依赖，使其影响被错误地归入刺激滤波器。",
+    "把线性预测量与响应均值混为一谈，忘记 GLM 中两者通过连接函数联系。"
   ],
   "errata": [
     {
       "id": "L14-E01",
       "lecture": 14,
-      "lectureTitle": "Spike-Triggered Covariance 与广义线性模型",
+      "lectureTitle": "脉冲触发协方差与广义线性模型",
       "kind": "caution",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 1,
@@ -630,7 +632,7 @@
     {
       "id": "L14-E02",
       "lecture": 14,
-      "lectureTitle": "Spike-Triggered Covariance 与广义线性模型",
+      "lectureTitle": "脉冲触发协方差与广义线性模型",
       "kind": "caution",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 2,
@@ -642,13 +644,13 @@
     {
       "id": "L14-E03",
       "lecture": 14,
-      "lectureTitle": "Spike-Triggered Covariance 与广义线性模型",
+      "lectureTitle": "脉冲触发协方差与广义线性模型",
       "kind": "caution",
       "sourceFile": "Lecture14-STC-GLM.pdf",
       "sourcePage": 5,
       "sectionId": "L14-M3",
       "originalIssue": "这里 的 retinal GLM coupling 应解释为 conditional statistical dependence，不自动证明 causal synaptic connection。",
-      "explanation": "即使 simultaneous fit，unobserved neurons 与 global state 仍可产生 residual coupling，因此 coefficient 是 predictive conditional dependence，不是 anatomical synapse label。",
+      "explanation": "该结论只能在条目列出的近似、参数或版本边界内解释，不能当作无条件结论。",
       "correction": "这里 的 retinal GLM coupling 应解释为 conditional statistical dependence，不自动证明 causal synaptic connection"
     }
   ],
@@ -665,37 +667,37 @@
         }
       ],
       "conceptTags": [
-        "Multiple relevant features 与 spike-triggered covariance"
+        "用协方差寻找多个相关特征"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 STC eigenvector 的正负号不能直接告诉我们 stimulus 是 excitatory 还是 inhibitory？",
+      "stem": "为什么 STC 特征向量的正负号不能直接告诉我们刺激是兴奋性还是抑制性？",
       "choices": [
         {
           "id": "a",
-          "text": "模型只能控制已测 covariates；unobserved common input、global state、model mismatch 与 indirect network paths 仍可制造 conditional dependence。causal synapse 还需 intervention、anatomy 或更强 identifiability assumptions。"
+          "text": "正特征向量表示兴奋，负特征向量表示抑制，只需固定数值求解器输出的符号即可。"
         },
         {
           "id": "b",
-          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "只要特征值为正，该轴两侧的刺激都必然使放电率单调增加，负特征值则两侧都单调减少。"
         },
         {
           "id": "c",
-          "text": "在 colored stimulus 上直接挑 \\(\\Delta C\\) 最大 eigenvector，把 stimulus 自身的高 variance 误认为 neural feature。"
+          "text": "协方差只保留刺激均值，所以不能判断兴奋或抑制。"
         },
         {
           "id": "d",
-          "text": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。"
+          "text": "特征向量反号仍代表同一轴；刺激哪一侧促进放电，还需沿该轴的非线性判断。"
         }
       ],
       "correctChoiceId": "d",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“Retinal population filters、Bernoulli logit 与 conditional dependence”中的另一组变量与条件，不能由题干推出。",
-        "b": "该结论使用“GLM 三要素与 Gaussian、Poisson likelihood”中的另一组变量与条件，不能由题干推出。",
-        "c": "错误在于：在 colored stimulus 上直接挑 \\(\\Delta C\\) 最大 eigenvector，把 stimulus 自身的高 variance 误认为 neural feature。"
+        "a": "数值求解器选择的整体符号没有生理意义；反号后仍代表同一特征轴。",
+        "b": "特征值符号说明条件方差扩大或缩小，不确定投影到放电率的完整函数。",
+        "c": "协方差描述中心化的二阶统计；不是只保留均值，问题在于轴的符号不唯一。"
       },
-      "explanation": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。 eigenvector 的正负号本身不唯一，v 与 -v 表示同一轴；真正 response sign 需结合 multidimensional nonlinearity 解释。"
+      "explanation": "协方差描述一条无方向的轴，v 与 -v 产生相同投影的平方和协方差；要判断投影符号如何影响发放率，必须再拟合或观察沿该轴的非线性。 特征向量的正负号不唯一，v 与 -v 表示同一轴，因此不能根据向量符号判断兴奋或抑制，仍须结合多维非线性。"
     },
     {
       "id": "L14-Q02",
@@ -709,37 +711,37 @@
         }
       ],
       "conceptTags": [
-        "GLM 三要素与 Gaussian、Poisson likelihood"
+        "GLM 的连接函数与响应分布"
       ],
       "difficulty": 2,
-      "type": "debug",
+      "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么 Poisson GLM 使用 identity link \\(\\lambda =\\eta\\) 会产生结构性问题？",
+      "stem": "为什么 Poisson GLM 使用恒等连接函数 \\(\\lambda =\\eta\\) 会产生结构性问题？",
       "choices": [
         {
           "id": "a",
-          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "无约束线性预测量可能为负；直接作为计数均值会超出 Poisson 模型允许的范围。"
         },
         {
           "id": "b",
-          "text": "模型只能控制已测 covariates；unobserved common input、global state、model mismatch 与 indirect network paths 仍可制造 conditional dependence。causal synapse 还需 intervention、anatomy 或更强 identifiability assumptions。"
+          "text": "恒等连接函数让每次计数都等于均值，因此不再存在随机放电。"
         },
         {
           "id": "c",
-          "text": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。"
+          "text": "恒等连接函数的问题是均值可能超过 1；Poisson 均值像二元概率一样必须限制在 0 到 1 之间。"
         },
         {
           "id": "d",
-          "text": "把 Gaussian、Poisson 与 Bernoulli 只当三个 loss 名称，不检查 response support 与 variance assumption。"
+          "text": "恒等连接函数会让均值带有时间单位，而对数连接函数会自动修正任何计数窗口的单位错误。"
         }
       ],
       "correctChoiceId": "a",
       "wrongChoiceExplanations": {
-        "b": "该结论使用“Retinal population filters、Bernoulli logit 与 conditional dependence”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Multiple relevant features 与 spike-triggered covariance”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：把 Gaussian、Poisson 与 Bernoulli 只当三个 loss 名称，不检查 response support 与 variance assumption。"
+        "b": "连接函数规定预测量与均值的关系，不把随机观测强制设成均值。",
+        "c": "Poisson 均值是预期计数，可以大于 1；无约束 identity 的主要问题是允许负值。",
+        "d": "窗口与单位必须在建模时明确，连接函数的选择不能自动纠正单位约定。"
       },
-      "explanation": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。 exponential 让任何 real predictor 都映到 positive mean，并使 log likelihood 变成 Σ[yη-e^η-log(y!"
+      "explanation": "线性预测量 \\(\\eta\\) 可取任意实数值，恒等连接函数会允许负期望计数；对数连接函数用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到正均值，并给典范泊松似然便利的残差梯度。 指数函数将任意实数预测量映到正均值，对数似然则写成 Σ[yη-e^η-log(y!"
     },
     {
       "id": "L14-Q03",
@@ -753,37 +755,37 @@
         }
       ],
       "conceptTags": [
-        "Retinal population filters、Bernoulli logit 与 conditional dependence"
+        "群体放电历史与条件依赖"
       ],
       "difficulty": 2,
       "type": "comparison",
       "cognitiveLevel": "understand",
-      "stem": "为什么同时拟合 stimulus 与 coupling filters 仍不能把 coupling coefficient 当成 causal synapse？",
+      "stem": "为什么同时拟合刺激与耦合滤波器仍不能把耦合系数当成因果突触？",
       "choices": [
         {
           "id": "a",
-          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "联合拟合已排除所有共同输入，所以任何非零耦合都必定对应直接突触连接。"
         },
         {
           "id": "b",
-          "text": "模型只能控制已测 covariates；unobserved common input、global state、model mismatch 与 indirect network paths 仍可制造 conditional dependence。causal synapse 还需 intervention、anatomy 或更强 identifiability assumptions。"
+          "text": "联合拟合只控制已纳入变量；未测共同输入和间接通路仍会产生耦合，不能据此识别直接突触。"
         },
         {
           "id": "c",
-          "text": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。"
+          "text": "只要耦合在交叉验证中稳定，其因果方向和直接连接就已确定，无需干预或额外可辨识性条件。"
         },
         {
           "id": "d",
-          "text": "在 history design matrix 中误用当前或未来 spikes，造成 information leakage 与虚假高预测力。"
+          "text": "只有负的耦合不能解释为突触，正系数则一定表示直接兴奋性连接。"
         }
       ],
       "correctChoiceId": "b",
       "wrongChoiceExplanations": {
-        "a": "该结论使用“GLM 三要素与 Gaussian、Poisson likelihood”中的另一组变量与条件，不能由题干推出。",
-        "c": "该结论使用“Multiple relevant features 与 spike-triggered covariance”中的另一组变量与条件，不能由题干推出。",
-        "d": "错误在于：在 history design matrix 中误用当前或未来 spikes，造成 information leakage 与虚假高预测力。"
+        "a": "未观测输入无法因纳入其他已测变量而自动消失。",
+        "c": "稳定预测也可能来自共同原因或间接通路；泛化性能不能单独建立直接因果连接。",
+        "d": "正负系数都属于条件预测关系，两种符号都可能受遗漏变量影响。"
       },
-      "explanation": "模型只能控制已测 covariates；unobserved common input、global state、model mismatch 与 indirect network paths 仍可制造 conditional dependence。causal synapse 还需 intervention、anatomy 或更强 identifiability assumptions。 即使 simultaneous fit，unobserved neurons 与 global state 仍可产生 residual coupling，因此 coefficient 是 predictive conditional dependence，不是 anatomical synapse label。"
+      "explanation": "模型只能控制已测协变量；未观测的共同输入、全局状态、模型失配与间接网络路径仍可制造条件依赖。因果突触还需干预、解剖或更强可辨识性假设。 即使同时拟合，未记录的神经元和全局状态仍可能造成剩余耦合。"
     },
     {
       "id": "L14-Q04",
@@ -797,37 +799,37 @@
         }
       ],
       "conceptTags": [
-        "Population GLM 把 stimulus、self-history 与 coupling 放进同一 conditional predictor"
+        "群体广义线性模型把刺激、自身历史与耦合放进同一条件预测量"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "观察\"Population GLM 把 stimulus、self-history 与 coupling 放进同一 conditional predictor\"时，哪项解释符合图中的标注与关系？",
+      "stem": "观察\"群体广义线性模型把刺激、自身历史与耦合放进同一条件预测量\"时，哪项解释符合图中的标注与关系？",
       "choices": [
         {
           "id": "a",
-          "text": "linear predictor \\(\\eta\\) 可取任意 real value，identity link 会允许 negative expected counts；log link 用 \\(\\lambda =e^\\eta\\) 把整个实数轴映到 positive means，并给 canonical Poisson likelihood 便利的 residual gradient。"
+          "text": "三个分支分别产生独立的脉冲，再把它们相加；连接函数的逆函数只负责给最终图形设定坐标单位。"
         },
         {
           "id": "b",
-          "text": "covariance 描述一条无方向的 axis，v 与 -v 产生相同 projection square 和 covariance；要判断 projection sign 如何影响 rate，必须再拟合或观察沿该 axis 的 nonlinearity。"
+          "text": "图中的自身历史与其他神经元历史可包含当前和未来脉冲，这能在不泄漏答案的情况下提高预测精度。"
         },
         {
           "id": "c",
-          "text": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor \\(\\eta _{i}(t)\\) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。"
+          "text": "刺激和多个神经元的历史共同合成预测量，再映到条件均值或概率；耦合系数仍不能直接认定为突触。"
         },
         {
           "id": "d",
-          "text": "在 history design matrix 中误用当前或未来 spikes，造成 information leakage 与虚假高预测力。"
+          "text": "刺激分支一旦加入，耦合分支就可直接读作已验证的突触连接图。"
         }
       ],
       "correctChoiceId": "c",
       "wrongChoiceExplanations": {
-        "a": "图中没有“GLM 三要素与 Gaussian、Poisson likelihood”所需的变量与条件。",
-        "b": "图中没有“Multiple relevant features 与 spike-triggered covariance”所需的变量与条件。",
-        "d": "图中的标注与关系不支持这种读法：在 history design matrix 中误用当前或未来 spikes，造成 information leakage 与虚假高预测力。"
+        "a": "分支合成线性预测量，连接函数的逆函数才将其映到响应分布的均值或概率。",
+        "b": "预测当前放电时使用当前答案或未来事件会造成信息泄漏；历史项应来自过去。",
+        "d": "控制已测刺激仍不能排除未测共同驱动或间接相互作用。"
       },
-      "explanation": "population GLM 同时把 stimulus filter、self-history filter 与 cross-neuron coupling filters 加到 predictor \\(\\eta _{i}(t)\\) 中，再由 log 或 logit inverse link 映到非负 rate 或 binary spike probability。simultaneous fitting 可减少 omitted-covariate 混淆，但 coupling coefficient 仍只表示给定已纳入变量后的 predictive dependence，不能直接当作 anatomical synapse。"
+      "explanation": "群体广义线性模型同时把刺激滤波器、自身历史滤波器与跨神经元耦合滤波器加到预测量 \\(\\eta _{i}(t)\\) 中，再由对数或 logit 连接函数的逆函数映到非负发放率或二值脉冲概率。同时拟合可减少遗漏协变量混淆，但耦合系数仍只表示给定已纳入变量后的预测依赖，不能直接当作解剖上的突触。"
     }
   ]
 }

@@ -39,9 +39,10 @@ for (const edition of editions) {
     requireGate((lecture.questions ?? []).length === modules.length + (lecture.figures ?? []).length, `${prefix}: expected one question per module plus one per figure`);
     requireGate(!('coreQuestion' in lecture) && !('diagnostic' in lecture) && !('diagnostic' in (lecture.studyGuide ?? {})), `${prefix}: open-ended lecture prompts remain published`);
 
-    for (const studyModule of modules) {
+    for (const [moduleIndex, studyModule] of modules.entries()) {
       const id = `${prefix}:${studyModule.id}`;
       moduleCount += 1;
+      if (moduleIndex > 0) requireGate(Boolean(studyModule.transition?.trim()), `${id}: no authored transition from the preceding module`);
       requireGate((studyModule.sourceRefs ?? []).length >= 1, `${id}: no source anchor`);
       requireGate(!('guidingQuestion' in studyModule) && !('selfCheck' in studyModule), `${id}: open-ended module prompts remain published`);
       requireGate((studyModule.paragraphs ?? []).length >= 4, `${id}: fewer than four explanatory paragraphs`);

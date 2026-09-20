@@ -2,26 +2,29 @@
 
 Static Chinese/English course website generated from the original NEUROSCI 366 notes, 27 lecture-specific source prompts, and 27 companion PDFs.
 
-The website is designed to be the primary course environment rather than a guide that requires simultaneous reading of the handwritten notes. Every source page is reconstructed as standalone teaching prose, and every module defaults to a Socratic sequence: predict, pressure-test assumptions, learn, attempt a worked problem, explain back, and judge transfer mastery. See [`PEDAGOGY.md`](PEDAGOGY.md) for the enforceable standalone-course contract and its limits.
+The website is designed to be the primary course environment. Lectures read continuously: prerequisite explanations lead into source-grounded teaching, derivations, figures, complete worked examples, and multiple-choice checks. Reading does not require submitting answers or completing a prescribed interaction sequence. See [`PEDAGOGY.md`](PEDAGOGY.md) for the standalone-course contract, validation requirements, and their limits.
+
+The public course contains Lectures 2–27, organized into six topics. Lecture 1 remains in the source archive and validation pipeline, as in the preceding continuous-lesson version.
 
 ## Repository layout
 
 - `site/app/` — statically generated Next.js routes.
-- `site/components/` — reading, source-view, question, search, practice, settings, and Socratic learning interfaces.
+- `site/components/` — lecture reading, scientific figures and formulas, questions, search, and practice interfaces.
 - `site/content/lectures/` — structured content for Lectures 1–27.
 - `site/content/en/` — generated English lectures, questions, search index, formulas, figures, glossary, and errata.
 - `site/content/coverage.json` — source-file/page → section/question coverage ledger.
 - `site/content/figures.json` — generated index for the 27 lecture figures.
 - `site/content/errata.json` — structured source cautions and corrections.
-- `site/public/resources/original/` — original notes and MATLAB files.
+- `site/public/resources/original/` — preserved original notes and MATLAB files, used for local source audits and omitted from the Pages export.
 - `site/public/resources/companions/` — companion PDFs.
 - `site/source/prompts/` — the source-aligned lecture prompts.
 - `site/source/extracted/` — companion PDF text used by the ingestion pipeline.
-- `site/source/self-study/` — authored objectives, prerequisite bridges, teaching modules, derivations, examples, diagnostics, and remediation.
+- `site/source/self-study/` — authored objectives, prerequisite bridges, teaching modules, derivations, examples, self-check material, and code audits.
 - `site/source/figures/` — authored, source-aligned scientific figure specifications.
+- `site/source/locales/zh/` — authored Chinese lecture summaries, common errors, formula names and conditions, and glossary definitions.
 - `site/source/locales/en/` — reviewed English teaching modules, figure labels, and lecture overlays.
-- `site/scripts/` — content generation and validation, including the standalone/Socratic pedagogy gate.
-- `site/tests/` — content-integrity, revisit-selection, and Socratic-progress tests.
+- `site/scripts/` — content generation and validation, including the standalone pedagogy gate.
+- `site/tests/` — content integrity, scientific rendering, lecture presentation, and practice-selection tests.
 
 ## Stack
 
@@ -37,15 +40,17 @@ npm install
 npm run dev
 ```
 
-## Standalone Socratic learning loop
+## Reading and practice
 
-Each teaching module opens with its scientific guiding question while the explanatory body remains hidden. The learner must either commit a written response or record a paper response before entering the lesson. The interface then asks for assumptions, controlled variables, falsifiers, and limiting cases; offers staged hints; collapses derivation steps; requires a worked-example attempt before revealing the solution; and requires a closed-book self-check before mastery can be recorded.
+Each lecture opens with the mathematical and conceptual background needed to follow it. Teaching modules present explanations, step-by-step derivations with symbol and unit checks, worked examples, and specific mistakes to avoid. The body and worked solutions remain readable throughout; open-ended prompts and source-page scaffolding are excluded from the published lesson.
 
-Only a module completed through prediction, worked-example attempt, self-check comparison, and an “independent explanation and transfer” judgment counts as independent mastery. The direct-reading control is retained for accessibility and reference use, but it cannot satisfy that mastery condition. Response text stays in component memory and is not persisted; only phase completion, confidence, and mastery status are stored locally in the browser.
+Multiple-choice checks appear within lectures and in lecture-specific or cumulative practice. Reading location, question history, and review scheduling stay in local browser storage. They support returning to the material; the site does not certify independent mastery from scrolling or answer completion.
+
+Desktop and mobile contents share the same section list and track the current reading position. Search includes whole lectures and individual teaching modules, with direct section links and matching passages. Formula and glossary indexes support keyword and lecture filters; the glossary retains distinct definitions when a term changes meaning between lectures.
 
 ## Content generation
 
-The generated companion PDFs have selectable text. `scripts/build-content.mjs` parses their source concordance, formula sheets, glossary tables, checks, answer keys, and errata. The prompt index maps lectures to source files. The main teaching narrative comes from the reviewed JSON in `source/self-study/`; PDF text extraction is not used as textbook prose.
+The generated companion PDFs have selectable text. `scripts/build-content.mjs` parses their source concordance, formula sheets, glossary tables, checks, answer keys, and errata. The prompt index maps lectures to source files. The main teaching narrative comes from the reviewed JSON in `source/self-study/`; Chinese summaries, common errors, formula names and conditions, and glossary definitions come from `source/locales/zh/`. PDF text extraction is not used as textbook prose.
 
 ```bash
 cd site
@@ -67,7 +72,7 @@ English locale prose is translated directly from the Chinese canonical records b
 
 Chinese questions are materialized in `site/content/questions.json`; English questions are materialized in `site/content/en/questions.json`. Each item records its lecture, source filename/page/section, concept tags, difficulty, cognitive type, four choices, one correct choice, answer reasoning, and explanations for every distractor. Inline questions allow one retry before revealing the complete answer.
 
-Generation produces 30–60 questions per lecture and validates source anchors, option integrity, explanation quality, balance, and coverage.
+Generation produces one question per teaching module and one per scientific figure. The source bank has 132 questions in each language, of which 128 are public in Lectures 2–27: four to seven per lecture. Every question has three authored alternatives addressing specific misconceptions about the same problem; the build rejects missing alternatives instead of borrowing unrelated statements. Concise correct choices preserve required conditions, with full reasoning in the feedback. Validation checks source anchors, option integrity, explanations, and module coverage. This is a compact check bank, not a comprehensive examination of every lecture objective; question count and automated labels alone do not establish assessment quality.
 
 The browser creates a stable two-hour session seed from the installation seed, lecture, visit number, and calendar-day bucket. Selection reserves room for delayed misses, then prefers unseen and older questions while varying concept, type, and difficulty. Visible inline slots and answer order vary by seed but remain stable during the session.
 
@@ -75,25 +80,26 @@ The browser creates a stable two-hour session seed from the installation seed, l
 
 ```bash
 cd site
+npm ci
 npm run validate
 npm test
 npm run lint
-npm run build
-npm run validate:export
+PAGES_BASE_PATH=/comp_neuro npm run build
+PAGES_BASE_PATH=/comp_neuro npm run validate:export
 ```
 
-`npm run validate` first regenerates both editions from canonical sources. It checks the Chinese content gates, verifies that the English edition has all 27 lectures with source and structural parity, and then runs `validate:pedagogy`. The pedagogy validator requires every source page to have a substantial source-anchored module with a guiding question, explain-back targets, a worked example, a free-response self-check, realistic failure modes, and—where applicable—an explicit derivation with symbol, units, and limiting-case checks.
+`npm run validate` first regenerates both editions from canonical sources. It checks the Chinese content gates, verifies that the English edition has all 27 lectures with source and structural parity, and runs the pedagogy and scientific-text validators. The combined gates require source-page coverage, substantial explanatory modules, key conclusions, complete worked examples, specific failure modes, multiple-choice checks, and explicit derivations with symbol, unit, and limiting-case checks. They also reject published open-ended prompts, source-page framing, repeated paragraphs, and known boilerplate. These structural checks complement scientific and editorial review; they cannot prove a claim is correct or an explanation is sufficient for every learner.
 
 After a build, `npm run validate:export` crawls both route trees, assets, source PDFs, fragment links, HTML language attributes, and exact language counterparts.
 
 ## Editing a lecture
 
-1. Update the corresponding source prompt or source material.
-2. Revise the lecture record in `source/self-study/`, keeping every claim tied to an original filename/page.
-3. Preserve the question-first contract: a falsifiable guiding question, standalone explanation, problem-first worked example, closed-book self-check, and at least two failure modes.
-4. Run `npm run content`.
-5. Review `content/lectures/NN.json` and `content/coverage.json`.
-6. Run `npm run validate && npm test && npm run lint && npm run build`.
+1. Read the relevant original files and lecture prompt. Preserve the original files and extracted companion text.
+2. Revise the lecture record in `source/self-study/`, retaining original filename/page references and teaching all required steps in continuous prose.
+3. Update the corresponding English source and any affected authored figures or formula records. Keep the full example, meaningful checks, and at least two specific failure modes in every module. Source `selfCheck` records feed the multiple-choice generator; they do not appear as open-ended prompts on the page.
+4. Run `npm run content`; do not edit `content/` by hand.
+5. Review both generated editions and `content/coverage.json`, including question choices and explanations.
+6. Run the required gates from `site/`: `npm ci`, `npm run validate`, `npm test`, `npm run lint`, `PAGES_BASE_PATH=/comp_neuro npm run build`, and `PAGES_BASE_PATH=/comp_neuro npm run validate:export`.
 
 Questions are regenerated from the canonical lecture sources; revise those sources and rerun `npm run content` instead of editing generated JSON directly.
 
@@ -109,5 +115,7 @@ Chinese uses the default route tree. English uses the same path with `/en` inser
 - `https://kaicao2003.github.io/comp_neuro/en/lectures/04/`
 
 The site does not inspect browser language and does not redirect automatically. The language control adds or removes only `/en`, preserving the current page, query string, and fragment.
+
+Before integrating or pushing, compare with the actual remote `main` and preserve remote and local user changes. Deployment is complete only after the Pages workflow for the pushed commit succeeds and the live site is verified. See [`AGENTS.md`](AGENTS.md) and [`site/AGENTS.md`](site/AGENTS.md) for the complete repository and formula-verification requirements.
 
 For another project-site repository name, change `PAGES_BASE_PATH` in `.github/workflows/pages.yml` and rebuild.
