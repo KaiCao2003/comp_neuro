@@ -82,7 +82,9 @@ function FlowGraphic({ figure, markerId }: { figure: Extract<FigureIndexEntry, {
           const boundaryScale = 1 / Math.max(Math.abs(dx) / 72, Math.abs(dy) / 27, 1);
           const x1 = fromX + dx * boundaryScale; const y1 = fromY + dy * boundaryScale;
           const x2 = toX - dx * boundaryScale; const y2 = toY - dy * boundaryScale;
-          return <g key={`${edge.from}-${edge.to}-${index}`}><line x1={x1} y1={y1} x2={x2} y2={y2} markerEnd={`url(#${markerId})`} strokeDasharray={edge.dashed ? '9 6' : undefined} />{edge.label && <SvgLabel className="edge-label" x={(x1 + x2) / 2} y={(y1 + y2) / 2 - 6} text={edge.label} />}</g>;
+          // Horizontal gaps can be narrower than the label, so keep it above the node boxes.
+          const labelOffset = dy === 0 ? 42 : 6;
+          return <g key={`${edge.from}-${edge.to}-${index}`}><line x1={x1} y1={y1} x2={x2} y2={y2} markerEnd={`url(#${markerId})`} strokeDasharray={edge.dashed ? '9 6' : undefined} />{edge.label && <SvgLabel className="edge-label" x={(x1 + x2) / 2} y={(y1 + y2) / 2 - labelOffset} text={edge.label} />}</g>;
         })}
       </g>
       <g className="scientific-nodes">
