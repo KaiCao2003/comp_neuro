@@ -17,7 +17,7 @@
   "codeSources": [],
   "objectives": [
     "Define a supervised-learning problem in terms of its dataset, architecture, loss, and learning rule, and distinguish the target support of classification from that of regression.",
-    "Use a first-order Taylor expansion to explain why the gradient is the locally steepest ascent direction and why a step along the negative gradient reduces squared loss.",
+    "Calculate two gradient-descent updates for one parameter, explain the minus sign, learning rate, and need to recompute the gradient, then use a first-order approximation to explain local descent.",
     "Derive the linear-regression gradient, its Hebbian-like and stabilizing components, and the normal equation step by step, including how to handle a singular design matrix.",
     "Explain why a deep linear network has a linear input-output map even though its multilayer factorization produces nonlinear and generally nonconvex optimization dynamics.",
     "Derive the backpropagated error recurrence and each layer's weight gradient by tracking shapes, while treating backpropagation as a training algorithm rather than an established neurobiological mechanism."
@@ -88,20 +88,21 @@
   "studyGuide": {
     "objectives": [
       "Define a supervised-learning problem in terms of its dataset, architecture, loss, and learning rule, and distinguish the target support of classification from that of regression.",
-      "Use a first-order Taylor expansion to explain why the gradient is the locally steepest ascent direction and why a step along the negative gradient reduces squared loss.",
+      "Calculate two gradient-descent updates for one parameter, explain the minus sign, learning rate, and need to recompute the gradient, then use a first-order approximation to explain local descent.",
       "Derive the linear-regression gradient, its Hebbian-like and stabilizing components, and the normal equation step by step, including how to handle a singular design matrix.",
       "Explain why a deep linear network has a linear input-output map even though its multilayer factorization produces nonlinear and generally nonconvex optimization dynamics.",
       "Derive the backpropagated error recurrence and each layer's weight gradient by tracking shapes, while treating backpropagation as a training algorithm rather than an established neurobiological mechanism."
     ],
     "prerequisiteBridge": [
-      "A supervised dataset contains P paired examples \\((x_\\mu,y_\\mu )\\). Here \\(x_\\mu\\) is an N×1 feature vector. If each sample is placed in one column of X, then \\(X\\in \\mathbb{R}^{N\\times P}\\). Scalar-regression targets form \\(y\\in \\mathbb{R}^{P\\times 1}\\), and the prediction is \\(X^\\mathrm{T} w\\). In classification, y is commonly a discrete label or one-hot vector; in regression it may be continuous.",
-      "A gradient collects all partial derivatives and has the same shape as its parameter. For a scalar function \\(L(w)\\), a small perturbation \\(\\Delta w\\) gives the first-order change \\(\\Delta L\\approx \\nabla L^\\mathrm{T}\\Delta w\\). A dot product equals the product of vector lengths and the cosine of their angle. With step length fixed, choosing \\(\\Delta w\\) parallel to \\(-\\nabla L\\) makes this linear approximation as negative as possible.",
-      "The chain rule differentiates compositions: if \\(y=f(z)\\) and \\(z=g(x)\\), then \\(dy/dx=(dy/dz)(dz/dx)\\). A multilayer network repeatedly applies this rule, but matrix shapes determine where transposes and outer products appear. The derivative of a square is \\(d(e^2)/de=2e\\). For \\(z=Wx\\), entry \\(W_{ij}\\) affects only \\(z_{i}\\), with a derivative proportional to \\(x_{j}\\)."
+      "Distinguish four quantities: the input \\(x\\) is the information given to the model; the target \\(y\\) is the answer supplied by the data; the prediction \\(\\hat{y}\\) is the answer computed by the model; and the parameter \\(w\\) is the number training adjusts. During an update, input and target stay fixed. Changing the parameter changes the prediction and its error relative to the target.",
+      "Read \\(L(w)\\) as “the loss when the parameter has this value.” The parentheses mean substituting a value into a function, not multiplying two quantities. For example, \\(L(0)\\) and \\(L(1)\\) use the same scoring rule with parameters 0 and 1; comparing the results tells us which prediction is better. The hat over the prediction denotes an estimated answer, not another calculation. The subscript in \\(w_{t}\\) identifies the update number, and \\(w_{t+1}\\) is the parameter after that update. These are successive values of the same parameter, not two independent controls.",
+      "The loss \\(L\\) scores prediction error: lower is better. The derivative \\(L'(w)\\) is the slope of the loss curve at the current position. It asks whether increasing the parameter slightly will raise or lower the loss. One parameter needs one slope. With several parameters, measure each parameter's effect separately; these partial derivatives together form the gradient.",
+      "This lecture first works through training with one parameter and squared error, then introduces sample matrices and multilayer networks in the next two sections. The chain rule tracks the sequence: parameter change → prediction change → loss change. You do not need to memorize matrix notation to understand the first section."
     ],
     "modules": [
       {
         "id": "L11-M1",
-        "title": "The Components of Supervised Learning and Gradient Descent",
+        "title": "Optimization and Gradient Descent: What Changes at Each Step?",
         "sourceRefs": [
           {
             "file": "Lecture11-MachineLearning.pdf",
@@ -113,57 +114,80 @@
           }
         ],
         "paragraphs": [
-          "Supervised learning supplies input-target pairs. In handwritten-digit recognition, x is an image and y is a discrete digit label, making the task classification. In optic-flow estimation, x may be two adjacent frames and y a continuous motion vector at each location, making it regression. Both require a clear account of how training examples are sampled and whether test examples follow the same distribution.",
-          "The architecture specifies the prediction function. A multilayer network can be written \\(z^{(0)}=x\\), \\(h^{(\\ell )}=W^{(\\ell -1)}z^{(\\ell -1)}\\), \\(z^{(\\ell )}=\\phi (h^{(\\ell )})\\), and finally \\(\\hat{y}=g(W^{(L)}z^{(L)})\\). If layer ℓ contains \\(N_\\ell\\) units, then \\(W^{(\\ell -1)}\\in \\mathbb{R}^{N_\\ell \\times N_{\\ell -1}}\\). Writing every shape exposes most transpose errors before the derivation begins.",
-          "A loss compresses the discrepancy between prediction and target into a scalar. Squared error is common for regression and cross-entropy for classification; choosing a loss embeds assumptions about noise and task priorities. An optimization rule then determines how W changes. Conflating architecture, loss, and learning rule makes it impossible to identify whether a performance change arose from representation, objective, or optimizer.",
-          "In a parameter plane, squared-loss contours are ellipses. The gradient is perpendicular to a contour and points locally uphill. A first-order Taylor approximation is reliable only for a sufficiently small step, so the learning rate \\(\\eta\\) must be neither so large that it jumps across the valley nor so small that training stalls. The negative gradient is a local descent direction; it does not take a deep network to a global optimum in one step."
+          "Optimization here means repeatedly adjusting model parameters to reduce prediction error. Start with one training example: input \\(x=1\\), target \\(y=2\\), and model \\(\\hat{y}=wx\\). For this example, the prediction is simply \\(\\hat{y}=w\\). Initially, \\(w=0\\), so the model predicts 0, below the target of 2. Training changes the parameter; input 1 and target 2 stay fixed. The answer is easy to see here, but this example lets us examine every algorithmic step before tackling problems whose answers are less obvious.",
+          "First, define how to score the error. Use squared loss \\(L(w)=\\frac12(\\hat{y}-y)^2=\\frac12(w-2)^2\\). Squaring penalizes predictions that are too high or too low and prevents positive and negative errors from canceling. The factor \\(1/2\\) simplifies differentiation without changing the optimal parameter. A prediction of 0 gives \\(L(0)=2\\); a prediction of 1 gives \\(L(1)=0.5\\); a prediction of 2 gives zero loss. Loss is the score; the parameter is what we can adjust.",
+          "Then decide which way to move. The plot has parameter on the horizontal axis and loss on the vertical axis; it does not show neural activity over time. Near \\(w=0\\), increasing the parameter slightly from 0 to 0.1 reduces loss from 2 to 1.805. Moving right therefore goes downhill here. Dividing the loss change by the parameter change gives \\((1.805-2)/0.1=-1.95\\). As the change becomes smaller, this ratio approaches the derivative \\(L'(0)=-2\\). A negative slope means increasing the parameter locally reduces loss.",
+          "Gradient descent turns that direction into an update rule: \\(w_{\\mathrm{new}}=w_{\\mathrm{old}}-\\eta L'(w_{\\mathrm{old}})\\). Here \\(\\eta\\), pronounced eta, is the learning rate: a positive number controlling the size of the change. With \\(\\eta=0.5\\) and a starting parameter of 0, the new parameter is \\(0-0.5\\times(-2)=1\\). Subtracting a negative number increases the parameter. “Descent” refers to decreasing loss; the parameter itself need not decrease. Recompute the prediction and loss to confirm that loss fell from 2 to 0.5.",
+          "Before the second step, recompute the slope at the new position. This loss has derivative \\(L'(w)=w-2\\), so at \\(w=1\\) the slope is now -1. The next update gives \\(1-0.5\\times(-1)=1.5\\), reducing loss again to 0.125. The repeated process is: predict with the current parameter, compute loss, compute the current slope, update the parameter, and check the new loss. The learning rate stays at 0.5, but the actual change shrinks from 1 to 0.5 because the curve gets flatter near its bottom.",
+          "A correct direction can still lead to a step that is too large. Starting again from 0 with \\(\\eta=3\\), the new parameter is \\(0-3\\times(-2)=6\\), and loss becomes \\(L(6)=8\\), worse than the initial 2. Crossing the bottom is not necessarily harmful: reaching 3 would give a loss of just 0.5. What matters is whether the new loss decreased. In practice, also check whether training stays stable, whether improvements have become small, and whether the model performs well on data excluded from fitting. Lower training error does not by itself establish generalization.",
+          "We can now distinguish the parts of a learning problem. Data supply inputs and targets. The model architecture specifies how to compute predictions; here it is \\(\\hat{y}=wx\\). The loss defines the score. The optimization method specifies how parameters change; here we use gradient descent. Handwritten-digit recognition has discrete labels as targets, making it classification. Optic-flow estimation has continuous motion vectors as targets, making it regression. A neural network or a classification loss changes how predictions and gradients are computed, but the sequence remains: predict, score, compute the gradient, update.",
+          "With multiple parameters, hold the others fixed and ask how a slight increase in each parameter would change the loss. These partial derivatives together form \\(\\nabla L\\). Each parameter subtracts the learning rate times its own partial derivative. For two parameters, loss can be drawn as a surface: height represents loss, and contours join parameter combinations with equal loss. A nonzero gradient is perpendicular to the contour and points locally uphill. Its negative gives a local downhill direction, without locating a distant global minimum. We next derive the single-parameter slope and then write the same rule in vector form."
         ],
         "keyPoints": [
-          "The dataset supplies the evidence defining the problem, the architecture defines the hypothesis class, the loss defines error, and the optimizer defines the search path.",
-          "A gradient has the same shape as its parameter and points in the locally steepest ascent direction; gradient descent applies the negative sign.",
-          "The Taylor argument is local. With an excessively large learning rate, the loss can rise instead of fall."
+          "Keep inputs and targets fixed while adjusting parameters. Parameters change predictions, and predictions determine loss.",
+          "The minus sign gives a local downhill direction; the learning rate controls the change. Recompute the gradient after every update.",
+          "A fixed learning rate can still produce different step sizes. Check the new loss to find out whether a step helped."
         ],
         "derivation": {
-          "title": "Deriving Gradient Descent from a Taylor Expansion and Computing a Single-Sample Linear Gradient",
-          "setup": "Use scalar prediction \\(\\hat{y}=w^\\mathrm{T}x\\), loss \\(L(w)=1/2(y-\\hat{y})^2\\), and parameter step \\(\\Delta w\\).",
+          "title": "From One Slope to a Gradient for Multiple Parameters",
+          "setup": "Continue with \\(x=1\\), \\(y=2\\), \\(\\hat{y}=w\\), and \\(L(w)=\\frac12(w-2)^2\\). First find the slope, then explain the local reasoning behind the update rule.",
           "steps": [
             {
-              "title": "Write the First-Order Change in Loss",
-              "explanation": "Near the current w, the dot product of the gradient and a small step controls the loss change; second- and higher-order terms are smaller when the step is sufficiently short.",
-              "latex": "L(\\mathbf w+\\Delta\\mathbf w)\\approx L(\\mathbf w)+\\nabla L(\\mathbf w)^{\\mathsf T}\\Delta\\mathbf w"
+              "title": "Find How an Error Change Affects Loss",
+              "explanation": "Let prediction minus target be \\(e=w-2\\), so loss is half the squared error. Differentiating the square gives twice the error, canceling the factor of one half. Any parameter increase produces the same error increase, so \\(de/dw=1\\).",
+              "latex": "L=\\frac12 e^2,\\qquad \\frac{dL}{de}=e,\\qquad \\frac{de}{dw}=1"
             },
             {
-              "title": "Choose a Local Descent Direction",
-              "explanation": "Set \\(\\Delta w=-\\eta \\nabla L\\). The linear term becomes \\(-\\eta ||\\nabla L||^2\\le 0\\), with \\(\\eta >0\\) setting the step size.",
-              "latex": "\\Delta\\mathbf w=-\\eta\\nabla L,\\qquad \\Delta L\\approx-\\eta\\|\\nabla L\\|_2^2"
+              "title": "Connect Parameter, Error, and Loss",
+              "explanation": "The chain rule multiplies these two effects, giving \\(L'(w)=w-2\\). The slope is -2 at 0, -1 at 1, and 1 at 3. In the last case, the parameter must decrease to move downhill.",
+              "latex": "\\frac{dL}{dw}=\\frac{dL}{de}\\frac{de}{dw}=(w-2)\\times1=w-2"
             },
             {
-              "title": "Apply the Chain Rule to Squared Error",
-              "explanation": "Let \\(e=y-w^\\mathrm{T}x\\). Then \\(\\partial L/\\partial e=e\\) and \\(\\partial e/\\partial w=-x\\), so the gradient is -ex and the update is \\(+\\eta ex\\). A positive error therefore raises the prediction along x.",
-              "latex": "\\nabla_{\\mathbf w}L=-(y-\\mathbf w^{\\mathsf T}\\mathbf x)\\mathbf x"
+              "title": "Put the Current Slope into the Update Rule",
+              "explanation": "The subscript \\(t\\) counts updates; it is not biological time. Evaluate the derivative at the current parameter, multiply by the learning rate, and subtract the result from the old parameter. The first step moves from 0 to 1; the second moves from 1 to 1.5.",
+              "latex": "w_{t+1}=w_t-\\eta(w_t-2)"
+            },
+            {
+              "title": "Explain Why a Small Step Can Lower Loss",
+              "explanation": "Over a sufficiently small interval, the curve is approximately straight, so loss change is approximately slope times parameter change. This is a first-order Taylor approximation. Substituting the negative-slope update gives minus the learning rate times the squared slope. With nonzero slope and a sufficiently small step, loss decreases. Larger steps must account for curvature.",
+              "latex": "\\Delta L\\approx L'(w)\\,\\Delta w=-\\eta[L'(w)]^2"
+            },
+            {
+              "title": "Use Partial Derivatives for Multiple Parameters",
+              "explanation": "If the prediction is \\(\\hat{y}=\\mathbf w^{\\mathsf T}\\mathbf x\\), changing weight j affects the prediction in proportion to input j. Again define error as prediction minus target. The chain rule gives each partial derivative as the error times its corresponding input; collecting them gives the gradient. With a single input equal to 1, this reduces to the earlier scalar slope.",
+              "latex": "L=\\frac12(\\mathbf w^{\\mathsf T}\\mathbf x-y)^2,\\qquad \\nabla_{\\mathbf w}L=(\\mathbf w^{\\mathsf T}\\mathbf x-y)\\mathbf x"
+            },
+            {
+              "title": "Write the Same Descent Rule in Vector Form",
+              "explanation": "The bold parameter is a column of adjustable numbers; the gradient is an equally long column of partial derivatives. The dot product sums each parameter's contribution to the loss change. Substituting the negative gradient gives a negative multiple of the sum of squared partial derivatives. This explains local descent; it does not guarantee that every loss has a unique optimum.",
+              "latex": "\\Delta\\mathbf w=-\\eta\\nabla L,\\qquad \\Delta L\\approx\\nabla L^{\\mathsf T}\\Delta\\mathbf w=-\\eta\\|\\nabla L\\|_2^2"
             }
           ],
           "symbolNotes": [
-            "\\(\\eta\\) has units parameter^2/loss so that \\(\\eta \\nabla L\\) has parameter units; after normalization it is often treated simply as a numerical hyperparameter.",
-            "For a batch loss, the gradient is the mean of the P sample gradients, not the product obtained by averaging x and y first."
+            "\\(\\hat{y}\\) is the prediction, \\(y\\) the fixed target, \\(e=\\hat{y}-y\\) the signed error used in this derivation, and \\(L\\) the error score.",
+            "\\(\\eta\\) is the learning rate; \\(\\Delta w\\) is the actual parameter change. They differ because the change also depends on the current slope.",
+            "\\(\\nabla\\) is pronounced nabla; \\(\\|\\nabla L\\|_2^2\\) is the sum of all squared partial derivatives. The mean loss over a batch has a gradient equal to the mean of the sample gradients."
           ],
-          "unitsCheck": "If y and ŷ are measured in deg/s while x is dimensionless, the gradient has units \\((\\mathrm{deg}/s)^2\\) per weight; \\(\\eta\\) must convert the update back to weight units.",
-          "limitCheck": "The gradient vanishes when the residual \\(e=0\\) or \\(x=0\\). If \\(\\eta\\) is too large, the neglected second-order term can cause the loss to increase."
+          "unitsCheck": "All numbers in this example are dimensionless. In general, a derivative has units of loss divided by parameter. The learning rate must convert it into a parameter change before it can be subtracted from the old parameter.",
+          "limitCheck": "At the bottom of this example, \\(w=2\\), the slope is zero and updates stop. Other losses can also have zero gradients at local maxima or saddle points. With \\(\\eta=0\\), no learning occurs. Starting away from the optimum, this quadratic loss converges for \\(0<\\eta<2\\). That upper bound follows from this particular curvature and does not apply to every model."
         },
         "workedExample": {
-          "title": "A Gradient Step Computed by Hand",
-          "problem": "Let \\(x=(1,2)^\\mathrm{T}\\), \\(y=5\\), \\(w=(0,0)^\\mathrm{T}\\), \\(L=1/2(y-w^\\mathrm{T}x)^2\\), and \\(\\eta =0.1\\). Compute the update and the new loss.",
+          "title": "Take Two Updates from 0, Then Check an Oversized Step",
+          "problem": "Fix \\(x=1\\) and \\(y=2\\), with \\(\\hat{y}=w\\) and \\(L(w)=\\frac12(w-2)^2\\). Start at \\(w_{0}=0\\) with \\(\\eta=0.5\\). Compute the prediction and loss after each of two updates. Then restart from 0, change only the learning rate to 3, and compare the first step.",
           "steps": [
-            "Initially the prediction is 0 and residual \\(e=5\\), so \\(\\mathrm{gradient}=-ex=(-5,-10)^\\mathrm{T}\\).",
-            "The update gives \\(w_{\\mathrm{new}}=w-\\eta \\mathrm{gradient}=(0.5,1.0)^\\mathrm{T}\\).",
-            "The new prediction is \\(0.5+2=2.5\\), and the new loss is \\(1/2(5-2.5)^2=3.125\\); the initial loss was 12.5."
+            "Initially, \\(w_{0}=0\\), the prediction is 0, the error is \\(0-2=-2\\), and loss is \\(L_{0}=\\frac12(-2)^2=2\\). The current slope is also -2.",
+            "First update: \\(w_{1}=0-0.5\\times(-2)=1\\). The prediction becomes 1, the error becomes -1, and the new loss is \\(L_{1}=\\frac12(-1)^2=0.5\\). Input and target have not changed.",
+            "Recompute the derivative before the second update: \\(L'(1)=1-2=-1\\). Then \\(w_{2}=1-0.5\\times(-1)=1.5\\), the prediction is 1.5, the error is -0.5, and the new loss is \\(L_{2}=\\frac12(-0.5)^2=0.125\\).",
+            "Large-step comparison: restart from 0 with \\(\\eta=3\\), giving \\(w_{1}=0-3\\times(-2)=6\\). The prediction is 6, the error is 4, and the new loss is \\(L_{1}=\\frac12(4)^2=8\\). The local direction is unchanged, but the step is too large and loss increases."
           ],
-          "result": "The negative-gradient step moves the prediction toward the target and reduces the loss by a factor of four.",
-          "sanityCheck": "Both the gradient and w are \\(2\\times 1\\). If the update's negative sign is mistakenly removed, w becomes (-0.5,-1), \\(\\mathrm{prediction}=-2.5\\), and the loss increases to 28.125."
+          "result": "With learning rate 0.5, the parameter moves toward the target as \\(0\\to1\\to1.5\\), while loss falls as \\(2\\to0.5\\to0.125\\). With learning rate 3, the very first step raises loss from 2 to 8.",
+          "sanityCheck": "Starting to the right of the bottom, at \\(w=3\\), the slope is 1. With the same \\(\\eta=0.5\\), the update moves to 2.5 and loss falls from 0.5 to 0.125. On the left the parameter must increase; on the right it must decrease. Both use the same rule: subtract the learning rate times the slope."
         },
         "pitfalls": [
-          "Classifying a task as classification or regression only by the model's name instead of examining target support and loss.",
-          "Turning the negative gradient's local descent guarantee into a global guarantee for every learning rate and every nonconvex network."
+          "Changing the target to match the prediction just to reduce error. Training adjusts parameters; the data supply the target.",
+          "Using the loss value as the gradient, or reusing the initial gradient at every step. Loss provides a score; the current gradient provides a local adjustment direction.",
+          "Assuming “descent” means parameters must decrease, or that a fixed learning rate means an identical parameter change every time.",
+          "Assuming any learning rate will reduce loss and find the global optimum as long as the update follows the negative gradient."
         ]
       },
       {
@@ -310,9 +334,9 @@
       "lecture": 11,
       "lectureTitle": "Machine Learning: Regression, Gradient Descent, and Backpropagation",
       "moduleId": "L11-M1",
-      "title": "The Negative Gradient Descends the Local Loss Slope",
-      "alt": "A normalized one-dimensional convex loss curve with a sequence of gradient-descent iterates approaching its minimum.",
-      "caption": "At the current parameter, the gradient points in the locally fastest direction of increasing loss, so update \\(\\Delta w=-\\eta \\nabla L\\) moves in the opposite direction. The markers show only normalized iteration order, not experimental observations. They illustrate that an appropriate step can approach the minimum successively, whereas the Taylor approximation does not guarantee descent with an excessively large learning rate.",
+      "title": "How the Weight Changes Along One Loss Curve",
+      "alt": "A quadratic loss curve, with gradient-descent positions A at weight 0 and loss 2, B at weight 1 and loss 0.5, and C at weight 1.5 and loss 0.125, approaching zero loss at weight 2.",
+      "caption": "The horizontal axis is the adjustable weight \\(w\\), not time; the vertical axis is prediction loss \\(L(w)=\\frac12(w-2)^2\\). Curve points are calculated from this formula. The letters mark successive positions: A is \\((w,L)=(0,2)\\), B is \\((1,0.5)\\), and C is \\((1.5,0.125)\\). At A, the slope is \\(w-2=-2\\). With a fixed learning rate \\(\\eta=0.5\\), the weight increases by \\(-0.5\\times(-2)=1\\), reaching B; recalculating the slope gives the next update to C. Curve height measures how wrong the prediction is; the local slope determines which way to change the weight. The dashed line connects calculated updates; it is neither another loss function nor neural experimental data.",
       "sourceRefs": [
         {
           "file": "Lecture11-MachineLearning.pdf",
@@ -325,76 +349,160 @@
       ],
       "schematic": true,
       "kind": "plot",
-      "xLabel": "Parameter w (normalized)",
-      "yLabel": "Loss \\(L(w)\\) (normalized)",
+      "xLabel": "Weight \\(w\\) (increases rightward)",
+      "yLabel": "Loss \\(L(w)\\) (increases upward)",
       "curves": [
         {
-          "label": "Convex loss",
+          "label": "Loss curve",
           "points": [
             [
-              5,
-              95
+              10,
+              80
+            ],
+            [
+              12.5,
+              70.3125
             ],
             [
               15,
-              66
+              61.25
+            ],
+            [
+              17.5,
+              52.8125
+            ],
+            [
+              20,
+              45
+            ],
+            [
+              22.5,
+              37.8125
             ],
             [
               25,
-              42
+              31.25
+            ],
+            [
+              27.5,
+              25.3125
+            ],
+            [
+              30,
+              20
+            ],
+            [
+              32.5,
+              15.3125
             ],
             [
               35,
-              24
+              11.25
+            ],
+            [
+              37.5,
+              7.8125
+            ],
+            [
+              40,
+              5
+            ],
+            [
+              42.5,
+              2.8125
             ],
             [
               45,
-              13
+              1.25
+            ],
+            [
+              47.5,
+              0.3125
             ],
             [
               50,
-              11
+              0
+            ],
+            [
+              52.5,
+              0.3125
             ],
             [
               55,
-              13
+              1.25
+            ],
+            [
+              57.5,
+              2.8125
+            ],
+            [
+              60,
+              5
+            ],
+            [
+              62.5,
+              7.8125
             ],
             [
               65,
-              24
+              11.25
+            ],
+            [
+              67.5,
+              15.3125
+            ],
+            [
+              70,
+              20
+            ],
+            [
+              72.5,
+              25.3125
             ],
             [
               75,
-              42
+              31.25
+            ],
+            [
+              77.5,
+              37.8125
+            ],
+            [
+              80,
+              45
+            ],
+            [
+              82.5,
+              52.8125
             ],
             [
               85,
-              66
+              61.25
             ],
             [
-              95,
-              95
+              87.5,
+              70.3125
+            ],
+            [
+              90,
+              80
             ]
           ]
         },
         {
-          "label": "Gradient-descent steps",
+          "label": "Update positions",
           "points": [
             [
-              12,
-              74
+              10,
+              80
             ],
             [
-              31,
-              30
+              30,
+              20
             ],
             [
-              43,
-              15
-            ],
-            [
-              49,
-              11
+              40,
+              5
             ]
           ],
           "dashed": true,
@@ -403,9 +511,24 @@
       ],
       "annotations": [
         {
+          "x": 10,
+          "y": 80,
+          "label": "A"
+        },
+        {
+          "x": 30,
+          "y": 20,
+          "label": "B"
+        },
+        {
+          "x": 40,
+          "y": 5,
+          "label": "C"
+        },
+        {
           "x": 50,
-          "y": 11,
-          "label": "Minimum"
+          "y": 0,
+          "label": "\\(w=2\\)"
         }
       ]
     }
@@ -685,36 +808,36 @@
         }
       ],
       "conceptTags": [
-        "The Components of Supervised Learning and Gradient Descent"
+        "Optimization and Gradient Descent: What Changes at Each Step?"
       ],
       "difficulty": 2,
-      "type": "comparison",
+      "type": "concept",
       "cognitiveLevel": "understand",
-      "stem": "Why is the statement “the gradient points toward the minimum” inaccurate?",
+      "stem": "For \\(L(w)=\\frac12(w-2)^2\\), the current parameter is \\(w=1\\) and the learning rate is \\(\\eta=0.5\\). What are the next parameter and loss, and why?",
       "choices": [
         {
           "id": "a",
-          "text": "The gradient points toward local steepest ascent; its negative gives local descent, not the location of a distant global minimum."
+          "text": "The parameter becomes 1.5 and loss becomes 0.125; recompute the current slope of -1, then apply the update rule."
         },
         {
           "id": "b",
-          "text": "The gradient points directly toward the nearest minimum; learning rate only determines how far along that route the parameters move."
+          "text": "The parameter becomes 0.5 and loss becomes 1.125; gradient descent means decreasing the parameter every time."
         },
         {
           "id": "c",
-          "text": "Both signs of the gradient move along contours without changing the loss."
+          "text": "The parameter becomes 2 and loss becomes 0; keep using the initial slope of -2 computed at 0."
         },
         {
           "id": "d",
-          "text": "Gradients point uphill only for convex losses; for nonconvex losses the same derivative points downhill, so updates no longer need a minus sign."
+          "text": "The parameter becomes 1.25 and loss becomes 0.28125; multiply the current loss of 0.5 by the learning rate to get the change."
         }
       ],
       "correctChoiceId": "a",
-      "explanation": "The gradient points in the locally steepest ascent direction at the current point; its negative is the local descent direction. It uses only first-order information at that location and does not directly identify a distant global minimum. Supervised learning supplies input-target pairs. In handwritten-digit recognition, x is an image and y is a discrete digit label, making the task classification. In optic-flow estimation, x may be two adjacent frames and y a continuous motion vector at each location, making it regression. Both require a clear account of how training examples are sampled and whether test examples follow the same distribution.",
+      "explanation": "The current slope is \\(L'(1)=-1\\), so \\(w_{\\mathrm{new}}=1-0.5\\times(-1)=1.5\\), and the new loss is \\(\\frac12(1.5-2)^2=0.125\\). Use the slope at the new position; do not reuse -2 from the starting position of 0. Optimization here means repeatedly adjusting model parameters to reduce prediction error. Start with one training example: input \\(x=1\\), target \\(y=2\\), and model \\(\\hat{y}=wx\\). For this example, the prediction is simply \\(\\hat{y}=w\\). Initially, \\(w=0\\), so the model predicts 0, below the target of 2. Training changes the parameter; input 1 and target 2 stay fixed. The answer is easy to see here, but this example lets us examine every algorithmic step before tackling problems whose answers are less obvious.",
       "wrongChoiceExplanations": {
-        "b": "A gradient contains local derivative information, not the nearest minimum's location.",
-        "c": "The gradient is perpendicular to contours; a sufficiently small negative-gradient step usually lowers loss.",
-        "d": "Convexity does not change the gradient's local ascent meaning; it affects global optimization properties."
+        "b": "Descent refers to loss. The slope here is negative, so subtracting it increases the parameter.",
+        "c": "Before the second step, recompute the slope at the current parameter of 1. It has changed from -2 to -1.",
+        "d": "The update uses the derivative of loss with respect to the parameter, not the loss value itself. The current slope is -1."
       }
     },
     {
@@ -832,12 +955,12 @@
         }
       ],
       "conceptTags": [
-        "The Negative Gradient Descends the Local Loss Slope"
+        "How the Weight Changes Along One Loss Curve"
       ],
       "difficulty": 4,
       "type": "figure",
       "cognitiveLevel": "analyze",
-      "stem": "Which interpretation is supported by the schematic “The Negative Gradient Descends the Local Loss Slope”?",
+      "stem": "Which interpretation is supported by the schematic “How the Weight Changes Along One Loss Curve”?",
       "choices": [
         {
           "id": "a",
@@ -857,11 +980,11 @@
         }
       ],
       "correctChoiceId": "d",
-      "explanation": "At the current parameter, the gradient points in the locally fastest direction of increasing loss, so update \\(\\Delta w=-\\eta \\nabla L\\) moves in the opposite direction. The markers show only normalized iteration order, not experimental observations. They illustrate that an appropriate step can approach the minimum successively, whereas the Taylor approximation does not guarantee descent with an excessively large learning rate.",
+      "explanation": "The horizontal axis is the adjustable weight \\(w\\), not time; the vertical axis is prediction loss \\(L(w)=\\frac12(w-2)^2\\). Curve points are calculated from this formula. The letters mark successive positions: A is \\((w,L)=(0,2)\\), B is \\((1,0.5)\\), and C is \\((1.5,0.125)\\). At A, the slope is \\(w-2=-2\\). With a fixed learning rate \\(\\eta=0.5\\), the weight increases by \\(-0.5\\times(-2)=1\\), reaching B; recalculating the slope gives the next update to C. Curve height measures how wrong the prediction is; the local slope determines which way to change the weight. The dashed line connects calculated updates; it is neither another loss function nor neural experimental data.",
       "wrongChoiceExplanations": {
         "a": "The direction is local; large steps can invalidate the first-order approximation and increase loss.",
         "b": "Smaller gradients also shrink steps at a fixed learning rate, so marker spacing alone cannot establish a schedule.",
-        "c": "These are normalized optimization illustrations, without empirical neural data or a biological time unit."
+        "c": "These points are calculated from the example loss and learning rate, without neural experimental data or a biological time unit."
       }
     }
   ]
